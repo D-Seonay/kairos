@@ -10,7 +10,11 @@
 		040A86C6285D90BF16F5B5AA /* PulseRecoveryEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 6B02FCA8EE3E67636F42D06C /* PulseRecoveryEngine */; };
 		0B8FFC73C2B071BD8176F831 /* PulseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D2D549D2FA86D57EF37548E /* PulseTests.swift */; };
 		2A294741604ED11BCA7E7E11 /* PulseApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D5309CAF2CC1BC7C626E937 /* PulseApp.swift */; };
+		34D97BE8FD8A749FF4D505C4 /* HealthDiagnosticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FD5D203E5ACBB813DC406BF /* HealthDiagnosticsView.swift */; };
 		926156F0D2A1BA89FCB63479 /* PulseHealth in Frameworks */ = {isa = PBXBuildFile; productRef = F4BAF19749CA79DDDA8F7559 /* PulseHealth */; };
+		A97FAA087245497AC6D5103D /* HealthDiagnosticsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F71FF6A3556C458B780BE1E /* HealthDiagnosticsModel.swift */; };
+		C61466EFD0C110C76A74159D /* HealthDiagnosticsModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 255B72F0A6C88756681084B7 /* HealthDiagnosticsModelTests.swift */; };
+		DF2ABCBBAD780B3181DC99A9 /* AppDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9DEE05CDD66A5E59B5183CA /* AppDependencies.swift */; };
 		FF152BDE6343A10B8627BC3C /* PulseDomain in Frameworks */ = {isa = PBXBuildFile; productRef = 8C27DDA66D90C7A34759B03B /* PulseDomain */; };
 /* End PBXBuildFile section */
 
@@ -26,11 +30,15 @@
 
 /* Begin PBXFileReference section */
 		13FEF2D2118D74C3572DF349 /* Pulse.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Pulse.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		255B72F0A6C88756681084B7 /* HealthDiagnosticsModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthDiagnosticsModelTests.swift; sourceTree = "<group>"; };
 		2D2D549D2FA86D57EF37548E /* PulseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PulseTests.swift; sourceTree = "<group>"; };
+		3F71FF6A3556C458B780BE1E /* HealthDiagnosticsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthDiagnosticsModel.swift; sourceTree = "<group>"; };
 		4D73F310B6D8564B1B597665 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		4FBA30D234A433E58E16508B /* PulseTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = PulseTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5FD5D203E5ACBB813DC406BF /* HealthDiagnosticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthDiagnosticsView.swift; sourceTree = "<group>"; };
 		9D5309CAF2CC1BC7C626E937 /* PulseApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PulseApp.swift; sourceTree = "<group>"; };
 		A70D8B0C52E658248BD5D9C9 /* PulseRecoveryEngine */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PulseRecoveryEngine; path = Packages/PulseRecoveryEngine; sourceTree = SOURCE_ROOT; };
+		A9DEE05CDD66A5E59B5183CA /* AppDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDependencies.swift; sourceTree = "<group>"; };
 		AB2D664BC108B8D410A545BF /* PulseDomain */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PulseDomain; path = Packages/PulseDomain; sourceTree = SOURCE_ROOT; };
 		CBC8AE5BF7C0419018C1192A /* Pulse.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Pulse.entitlements; sourceTree = "<group>"; };
 		E88E86A74B7F7A81085945C2 /* PulseHealth */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PulseHealth; path = Packages/PulseHealth; sourceTree = SOURCE_ROOT; };
@@ -53,9 +61,11 @@
 		16C8605271C6A45188D07E13 /* Pulse */ = {
 			isa = PBXGroup;
 			children = (
+				A9DEE05CDD66A5E59B5183CA /* AppDependencies.swift */,
 				4D73F310B6D8564B1B597665 /* Info.plist */,
 				CBC8AE5BF7C0419018C1192A /* Pulse.entitlements */,
 				9D5309CAF2CC1BC7C626E937 /* PulseApp.swift */,
+				9ED445E85063B319F11D8C3C /* Diagnostics */,
 			);
 			path = Pulse;
 			sourceTree = "<group>";
@@ -89,9 +99,19 @@
 			);
 			sourceTree = "<group>";
 		};
+		9ED445E85063B319F11D8C3C /* Diagnostics */ = {
+			isa = PBXGroup;
+			children = (
+				3F71FF6A3556C458B780BE1E /* HealthDiagnosticsModel.swift */,
+				5FD5D203E5ACBB813DC406BF /* HealthDiagnosticsView.swift */,
+			);
+			path = Diagnostics;
+			sourceTree = "<group>";
+		};
 		FCB0E6001B954CCA450AA55C /* PulseTests */ = {
 			isa = PBXGroup;
 			children = (
+				255B72F0A6C88756681084B7 /* HealthDiagnosticsModelTests.swift */,
 				2D2D549D2FA86D57EF37548E /* PulseTests.swift */,
 			);
 			path = PulseTests;
@@ -186,6 +206,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C61466EFD0C110C76A74159D /* HealthDiagnosticsModelTests.swift in Sources */,
 				0B8FFC73C2B071BD8176F831 /* PulseTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -194,6 +215,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DF2ABCBBAD780B3181DC99A9 /* AppDependencies.swift in Sources */,
+				A97FAA087245497AC6D5103D /* HealthDiagnosticsModel.swift in Sources */,
+				34D97BE8FD8A749FF4D505C4 /* HealthDiagnosticsView.swift in Sources */,
 				2A294741604ED11BCA7E7E11 /* PulseApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

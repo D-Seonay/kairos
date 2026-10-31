@@ -4,7 +4,7 @@ import SwiftUI
 struct PulseApp: App {
     var body: some Scene {
         WindowGroup {
-            Text(String(localized: "Pulse"))
+            HealthDiagnosticsView(model: HealthDiagnosticsModel(dependencies: .live()))
         }
     }
 }
