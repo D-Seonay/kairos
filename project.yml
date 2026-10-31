@@ -14,11 +14,16 @@ settings:
     TARGETED_DEVICE_FAMILY: "1"
     SUPPORTS_MACCATALYST: "NO"
     CODE_SIGN_STYLE: Automatic
+packages:
+  PulseDomain:
+    path: Packages/PulseDomain
 targets:
   Pulse:
     type: application
     platform: iOS
     sources: [Pulse]
+    dependencies:
+      - package: PulseDomain
     info:
       path: Pulse/Info.plist
       properties:
@@ -51,4 +56,6 @@ schemes:
       config: Debug
     test:
       config: Debug
-      targets: [PulseTests]
+      targets:
+        - PulseTests
+        - package: PulseDomain/PulseDomainTests

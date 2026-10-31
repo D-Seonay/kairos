@@ -50,6 +50,17 @@
                ReferencedContainer = "container:Pulse.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "PulseDomainTests"
+               BuildableName = "PulseDomainTests"
+               BlueprintName = "PulseDomainTests"
+               ReferencedContainer = "container:Packages/PulseDomain">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>

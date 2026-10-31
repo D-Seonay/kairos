@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		0B8FFC73C2B071BD8176F831 /* PulseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D2D549D2FA86D57EF37548E /* PulseTests.swift */; };
 		2A294741604ED11BCA7E7E11 /* PulseApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D5309CAF2CC1BC7C626E937 /* PulseApp.swift */; };
+		FF152BDE6343A10B8627BC3C /* PulseDomain in Frameworks */ = {isa = PBXBuildFile; productRef = 8C27DDA66D90C7A34759B03B /* PulseDomain */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -27,8 +28,20 @@
 		4D73F310B6D8564B1B597665 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		4FBA30D234A433E58E16508B /* PulseTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = PulseTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D5309CAF2CC1BC7C626E937 /* PulseApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PulseApp.swift; sourceTree = "<group>"; };
+		AB2D664BC108B8D410A545BF /* PulseDomain */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PulseDomain; path = Packages/PulseDomain; sourceTree = SOURCE_ROOT; };
 		CBC8AE5BF7C0419018C1192A /* Pulse.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Pulse.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		1C9078D005D61D91A0E0C7F8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FF152BDE6343A10B8627BC3C /* PulseDomain in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		16C8605271C6A45188D07E13 /* Pulse */ = {
@@ -50,9 +63,18 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		66B4C3B58C6C8FE5EA3EA8B7 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				AB2D664BC108B8D410A545BF /* PulseDomain */,
+			);
+			path = Packages;
+			sourceTree = "<group>";
+		};
 		7A87E3B4AE2E59047EFB8F61 = {
 			isa = PBXGroup;
 			children = (
+				66B4C3B58C6C8FE5EA3EA8B7 /* Packages */,
 				16C8605271C6A45188D07E13 /* Pulse */,
 				FCB0E6001B954CCA450AA55C /* PulseTests */,
 				1FEE830988994786371D8E45 /* Products */,
@@ -93,6 +115,7 @@
 			buildConfigurationList = 9608D96881FD5C17BB380FA0 /* Build configuration list for PBXNativeTarget "Pulse" */;
 			buildPhases = (
 				D70CFAE236269B6E146109F4 /* Sources */,
+				1C9078D005D61D91A0E0C7F8 /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -100,6 +123,7 @@
 			);
 			name = Pulse;
 			packageProductDependencies = (
+				8C27DDA66D90C7A34759B03B /* PulseDomain */,
 			);
 			productName = Pulse;
 			productReference = 13FEF2D2118D74C3572DF349 /* Pulse.app */;
@@ -131,6 +155,9 @@
 			);
 			mainGroup = 7A87E3B4AE2E59047EFB8F61;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				3F03ECA5ED4F94E324D71332 /* XCLocalSwiftPackageReference "Packages/PulseDomain" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 1FEE830988994786371D8E45 /* Products */;
 			projectDirPath = "";
@@ -398,6 +425,20 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		3F03ECA5ED4F94E324D71332 /* XCLocalSwiftPackageReference "Packages/PulseDomain" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/PulseDomain;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		8C27DDA66D90C7A34759B03B /* PulseDomain */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PulseDomain;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 84FEC84833EC6BF77563A3F6 /* Project object */;
 }
