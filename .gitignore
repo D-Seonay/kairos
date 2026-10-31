@@ -1,0 +1,15 @@
+# Xcode
+xcuserdata/
+*.xcuserstate
+DerivedData/
+build/
+*.xcresult
+# SwiftPM
+.build/
+.swiftpm/
+Packages/*/.build/
+# macOS
+.DS_Store
+# Secrets
+*.p8
+*.mobileprovision

@@ -1,0 +1,54 @@
+# Scaffold only (M1): regenerate with `xcodegen generate`. Removed at the end of M1 (spec §4: no generator).
+name: Pulse
+options:
+  bundleIdPrefix: fr.seonay
+  deploymentTarget:
+    iOS: "26.0"
+  xcodeVersion: "27.0"
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    TARGETED_DEVICE_FAMILY: "1"
+    SUPPORTS_MACCATALYST: "NO"
+    CODE_SIGN_STYLE: Automatic
+targets:
+  Pulse:
+    type: application
+    platform: iOS
+    sources: [Pulse]
+    info:
+      path: Pulse/Info.plist
+      properties:
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        CFBundleDisplayName: Pulse
+        CFBundleDevelopmentRegion: fr
+    entitlements:
+      path: Pulse/Pulse.entitlements
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: fr.seonay.pulse
+        ENABLE_PREVIEWS: "YES"
+  PulseTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [PulseTests]
+    dependencies:
+      - target: Pulse
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: fr.seonay.pulse.tests
+        GENERATE_INFOPLIST_FILE: "YES"
+schemes:
+  Pulse:
+    build:
+      targets:
+        Pulse: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets: [PulseTests]
