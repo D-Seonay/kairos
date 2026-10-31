@@ -15,6 +15,7 @@
 		A97FAA087245497AC6D5103D /* HealthDiagnosticsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F71FF6A3556C458B780BE1E /* HealthDiagnosticsModel.swift */; };
 		C61466EFD0C110C76A74159D /* HealthDiagnosticsModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 255B72F0A6C88756681084B7 /* HealthDiagnosticsModelTests.swift */; };
 		DF2ABCBBAD780B3181DC99A9 /* AppDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9DEE05CDD66A5E59B5183CA /* AppDependencies.swift */; };
+		E1A0C0022026103100000002 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E1A0C0012026103100000001 /* Assets.xcassets */; };
 		FF152BDE6343A10B8627BC3C /* PulseDomain in Frameworks */ = {isa = PBXBuildFile; productRef = 8C27DDA66D90C7A34759B03B /* PulseDomain */; };
 /* End PBXBuildFile section */
 
@@ -41,6 +42,7 @@
 		A9DEE05CDD66A5E59B5183CA /* AppDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDependencies.swift; sourceTree = "<group>"; };
 		AB2D664BC108B8D410A545BF /* PulseDomain */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PulseDomain; path = Packages/PulseDomain; sourceTree = SOURCE_ROOT; };
 		CBC8AE5BF7C0419018C1192A /* Pulse.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Pulse.entitlements; sourceTree = "<group>"; };
+		E1A0C0012026103100000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E88E86A74B7F7A81085945C2 /* PulseHealth */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PulseHealth; path = Packages/PulseHealth; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -62,6 +64,7 @@
 			isa = PBXGroup;
 			children = (
 				A9DEE05CDD66A5E59B5183CA /* AppDependencies.swift */,
+				E1A0C0012026103100000001 /* Assets.xcassets */,
 				4D73F310B6D8564B1B597665 /* Info.plist */,
 				CBC8AE5BF7C0419018C1192A /* Pulse.entitlements */,
 				9D5309CAF2CC1BC7C626E937 /* PulseApp.swift */,
@@ -144,6 +147,7 @@
 			buildPhases = (
 				D70CFAE236269B6E146109F4 /* Sources */,
 				1C9078D005D61D91A0E0C7F8 /* Frameworks */,
+				E1A0C0032026103100000003 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -200,6 +204,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		E1A0C0032026103100000003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E1A0C0022026103100000002 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		8B00C375CD98515701D2325C /* Sources */ = {
