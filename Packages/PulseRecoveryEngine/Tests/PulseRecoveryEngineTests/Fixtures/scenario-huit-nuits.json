@@ -1,0 +1,94 @@
+{
+  "name": "huit-nuits",
+  "day": "2026-11-20",
+  "history": [
+    {
+      "day": "2026-11-12",
+      "sdnnMs": 50,
+      "restingHeartRate": 50,
+      "sleep": {
+        "asleepMinutes": 480,
+        "deepMinutes": 96
+      }
+    },
+    {
+      "day": "2026-11-13",
+      "sdnnMs": 50,
+      "restingHeartRate": 50,
+      "sleep": {
+        "asleepMinutes": 480,
+        "deepMinutes": 96
+      }
+    },
+    {
+      "day": "2026-11-14",
+      "sdnnMs": 50,
+      "restingHeartRate": 50,
+      "sleep": {
+        "asleepMinutes": 480,
+        "deepMinutes": 96
+      }
+    },
+    {
+      "day": "2026-11-15",
+      "sdnnMs": 50,
+      "restingHeartRate": 50,
+      "sleep": {
+        "asleepMinutes": 480,
+        "deepMinutes": 96
+      }
+    },
+    {
+      "day": "2026-11-16",
+      "sdnnMs": 50,
+      "restingHeartRate": 50,
+      "sleep": {
+        "asleepMinutes": 480,
+        "deepMinutes": 96
+      }
+    },
+    {
+      "day": "2026-11-17",
+      "sdnnMs": 50,
+      "restingHeartRate": 50,
+      "sleep": {
+        "asleepMinutes": 480,
+        "deepMinutes": 96
+      }
+    },
+    {
+      "day": "2026-11-18",
+      "sdnnMs": 50,
+      "restingHeartRate": 50,
+      "sleep": {
+        "asleepMinutes": 480,
+        "deepMinutes": 96
+      }
+    },
+    {
+      "day": "2026-11-19",
+      "sdnnMs": 50,
+      "restingHeartRate": 50,
+      "sleep": {
+        "asleepMinutes": 480,
+        "deepMinutes": 96
+      }
+    }
+  ],
+  "today": {
+    "day": "2026-11-20",
+    "sdnnMs": 50,
+    "restingHeartRate": 50,
+    "sleep": {
+      "asleepMinutes": 480,
+      "deepMinutes": 96
+    }
+  },
+  "expected": {
+    "outcome": "measured",
+    "category": "optimal",
+    "score": 95,
+    "calibration": "calibrating:8",
+    "missing": []
+  }
+}

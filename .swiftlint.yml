@@ -1,0 +1,7 @@
+included: [Pulse, PulseTests, PulseWidgets, Packages]
+excluded: [Packages/*/.build, DerivedData]
+opt_in_rules: [force_unwrapping, implicitly_unwrapped_optional, sorted_imports, closure_spacing, empty_count]
+line_length: { warning: 140, error: 180 }
+file_length: { warning: 400, error: 600 }
+function_body_length: { warning: 50, error: 80 }
+identifier_name: { min_length: 2, excluded: [id, x, y, z, i, n, r, d] }

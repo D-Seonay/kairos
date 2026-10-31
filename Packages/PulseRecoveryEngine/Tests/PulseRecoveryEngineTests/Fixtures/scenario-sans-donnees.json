@@ -1,0 +1,22 @@
+{
+  "name": "sans-donnees",
+  "day": "2026-11-20",
+  "history": [],
+  "today": {
+    "day": "2026-11-20",
+    "sdnnMs": null,
+    "restingHeartRate": null,
+    "sleep": null
+  },
+  "expected": {
+    "outcome": "needsCheckIn",
+    "category": null,
+    "score": null,
+    "calibration": null,
+    "missing": [
+      "hrv",
+      "restingHeartRate",
+      "sleep"
+    ]
+  }
+}
