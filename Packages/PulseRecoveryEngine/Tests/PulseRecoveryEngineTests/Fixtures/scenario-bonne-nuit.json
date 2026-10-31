@@ -1,0 +1,148 @@
+{
+  "name": "bonne-nuit",
+  "day": "2026-11-20",
+  "history": [
+    {
+      "day": "2026-11-06",
+      "sdnnMs": 49,
+      "restingHeartRate": 50,
+      "sleep": {
+        "asleepMinutes": 450,
+        "deepMinutes": 90
+      }
+    },
+    {
+      "day": "2026-11-07",
+      "sdnnMs": 51,
+      "restingHeartRate": 50,
+      "sleep": {
+        "asleepMinutes": 450,
+        "deepMinutes": 90
+      }
+    },
+    {
+      "day": "2026-11-08",
+      "sdnnMs": 49,
+      "restingHeartRate": 50,
+      "sleep": {
+        "asleepMinutes": 450,
+        "deepMinutes": 90
+      }
+    },
+    {
+      "day": "2026-11-09",
+      "sdnnMs": 51,
+      "restingHeartRate": 50,
+      "sleep": {
+        "asleepMinutes": 450,
+        "deepMinutes": 90
+      }
+    },
+    {
+      "day": "2026-11-10",
+      "sdnnMs": 49,
+      "restingHeartRate": 50,
+      "sleep": {
+        "asleepMinutes": 450,
+        "deepMinutes": 90
+      }
+    },
+    {
+      "day": "2026-11-11",
+      "sdnnMs": 51,
+      "restingHeartRate": 50,
+      "sleep": {
+        "asleepMinutes": 450,
+        "deepMinutes": 90
+      }
+    },
+    {
+      "day": "2026-11-12",
+      "sdnnMs": 49,
+      "restingHeartRate": 50,
+      "sleep": {
+        "asleepMinutes": 450,
+        "deepMinutes": 90
+      }
+    },
+    {
+      "day": "2026-11-13",
+      "sdnnMs": 51,
+      "restingHeartRate": 50,
+      "sleep": {
+        "asleepMinutes": 450,
+        "deepMinutes": 90
+      }
+    },
+    {
+      "day": "2026-11-14",
+      "sdnnMs": 49,
+      "restingHeartRate": 50,
+      "sleep": {
+        "asleepMinutes": 450,
+        "deepMinutes": 90
+      }
+    },
+    {
+      "day": "2026-11-15",
+      "sdnnMs": 51,
+      "restingHeartRate": 50,
+      "sleep": {
+        "asleepMinutes": 450,
+        "deepMinutes": 90
+      }
+    },
+    {
+      "day": "2026-11-16",
+      "sdnnMs": 49,
+      "restingHeartRate": 50,
+      "sleep": {
+        "asleepMinutes": 450,
+        "deepMinutes": 90
+      }
+    },
+    {
+      "day": "2026-11-17",
+      "sdnnMs": 51,
+      "restingHeartRate": 50,
+      "sleep": {
+        "asleepMinutes": 450,
+        "deepMinutes": 90
+      }
+    },
+    {
+      "day": "2026-11-18",
+      "sdnnMs": 49,
+      "restingHeartRate": 50,
+      "sleep": {
+        "asleepMinutes": 450,
+        "deepMinutes": 90
+      }
+    },
+    {
+      "day": "2026-11-19",
+      "sdnnMs": 51,
+      "restingHeartRate": 50,
+      "sleep": {
+        "asleepMinutes": 450,
+        "deepMinutes": 90
+      }
+    }
+  ],
+  "today": {
+    "day": "2026-11-20",
+    "sdnnMs": 60,
+    "restingHeartRate": 49,
+    "sleep": {
+      "asleepMinutes": 480,
+      "deepMinutes": 100
+    }
+  },
+  "expected": {
+    "outcome": "measured",
+    "category": "optimal",
+    "score": 100,
+    "calibration": "ready",
+    "missing": []
+  }
+}

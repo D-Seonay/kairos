@@ -19,6 +19,7 @@ let package = Package(
         .testTarget(
             name: "PulseRecoveryEngineTests",
             dependencies: ["PulseRecoveryEngine"],
+            resources: [.copy("Fixtures")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
     ]
