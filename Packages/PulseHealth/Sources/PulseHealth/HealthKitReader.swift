@@ -121,7 +121,7 @@ public final class HealthKitReader: HealthReading, @unchecked Sendable {
         }
     }
 
-    private static func valueText(for sample: HKSample, type: HealthDataType) -> String {
+    static func valueText(for sample: HKSample, type: HealthDataType) -> String {
         switch type {
         case .hrvSDNN:
             guard let quantity = (sample as? HKQuantitySample)?.quantity else { return "" }
@@ -136,7 +136,7 @@ public final class HealthKitReader: HealthReading, @unchecked Sendable {
             let stageName = (sample as? HKCategorySample)
                 .flatMap { HKCategoryValueSleepAnalysis(rawValue: $0.value) }
                 .flatMap(stage(for:))
-                .map(\.rawValue) ?? ""
+                .map(\.localizedName) ?? ""
             return "\(durationText(sample.endDate.timeIntervalSince(sample.startDate))) \(stageName)".trimmingCharacters(in: .whitespaces)
         case .runningWorkouts:
             guard let workout = sample as? HKWorkout else { return "" }
