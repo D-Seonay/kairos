@@ -7,8 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		040A86C6285D90BF16F5B5AA /* PulseRecoveryEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 6B02FCA8EE3E67636F42D06C /* PulseRecoveryEngine */; };
 		0B8FFC73C2B071BD8176F831 /* PulseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D2D549D2FA86D57EF37548E /* PulseTests.swift */; };
 		2A294741604ED11BCA7E7E11 /* PulseApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D5309CAF2CC1BC7C626E937 /* PulseApp.swift */; };
+		926156F0D2A1BA89FCB63479 /* PulseHealth in Frameworks */ = {isa = PBXBuildFile; productRef = F4BAF19749CA79DDDA8F7559 /* PulseHealth */; };
 		FF152BDE6343A10B8627BC3C /* PulseDomain in Frameworks */ = {isa = PBXBuildFile; productRef = 8C27DDA66D90C7A34759B03B /* PulseDomain */; };
 /* End PBXBuildFile section */
 
@@ -28,8 +30,10 @@
 		4D73F310B6D8564B1B597665 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		4FBA30D234A433E58E16508B /* PulseTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = PulseTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D5309CAF2CC1BC7C626E937 /* PulseApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PulseApp.swift; sourceTree = "<group>"; };
+		A70D8B0C52E658248BD5D9C9 /* PulseRecoveryEngine */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PulseRecoveryEngine; path = Packages/PulseRecoveryEngine; sourceTree = SOURCE_ROOT; };
 		AB2D664BC108B8D410A545BF /* PulseDomain */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PulseDomain; path = Packages/PulseDomain; sourceTree = SOURCE_ROOT; };
 		CBC8AE5BF7C0419018C1192A /* Pulse.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Pulse.entitlements; sourceTree = "<group>"; };
+		E88E86A74B7F7A81085945C2 /* PulseHealth */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PulseHealth; path = Packages/PulseHealth; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -38,6 +42,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				FF152BDE6343A10B8627BC3C /* PulseDomain in Frameworks */,
+				040A86C6285D90BF16F5B5AA /* PulseRecoveryEngine in Frameworks */,
+				926156F0D2A1BA89FCB63479 /* PulseHealth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -67,6 +73,8 @@
 			isa = PBXGroup;
 			children = (
 				AB2D664BC108B8D410A545BF /* PulseDomain */,
+				E88E86A74B7F7A81085945C2 /* PulseHealth */,
+				A70D8B0C52E658248BD5D9C9 /* PulseRecoveryEngine */,
 			);
 			path = Packages;
 			sourceTree = "<group>";
@@ -124,6 +132,8 @@
 			name = Pulse;
 			packageProductDependencies = (
 				8C27DDA66D90C7A34759B03B /* PulseDomain */,
+				6B02FCA8EE3E67636F42D06C /* PulseRecoveryEngine */,
+				F4BAF19749CA79DDDA8F7559 /* PulseHealth */,
 			);
 			productName = Pulse;
 			productReference = 13FEF2D2118D74C3572DF349 /* Pulse.app */;
@@ -157,6 +167,8 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				3F03ECA5ED4F94E324D71332 /* XCLocalSwiftPackageReference "Packages/PulseDomain" */,
+				A81386294F42011B679000AB /* XCLocalSwiftPackageReference "Packages/PulseHealth" */,
+				A8A3B40E44C020828C72886D /* XCLocalSwiftPackageReference "Packages/PulseRecoveryEngine" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 1FEE830988994786371D8E45 /* Products */;
@@ -431,12 +443,28 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/PulseDomain;
 		};
+		A81386294F42011B679000AB /* XCLocalSwiftPackageReference "Packages/PulseHealth" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/PulseHealth;
+		};
+		A8A3B40E44C020828C72886D /* XCLocalSwiftPackageReference "Packages/PulseRecoveryEngine" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/PulseRecoveryEngine;
+		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		6B02FCA8EE3E67636F42D06C /* PulseRecoveryEngine */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PulseRecoveryEngine;
+		};
 		8C27DDA66D90C7A34759B03B /* PulseDomain */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = PulseDomain;
+		};
+		F4BAF19749CA79DDDA8F7559 /* PulseHealth */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PulseHealth;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
