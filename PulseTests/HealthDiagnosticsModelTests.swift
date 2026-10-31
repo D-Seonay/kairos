@@ -1,8 +1,9 @@
+// swiftlint:disable force_unwrapping
 import Foundation
+@testable import Pulse
 import PulseDomain
 import PulseHealth
 import Testing
-@testable import Pulse
 
 @MainActor
 @Suite struct HealthDiagnosticsModelTests {
@@ -18,7 +19,8 @@ import Testing
             sdnn.append(TimedSample(date: calendar.date(byAdding: .hour, value: 3, to: wake)!, value: 50))
             rhr.append(TimedSample(date: calendar.date(byAdding: .hour, value: 10, to: wake)!, value: 50))
         }
-        let latest = HealthSamplePoint(type: .hrvSDNN, date: sdnn[0].date, valueText: "50 ms", sourceName: "Fitbit", sourceBundleID: "com.fitbit.FitbitMobile")
+        let latest = HealthSamplePoint(type: .hrvSDNN, date: sdnn[0].date, valueText: "50 ms",
+                                       sourceName: "Fitbit", sourceBundleID: "com.fitbit.FitbitMobile")
         return StubHealthReader(latest: [.hrvSDNN: latest], counts: [.hrvSDNN: 20], sdnn: sdnn, restingHeartRate: rhr, sleep: sleep)
     }
 
@@ -61,3 +63,4 @@ import Testing
         #expect(deps.calendar == .current)
     }
 }
+// swiftlint:enable force_unwrapping

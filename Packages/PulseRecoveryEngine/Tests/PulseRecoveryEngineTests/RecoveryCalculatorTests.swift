@@ -1,7 +1,7 @@
 import Foundation
 import PulseDomain
-import Testing
 @testable import PulseRecoveryEngine
+import Testing
 
 @Suite struct RecoveryCalculatorTests {
     let calculator = RecoveryCalculator(calendar: TestCalendar.paris)
@@ -52,7 +52,8 @@ import Testing
 
     @Test func eightNightsIsCalibrating() throws {
         let history = (1...8).map {
-            NightSample(day: TestCalendar.shift(day, by: -$0), sdnnMs: 50, restingHeartRate: 50, sleep: .init(asleepMinutes: 480, deepMinutes: 96))
+            NightSample(day: TestCalendar.shift(day, by: -$0), sdnnMs: 50, restingHeartRate: 50,
+                        sleep: .init(asleepMinutes: 480, deepMinutes: 96))
         }
         let today = NightSample(day: day, sdnnMs: 50, restingHeartRate: 50, sleep: .init(asleepMinutes: 480, deepMinutes: 96))
         let r = try measured(calculator.compute(day: day, today: today, history: history))
@@ -64,7 +65,8 @@ import Testing
 
     @Test func threeNightsDropsHRVButKeepsOthers() throws {
         let history = (1...3).map {
-            NightSample(day: TestCalendar.shift(day, by: -$0), sdnnMs: 50, restingHeartRate: 50, sleep: .init(asleepMinutes: 450, deepMinutes: 90))
+            NightSample(day: TestCalendar.shift(day, by: -$0), sdnnMs: 50, restingHeartRate: 50,
+                        sleep: .init(asleepMinutes: 450, deepMinutes: 90))
         }
         let today = NightSample(day: day, sdnnMs: 50, restingHeartRate: 50, sleep: .init(asleepMinutes: 450, deepMinutes: 90))
         let r = try measured(calculator.compute(day: day, today: today, history: history))

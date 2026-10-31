@@ -1,6 +1,6 @@
 import Foundation
-import Testing
 @testable import PulseRecoveryEngine
+import Testing
 
 @Test func baselineNeedsFiveNights() {
     #expect(HRVBaseline(sdnnValuesMs: [50, 50, 50, 50]) == nil)

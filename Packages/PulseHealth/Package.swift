@@ -6,10 +6,10 @@ let package = Package(
     defaultLocalization: "fr",
     platforms: [.iOS(.v26)],
     products: [
-        .library(name: "PulseHealth", targets: ["PulseHealth"]),
+        .library(name: "PulseHealth", targets: ["PulseHealth"])
     ],
     dependencies: [
-        .package(path: "../PulseDomain"),
+        .package(path: "../PulseDomain")
     ],
     targets: [
         .target(
@@ -22,6 +22,6 @@ let package = Package(
             name: "PulseHealthTests",
             dependencies: ["PulseHealth"],
             swiftSettings: [.swiftLanguageMode(.v6)]
-        ),
+        )
     ]
 )

@@ -21,7 +21,7 @@ public final class HealthKitReader: HealthReading, @unchecked Sendable {
             HKQuantityType(.restingHeartRate),
             HKQuantityType(.heartRate),
             HKQuantityType(.bodyMass),
-            HKWorkoutType.workoutType(),
+            HKWorkoutType.workoutType()
         ]
         try await store.requestAuthorization(toShare: [], read: types)
     }

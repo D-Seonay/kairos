@@ -1,7 +1,7 @@
 import Foundation
 import PulseDomain
-import Testing
 @testable import PulseRecoveryEngine
+import Testing
 
 @Suite struct NightAggregatorTests {
     let aggregator = NightAggregator(calendar: TestCalendar.paris)

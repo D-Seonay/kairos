@@ -1,7 +1,7 @@
 import Foundation
 import PulseDomain
-import Testing
 @testable import PulseHealth
+import Testing
 
 @Suite struct StubHealthReaderTests {
     let t0 = Date(timeIntervalSince1970: 1_000_000)
@@ -20,7 +20,8 @@ import Testing
     }
 
     @Test func seriesAreFilteredOnInclusiveBounds() async throws {
-        let sdnn = [TimedSample(date: t0.addingTimeInterval(-1), value: 1), .init(date: t0, value: 2), .init(date: t1, value: 3), .init(date: t2.addingTimeInterval(1), value: 4)]
+        let sdnn = [TimedSample(date: t0.addingTimeInterval(-1), value: 1), .init(date: t0, value: 2),
+                    .init(date: t1, value: 3), .init(date: t2.addingTimeInterval(1), value: 4)]
         let sleep = [SleepInterval(start: t0, end: t1, stage: .core), .init(start: t2, end: t2.addingTimeInterval(60), stage: .core)]
         let stub = StubHealthReader(sdnn: sdnn, restingHeartRate: sdnn, sleep: sleep)
         #expect(try await stub.sdnnSamples(from: t0, to: t1).map(\.value) == [2, 3])
@@ -29,7 +30,8 @@ import Testing
     }
 
     @Test func latestAndCountsComeFromConfiguration() async throws {
-        let point = HealthSamplePoint(type: .hrvSDNN, date: t0, valueText: "52 ms", sourceName: "Fitbit", sourceBundleID: "com.fitbit.FitbitMobile")
+        let point = HealthSamplePoint(type: .hrvSDNN, date: t0, valueText: "52 ms",
+                                      sourceName: "Fitbit", sourceBundleID: "com.fitbit.FitbitMobile")
         let stub = StubHealthReader(latest: [.hrvSDNN: point], counts: [.hrvSDNN: 20])
         #expect(try await stub.latestSample(of: .hrvSDNN) == point)
         #expect(try await stub.latestSample(of: .sleepAnalysis) == nil)

@@ -1,5 +1,5 @@
-import Testing
 @testable import PulseRecoveryEngine
+import Testing
 
 @Test func sleepScoreFullNight() { #expect(SleepScorer.score(asleepMinutes: 480, deepMinutes: 96) == 100) }
 @Test func sleepScoreShortNightLowDeep() { #expect(abs(SleepScorer.score(asleepMinutes: 360, deepMinutes: 36) - 67.5) < 1e-9) }

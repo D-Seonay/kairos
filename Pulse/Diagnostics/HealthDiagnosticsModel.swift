@@ -70,7 +70,7 @@ final class HealthDiagnosticsModel {
             }
             self.rows = rows
         } catch {
-            errorMessage = String(localized: "Apple Santé n'a pas pu être lu. Vérifiez l'autorisation dans Réglages › Confidentialité et sécurité › Santé › Pulse.")
+            errorMessage = String(localized: "Apple Santé n'a pas pu être lu. Vérifiez l'autorisation dans Réglages › Santé › Pulse.")
         }
     }
 }

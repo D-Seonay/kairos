@@ -21,7 +21,7 @@ public struct RecoveryScenario: Codable, Sendable {
     public var expected: Expected
 
     /// Fuseau dans lequel les dates `"YYYY-MM-DD"` des fixtures sont interprétées, à minuit.
-    public static let timeZone = TimeZone(identifier: "Europe/Paris")!
+    public static let timeZone = TimeZone(identifier: "Europe/Paris") ?? .current
 
     /// Décodeur acceptant les dates au format `"YYYY-MM-DD"`, décodées à minuit Europe/Paris.
     public static var decoder: JSONDecoder {

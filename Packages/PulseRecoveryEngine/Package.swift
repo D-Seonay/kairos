@@ -5,10 +5,10 @@ let package = Package(
     name: "PulseRecoveryEngine",
     platforms: [.iOS(.v26), .macOS(.v15)],
     products: [
-        .library(name: "PulseRecoveryEngine", targets: ["PulseRecoveryEngine"]),
+        .library(name: "PulseRecoveryEngine", targets: ["PulseRecoveryEngine"])
     ],
     dependencies: [
-        .package(path: "../PulseDomain"),
+        .package(path: "../PulseDomain")
     ],
     targets: [
         .target(
@@ -21,6 +21,6 @@ let package = Package(
             dependencies: ["PulseRecoveryEngine"],
             resources: [.copy("Fixtures")],
             swiftSettings: [.swiftLanguageMode(.v6)]
-        ),
+        )
     ]
 )

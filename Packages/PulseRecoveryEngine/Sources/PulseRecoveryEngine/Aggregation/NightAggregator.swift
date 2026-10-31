@@ -25,7 +25,9 @@ public struct NightAggregator: Sendable {
     /// `day` est minuit local du jour de réveil.
     public func night(for day: Date, sdnn: [TimedSample], restingHeartRate: [TimedSample], sleep: [SleepInterval]) -> NightSample {
         let asleep = mergedAsleepIntervals(for: day, in: sleep)
-        let sleepWindow = asleep.isEmpty ? fallbackWindow(for: day) : DateInterval(start: asleep[0].start, end: asleep[asleep.count - 1].end)
+        let sleepWindow = asleep.isEmpty
+            ? fallbackWindow(for: day)
+            : DateInterval(start: asleep[0].start, end: asleep[asleep.count - 1].end)
 
         return NightSample(
             day: day,

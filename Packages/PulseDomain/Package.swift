@@ -5,7 +5,7 @@ let package = Package(
     name: "PulseDomain",
     platforms: [.iOS(.v26), .macOS(.v15)],
     products: [
-        .library(name: "PulseDomain", targets: ["PulseDomain"]),
+        .library(name: "PulseDomain", targets: ["PulseDomain"])
     ],
     targets: [
         .target(
@@ -16,6 +16,6 @@ let package = Package(
             name: "PulseDomainTests",
             dependencies: ["PulseDomain"],
             swiftSettings: [.swiftLanguageMode(.v6)]
-        ),
+        )
     ]
 )

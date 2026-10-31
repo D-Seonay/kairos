@@ -860,4 +860,17 @@ Cette section décide d'un point du plan M3 : si la SDNN nocturne n'arrive pas o
 
 ## Résultat du diagnostic
 
-_À remplir en tâche 10, étape 5._
+_Non encore réalisé._ La session du 31 octobre 2026 a livré les tâches 1 à 11 sur la branche `m1-fondations-moteur` (projet, trois packages, 47 tests verts, lint strict à zéro, Makefile, script Xcode Cloud), mais l'iPhone de Mathéo n'était pas branché et aucune session Xcode / App Store Connect n'était ouverte. Restent à faire par Mathéo :
+
+1. **Tâche 10, étape 5** : brancher l'iPhone, régler l'équipe de signature (cible `Pulse` › Signing & Capabilities), lancer l'app, autoriser Apple Santé, puis remplir le tableau ci-dessous.
+2. **Tâche 11, étapes 5 et 6** : créer le workflow Xcode Cloud (environnement **Xcode 27**, pas 26 : c'est la version installée et celle qui a compilé ce jalon), pousser la branche, installer depuis TestFlight et refaire le diagnostic.
+
+| Type | Source (app émettrice) | Fréquence / heure d'arrivée | Phases de sommeil ? | SDNN pendant la nuit ? |
+| :--- | :--- | :--- | :--- | :--- |
+| Sommeil | | | | |
+| VFC (SDNN) | | | | |
+| FC au repos | | | | |
+| Fréquence cardiaque | | | | |
+| Courses | | | | |
+| Poids | | | | |
+

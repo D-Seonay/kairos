@@ -1,6 +1,6 @@
 import Foundation
-import Testing
 @testable import PulseRecoveryEngine
+import Testing
 
 @Suite struct LoadCalculatorTests {
     let calculator = LoadCalculator(calendar: TestCalendar.paris)
@@ -36,7 +36,7 @@ import Testing
 
     @Test(arguments: [
         (0.79, ACWRZone.undertraining), (0.8, .optimal), (1.3, .optimal),
-        (1.31, .elevated), (1.49, .elevated), (1.5, .risk),
+        (1.31, .elevated), (1.49, .elevated), (1.5, .risk)
     ])
     func zoneBoundaries(ratio: Double, expected: ACWRZone) {
         #expect(ACWRZone(ratio: ratio) == expected)

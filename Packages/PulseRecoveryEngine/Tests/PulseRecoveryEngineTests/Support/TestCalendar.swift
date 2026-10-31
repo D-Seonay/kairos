@@ -1,3 +1,4 @@
+// swiftlint:disable force_unwrapping
 import Foundation
 
 /// Calendrier grégorien en fuseau Europe/Paris, partagé par les tests du moteur.
@@ -22,3 +23,4 @@ enum TestCalendar {
         paris.date(byAdding: .day, value: offset, to: day)!
     }
 }
+// swiftlint:enable force_unwrapping

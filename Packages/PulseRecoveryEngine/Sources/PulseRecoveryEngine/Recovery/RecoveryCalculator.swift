@@ -6,7 +6,14 @@ public struct RecoveryCalculator: Sendable {
     public static let hrvWindowDays = 14
     public static let restingHeartRateWindowDays = 7
     public static let restingHeartRateMinimumValues = 3
-    public static let nominalWeights: [Factor: Double] = [.hrv: 0.50, .restingHeartRate: 0.25, .sleep: 0.25]
+    /// Poids nominaux VFC 0,50 / FC repos 0,25 / sommeil 0,25 (spec §6.2).
+    public static func nominalWeight(for factor: Factor) -> Double {
+        switch factor {
+        case .hrv: 0.50
+        case .restingHeartRate: 0.25
+        case .sleep: 0.25
+        }
+    }
     /// En dessous de ce nombre de facteurs présents, le score laisse place au check-in.
     public static let minimumFactors = 2
 
@@ -21,7 +28,7 @@ public struct RecoveryCalculator: Sendable {
         let present = [
             hrv.score,
             restingHeartRateFactor(day: day, today: today, history: history),
-            sleepFactor(today: today),
+            sleepFactor(today: today)
         ].compactMap { $0 }
 
         let missing = Factor.allCases.filter { factor in !present.contains { $0.factor == factor } }
@@ -29,10 +36,10 @@ public struct RecoveryCalculator: Sendable {
             return .needsCheckIn(missing: missing)
         }
 
-        let totalWeight = present.reduce(0) { $0 + Self.nominalWeights[$1.factor]! }
+        let totalWeight = present.reduce(0) { $0 + Self.nominalWeight(for: $1.factor) }
         let factors = present.map { partial in
             FactorScore(factor: partial.factor, score: partial.score,
-                        weight: Self.nominalWeights[partial.factor]! / totalWeight,
+                        weight: Self.nominalWeight(for: partial.factor) / totalWeight,
                         todayValue: partial.todayValue, baselineValue: partial.baselineValue)
         }
         let score = factors.reduce(0) { $0 + $1.score * $1.weight }
@@ -49,7 +56,8 @@ public struct RecoveryCalculator: Sendable {
         let baselineValue: Double?
     }
 
-    private func hrvFactor(day: Date, today: NightSample, history: [NightSample]) -> (score: PartialFactor?, calibration: CalibrationState) {
+    private func hrvFactor(day: Date, today: NightSample,
+                           history: [NightSample]) -> (score: PartialFactor?, calibration: CalibrationState) {
         let values = history
             .filter { offset(from: $0, to: day).map { (1...Self.hrvWindowDays).contains($0) } ?? false }
             .compactMap(\.sdnnMs)

@@ -29,7 +29,8 @@ public struct RecoveryResult: Sendable, Equatable {
     public let missing: [Factor]
     public let calibration: CalibrationState
 
-    public init(day: Date, score: Double, category: RecoveryCategory, factors: [FactorScore], missing: [Factor], calibration: CalibrationState) {
+    public init(day: Date, score: Double, category: RecoveryCategory,
+                factors: [FactorScore], missing: [Factor], calibration: CalibrationState) {
         self.day = day
         self.score = score
         self.category = category
