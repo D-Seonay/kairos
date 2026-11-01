@@ -24,6 +24,8 @@ public final class TodayModel {
     @ObservationIgnored private var isSubmittingCheckIn = false
     /// Change à chaque check-in enregistré : une lecture qui a commencé avant lui n'écrase pas le score estimé.
     @ObservationIgnored private var scoreEpoch = 0
+    /// Le jour de la dernière actualisation : un jour de plus et le formulaire du check-in repart de zéro.
+    @ObservationIgnored private var lastRefreshDay: Date?
 
     public init(environment: TodayEnvironment) {
         self.environment = environment
@@ -45,6 +47,7 @@ public final class TodayModel {
         let now = environment.now()
         let epoch = scoreEpoch
         dateText = Self.dateText(now, calendar: environment.calendar)
+        resetCheckInOnNewDay(now)
 
         let profile = try? await environment.profiles.load()
         greeting = Self.greeting(firstName: profile?.firstName)
@@ -68,6 +71,7 @@ public final class TodayModel {
             let estimated = try await environment.scores.saveCheckIn(answers, now: environment.now())
             scoreEpoch += 1
             errorMessage = nil
+            checkIn.selection = [:]
             apply(.scored(estimated))
         } catch {
             errorMessage = String(localized: "Pulse n'a pas pu enregistrer ton check-in.", bundle: .module)
@@ -75,6 +79,14 @@ public final class TodayModel {
     }
 
     // MARK: - Interne
+
+    private func resetCheckInOnNewDay(_ now: Date) {
+        let day = environment.calendar.startOfDay(for: now)
+        if let lastRefreshDay, lastRefreshDay != day {
+            checkIn.selection = [:]
+        }
+        lastRefreshDay = day
+    }
 
     private func plan(for profile: UserProfile?, now: Date) async {
         var program: Program?

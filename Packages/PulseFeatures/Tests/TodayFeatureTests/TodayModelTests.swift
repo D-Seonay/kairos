@@ -82,6 +82,40 @@ struct TodayModelTests {
         #expect(model.factors.allSatisfy { $0.isMissing })
     }
 
+    @Test func checkInFormIsEmptyAfterASuccessfulSubmit() async {
+        let fixture = TodayFixture(scenario: .threeNights)
+        let model = fixture.makeModel()
+        await model.refresh()
+        model.checkIn.selection = [.sleep: 3, .pain: 3, .motivation: 3]
+        await model.submitCheckIn()
+        #expect(model.checkIn.selection.isEmpty)
+    }
+
+    @Test func checkInFormStartsEmptyOnTheNextDay() async {
+        let fixture = TodayFixture(scenario: .threeNights)
+        let model = fixture.makeModel()
+        await model.refresh()
+        model.checkIn.selection = [.sleep: 3, .pain: 2]
+        fixture.clock.set("2026-11-03T08:00")
+        await model.refresh()
+        guard case .needsCheckIn = model.score else {
+            Issue.record("Un check-in était attendu, obtenu \(String(describing: model.score))")
+            return
+        }
+        #expect(model.checkIn.selection.isEmpty)
+        #expect(model.checkIn.answers == nil)
+    }
+
+    @Test func checkInAnswersSurviveARefreshOnTheSameDay() async {
+        let fixture = TodayFixture(scenario: .threeNights)
+        let model = fixture.makeModel()
+        await model.refresh()
+        model.checkIn.selection = [.sleep: 3, .pain: 2]
+        fixture.clock.set("2026-11-02T09:30")
+        await model.refresh()
+        #expect(model.checkIn.selection == [.sleep: 3, .pain: 2])
+    }
+
     @Test func checkInIsIgnoredOverAScore() async throws {
         let fixture = TodayFixture()
         let model = fixture.makeModel()
