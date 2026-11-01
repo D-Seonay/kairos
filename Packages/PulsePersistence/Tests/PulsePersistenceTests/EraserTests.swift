@@ -35,7 +35,7 @@ private struct EraseFixture {
 
 @Test func eraseEmptiesEveryTableDefaultsAndExports() async throws {
     let fixture = try EraseFixture()
-    try await SampleDataSeeder(container: fixture.box.container).seed(now: Fixed.t0)
+    try await SampleDataSeeder(container: fixture.box.container, calendar: Fixed.calendar).seed(now: Fixed.t0)
     try await SwiftDataActiveSessionStore(modelContainer: fixture.box.container).save(Sample.snapshot())
     try await SwiftDataHealthSampleCache(modelContainer: fixture.box.container).saveAnchor(Data([1]), for: .sleep)
     #expect(try await fixture.counts().values.contains { $0 > 0 })
@@ -56,7 +56,7 @@ private struct EraseFixture {
 @Test func healthEraseFailureStillWipesLocalStore() async throws {   // Review Focus 4
     struct Boom: Error {}
     let fixture = try EraseFixture(health: StubHealthEraser(error: Boom()))
-    try await SampleDataSeeder(container: fixture.box.container).seed(now: Fixed.t0)
+    try await SampleDataSeeder(container: fixture.box.container, calendar: Fixed.calendar).seed(now: Fixed.t0)
     await #expect(throws: Boom.self) {
         try await fixture.eraser().eraseEverything(options: EraseOptions(includeAppleHealth: true))
     }
@@ -82,7 +82,7 @@ private struct EraseFixture {
 /// synchronisé effacé doit y laisser une suppression (spec M2 §7.2, suppression enregistrement par enregistrement).
 @Test func eraseRecordsADeleteInHistoryForEverySyncedRecord() async throws {
     let fixture = try EraseFixture()
-    try await SampleDataSeeder(container: fixture.box.container).seed(now: Fixed.t0)
+    try await SampleDataSeeder(container: fixture.box.container, calendar: Fixed.calendar).seed(now: Fixed.t0)
     let before = try await fixture.counts()
     let syncedCount = StoreTable.exported.reduce(0) { $0 + (before[$1] ?? 0) }
     let syncedEntities = Set(PersistenceStack.syncedModels.map { String(describing: $0) })

@@ -14,6 +14,14 @@ enum Fixed {
     static let t0 = Date(timeIntervalSince1970: 1_794_700_000)
     static let t1 = Date(timeIntervalSince1970: 1_794_700_001)
     static let t2 = Date(timeIntervalSince1970: 1_794_700_002)
+
+    /// Calendrier grégorien de Paris, celui de tous les tests.
+    static let calendar: Calendar = {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "Europe/Paris") ?? .gmt
+        calendar.locale = Locale(identifier: "fr_FR")
+        return calendar
+    }()
 }
 
 enum Sample {

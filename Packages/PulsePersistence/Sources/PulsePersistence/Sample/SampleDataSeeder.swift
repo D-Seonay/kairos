@@ -5,9 +5,11 @@ import SwiftData
 /// Insère le jeu de données d'exemple de la spec M2 §6.3, via les dépôts. Ne dépend pas de `PulseContent`.
 public struct SampleDataSeeder: Sendable {
     private let container: ModelContainer
+    private let calendar: Calendar
 
-    public init(container: ModelContainer) {
+    public init(container: ModelContainer, calendar: Calendar) {
         self.container = container
+        self.calendar = calendar
     }
 
     public func seed(now: Date) async throws {
@@ -20,7 +22,7 @@ public struct SampleDataSeeder: Sendable {
         try await SwiftDataWorkoutRepository(modelContainer: container).save(session)
         try await SwiftDataScheduledDayRepository(modelContainer: container).save(scheduledDay(date: yesterday, program: program,
                                                                                                 session: session, now: now))
-        let recovery = SwiftDataRecoveryRepository(modelContainer: container)
+        let recovery = SwiftDataRecoveryRepository(modelContainer: container, calendar: calendar)
         try await recovery.save(measuredRecovery(day: yesterday, now: now))
         try await recovery.save(estimatedRecovery(day: now))
         try await recovery.save(checkIn(day: now))
@@ -109,7 +111,7 @@ public struct SampleDataSeeder: Sendable {
     }
 
     private func scheduledDay(date: Date, program: Program, session: WorkoutSession, now: Date) -> ScheduledDay {
-        ScheduledDay(date: Calendar.current.startOfDay(for: date), programID: program.id, routineDayID: program.days.first?.id,
+        ScheduledDay(date: calendar.startOfDay(for: date), programID: program.id, routineDayID: program.days.first?.id,
                      title: "Push", kind: .strength, status: .completed, sessionID: session.id, createdAt: now, updatedAt: now)
     }
 

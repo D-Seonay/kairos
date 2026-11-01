@@ -72,14 +72,14 @@ struct AppDependencies: Sendable {
             userExercises: SwiftDataUserExerciseRepository(modelContainer: container),
             workouts: SwiftDataWorkoutRepository(modelContainer: container),
             scheduledDays: SwiftDataScheduledDayRepository(modelContainer: container),
-            recovery: SwiftDataRecoveryRepository(modelContainer: container),
+            recovery: SwiftDataRecoveryRepository(modelContainer: container, calendar: calendar),
             supplements: SwiftDataSupplementRepository(modelContainer: container),
             bodyMeasurements: SwiftDataBodyMeasurementRepository(modelContainer: container),
             personalRecords: SwiftDataPersonalRecordRepository(modelContainer: container),
             healthCache: SwiftDataHealthSampleCache(modelContainer: container),
             activeSession: SwiftDataActiveSessionStore(modelContainer: container),
             inspector: SwiftDataStoreInspector(container: container, cloudEnabled: mode == .cloud),
-            exporter: exporter, eraser: eraser, seeder: SampleDataSeeder(container: container))
+            exporter: exporter, eraser: eraser, seeder: SampleDataSeeder(container: container, calendar: calendar))
     }
 
     private static var appVersion: String {

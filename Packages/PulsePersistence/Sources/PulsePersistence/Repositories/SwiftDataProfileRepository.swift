@@ -4,11 +4,12 @@ import SwiftData
 
 @ModelActor
 public actor SwiftDataProfileRepository: ProfileRepository {
+    /// Tri en mémoire : il n'y a jamais qu'un ou deux profils, et l'ordre par `id.uuidString` départage deux appareils.
     public func load() throws -> UserProfile? {
-        var descriptor = FetchDescriptor<StoredProfile>(predicate: #Predicate { $0.deletedAt == nil },
-                                                        sortBy: [SortDescriptor(\.createdAt, order: .forward)])
-        descriptor.fetchLimit = 1
-        return try modelContext.fetch(descriptor).first?.toDomain()
+        let stored = try modelContext.fetch(FetchDescriptor<StoredProfile>(predicate: #Predicate { $0.deletedAt == nil }))
+        return stored.min { lhs, rhs in
+            lhs.createdAt != rhs.createdAt ? lhs.createdAt < rhs.createdAt : lhs.id.uuidString < rhs.id.uuidString
+        }?.toDomain()
     }
 
     public func save(_ profile: UserProfile) throws {
@@ -20,6 +21,16 @@ public actor SwiftDataProfileRepository: ProfileRepository {
         } else {
             modelContext.insert(StoredProfile(stamped))
         }
+        try modelContext.save()
+    }
+
+    public func delete(id: UUID) throws {
+        guard let stored = try modelContext.first(StoredProfile.self, where: #Predicate { $0.id == id && $0.deletedAt == nil }) else {
+            return
+        }
+        let now = Date()
+        stored.deletedAt = now
+        stored.updatedAt = now
         try modelContext.save()
     }
 }
