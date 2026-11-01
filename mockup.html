@@ -1,0 +1,3520 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fitness & Biométrie IA - Design System Mobile Haute Fidélité</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+    :root {
+      --bg-dark: #000000;
+      --bg-panel: #0C0D11;
+      --card-white: #FFFFFF;
+      --card-dark: #121318;
+      --card-dark-glass: rgba(18, 20, 28, 0.75);
+      
+      --text-main-dark: #0A0B0E;
+      --text-muted-dark: #717684;
+      --text-main-light: #FFFFFF;
+      --text-muted-light: #8E94A4;
+
+      --aura-gold: #F59E0B;
+      --aura-amber: #D97706;
+      --aura-sun: #FEF3C7;
+      --aura-orange: #EA580C;
+
+      --accent-green: #10B981;
+      --accent-cyan: #06B6D4;
+      --accent-red: #EF4444;
+
+      --radius-squircle: 28px;
+      --radius-sm: 16px;
+      --radius-pill: 999px;
+      --border-glass: rgba(255, 255, 255, 0.12);
+
+      /* APPLE 2030 SPATIAL DESIGN TOKENS */
+      --glass-specular: inset 0 1px 1.5px rgba(255, 255, 255, 0.5);
+      --glass-blur: blur(36px) saturate(210%);
+      --spring-physics: cubic-bezier(0.16, 1, 0.3, 1);
+      --siri-neural-gradient: linear-gradient(135deg, #FF3B30 0%, #FF9500 20%, #AF52DE 50%, #5856D6 75%, #007AFF 100%);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background: #030406;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 16px 60px 16px;
+    }
+
+    /* BARRE D'OUTILS SHOWCASE */
+    .showcase-nav {
+      width: 100%;
+      max-width: 440px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .showcase-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 0 4px;
+    }
+
+    .brand-pill-title {
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pill-tag-2030 {
+      background: var(--siri-neural-gradient);
+      color: #fff;
+      font-size: 9px;
+      font-weight: 800;
+      padding: 3px 9px;
+      border-radius: var(--radius-pill);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      box-shadow: 0 0 16px rgba(175, 82, 222, 0.45);
+      animation: pulseAura 3s infinite ease-in-out;
+    }
+
+    @keyframes pulseAura {
+      0%, 100% { opacity: 0.9; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.04); }
+    }
+
+    .spatial-theme-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .spatial-theme-btn:hover {
+      background: rgba(255, 255, 255, 0.16);
+      transform: translateY(-1px);
+    }
+
+    /* SÉLECTEUR D'ÉCRANS HAUT DE PAGE */
+    .screen-tabs {
+      display: flex;
+      gap: 5px;
+      background: rgba(18, 20, 28, 0.85);
+      backdrop-filter: var(--glass-blur);
+      padding: 4px;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border-glass);
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-muted-light);
+      padding: 8px 12px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.25s var(--spring-physics);
+    }
+
+    .tab-btn:hover {
+      color: #fff;
+    }
+
+    .tab-btn.active {
+      background: #FFFFFF;
+      color: #000000;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.5), var(--glass-specular);
+    }
+
+    /* CHÂSSIS SMARTPHONE LUXE (IPHONE TITANIUM CERAMIC 2030) */
+    .phone-container {
+      width: 400px;
+      background: #000000;
+      border-radius: 54px;
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15), 0 0 0 10px #0D0E13, 0 35px 100px rgba(0,0,0,0.95), 0 0 160px rgba(245, 158, 11, 0.16);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: all 0.5s ease;
+    }
+
+    /* STATUS BAR & DYNAMIC NEURAL ISLAND 2030 */
+    .phone-status-bar {
+      height: 48px;
+      padding: 12px 28px 0 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      z-index: 90;
+      position: relative;
+    }
+
+    .dynamic-island {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 154px;
+      height: 32px;
+      background: #000;
+      border-radius: 24px;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      border: 0.5px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.3);
+      cursor: pointer;
+      transition: all 0.35s var(--spring-physics);
+    }
+
+    .dynamic-island:hover {
+      width: 180px;
+      border-color: rgba(245, 158, 11, 0.4);
+      box-shadow: 0 4px 24px rgba(245, 158, 11, 0.25);
+    }
+
+    .dynamic-island.expanded {
+      width: 340px;
+      height: 72px;
+      border-radius: 28px;
+      padding: 14px 18px;
+      background: rgba(14, 15, 22, 0.98);
+      backdrop-filter: var(--glass-blur);
+    }
+
+    .island-left-data {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 10px var(--accent-green);
+      animation: heartPulse 1.2s infinite ease-in-out;
+    }
+
+    @keyframes heartPulse {
+      0%, 100% { transform: scale(1); opacity: 0.9; }
+      50% { transform: scale(1.4); opacity: 1; }
+    }
+
+    .island-ecg-wave {
+      width: 42px;
+      height: 14px;
+    }
+
+    .island-status-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .island-cam {
+      width: 10px;
+      height: 10px;
+      background: #0E1218;
+      border-radius: 50%;
+      border: 1.5px solid #1c212a;
+    }
+
+    /* DÉGRADÉ LUMINEUX D'AMBIANCE EXACT (WARM GOLDEN AURA GLOW) */
+    .aurora-ambient-glow {
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      width: 380px;
+      height: 400px;
+      background: radial-gradient(circle at 65% 35%, 
+        rgba(253, 224, 71, 0.75) 0%, 
+        rgba(245, 158, 11, 0.65) 25%, 
+        rgba(217, 119, 6, 0.40) 48%, 
+        rgba(234, 88, 12, 0.18) 65%, 
+        rgba(0, 0, 0, 0) 80%);
+      filter: blur(48px);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .aurora-ambient-subtle {
+      position: absolute;
+      top: 180px;
+      left: -60px;
+      width: 280px;
+      height: 280px;
+      background: radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, rgba(0,0,0,0) 70%);
+      filter: blur(55px);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* CONTENU INTERACTIF DÉFILANT */
+    .phone-content {
+      position: relative;
+      z-index: 2;
+      padding: 4px 16px 88px 16px;
+      overflow-y: auto;
+      max-height: 800px;
+    }
+
+    .phone-content::-webkit-scrollbar {
+      display: none;
+    }
+
+    .screen-page {
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .screen-page.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* TOP BAR ÉCRAN */
+    .screen-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 2px;
+    }
+
+    .brand-logo-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-icon-box {
+      width: 28px;
+      height: 28px;
+      background: #000;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    }
+
+    .brand-name {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+      color: #fff;
+    }
+
+    /* CONTROLES CAPSULES HAUT DE PAGE */
+    .header-capsules {
+      display: flex;
+      gap: 4px;
+      background: rgba(18, 20, 26, 0.6);
+      backdrop-filter: blur(16px);
+      padding: 3px;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border-glass);
+    }
+
+    .capsule-pill {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted-light);
+      padding: 5px 12px;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .capsule-pill.active {
+      background: #000;
+      color: #fff;
+    }
+
+    /* TITRE PRINCIPAL DE SECTION (Health Karma style) */
+    .hero-title-group {
+      margin-top: 4px;
+      margin-bottom: 2px;
+    }
+
+    .hero-title {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      color: #fff;
+    }
+
+    .sub-tabs-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .sub-tab-pill {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-pill);
+      padding: 4px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .sub-tab-pill.active {
+      background: #FFFFFF;
+      color: #000;
+      border-color: #FFFFFF;
+      font-weight: 700;
+    }
+
+    /* ============================================================ */
+    /* BENTO GRID HAUTE FIDÉLITÉ (Dual-Tone Opal & Obsidian)        */
+    /* ============================================================ */
+    .bento-row {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 12px;
+    }
+
+    /* 1. CARTE BLANCHE HAUT CONTRASTE AVEC COMPTEUR TACHYMÈTRE */
+    .card-opal-hero {
+      background: var(--card-white);
+      border-radius: var(--radius-squircle);
+      padding: 18px 16px;
+      color: var(--text-main-dark);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.35);
+      position: relative;
+      min-height: 236px;
+    }
+
+    .score-pts-badge {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted-dark);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .giant-metric-number {
+      font-size: 58px;
+      font-weight: 800;
+      letter-spacing: -2.5px;
+      line-height: 0.95;
+      margin: 4px 0 6px 0;
+      color: #000;
+    }
+
+    .metric-status-text {
+      font-size: 11px;
+      font-weight: 700;
+      color: #000;
+      line-height: 1.2;
+    }
+
+    .metric-status-sub {
+      font-size: 10px;
+      color: var(--text-muted-dark);
+      font-weight: 500;
+    }
+
+    /* TACHYMÈTRE FILAIRE EXACT */
+    .tachymeter-box {
+      width: 100%;
+      height: 84px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin-top: 4px;
+    }
+
+    .tachymeter-svg {
+      width: 140px;
+      height: 75px;
+    }
+
+    /* PASTILLE RONDE AVEC FLÈCHE ↗ EXACTE */
+    .arrow-badge-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #000000;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+
+    .arrow-badge-btn:hover {
+      transform: scale(1.08);
+    }
+
+    /* 2. CARTE À DÉGRADÉ MESH ATMOSPHÉRIQUE (Credit Card Use style) */
+    .card-gradient-mesh {
+      background: linear-gradient(145deg, 
+        rgba(56, 88, 120, 0.85) 0%, 
+        rgba(92, 75, 70, 0.80) 50%, 
+        rgba(217, 119, 6, 0.70) 100%);
+      backdrop-filter: blur(20px);
+      border-radius: var(--radius-squircle);
+      padding: 16px;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      min-height: 112px;
+    }
+
+    .card-gradient-mesh .arrow-badge-btn {
+      background: rgba(255,255,255,0.9);
+      color: #000;
+    }
+
+    .card-title-tiny {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.85);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mesh-metric-val {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-top: 4px;
+    }
+
+    /* PAGINATION DOTS EXACTES */
+    .dot-indicators {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      margin-top: 6px;
+    }
+
+    .dot-item {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.35);
+    }
+
+    .dot-item.active {
+      width: 14px;
+      border-radius: 3px;
+      background: #FFFFFF;
+    }
+
+    /* 3. CARTES BLANCHES COMPACTES (Net Worth & Total Dept style) */
+    .bento-grid-2x2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .card-opal-compact {
+      background: var(--card-white);
+      border-radius: var(--radius-squircle);
+      padding: 14px;
+      color: var(--text-main-dark);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      min-height: 98px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+
+    .card-opal-compact .arrow-badge-btn {
+      top: 10px;
+      right: 10px;
+      width: 22px;
+      height: 22px;
+      font-size: 11px;
+    }
+
+    .compact-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted-dark);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .compact-number {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #000;
+      display: flex;
+      align-items: baseline;
+      gap: 2px;
+    }
+
+    /* SPARKLINE LISSÉE */
+    .micro-sparkline-svg {
+      width: 50px;
+      height: 18px;
+    }
+
+    /* ============================================================ */
+    /* SECTION HISTORIQUE & GRAPHIQUE NOIR PROFOND (Score History) */
+    /* ============================================================ */
+    .score-history-panel {
+      background: #000000;
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-squircle);
+      padding: 18px 16px;
+      margin-top: 4px;
+      position: relative;
+    }
+
+    .history-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .history-heading {
+      font-size: 15px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .time-pills-row {
+      display: flex;
+      gap: 4px;
+      background: #111319;
+      padding: 2px;
+      border-radius: var(--radius-pill);
+    }
+
+    .time-pill-btn {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted-light);
+      padding: 4px 8px;
+      border-radius: var(--radius-pill);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+    }
+
+    .time-pill-btn.active {
+      background: #252834;
+      color: #fff;
+    }
+
+    /* REPRODUCTION DE LA CARTE FLOATING SCORE TOOLTIP */
+    .chart-container-financial {
+      position: relative;
+      height: 100px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding: 0 10px 10px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .grid-vertical-dashed {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      border-left: 1px dashed rgba(255,255,255,0.12);
+    }
+
+    .chart-bar-pillar {
+      width: 4px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      position: relative;
+    }
+
+    .pillar-line {
+      width: 2px;
+      background: #1E222D;
+      border-radius: 1px;
+    }
+
+    .pillar-cap {
+      width: 8px;
+      height: 3px;
+      border-radius: 2px;
+      background: #EA580C;
+      margin-bottom: 2px;
+    }
+
+    .pillar-cap.green {
+      background: #10B981;
+    }
+
+    /* FLOATING TOOLTIP BLACK CARD (816 style) */
+    .floating-score-card {
+      position: absolute;
+      top: 15px;
+      left: 38%;
+      background: #12141C;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      padding: 6px 12px;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.8);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .tooltip-score-val {
+      font-size: 15px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tooltip-score-sub {
+      font-size: 9px;
+      color: var(--text-muted-light);
+      font-weight: 600;
+    }
+
+    /* SECTION DES OFFRES / ENTRAÎNEMENT IA (Credit Offers style) */
+    .offers-heading-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 14px;
+      margin-bottom: 10px;
+    }
+
+    .offers-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .offers-badge-count {
+      font-size: 11px;
+      color: var(--text-muted-light);
+      font-weight: 600;
+    }
+
+    .offers-cards-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .offer-card-item {
+      background: linear-gradient(145deg, #161822 0%, #0F1017 100%);
+      border: 1px solid var(--border-glass);
+      border-radius: 18px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .offer-card-item.highlighted {
+      background: linear-gradient(145deg, rgba(245, 158, 11, 0.16) 0%, #12141E 100%);
+      border-color: rgba(245, 158, 11, 0.35);
+    }
+
+    .offer-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .offer-icon-circle {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .offer-meta-grid {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 4px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .offer-meta-col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .offer-meta-label {
+      font-size: 9px;
+      color: var(--text-muted-light);
+      font-weight: 600;
+    }
+
+    .offer-meta-val {
+      font-size: 14px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    /* BARRE D'ACTION PRINCIPALE SÉANCE DU JOUR */
+    .cta-workout-btn {
+      width: 100%;
+      background: #FFFFFF;
+      color: #000000;
+      border: none;
+      padding: 14px;
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 12px;
+      box-shadow: 0 4px 20px rgba(255,255,255,0.25);
+    }
+
+    /* NAVIGATION INFÉRIEURE SPATIAL DOCK 2030 (VISIONOS GLASS DOCK) */
+    .mobile-tab-bar {
+      position: absolute;
+      bottom: 14px;
+      left: 14px;
+      right: 14px;
+      height: 64px;
+      background: rgba(18, 20, 28, 0.76);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border-radius: var(--radius-pill);
+      border: 0.5px solid rgba(255, 255, 255, 0.22);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.75), var(--glass-specular), 0 0 24px rgba(245, 158, 11, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 6px;
+      z-index: 95;
+    }
+
+    .tab-bar-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      color: rgba(255, 255, 255, 0.45);
+      font-size: 9px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: var(--radius-pill);
+      transition: all 0.25s var(--spring-physics);
+      position: relative;
+    }
+
+    .tab-bar-item:hover {
+      color: #FFFFFF;
+      transform: translateY(-2px);
+    }
+
+    .tab-bar-item.active {
+      color: #FFFFFF;
+      background: rgba(255, 255, 255, 0.14);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.35);
+    }
+
+    .tab-bar-item svg {
+      width: 19px;
+      height: 19px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2.2;
+      transition: transform 0.2s var(--spring-physics);
+    }
+
+    .tab-bar-item.active svg {
+      transform: scale(1.08);
+      stroke: var(--aura-gold);
+    }
+
+    /* DÉTAILS SÉANCE MUSCULATION IN-WORKOUT (ÉCRAN 2) */
+    .workout-set-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+    }
+
+    .workout-set-table th {
+      font-size: 10px;
+      color: var(--text-muted-light);
+      text-transform: uppercase;
+      font-weight: 700;
+      text-align: left;
+      padding: 6px 8px;
+    }
+
+    .workout-set-table td {
+      padding: 10px 8px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .set-check-round {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #181B24;
+      border: 1px solid rgba(255,255,255,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .set-check-round.checked {
+      background: var(--accent-green);
+      color: #000;
+      border-color: var(--accent-green);
+    }
+
+    /* ============================================================ */
+    /* NOUVEAU DESIGN STATISTIQUES (RÉFÉRENCE DARK HEATMAP & GLOW)  */
+    /* ============================================================ */
+    .stat-filter-row {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      margin-bottom: 12px;
+    }
+    .stat-filter-pill {
+      background: #111319;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-muted-light);
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s var(--spring-physics);
+    }
+    .stat-filter-pill.active {
+      background: #FFFFFF;
+      color: #000000;
+      border-color: #FFFFFF;
+      box-shadow: 0 4px 14px rgba(255, 255, 255, 0.2);
+    }
+
+    /* CARTE HEATMAP ASSIDUITÉ (SCREEN 1 DU VISUEL) */
+    .heatmap-card {
+      background: #10121A;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-squircle);
+      padding: 16px;
+      position: relative;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      margin-bottom: 10px;
+    }
+    .heatmap-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .heatmap-title-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .heatmap-grid-container {
+      display: flex;
+      gap: 4.5px;
+      justify-content: space-between;
+    }
+    .heatmap-col {
+      display: flex;
+      flex-direction: column;
+      gap: 4.5px;
+    }
+    .heatmap-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      transition: transform 0.15s ease;
+    }
+    .heatmap-dot:hover {
+      transform: scale(1.25);
+    }
+    /* Teintes rouge/corail exactes à l'écran 1 */
+    .dot-l0 { background: #181A24; }
+    .dot-l1 { background: #4C1D26; }
+    .dot-l2 { background: #9F1239; }
+    .dot-l3 { background: #E11D48; }
+    .dot-l4 { background: #FB7185; box-shadow: 0 0 8px rgba(251, 113, 133, 0.6); }
+
+    /* BENTO STATS 2x2 GRANDS CHIFFRES LUMINEUX */
+    .bento-glow-card {
+      background: #111319;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 22px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 104px;
+      position: relative;
+      transition: transform 0.2s var(--spring-physics);
+    }
+    .bento-glow-card:hover {
+      transform: translateY(-2px);
+    }
+    .bento-glow-tag {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted-light);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .bento-glow-num {
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: -1.2px;
+      line-height: 1;
+      margin: 6px 0 2px 0;
+    }
+    .bento-glow-num.coral {
+      color: #FB7185;
+      text-shadow: 0 0 24px rgba(251, 113, 133, 0.5);
+    }
+    .bento-glow-num.neon-green {
+      color: #4ADE80;
+      text-shadow: 0 0 24px rgba(74, 222, 128, 0.5);
+    }
+    .bento-glow-num.amber {
+      color: #FBBF24;
+      text-shadow: 0 0 24px rgba(251, 191, 36, 0.5);
+    }
+    .bento-glow-sub {
+      font-size: 10px;
+      color: var(--text-muted-light);
+      font-weight: 600;
+    }
+
+    /* CARTE TIMELINE JOURNAL (SCREEN 2 DU VISUEL) */
+    .timeline-log-card {
+      background: #111319;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-squircle);
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 8px;
+      transition: transform 0.2s var(--spring-physics);
+    }
+    .timeline-log-card:hover {
+      transform: translateY(-2px);
+    }
+    .timeline-log-glow-aura {
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      filter: blur(28px);
+      pointer-events: none;
+      opacity: 0.35;
+    }
+    .timeline-log-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-width: 76%;
+    }
+    .timeline-log-time {
+      font-size: 10px;
+      color: var(--text-muted-light);
+      font-weight: 600;
+    }
+    .timeline-log-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: #FFFFFF;
+      line-height: 1.3;
+    }
+    .timeline-log-tags {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin-top: 3px;
+    }
+    .timeline-tag-pill {
+      background: rgba(255, 255, 255, 0.06);
+      border: 0.5px solid rgba(255, 255, 255, 0.1);
+      padding: 2px 7px;
+      border-radius: var(--radius-pill);
+      font-size: 9px;
+      font-weight: 600;
+      color: #CBD5E1;
+    }
+    .timeline-log-digit {
+      font-size: 40px;
+      font-weight: 800;
+      line-height: 1;
+      padding-right: 4px;
+      z-index: 2;
+    }
+
+    /* MINI HEATMAPS PAR HABITUDE (SCREEN 4 DU VISUEL) */
+    .habit-matrix-card {
+      background: #111319;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    /* ============================================================ */
+    /* DESIGN RUNNING 3D & ANY DISTANCE AESTHETIC                   */
+    /* ============================================================ */
+    .running-dot-backdrop {
+      background-color: #07080B;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+      background-size: 14px 14px;
+      border-radius: var(--radius-squircle);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      position: relative;
+      overflow: hidden;
+      padding: 14px 14px 12px 14px;
+      margin-bottom: 12px;
+    }
+    .running-top-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .btn-circle-blur {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      border: 0.5px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .btn-story-instagram {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(16px);
+      border: 0.5px solid rgba(255, 255, 255, 0.2);
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 700;
+      color: #FFFFFF;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    }
+    .insta-gradient-icon {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      background: linear-gradient(45deg, #F58529, #DD2A7B, #8134AF, #515BD4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .map-controls-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 24px;
+      margin-top: 10px;
+    }
+    .map-control-btn {
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.6);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s ease;
+    }
+    .map-control-btn.active {
+      color: #F59E0B;
+    }
+
+    .healthkit-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin: 12px 0 16px 0;
+    }
+    .healthkit-check-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #10B981;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 900;
+      color: #000;
+    }
+
+    .running-metric-block {
+      display: flex;
+      flex-direction: column;
+    }
+    .running-metric-val {
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.05;
+      color: #FFFFFF;
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+    .running-metric-unit {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0;
+      color: #FFFFFF;
+    }
+    .running-metric-label {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      color: #64748B;
+      margin-top: 4px;
+      text-transform: uppercase;
+    }
+
+    /* CARTE D'ACCOMPLISSEMENT / 3D MEDAL DRAWER */
+    .achievement-medal-card {
+      background: #101218;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-squircle);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      margin-top: 14px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+    .achievement-medal-pod {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #252836 0%, #0B0C10 80%);
+      border: 2px solid rgba(245, 158, 11, 0.7);
+      box-shadow: 0 0 18px rgba(245, 158, 11, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .achievement-medal-pod::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 1px dashed rgba(245, 158, 11, 0.4);
+    }
+
+    /* ============================================================ */
+    /* DESIGN CALENDAR MONTHLY STREAK & ACTIVITIES                  */
+    /* ============================================================ */
+    .calendar-card-container {
+      background: #14151B;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-squircle);
+      padding: 18px 16px 16px 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
+    }
+    .calendar-title-month {
+      font-size: 20px;
+      font-weight: 800;
+      color: #FFFFFF;
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+    }
+    .calendar-streak-stats-row {
+      display: flex;
+      gap: 32px;
+      margin-bottom: 16px;
+    }
+    .calendar-streak-stat-item {
+      display: flex;
+      flex-direction: column;
+    }
+    .calendar-streak-stat-label {
+      font-size: 10px;
+      color: #94A3B8;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .calendar-streak-stat-val {
+      font-size: 17px;
+      font-weight: 800;
+      color: #FFFFFF;
+      letter-spacing: -0.4px;
+    }
+
+    .calendar-body-flex {
+      display: flex;
+      gap: 10px;
+      align-items: stretch;
+    }
+    .calendar-grid-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .calendar-weekday-row {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #94A3B8;
+      margin-bottom: 2px;
+    }
+    .calendar-week-row {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      align-items: center;
+    }
+    .calendar-day-item {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748B;
+      border-radius: 50%;
+    }
+    .calendar-day-item.today {
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      color: #FFFFFF;
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .calendar-day-item.workout-badge {
+      background: #FFFFFF;
+      color: #000000;
+      box-shadow: 0 2px 8px rgba(255, 255, 255, 0.15);
+    }
+    .calendar-day-item.workout-badge svg {
+      width: 15px;
+      height: 15px;
+    }
+    .calendar-day-item .multi-dot {
+      position: absolute;
+      top: -1px;
+      right: -1px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      border: 1.5px solid #14151B;
+    }
+
+    /* COLONNE VERTICALE ORANGE PILL STREAK */
+    .calendar-streak-pillar {
+      width: 38px;
+      background: linear-gradient(180deg, rgba(124, 45, 18, 0.35) 0%, rgba(194, 65, 12, 0.6) 70%, #EA580C 100%);
+      border: 1px solid rgba(249, 115, 22, 0.35);
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0 6px 0;
+      box-shadow: 0 0 16px rgba(234, 88, 12, 0.25);
+    }
+    .streak-check-circle {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #EA580C;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 900;
+      color: #FFFFFF;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    }
+    .streak-check-circle.hollow {
+      background: transparent;
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+    }
+    .streak-flame-badge {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      position: relative;
+    }
+    .streak-flame-icon {
+      font-size: 26px;
+      line-height: 1;
+      filter: drop-shadow(0 0 8px #F97316);
+    }
+    .streak-flame-number {
+      position: absolute;
+      bottom: 2px;
+      font-size: 9px;
+      font-weight: 900;
+      color: #000;
+    }
+
+    /* ============================================================ */
+    /* DESIGN SETTINGS & SYSTEM CONTROL CENTER                      */
+    /* ============================================================ */
+    .settings-group {
+      background: #101217;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-squircle);
+      margin-bottom: 14px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+    .settings-group-header {
+      padding: 12px 16px 6px 16px;
+      font-size: 10px;
+      font-weight: 800;
+      color: #64748B;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+    .settings-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 0.5px solid rgba(255, 255, 255, 0.05);
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .settings-row:last-child {
+      border-bottom: none;
+    }
+    .settings-row:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .settings-label-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .settings-icon-badge {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .settings-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #FFFFFF;
+    }
+    .settings-desc {
+      font-size: 10px;
+      color: #64748B;
+      margin-top: 1px;
+    }
+    .settings-action-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .settings-val-pill {
+      font-size: 11px;
+      font-weight: 700;
+      color: #94A3B8;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      border: 0.5px solid rgba(255, 255, 255, 0.08);
+    }
+    .apple-switch {
+      width: 44px;
+      height: 26px;
+      background: #252836;
+      border-radius: 999px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.25s ease;
+    }
+    .apple-switch.active {
+      background: #10B981;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+    }
+    .apple-switch-dot {
+      width: 20px;
+      height: 20px;
+      background: #FFFFFF;
+      border-radius: 50%;
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      transition: transform 0.25s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
+    .apple-switch.active .apple-switch-dot {
+      transform: translateX(18px);
+    }
+
+    /* ============================================================ */
+    /* DESIGN PROFILE ATHLETE PASSPORT & 1RM HALL OF FAME           */
+    /* ============================================================ */
+    .profile-hero-card {
+      background: linear-gradient(180deg, #161822 0%, #0F1015 100%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-squircle);
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 14px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+    }
+    .profile-avatar-wrap {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #F59E0B, #EA580C, #8B5CF6);
+      padding: 3px;
+      box-shadow: 0 0 24px rgba(245, 158, 11, 0.35);
+      margin-bottom: 10px;
+      position: relative;
+    }
+    .profile-avatar-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: #12131A;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+    .profile-name {
+      font-size: 19px;
+      font-weight: 800;
+      color: #FFFFFF;
+      letter-spacing: -0.4px;
+    }
+    .profile-badge-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .profile-pill {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .pr-wall-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .pr-wall-card {
+      background: #101218;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 12px 14px;
+      position: relative;
+      overflow: hidden;
+    }
+    .pr-wall-lift {
+      font-size: 10px;
+      font-weight: 800;
+      color: #64748B;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .pr-wall-weight {
+      font-size: 24px;
+      font-weight: 900;
+      color: #FFFFFF;
+      letter-spacing: -0.6px;
+      margin-top: 2px;
+      display: flex;
+      align-items: baseline;
+      gap: 3px;
+    }
+    .pr-wall-unit {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--aura-gold);
+    }
+    .pr-wall-date {
+      font-size: 9px;
+      color: #94A3B8;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- BARRE SUPÉRIEURE DE SÉLECTION DU PROTOTYPE -->
+  <div class="showcase-nav">
+    <div class="showcase-header">
+      <div class="brand-pill-title">
+        <span>Fitness & Recovery System</span>
+        <span class="pill-tag-2030">Apple Vision 2030</span>
+      </div>
+      <button class="spatial-theme-btn" onclick="toggleSpatialTheme()">
+        <span id="theme-icon">🌌</span>
+        <span id="theme-text">VisionOS Améthyste</span>
+      </button>
+    </div>
+
+    <!-- SÉLECTEUR RAPIDE D'ÉCRANS -->
+    <div class="screen-tabs">
+      <button class="tab-btn active" onclick="gotoScreen('dashboard')">1. Karma 2030</button>
+      <button class="tab-btn" onclick="gotoScreen('workout')">2. Live Muscu</button>
+      <button class="tab-btn" onclick="gotoScreen('running')">3. Running GPS</button>
+      <button class="tab-btn" onclick="gotoScreen('planning')">4. Planning</button>
+      <button class="tab-btn" onclick="gotoScreen('stats')">5. Statistiques</button>
+      <button class="tab-btn" onclick="gotoScreen('social')">6. Potes & Partage</button>
+      <button class="tab-btn" onclick="gotoScreen('settings')">7. Paramètres & Capteurs</button>
+      <button class="tab-btn" onclick="gotoScreen('profile')">8. Profil & PR</button>
+    </div>
+  </div>
+
+  <!-- CADRE SMARTPHONE IPHONE HAUTE DÉFINITION (APPLE 2030 CERAMIC UNIBODY) -->
+  <div class="phone-container" id="phone-frame">
+    <!-- DYNAMIC NEURAL ISLAND 2030 INTERACTIVE -->
+    <div class="dynamic-island" id="main-island" onclick="toggleIslandExpansion()" title="Touchez pour ouvrir le HUD Biométrique 2030">
+      <div class="island-left-data">
+        <span class="pulse-dot"></span>
+        <span style="font-size: 11px; font-weight: 800; color: #fff;">88</span>
+      </div>
+      <!-- Mini ECG Wave -->
+      <svg class="island-ecg-wave" viewBox="0 0 42 14">
+        <path d="M 0 7 L 12 7 L 15 2 L 18 12 L 21 4 L 24 9 L 26 7 L 42 7" fill="none" stroke="#10B981" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      <div class="island-status-pill">
+        <span style="font-size: 8px; color: var(--aura-gold); font-weight: 700;">⚡ Sync</span>
+        <div class="island-cam"></div>
+      </div>
+    </div>
+
+    <!-- STATUS BAR -->
+    <div class="phone-status-bar">
+      <span>09:41</span>
+      <div style="display: flex; gap: 6px; align-items: center;">
+        <span style="font-size: 9px; font-weight: 800; color: var(--aura-gold); background: rgba(245, 158, 11, 0.15); padding: 1px 6px; border-radius: 999px; border: 0.5px solid rgba(245, 158, 11, 0.3);">5G+ Spatial</span>
+        <svg width="15" height="11" viewBox="0 0 15 11" fill="none"><path d="M1 9.5H3V10.5H1V9.5ZM4.5 7H6.5V10.5H4.5V7ZM8 4.5H10V10.5H8V4.5ZM11.5 1H13.5V10.5H11.5V1Z" fill="white"/></svg>
+        <svg width="15" height="11" viewBox="0 0 16 12" fill="none"><path d="M8 9.5C8.82843 9.5 9.5 8.82843 9.5 8C9.5 7.17157 8.82843 6.5 8 6.5C7.17157 6.5 6.5 7.17157 6.5 8C6.5 8.82843 7.17157 9.5 8 9.5Z" fill="white"/><path d="M3.75736 3.75736C6.10051 1.41421 9.89949 1.41421 12.2426 3.75736L13.6569 2.34315C10.5327 -0.781048 5.46734 -0.781048 2.34315 2.34315L3.75736 3.75736Z" fill="white"/></svg>
+        <span style="font-size: 11px;">100%</span>
+      </div>
+    </div>
+
+    <!-- AMBIANCE LUMINEUSE DORÉE FLOUÉE -->
+    <div class="aurora-ambient-glow" id="aurora-main"></div>
+    <div class="aurora-ambient-subtle" id="aurora-secondary"></div>
+
+    <!-- CONTENU DÉFILANT -->
+    <div class="phone-content">
+
+      <!-- ============================================================ -->
+      <!-- ÉCRAN 1 : DASHBOARD PRINCIPAL (RÉPLIQUE EXACTE HEALTH KARMA) -->
+      <!-- ============================================================ -->
+      <div id="page-dashboard" class="screen-page active">
+        <!-- TOP BRAND BAR -->
+        <div class="screen-top-bar">
+          <div class="brand-logo-group">
+            <div class="logo-icon-box" style="box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+            </div>
+            <span class="brand-name">fitnesskarma</span>
+          </div>
+
+          <div class="header-capsules">
+            <div class="capsule-pill active">Karma</div>
+            <div class="capsule-pill" onclick="gotoScreen('workout')">Workouts</div>
+            <div class="capsule-pill" onclick="gotoScreen('running')">Runs</div>
+          </div>
+        </div>
+
+        <!-- BANNIÈRE APPLE INTELLIGENCE 2030 (NEURAL PREDICTION) -->
+        <div style="background: rgba(18, 20, 28, 0.85); backdrop-filter: var(--glass-blur); border: 0.5px solid rgba(255, 255, 255, 0.16); border-radius: 20px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; box-shadow: var(--glass-specular), 0 8px 24px rgba(0,0,0,0.4); position: relative; overflow: hidden;">
+          <div style="position: absolute; top: 0; left: 0; right: 0; height: 1.5px; background: var(--siri-neural-gradient);"></div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 22px; height: 22px; border-radius: 50%; background: var(--siri-neural-gradient); display: flex; align-items: center; justify-content: center; font-size: 11px;">
+              ✨
+            </div>
+            <div>
+              <div style="font-size: 10px; font-weight: 800; color: #fff;">Apple Intelligence 2030</div>
+              <div style="font-size: 9px; color: var(--text-muted-light);">Pic parasympathique • Surcharge +2.5 kg autorisée</div>
+            </div>
+          </div>
+          <button style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18); color: #fff; padding: 4px 8px; border-radius: var(--radius-pill); font-size: 9px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+            <span>🎙️</span>
+            <span>Brief</span>
+          </button>
+        </div>
+
+        <!-- HERO SECTION TITLE -->
+        <div class="hero-title-group">
+          <h1 class="hero-title">Health Karma</h1>
+          <div class="sub-tabs-row">
+            <div class="sub-tab-pill active">Apple Health</div>
+            <div class="sub-tab-pill">Garmin Core</div>
+          </div>
+        </div>
+
+        <!-- BENTO ROW 1 : CARTE BLANCHE HÉROS + CARTE GRADIENT MESH -->
+        <div class="bento-row">
+          <!-- 1. CARTE BLANCHE OPALE HAUT CONTRASTE (Score 88 / Tachymètre) -->
+          <div class="card-opal-hero">
+            <div class="score-pts-badge">-1 pts</div>
+            
+            <div class="giant-metric-number">88</div>
+            
+            <div>
+              <div class="metric-status-text">Excellent</div>
+              <div class="metric-status-sub">Vérifié ce matin</div>
+            </div>
+
+            <!-- TACHYMÈTRE FILAIRE MINIMALISTE -->
+            <div class="tachymeter-box">
+              <svg class="tachymeter-svg" viewBox="0 0 120 70">
+                <!-- Arc de fond gris -->
+                <path d="M 15 60 A 45 45 0 0 1 105 60" fill="none" stroke="#E5E7EB" stroke-width="4.5" stroke-linecap="round"/>
+                <!-- Ticks légers -->
+                <line x1="25" y1="52" x2="30" y2="48" stroke="#D1D5DB" stroke-width="2"/>
+                <line x1="60" y1="18" x2="60" y2="24" stroke="#D1D5DB" stroke-width="2"/>
+                <line x1="95" y1="52" x2="90" y2="48" stroke="#D1D5DB" stroke-width="2"/>
+                <!-- Arc actif noir -->
+                <path d="M 15 60 A 45 45 0 0 1 92 24" fill="none" stroke="#000000" stroke-width="4.5" stroke-linecap="round"/>
+                <!-- Pivot et Aiguille filaire fine pointant vers le haut droit -->
+                <circle cx="60" cy="60" r="3.5" fill="#000"/>
+                <line x1="60" y1="60" x2="88" y2="26" stroke="#000" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- COLONNE DROITE : GRADIENT MESH CARD + SOMMEIL WHITE CARD -->
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <!-- CARTE GRADIENT MESH (Credit Card Use 9% style -> Training Strain 9.4) -->
+            <div class="card-gradient-mesh">
+              <div class="arrow-badge-btn">↗</div>
+              <div class="card-title-tiny">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                Strain Index
+              </div>
+              <div class="mesh-metric-val">9.4</div>
+              <!-- Dots de pagination -->
+              <div class="dot-indicators">
+                <div class="dot-item active"></div>
+                <div class="dot-item"></div>
+                <div class="dot-item"></div>
+                <div class="dot-item"></div>
+              </div>
+            </div>
+
+            <!-- CARTE SOMMEIL BLANCHE (Payment History 100% style) -->
+            <div class="card-opal-compact" style="min-height: 108px;">
+              <div class="arrow-badge-btn">↗</div>
+              <div class="compact-label">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                Sleep Score
+              </div>
+              <div class="compact-number" style="margin-top: 6px;">
+                100<span style="font-size: 14px; font-weight: 600; color: var(--text-muted-dark);">%</span>
+              </div>
+              <div style="font-size: 10px; color: var(--text-muted-dark); font-weight: 600;">8h 14m optimal</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BENTO ROW 2 : CARTES 2x2 BLANCHES (Net Worth $137k / Total Dept $64k / Credit Age / Total Accounts) -->
+        <div class="bento-grid-2x2">
+          <!-- VFC rMSSD (Net Worth style) -->
+          <div class="card-opal-compact">
+            <div class="arrow-badge-btn">↗</div>
+            <div class="compact-label">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+              VFC Nocturne
+            </div>
+            <div class="compact-number">
+              68 <span style="font-size: 13px; font-weight: 600; color: var(--text-muted-dark);">ms</span>
+            </div>
+          </div>
+
+          <!-- FC REPOS (Total Dept style avec pastille d'alerte) -->
+          <div class="card-opal-compact">
+            <div class="arrow-badge-btn">↗</div>
+            <div class="compact-label">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="#EF4444" stroke="none"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+              FC au Repos
+            </div>
+            <div class="compact-number">
+              49 <span style="font-size: 13px; font-weight: 600; color: var(--text-muted-dark);">bpm</span>
+            </div>
+          </div>
+
+          <!-- CHARGE AIGUË / CHRONIQUE ACWR (Credit Age style avec sparkline) -->
+          <div class="card-opal-compact">
+            <div class="arrow-badge-btn">↗</div>
+            <div class="compact-label">Ratio ACWR</div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 4px;">
+              <div class="compact-number">1.12</div>
+              <svg class="micro-sparkline-svg" viewBox="0 0 50 18">
+                <path d="M 2 14 Q 14 4 25 12 T 48 6" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- SÉANCES CETTE SEMAINE (Total Accounts style) -->
+          <div class="card-opal-compact">
+            <div class="arrow-badge-btn">↗</div>
+            <div class="compact-label">Séances Validées</div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 4px;">
+              <div class="compact-number">4 <span style="font-size: 12px; font-weight: 500; color: var(--text-muted-dark);">/ 5</span></div>
+              <svg class="micro-sparkline-svg" viewBox="0 0 50 18">
+                <path d="M 2 16 Q 16 16 26 8 T 48 4" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- SECTION NOIRE SCORE HISTORY (FINTECH GRAPHIC EXACT)           -->
+        <!-- ============================================================ -->
+        <div class="score-history-panel">
+          <div class="history-top-row">
+            <div class="history-heading">Score History</div>
+            <div class="time-pills-row">
+              <button class="time-pill-btn">7 jours</button>
+              <button class="time-pill-btn active">1 mois</button>
+              <button class="time-pill-btn">3 mois</button>
+            </div>
+          </div>
+
+          <!-- GRAPHIQUE AVEC LIGNES POINTILLÉES ET TOOLTIP FLOTTANT -->
+          <div class="chart-container-financial">
+            <!-- Lignes directrices pointillées -->
+            <div class="grid-vertical-dashed" style="left: 15%;"></div>
+            <div class="grid-vertical-dashed" style="left: 38%;"></div>
+            <div class="grid-vertical-dashed" style="left: 62%;"></div>
+            <div class="grid-vertical-dashed" style="left: 85%;"></div>
+
+            <!-- FLOATING TOOLTIP CARD (816 style) -->
+            <div class="floating-score-card">
+              <div class="tooltip-score-val">
+                <span>88</span>
+                <span style="font-size: 10px; color: var(--accent-green); font-weight: 700;">+6% ↗</span>
+              </div>
+              <div class="tooltip-score-sub">Récupération Optimale</div>
+            </div>
+
+            <!-- Piliers du graphique financier -->
+            <div class="chart-bar-pillar"><div class="pillar-cap"></div><div class="pillar-line" style="height: 40px;"></div></div>
+            <div class="chart-bar-pillar"><div class="pillar-cap"></div><div class="pillar-line" style="height: 52px;"></div></div>
+            <div class="chart-bar-pillar"><div class="pillar-cap green"></div><div class="pillar-line" style="height: 75px;"></div></div>
+            <div class="chart-bar-pillar"><div class="pillar-cap green"></div><div class="pillar-line" style="height: 84px;"></div></div>
+            <div class="chart-bar-pillar"><div class="pillar-cap green"></div><div class="pillar-line" style="height: 70px;"></div></div>
+            <div class="chart-bar-pillar"><div class="pillar-cap green"></div><div class="pillar-line" style="height: 88px;"></div></div>
+          </div>
+
+          <!-- SECTION SÉANCES & RECOMMANDATION IA (Credit Offers style) -->
+          <div class="offers-heading-row">
+            <div class="offers-title">Recommandations IA</div>
+            <div class="offers-badge-count">2 ajustements actifs</div>
+          </div>
+
+          <div class="offers-cards-row">
+            <!-- CARTE 1 : SURCHARGE PROGRESSIVE -->
+            <div class="offer-card-item highlighted">
+              <div class="offer-brand">
+                <div class="offer-icon-circle">🏋️</div>
+                <span>Surcharge +2.5%</span>
+              </div>
+              <div class="offer-meta-grid">
+                <div class="offer-meta-col">
+                  <span class="offer-meta-label">EXERCICE</span>
+                  <span class="offer-meta-val">Couché</span>
+                </div>
+                <div class="offer-meta-col" style="text-align: right;">
+                  <span class="offer-meta-label">CHARGE</span>
+                  <span class="offer-meta-val" style="color: var(--aura-gold);">92.5 kg</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- CARTE 2 : ANTI-INTERFÉRENCE RUNNING -->
+            <div class="offer-card-item">
+              <div class="offer-brand">
+                <div class="offer-icon-circle">🏃</div>
+                <span>Course Zone 2</span>
+              </div>
+              <div class="offer-meta-grid">
+                <div class="offer-meta-col">
+                  <span class="offer-meta-label">ALLURE</span>
+                  <span class="offer-meta-val">5:15/km</span>
+                </div>
+                <div class="offer-meta-col" style="text-align: right;">
+                  <span class="offer-meta-label">DURÉE</span>
+                  <span class="offer-meta-val">45 min</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- BOUTON D'ACTION PRINCIPAL -->
+          <button class="cta-workout-btn" onclick="gotoScreen('workout')">
+            <span>Lancer la séance du jour</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          </button>
+        </div>
+      </div>
+
+
+      <!-- ============================================================ -->
+      <!-- ÉCRAN 2 : LIVE MUSCULATION IN-WORKOUT (DARK OLED HAUTE PRÉCISION) -->
+      <!-- ============================================================ -->
+      <div id="page-workout" class="screen-page">
+        <div class="screen-top-bar">
+          <div>
+            <div style="font-size: 11px; color: var(--aura-gold); font-weight: 800;">EN DIRECT • SÉANCE MUSCULATION</div>
+            <div style="font-size: 20px; font-weight: 800; color: #fff;">Pectoraux, Épaules & Bras</div>
+          </div>
+          <button style="background: rgba(239, 68, 68, 0.2); border: 1px solid var(--accent-red); color: #fff; padding: 6px 14px; border-radius: var(--radius-pill); font-size: 11px; font-weight: 700;">
+            Terminer
+          </button>
+        </div>
+
+        <!-- 3 COMPTEURS HUD -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+          <div class="card-opal-compact" style="align-items: center; text-align: center; padding: 10px;">
+            <div class="compact-label">DURÉE</div>
+            <div class="compact-number" style="font-size: 18px;">24:18</div>
+          </div>
+          <div class="card-opal-compact" style="align-items: center; text-align: center; padding: 10px;">
+            <div class="compact-label">TONNAGE</div>
+            <div class="compact-number" style="font-size: 18px; color: var(--aura-amber);">3 420 kg</div>
+          </div>
+          <div class="card-opal-compact" style="align-items: center; text-align: center; padding: 10px;">
+            <div class="compact-label">CARDIO</div>
+            <div class="compact-number" style="font-size: 18px; color: var(--accent-red);">134 bpm</div>
+          </div>
+        </div>
+
+        <!-- CHRONOMÈTRE DE REPOS AUTOMATIQUE FLOTTANT -->
+        <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, #161822 100%); border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 20px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; border: 2.5px solid var(--aura-gold); display: flex; align-items: center; justify-content: center; font-size: 13px;">
+              ⏱
+            </div>
+            <div>
+              <div style="font-size: 10px; color: var(--text-muted-light); font-weight: 700;">TEMPS DE REPOS IA</div>
+              <div style="font-size: 18px; font-weight: 800; color: #fff;">01:34</div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button style="background: rgba(255,255,255,0.1); border:none; color:#fff; padding: 6px 10px; border-radius: var(--radius-pill); font-size: 11px; font-weight: 700;">+30s</button>
+            <button style="background: #fff; border:none; color:#000; padding: 6px 12px; border-radius: var(--radius-pill); font-size: 11px; font-weight: 800;">Passer</button>
+          </div>
+        </div>
+
+        <!-- CARTE EXERCICE EN COURS -->
+        <div style="background: #11131A; border: 1px solid var(--border-glass); border-radius: var(--radius-squircle); padding: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div>
+              <div style="font-size: 16px; font-weight: 800; color: #fff;">1. Développé Couché Barre</div>
+              <div style="font-size: 11px; color: var(--text-muted-light);">Charge progressive cible : 90.0 kg</div>
+            </div>
+            <button style="background: rgba(255,255,255,0.08); border:none; color: var(--aura-gold); padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
+              Échanger ⇄
+            </button>
+          </div>
+
+          <table class="workout-set-table">
+            <thead>
+              <tr>
+                <th>SET</th>
+                <th>POIDS</th>
+                <th>REPS</th>
+                <th>RPE</th>
+                <th style="text-align: right;">VAL.</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span style="background: #1E222D; padding: 2px 6px; border-radius: 4px;">1</span></td>
+                <td>80.0 kg</td>
+                <td>10</td>
+                <td>7.5</td>
+                <td style="text-align: right;"><div class="set-check-round checked">✓</div></td>
+              </tr>
+              <tr>
+                <td><span style="background: #1E222D; padding: 2px 6px; border-radius: 4px;">2</span></td>
+                <td>85.0 kg</td>
+                <td>8</td>
+                <td>8.0</td>
+                <td style="text-align: right;"><div class="set-check-round checked">✓</div></td>
+              </tr>
+              <tr style="background: rgba(245, 158, 11, 0.08);">
+                <td><span style="background: var(--aura-gold); color:#000; padding: 2px 6px; border-radius: 4px; font-weight: 800;">3</span></td>
+                <td style="color: var(--aura-gold); font-weight: 800;">90.0 kg</td>
+                <td style="color: var(--aura-gold); font-weight: 800;">6 reps</td>
+                <td>Cible</td>
+                <td style="text-align: right;"><div class="set-check-round" onclick="toggleSetCheck(this)"></div></td>
+              </tr>
+              <tr>
+                <td><span style="background: #1E222D; padding: 2px 6px; border-radius: 4px;">4</span></td>
+                <td style="color: var(--text-muted-light);">90.0 kg</td>
+                <td style="color: var(--text-muted-light);">6 reps</td>
+                <td>-</td>
+                <td style="text-align: right;"><div class="set-check-round" onclick="toggleSetCheck(this)"></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+
+      <!-- ============================================================ -->
+      <!-- ÉCRAN 3 : RUNNING ANY DISTANCE AESTHETIC (3D ELEVATION CURTAIN)-->
+      <!-- ============================================================ -->
+      <div id="page-running" class="screen-page">
+        <!-- 1. CARTE CARTO 3D AVEC FOND À PETITS POINTS -->
+        <div class="running-dot-backdrop">
+          <!-- TOP ACTIONS : BOUTON CLOSE & ADD TO STORY INSTAGRAM -->
+          <div class="running-top-actions">
+            <button class="btn-circle-blur" onclick="gotoScreen('dashboard')">✕</button>
+            <button class="btn-story-instagram">
+              <div class="insta-gradient-icon">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+                </svg>
+              </div>
+              <span>Add to Story</span>
+            </button>
+          </div>
+
+          <!-- 3D ELEVATION TRACK MAP (ISOMETRIC RIBBON CURTAIN) -->
+          <div style="position: relative; width: 100%; height: 260px; display: flex; align-items: center; justify-content: center;">
+            <svg style="width: 100%; height: 100%; overflow: visible;" viewBox="0 0 320 250">
+              <defs>
+                <!-- Dégradé vertical pour le rideau d'extrusion 3D (Elevation Drop Curtain) -->
+                <linearGradient id="elevationCurtainGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.48"/>
+                  <stop offset="35%" stop-color="#E2E8F0" stop-opacity="0.22"/>
+                  <stop offset="70%" stop-color="#64748B" stop-opacity="0.08"/>
+                  <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+                </linearGradient>
+
+                <linearGradient id="elevationCurtainGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.38"/>
+                  <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+                </linearGradient>
+
+                <filter id="routeGlow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="2.5" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+
+              <!-- RIDEAU D'ÉLÉVATION 3D EXTRUDÉ VERS LE BAS (POLYGONES DE DRAPÉ) -->
+              <!-- Segment 1 Extrusion -->
+              <polygon points="105,45 118,52 118,125 105,95" fill="url(#elevationCurtainGrad)" />
+              <!-- Segment 2 Grand Drapé Nord -->
+              <polygon points="118,52 145,62 172,55 172,130 145,135 118,125" fill="url(#elevationCurtainGrad)" />
+              <!-- Segment 3 Virage Sommet 828ft -->
+              <polygon points="172,55 178,65 178,140 172,130" fill="url(#elevationCurtainGrad2)" />
+              <!-- Segment 4 Versant Est -->
+              <polygon points="178,65 215,75 235,95 235,160 215,145 178,140" fill="url(#elevationCurtainGrad)" />
+              <!-- Segment 5 Descente Sud-Est -->
+              <polygon points="235,95 230,135 205,170 205,210 230,185 235,160" fill="url(#elevationCurtainGrad)" />
+              <!-- Segment 6 Base Sud 287ft -->
+              <polygon points="205,170 170,205 155,212 155,225 170,218 205,210" fill="url(#elevationCurtainGrad2)" />
+              <!-- Segment 7 Flanc Ouest Retour -->
+              <polygon points="155,212 185,155 145,115 145,145 185,185 155,225" fill="url(#elevationCurtainGrad)" />
+              <polygon points="145,115 120,80 105,45 105,95 120,120 145,145" fill="url(#elevationCurtainGrad2)" />
+
+              <!-- TRACÉ SUPÉRIEUR CRÊTE BLANCHE ÉCLATANTE (3D ROUTE CREST) -->
+              <path d="M 105 45 
+                       L 118 52 
+                       L 145 62 
+                       L 172 55 
+                       L 178 65 
+                       L 215 75 
+                       Q 235 85 235 95 
+                       L 230 135 
+                       L 205 170 
+                       L 170 205 
+                       L 155 212 
+                       L 185 155 
+                       L 145 115 
+                       L 120 80 
+                       Z" 
+                    fill="none" 
+                    stroke="#FFFFFF" 
+                    stroke-width="2.6" 
+                    stroke-linecap="round" 
+                    stroke-linejoin="round"
+                    filter="url(#routeGlow)"/>
+
+              <!-- REPÈRE D'ALTITUDE SOMMET ▲ 828 ft -->
+              <g transform="translate(170, 36)">
+                <text x="0" y="0" fill="#FFFFFF" font-size="9" font-weight="800" letter-spacing="0.5px">▲ 828 ft</text>
+                <line x1="8" y1="3" x2="8" y2="18" stroke="rgba(255,255,255,0.4)" stroke-width="1" stroke-dasharray="2,2"/>
+              </g>
+
+              <!-- REPÈRE D'ALTITUDE FOND ▼ 287 ft -->
+              <g transform="translate(152, 192)">
+                <text x="0" y="0" fill="#FFFFFF" font-size="9" font-weight="800" letter-spacing="0.5px">▼ 287 ft</text>
+              </g>
+
+              <!-- PINPOINT LUMINEUX ORANGE DE DÉPART (START NODE) -->
+              <circle cx="105" cy="45" r="5" fill="#F59E0B" style="filter: drop-shadow(0 0 8px #F59E0B);"/>
+              <circle cx="105" cy="45" r="2.5" fill="#FFFFFF"/>
+            </svg>
+          </div>
+
+          <!-- BARRE D'OUTILS ET CONTRÔLES CARTO EN BAS DE LA 3D -->
+          <div class="map-controls-row">
+            <!-- Icône Dénivelé Actif Orange -->
+            <button class="map-control-btn active" title="Profil Altimétrique">
+              <svg width="22" height="18" viewBox="0 0 24 20" fill="none" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="2 16 7 11 12 14 18 4 22 8"/>
+              </svg>
+            </button>
+
+            <!-- Icône Ruban 2D/3D -->
+            <button class="map-control-btn" title="Vue Ruban">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+              </svg>
+            </button>
+
+            <!-- Bouton Cercle Flocon / Cube Perspective Frosted Glass -->
+            <div style="width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.12); border: 0.5px solid rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="2" x2="12" y2="22"/>
+                <line x1="2" y1="12" x2="22" y2="12"/>
+                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                <line x1="4.93" y1="19.07" x2="19.07" y2="4.93"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. HEALTHKIT SYNC BADGE -->
+        <div class="healthkit-badge">
+          <div class="healthkit-check-dot">✓</div>
+          <span>Saved To Apple Health</span>
+        </div>
+
+        <!-- 3. ACTIVITÉ & HORODATAGE -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding: 0 4px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+              <circle cx="12" cy="5" r="2.5"/>
+              <path d="M10 22v-6l-2-2 3.5-3.5L14 13v9"/>
+              <path d="M7 13l3-3 2 2 3-3"/>
+            </svg>
+            <span style="font-size: 20px; font-weight: 800; color: #fff;">Walk / Run</span>
+          </div>
+          <div style="font-size: 11px; font-weight: 600; color: #64748B;">September 2 7:05PM – 8:11PM</div>
+        </div>
+
+        <!-- 4. CORE METRICS 2x2 GRID (ANY DISTANCE CLEAN MONO TYPOGRAPHY) -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px 24px; padding: 0 4px; margin-bottom: 24px;">
+          <!-- DISTANCE -->
+          <div class="running-metric-block">
+            <div class="running-metric-val">
+              <span>2.68</span>
+              <span class="running-metric-unit">MI</span>
+            </div>
+            <div class="running-metric-label">DISTANCE</div>
+          </div>
+
+          <!-- PACE -->
+          <div class="running-metric-block">
+            <div class="running-metric-val">
+              <span>24:46</span>
+              <span class="running-metric-unit">/MI</span>
+            </div>
+            <div class="running-metric-label">PACE</div>
+          </div>
+
+          <!-- HOURS -->
+          <div class="running-metric-block">
+            <div class="running-metric-val">1:06:19</div>
+            <div class="running-metric-label">HOURS</div>
+          </div>
+
+          <!-- ACTIVE CAL -->
+          <div class="running-metric-block">
+            <div class="running-metric-val">311</div>
+            <div class="running-metric-label">ACTIVE CAL</div>
+          </div>
+        </div>
+
+        <!-- 5. ACHIEVEMENTS & COLLECTIBLE 3D MEDAL DRAWER -->
+        <div style="padding: 0 2px; margin-bottom: 20px;">
+          <div style="font-size: 16px; font-weight: 800; color: #FFFFFF; margin-bottom: 8px;">Achievements</div>
+
+          <div class="achievement-medal-card">
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <!-- 3D DIGITAL COLLECTIBLE MEDAL POD -->
+              <div class="achievement-medal-pod">
+                <div style="font-size: 7px; color: #F59E0B; font-weight: 800; margin-bottom: 1px;">⏱️</div>
+                <div style="font-size: 13px; font-weight: 900; color: #F59E0B; letter-spacing: -0.5px; line-height: 1;">1.0</div>
+                <div style="font-size: 7px; font-weight: 800; color: #94A3B8; text-transform: uppercase;">HOUR</div>
+                <div style="font-size: 6px; color: #F59E0B; margin-top: 1px;">🏃</div>
+              </div>
+
+              <!-- TEXT DETAILS -->
+              <div>
+                <div style="font-size: 9px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px;">Achievement</div>
+                <div style="font-size: 15px; font-weight: 800; color: #FFFFFF; margin: 1px 0;">1-Hour Activity</div>
+                <div style="font-size: 9px; color: #94A3B8; font-weight: 500;">By the Any Distance Time Dept.</div>
+              </div>
+            </div>
+
+            <!-- BUTTON WEAR MEDAL -->
+            <button style="background: rgba(255,255,255,0.08); border: 0.5px solid rgba(255,255,255,0.18); color: #FFFFFF; padding: 6px 12px; border-radius: var(--radius-pill); font-size: 10px; font-weight: 700; display: flex; align-items: center; gap: 5px; cursor: pointer;">
+              <span>❄️</span>
+              <span>Wear Medal</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ============================================================ -->
+      <!-- ÉCRAN 4 : PLANNING & CALENDRIER MENSUEL (STREAK PILLAR)       -->
+      <!-- ============================================================ -->
+      <div id="page-planning" class="screen-page">
+        <!-- TOP BAR -->
+        <div class="screen-top-bar">
+          <div>
+            <div style="font-size: 11px; color: var(--aura-gold); font-weight: 800;">CALENDRIER & PLANIFICATION</div>
+            <div style="font-size: 20px; font-weight: 800; color: #fff;">Programme Hybride IA</div>
+          </div>
+          <div style="background: #181A22; border: 1px solid rgba(255,255,255,0.1); padding: 5px 12px; border-radius: var(--radius-pill); font-size: 11px; font-weight: 700; color: #fff;">
+            2025–2026 ▾
+          </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- CALENDRIER DE STREAK MENSUEL (RÉPLIQUE EXACTE DU VISUEL)     -->
+        <!-- ============================================================ -->
+        <div class="calendar-card-container">
+          <!-- TITRE DU MOIS -->
+          <div class="calendar-title-month">June 2025</div>
+
+          <!-- EN-TÊTE STREAK & TOTAL ACTIVITIES -->
+          <div class="calendar-streak-stats-row">
+            <div class="calendar-streak-stat-item">
+              <span class="calendar-streak-stat-label">Your Streak</span>
+              <span class="calendar-streak-stat-val">100 Weeks</span>
+            </div>
+            <div class="calendar-streak-stat-item">
+              <span class="calendar-streak-stat-label">Streak Activities</span>
+              <span class="calendar-streak-stat-val">492</span>
+            </div>
+          </div>
+
+          <!-- CORPS DU CALENDRIER : GRILLE 7 COLONNES + PILIER STREAK ORANGE -->
+          <div class="calendar-body-flex">
+            <!-- GRILLE DES JOURS -->
+            <div class="calendar-grid-area">
+              <!-- JOURS DE LA SEMAINE -->
+              <div class="calendar-weekday-row">
+                <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+              </div>
+
+              <!-- LIGNE SEMAINE 1 -->
+              <div class="calendar-week-row">
+                <div class="calendar-day-item">26</div>
+                <div class="calendar-day-item workout-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v-2.5C4 11 6 9 8.5 9H13l2.5 4.5L20 15v3H4z"/><path d="M4 18h16"/></svg>
+                </div>
+                <div class="calendar-day-item workout-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v-2.5C4 11 6 9 8.5 9H13l2.5 4.5L20 15v3H4z"/><path d="M4 18h16"/></svg>
+                </div>
+                <div class="calendar-day-item workout-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v-2.5C4 11 6 9 8.5 9H13l2.5 4.5L20 15v3H4z"/><path d="M4 18h16"/></svg>
+                </div>
+                <div class="calendar-day-item">30</div>
+                <div class="calendar-day-item workout-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>
+                </div>
+                <div class="calendar-day-item workout-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v-2.5C4 11 6 9 8.5 9H13l2.5 4.5L20 15v3H4z"/><path d="M4 18h16"/></svg>
+                </div>
+              </div>
+
+              <!-- LIGNE SEMAINE 2 -->
+              <div class="calendar-week-row">
+                <div class="calendar-day-item">2</div>
+                <div class="calendar-day-item workout-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v-2.5C4 11 6 9 8.5 9H13l2.5 4.5L20 15v3H4z"/><path d="M4 18h16"/></svg>
+                </div>
+                <div class="calendar-day-item workout-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v-2.5C4 11 6 9 8.5 9H13l2.5 4.5L20 15v3H4z"/><path d="M4 18h16"/></svg>
+                </div>
+                <div class="calendar-day-item workout-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v-2.5C4 11 6 9 8.5 9H13l2.5 4.5L20 15v3H4z"/><path d="M4 18h16"/></svg>
+                </div>
+                <div class="calendar-day-item">6</div>
+                <div class="calendar-day-item workout-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>
+                  <div class="multi-dot"></div>
+                </div>
+                <div class="calendar-day-item workout-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v-2.5C4 11 6 9 8.5 9H13l2.5 4.5L20 15v3H4z"/><path d="M4 18h16"/></svg>
+                </div>
+              </div>
+
+              <!-- LIGNE SEMAINE 3 -->
+              <div class="calendar-week-row">
+                <div class="calendar-day-item workout-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v-2.5C4 11 6 9 8.5 9H13l2.5 4.5L20 15v3H4z"/><path d="M4 18h16"/></svg>
+                </div>
+                <div class="calendar-day-item workout-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/></svg>
+                </div>
+                <div class="calendar-day-item workout-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v-2.5C4 11 6 9 8.5 9H13l2.5 4.5L20 15v3H4z"/><path d="M4 18h16"/></svg>
+                </div>
+                <div class="calendar-day-item workout-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v-2.5C4 11 6 9 8.5 9H13l2.5 4.5L20 15v3H4z"/><path d="M4 18h16"/></svg>
+                </div>
+                <div class="calendar-day-item">13</div>
+                <div class="calendar-day-item workout-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v-2.5C4 11 6 9 8.5 9H13l2.5 4.5L20 15v3H4z"/><path d="M4 18h16"/></svg>
+                </div>
+                <div class="calendar-day-item workout-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v-2.5C4 11 6 9 8.5 9H13l2.5 4.5L20 15v3H4z"/><path d="M4 18h16"/></svg>
+                  <div class="multi-dot"></div>
+                </div>
+              </div>
+
+              <!-- LIGNE SEMAINE 4 -->
+              <div class="calendar-week-row">
+                <div class="calendar-day-item workout-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v-2.5C4 11 6 9 8.5 9H13l2.5 4.5L20 15v3H4z"/><path d="M4 18h16"/></svg>
+                </div>
+                <div class="calendar-day-item">17</div>
+                <div class="calendar-day-item workout-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v-2.5C4 11 6 9 8.5 9H13l2.5 4.5L20 15v3H4z"/><path d="M4 18h16"/></svg>
+                </div>
+                <div class="calendar-day-item workout-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v-2.5C4 11 6 9 8.5 9H13l2.5 4.5L20 15v3H4z"/><path d="M4 18h16"/></svg>
+                  <div class="multi-dot"></div>
+                </div>
+                <div class="calendar-day-item workout-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>
+                </div>
+                <div class="calendar-day-item workout-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v-2.5C4 11 6 9 8.5 9H13l2.5 4.5L20 15v3H4z"/><path d="M4 18h16"/></svg>
+                </div>
+                <div class="calendar-day-item">22</div>
+              </div>
+
+              <!-- LIGNE SEMAINE 5 -->
+              <div class="calendar-week-row">
+                <div class="calendar-day-item workout-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>
+                </div>
+                <div class="calendar-day-item workout-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v-2.5C4 11 6 9 8.5 9H13l2.5 4.5L20 15v3H4z"/><path d="M4 18h16"/></svg>
+                </div>
+                <div class="calendar-day-item workout-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v-2.5C4 11 6 9 8.5 9H13l2.5 4.5L20 15v3H4z"/><path d="M4 18h16"/></svg>
+                </div>
+                <div class="calendar-day-item workout-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>
+                  <div class="multi-dot"></div>
+                </div>
+                <div class="calendar-day-item workout-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>
+                </div>
+                <div class="calendar-day-item workout-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/></svg>
+                  <div class="multi-dot"></div>
+                </div>
+                <div class="calendar-day-item">29</div>
+              </div>
+
+              <!-- LIGNE SEMAINE 6 (EN COURS / AUJOURD'HUI) -->
+              <div class="calendar-week-row">
+                <div class="calendar-day-item today">30</div>
+                <div class="calendar-day-item">1</div>
+                <div class="calendar-day-item">2</div>
+                <div class="calendar-day-item">3</div>
+                <div class="calendar-day-item">4</div>
+                <div class="calendar-day-item">5</div>
+                <div class="calendar-day-item">6</div>
+              </div>
+            </div>
+
+            <!-- PILIER VERTICAL DE STREAK ORANGE AVEC FLAMME 100 -->
+            <div class="calendar-streak-pillar">
+              <div class="streak-check-circle">✓</div>
+              <div class="streak-check-circle">✓</div>
+              <div class="streak-check-circle">✓</div>
+              <div class="streak-check-circle">✓</div>
+              <div class="streak-flame-badge">
+                <span class="streak-flame-icon">🔥</span>
+                <span class="streak-flame-number">100</span>
+              </div>
+              <div class="streak-check-circle hollow"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BANDEAU SCIENTIFIQUE ANTI-INTERFÉRENCE AMPK / MTOR -->
+        <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: var(--radius-squircle); padding: 14px; margin-bottom: 12px;">
+          <div style="display: flex; align-items: center; gap: 8px; color: var(--accent-green); font-size: 12px; font-weight: 800;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Coordination Hybride Sans Conflit
+          </div>
+          <div style="font-size: 11px; color: #CBD5E1; margin-top: 4px; line-height: 1.4;">
+            Séance fractionné running programmée avec 36h d'écart après le Squat pour préserver les voies de signalisation (mTOR vs AMPK).
+          </div>
+        </div>
+
+        <!-- AUJOURD'HUI : SÉANCE DU JOUR SÉLECTIONNÉE -->
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div class="card-opal-compact" style="flex-direction: row; justify-content: space-between; align-items: center; padding: 14px 16px; border: 2px solid var(--aura-gold);">
+            <div>
+              <div style="font-size: 10px; color: var(--aura-amber); font-weight: 800;">AUJOURD'HUI • EN ATTENTE</div>
+              <div style="font-size: 14px; font-weight: 800; color: #000;">Dos & Biceps (Tirage Lourd)</div>
+            </div>
+            <button style="background: #000; color: #fff; border:none; padding: 6px 14px; border-radius: var(--radius-pill); font-size: 11px; font-weight: 800; cursor: pointer;" onclick="gotoScreen('workout')">
+              Lancer
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- ÉCRAN 5 : STATISTIQUES & ANALYTICS AVANCÉES                    -->
+      <!-- ============================================================ -->
+      <!-- ÉCRAN 5 : STATISTIQUES (RÉPLIQUE FIDÈLE DU VISUEL UTILISATEUR) -->
+      <!-- ============================================================ -->
+      <div id="page-stats" class="screen-page">
+        <!-- TOP BAR STYLE "ANALYZE" -->
+        <div class="screen-top-bar">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="font-size: 22px; font-weight: 800; color: #fff; letter-spacing: -0.6px;">Analyze</div>
+          </div>
+          <div style="background: #151822; border: 1px solid rgba(255,255,255,0.1); padding: 5px 12px; border-radius: var(--radius-pill); font-size: 11px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 4px; cursor: pointer;">
+            <span>Week</span>
+            <span style="font-size: 9px; color: var(--text-muted-light);">▾</span>
+          </div>
+        </div>
+
+        <!-- SÉLECTEUR HORIZONTAL DE PÉRIODE (DEC 1-7, DEC 15-21...) -->
+        <div class="stat-filter-row">
+          <div class="stat-filter-pill">DEC 1–7</div>
+          <div class="stat-filter-pill">DEC 8–14</div>
+          <div class="stat-filter-pill active">DEC 15–21</div>
+          <div class="stat-filter-pill">DEC 22–28</div>
+          <div class="stat-filter-pill">JAN 1–7</div>
+        </div>
+
+        <!-- 1. CARTE HEATMAP ASSIDUITÉ (SCREEN 1 DU VISUEL "JOURNALING RITUAL") -->
+        <div class="heatmap-card">
+          <div class="heatmap-header">
+            <div class="heatmap-title-box">
+              <span style="font-size: 14px;">📕</span>
+              <span>Consistency ritual</span>
+            </div>
+            <div style="width: 22px; height: 22px; border-radius: 50%; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--text-muted-light); cursor: pointer;">✕</div>
+          </div>
+
+          <!-- GRILLE DE POINTS / MATRICE DE HABITATS (7 LIGNES x 16 COLONNES) -->
+          <div style="display: flex; gap: 6px; align-items: center; margin-bottom: 12px;">
+            <div style="display: flex; flex-direction: column; gap: 4.5px; font-size: 8px; font-weight: 700; color: #64748B; padding-right: 2px;">
+              <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+            </div>
+            <div class="heatmap-grid-container" style="flex: 1;">
+              <!-- Col 1 -->
+              <div class="heatmap-col"><div class="heatmap-dot dot-l1"></div><div class="heatmap-dot dot-l0"></div><div class="heatmap-dot dot-l2"></div><div class="heatmap-dot dot-l3"></div><div class="heatmap-dot dot-l1"></div><div class="heatmap-dot dot-l0"></div><div class="heatmap-dot dot-l2"></div></div>
+              <!-- Col 2 -->
+              <div class="heatmap-col"><div class="heatmap-dot dot-l3"></div><div class="heatmap-dot dot-l2"></div><div class="heatmap-dot dot-l4"></div><div class="heatmap-dot dot-l1"></div><div class="heatmap-dot dot-l3"></div><div class="heatmap-dot dot-l2"></div><div class="heatmap-dot dot-l0"></div></div>
+              <!-- Col 3 -->
+              <div class="heatmap-col"><div class="heatmap-dot dot-l2"></div><div class="heatmap-dot dot-l3"></div><div class="heatmap-dot dot-l1"></div><div class="heatmap-dot dot-l4"></div><div class="heatmap-dot dot-l2"></div><div class="heatmap-dot dot-l3"></div><div class="heatmap-dot dot-l1"></div></div>
+              <!-- Col 4 -->
+              <div class="heatmap-col"><div class="heatmap-dot dot-l4"></div><div class="heatmap-dot dot-l4"></div><div class="heatmap-dot dot-l3"></div><div class="heatmap-dot dot-l2"></div><div class="heatmap-dot dot-l4"></div><div class="heatmap-dot dot-l1"></div><div class="heatmap-dot dot-l3"></div></div>
+              <!-- Col 5 -->
+              <div class="heatmap-col"><div class="heatmap-dot dot-l1"></div><div class="heatmap-dot dot-l2"></div><div class="heatmap-dot dot-l4"></div><div class="heatmap-dot dot-l3"></div><div class="heatmap-dot dot-l1"></div><div class="heatmap-dot dot-l4"></div><div class="heatmap-dot dot-l2"></div></div>
+              <!-- Col 6 -->
+              <div class="heatmap-col"><div class="heatmap-dot dot-l3"></div><div class="heatmap-dot dot-l4"></div><div class="heatmap-dot dot-l2"></div><div class="heatmap-dot dot-l4"></div><div class="heatmap-dot dot-l3"></div><div class="heatmap-dot dot-l2"></div><div class="heatmap-dot dot-l4"></div></div>
+              <!-- Col 7 -->
+              <div class="heatmap-col"><div class="heatmap-dot dot-l2"></div><div class="heatmap-dot dot-l1"></div><div class="heatmap-dot dot-l3"></div><div class="heatmap-dot dot-l2"></div><div class="heatmap-dot dot-l4"></div><div class="heatmap-dot dot-l3"></div><div class="heatmap-dot dot-l1"></div></div>
+              <!-- Col 8 -->
+              <div class="heatmap-col"><div class="heatmap-dot dot-l4"></div><div class="heatmap-dot dot-l3"></div><div class="heatmap-dot dot-l4"></div><div class="heatmap-dot dot-l1"></div><div class="heatmap-dot dot-l2"></div><div class="heatmap-dot dot-l4"></div><div class="heatmap-dot dot-l3"></div></div>
+              <!-- Col 9 -->
+              <div class="heatmap-col"><div class="heatmap-dot dot-l1"></div><div class="heatmap-dot dot-l4"></div><div class="heatmap-dot dot-l2"></div><div class="heatmap-dot dot-l3"></div><div class="heatmap-dot dot-l4"></div><div class="heatmap-dot dot-l1"></div><div class="heatmap-dot dot-l2"></div></div>
+              <!-- Col 10 -->
+              <div class="heatmap-col"><div class="heatmap-dot dot-l3"></div><div class="heatmap-dot dot-l2"></div><div class="heatmap-dot dot-l4"></div><div class="heatmap-dot dot-l4"></div><div class="heatmap-dot dot-l3"></div><div class="heatmap-dot dot-l4"></div><div class="heatmap-dot dot-l4"></div></div>
+              <!-- Col 11 -->
+              <div class="heatmap-col"><div class="heatmap-dot dot-l4"></div><div class="heatmap-dot dot-l3"></div><div class="heatmap-dot dot-l1"></div><div class="heatmap-dot dot-l2"></div><div class="heatmap-dot dot-l4"></div><div class="heatmap-dot dot-l3"></div><div class="heatmap-dot dot-l2"></div></div>
+              <!-- Col 12 -->
+              <div class="heatmap-col"><div class="heatmap-dot dot-l2"></div><div class="heatmap-dot dot-l4"></div><div class="heatmap-dot dot-l4"></div><div class="heatmap-dot dot-l3"></div><div class="heatmap-dot dot-l1"></div><div class="heatmap-dot dot-l4"></div><div class="heatmap-dot dot-l4"></div></div>
+              <!-- Col 13 -->
+              <div class="heatmap-col"><div class="heatmap-dot dot-l4"></div><div class="heatmap-dot dot-l4"></div><div class="heatmap-dot dot-l3"></div><div class="heatmap-dot dot-l4"></div><div class="heatmap-dot dot-l4"></div><div class="heatmap-dot dot-l2"></div><div class="heatmap-dot dot-l3"></div></div>
+              <!-- Col 14 -->
+              <div class="heatmap-col"><div class="heatmap-dot dot-l3"></div><div class="heatmap-dot dot-l1"></div><div class="heatmap-dot dot-l4"></div><div class="heatmap-dot dot-l2"></div><div class="heatmap-dot dot-l4"></div><div class="heatmap-dot dot-l4"></div><div class="heatmap-dot dot-l4"></div></div>
+            </div>
+          </div>
+
+          <!-- DATES RANGE AVEC FLÈCHES -->
+          <div style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 10px; font-weight: 600; color: #94A3B8;">
+            <span style="cursor: pointer;">‹</span>
+            <span>Sep 22, 2025 – Feb 3, 2026</span>
+            <span style="cursor: pointer;">›</span>
+          </div>
+        </div>
+
+        <!-- 2. GRILLE BENTO 2x2 AUX GRANDS CHIFFRES LUMINEUX (SCREEN 1 DU VISUEL) -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+          <!-- STREAK -->
+          <div class="bento-glow-card">
+            <div class="bento-glow-tag">
+              <span>🔥</span>
+              <span>Streak</span>
+            </div>
+            <div class="bento-glow-num coral">8</div>
+            <div class="bento-glow-sub">Longest: 8</div>
+          </div>
+
+          <!-- TOTAL CHECK-INS -->
+          <div class="bento-glow-card">
+            <div class="bento-glow-tag">
+              <span>🏋️</span>
+              <span>Total Check-Ins</span>
+            </div>
+            <div class="bento-glow-num coral">558</div>
+            <div class="bento-glow-sub">Started: Apr 13</div>
+          </div>
+
+          <!-- AVG. LOG TIME -->
+          <div class="bento-glow-card">
+            <div class="bento-glow-tag">
+              <span>⏱️</span>
+              <span>Avg. Log Time</span>
+            </div>
+            <div class="bento-glow-num coral" style="font-size: 30px;">2:50</div>
+            <div class="bento-glow-sub">PM</div>
+          </div>
+
+          <!-- GOAL PROGRESS -->
+          <div class="bento-glow-card">
+            <div class="bento-glow-tag">
+              <span>🏆</span>
+              <span>Goal Progress</span>
+            </div>
+            <div class="bento-glow-num coral">67%</div>
+            <!-- Progress Bar -->
+            <div style="width: 100%; height: 5px; background: rgba(255,255,255,0.08); border-radius: var(--radius-pill); overflow: hidden; margin-top: 4px;">
+              <div style="width: 67%; height: 100%; background: #FB7185; border-radius: var(--radius-pill); box-shadow: 0 0 10px rgba(251, 113, 133, 0.7);"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. GRAPHIQUE SPLINE VIBRANT AVEC POINTS LUMINEUX (SCREEN 3 DU VISUEL "ANALYZE") -->
+        <div class="heatmap-card" style="padding: 16px 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <div style="font-size: 13px; font-weight: 800; color: #fff;">Mood / Forme over time</div>
+            <span style="font-size: 10px; color: var(--accent-green); font-weight: 700;">Zone Pic</span>
+          </div>
+
+          <!-- SVG SPLINE GRAPH EXACT AU VISUEL -->
+          <div style="position: relative; width: 100%; height: 110px;">
+            <!-- Axe horizontal en pointillés légers -->
+            <div style="position: absolute; left: 0; right: 0; top: 20px; border-bottom: 1px dashed rgba(255,255,255,0.08);"></div>
+            <div style="position: absolute; left: 0; right: 0; top: 55px; border-bottom: 1px dashed rgba(255,255,255,0.08);"></div>
+            <div style="position: absolute; left: 0; right: 0; top: 90px; border-bottom: 1px dashed rgba(255,255,255,0.08);"></div>
+
+            <!-- SVG Courbe fluide -->
+            <svg style="width: 100%; height: 100%; overflow: visible;" viewBox="0 0 340 100">
+              <defs>
+                <linearGradient id="splineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#FFFFFF"/>
+                  <stop offset="25%" stop-color="#4ADE80"/>
+                  <stop offset="50%" stop-color="#22D3EE"/>
+                  <stop offset="75%" stop-color="#F59E0B"/>
+                  <stop offset="90%" stop-color="#FB923C"/>
+                  <stop offset="100%" stop-color="#4ADE80"/>
+                </linearGradient>
+              </defs>
+
+              <!-- Spline Curve path lissé -->
+              <path d="M 10 65 Q 40 60 70 56 T 130 72 T 190 35 T 250 18 T 320 54" fill="none" stroke="url(#splineGradient)" stroke-width="3" stroke-linecap="round"/>
+
+              <!-- Glow Circle Markers exacts à l'image -->
+              <circle cx="10" cy="65" r="4" fill="#FFFFFF"/>
+              <circle cx="70" cy="56" r="4.5" fill="#4ADE80"/>
+              <circle cx="130" cy="72" r="4.5" fill="#22D3EE"/>
+              <circle cx="190" cy="35" r="5" fill="#FDE047"/>
+              <circle cx="250" cy="18" r="6" fill="#FB923C" stroke="#fff" stroke-width="2" style="filter: drop-shadow(0 0 8px #FB923C);"/>
+              <circle cx="320" cy="54" r="4.5" fill="#4ADE80"/>
+            </svg>
+          </div>
+
+          <!-- Labels des jours sous la courbe -->
+          <div style="display: flex; justify-content: space-between; font-size: 8px; color: #64748B; margin-top: 6px; padding: 0 4px;">
+            <span>DEC 15</span><span>DEC 16</span><span>DEC 17</span><span>DEC 18</span><span>DEC 19</span><span>DEC 20</span><span>DEC 21</span>
+          </div>
+        </div>
+
+        <!-- BENTO ANALYZE RATE (SCREEN 3 DU VISUEL) -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+          <!-- AVERAGE RATE -->
+          <div class="bento-glow-card">
+            <div class="bento-glow-tag">
+              <span>⚡</span>
+              <span>Average Rate</span>
+            </div>
+            <div class="bento-glow-num neon-green">6,3 <span style="font-size: 18px;">↗</span></div>
+            <div class="bento-glow-sub">Last period: 6,1</div>
+          </div>
+
+          <!-- TOTAL LOGS -->
+          <div class="bento-glow-card">
+            <div class="bento-glow-tag">
+              <span>📋</span>
+              <span>Total Logs</span>
+            </div>
+            <div class="bento-glow-num" style="color: #FFFFFF;">12 <span style="font-size: 18px; color: var(--text-muted-light);">↗</span></div>
+            <div class="bento-glow-sub">Last period: 11</div>
+          </div>
+        </div>
+
+        <!-- WHAT YOU DID SECTION (SCREEN 3 DU VISUEL) -->
+        <div style="background: #111319; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 12px 14px; margin-bottom: 12px;">
+          <div style="font-size: 12px; font-weight: 800; color: #fff; margin-bottom: 8px;">What you did</div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: var(--radius-pill); font-size: 10px; font-weight: 700; color: #E2E8F0;">
+              <span>Creating</span>
+              <span style="display: flex; gap: 2px;"><span style="width: 5px; height: 5px; border-radius: 50%; background: #38BDF8;"></span><span style="width: 5px; height: 5px; border-radius: 50%; background: #4ADE80;"></span></span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: var(--radius-pill); font-size: 10px; font-weight: 700; color: #E2E8F0;">
+              <span>Training</span>
+              <span style="display: flex; gap: 2px;"><span style="width: 5px; height: 5px; border-radius: 50%; background: #FB923C;"></span><span style="width: 5px; height: 5px; border-radius: 50%; background: #F87171;"></span></span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: var(--radius-pill); font-size: 10px; font-weight: 700; color: #E2E8F0;">
+              <span>Socializing</span>
+              <span style="display: flex; gap: 2px;"><span style="width: 5px; height: 5px; border-radius: 50%; background: #A855F7;"></span></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. TIMELINE DE SÉANCES AVEC GRANDS CHIFFRES LUMINEUX SUR LE CÔTÉ (SCREEN 2 DU VISUEL "JANUARY") -->
+        <div style="margin-bottom: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 2px;">
+            <div style="font-size: 15px; font-weight: 800; color: #fff;">January Logs</div>
+            <div style="display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 800; color: #fff;">
+              <span>🔥</span><span>4</span>
+            </div>
+          </div>
+
+          <!-- Log 1 (Score 8 Jaune/Ambre) -->
+          <div class="timeline-log-card">
+            <div class="timeline-log-glow-aura" style="background: radial-gradient(circle, #FBBF24 0%, transparent 70%);"></div>
+            <div class="timeline-log-left">
+              <div class="timeline-log-time">Wed 2:18 PM</div>
+              <div class="timeline-log-title">A long walk with Mike & Stretch</div>
+              <div class="timeline-log-tags">
+                <span class="timeline-tag-pill">🔄</span>
+                <span class="timeline-tag-pill">Walking</span>
+                <span class="timeline-tag-pill">Nature</span>
+                <span class="timeline-tag-pill">Friend</span>
+              </div>
+            </div>
+            <div class="timeline-log-digit" style="color: #FBBF24; text-shadow: 0 0 20px rgba(251, 191, 36, 0.45);">8</div>
+          </div>
+
+          <!-- Log 2 (Score 6 Vert) -->
+          <div class="timeline-log-card">
+            <div class="timeline-log-glow-aura" style="background: radial-gradient(circle, #4ADE80 0%, transparent 70%);"></div>
+            <div class="timeline-log-left">
+              <div class="timeline-log-time">Wed 9:32 AM</div>
+              <div class="timeline-log-title">Good day but messy thoughts</div>
+              <div class="timeline-log-tags">
+                <span class="timeline-tag-pill">🔄</span>
+                <span class="timeline-tag-pill">Training</span>
+                <span class="timeline-tag-pill">Gym</span>
+                <span class="timeline-tag-pill">Alone</span>
+              </div>
+            </div>
+            <div class="timeline-log-digit" style="color: #4ADE80; text-shadow: 0 0 20px rgba(74, 222, 128, 0.45);">6</div>
+          </div>
+
+          <!-- Log 3 (Score 7 Lime) -->
+          <div class="timeline-log-card">
+            <div class="timeline-log-glow-aura" style="background: radial-gradient(circle, #A3E635 0%, transparent 70%);"></div>
+            <div class="timeline-log-left">
+              <div class="timeline-log-time">Mon 8:45 PM</div>
+              <div class="timeline-log-title">Home felt cozy today</div>
+              <div class="timeline-log-tags">
+                <span class="timeline-tag-pill">🔄</span>
+                <span class="timeline-tag-pill">Socializing</span>
+                <span class="timeline-tag-pill">Home</span>
+                <span class="timeline-tag-pill">Family</span>
+              </div>
+            </div>
+            <div class="timeline-log-digit" style="color: #A3E635; text-shadow: 0 0 20px rgba(163, 230, 53, 0.45);">7</div>
+          </div>
+
+          <!-- Log 4 (Score 10 Orange Vif) -->
+          <div class="timeline-log-card">
+            <div class="timeline-log-glow-aura" style="background: radial-gradient(circle, #FB923C 0%, transparent 70%);"></div>
+            <div class="timeline-log-left">
+              <div class="timeline-log-time">Sat 5:53 PM</div>
+              <div class="timeline-log-title">Slow, calm and just perfect</div>
+              <div class="timeline-log-tags">
+                <span class="timeline-tag-pill">🔄</span>
+                <span class="timeline-tag-pill">Reflecting</span>
+                <span class="timeline-tag-pill">Home</span>
+                <span class="timeline-tag-pill">Friends</span>
+              </div>
+            </div>
+            <div class="timeline-log-digit" style="color: #FB923C; text-shadow: 0 0 20px rgba(251, 146, 60, 0.5);">10</div>
+          </div>
+        </div>
+
+        <!-- 5. HABITS / DISCIPLINES QUOTIDIENNES (SCREEN 4 DU VISUEL) -->
+        <div style="margin-bottom: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 2px;">
+            <div style="font-size: 15px; font-weight: 800; color: #fff;">Habits Consistency</div>
+            <span style="font-size: 11px; color: var(--aura-gold); font-weight: 700;">Voir tout</span>
+          </div>
+
+          <!-- Habit 1 : Drink Water (Pixel Matrix Bleu-Violet) -->
+          <div class="habit-matrix-card">
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div style="font-size: 12px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
+                <span>💧</span>
+                <span>Drink water</span>
+              </div>
+              <!-- Micro pixel matrix 4x6 -->
+              <div style="display: flex; gap: 3.5px;">
+                <div style="display: flex; flex-direction: column; gap: 3px;"><div style="width: 9px; height: 9px; border-radius: 2px; background: #6366F1;"></div><div style="width: 9px; height: 9px; border-radius: 2px; background: #818CF8;"></div><div style="width: 9px; height: 9px; border-radius: 2px; background: #4338CA;"></div></div>
+                <div style="display: flex; flex-direction: column; gap: 3px;"><div style="width: 9px; height: 9px; border-radius: 2px; background: #C7D2FE;"></div><div style="width: 9px; height: 9px; border-radius: 2px; background: #818CF8;"></div><div style="width: 9px; height: 9px; border-radius: 2px; background: #6366F1;"></div></div>
+                <div style="display: flex; flex-direction: column; gap: 3px;"><div style="width: 9px; height: 9px; border-radius: 2px; background: #4338CA;"></div><div style="width: 9px; height: 9px; border-radius: 2px; background: #6366F1;"></div><div style="width: 9px; height: 9px; border-radius: 2px; background: #C7D2FE;"></div></div>
+                <div style="display: flex; flex-direction: column; gap: 3px;"><div style="width: 9px; height: 9px; border-radius: 2px; background: #818CF8;"></div><div style="width: 9px; height: 9px; border-radius: 2px; background: #4338CA;"></div><div style="width: 9px; height: 9px; border-radius: 2px; background: #6366F1;"></div></div>
+                <div style="display: flex; flex-direction: column; gap: 3px;"><div style="width: 9px; height: 9px; border-radius: 2px; background: #6366F1;"></div><div style="width: 9px; height: 9px; border-radius: 2px; background: #C7D2FE;"></div><div style="width: 9px; height: 9px; border-radius: 2px; background: #818CF8;"></div></div>
+              </div>
+            </div>
+
+            <button style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18); color: #fff; padding: 6px 14px; border-radius: var(--radius-pill); font-size: 11px; font-weight: 700; cursor: pointer;">
+              Check-In
+            </button>
+          </div>
+
+          <!-- Habit 2 : Play with my dog (Pixel Matrix Jaune/Or) -->
+          <div class="habit-matrix-card">
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div style="font-size: 12px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
+                <span>🐶</span>
+                <span>Play with my dog</span>
+              </div>
+              <div style="display: flex; gap: 3.5px;">
+                <div style="display: flex; flex-direction: column; gap: 3px;"><div style="width: 9px; height: 9px; border-radius: 2px; background: #F59E0B;"></div><div style="width: 9px; height: 9px; border-radius: 2px; background: #FCD34D;"></div><div style="width: 9px; height: 9px; border-radius: 2px; background: #D97706;"></div></div>
+                <div style="display: flex; flex-direction: column; gap: 3px;"><div style="width: 9px; height: 9px; border-radius: 2px; background: #FCD34D;"></div><div style="width: 9px; height: 9px; border-radius: 2px; background: #F59E0B;"></div><div style="width: 9px; height: 9px; border-radius: 2px; background: #F59E0B;"></div></div>
+                <div style="display: flex; flex-direction: column; gap: 3px;"><div style="width: 9px; height: 9px; border-radius: 2px; background: #B45309;"></div><div style="width: 9px; height: 9px; border-radius: 2px; background: #FCD34D;"></div><div style="width: 9px; height: 9px; border-radius: 2px; background: #F59E0B;"></div></div>
+                <div style="display: flex; flex-direction: column; gap: 3px;"><div style="width: 9px; height: 9px; border-radius: 2px; background: #F59E0B;"></div><div style="width: 9px; height: 9px; border-radius: 2px; background: #D97706;"></div><div style="width: 9px; height: 9px; border-radius: 2px; background: #FCD34D;"></div></div>
+                <div style="display: flex; flex-direction: column; gap: 3px;"><div style="width: 9px; height: 9px; border-radius: 2px; background: #FCD34D;"></div><div style="width: 9px; height: 9px; border-radius: 2px; background: #F59E0B;"></div><div style="width: 9px; height: 9px; border-radius: 2px; background: #B45309;"></div></div>
+              </div>
+            </div>
+
+            <div style="width: 28px; height: 28px; border-radius: 50%; background: #FFFFFF; color: #000; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800;">
+              ✓
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- ÉCRAN 6 : COMMUNAUTÉ, POTES & PARTAGE SOCIAL                 -->
+      <!-- ============================================================ -->
+      <div id="page-social" class="screen-page">
+        <div class="screen-top-bar">
+          <div>
+            <div style="font-size: 11px; color: var(--aura-gold); font-weight: 800;">COMMUNAUTÉ & POTES</div>
+            <div style="font-size: 20px; font-weight: 800; color: #fff;">Cercle Hybride</div>
+          </div>
+          <div class="header-capsules">
+            <div class="capsule-pill active">👥 Potes (4)</div>
+            <div class="capsule-pill">🌍 Club</div>
+          </div>
+        </div>
+
+        <!-- CARTE DE PARTAGE STORY PRÊTE À EXPORTER -->
+        <div style="background: linear-gradient(145deg, #181922 0%, #0A0B0E 100%); border: 1px solid rgba(245, 158, 11, 0.4); border-radius: var(--radius-squircle); padding: 16px; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.6);">
+          <div style="position: absolute; top: -30px; right: -30px; width: 140px; height: 140px; background: radial-gradient(circle, rgba(245, 158, 11, 0.35) 0%, transparent 70%); filter: blur(20px);"></div>
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; color: var(--aura-gold);">
+              <span>⚡</span>
+              <span>CARTE STORY DU JOUR</span>
+            </div>
+            <span style="font-size: 10px; color: var(--text-muted-light);">Prêt pour Instagram / Snap</span>
+          </div>
+
+          <div style="background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(12px); border-radius: 16px; padding: 12px; border: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="font-size: 10px; color: var(--text-muted-light); font-weight: 700;">RÉCUPÉRATION DU JOUR</div>
+                <div style="font-size: 28px; font-weight: 800; color: #fff;">88 <span style="font-size: 13px; color: var(--accent-green);">Excellent ↗</span></div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 10px; color: var(--text-muted-light); font-weight: 700;">TONNAGE SÉANCE</div>
+                <div style="font-size: 20px; font-weight: 800; color: var(--aura-amber);">3 420 kg</div>
+              </div>
+            </div>
+            <div style="margin-top: 8px; font-size: 11px; color: #fff; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+              <span>🏆</span>
+              <span>Nouveau record : 6 reps @ 90.0 kg Couché</span>
+            </div>
+          </div>
+
+          <button style="width: 100%; background: #FFFFFF; color: #000; border: none; padding: 10px; border-radius: var(--radius-pill); font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 14px rgba(255,255,255,0.2);">
+            <span>Partager en Story ou avec un pote</span>
+            <span>↗</span>
+          </button>
+        </div>
+
+        <!-- FEED D'ACTIVITÉ DES POTES -->
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="font-size: 13px; font-weight: 800; color: #fff; margin-top: 4px;">Activité récente du cercle</div>
+
+          <!-- POST 1 : Thomas L. -->
+          <div style="background: #111319; border: 1px solid var(--border-glass); border-radius: var(--radius-squircle); padding: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #F59E0B, #EA580C); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: #000;">
+                  TL
+                </div>
+                <div>
+                  <div style="font-size: 13px; font-weight: 800; color: #fff;">Thomas L.</div>
+                  <div style="font-size: 10px; color: var(--text-muted-light);">Il y a 22 minutes • Salle République</div>
+                </div>
+              </div>
+              <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); color: var(--accent-green); font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: var(--radius-pill);">
+                92% Prêt
+              </div>
+            </div>
+
+            <div style="font-size: 12px; color: #E2E8F0; margin-bottom: 8px; line-height: 1.4;">
+              Grosse séance pecs ce midi ! Passage des 100 kg validé au couché 💪. Enchaîné avec 5 km de récup active.
+            </div>
+
+            <!-- Performance Card -->
+            <div style="background: #171A24; border-radius: 12px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <div>
+                <div style="font-size: 9px; color: var(--text-muted-light); font-weight: 700;">NOUVEAU RECORD (PR)</div>
+                <div style="font-size: 13px; font-weight: 800; color: #fff;">100.0 kg × 5 reps</div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 9px; color: var(--text-muted-light); font-weight: 700;">RUNNING</div>
+                <div style="font-size: 13px; font-weight: 800; color: #fff;">5.1 km en 24:12</div>
+              </div>
+            </div>
+
+            <!-- Boutons d'interaction sociale -->
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button onclick="this.classList.toggle('active')" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 5px 12px; border-radius: var(--radius-pill); font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                <span>👊</span>
+                <span>Fistbump</span>
+                <span style="color: var(--aura-gold); font-weight: 800;">14</span>
+              </button>
+              <button style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 5px 10px; border-radius: var(--radius-pill); font-size: 11px; font-weight: 700; cursor: pointer;">
+                🔥 8
+              </button>
+              <button style="background: transparent; border: none; color: var(--text-muted-light); padding: 5px 8px; font-size: 11px; font-weight: 600; cursor: pointer; margin-left: auto;">
+                💬 3 coms
+              </button>
+            </div>
+          </div>
+
+          <!-- POST 2 : Sarah M. -->
+          <div style="background: #111319; border: 1px solid var(--border-glass); border-radius: var(--radius-squircle); padding: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #10B981, #06B6D4); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: #000;">
+                  SM
+                </div>
+                <div>
+                  <div style="font-size: 13px; font-weight: 800; color: #fff;">Sarah M.</div>
+                  <div style="font-size: 10px; color: var(--text-muted-light);">Il y a 1h • Parc de Sceaux</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="font-size: 12px; color: #E2E8F0; margin-bottom: 8px;">
+              Sortie longue du dimanche en pleine Zone 2. Cardio ultra-stable sous les 140 bpm 🏃‍♀️✨
+            </div>
+
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 5px 12px; border-radius: var(--radius-pill); font-size: 11px; font-weight: 700; cursor: pointer;">
+                👊 Fistbump <span style="color: var(--aura-gold);">9</span>
+              </button>
+              <button style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 5px 10px; border-radius: var(--radius-pill); font-size: 11px; font-weight: 700; cursor: pointer;">
+                ⚡ 5
+              </button>
+            </div>
+          </div>
+
+          <!-- MINI LEADERBOARD DU CERCLE -->
+          <div style="background: #000000; border: 1px solid var(--border-glass); border-radius: var(--radius-squircle); padding: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <span style="font-size: 13px; font-weight: 800; color: #fff;">Classement Volume Mensuel</span>
+              <span style="font-size: 10px; color: var(--aura-gold); font-weight: 700;">Cercle Privé</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; border-radius: 8px; background: rgba(255,255,255,0.04);">
+                <span style="font-size: 12px; font-weight: 700; color: #fff;">🥇 1. Thomas L.</span>
+                <span style="font-size: 12px; font-weight: 800; color: var(--aura-gold);">52.4 t</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; border-radius: 8px; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3);">
+                <span style="font-size: 12px; font-weight: 800; color: #fff;">🥈 2. Vous (Mathéo)</span>
+                <span style="font-size: 12px; font-weight: 800; color: #fff;">48.2 t</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; border-radius: 8px; background: rgba(255,255,255,0.04);">
+                <span style="font-size: 12px; font-weight: 700; color: var(--text-muted-light);">🥉 3. Lucas B.</span>
+                <span style="font-size: 12px; font-weight: 800; color: var(--text-muted-light);">39.8 t</span>
+              </div>
+            </div>
+
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- ÉCRAN 7 : PARAMÈTRES, SYSTÈME & GESTION DES CAPTEURS        -->
+      <!-- ============================================================ -->
+      <div id="page-settings" class="screen-page">
+        <div class="screen-top-bar">
+          <div>
+            <div style="font-size: 11px; color: var(--aura-gold); font-weight: 800;">CENTRE DE CONTRÔLE</div>
+            <div style="font-size: 20px; font-weight: 800; color: #fff;">Paramètres & Capteurs</div>
+          </div>
+          <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); padding: 4px 10px; border-radius: var(--radius-pill); font-size: 10px; font-weight: 800; color: var(--accent-green); display: flex; align-items: center; gap: 5px;">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--accent-green); box-shadow: 0 0 6px var(--accent-green);"></span>
+            <span>Cloud Sync Sécurisé</span>
+          </div>
+        </div>
+
+        <!-- GROUPE 1 : CAPTEURS & HARDWARE -->
+        <div class="settings-group">
+          <div class="settings-group-header">Capteurs & Synchronisations Santé</div>
+
+          <!-- Apple Health -->
+          <div class="settings-row">
+            <div class="settings-label-wrap">
+              <div class="settings-icon-badge" style="background: linear-gradient(135deg, #FF2D55, #FF375F); color: #fff;">❤️</div>
+              <div>
+                <div class="settings-title">Apple Health (HealthKit)</div>
+                <div class="settings-desc">Sommeil, VFC, FC repos, Voies respiratoires</div>
+              </div>
+            </div>
+            <div class="apple-switch active" onclick="this.classList.toggle('active')">
+              <div class="apple-switch-dot"></div>
+            </div>
+          </div>
+
+          <!-- Ceinture Bluetooth BLE Polar H10 -->
+          <div class="settings-row">
+            <div class="settings-label-wrap">
+              <div class="settings-icon-badge" style="background: #1E293B; border: 1px solid rgba(255,255,255,0.1); color: #38BDF8;">📡</div>
+              <div>
+                <div class="settings-title">Ceinture Thoracique BLE</div>
+                <div class="settings-desc">Polar H10 #48291 • Batterie 85%</div>
+              </div>
+            </div>
+            <div class="settings-val-pill" style="color: var(--accent-green); display: flex; align-items: center; gap: 4px;">
+              <span style="width: 5px; height: 5px; border-radius: 50%; background: var(--accent-green);"></span>
+              <span>Connecté</span>
+            </div>
+          </div>
+
+          <!-- Apple Watch -->
+          <div class="settings-row">
+            <div class="settings-label-wrap">
+              <div class="settings-icon-badge" style="background: #1E293B; border: 1px solid rgba(255,255,255,0.1); color: #F59E0B;">⌚</div>
+              <div>
+                <div class="settings-title">Apple Watch Ultra</div>
+                <div class="settings-desc">Détection haptique des séries & cadence</div>
+              </div>
+            </div>
+            <div class="apple-switch active" onclick="this.classList.toggle('active')">
+              <div class="apple-switch-dot"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- GROUPE 2 : ALGORITHMES & PRÉFÉRENCES SPORTIVES -->
+        <div class="settings-group">
+          <div class="settings-group-header">Algorithmes Physiologiques & Musculation</div>
+
+          <!-- Anti-Interférence -->
+          <div class="settings-row">
+            <div class="settings-label-wrap">
+              <div class="settings-icon-badge" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); color: var(--accent-green);">⚡</div>
+              <div>
+                <div class="settings-title">Moteur Anti-Interférence</div>
+                <div class="settings-desc">Médiation biochimique AMPK / mTOR auto</div>
+              </div>
+            </div>
+            <div class="apple-switch active" onclick="this.classList.toggle('active')">
+              <div class="apple-switch-dot"></div>
+            </div>
+          </div>
+
+          <!-- Échelle RPE -->
+          <div class="settings-row">
+            <div class="settings-label-wrap">
+              <div class="settings-icon-badge" style="background: #1E293B; color: #F59E0B;">📊</div>
+              <div>
+                <div class="settings-title">Échelle d'Effort RPE (Borg)</div>
+                <div class="settings-desc">Ajustement dynamique des charges IA</div>
+              </div>
+            </div>
+            <div class="apple-switch active" onclick="this.classList.toggle('active')">
+              <div class="apple-switch-dot"></div>
+            </div>
+          </div>
+
+          <!-- Unités -->
+          <div class="settings-row">
+            <div class="settings-label-wrap">
+              <div class="settings-icon-badge" style="background: #1E293B; color: #94A3B8;">⚖️</div>
+              <div>
+                <div class="settings-title">Système d'Unités</div>
+                <div class="settings-desc">Poids, distances et allures</div>
+              </div>
+            </div>
+            <div class="settings-val-pill">Métrique (kg, km) ▾</div>
+          </div>
+
+          <!-- Temps de repos -->
+          <div class="settings-row">
+            <div class="settings-label-wrap">
+              <div class="settings-icon-badge" style="background: #1E293B; color: #94A3B8;">⏱️</div>
+              <div>
+                <div class="settings-title">Timer de Repos par Défaut</div>
+                <div class="settings-desc">Déclenchement automatique post-série</div>
+              </div>
+            </div>
+            <div class="settings-val-pill">90 sec ▾</div>
+          </div>
+        </div>
+
+        <!-- GROUPE 3 : AUDIO, VOIX DU COACH & HAPTIQUE 2030 -->
+        <div class="settings-group">
+          <div class="settings-group-header">Audio Coach & Expérience Sensorielle</div>
+
+          <!-- Retours Haptiques -->
+          <div class="settings-row">
+            <div class="settings-label-wrap">
+              <div class="settings-icon-badge" style="background: #1E293B; color: #A855F7;">📳</div>
+              <div>
+                <div class="settings-title">Retours Haptiques Haute Précision</div>
+                <div class="settings-desc">Pulsations Taptic à chaque répétition</div>
+              </div>
+            </div>
+            <div class="apple-switch active" onclick="this.classList.toggle('active')">
+              <div class="apple-switch-dot"></div>
+            </div>
+          </div>
+
+          <!-- Audio Cues Running -->
+          <div class="settings-row">
+            <div class="settings-label-wrap">
+              <div class="settings-icon-badge" style="background: #1E293B; color: #38BDF8;">🎧</div>
+              <div>
+                <div class="settings-title">Coaching Vocal AirPods</div>
+                <div class="settings-desc">Annonce km, maintien Zone 2 en direct</div>
+              </div>
+            </div>
+            <div class="apple-switch active" onclick="this.classList.toggle('active')">
+              <div class="apple-switch-dot"></div>
+            </div>
+          </div>
+
+          <!-- Ducking Audio -->
+          <div class="settings-row">
+            <div class="settings-label-wrap">
+              <div class="settings-icon-badge" style="background: #1E293B; color: #94A3B8;">🎵</div>
+              <div>
+                <div class="settings-title">Atténuation Musique (Ducking)</div>
+                <div class="settings-desc">Baisse automatique lors des annonces</div>
+              </div>
+            </div>
+            <div class="settings-val-pill">-12 dB ▾</div>
+          </div>
+        </div>
+
+        <!-- GROUPE 4 : SÉCURITÉ, DONNÉES & CONFIDENTIALITÉ -->
+        <div class="settings-group">
+          <div class="settings-group-header">Sécurité & Souveraineté des Données</div>
+
+          <div class="settings-row">
+            <div class="settings-label-wrap">
+              <div class="settings-icon-badge" style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); color: var(--aura-gold);">🔒</div>
+              <div>
+                <div class="settings-title">Chiffrement Local & Cloud</div>
+                <div class="settings-desc">Zero-Knowledge AES-256 de bout en bout</div>
+              </div>
+            </div>
+            <div class="settings-val-pill" style="color: var(--aura-gold);">Actif</div>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-label-wrap">
+              <div class="settings-icon-badge" style="background: #1E293B; color: #94A3B8;">💾</div>
+              <div>
+                <div class="settings-title">Exporter Toutes les Séances</div>
+                <div class="settings-desc">Fichiers GPX et JSON bruts</div>
+              </div>
+            </div>
+            <button style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: #fff; padding: 5px 12px; border-radius: var(--radius-pill); font-size: 11px; font-weight: 700; cursor: pointer;">
+              Exporter ↗
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- ÉCRAN 8 : PROFIL DE L'ATHLÈTE & PASSEPORT DES RECORDS (PR)    -->
+      <!-- ============================================================ -->
+      <div id="page-profile" class="screen-page">
+        <!-- TOP BAR -->
+        <div class="screen-top-bar">
+          <div>
+            <div style="font-size: 11px; color: var(--aura-gold); font-weight: 800;">PASSEPORT BIOMÉTRIQUE</div>
+            <div style="font-size: 20px; font-weight: 800; color: #fff;">Profil Athlète</div>
+          </div>
+          <button style="background: rgba(255,255,255,0.08); border: 0.5px solid rgba(255,255,255,0.18); color: #fff; padding: 5px 12px; border-radius: var(--radius-pill); font-size: 11px; font-weight: 700; cursor: pointer;" onclick="gotoScreen('settings')">
+            ⚙️ Réglages
+          </button>
+        </div>
+
+        <!-- HERO ATHLÈTE CARD -->
+        <div class="profile-hero-card">
+          <div class="profile-avatar-wrap">
+            <div class="profile-avatar-inner">⚡</div>
+          </div>
+          <div class="profile-name">Mathéo D.</div>
+          <div style="font-size: 11px; color: var(--text-muted-light); font-weight: 600; margin-top: 2px;">Athlète Hybride • Niveau 14</div>
+
+          <div class="profile-badge-row">
+            <span class="profile-pill" style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35); color: var(--aura-gold);">🔥 100 Semaines</span>
+            <span class="profile-pill" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); color: var(--accent-green);">⚡ 88 Karma</span>
+            <span class="profile-pill" style="background: rgba(255, 255, 255, 0.08); color: #fff;">✓ Certifié</span>
+          </div>
+
+          <!-- BIOMARQUEURS ESSENTIELS EN BANDEAU -->
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; width: 100%; margin-top: 16px; padding-top: 14px; border-top: 0.5px solid rgba(255,255,255,0.08);">
+            <div>
+              <div style="font-size: 9px; color: #64748B; font-weight: 700;">POIDS</div>
+              <div style="font-size: 14px; font-weight: 800; color: #fff;">78.4 <span style="font-size: 9px; color: #94A3B8;">kg</span></div>
+            </div>
+            <div>
+              <div style="font-size: 9px; color: #64748B; font-weight: 700;">TAILLE</div>
+              <div style="font-size: 14px; font-weight: 800; color: #fff;">182 <span style="font-size: 9px; color: #94A3B8;">cm</span></div>
+            </div>
+            <div>
+              <div style="font-size: 9px; color: #64748B; font-weight: 700;">FC REPOS</div>
+              <div style="font-size: 14px; font-weight: 800; color: #10B981;">47 <span style="font-size: 9px; color: #94A3B8;">bpm</span></div>
+            </div>
+            <div>
+              <div style="font-size: 9px; color: #64748B; font-weight: 700;">VMA</div>
+              <div style="font-size: 14px; font-weight: 800; color: #38BDF8;">15.8 <span style="font-size: 9px; color: #94A3B8;">km/h</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MUR DES RECORDS PERSONNELS (PR WALL & 1RM ESTIMÉ) -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 2px;">
+          <div style="font-size: 15px; font-weight: 800; color: #fff;">Mur des Records (1RM & Running)</div>
+          <span style="font-size: 10px; color: var(--aura-gold); font-weight: 700;">Historique complet ↗</span>
+        </div>
+
+        <div class="pr-wall-grid">
+          <!-- Squat -->
+          <div class="pr-wall-card">
+            <div class="pr-wall-lift">Squat Barre</div>
+            <div class="pr-wall-weight">
+              <span>145.0</span>
+              <span class="pr-wall-unit">KG</span>
+            </div>
+            <div class="pr-wall-date">1RM estimé : 152 kg • 12 Jan</div>
+          </div>
+
+          <!-- Bench -->
+          <div class="pr-wall-card">
+            <div class="pr-wall-lift">Développé Couché</div>
+            <div class="pr-wall-weight">
+              <span>105.0</span>
+              <span class="pr-wall-unit">KG</span>
+            </div>
+            <div class="pr-wall-date">1RM estimé : 112 kg • Hier</div>
+          </div>
+
+          <!-- Deadlift -->
+          <div class="pr-wall-card">
+            <div class="pr-wall-lift">Soulevé de Terre</div>
+            <div class="pr-wall-weight">
+              <span>180.0</span>
+              <span class="pr-wall-unit">KG</span>
+            </div>
+            <div class="pr-wall-date">1RM estimé : 190 kg • 28 Déc</div>
+          </div>
+
+          <!-- 5K Record -->
+          <div class="pr-wall-card">
+            <div class="pr-wall-lift">5 Kilomètres</div>
+            <div class="pr-wall-weight">
+              <span>20:45</span>
+              <span class="pr-wall-unit">MIN</span>
+            </div>
+            <div class="pr-wall-date">Allure 4:09 /km • 15 Oct</div>
+          </div>
+        </div>
+
+        <!-- VITRINE DES MÉDAILLES NUMÉRIQUES 3D COLLECTÉES -->
+        <div style="margin-bottom: 18px;">
+          <div style="font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 10px; padding: 0 2px;">Vitrine des Médailles 3D</div>
+
+          <div style="background: #101218; border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-squircle); padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+            <!-- Médaille 1 -->
+            <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 0.5px solid rgba(255,255,255,0.06); padding-bottom: 10px;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="achievement-medal-pod" style="width: 46px; height: 46px;">
+                  <div style="font-size: 10px; font-weight: 900; color: #F59E0B;">1.0</div>
+                  <div style="font-size: 6px; font-weight: 800; color: #94A3B8;">HOUR</div>
+                </div>
+                <div>
+                  <div style="font-size: 13px; font-weight: 800; color: #fff;">1-Hour Activity</div>
+                  <div style="font-size: 9px; color: #64748B;">Any Distance Time Dept.</div>
+                </div>
+              </div>
+              <span style="font-size: 10px; font-weight: 800; color: var(--aura-gold); background: rgba(245,158,11,0.12); padding: 3px 8px; border-radius: 999px;">Arboré ✨</span>
+            </div>
+
+            <!-- Médaille 2 -->
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="achievement-medal-pod" style="width: 46px; height: 46px; border-color: #EA580C; box-shadow: 0 0 14px rgba(234, 88, 12, 0.4);">
+                  <div style="font-size: 12px;">🔥</div>
+                  <div style="font-size: 6px; font-weight: 800; color: #EA580C;">100 W</div>
+                </div>
+                <div>
+                  <div style="font-size: 13px; font-weight: 800; color: #fff;">100-Week Streak Master</div>
+                  <div style="font-size: 9px; color: #64748B;">Discipline Ininterrompue</div>
+                </div>
+              </div>
+              <button style="background: rgba(255,255,255,0.08); border: 0.5px solid rgba(255,255,255,0.18); color: #fff; padding: 4px 10px; border-radius: var(--radius-pill); font-size: 10px; font-weight: 700; cursor: pointer;">
+                Arborer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- BARRE DE NAVIGATION INFÉRIEURE DU SMARTPHONE -->
+    <div class="mobile-tab-bar">
+      <div class="tab-bar-item active" onclick="gotoScreen('dashboard')">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        <span>Karma</span>
+      </div>
+      <div class="tab-bar-item" onclick="gotoScreen('workout')">
+        <svg viewBox="0 0 24 24"><path d="M6 4v16M18 4v16M2 8h4M18 8h4M2 16h4M18 16h4"/></svg>
+        <span>Muscu</span>
+      </div>
+      <div class="tab-bar-item" onclick="gotoScreen('running')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>Running</span>
+      </div>
+      <div class="tab-bar-item" onclick="gotoScreen('planning')">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>Planning</span>
+      </div>
+      <div class="tab-bar-item" onclick="gotoScreen('stats')">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span>Stats</span>
+      </div>
+      <div class="tab-bar-item" onclick="gotoScreen('social')">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Potes</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let isVisionTheme = false;
+
+    function toggleSpatialTheme() {
+      isVisionTheme = !isVisionTheme;
+      const phoneFrame = document.getElementById('phone-frame');
+      const auroraMain = document.getElementById('aurora-main');
+      const auroraSec = document.getElementById('aurora-secondary');
+      const themeIcon = document.getElementById('theme-icon');
+      const themeText = document.getElementById('theme-text');
+
+      if (isVisionTheme) {
+        document.documentElement.style.setProperty('--aura-gold', '#A855F7');
+        document.documentElement.style.setProperty('--aura-amber', '#8B5CF6');
+        auroraMain.style.background = 'radial-gradient(circle at 65% 35%, rgba(168, 85, 247, 0.75) 0%, rgba(99, 102, 241, 0.55) 30%, rgba(14, 165, 233, 0.3) 60%, transparent 85%)';
+        auroraSec.style.background = 'radial-gradient(circle, rgba(236, 72, 153, 0.3) 0%, transparent 70%)';
+        phoneFrame.style.boxShadow = '0 0 0 1px rgba(255, 255, 255, 0.2), 0 0 0 10px #0D0E13, 0 35px 100px rgba(0,0,0,0.95), 0 0 160px rgba(168, 85, 247, 0.25)';
+        themeIcon.innerText = '☀️';
+        themeText.innerText = 'Karma Doré';
+      } else {
+        document.documentElement.style.setProperty('--aura-gold', '#F59E0B');
+        document.documentElement.style.setProperty('--aura-amber', '#D97706');
+        auroraMain.style.background = 'radial-gradient(circle at 65% 35%, rgba(253, 224, 71, 0.75) 0%, rgba(245, 158, 11, 0.65) 25%, rgba(217, 119, 6, 0.40) 48%, rgba(234, 88, 12, 0.18) 65%, rgba(0, 0, 0, 0) 80%)';
+        auroraSec.style.background = 'radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, rgba(0,0,0,0) 70%)';
+        phoneFrame.style.boxShadow = '0 0 0 1px rgba(255, 255, 255, 0.15), 0 0 0 10px #0D0E13, 0 35px 100px rgba(0,0,0,0.95), 0 0 160px rgba(245, 158, 11, 0.16)';
+        themeIcon.innerText = '🌌';
+        themeText.innerText = 'VisionOS Améthyste';
+      }
+    }
+
+    let islandExpanded = false;
+    function toggleIslandExpansion() {
+      const island = document.getElementById('main-island');
+      islandExpanded = !islandExpanded;
+
+      if (islandExpanded) {
+        island.classList.add('expanded');
+        island.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; width:100%; height:100%;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div style="width:36px; height:36px; border-radius:50%; background:var(--siri-neural-gradient); display:flex; align-items:center; justify-content:center; font-size:16px;">
+                ✨
+              </div>
+              <div>
+                <div style="font-size:11px; font-weight:800; color:#fff;">Apple Intelligence HUD 2030</div>
+                <div style="font-size:9px; color:var(--accent-green); font-weight:700;">● Bio-Capteurs AirPods Pro 3 Actifs</div>
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:18px; font-weight:800; color:var(--aura-gold);">88 Karma</div>
+              <div style="font-size:9px; color:var(--text-muted-light);">VFC 68ms • FC 49</div>
+            </div>
+          </div>
+        `;
+      } else {
+        island.classList.remove('expanded');
+        island.innerHTML = `
+          <div class="island-left-data">
+            <span class="pulse-dot"></span>
+            <span style="font-size: 11px; font-weight: 800; color: #fff;">88</span>
+          </div>
+          <svg class="island-ecg-wave" viewBox="0 0 42 14">
+            <path d="M 0 7 L 12 7 L 15 2 L 18 12 L 21 4 L 24 9 L 26 7 L 42 7" fill="none" stroke="#10B981" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <div class="island-status-pill">
+            <span style="font-size: 8px; color: var(--aura-gold); font-weight: 700;">⚡ Sync</span>
+            <div class="island-cam"></div>
+          </div>
+        `;
+      }
+    }
+
+    function gotoScreen(screenName) {
+      // Masquer toutes les pages
+      document.querySelectorAll('.screen-page').forEach(page => {
+        page.classList.remove('active');
+      });
+
+      // Désactiver les boutons du haut
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+
+      // Désactiver la barre du bas
+      document.querySelectorAll('.tab-bar-item').forEach(item => {
+        item.classList.remove('active');
+      });
+
+      // Activer la page ciblée
+      const targetPage = document.getElementById('page-' + screenName);
+      if (targetPage) {
+        targetPage.classList.add('active');
+      }
+
+      // Synchroniser les boutons
+      const screenList = ['dashboard', 'workout', 'running', 'planning', 'stats', 'social', 'settings', 'profile'];
+      const idx = screenList.indexOf(screenName);
+
+      const topBtns = document.querySelectorAll('.tab-btn');
+      if (idx !== -1 && topBtns[idx]) topBtns[idx].classList.add('active');
+
+      const bottomItems = document.querySelectorAll('.tab-bar-item');
+      if (idx !== -1 && bottomItems[idx]) bottomItems[idx].classList.add('active');
+    }
+
+    function toggleSetCheck(el) {
+      el.classList.toggle('checked');
+      if (el.classList.contains('checked')) {
+        el.innerHTML = '✓';
+        el.style.boxShadow = '0 0 16px rgba(16, 185, 129, 0.6)';
+      } else {
+        el.innerHTML = '';
+        el.style.boxShadow = 'none';
+      }
+    }
+  </script>
+</body>
+</html>
