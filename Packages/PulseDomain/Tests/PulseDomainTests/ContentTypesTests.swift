@@ -16,7 +16,8 @@ private let specExampleJSON = Data("""
   "loadKind": "external",
   "defaultIncrementKg": 2.5,
   "defaultRestSeconds": 120,
-  "cues": { "fr": ["Omoplates serrées et abaissées sur le banc.", "Barre au niveau du bas des pectoraux, coudes à 45°.", "Pieds ancrés, pousser le sol pendant la montée."] },
+  "cues": { "fr": ["Omoplates serrées et abaissées sur le banc.", "Barre au niveau du bas des pectoraux, coudes à 45°.",
+                   "Pieds ancrés, pousser le sol pendant la montée."] },
   "mistakes": { "fr": ["Rebondir la barre sur la poitrine.", "Décoller les fesses du banc."] },
   "alternatives": ["chest-press-machine", "bench-press-dumbbell", "incline-chest-press-machine"]
 }
@@ -37,7 +38,8 @@ private let specTemplateJSON = Data("""
       "kind": "strength",
       "exercises": [
         { "exercise": "bench-press-barbell", "sets": 4, "repsMin": 6, "repsMax": 10, "targetRPE": 8, "restSeconds": 120 },
-        { "exercise": "triceps-pushdown-cable", "sets": 3, "repsMin": 10, "repsMax": 15, "targetRPE": 8, "restSeconds": 60, "supersetGroup": 1 },
+        { "exercise": "triceps-pushdown-cable", "sets": 3, "repsMin": 10, "repsMax": 15, "targetRPE": 8, "restSeconds": 60,
+          "supersetGroup": 1 },
         { "exercise": "wrist-curl-cable", "sets": 3, "repsMin": 12, "repsMax": 20, "targetRPE": 8, "restSeconds": 60, "supersetGroup": 1 }
       ]
     },
