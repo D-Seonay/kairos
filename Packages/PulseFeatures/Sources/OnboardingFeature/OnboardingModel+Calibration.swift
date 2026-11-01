@@ -5,8 +5,16 @@ import PulseServices
 extension OnboardingModel {
     /// Lit 60 jours d'Apple Santé, calcule le premier score et la ligne de base ; sans lecture ou sans assez de données,
     /// la calibration passe par le check-in. Avant 4 h le jour n'a pas commencé : aucun score n'est calculé, le check-in est demandé.
+    ///
+    /// Une reprise de l'onboarding à `.calibration` ne relance pas la calibration d'elle-même (`start()` ne fait que restaurer
+    /// l'étape) : c'est à l'écran de la lancer à son apparition.
     public func runCalibration() async {
         errorMessage = nil
+        await calibrate()
+    }
+
+    /// Comme `runCalibration()`, sans effacer le message d'erreur laissé par l'étape qui précède.
+    func calibrate() async {
         let now = environment.now()
         guard !healthSkipped else {
             calibration = .needsCheckIn(missing: Factor.allCases, baseline: baseline(of: [], at: now))

@@ -26,17 +26,44 @@ enum OnboardingClock {
     }
 }
 
+/// Dépôt de profil dont les enregistrements peuvent échouer à la demande.
+actor FlakyProfileRepository: ProfileRepository {
+    struct SaveFailure: Error {}
+
+    private let inner = InMemoryProfileRepository()
+    private var failsOnSave = false
+
+    func setFailsOnSave(_ value: Bool) {
+        failsOnSave = value
+    }
+
+    func load() async throws -> UserProfile? {
+        try await inner.load()
+    }
+
+    func save(_ profile: UserProfile) async throws {
+        if failsOnSave { throw SaveFailure() }
+        try await inner.save(profile)
+    }
+
+    func delete(id: UUID) async throws {
+        try await inner.delete(id: id)
+    }
+}
+
 /// Les doublures d'un parcours d'onboarding, et le modèle construit dessus.
 @MainActor
 struct OnboardingFixture {
-    let profiles = InMemoryProfileRepository()
+    let profiles: any ProfileRepository
     let programs = InMemoryProgramRepository()
     let recovery = InMemoryRecoveryRepository(calendar: OnboardingClock.calendar)
     let notifications: StubNotificationAuthorizer
     let stepStore = InMemoryOnboardingStepStore()
     let environment: OnboardingEnvironment
 
-    init(scenario: HealthScenario = .goodNight, notificationsGranted: Bool = true, health: (any HealthSampleSource)? = nil) {
+    init(scenario: HealthScenario = .goodNight, notificationsGranted: Bool = true, health: (any HealthSampleSource)? = nil,
+         profiles: any ProfileRepository = InMemoryProfileRepository()) {
+        self.profiles = profiles
         let calendar = OnboardingClock.calendar
         let now = OnboardingClock.now
         let source = health ?? ScenarioHealthSource(scenario: scenario, now: now, calendar: calendar)

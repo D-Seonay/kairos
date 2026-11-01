@@ -57,6 +57,9 @@ public final class OnboardingModel {
             profile = stored
         }
         step = environment.stepStore.load() ?? .welcome
+        if step.rawValue >= OnboardingStep.program.rawValue {
+            await restoreProgramSelection()
+        }
     }
 
     /// Vrai si un profil terminé est apparu depuis iCloud : le brouillon et son programme sont alors écartés.
@@ -75,6 +78,7 @@ public final class OnboardingModel {
     // MARK: - Étapes
 
     public func begin() async {
+        errorMessage = nil
         await advance(to: .health)
     }
 
@@ -99,6 +103,7 @@ public final class OnboardingModel {
     }
 
     public func continueFromProfile() async {
+        errorMessage = nil
         let increments = profile.strengthLevel.defaultIncrementsKg
         profile.upperIncrementKg = increments.upper
         profile.lowerIncrementKg = increments.lower
@@ -106,28 +111,41 @@ public final class OnboardingModel {
     }
 
     public func continueFromGoals() async {
-        recommendedTemplateID = TemplateRecommender.recommendedID(
-            focus: profile.focus, daysPerWeek: profile.trainingDaysPerWeek, templates: environment.library.programTemplates)
+        errorMessage = nil
+        recommendedTemplateID = recommendation()
         selectedTemplateID = recommendedTemplateID
         choseCustomProgram = false
         await advance(to: .program)
     }
 
     /// Adopte le modèle choisi (ou aucun) à la place du programme adopté plus tôt dans ce parcours, puis lance la calibration.
+    /// Si le brouillon ne s'enregistre pas, rien ne change : on reste sur l'étape, le programme précédent est conservé.
     public func adoptProgram() async {
         errorMessage = nil
+        let previous = profile.activeProgramID
+        let adopted: UUID?
         do {
-            let previous = profile.activeProgramID
-            profile.activeProgramID = try await adoptSelectedTemplate()
-            if let previous, previous != profile.activeProgramID {
-                try await environment.programs.delete(id: previous)
-            }
+            adopted = try await adoptSelectedTemplate()
         } catch {
             errorMessage = Self.saveFailureMessage
             return
         }
-        await advance(to: .calibration)
-        await runCalibration()
+        profile.activeProgramID = adopted
+        guard await advance(to: .calibration) else {
+            profile.activeProgramID = previous
+            if let adopted {
+                try? await environment.programs.delete(id: adopted)
+            }
+            return
+        }
+        if let previous, previous != adopted {
+            do {
+                try await environment.programs.delete(id: previous)
+            } catch {
+                errorMessage = Self.saveFailureMessage
+            }
+        }
+        await calibrate()
     }
 
     public func finish() async {
@@ -157,10 +175,13 @@ public final class OnboardingModel {
 
     // MARK: - Interne
 
-    func advance(to next: OnboardingStep) async {
-        _ = await saveDraft()
+    /// Enregistre le brouillon puis l'étape. Si le brouillon ne s'enregistre pas, on reste sur l'étape courante.
+    @discardableResult
+    func advance(to next: OnboardingStep) async -> Bool {
+        guard await saveDraft() else { return false }
         step = next
         environment.stepStore.save(next)
+        return true
     }
 
     func saveDraft() async -> Bool {
@@ -176,6 +197,23 @@ public final class OnboardingModel {
 
     static var saveFailureMessage: String {
         String(localized: "Pulse n'a pas pu enregistrer ta progression.", bundle: .module)
+    }
+
+    private func recommendation() -> String? {
+        TemplateRecommender.recommendedID(
+            focus: profile.focus, daysPerWeek: profile.trainingDaysPerWeek, templates: environment.library.programTemplates)
+    }
+
+    /// Reprise à `.program` ou après : la recommandation vient du brouillon, la sélection du programme déjà adopté (sinon de la
+    /// recommandation). « Je construis le mien » n'est retenu qu'une fois la calibration atteinte sans programme.
+    private func restoreProgramSelection() async {
+        recommendedTemplateID = recommendation()
+        var adoptedTemplateID: String?
+        if let programID = profile.activeProgramID {
+            adoptedTemplateID = try? await environment.programs.program(id: programID)?.templateID
+        }
+        selectedTemplateID = adoptedTemplateID ?? recommendedTemplateID
+        choseCustomProgram = step == .calibration && profile.activeProgramID == nil
     }
 
     /// Ne remplit que les champs encore vides ; le sexe seulement s'il vaut `.unspecified`.
