@@ -8,13 +8,25 @@
 
 /* Begin PBXBuildFile section */
 		040A86C6285D90BF16F5B5AA /* PulseRecoveryEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 6B02FCA8EE3E67636F42D06C /* PulseRecoveryEngine */; };
+		41A0C7A70FCDB1E786FF3D21 /* OnboardingFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 23A0449ABFD0F90FCF52CB7E /* OnboardingFeature */; };
 		5024563D1C977796CEC6C4D2 /* PulseContent in Frameworks */ = {isa = PBXBuildFile; productRef = CADDF951A0B30D2BE04A2F29 /* PulseContent */; };
+		64068CB54DF03A28FE132C72 /* CheckInFeature in Frameworks */ = {isa = PBXBuildFile; productRef = A9C8BCE68F5B531CBD349FDB /* CheckInFeature */; };
 		69CB165197E173B96333A3CA /* PulsePersistence in Frameworks */ = {isa = PBXBuildFile; productRef = BA7396E5B28E53EE5BB52EFE /* PulsePersistence */; };
+		6D0C4ACE8C0C1D8A460ECC91 /* PulseDesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 778E32CCFEBB1FE604B7373D /* PulseDesignSystem */; };
 		926156F0D2A1BA89FCB63479 /* PulseHealth in Frameworks */ = {isa = PBXBuildFile; productRef = F4BAF19749CA79DDDA8F7559 /* PulseHealth */; };
+		B7C03201C860D0561958042A /* TodayFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 2CBD7AA3EB8955404F12F8BD /* TodayFeature */; };
+		F50A07489A5904474C44FB45 /* PulseServices in Frameworks */ = {isa = PBXBuildFile; productRef = 9941CEBC4406D825833E5CB8 /* PulseServices */; };
 		FF152BDE6343A10B8627BC3C /* PulseDomain in Frameworks */ = {isa = PBXBuildFile; productRef = 8C27DDA66D90C7A34759B03B /* PulseDomain */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		232E7BA609C87DFE93F6A643 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 84FEC84833EC6BF77563A3F6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CF79B1BAD3D70F54153FE0B3;
+			remoteInfo = Pulse;
+		};
 		EE9EFEEC20EB618CA7451ADB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 84FEC84833EC6BF77563A3F6 /* Project object */;
@@ -26,16 +38,19 @@
 
 /* Begin PBXFileReference section */
 		08C0C5C2A43D096433BA0B8F /* PulseContent */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PulseContent; path = Packages/PulseContent; sourceTree = SOURCE_ROOT; };
-		13FEF2D2118D74C3572DF349 /* Pulse.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Pulse.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		13FEF2D2118D74C3572DF349 /* Pulse.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Pulse.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		401063C8184B4A8F0651DCAB /* PulseDesignSystem */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PulseDesignSystem; path = Packages/PulseDesignSystem; sourceTree = SOURCE_ROOT; };
 		4FBA30D234A433E58E16508B /* PulseTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = PulseTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A70D8B0C52E658248BD5D9C9 /* PulseRecoveryEngine */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PulseRecoveryEngine; path = Packages/PulseRecoveryEngine; sourceTree = SOURCE_ROOT; };
 		AB2D664BC108B8D410A545BF /* PulseDomain */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PulseDomain; path = Packages/PulseDomain; sourceTree = SOURCE_ROOT; };
 		C038C8A3EE9A6E3AF29E18F4 /* PulsePersistence */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PulsePersistence; path = Packages/PulsePersistence; sourceTree = SOURCE_ROOT; };
+		C7C03033530D8BA199B06F1B /* PulseFeatures */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PulseFeatures; path = Packages/PulseFeatures; sourceTree = SOURCE_ROOT; };
 		E88E86A74B7F7A81085945C2 /* PulseHealth */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PulseHealth; path = Packages/PulseHealth; sourceTree = SOURCE_ROOT; };
+		FE8D92E6665E742A48BC43D2 /* PulseUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = PulseUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		C9BD4A9A33AA4579CDB23D6E /* Exceptions for "Pulse" folder in "Pulse" target */ = {
+		C9BD4A9A33AA4579CDB23D6E /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -47,13 +62,30 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		BE553024BFA22B3A91E57AAE /* PulseTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
 			path = PulseTests;
+			sourceTree = "<group>";
+		};
+		F25C064D337B30DFBA7B9655 /* PulseUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = PulseUITests;
 			sourceTree = "<group>";
 		};
 		F43F5B3DCF8CA4AA62083E92 /* Pulse */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				C9BD4A9A33AA4579CDB23D6E /* Exceptions for "Pulse" folder in "Pulse" target */,
+				C9BD4A9A33AA4579CDB23D6E /* PBXFileSystemSynchronizedBuildFileExceptionSet */,
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
 			);
 			path = Pulse;
 			sourceTree = "<group>";
@@ -70,6 +102,11 @@
 				926156F0D2A1BA89FCB63479 /* PulseHealth in Frameworks */,
 				5024563D1C977796CEC6C4D2 /* PulseContent in Frameworks */,
 				69CB165197E173B96333A3CA /* PulsePersistence in Frameworks */,
+				6D0C4ACE8C0C1D8A460ECC91 /* PulseDesignSystem in Frameworks */,
+				F50A07489A5904474C44FB45 /* PulseServices in Frameworks */,
+				64068CB54DF03A28FE132C72 /* CheckInFeature in Frameworks */,
+				41A0C7A70FCDB1E786FF3D21 /* OnboardingFeature in Frameworks */,
+				B7C03201C860D0561958042A /* TodayFeature in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -81,6 +118,7 @@
 			children = (
 				13FEF2D2118D74C3572DF349 /* Pulse.app */,
 				4FBA30D234A433E58E16508B /* PulseTests.xctest */,
+				FE8D92E6665E742A48BC43D2 /* PulseUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -89,7 +127,9 @@
 			isa = PBXGroup;
 			children = (
 				08C0C5C2A43D096433BA0B8F /* PulseContent */,
+				401063C8184B4A8F0651DCAB /* PulseDesignSystem */,
 				AB2D664BC108B8D410A545BF /* PulseDomain */,
+				C7C03033530D8BA199B06F1B /* PulseFeatures */,
 				E88E86A74B7F7A81085945C2 /* PulseHealth */,
 				C038C8A3EE9A6E3AF29E18F4 /* PulsePersistence */,
 				A70D8B0C52E658248BD5D9C9 /* PulseRecoveryEngine */,
@@ -103,6 +143,7 @@
 				66B4C3B58C6C8FE5EA3EA8B7 /* Packages */,
 				F43F5B3DCF8CA4AA62083E92 /* Pulse */,
 				BE553024BFA22B3A91E57AAE /* PulseTests */,
+				F25C064D337B30DFBA7B9655 /* PulseUITests */,
 				1FEE830988994786371D8E45 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -132,6 +173,28 @@
 			productReference = 4FBA30D234A433E58E16508B /* PulseTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		AD188051DBF61C8291631068 /* PulseUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EEDF49BCEEFCC0E6884EE85E /* Build configuration list for PBXNativeTarget "PulseUITests" */;
+			buildPhases = (
+				1469FCE86B2CB9FF2BBF3EB2 /* Sources */,
+				1269000141C35AF1C1BF380A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				24C65BB34EBACEED26C327CD /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				F25C064D337B30DFBA7B9655 /* PulseUITests */,
+			);
+			name = PulseUITests;
+			packageProductDependencies = (
+			);
+			productName = PulseUITests;
+			productReference = FE8D92E6665E742A48BC43D2 /* PulseUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		CF79B1BAD3D70F54153FE0B3 /* Pulse */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 9608D96881FD5C17BB380FA0 /* Build configuration list for PBXNativeTarget "Pulse" */;
@@ -154,6 +217,11 @@
 				F4BAF19749CA79DDDA8F7559 /* PulseHealth */,
 				CADDF951A0B30D2BE04A2F29 /* PulseContent */,
 				BA7396E5B28E53EE5BB52EFE /* PulsePersistence */,
+				778E32CCFEBB1FE604B7373D /* PulseDesignSystem */,
+				9941CEBC4406D825833E5CB8 /* PulseServices */,
+				A9C8BCE68F5B531CBD349FDB /* CheckInFeature */,
+				23A0449ABFD0F90FCF52CB7E /* OnboardingFeature */,
+				2CBD7AA3EB8955404F12F8BD /* TodayFeature */,
 			);
 			productName = Pulse;
 			productReference = 13FEF2D2118D74C3572DF349 /* Pulse.app */;
@@ -170,6 +238,10 @@
 				TargetAttributes = {
 					26CB5097CD9CC52FD2F253AB = {
 						ProvisioningStyle = Automatic;
+					};
+					AD188051DBF61C8291631068 = {
+						ProvisioningStyle = Automatic;
+						TestTargetID = CF79B1BAD3D70F54153FE0B3;
 					};
 					CF79B1BAD3D70F54153FE0B3 = {
 						DevelopmentTeam = UP9NVJDBKA;
@@ -188,7 +260,9 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				5B9CC20B00D37362BAA4EE7C /* XCLocalSwiftPackageReference "Packages/PulseContent" */,
+				7A2577FEDFD57AC2352F166E /* XCLocalSwiftPackageReference "Packages/PulseDesignSystem" */,
 				3F03ECA5ED4F94E324D71332 /* XCLocalSwiftPackageReference "Packages/PulseDomain" */,
+				EAC9E566AAF5AEB23A012043 /* XCLocalSwiftPackageReference "Packages/PulseFeatures" */,
 				A81386294F42011B679000AB /* XCLocalSwiftPackageReference "Packages/PulseHealth" */,
 				4EBDC5E5E84F811AC2F3F612 /* XCLocalSwiftPackageReference "Packages/PulsePersistence" */,
 				A8A3B40E44C020828C72886D /* XCLocalSwiftPackageReference "Packages/PulseRecoveryEngine" */,
@@ -200,11 +274,19 @@
 			targets = (
 				CF79B1BAD3D70F54153FE0B3 /* Pulse */,
 				26CB5097CD9CC52FD2F253AB /* PulseTests */,
+				AD188051DBF61C8291631068 /* PulseUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		1269000141C35AF1C1BF380A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		606EBA1EB03BF3A2D7674713 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -222,6 +304,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		1469FCE86B2CB9FF2BBF3EB2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8B00C375CD98515701D2325C /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -239,6 +328,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		24C65BB34EBACEED26C327CD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CF79B1BAD3D70F54153FE0B3 /* Pulse */;
+			targetProxy = 232E7BA609C87DFE93F6A643 /* PBXContainerItemProxy */;
+		};
 		43B12092B94F779018A5F285 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = CF79B1BAD3D70F54153FE0B3 /* Pulse */;
@@ -247,6 +341,23 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		06D1B8F6B37F28F892C685B3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = fr.seonay.pulse.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Pulse;
+			};
+			name = Debug;
+		};
 		2269555CAF74F95347158B33 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -343,6 +454,23 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
+		};
+		C36FE27327E562F4AFC22F30 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = fr.seonay.pulse.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Pulse;
+			};
+			name = Release;
 		};
 		DF81B04A566426AD422B92B3 /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -469,6 +597,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
+		EEDF49BCEEFCC0E6884EE85E /* Build configuration list for PBXNativeTarget "PulseUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				06D1B8F6B37F28F892C685B3 /* Debug */,
+				C36FE27327E562F4AFC22F30 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		F2F1EA2CB05C310F102D486E /* Build configuration list for PBXNativeTarget "PulseTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -493,6 +630,10 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/PulseContent;
 		};
+		7A2577FEDFD57AC2352F166E /* XCLocalSwiftPackageReference "Packages/PulseDesignSystem" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/PulseDesignSystem;
+		};
 		A81386294F42011B679000AB /* XCLocalSwiftPackageReference "Packages/PulseHealth" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/PulseHealth;
@@ -501,16 +642,40 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/PulseRecoveryEngine;
 		};
+		EAC9E566AAF5AEB23A012043 /* XCLocalSwiftPackageReference "Packages/PulseFeatures" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/PulseFeatures;
+		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		23A0449ABFD0F90FCF52CB7E /* OnboardingFeature */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = OnboardingFeature;
+		};
+		2CBD7AA3EB8955404F12F8BD /* TodayFeature */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TodayFeature;
+		};
 		6B02FCA8EE3E67636F42D06C /* PulseRecoveryEngine */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = PulseRecoveryEngine;
 		};
+		778E32CCFEBB1FE604B7373D /* PulseDesignSystem */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PulseDesignSystem;
+		};
 		8C27DDA66D90C7A34759B03B /* PulseDomain */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = PulseDomain;
+		};
+		9941CEBC4406D825833E5CB8 /* PulseServices */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PulseServices;
+		};
+		A9C8BCE68F5B531CBD349FDB /* CheckInFeature */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CheckInFeature;
 		};
 		BA7396E5B28E53EE5BB52EFE /* PulsePersistence */ = {
 			isa = XCSwiftPackageProductDependency;

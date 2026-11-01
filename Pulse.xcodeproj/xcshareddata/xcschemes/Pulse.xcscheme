@@ -55,6 +55,17 @@
             parallelizable = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "AD188051DBF61C8291631068"
+               BuildableName = "PulseUITests.xctest"
+               BlueprintName = "PulseUITests"
+               ReferencedContainer = "container:Pulse.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "PulseDomainTests"
                BuildableName = "PulseDomainTests"
                BlueprintName = "PulseDomainTests"
@@ -103,6 +114,61 @@
                BuildableName = "PulsePersistenceTests"
                BlueprintName = "PulsePersistenceTests"
                ReferencedContainer = "container:Packages/PulsePersistence">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "PulseDesignSystemTests"
+               BuildableName = "PulseDesignSystemTests"
+               BlueprintName = "PulseDesignSystemTests"
+               ReferencedContainer = "container:Packages/PulseDesignSystem">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "PulseServicesTests"
+               BuildableName = "PulseServicesTests"
+               BlueprintName = "PulseServicesTests"
+               ReferencedContainer = "container:Packages/PulseFeatures">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "CheckInFeatureTests"
+               BuildableName = "CheckInFeatureTests"
+               BlueprintName = "CheckInFeatureTests"
+               ReferencedContainer = "container:Packages/PulseFeatures">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "OnboardingFeatureTests"
+               BuildableName = "OnboardingFeatureTests"
+               BlueprintName = "OnboardingFeatureTests"
+               ReferencedContainer = "container:Packages/PulseFeatures">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "TodayFeatureTests"
+               BuildableName = "TodayFeatureTests"
+               BlueprintName = "TodayFeatureTests"
+               ReferencedContainer = "container:Packages/PulseFeatures">
             </BuildableReference>
          </TestableReference>
       </Testables>
