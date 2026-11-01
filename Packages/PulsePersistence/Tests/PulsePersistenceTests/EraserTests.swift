@@ -2,6 +2,7 @@
 import Foundation
 import PulseDomain
 @testable import PulsePersistence
+import SwiftData
 import Testing
 
 private struct EraseFixture {
@@ -76,3 +77,22 @@ private struct EraseFixture {
     #expect(canceller.calls == 1)
 }
 // swiftlint:enable force_unwrapping
+
+/// Le miroir CloudKit n'exporte que ce qui passe par l'historique persistant : chaque enregistrement
+/// synchronisé effacé doit y laisser une suppression (spec M2 §7.2, suppression enregistrement par enregistrement).
+@Test func eraseRecordsADeleteInHistoryForEverySyncedRecord() async throws {
+    let fixture = try EraseFixture()
+    try await SampleDataSeeder(container: fixture.box.container).seed(now: Fixed.t0)
+    let before = try await fixture.counts()
+    let syncedCount = StoreTable.exported.reduce(0) { $0 + (before[$1] ?? 0) }
+    let syncedEntities = Set(PersistenceStack.syncedModels.map { String(describing: $0) })
+    try await fixture.eraser().eraseEverything(options: EraseOptions(includeAppleHealth: false))
+    let context = ModelContext(fixture.box.container)
+    let changes = try context.fetchHistory(HistoryDescriptor<DefaultHistoryTransaction>()).flatMap(\.changes)
+    let deletes = changes.compactMap { change -> String? in
+        guard case .delete(let deletion) = change else { return nil }
+        return deletion.changedPersistentIdentifier.entityName
+    }
+    #expect(syncedCount == 31, "jeu d'exemple : 31 enregistrements synchronisés sur les 14 tables")
+    #expect(deletes.filter { syncedEntities.contains($0) }.count == syncedCount)
+}
