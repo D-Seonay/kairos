@@ -33,6 +33,9 @@ public struct NightHistory: Sendable {
         var sleep: [SleepInterval]
     }
 
+    /// Une lecture qui aboutit remplace le cache, même vide. Quand l'accès à Santé est révoqué, HealthKit ne signale aucune
+    /// erreur : il répond sans échantillon, le cache est vidé et `readAt` est renseigné. C'est voulu : l'utilisateur retombe
+    /// sur le check-in, et le score déjà enregistré pour aujourd'hui est conservé par `DailyScoreService`.
     public func refresh(now: Date, progress: @Sendable (Double) -> Void = { _ in }) async -> NightHistorySnapshot {
         let today = calendar.startOfDay(for: now)
         let start = calendar.date(byAdding: .day, value: -Self.historyDays, to: today) ?? today
