@@ -57,6 +57,25 @@ import Testing
     }
 }
 
+@Test func layersKeepTheDocumentDrawOrder() {
+    let front = MuscleMapArtwork.bundled.layers(.front).map(\.region)
+    #expect(Array(front.prefix(4)) == [nil, .trapezius, nil, .deltoids])
+    let back = MuscleMapArtwork.bundled.layers(.back).map(\.region)
+    #expect(Array(back.prefix(4)) == [nil, nil, .trapezius, .deltoids])
+}
+
+@Test func layerCountMatchesTheSvgGroups() {
+    let art = MuscleMapArtwork.bundled
+    #expect(art.layers(.front).count == 29)
+    #expect(art.layers(.back).count == 20)
+    for side in [MuscleMapSide.front, .back] {
+        let layered = art.layers(side).reduce(0) { $0 + $1.paths.count }
+        let flat = art.body(side).count + art.regions(side).values.reduce(0) { $0 + $1.count }
+        #expect(layered == flat)
+        #expect(art.layers(side).filter { $0.region == nil }.flatMap(\.paths).count == art.body(side).count)
+    }
+}
+
 @Test func intensityQuarters() {
     let levels = MuscleIntensity.levels(weights: [.chest: 4, .triceps: 3, .frontDelts: 1.5, .abs: 0])
     #expect(levels == [.chest: 4, .triceps: 3, .frontDeltoid: 2])

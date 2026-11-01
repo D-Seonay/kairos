@@ -13,7 +13,10 @@ FILL = re.compile(r"fill:\s*var\(--mm-([A-Za-z]+)")
 
 
 class SymbolReader(HTMLParser):
-    """Collecte les `d` des tracés d'un symbole, rangés par groupe `fill:var(--mm-<nom>…)`."""
+    """Collecte les `d` des tracés d'un symbole, rangés par groupe `fill:var(--mm-<nom>…)`.
+
+    `layers` garde un groupe `<g>` par entrée, dans l'ordre du document (l'ordre de dessin).
+    """
 
     def __init__(self, symbol_id):
         super().__init__()
@@ -21,6 +24,7 @@ class SymbolReader(HTMLParser):
         self.view_box = None
         self.body = []
         self.regions = {}
+        self.layers = []
         self._inside = False
         self._groups = []
 
@@ -32,6 +36,8 @@ class SymbolReader(HTMLParser):
         elif self._inside and tag == "g":
             match = FILL.search(attributes.get("style", ""))
             self._groups.append(match.group(1) if match else None)
+            if match:
+                self.layers.append({"name": match.group(1), "paths": []})
         elif self._inside and tag == "path":
             self._add(attributes["d"])
 
@@ -52,6 +58,7 @@ class SymbolReader(HTMLParser):
         if not self._groups or self._groups[-1] is None:
             raise SystemExit(f"{self.symbol_id}: tracé hors d'un groupe fill:var(--mm-…)")
         name = self._groups[-1]
+        self.layers[-1]["paths"].append(data)
         if name == "body":
             self.body.append(data)
         else:
@@ -71,7 +78,7 @@ def read_side(html, symbol_id):
     if reader.view_box is None or not reader.body or not reader.regions:
         raise SystemExit(f"symbole {symbol_id} introuvable ou vide")
     view_box = [int(v) if v == int(v) else v for v in reader.view_box]
-    return {"viewBox": view_box, "body": reader.body, "regions": reader.regions}
+    return {"viewBox": view_box, "body": reader.body, "regions": reader.regions, "layers": reader.layers}
 
 
 def main(source, destination):

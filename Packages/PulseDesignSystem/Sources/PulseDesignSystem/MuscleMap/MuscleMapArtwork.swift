@@ -7,12 +7,19 @@ public enum MuscleMapSide: Sendable {
     case back
 }
 
+/// Un groupe `<g>` du SVG : `region == nil` pour le corps. Les calques sont rangés dans l'ordre de dessin du document.
+public struct MuscleMapLayer: Sendable {
+    public let region: MuscleMapRegion?
+    public let paths: [Path]
+}
+
 /// Les silhouettes MuscleMap (MIT, Melih Colpan), lues dans `musclemap.json` et parsées une seule fois.
 public struct MuscleMapArtwork: Sendable {
     fileprivate struct Silhouette: Sendable {
         let viewBox: CGRect
         let body: [Path]
         let regions: [MuscleMapRegion: [Path]]
+        let layers: [MuscleMapLayer]
     }
 
     public static let bundled = load()
@@ -24,6 +31,9 @@ public struct MuscleMapArtwork: Sendable {
     public func body(_ side: MuscleMapSide) -> [Path] { silhouette(side).body }
 
     public func regions(_ side: MuscleMapSide) -> [MuscleMapRegion: [Path]] { silhouette(side).regions }
+
+    /// Les groupes du SVG dans l'ordre du document : c'est l'ordre dans lequel il faut les dessiner.
+    public func layers(_ side: MuscleMapSide) -> [MuscleMapLayer] { silhouette(side).layers }
 
     public func viewBox(_ side: MuscleMapSide) -> CGRect { silhouette(side).viewBox }
 
@@ -40,6 +50,12 @@ private extension MuscleMapArtwork {
         let viewBox: [Double]
         let body: [String]
         let regions: [String: [String]]
+        let layers: [LayerFile]
+    }
+
+    struct LayerFile: Decodable {
+        let name: String
+        let paths: [String]
     }
 
     struct File: Decodable {
@@ -62,7 +78,7 @@ private extension MuscleMapArtwork {
 }
 
 fileprivate extension MuscleMapArtwork.Silhouette {
-    static let empty = MuscleMapArtwork.Silhouette(viewBox: .zero, body: [], regions: [:])
+    static let empty = MuscleMapArtwork.Silhouette(viewBox: .zero, body: [], regions: [:], layers: [])
 
     init(_ file: MuscleMapArtwork.SideFile) {
         let box = file.viewBox
@@ -73,6 +89,13 @@ fileprivate extension MuscleMapArtwork.Silhouette {
                 regions[region] = data.compactMap { try? SVGPathParser.parse($0) }
             }
         }
-        self.init(viewBox: rect, body: file.body.compactMap { try? SVGPathParser.parse($0) }, regions: regions)
+        let layers = file.layers.compactMap { layer -> MuscleMapLayer? in
+            let region = MuscleMapRegion(rawValue: layer.name)
+            guard region != nil || layer.name == "body" else { return nil }
+            return MuscleMapLayer(region: region, paths: layer.paths.compactMap { try? SVGPathParser.parse($0) })
+        }
+        self.init(
+            viewBox: rect, body: file.body.compactMap { try? SVGPathParser.parse($0) }, regions: regions, layers: layers
+        )
     }
 }

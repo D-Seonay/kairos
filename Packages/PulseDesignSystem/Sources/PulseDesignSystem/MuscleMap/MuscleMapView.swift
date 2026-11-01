@@ -41,20 +41,22 @@ public struct MuscleMapView: View {
         guard box.width > 0, box.height > 0 else { return }
         let scale = min(size.width / box.width, size.height / box.height)
         let transform = CGAffineTransform(translationX: -box.minX, y: -box.minY).scaledBy(x: scale, y: scale)
-        let regions = artwork.regions(side)
 
-        for path in artwork.body(side) {
-            context.fill(path.applying(transform), with: .color(PulsePalette.muscleBody))
-        }
-        for region in MuscleMapRegion.allCases {
-            guard let paths = regions[region] else { continue }
-            let level = levels[region] ?? 0
-            if level == 0, region.isOverlay { continue }
-            let color = level == 0 ? PulsePalette.muscleOff : Color(MuscleIntensity.color(level: level, accent: accent))
-            for path in paths {
+        for layer in artwork.layers(side) {
+            guard let color = fill(for: layer.region, accent: accent) else { continue }
+            for path in layer.paths {
                 context.fill(path.applying(transform), with: .color(color))
             }
         }
+    }
+
+    /// Le corps en `muscleBody`, une région allumée à son niveau, une région de base éteinte en `muscleOff`,
+    /// une région en surimpression éteinte : rien.
+    private func fill(for region: MuscleMapRegion?, accent: PulseRGBA) -> Color? {
+        guard let region else { return PulsePalette.muscleBody }
+        let level = levels[region] ?? 0
+        if level > 0 { return Color(MuscleIntensity.color(level: level, accent: accent)) }
+        return region.isOverlay ? nil : PulsePalette.muscleOff
     }
 }
 
