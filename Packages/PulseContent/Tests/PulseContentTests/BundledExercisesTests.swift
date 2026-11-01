@@ -21,3 +21,15 @@ private func expectCounts(_ expected: [MovementPattern: Int], in lib: ContentLib
     let issues = ContentValidator.issues(in: lib, ignoring: sliceRules)
     #expect(issues.isEmpty, Comment(rawValue: issues.map(\.description).joined(separator: "\n")))
 }
+
+@Test func armsAndLowerBodyExercisesArePresentAndValid() throws {
+    let lib = try ContentLibrary.load(from: ContentLibrary.resourceBundle)
+    expectCounts([.elbowFlexion: 5, .elbowExtension: 5, .forearm: 4, .squat: 5, .lunge: 4, .hinge: 5], in: lib)
+    #expect(lib.exercise(id: "leg-press-machine")?.region == .lower)
+    #expect(lib.exercise(id: "leg-press-machine")?.defaultIncrementKg == 5)
+    #expect(lib.exercise(id: "hammer-curl-dumbbell")?.name.fr == "Curl marteau aux haltères")
+    #expect(lib.exercise(id: "wrist-curl-cable")?.pattern == .forearm)
+    #expect(lib.exercise(id: "dips")?.loadKind == .bodyweight)
+    let issues = ContentValidator.issues(in: lib, ignoring: sliceRules)
+    #expect(issues.isEmpty, Comment(rawValue: issues.map(\.description).joined(separator: "\n")))
+}

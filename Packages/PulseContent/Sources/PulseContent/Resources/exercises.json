@@ -1125,6 +1125,1113 @@
         "seated-cable-row",
         "barbell-row"
       ]
+    },
+    {
+      "id": "preacher-curl-machine",
+      "name": {
+        "fr": "Curl pupitre à la machine",
+        "en": "Preacher Curl Machine"
+      },
+      "primaryMuscles": [
+        "biceps"
+      ],
+      "secondaryMuscles": [
+        "forearms"
+      ],
+      "equipment": "machine",
+      "pattern": "elbowFlexion",
+      "region": "upper",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Aisselles calées sur le haut du pupitre.",
+          "Monter sans décoller les coudes du coussin.",
+          "Descendre lentement sans tendre complètement les coudes sous charge."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Soulever les coudes du pupitre en haut du mouvement.",
+          "Laisser tomber la charge en extension complète."
+        ]
+      },
+      "alternatives": [
+        "ez-bar-preacher-curl",
+        "cable-curl",
+        "hammer-curl-dumbbell"
+      ]
+    },
+    {
+      "id": "hammer-curl-dumbbell",
+      "name": {
+        "fr": "Curl marteau aux haltères",
+        "en": "Dumbbell Hammer Curl"
+      },
+      "primaryMuscles": [
+        "biceps",
+        "forearms"
+      ],
+      "secondaryMuscles": [],
+      "equipment": "dumbbell",
+      "pattern": "elbowFlexion",
+      "region": "upper",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Paumes face à face pendant tout le mouvement.",
+          "Coudes fixes le long du corps.",
+          "Monter jusqu'à l'épaule, redescendre sur deux secondes."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Balancer le buste pour monter les haltères.",
+          "Avancer les coudes en fin de montée."
+        ]
+      },
+      "alternatives": [
+        "cable-curl",
+        "preacher-curl-machine",
+        "barbell-curl"
+      ]
+    },
+    {
+      "id": "barbell-curl",
+      "name": {
+        "fr": "Curl à la barre",
+        "en": "Barbell Curl"
+      },
+      "primaryMuscles": [
+        "biceps"
+      ],
+      "secondaryMuscles": [
+        "forearms"
+      ],
+      "equipment": "barbell",
+      "pattern": "elbowFlexion",
+      "region": "upper",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Prise largeur épaules, coudes collés au buste.",
+          "Monter la barre sans avancer les coudes.",
+          "Contrôler la descente jusqu'aux bras presque tendus."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Se cambrer et lancer la barre avec les hanches.",
+          "Rouler les poignets en haut du mouvement."
+        ]
+      },
+      "alternatives": [
+        "ez-bar-preacher-curl",
+        "cable-curl",
+        "preacher-curl-machine"
+      ]
+    },
+    {
+      "id": "ez-bar-preacher-curl",
+      "name": {
+        "fr": "Curl pupitre barre EZ",
+        "en": "EZ-Bar Preacher Curl"
+      },
+      "primaryMuscles": [
+        "biceps"
+      ],
+      "secondaryMuscles": [
+        "forearms"
+      ],
+      "equipment": "ezBar",
+      "pattern": "elbowFlexion",
+      "region": "upper",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Triceps bien à plat sur le pupitre.",
+          "Monter la barre jusqu'à la contraction complète.",
+          "Descendre lentement, sans verrouiller les coudes en bas."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Prendre trop lourd et décoller les bras du pupitre.",
+          "Extension brutale en bas : tendon du biceps en danger."
+        ]
+      },
+      "alternatives": [
+        "preacher-curl-machine",
+        "barbell-curl",
+        "cable-curl"
+      ]
+    },
+    {
+      "id": "cable-curl",
+      "name": {
+        "fr": "Curl à la poulie",
+        "en": "Cable Curl"
+      },
+      "primaryMuscles": [
+        "biceps"
+      ],
+      "secondaryMuscles": [
+        "forearms"
+      ],
+      "equipment": "cable",
+      "pattern": "elbowFlexion",
+      "region": "upper",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Poulie basse, un pas en arrière pour tendre le câble.",
+          "Coudes fixes, monter jusqu'à la contraction.",
+          "Tension constante : ne pas reposer la charge en bas."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Reculer les coudes derrière le buste.",
+          "Hausser les épaules pour aider."
+        ]
+      },
+      "alternatives": [
+        "preacher-curl-machine",
+        "hammer-curl-dumbbell",
+        "ez-bar-preacher-curl"
+      ]
+    },
+    {
+      "id": "triceps-pushdown-cable",
+      "name": {
+        "fr": "Extension triceps poulie haute",
+        "en": "Cable Triceps Pushdown"
+      },
+      "primaryMuscles": [
+        "triceps"
+      ],
+      "secondaryMuscles": [],
+      "equipment": "cable",
+      "pattern": "elbowExtension",
+      "region": "upper",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Coudes collés aux flancs, buste légèrement penché.",
+          "Pousser jusqu'à l'extension complète en serrant les triceps.",
+          "Remonter jusqu'à l'angle droit, pas plus haut."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Écarter les coudes et pousser avec les épaules.",
+          "Se pencher sur la charge pour la descendre."
+        ]
+      },
+      "alternatives": [
+        "overhead-triceps-extension-cable",
+        "skull-crusher-ez-bar",
+        "dips"
+      ]
+    },
+    {
+      "id": "overhead-triceps-extension-cable",
+      "name": {
+        "fr": "Extension triceps au-dessus de la tête à la poulie",
+        "en": "Cable Overhead Triceps Extension"
+      },
+      "primaryMuscles": [
+        "triceps"
+      ],
+      "secondaryMuscles": [],
+      "equipment": "cable",
+      "pattern": "elbowExtension",
+      "region": "upper",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Dos à la poulie, corde derrière la tête.",
+          "Coudes près des oreilles, tendre les bras vers l'avant.",
+          "Revenir jusqu'à l'étirement complet du triceps."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Écarter les coudes vers l'extérieur.",
+          "Cambrer le dos pour compenser."
+        ]
+      },
+      "alternatives": [
+        "triceps-pushdown-cable",
+        "skull-crusher-ez-bar",
+        "close-grip-bench-press"
+      ]
+    },
+    {
+      "id": "skull-crusher-ez-bar",
+      "name": {
+        "fr": "Barre au front",
+        "en": "EZ-Bar Skull Crusher"
+      },
+      "primaryMuscles": [
+        "triceps"
+      ],
+      "secondaryMuscles": [],
+      "equipment": "ezBar",
+      "pattern": "elbowExtension",
+      "region": "upper",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Allongé, bras légèrement inclinés vers l'arrière.",
+          "Descendre la barre vers le front ou derrière la tête.",
+          "Tendre les bras sans bouger les coudes."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Laisser les coudes s'écarter.",
+          "Prendre trop lourd et transformer le mouvement en développé."
+        ]
+      },
+      "alternatives": [
+        "overhead-triceps-extension-cable",
+        "triceps-pushdown-cable",
+        "close-grip-bench-press"
+      ]
+    },
+    {
+      "id": "close-grip-bench-press",
+      "name": {
+        "fr": "Développé couché prise serrée",
+        "en": "Close-Grip Bench Press"
+      },
+      "primaryMuscles": [
+        "triceps"
+      ],
+      "secondaryMuscles": [
+        "chest",
+        "frontDelts"
+      ],
+      "equipment": "barbell",
+      "pattern": "elbowExtension",
+      "region": "upper",
+      "isCompound": true,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 120,
+      "cues": {
+        "fr": [
+          "Prise largeur épaules, pas plus serrée.",
+          "Coudes près du corps pendant la descente.",
+          "Pousser en verrouillant les coudes avec les triceps."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Prise trop serrée, poignets en souffrance.",
+          "Rebondir la barre sur la poitrine."
+        ]
+      },
+      "alternatives": [
+        "dips",
+        "triceps-pushdown-cable",
+        "skull-crusher-ez-bar"
+      ]
+    },
+    {
+      "id": "dips",
+      "name": {
+        "fr": "Dips",
+        "en": "Dips"
+      },
+      "primaryMuscles": [
+        "triceps"
+      ],
+      "secondaryMuscles": [
+        "chest",
+        "frontDelts"
+      ],
+      "equipment": "bodyweight",
+      "pattern": "elbowExtension",
+      "region": "upper",
+      "isCompound": true,
+      "isUnilateral": false,
+      "loadKind": "bodyweight",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 90,
+      "cues": {
+        "fr": [
+          "Buste droit pour cibler les triceps.",
+          "Descendre jusqu'à l'angle droit des coudes.",
+          "Pousser en gardant les épaules basses."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Descendre trop bas et tirer sur les épaules.",
+          "Balancer les jambes pour remonter."
+        ]
+      },
+      "alternatives": [
+        "close-grip-bench-press",
+        "triceps-pushdown-cable",
+        "overhead-triceps-extension-cable"
+      ]
+    },
+    {
+      "id": "wrist-curl-cable",
+      "name": {
+        "fr": "Flexion des poignets à la poulie, barre droite",
+        "en": "Cable Wrist Curl"
+      },
+      "primaryMuscles": [
+        "forearms"
+      ],
+      "secondaryMuscles": [],
+      "equipment": "cable",
+      "pattern": "forearm",
+      "region": "upper",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 1.25,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Avant-bras appuyés, poignets dans le vide.",
+          "Enrouler les poignets vers soi, lentement.",
+          "Laisser la barre descendre jusqu'à l'ouverture des doigts."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Bouger les coudes pour aider.",
+          "Aller trop vite et perdre la tension."
+        ]
+      },
+      "alternatives": [
+        "wrist-curl-barbell",
+        "reverse-wrist-curl-barbell",
+        "reverse-curl-ez-bar"
+      ]
+    },
+    {
+      "id": "wrist-curl-barbell",
+      "name": {
+        "fr": "Flexion des poignets à la barre",
+        "en": "Barbell Wrist Curl"
+      },
+      "primaryMuscles": [
+        "forearms"
+      ],
+      "secondaryMuscles": [],
+      "equipment": "barbell",
+      "pattern": "forearm",
+      "region": "upper",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 1.25,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Assis, avant-bras sur les cuisses, paumes vers le haut.",
+          "Enrouler les poignets à fond.",
+          "Descendre jusqu'à l'ouverture des doigts, en contrôle."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Décoller les avant-bras des cuisses.",
+          "Charger trop et réduire l'amplitude."
+        ]
+      },
+      "alternatives": [
+        "wrist-curl-cable",
+        "reverse-wrist-curl-barbell",
+        "reverse-curl-ez-bar"
+      ]
+    },
+    {
+      "id": "reverse-wrist-curl-barbell",
+      "name": {
+        "fr": "Extension des poignets à la barre",
+        "en": "Barbell Reverse Wrist Curl"
+      },
+      "primaryMuscles": [
+        "forearms"
+      ],
+      "secondaryMuscles": [],
+      "equipment": "barbell",
+      "pattern": "forearm",
+      "region": "upper",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 1.25,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Avant-bras appuyés, paumes vers le bas.",
+          "Relever le dos de la main le plus haut possible.",
+          "Charge légère : les extenseurs sont faibles."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Prendre la même charge que la flexion.",
+          "Bouger les coudes pour relever la barre."
+        ]
+      },
+      "alternatives": [
+        "wrist-curl-barbell",
+        "wrist-curl-cable",
+        "reverse-curl-ez-bar"
+      ]
+    },
+    {
+      "id": "reverse-curl-ez-bar",
+      "name": {
+        "fr": "Curl inversé barre EZ",
+        "en": "EZ-Bar Reverse Curl"
+      },
+      "primaryMuscles": [
+        "forearms"
+      ],
+      "secondaryMuscles": [
+        "biceps"
+      ],
+      "equipment": "ezBar",
+      "pattern": "forearm",
+      "region": "upper",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 1.25,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Prise en pronation, poignets droits.",
+          "Coudes fixes le long du corps.",
+          "Monter jusqu'à l'épaule et freiner la descente."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Casser les poignets vers le bas.",
+          "Balancer le buste pour monter la barre."
+        ]
+      },
+      "alternatives": [
+        "wrist-curl-cable",
+        "wrist-curl-barbell",
+        "reverse-wrist-curl-barbell"
+      ]
+    },
+    {
+      "id": "back-squat-barbell",
+      "name": {
+        "fr": "Squat barre",
+        "en": "Barbell Back Squat"
+      },
+      "primaryMuscles": [
+        "quads",
+        "glutes"
+      ],
+      "secondaryMuscles": [
+        "hamstrings",
+        "lowerBack",
+        "abs"
+      ],
+      "equipment": "barbell",
+      "pattern": "squat",
+      "region": "lower",
+      "isCompound": true,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 5,
+      "defaultRestSeconds": 180,
+      "cues": {
+        "fr": [
+          "Barre sur les trapèzes, pieds largeur épaules.",
+          "Descendre genoux dans l'axe des pieds, dos neutre.",
+          "Pousser le sol en remontant, poitrine haute."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Genoux qui rentrent vers l'intérieur.",
+          "Talons qui décollent, poids sur l'avant du pied."
+        ]
+      },
+      "alternatives": [
+        "hack-squat-machine",
+        "leg-press-machine",
+        "goblet-squat"
+      ]
+    },
+    {
+      "id": "front-squat-barbell",
+      "name": {
+        "fr": "Squat avant",
+        "en": "Barbell Front Squat"
+      },
+      "primaryMuscles": [
+        "quads"
+      ],
+      "secondaryMuscles": [
+        "glutes",
+        "abs",
+        "upperBack"
+      ],
+      "equipment": "barbell",
+      "pattern": "squat",
+      "region": "lower",
+      "isCompound": true,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 5,
+      "defaultRestSeconds": 180,
+      "cues": {
+        "fr": [
+          "Barre sur les deltoïdes avant, coudes hauts.",
+          "Descendre droit, buste vertical.",
+          "Remonter en gardant les coudes hauts."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Coudes qui tombent, barre qui roule en avant.",
+          "Arrondir le haut du dos sous la charge."
+        ]
+      },
+      "alternatives": [
+        "hack-squat-machine",
+        "goblet-squat",
+        "leg-press-machine"
+      ]
+    },
+    {
+      "id": "goblet-squat",
+      "name": {
+        "fr": "Goblet squat",
+        "en": "Goblet Squat"
+      },
+      "primaryMuscles": [
+        "quads",
+        "glutes"
+      ],
+      "secondaryMuscles": [
+        "abs"
+      ],
+      "equipment": "dumbbell",
+      "pattern": "squat",
+      "region": "lower",
+      "isCompound": true,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 90,
+      "cues": {
+        "fr": [
+          "Haltère tenu contre la poitrine, coudes rentrés.",
+          "Descendre entre les genoux, buste droit.",
+          "Pousser les genoux vers l'extérieur en remontant."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Laisser l'haltère s'éloigner de la poitrine.",
+          "Arrondir le dos en bas."
+        ]
+      },
+      "alternatives": [
+        "leg-press-machine",
+        "hack-squat-machine",
+        "back-squat-barbell"
+      ]
+    },
+    {
+      "id": "hack-squat-machine",
+      "name": {
+        "fr": "Hack squat",
+        "en": "Hack Squat Machine"
+      },
+      "primaryMuscles": [
+        "quads"
+      ],
+      "secondaryMuscles": [
+        "glutes"
+      ],
+      "equipment": "machine",
+      "pattern": "squat",
+      "region": "lower",
+      "isCompound": true,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 5,
+      "defaultRestSeconds": 120,
+      "cues": {
+        "fr": [
+          "Dos et tête contre le dossier, pieds au milieu de la plateforme.",
+          "Descendre jusqu'à la cuisse parallèle ou plus bas.",
+          "Pousser sans verrouiller les genoux en haut."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Décoller les fesses du dossier en bas.",
+          "Pieds trop hauts, genoux qui ne plient pas."
+        ]
+      },
+      "alternatives": [
+        "leg-press-machine",
+        "back-squat-barbell",
+        "front-squat-barbell"
+      ]
+    },
+    {
+      "id": "leg-press-machine",
+      "name": {
+        "fr": "Presse à cuisses",
+        "en": "Leg Press Machine"
+      },
+      "primaryMuscles": [
+        "quads",
+        "glutes"
+      ],
+      "secondaryMuscles": [
+        "hamstrings"
+      ],
+      "equipment": "machine",
+      "pattern": "squat",
+      "region": "lower",
+      "isCompound": true,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 5,
+      "defaultRestSeconds": 120,
+      "cues": {
+        "fr": [
+          "Pieds largeur épaules, au milieu de la plateforme.",
+          "Descendre jusqu'à l'angle droit sans décoller le bassin.",
+          "Pousser avec les talons, genoux dans l'axe."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Verrouiller les genoux en haut.",
+          "Descendre trop bas et arrondir le bas du dos."
+        ]
+      },
+      "alternatives": [
+        "hack-squat-machine",
+        "back-squat-barbell",
+        "goblet-squat"
+      ]
+    },
+    {
+      "id": "walking-lunge-dumbbell",
+      "name": {
+        "fr": "Fentes marchées aux haltères",
+        "en": "Dumbbell Walking Lunge"
+      },
+      "primaryMuscles": [
+        "quads",
+        "glutes"
+      ],
+      "secondaryMuscles": [
+        "hamstrings",
+        "abs"
+      ],
+      "equipment": "dumbbell",
+      "pattern": "lunge",
+      "region": "lower",
+      "isCompound": true,
+      "isUnilateral": true,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 90,
+      "cues": {
+        "fr": [
+          "Grand pas, descendre le genou arrière vers le sol.",
+          "Buste droit, regard devant.",
+          "Pousser sur le talon avant pour enchaîner."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Genou avant qui dépasse largement la pointe du pied.",
+          "Pas trop court, équilibre précaire."
+        ]
+      },
+      "alternatives": [
+        "reverse-lunge-dumbbell",
+        "bulgarian-split-squat",
+        "step-up-dumbbell"
+      ]
+    },
+    {
+      "id": "bulgarian-split-squat",
+      "name": {
+        "fr": "Fente bulgare",
+        "en": "Bulgarian Split Squat"
+      },
+      "primaryMuscles": [
+        "quads",
+        "glutes"
+      ],
+      "secondaryMuscles": [
+        "hamstrings",
+        "abs"
+      ],
+      "equipment": "dumbbell",
+      "pattern": "lunge",
+      "region": "lower",
+      "isCompound": true,
+      "isUnilateral": true,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 90,
+      "cues": {
+        "fr": [
+          "Pied arrière sur le banc, pied avant un grand pas devant.",
+          "Descendre droit jusqu'à la cuisse parallèle.",
+          "Pousser sur le talon avant, buste légèrement penché."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Pied avant trop près du banc.",
+          "Genou qui rentre vers l'intérieur."
+        ]
+      },
+      "alternatives": [
+        "reverse-lunge-dumbbell",
+        "walking-lunge-dumbbell",
+        "step-up-dumbbell"
+      ]
+    },
+    {
+      "id": "reverse-lunge-dumbbell",
+      "name": {
+        "fr": "Fente arrière aux haltères",
+        "en": "Dumbbell Reverse Lunge"
+      },
+      "primaryMuscles": [
+        "quads",
+        "glutes"
+      ],
+      "secondaryMuscles": [
+        "hamstrings"
+      ],
+      "equipment": "dumbbell",
+      "pattern": "lunge",
+      "region": "lower",
+      "isCompound": true,
+      "isUnilateral": true,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 90,
+      "cues": {
+        "fr": [
+          "Reculer un pied, descendre le genou arrière vers le sol.",
+          "Tibia avant vertical.",
+          "Revenir en poussant sur le talon avant."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Buste qui bascule en avant.",
+          "Pas arrière trop court."
+        ]
+      },
+      "alternatives": [
+        "walking-lunge-dumbbell",
+        "bulgarian-split-squat",
+        "step-up-dumbbell"
+      ]
+    },
+    {
+      "id": "step-up-dumbbell",
+      "name": {
+        "fr": "Montée sur banc aux haltères",
+        "en": "Dumbbell Step-up"
+      },
+      "primaryMuscles": [
+        "quads",
+        "glutes"
+      ],
+      "secondaryMuscles": [
+        "hamstrings",
+        "calves"
+      ],
+      "equipment": "dumbbell",
+      "pattern": "lunge",
+      "region": "lower",
+      "isCompound": true,
+      "isUnilateral": true,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 90,
+      "cues": {
+        "fr": [
+          "Banc à hauteur de genou environ.",
+          "Pousser sur la jambe du dessus sans élan de la jambe au sol.",
+          "Redescendre en contrôle, même jambe."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Se propulser avec la jambe au sol.",
+          "Banc trop haut, dos qui se penche."
+        ]
+      },
+      "alternatives": [
+        "bulgarian-split-squat",
+        "reverse-lunge-dumbbell",
+        "walking-lunge-dumbbell"
+      ]
+    },
+    {
+      "id": "deadlift-barbell",
+      "name": {
+        "fr": "Soulevé de terre",
+        "en": "Barbell Deadlift"
+      },
+      "primaryMuscles": [
+        "hamstrings",
+        "glutes",
+        "lowerBack"
+      ],
+      "secondaryMuscles": [
+        "quads",
+        "traps",
+        "forearms"
+      ],
+      "equipment": "barbell",
+      "pattern": "hinge",
+      "region": "lower",
+      "isCompound": true,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 5,
+      "defaultRestSeconds": 180,
+      "cues": {
+        "fr": [
+          "Barre contre les tibias, dos plat, bras tendus.",
+          "Pousser le sol et garder la barre collée aux jambes.",
+          "Verrouiller les hanches en haut sans se cambrer."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Arrondir le dos au décollage.",
+          "Tirer avec les bras et les lombaires avant les jambes."
+        ]
+      },
+      "alternatives": [
+        "romanian-deadlift-barbell",
+        "hip-thrust-barbell",
+        "romanian-deadlift-dumbbell"
+      ]
+    },
+    {
+      "id": "romanian-deadlift-barbell",
+      "name": {
+        "fr": "Soulevé de terre roumain à la barre",
+        "en": "Barbell Romanian Deadlift"
+      },
+      "primaryMuscles": [
+        "hamstrings",
+        "glutes"
+      ],
+      "secondaryMuscles": [
+        "lowerBack",
+        "forearms"
+      ],
+      "equipment": "barbell",
+      "pattern": "hinge",
+      "region": "lower",
+      "isCompound": true,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 5,
+      "defaultRestSeconds": 120,
+      "cues": {
+        "fr": [
+          "Genoux légèrement fléchis, fixes.",
+          "Reculer les hanches, barre le long des cuisses.",
+          "Descendre jusqu'à l'étirement des ischios, remonter avec les fessiers."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Plier les genoux et transformer en squat.",
+          "Arrondir le dos pour descendre plus bas."
+        ]
+      },
+      "alternatives": [
+        "romanian-deadlift-dumbbell",
+        "single-leg-romanian-deadlift",
+        "hip-thrust-barbell"
+      ]
+    },
+    {
+      "id": "romanian-deadlift-dumbbell",
+      "name": {
+        "fr": "Soulevé de terre roumain aux haltères",
+        "en": "Dumbbell Romanian Deadlift"
+      },
+      "primaryMuscles": [
+        "hamstrings",
+        "glutes"
+      ],
+      "secondaryMuscles": [
+        "lowerBack",
+        "forearms"
+      ],
+      "equipment": "dumbbell",
+      "pattern": "hinge",
+      "region": "lower",
+      "isCompound": true,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 90,
+      "cues": {
+        "fr": [
+          "Haltères contre les cuisses, épaules en arrière.",
+          "Pousser les hanches vers l'arrière, dos neutre.",
+          "Remonter en serrant les fessiers."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Laisser les haltères s'éloigner des jambes.",
+          "Regarder en l'air et cambrer la nuque."
+        ]
+      },
+      "alternatives": [
+        "romanian-deadlift-barbell",
+        "single-leg-romanian-deadlift",
+        "hip-thrust-barbell"
+      ]
+    },
+    {
+      "id": "single-leg-romanian-deadlift",
+      "name": {
+        "fr": "Soulevé de terre roumain unijambiste",
+        "en": "Single-Leg Romanian Deadlift"
+      },
+      "primaryMuscles": [
+        "hamstrings",
+        "glutes"
+      ],
+      "secondaryMuscles": [
+        "abductors",
+        "lowerBack",
+        "abs"
+      ],
+      "equipment": "dumbbell",
+      "pattern": "hinge",
+      "region": "lower",
+      "isCompound": true,
+      "isUnilateral": true,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 90,
+      "cues": {
+        "fr": [
+          "Haltère dans la main opposée à la jambe d'appui.",
+          "Basculer le buste en levant la jambe libre derrière.",
+          "Hanches face au sol, bassin horizontal."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Ouvrir la hanche de la jambe libre vers l'extérieur.",
+          "Plier le genou d'appui pour compenser."
+        ]
+      },
+      "alternatives": [
+        "romanian-deadlift-dumbbell",
+        "romanian-deadlift-barbell",
+        "hip-thrust-barbell"
+      ]
+    },
+    {
+      "id": "hip-thrust-barbell",
+      "name": {
+        "fr": "Hip thrust à la barre",
+        "en": "Barbell Hip Thrust"
+      },
+      "primaryMuscles": [
+        "glutes"
+      ],
+      "secondaryMuscles": [
+        "hamstrings",
+        "abs"
+      ],
+      "equipment": "barbell",
+      "pattern": "hinge",
+      "region": "lower",
+      "isCompound": true,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 5,
+      "defaultRestSeconds": 120,
+      "cues": {
+        "fr": [
+          "Haut du dos sur le banc, barre sur les hanches.",
+          "Pousser les hanches vers le haut jusqu'à l'alignement épaules-genoux.",
+          "Menton rentré, serrer les fessiers une seconde en haut."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Cambrer les lombaires en haut du mouvement.",
+          "Pieds trop loin, les ischios prennent le relais."
+        ]
+      },
+      "alternatives": [
+        "romanian-deadlift-barbell",
+        "romanian-deadlift-dumbbell",
+        "deadlift-barbell"
+      ]
     }
   ]
 }
