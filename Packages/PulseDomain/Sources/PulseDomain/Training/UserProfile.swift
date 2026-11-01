@@ -55,6 +55,8 @@ public enum Theme: String, Sendable, Codable, CaseIterable {
 /// Le profil de l'utilisateur, un seul enregistrement (spec M2 §5.3). `focus` : 0 = force, 1 = endurance.
 public struct UserProfile: Sendable, Equatable, Codable, Identifiable {
     public var id: UUID
+    /// Prénom saisi à l'accueil, utilisé pour les salutations. Nul tant qu'il n'est pas renseigné.
+    public var firstName: String?
     public var sex: Sex
     public var birthDate: Date?
     public var heightCm: Double?
@@ -89,6 +91,7 @@ public struct UserProfile: Sendable, Equatable, Codable, Identifiable {
 
     public init(
         id: UUID = UUID(),
+        firstName: String? = nil,
         sex: Sex = .unspecified,
         birthDate: Date? = nil,
         heightCm: Double? = nil,
@@ -122,6 +125,7 @@ public struct UserProfile: Sendable, Equatable, Codable, Identifiable {
         updatedAt: Date = Date()
     ) {
         self.id = id
+        self.firstName = firstName
         self.sex = sex
         self.birthDate = birthDate
         self.heightCm = heightCm

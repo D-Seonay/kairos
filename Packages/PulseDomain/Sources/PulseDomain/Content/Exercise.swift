@@ -17,13 +17,15 @@ public struct Exercise: Sendable, Equatable, Codable, Identifiable {
     public var cues: LocalizedList
     public var mistakes: LocalizedList
     public var alternatives: [String]
+    /// Zones douloureuses pour lesquelles l'exercice est déconseillé ; vide quand le catalogue ne le précise pas.
+    public var riskAreas: [PainArea]
     /// Un exercice retiré n'est plus proposé mais reste résoluble par les anciennes séries.
     public var retired: Bool
 
     public init(id: String, name: LocalizedText, primaryMuscles: [Muscle], secondaryMuscles: [Muscle],
                 equipment: Equipment, pattern: MovementPattern, region: BodyRegion, isCompound: Bool,
                 isUnilateral: Bool, loadKind: LoadKind, defaultIncrementKg: Double, defaultRestSeconds: Int,
-                cues: LocalizedList, mistakes: LocalizedList, alternatives: [String], retired: Bool = false) {
+                cues: LocalizedList, mistakes: LocalizedList, alternatives: [String], riskAreas: [PainArea] = [], retired: Bool = false) {
         self.id = id
         self.name = name
         self.primaryMuscles = primaryMuscles
@@ -39,6 +41,7 @@ public struct Exercise: Sendable, Equatable, Codable, Identifiable {
         self.cues = cues
         self.mistakes = mistakes
         self.alternatives = alternatives
+        self.riskAreas = riskAreas
         self.retired = retired
     }
 
@@ -59,6 +62,7 @@ public struct Exercise: Sendable, Equatable, Codable, Identifiable {
         cues = try container.decode(LocalizedList.self, forKey: .cues)
         mistakes = try container.decode(LocalizedList.self, forKey: .mistakes)
         alternatives = try container.decode([String].self, forKey: .alternatives)
+        riskAreas = try container.decodeIfPresent([PainArea].self, forKey: .riskAreas) ?? []
         retired = try container.decodeIfPresent(Bool.self, forKey: .retired) ?? false
     }
 }
