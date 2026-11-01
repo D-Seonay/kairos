@@ -1,1 +1,430 @@
-{"sourceLanguage":"fr","strings":{},"version":"1.0"}
+{
+  "sourceLanguage" : "fr",
+  "strings" : {
+    "%@ km" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ km"
+          }
+        }
+      }
+    },
+    "%@ vs 14 j" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ vs 14 j"
+          }
+        }
+      }
+    },
+    "%lld séries" : {
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld série"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld séries"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Aucune autre séance prévue cette semaine." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune autre séance prévue cette semaine."
+          }
+        }
+      }
+    },
+    "Aucune séance prévue." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune séance prévue."
+          }
+        }
+      }
+    },
+    "Bonjour" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bonjour"
+          }
+        }
+      }
+    },
+    "Bonjour %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bonjour %@"
+          }
+        }
+      }
+    },
+    "En calibration (%lld nuits)" : {
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "En calibration (%lld nuit)"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "En calibration (%lld nuits)"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Estimé" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimé"
+          }
+        }
+      }
+    },
+    "FC repos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FC repos"
+          }
+        }
+      }
+    },
+    "L'éditeur de routines arrive avec la séance en direct." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'éditeur de routines arrive avec la séance en direct."
+          }
+        }
+      }
+    },
+    "Le score du jour se calcule après 4 h" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le score du jour se calcule après 4 h"
+          }
+        }
+      }
+    },
+    "Muscles sollicités : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muscles sollicités : %@"
+          }
+        }
+      }
+    },
+    "Pas de score hier. Le score du jour se calcule après 4 h" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas de score hier. Le score du jour se calcule après 4 h"
+          }
+        }
+      }
+    },
+    "Pas encore synchronisé" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas encore synchronisé"
+          }
+        }
+      }
+    },
+    "Prochaine séance : %@, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prochaine séance : %@, %@"
+          }
+        }
+      }
+    },
+    "Profil" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profil"
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu enregistrer ton check-in." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu enregistrer ton check-in."
+          }
+        }
+      }
+    },
+    "RPE max %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RPE max %@"
+          }
+        }
+      }
+    },
+    "Relit tes données Apple Santé" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Relit tes données Apple Santé"
+          }
+        }
+      }
+    },
+    "Repos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repos"
+          }
+        }
+      }
+    },
+    "Récupération" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Récupération"
+          }
+        }
+      }
+    },
+    "Score d'hier" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Score d'hier"
+          }
+        }
+      }
+    },
+    "Sommeil" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sommeil"
+          }
+        }
+      }
+    },
+    "Synchro %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchro %@"
+          }
+        }
+      }
+    },
+    "Séance du jour" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance du jour"
+          }
+        }
+      }
+    },
+    "Variabilité" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Variabilité"
+          }
+        }
+      }
+    },
+    "dimanche" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "dimanche"
+          }
+        }
+      }
+    },
+    "jeudi" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "jeudi"
+          }
+        }
+      }
+    },
+    "ligne de base en cours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ligne de base en cours"
+          }
+        }
+      }
+    },
+    "ligne de base en cours, %lld sur %lld nuits" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ligne de base en cours, %lld sur %lld nuits"
+          }
+        }
+      }
+    },
+    "lundi" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "lundi"
+          }
+        }
+      }
+    },
+    "mardi" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mardi"
+          }
+        }
+      }
+    },
+    "mercredi" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mercredi"
+          }
+        }
+      }
+    },
+    "pas de donnée cette nuit" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pas de donnée cette nuit"
+          }
+        }
+      }
+    },
+    "phases inconnues" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "phases inconnues"
+          }
+        }
+      }
+    },
+    "profond %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "profond %@"
+          }
+        }
+      }
+    },
+    "samedi" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "samedi"
+          }
+        }
+      }
+    },
+    "vendredi" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "vendredi"
+          }
+        }
+      }
+    },
+    "~ %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "~ %@"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
