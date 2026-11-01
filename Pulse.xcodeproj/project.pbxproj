@@ -35,7 +35,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		C9BD4A9A33AA4579CDB23D6E /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+		C9BD4A9A33AA4579CDB23D6E /* Exceptions for "Pulse" folder in "Pulse" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -47,21 +47,13 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		BE553024BFA22B3A91E57AAE /* PulseTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
 			path = PulseTests;
 			sourceTree = "<group>";
 		};
 		F43F5B3DCF8CA4AA62083E92 /* Pulse */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				C9BD4A9A33AA4579CDB23D6E /* PBXFileSystemSynchronizedBuildFileExceptionSet */,
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
+				C9BD4A9A33AA4579CDB23D6E /* Exceptions for "Pulse" folder in "Pulse" target */,
 			);
 			path = Pulse;
 			sourceTree = "<group>";
