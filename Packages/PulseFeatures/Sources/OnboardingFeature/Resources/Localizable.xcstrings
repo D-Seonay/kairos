@@ -1,1 +1,46 @@
-{"sourceLanguage":"fr","strings":{},"version":"1.0"}
+{
+  "sourceLanguage": "fr",
+  "strings": {
+    "Pulse n'a pas pu accéder à Apple Santé. Tu peux continuer sans.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pulse n'a pas pu accéder à Apple Santé. Tu peux continuer sans."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu enregistrer ta progression.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pulse n'a pas pu enregistrer ta progression."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu calculer ton score pour le moment.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pulse n'a pas pu calculer ton score pour le moment."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu enregistrer ton check-in.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pulse n'a pas pu enregistrer ton check-in."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
