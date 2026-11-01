@@ -28,10 +28,15 @@ public final class OnboardingModel {
     public let checkIn = CheckInForm()
     public private(set) var isFinished = false
     public internal(set) var errorMessage: String?
+    /// Faux tant que `start()` n'a pas restauré le brouillon et l'étape : avant, aucune action ne doit écrire le profil.
+    public private(set) var hasStarted = false
 
     @ObservationIgnored let environment: OnboardingEnvironment
     /// Apple Santé ignoré : la calibration passe directement par le check-in.
     @ObservationIgnored var healthSkipped = false
+    /// Numéro de la calibration en cours : une lecture périmée (retour arrière, nouvelle lecture) n'écrit plus rien.
+    @ObservationIgnored var calibrationGeneration = 0
+    @ObservationIgnored var isSubmittingCheckIn = false
 
     public init(environment: OnboardingEnvironment) {
         self.environment = environment
@@ -48,6 +53,7 @@ public final class OnboardingModel {
     // MARK: - Reprise
 
     public func start() async {
+        defer { hasStarted = true }
         let stored = try? await environment.profiles.load()
         if let stored, stored.onboardingCompletedAt != nil {
             isFinished = true
@@ -78,6 +84,7 @@ public final class OnboardingModel {
     // MARK: - Étapes
 
     public func begin() async {
+        guard hasStarted else { return }
         errorMessage = nil
         await advance(to: .health)
     }
@@ -131,7 +138,10 @@ public final class OnboardingModel {
             return
         }
         profile.activeProgramID = adopted
+        // L'étape change avant la fin de l'enregistrement qui suit : la lecture est déjà « en cours » pour que la vue ne la relance pas.
+        calibration = .reading(progress: 0)
         guard await advance(to: .calibration) else {
+            calibration = .idle
             profile.activeProgramID = previous
             if let adopted {
                 try? await environment.programs.delete(id: adopted)
@@ -169,6 +179,7 @@ public final class OnboardingModel {
         guard let previous = OnboardingStep(rawValue: step.rawValue - 1) else { return }
         if step == .calibration {
             calibration = .idle
+            calibrationGeneration += 1
         }
         step = previous
         environment.stepStore.save(previous)

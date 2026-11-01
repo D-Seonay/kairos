@@ -112,19 +112,29 @@ extension PainArea {
     }
 }
 
-/// Une ligne de « Ta ligne de base » : « Variabilité cardiaque — 54 ms ± 9 ».
+/// Une ligne de « Ta ligne de base » : « Variabilité cardiaque — 54 ms ± 9 », ou la VFC qui attend sa ligne de base.
 struct BaselineRow: Equatable {
     let title: String
     let value: String
     let deviation: String?
+    /// Vrai pour la VFC dont la ligne de base n'existe pas encore : le texte explique l'attente au lieu de donner une mesure.
+    var isPending = false
 
-    /// Les seules lignes pour lesquelles la ligne de base a une valeur.
-    static func rows(from baseline: BaselineSummary) -> [BaselineRow] {
+    /// Le nombre de nuits avec SDNN valide qu'il faut pour que la VFC compte dans le score (`HRVBaseline.minimumNights`).
+    static let hrvNightsNeeded = 5
+
+    /// Les seules lignes pour lesquelles la ligne de base a une valeur. Un score mesuré sans VFC (`recovery.missingFactors`)
+    /// qui n'a pas encore ses 5 nuits garde sa ligne VFC, en attente : « ligne de base en cours, 3 sur 5 nuits ».
+    static func rows(from baseline: BaselineSummary, recovery: DailyRecovery? = nil) -> [BaselineRow] {
         var rows: [BaselineRow] = []
-        if let mean = baseline.hrvMeanMs {
+        if let nights = pendingHRVNights(recovery) {
             rows.append(BaselineRow(
-                title: String(localized: "Variabilité cardiaque", bundle: .module),
-                value: PulseFormat.integer(mean, unit: "ms"), deviation: deviation(baseline.hrvDeviationMs)))
+                title: hrvTitle,
+                value: String(localized: "ligne de base en cours, \(nights) sur \(hrvNightsNeeded) nuits", bundle: .module),
+                deviation: nil, isPending: true))
+        } else if let mean = baseline.hrvMeanMs {
+            rows.append(BaselineRow(
+                title: hrvTitle, value: PulseFormat.integer(mean, unit: "ms"), deviation: deviation(baseline.hrvDeviationMs)))
         }
         if let mean = baseline.restingHeartRateMean {
             rows.append(BaselineRow(
@@ -137,6 +147,17 @@ struct BaselineRow: Equatable {
                 value: PulseFormat.duration(minutes: minutes), deviation: nil))
         }
         return rows
+    }
+
+    /// Les nuits comptées pour la VFC quand le score mesuré s'est passé d'elle faute de ligne de base ; sinon `nil`.
+    static func pendingHRVNights(_ recovery: DailyRecovery?) -> Int? {
+        guard let recovery, !recovery.isEstimated, recovery.missingFactors.contains(.hrv),
+              case .calibrating(let nights) = recovery.calibration, nights < hrvNightsNeeded else { return nil }
+        return nights
+    }
+
+    private static var hrvTitle: String {
+        String(localized: "Variabilité cardiaque", bundle: .module)
     }
 
     private static func deviation(_ value: Double?) -> String? {

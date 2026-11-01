@@ -55,15 +55,20 @@ actor FlakyProfileRepository: ProfileRepository {
 @MainActor
 struct OnboardingFixture {
     let profiles: any ProfileRepository
-    let programs = InMemoryProgramRepository()
-    let recovery = InMemoryRecoveryRepository(calendar: OnboardingClock.calendar)
+    let recovery: any RecoveryRepository
+    let programs: any ProgramRepository
     let notifications: StubNotificationAuthorizer
     let stepStore = InMemoryOnboardingStepStore()
     let environment: OnboardingEnvironment
 
     init(scenario: HealthScenario = .goodNight, notificationsGranted: Bool = true, health: (any HealthSampleSource)? = nil,
-         profiles: any ProfileRepository = InMemoryProfileRepository()) {
+         profiles: any ProfileRepository = InMemoryProfileRepository(),
+         programs: any ProgramRepository = InMemoryProgramRepository(),
+         recovery: (any RecoveryRepository)? = nil) {
         self.profiles = profiles
+        self.programs = programs
+        let recovery = recovery ?? InMemoryRecoveryRepository(calendar: OnboardingClock.calendar)
+        self.recovery = recovery
         let calendar = OnboardingClock.calendar
         let now = OnboardingClock.now
         let source = health ?? ScenarioHealthSource(scenario: scenario, now: now, calendar: calendar)

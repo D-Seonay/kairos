@@ -1197,6 +1197,16 @@
         }
       }
     },
+    "ligne de base en cours, %lld sur %lld nuits" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ligne de base en cours, %lld sur %lld nuits"
+          }
+        }
+      }
+    },
     "musculation" : {
       "localizations" : {
         "fr" : {

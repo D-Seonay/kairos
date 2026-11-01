@@ -20,4 +20,14 @@ extension OnboardingModel {
     public var latestBirthDate: Date {
         environment.now()
     }
+
+    /// Le retour est offert dès le profil, sauf pendant la lecture des nuits (la calibration qui commence ne s'interrompt pas).
+    public var canGoBack: Bool {
+        guard step.rawValue >= OnboardingStep.profile.rawValue else { return false }
+        guard step == .calibration else { return true }
+        switch calibration {
+        case .idle, .reading: return false
+        case .scored, .needsCheckIn: return true
+        }
+    }
 }

@@ -55,6 +55,7 @@ struct ProfileStepView: View {
             TextField(
                 String(localized: "Prénom affiché", bundle: .module), text: firstNameBinding,
                 prompt: Text(String(localized: "Facultatif", bundle: .module)))
+                .pulseGivenNameField()
                 .onboardingInput()
         }
     }

@@ -14,11 +14,13 @@ public struct OnboardingFlowView: View {
         ZStack {
             PulsePalette.background.ignoresSafeArea()
             AuraBackground().ignoresSafeArea()
-            VStack(spacing: 0) {
-                header
-                content
-                    .id(model.step)
-                    .transition(.opacity)
+            if model.hasStarted {
+                VStack(spacing: 0) {
+                    header
+                    content
+                        .id(model.step)
+                        .transition(.opacity)
+                }
             }
         }
         .animation(reduceMotion ? nil : .easeInOut(duration: 0.25), value: model.step)
@@ -26,12 +28,12 @@ public struct OnboardingFlowView: View {
         .task(id: model.step) { await stepDidChange() }
     }
 
-    /// Barre d'étapes à partir de l'écran Apple Santé, bouton retour à partir du profil.
+    /// Barre d'étapes à partir de l'écran Apple Santé, bouton retour à partir du profil (sauf pendant la lecture des nuits).
     @ViewBuilder
     private var header: some View {
         if model.step.rawValue >= OnboardingStep.health.rawValue {
             HStack(spacing: 12) {
-                if model.step.rawValue >= OnboardingStep.profile.rawValue {
+                if model.canGoBack {
                     Button {
                         model.goBack()
                     } label: {
@@ -43,6 +45,8 @@ public struct OnboardingFlowView: View {
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel(String(localized: "Retour", bundle: .module))
+                } else if model.step.rawValue >= OnboardingStep.profile.rawValue {
+                    Color.clear.frame(width: 44, height: 44)
                 }
                 StepProgressBar(current: model.step.rawValue, total: OnboardingStep.allCases.count - 1)
             }
@@ -64,12 +68,10 @@ public struct OnboardingFlowView: View {
         }
     }
 
-    /// Un profil terminé a pu arriver d'iCloud ; et une reprise sur la calibration (`.idle`) doit la relancer d'elle-même.
+    /// Un profil terminé a pu arriver d'iCloud ; et une reprise sur la calibration doit la relancer d'elle-même.
     private func stepDidChange() async {
         if await model.checkForRestoredProfile() { return }
-        if model.step == .calibration, model.calibration == .idle {
-            await model.runCalibration()
-        }
+        await model.resumeCalibrationIfNeeded()
     }
 }
 

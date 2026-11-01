@@ -24,6 +24,15 @@ public extension View {
         #endif
     }
 
+    /// Saisie d'un prénom : le type de contenu `givenName` laisse le clavier proposer le prénom de l'utilisateur.
+    func pulseGivenNameField() -> some View {
+        #if os(iOS)
+        textContentType(.givenName)
+        #else
+        self
+        #endif
+    }
+
     /// Titre de navigation compact, comme les écrans d'onboarding de la maquette.
     func pulseInlineTitle() -> some View {
         #if os(iOS)

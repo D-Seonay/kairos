@@ -67,7 +67,7 @@ struct ScoredView: View {
 
     @ViewBuilder
     private var baselineSection: some View {
-        let rows = BaselineRow.rows(from: baseline)
+        let rows = BaselineRow.rows(from: baseline, recovery: recovery)
         VStack(alignment: .leading, spacing: 12) {
             if !rows.isEmpty {
                 ObsidianCard {
@@ -80,10 +80,18 @@ struct ScoredView: View {
                     }
                 }
             }
-            Text(rows.isEmpty ? Self.estimateNote : Self.baselineNote)
-                .font(.footnote)
-                .foregroundStyle(PulsePalette.muted)
+            if let note = note(rows: rows) {
+                Text(note)
+                    .font(.footnote)
+                    .foregroundStyle(PulsePalette.muted)
+            }
         }
+    }
+
+    /// Sans ligne : une estimation. VFC en attente de sa ligne de base : pas de phrase sur la comparaison aux 14 dernières nuits.
+    private func note(rows: [BaselineRow]) -> String? {
+        if rows.isEmpty { return Self.estimateNote }
+        return rows.contains(where: \.isPending) ? nil : Self.baselineNote
     }
 
     private func baselineRow(_ row: BaselineRow) -> some View {
@@ -92,8 +100,9 @@ struct ScoredView: View {
                 .foregroundStyle(PulsePalette.text2)
             Spacer(minLength: 8)
             Text(row.value)
-                .font(.body.weight(.bold).monospacedDigit())
-                .foregroundStyle(PulsePalette.text)
+                .font(row.isPending ? .subheadline : .body.weight(.bold).monospacedDigit())
+                .multilineTextAlignment(.trailing)
+                .foregroundStyle(row.isPending ? PulsePalette.text2 : PulsePalette.text)
             if let deviation = row.deviation {
                 Text(deviation)
                     .font(.body.monospacedDigit())

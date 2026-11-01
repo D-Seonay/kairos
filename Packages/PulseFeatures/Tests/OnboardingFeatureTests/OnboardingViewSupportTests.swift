@@ -110,6 +110,46 @@ struct OnboardingViewSupportTests {
         #expect(BaselineRow.rows(from: empty).isEmpty)
     }
 
+    // MARK: - VFC en attente de sa ligne de base
+
+    private let partialBaseline = BaselineSummary(
+        hrvMeanMs: 50, hrvDeviationMs: 8, restingHeartRateMean: 49, restingHeartRateDeviation: 3,
+        sleepMeanMinutes: 432, nightsAnalyzed: 4)
+
+    @Test func hrvWithoutItsBaselineStaysAsAPendingRow() {
+        let measured = recovery(estimated: false, calibration: .calibrating(nights: 3), missing: [.hrv])
+        let rows = BaselineRow.rows(from: partialBaseline, recovery: measured)
+        #expect(rows.map(\.title).first == "Variabilité cardiaque")
+        #expect(rows.first?.value == "ligne de base en cours, 3 sur 5 nuits")
+        #expect(rows.first?.isPending == true)
+        #expect(rows.first?.deviation == nil)
+        #expect(rows.dropFirst().map(\.value) == ["49 bpm", "7 h 12"])
+    }
+
+    @Test func pendingHrvRowShowsEvenWithoutAnyOtherBaselineValue() {
+        let empty = BaselineSummary(
+            hrvMeanMs: nil, hrvDeviationMs: nil, restingHeartRateMean: nil, restingHeartRateDeviation: nil,
+            sleepMeanMinutes: nil, nightsAnalyzed: 0)
+        let measured = recovery(estimated: false, calibration: .calibrating(nights: 0), missing: [.hrv])
+        #expect(BaselineRow.rows(from: empty, recovery: measured).map(\.value) == ["ligne de base en cours, 0 sur 5 nuits"])
+    }
+
+    @Test func hrvRowIsMeasuredOnceTheBaselineExists() {
+        let calibrating = recovery(estimated: false, calibration: .calibrating(nights: 9))
+        #expect(BaselineRow.rows(from: partialBaseline, recovery: calibrating).first?.value == "50 ms")
+        // La VFC du jour manque mais la ligne de base existe : la ligne reste une mesure.
+        let todayMissing = recovery(estimated: false, calibration: .calibrating(nights: 9), missing: [.hrv])
+        #expect(BaselineRow.rows(from: partialBaseline, recovery: todayMissing).first?.isPending == false)
+        let ready = recovery(estimated: false, calibration: .ready, missing: [.hrv])
+        #expect(BaselineRow.rows(from: partialBaseline, recovery: ready).first?.isPending == false)
+    }
+
+    @Test func anEstimatedScoreHasNoPendingHrvRow() {
+        let estimated = recovery(estimated: true, calibration: .calibrating(nights: 0), missing: Factor.allCases)
+        #expect(BaselineRow.pendingHRVNights(estimated) == nil)
+        #expect(BaselineRow.pendingHRVNights(nil) == nil)
+    }
+
     // MARK: - Textes
 
     @Test func proposalNamesBothHalvesOfTheWeek() {
@@ -122,10 +162,10 @@ struct OnboardingViewSupportTests {
         #expect(OnboardingCopy.proposal(strength: 0, runs: 2) == "Proposition : 2 sorties par semaine.")
     }
 
-    private func recovery(estimated: Bool, calibration: CalibrationState) -> DailyRecovery {
+    private func recovery(estimated: Bool, calibration: CalibrationState, missing: [Factor] = []) -> DailyRecovery {
         DailyRecovery(
-            day: OnboardingClock.now, score: 70, category: .normal, isEstimated: estimated, calibration: calibration,
-            createdAt: OnboardingClock.now, updatedAt: OnboardingClock.now)
+            day: OnboardingClock.now, score: 70, category: .normal, isEstimated: estimated, missingFactors: missing,
+            calibration: calibration, createdAt: OnboardingClock.now, updatedAt: OnboardingClock.now)
     }
 
     @Test func markerSaysEstimatedOrCalibrating() {
