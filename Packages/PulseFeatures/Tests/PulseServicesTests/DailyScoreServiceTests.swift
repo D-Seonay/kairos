@@ -3,6 +3,33 @@ import PulseDomain
 import PulseServices
 import Testing
 
+/// Un dépôt qui compte les `DailyRecovery` enregistrées, au-dessus d'un vrai dépôt en mémoire.
+private actor CountingRecoveryRepository: RecoveryRepository {
+    private let inner: InMemoryRecoveryRepository
+    private(set) var recoverySaves = 0
+
+    init(calendar: Calendar) {
+        inner = InMemoryRecoveryRepository(calendar: calendar)
+    }
+
+    func dailyRecoveries(from: Date, to: Date) async throws -> [DailyRecovery] {
+        try await inner.dailyRecoveries(from: from, to: to)
+    }
+
+    func save(_ recovery: DailyRecovery) async throws {
+        recoverySaves += 1
+        try await inner.save(recovery)
+    }
+
+    func checkIns(from: Date, to: Date) async throws -> [CheckIn] {
+        try await inner.checkIns(from: from, to: to)
+    }
+
+    func save(_ checkIn: CheckIn) async throws {
+        try await inner.save(checkIn)
+    }
+}
+
 struct DailyScoreServiceTests {
     private var calendar: Calendar { TestClock.calendar }
 
@@ -206,5 +233,45 @@ struct DailyScoreServiceTests {
         let frozen = try scored(try await fixture.service.update(nights: await nights(.goodNight, at: noon), now: noon))
         #expect(frozen.frozenAt == noon)
         #expect(try await records(fixture, on: "\(day)T00:00").first?.frozenAt == noon)
+    }
+
+    @Test func unchangedNightsDoNotSaveAgainBeforeNoon() async throws {
+        let repository = CountingRecoveryRepository(calendar: calendar)
+        let service = DailyScoreService(recovery: repository, calendar: calendar)
+        let early = TestClock.date("2026-11-02T07:00")
+        let first = try scored(try await service.update(nights: await nights(.goodNight, at: early), now: early))
+        let later = TestClock.date("2026-11-02T09:00")
+        let second = try scored(try await service.update(nights: await nights(.goodNight, at: later), now: later))
+        #expect(await repository.recoverySaves == 1)
+        #expect(second == first)
+    }
+
+    @Test func changedNightsStillSaveBeforeNoon() async throws {
+        let repository = CountingRecoveryRepository(calendar: calendar)
+        let service = DailyScoreService(recovery: repository, calendar: calendar)
+        let early = TestClock.date("2026-11-02T07:00")
+        _ = try await service.update(nights: await nights(.badNight, at: early), now: early)
+        let later = TestClock.date("2026-11-02T09:00")
+        let second = try scored(try await service.update(nights: await nights(.goodNight, at: later), now: later))
+        #expect(await repository.recoverySaves == 2)
+        #expect(second.updatedAt == later)
+    }
+
+    @Test func anEmptySuccessfulReadKeepsTodaysStoredScore() async throws {
+        let fixture = fixture()
+        let cache = InMemoryHealthSampleCache()
+        let morning = TestClock.date("2026-11-02T08:00")
+        let measuredSource = ScenarioHealthSource(scenario: .goodNight, now: morning, calendar: calendar)
+        let first = await NightHistory(source: measuredSource, cache: cache, calendar: calendar).refresh(now: morning)
+        let stored = try scored(try await fixture.service.update(nights: first.nights, now: morning))
+
+        // Accès Santé révoqué : HealthKit répond sans erreur et sans échantillon.
+        let later = TestClock.date("2026-11-02T10:00")
+        let revokedSource = ScenarioHealthSource(scenario: .noData, now: later, calendar: calendar)
+        let empty = await NightHistory(source: revokedSource, cache: cache, calendar: calendar).refresh(now: later)
+        #expect(empty.readAt == later)
+        #expect(empty.nights.allSatisfy { $0.sdnnMs == nil && $0.restingHeartRate == nil && $0.sleep == nil })
+        let result = try await fixture.service.update(nights: empty.nights, now: later)
+        #expect(result == .scored(stored))
     }
 }

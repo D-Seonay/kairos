@@ -45,6 +45,7 @@ public struct DailyScoreService: Sendable {
             measured.id = existing?.id ?? measured.id
             measured.createdAt = existing?.createdAt ?? now
             measured.frozenAt = isAfterFreeze ? now : nil
+            if let existing, existing.isSameMeasure(as: measured) { return .scored(existing) }
             try await recovery.save(measured)
             return .scored(measured)
         case .needsCheckIn(let missing):
@@ -78,5 +79,17 @@ public struct DailyScoreService: Sendable {
     private func yesterday(before day: Date) async throws -> DailyRecovery? {
         guard let previous = calendar.date(byAdding: .day, value: -1, to: day) else { return nil }
         return try await stored(on: previous)
+    }
+}
+
+private extension DailyRecovery {
+    /// Vrai si `other` ne diffère de ce score que par son identité et ses dates d'écriture : le réenregistrer ne changerait rien,
+    /// sinon qu'une écriture CloudKit de plus à chaque retour sur l'onglet Aujourd'hui.
+    func isSameMeasure(as other: DailyRecovery) -> Bool {
+        var comparable = other
+        comparable.id = id
+        comparable.createdAt = createdAt
+        comparable.updatedAt = updatedAt
+        return comparable == self
     }
 }
