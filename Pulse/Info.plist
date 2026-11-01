@@ -20,12 +20,16 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>NSHealthShareUsageDescription</key>
 	<string>Pulse lit votre sommeil, votre variabilité cardiaque et votre fréquence cardiaque au repos pour calculer votre score de récupération du matin. Ces données restent sur votre iPhone.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>Pulse enregistre vos séances de musculation et vos prises de compléments dans Apple Santé.</string>
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UISupportedInterfaceOrientations</key>
