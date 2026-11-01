@@ -194,4 +194,17 @@ struct DailyScoreServiceTests {
         let frozen = try scored(try await fixture.service.update(nights: await nights(.goodNight, at: noon), now: noon))
         #expect(frozen.day == dayStart && frozen.frozenAt == noon)
     }
+
+    @Test(arguments: ["2026-11-02", "2026-10-25"])
+    func freezeHappensAtNoonSharpNotBefore(day: String) async throws {
+        let fixture = fixture()
+        let beforeNoon = TestClock.date("\(day)T11:59")
+        let open = try scored(try await fixture.service.update(nights: await nights(.goodNight, at: beforeNoon), now: beforeNoon))
+        #expect(open.frozenAt == nil)
+        #expect(try await records(fixture, on: "\(day)T00:00").first?.frozenAt == nil)
+        let noon = TestClock.date("\(day)T12:00")
+        let frozen = try scored(try await fixture.service.update(nights: await nights(.goodNight, at: noon), now: noon))
+        #expect(frozen.frozenAt == noon)
+        #expect(try await records(fixture, on: "\(day)T00:00").first?.frozenAt == noon)
+    }
 }
