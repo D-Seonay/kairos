@@ -29,3 +29,31 @@ import Testing
     try await repo.save(older)
     #expect(try await repo.load()?.id == older.id)
 }
+
+@Test func profileFirstNameSurvivesSave() async throws {
+    let repo = SwiftDataProfileRepository(modelContainer: try TestContainer.make())
+    try await repo.save(UserProfile(firstName: "Mathéo", createdAt: Fixed.t0, updatedAt: Fixed.t0))
+    #expect(try await repo.load()?.firstName == "Mathéo")
+}
+
+@Test func profilesWithSameCreatedAtResolveByID() async throws {
+    let repo = SwiftDataProfileRepository(modelContainer: try TestContainer.make())
+    let profiles = (0..<4).map { _ in UserProfile(createdAt: Fixed.t1, updatedAt: Fixed.t1) }
+    for profile in profiles {
+        try await repo.save(profile)
+    }
+    let smallest = profiles.min { $0.id.uuidString < $1.id.uuidString }
+    #expect(try await repo.load()?.id == smallest?.id)
+}
+
+@Test func deletedProfileIsNotLoaded() async throws {
+    let repo = SwiftDataProfileRepository(modelContainer: try TestContainer.make())
+    let older = UserProfile(createdAt: Fixed.t0, updatedAt: Fixed.t0)
+    let newer = UserProfile(createdAt: Fixed.t2, updatedAt: Fixed.t2)
+    try await repo.save(older)
+    try await repo.save(newer)
+    try await repo.delete(id: older.id)
+    #expect(try await repo.load()?.id == newer.id)
+    let context = ModelContext(repo.modelContainer)
+    #expect(try context.fetchCount(FetchDescriptor<StoredProfile>()) == 2)
+}

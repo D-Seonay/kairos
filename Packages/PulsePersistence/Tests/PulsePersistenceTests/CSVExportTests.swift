@@ -5,7 +5,7 @@ import Testing
 
 @Test func csvArchiveContainsEveryTableAndRoundTripsQuotedNote() async throws {   // Review Focus 2
     let box = try ModelContainerBox()
-    try await SampleDataSeeder(container: box.container).seed(now: Fixed.t0)
+    try await SampleDataSeeder(container: box.container, calendar: Fixed.calendar).seed(now: Fixed.t0)
     let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
     let exporter = SwiftDataExporter(container: box.container, appVersion: "1.0 (1)", contentVersion: "1.0.0",
                                      exerciseNames: { _ in nil }, directory: directory)
@@ -33,4 +33,17 @@ import Testing
         let text = try String(contentsOf: folder.appendingPathComponent(table.fileName + ".csv"), encoding: .utf8)
         #expect(text.split(separator: "\n").count == 1, Comment(rawValue: table.rawValue))
     }
+}
+
+@Test func csvHasNewColumns() async throws {
+    let box = try ModelContainerBox()
+    let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    let exporter = SwiftDataExporter(container: box.container, appVersion: "1.0 (1)", contentVersion: "1.0.0",
+                                     exerciseNames: { _ in nil }, directory: directory)
+    _ = try await exporter.exportCSVArchive()
+    let folder = try #require(exporter.lastCSVDirectory(in: directory))
+    let profile = try String(contentsOf: folder.appendingPathComponent("profile.csv"), encoding: .utf8)
+    #expect(profile.hasPrefix("id,first_name,"))
+    let recoveries = try String(contentsOf: folder.appendingPathComponent("daily_recoveries.csv"), encoding: .utf8)
+    #expect(recoveries.contains("frozen_at,original_session_chosen"))
 }

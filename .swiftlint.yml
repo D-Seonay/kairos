@@ -1,4 +1,4 @@
-included: [Pulse, PulseTests, PulseWidgets, Packages]
+included: [Pulse, PulseTests, PulseUITests, PulseWidgets, Packages]
 excluded: [Packages/*/.build, DerivedData]
 opt_in_rules: [force_unwrapping, implicitly_unwrapped_optional, sorted_imports, closure_spacing, empty_count]
 line_length: { warning: 140, error: 180 }

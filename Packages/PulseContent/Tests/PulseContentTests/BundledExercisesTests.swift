@@ -59,3 +59,23 @@ private func expectCounts(_ expected: [MovementPattern: Int], in lib: ContentLib
 @Test func unknownExerciseResolvesToNil() throws {
     #expect(try ContentLibrary.load(from: ContentLibrary.resourceBundle).exercise(id: "does-not-exist") == nil)
 }
+
+@Test func riskAreasMatchTheSpecTable() {
+    let expected: [String: [PainArea]] = [
+        "overhead-press-barbell": [.shoulders], "seated-dumbbell-shoulder-press": [.shoulders], "shoulder-press-machine": [.shoulders],
+        "arnold-press": [.shoulders], "dips": [.shoulders], "dumbbell-fly": [.shoulders],
+        "deadlift-barbell": [.lowerBack], "romanian-deadlift-barbell": [.lowerBack], "barbell-row": [.lowerBack],
+        "back-squat-barbell": [.lowerBack], "front-squat-barbell": [.lowerBack, .wrists],
+        "sissy-squat": [.knees], "walking-lunge-dumbbell": [.knees], "bulgarian-split-squat": [.knees],
+        "reverse-lunge-dumbbell": [.knees], "leg-extension-machine": [.knees], "single-leg-extension-machine": [.knees],
+        "push-up": [.wrists], "barbell-curl": [.wrists], "wrist-curl-barbell": [.wrists], "reverse-wrist-curl-barbell": [.wrists]
+    ]
+    let tagged = ContentLibrary.bundled.exercises.filter { !$0.riskAreas.isEmpty }
+    let actual = Dictionary(uniqueKeysWithValues: tagged.map { ($0.id, $0.riskAreas) })
+    #expect(actual == expected)
+}
+
+@Test func machinePreacherCurlPrefersCableBeforeEZBar() {
+    #expect(ContentLibrary.bundled.exercise(id: "preacher-curl-machine")?.alternatives
+        == ["cable-curl", "ez-bar-preacher-curl", "hammer-curl-dumbbell"])
+}

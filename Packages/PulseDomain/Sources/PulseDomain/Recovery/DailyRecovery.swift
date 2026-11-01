@@ -20,6 +20,8 @@ public struct DailyRecovery: Sendable, Equatable, Codable, Identifiable {
     public var calibration: CalibrationState
     public var adjustments: [SessionAdjustment]
     public var frozenAt: Date?
+    /// Vrai si l'utilisateur a gardé la séance prévue malgré l'ajustement proposé ; nul tant qu'il n'a pas choisi.
+    public var originalSessionChosen: Bool?
     public var createdAt: Date
     public var updatedAt: Date
 
@@ -28,7 +30,7 @@ public struct DailyRecovery: Sendable, Equatable, Codable, Identifiable {
                 sdnnMs: Double? = nil, sdnnBaselineMs: Double? = nil, restingHeartRate: Double? = nil,
                 restingHeartRateBaseline: Double? = nil, asleepMinutes: Int? = nil, deepMinutes: Int? = nil,
                 missingFactors: [Factor] = [], calibration: CalibrationState, adjustments: [SessionAdjustment] = [],
-                frozenAt: Date? = nil, createdAt: Date, updatedAt: Date) {
+                frozenAt: Date? = nil, originalSessionChosen: Bool? = nil, createdAt: Date, updatedAt: Date) {
         self.id = id
         self.day = day
         self.score = score
@@ -47,6 +49,7 @@ public struct DailyRecovery: Sendable, Equatable, Codable, Identifiable {
         self.calibration = calibration
         self.adjustments = adjustments
         self.frozenAt = frozenAt
+        self.originalSessionChosen = originalSessionChosen
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }

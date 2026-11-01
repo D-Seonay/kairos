@@ -134,3 +134,18 @@ func rejectsMalformedIDs(id: String) {
     let lib = Fixtures.library(exercises: Fixtures.fourExercises(pattern: .squat), templates: [template])
     #expect(rules(lib) == [.dayID])
 }
+
+@Test func rejectsDuplicateExerciseInDay() {
+    let day = Fixtures.strengthDay(id: "a", exercises: [Fixtures.templateExercise("p-1"), Fixtures.templateExercise("p-2"),
+                                                        Fixtures.templateExercise("p-1")])
+    let template = Fixtures.template(days: [day], suggestedWeek: ["a", nil, nil, nil, nil, nil, nil], sessionsPerWeek: 1)
+    let lib = Fixtures.library(exercises: Fixtures.fourExercises(pattern: .squat), templates: [template])
+    #expect(rules(lib) == [.duplicateExerciseInDay])
+}
+
+@Test func rejectsDuplicateRiskArea() {
+    var exercises = Fixtures.fourExercises(pattern: .squat)
+    exercises[0].riskAreas = [.knees, .knees]
+    exercises[1].riskAreas = [.knees, .wrists]
+    #expect(rules(Fixtures.library(exercises: exercises)) == [.riskAreas])
+}

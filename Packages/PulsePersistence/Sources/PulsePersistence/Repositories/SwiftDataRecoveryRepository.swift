@@ -2,9 +2,18 @@ import Foundation
 import PulseDomain
 import SwiftData
 
-/// Scores et check-ins : un enregistrement par jour local, remplacé à chaque `save`.
-@ModelActor
-public actor SwiftDataRecoveryRepository: RecoveryRepository {
+/// Scores et check-ins : un enregistrement par jour local, remplacé à chaque `save`. Le jour est normalisé avec `calendar`.
+public actor SwiftDataRecoveryRepository: ModelActor, RecoveryRepository {
+    public nonisolated let modelContainer: ModelContainer
+    public nonisolated let modelExecutor: any ModelExecutor
+    private let calendar: Calendar
+
+    public init(modelContainer: ModelContainer, calendar: Calendar) {
+        self.modelContainer = modelContainer
+        modelExecutor = DefaultSerialModelExecutor(modelContext: ModelContext(modelContainer))
+        self.calendar = calendar
+    }
+
     public func dailyRecoveries(from: Date, to: Date) throws -> [DailyRecovery] {
         let descriptor = FetchDescriptor<StoredDailyRecovery>(
             predicate: #Predicate { $0.deletedAt == nil && $0.day >= from && $0.day < to },
@@ -14,7 +23,7 @@ public actor SwiftDataRecoveryRepository: RecoveryRepository {
 
     public func save(_ recovery: DailyRecovery) throws {
         var stamped = recovery
-        stamped.day = Calendar.current.startOfDay(for: recovery.day)
+        stamped.day = calendar.startOfDay(for: recovery.day)
         stamped.updatedAt = Date()
         let day = stamped.day
         if let existing = try modelContext.first(StoredDailyRecovery.self, where: #Predicate { $0.day == day && $0.deletedAt == nil }) {
@@ -36,7 +45,7 @@ public actor SwiftDataRecoveryRepository: RecoveryRepository {
 
     public func save(_ checkIn: CheckIn) throws {
         var stamped = checkIn
-        stamped.day = Calendar.current.startOfDay(for: checkIn.day)
+        stamped.day = calendar.startOfDay(for: checkIn.day)
         stamped.updatedAt = Date()
         let day = stamped.day
         if let existing = try modelContext.first(StoredCheckIn.self, where: #Predicate { $0.day == day && $0.deletedAt == nil }) {

@@ -14,6 +14,7 @@ public enum ContentRule: String, Sendable, CaseIterable {
     case increment
     case rest
     case alternatives
+    case riskAreas
     case patternPopulation
     case templateExercise
     case templateSets
@@ -21,6 +22,7 @@ public enum ContentRule: String, Sendable, CaseIterable {
     case templateRPE
     case templateRest
     case superset
+    case duplicateExerciseInDay
     case runTarget
     case suggestedWeek
     case sessionsPerWeek

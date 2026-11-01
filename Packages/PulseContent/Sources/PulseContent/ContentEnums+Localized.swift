@@ -89,3 +89,23 @@ extension LoadKind {
         }
     }
 }
+
+extension RunType {
+    public var localizedName: String {
+        switch self {
+        case .easy: String(localized: "Sortie facile", bundle: .module)
+        case .intervals: String(localized: "Fractionné", bundle: .module)
+        case .long: String(localized: "Sortie longue", bundle: .module)
+        }
+    }
+}
+
+extension TrainingFocus {
+    public var localizedName: String {
+        switch self {
+        case .strength: String(localized: "Force", bundle: .module)
+        case .balanced: String(localized: "Équilibré", bundle: .module)
+        case .endurance: String(localized: "Endurance", bundle: .module)
+        }
+    }
+}

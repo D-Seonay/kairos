@@ -181,7 +181,8 @@ Le développement est segmenté en 8 jalons autonomes livrant chacun un sous-ens
 | :---: | :--- | :---: | :--- |
 | **M1** | **Fondations et Moteur** | ✅ Terminé | Architecture packages, moteur physiologique complet, lecture HealthKit, agrégateur nocturne, écran diagnostics, CI Xcode Cloud. |
 | **M2** | **Données et Contenu** | 🚧 En cours | Persistance SwiftData + CloudKit, package `PulseContent` (80 exercices + 4 programmes types en JSON), export et suppression RGPD. |
-| **M3** | **Onboarding & Tableau de bord** | ⏳ Prévu | Onboarding 6 écrans, accueil Today avec jauge ambrée, carte Pourquoi, check-in, widget de récupération. |
+| **M3a** | **Onboarding, design system, score du jour** | ✅ Fait | Package `PulseDesignSystem`, onboarding 6 écrans avec import de 60 jours et premier score, cycle de vie du score du jour, check-in, accueil simple, fausse source Apple Santé à scénarios et test d'interface. |
+| **M3b** | **Accueil complet, arrière-plan, widgets** | ⏳ Prévu | Ajustements de séance, carte Pourquoi, lecture ancrée et livraison en arrière-plan, notification du matin, widget de récupération. |
 | **M4** | **Programmes & Séance Live** | ⏳ Prévu | Carnet live, clavier numérique grand format, chrono en Live Activity / Dynamic Island, calculateur de disques, 1RM. |
 | **M5** | **Compléments** | ⏳ Prévu | Suivi des prises par moment, alertes de stock, synchronisation HealthKit, notification interactive « Pris ». |
 | **M6** | **Planning & Anti-interférence** | ⏳ Prévu | Calendrier mensuel, import des courses Apple Santé, détection et résolution des conflits jambes / course à pied, décharge ACWR. |

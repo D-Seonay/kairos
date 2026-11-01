@@ -1,13 +1,26 @@
 import Foundation
+import OnboardingFeature
 import PulseContent
 import PulseDomain
 import PulseHealth
 import PulsePersistence
+import PulseServices
 import SwiftData
+import TodayFeature
 
 /// Les dépendances externes de l'app, assemblées une fois au lancement.
 struct AppDependencies: Sendable {
+    /// Préférences du mode mémoire (`-PulseStore inMemory`), vidées à chaque lancement.
+    static let memoryDefaultsSuite = "fr.seonay.pulse.memory"
+    /// Préférences des tests de la cible app, jamais celles de l'app réelle.
+    static let testingDefaultsSuite = "fr.seonay.pulse.tests"
+
     let health: any HealthReading
+    let healthSource: any HealthSampleSource
+    let notifications: any NotificationAuthorizing
+    let onboardingSteps: any OnboardingStepStore
+    let now: @Sendable () -> Date
+    let launch: LaunchOptions
     let calendar: Calendar
     let content: ContentLibrary
     let container: ModelContainer
@@ -29,19 +42,63 @@ struct AppDependencies: Sendable {
     let eraser: any DataEraser
     let seeder: SampleDataSeeder
 
+    /// Ce qui change entre l'app réelle, le mode mémoire des tests d'interface et les tests de la cible app.
+    private struct Wiring {
+        var health: any HealthReading
+        var healthSource: any HealthSampleSource
+        var notifications: any NotificationAuthorizing
+        var healthEraser: any HealthErasing
+        /// `nil` : `UserDefaults.standard`.
+        var defaultsSuite: String?
+        var calendar: Calendar
+        var now: @Sendable () -> Date
+        var launch: LaunchOptions
+    }
+
     /// Apple Santé réel quand l'appareil le permet ; iCloud sur appareil, fichier local sur simulateur, mémoire en dernier recours.
+    /// En Debug, les options de lancement remplacent le magasin, Apple Santé et l'horloge.
     static func live() -> AppDependencies {
-        let health: any HealthReading = HealthKitReader.isAvailable ? HealthKitReader() : StubHealthReader()
+        #if DEBUG
+        let launch = LaunchOptions.parse(ProcessInfo.processInfo.arguments)
+        #else
+        let launch = LaunchOptions()
+        #endif
+        let calendar = Calendar.current
+        let now: @Sendable () -> Date
+        if let fixed = launch.fixedNow {
+            now = { fixed }
+        } else {
+            now = { Date.now }
+        }
+        let reader = HealthKitReader.isAvailable ? HealthKitReader() : nil
+        let healthSource: any HealthSampleSource
+        if let scenario = launch.healthScenario {
+            healthSource = ScenarioHealthSource(scenario: scenario, now: now(), calendar: calendar)
+        } else if let reader {
+            healthSource = reader
+        } else {
+            healthSource = FailingHealthSource()
+        }
+        var wiring = Wiring(health: reader ?? StubHealthReader(), healthSource: healthSource,
+                            notifications: UserNotificationAuthorizer(), healthEraser: StubHealthEraser(),
+                            defaultsSuite: nil, calendar: calendar, now: now, launch: launch)
+        if launch.storeInMemory {
+            UserDefaults(suiteName: memoryDefaultsSuite)?.removePersistentDomain(forName: memoryDefaultsSuite)
+            wiring.defaultsSuite = memoryDefaultsSuite
+            wiring.notifications = StubNotificationAuthorizer(granted: false)
+            guard let memory = try? make(wiring, mode: .inMemory, error: nil) else { crash(nil) }
+            return memory
+        }
         #if targetEnvironment(simulator)
         let preferred = StoreMode.localOnly
         #else
         let preferred = StoreMode.cloud
         #endif
         do {
-            return try make(health: health, calendar: .current, mode: preferred, error: nil)
+            return try make(wiring, mode: preferred, error: nil)
         } catch {
             let message = String(localized: "Le stockage n'a pas pu être ouvert ; les données ne seront pas conservées.")
-            guard let fallback = try? make(health: health, calendar: .current, mode: .inMemory, error: message) else { crash(error) }
+            guard let fallback = try? make(wiring, mode: .inMemory, error: message) else { crash(error) }
             return fallback
         }
     }
@@ -50,36 +107,47 @@ struct AppDependencies: Sendable {
         testing()
     }
 
-    /// Conteneur en mémoire et doublures, pour les tests et les aperçus.
-    static func testing(health: any HealthReading = StubHealthReader(), calendar: Calendar = .current) -> AppDependencies {
-        guard let dependencies = try? make(health: health, calendar: calendar, mode: .inMemory, error: nil) else { crash(nil) }
+    /// Conteneur en mémoire, doublures et suite de préférences dédiée, pour les tests et les aperçus.
+    static func testing(health: any HealthReading = StubHealthReader(), healthSource: (any HealthSampleSource)? = nil,
+                        healthEraser: any HealthErasing = StubHealthEraser(), calendar: Calendar = .current) -> AppDependencies {
+        let now: @Sendable () -> Date = { Date.now }
+        let wiring = Wiring(
+            health: health,
+            healthSource: healthSource ?? ScenarioHealthSource(scenario: .noData, now: now(), calendar: calendar),
+            notifications: StubNotificationAuthorizer(granted: false), healthEraser: healthEraser,
+            defaultsSuite: testingDefaultsSuite, calendar: calendar, now: now, launch: LaunchOptions())
+        guard let dependencies = try? make(wiring, mode: .inMemory, error: nil) else { crash(nil) }
         return dependencies
     }
 
-    private static func make(health: any HealthReading, calendar: Calendar, mode: StoreMode, error: String?) throws -> AppDependencies {
+    private static func make(_ wiring: Wiring, mode: StoreMode, error: String?) throws -> AppDependencies {
         let container = try PersistenceStack.makeContainer(mode: mode)
         let content = ContentLibrary.bundled
+        let calendar = wiring.calendar
         let exporter = SwiftDataExporter(container: container, appVersion: appVersion, contentVersion: content.contentVersion,
                                          exerciseNames: { content.exercise(id: $0)?.name.fr })
-        let eraser = SwiftDataEraser(container: container, defaultsSuite: nil,
-                                     defaultsDomain: Bundle.main.bundleIdentifier ?? "fr.seonay.pulse",
-                                     healthEraser: StubHealthEraser(), notifications: nil,
+        let eraser = SwiftDataEraser(container: container, defaultsSuite: wiring.defaultsSuite,
+                                     defaultsDomain: wiring.defaultsSuite ?? Bundle.main.bundleIdentifier ?? "fr.seonay.pulse",
+                                     healthEraser: wiring.healthEraser, notifications: nil,
                                      exportsDirectory: SwiftDataExporter.exportsDirectory)
         return AppDependencies(
-            health: health, calendar: calendar, content: content, container: container, storeMode: mode, storeError: error,
+            health: wiring.health, healthSource: wiring.healthSource, notifications: wiring.notifications,
+            onboardingSteps: UserDefaultsOnboardingStepStore(suiteName: wiring.defaultsSuite),
+            now: wiring.now, launch: wiring.launch,
+            calendar: calendar, content: content, container: container, storeMode: mode, storeError: error,
             profiles: SwiftDataProfileRepository(modelContainer: container),
             programs: SwiftDataProgramRepository(modelContainer: container),
             userExercises: SwiftDataUserExerciseRepository(modelContainer: container),
             workouts: SwiftDataWorkoutRepository(modelContainer: container),
             scheduledDays: SwiftDataScheduledDayRepository(modelContainer: container),
-            recovery: SwiftDataRecoveryRepository(modelContainer: container),
+            recovery: SwiftDataRecoveryRepository(modelContainer: container, calendar: calendar),
             supplements: SwiftDataSupplementRepository(modelContainer: container),
             bodyMeasurements: SwiftDataBodyMeasurementRepository(modelContainer: container),
             personalRecords: SwiftDataPersonalRecordRepository(modelContainer: container),
             healthCache: SwiftDataHealthSampleCache(modelContainer: container),
             activeSession: SwiftDataActiveSessionStore(modelContainer: container),
             inspector: SwiftDataStoreInspector(container: container, cloudEnabled: mode == .cloud),
-            exporter: exporter, eraser: eraser, seeder: SampleDataSeeder(container: container))
+            exporter: exporter, eraser: eraser, seeder: SampleDataSeeder(container: container, calendar: calendar))
     }
 
     private static var appVersion: String {
@@ -90,5 +158,29 @@ struct AppDependencies: Sendable {
 
     private static func crash(_ error: (any Error)?) -> Never {
         fatalError("Impossible de créer le conteneur SwiftData : \(error.map { String(describing: $0) } ?? "inconnu")")
+    }
+}
+
+// MARK: - Environnements des fonctionnalités
+
+extension AppDependencies {
+    /// Les nuits lues dans la source Apple Santé, mises en cache dans le magasin.
+    var nightHistory: NightHistory {
+        NightHistory(source: healthSource, cache: healthCache, calendar: calendar)
+    }
+
+    var scores: DailyScoreService {
+        DailyScoreService(recovery: recovery, calendar: calendar)
+    }
+
+    func onboardingEnvironment() -> OnboardingEnvironment {
+        OnboardingEnvironment(profiles: profiles, programs: programs, health: healthSource, nightHistory: nightHistory,
+                              scores: scores, notifications: notifications, library: content, stepStore: onboardingSteps,
+                              calendar: calendar, now: now)
+    }
+
+    func todayEnvironment() -> TodayEnvironment {
+        TodayEnvironment(profiles: profiles, programs: programs, nightHistory: nightHistory, scores: scores,
+                         library: content, calendar: calendar, now: now)
     }
 }

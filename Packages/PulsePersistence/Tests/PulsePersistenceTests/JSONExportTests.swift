@@ -11,7 +11,7 @@ private func makeExporter(_ container: ModelContainerBox, directory: URL? = nil)
 
 @Test func jsonExportDecodesBackToSameData() async throws {
     let box = try ModelContainerBox()
-    try await SampleDataSeeder(container: box.container).seed(now: Fixed.t0)
+    try await SampleDataSeeder(container: box.container, calendar: Fixed.calendar).seed(now: Fixed.t0)
     let exporter = makeExporter(box)
     let url = try await exporter.exportJSON()
     #expect(url.lastPathComponent.hasPrefix("Pulse-") && url.pathExtension == "json")

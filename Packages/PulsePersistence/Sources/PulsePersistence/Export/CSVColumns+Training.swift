@@ -4,7 +4,8 @@ import PulseDomain
 /// Colonnes des tables d'entraînement, dans l'ordre de déclaration des entités.
 enum CSVColumns {
     static let profile: [CSVColumn<UserProfile>] = [
-        .init(name: "id") { $1.uuid($0.id) }, .init(name: "sex") { $1.raw($0.sex) },
+        .init(name: "id") { $1.uuid($0.id) }, .init(name: "first_name") { item, _ in item.firstName },
+        .init(name: "sex") { $1.raw($0.sex) },
         .init(name: "birth_date") { $1.date($0.birthDate) }, .init(name: "height_cm") { $1.num($0.heightCm) },
         .init(name: "weight_kg") { $1.num($0.weightKg) }, .init(name: "strength_level") { $1.raw($0.strengthLevel) },
         .init(name: "running_level") { $1.raw($0.runningLevel) }, .init(name: "focus") { $1.num($0.focus) },

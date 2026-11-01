@@ -23,34 +23,43 @@ public enum PersistenceStack {
     }
 
     public static func makeContainer(mode: StoreMode) throws -> ModelContainer {
-        let synced = Schema(syncedModels)
-        let local = Schema(localModels)
-        let configurations: [ModelConfiguration]
         switch mode {
         case .inMemory:
-            configurations = [
-                ModelConfiguration("synced", schema: synced, isStoredInMemoryOnly: true, cloudKitDatabase: .none),
-                ModelConfiguration("local", schema: local, isStoredInMemoryOnly: true, cloudKitDatabase: .none)
-            ]
+            return try makeContainer(configurations: [
+                ModelConfiguration("synced", schema: Schema(syncedModels), isStoredInMemoryOnly: true, cloudKitDatabase: .none),
+                ModelConfiguration("local", schema: Schema(localModels), isStoredInMemoryOnly: true, cloudKitDatabase: .none)
+            ])
         case .localOnly:
-            configurations = [
-                ModelConfiguration("synced", schema: synced, url: try storeURL("synced"), cloudKitDatabase: .none),
-                ModelConfiguration("local", schema: local, url: try storeURL("local"), cloudKitDatabase: .none)
-            ]
+            return try makeContainer(directory: try storeDirectory())
         case .cloud:
-            configurations = [
-                ModelConfiguration("synced", schema: synced, url: try storeURL("synced"),
+            let directory = try storeDirectory()
+            return try makeContainer(configurations: [
+                ModelConfiguration("synced", schema: Schema(syncedModels), url: directory.appending(path: "synced.store"),
                                    cloudKitDatabase: .private(cloudContainerIdentifier)),
-                ModelConfiguration("local", schema: local, url: try storeURL("local"), cloudKitDatabase: .none)
-            ]
+                ModelConfiguration("local", schema: Schema(localModels), url: directory.appending(path: "local.store"),
+                                   cloudKitDatabase: .none)
+            ])
         }
-        return try ModelContainer(for: Schema(versionedSchema: PulseSchemaV1.self), migrationPlan: PulseMigrationPlan.self,
-                                  configurations: configurations)
     }
 
-    private static func storeURL(_ name: String) throws -> URL {
+    /// Magasins `synced.store` et `local.store` dans `directory`, sans CloudKit, migrés jusqu'à la dernière version.
+    public static func makeContainer(directory: URL) throws -> ModelContainer {
+        try makeContainer(configurations: [
+            ModelConfiguration("synced", schema: Schema(syncedModels), url: directory.appending(path: "synced.store"),
+                               cloudKitDatabase: .none),
+            ModelConfiguration("local", schema: Schema(localModels), url: directory.appending(path: "local.store"),
+                               cloudKitDatabase: .none)
+        ])
+    }
+
+    private static func makeContainer(configurations: [ModelConfiguration]) throws -> ModelContainer {
+        try ModelContainer(for: Schema(versionedSchema: PulseSchemaV2.self), migrationPlan: PulseMigrationPlan.self,
+                           configurations: configurations)
+    }
+
+    private static func storeDirectory() throws -> URL {
         let directory = URL.applicationSupportDirectory.appending(path: "Pulse", directoryHint: .isDirectory)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        return directory.appending(path: "\(name).store")
+        return directory
     }
 }

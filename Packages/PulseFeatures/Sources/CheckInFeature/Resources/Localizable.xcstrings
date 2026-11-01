@@ -1,0 +1,246 @@
+{
+  "sourceLanguage": "fr",
+  "strings": {
+    "Ton sommeil cette nuit": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ton sommeil cette nuit"
+          }
+        }
+      }
+    },
+    "Courbatures et douleurs": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Courbatures et douleurs"
+          }
+        }
+      }
+    },
+    "Motivation à t'entraîner": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Motivation à t'entraîner"
+          }
+        }
+      }
+    },
+    "Mauvais": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mauvais"
+          }
+        }
+      }
+    },
+    "Moyen": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moyen"
+          }
+        }
+      }
+    },
+    "Correct": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Correct"
+          }
+        }
+      }
+    },
+    "Bon": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bon"
+          }
+        }
+      }
+    },
+    "Excellent": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Excellent"
+          }
+        }
+      }
+    },
+    "Aucune": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune"
+          }
+        }
+      }
+    },
+    "Légères": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Légères"
+          }
+        }
+      }
+    },
+    "Modérées": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modérées"
+          }
+        }
+      }
+    },
+    "Marquées": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marquées"
+          }
+        }
+      }
+    },
+    "Douleur aiguë": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Douleur aiguë"
+          }
+        }
+      }
+    },
+    "Zéro": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zéro"
+          }
+        }
+      }
+    },
+    "Faible": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Faible"
+          }
+        }
+      }
+    },
+    "Moyenne": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moyenne"
+          }
+        }
+      }
+    },
+    "Bonne": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bonne"
+          }
+        }
+      }
+    },
+    "À fond": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À fond"
+          }
+        }
+      }
+    },
+    "Un score estimé n'autorise jamais de surcharge progressive.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un score estimé n'autorise jamais de surcharge progressive."
+          }
+        }
+      }
+    },
+    "Pas de données de nuit": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas de données de nuit"
+          }
+        }
+      }
+    },
+    "Montre déchargée ou non portée ? Trois questions suffisent pour estimer ta récupération.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Montre déchargée ou non portée ? Trois questions suffisent pour estimer ta récupération."
+          }
+        }
+      }
+    },
+    "Estimation": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estimation"
+          }
+        }
+      }
+    },
+    "Réponds aux trois questions": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réponds aux trois questions"
+          }
+        }
+      }
+    },
+    "Utiliser ce score aujourd'hui": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utiliser ce score aujourd'hui"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

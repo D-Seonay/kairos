@@ -5,6 +5,7 @@ import SwiftData
 @Model
 public final class StoredProfile {
     public var id: UUID = UUID()
+    public var firstName: String?
     public var sex: String = Sex.unspecified.rawValue
     public var birthDate: Date?
     public var heightCm: Double?
@@ -46,6 +47,7 @@ public final class StoredProfile {
 
     /// Recopie tous les champs sauf `id` et `createdAt`.
     public func apply(_ profile: UserProfile) {
+        firstName = profile.firstName
         sex = profile.sex.rawValue
         birthDate = profile.birthDate
         heightCm = profile.heightCm
@@ -80,7 +82,8 @@ public final class StoredProfile {
 
     public func toDomain() -> UserProfile {
         UserProfile(
-            id: id, sex: .stored(sex, default: .unspecified), birthDate: birthDate, heightCm: heightCm, weightKg: weightKg,
+            id: id, firstName: firstName, sex: .stored(sex, default: .unspecified), birthDate: birthDate, heightCm: heightCm,
+            weightKg: weightKg,
             strengthLevel: .stored(strengthLevel, default: .beginner), runningLevel: .stored(runningLevel, default: .beginner),
             focus: focus, trainingDaysPerWeek: trainingDaysPerWeek,
             restWeekdays: CodableColumn.decode([Weekday].self, from: restWeekdays, default: []),

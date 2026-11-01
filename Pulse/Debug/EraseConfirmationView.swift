@@ -5,6 +5,8 @@ struct EraseConfirmationView: View {
     static let confirmationWord = "SUPPRIMER"
 
     let model: DataDebugModel
+    /// Appelé après une suppression réussie, une fois la feuille fermée.
+    let onErased: () async -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var includeAppleHealth = false
     @State private var typed = ""
@@ -31,6 +33,7 @@ struct EraseConfirmationView: View {
                             Task {
                                 await model.erase(includeAppleHealth: includeAppleHealth)
                                 dismiss()
+                                if model.didErase { await onErased() }
                             }
                         }
                         .disabled(typed != Self.confirmationWord)
@@ -38,7 +41,8 @@ struct EraseConfirmationView: View {
                 }
             }
             .navigationTitle(String(localized: "Tout supprimer"))
-            .toolbar { Button(String(localized: "Annuler")) { dismiss() } }
+            .toolbar { Button(String(localized: "Annuler")) { dismiss() }.disabled(model.isBusy) }
         }
+        .interactiveDismissDisabled(model.isBusy)
     }
 }

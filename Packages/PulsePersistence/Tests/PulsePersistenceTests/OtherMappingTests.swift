@@ -15,7 +15,15 @@ import Testing
     #expect(try context.fetchCount(FetchDescriptor<StoredHealthQueryAnchor>()) == 1)
     #expect(PersistenceStack.localModels.count == 3)
     #expect(PersistenceStack.syncedModels.count == 14)
-    #expect(PulseSchemaV1.models.count == 17)
+    #expect(PulseSchemaV1.models.count == 17 && PulseSchemaV2.models.count == 17)
+}
+
+@Test func newM3FieldsRoundTripThroughStoredModels() {
+    var recovery = Sample.recovery()
+    recovery.originalSessionChosen = false
+    #expect(StoredDailyRecovery(recovery).toDomain() == recovery)
+    let profile = UserProfile(firstName: "Mathéo", createdAt: Fixed.t0, updatedAt: Fixed.t1)
+    #expect(StoredProfile(profile).toDomain() == profile)
 }
 
 @Test func recoveryCheckInSupplementRoundTrip() throws {

@@ -5,7 +5,7 @@ import Testing
 
 @Test func seederFillsEveryExportedTable() async throws {
     let container = try TestContainer.make()
-    try await SampleDataSeeder(container: container).seed(now: Fixed.t0)
+    try await SampleDataSeeder(container: container, calendar: Fixed.calendar).seed(now: Fixed.t0)
     let counts = try await SwiftDataStoreInspector(container: container, cloudEnabled: false).counts()
     for table in StoreTable.allCases where table != .healthQueryAnchors && table != .activeSessionSnapshots {
         #expect((counts[table] ?? 0) > 0, Comment(rawValue: table.rawValue))

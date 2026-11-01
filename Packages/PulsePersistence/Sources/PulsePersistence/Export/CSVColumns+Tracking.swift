@@ -25,6 +25,7 @@ extension CSVColumns {
         .init(name: "asleep_minutes") { $1.int($0.asleepMinutes) }, .init(name: "deep_minutes") { $1.int($0.deepMinutes) },
         .init(name: "missing_factors") { $1.list($0.missingFactors) }, .init(name: "calibration") { $1.calibration($0.calibration) },
         .init(name: "adjustments") { $1.json($0.adjustments) }, .init(name: "frozen_at") { $1.date($0.frozenAt) },
+        .init(name: "original_session_chosen") { item, format in item.originalSessionChosen.map(format.bool) },
         .init(name: "created_at") { $1.date($0.createdAt) }, .init(name: "updated_at") { $1.date($0.updatedAt) }
     ]
 

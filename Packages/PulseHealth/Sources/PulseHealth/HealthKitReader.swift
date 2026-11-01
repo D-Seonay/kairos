@@ -6,7 +6,7 @@ import PulseDomain
 public final class HealthKitReader: HealthReading, @unchecked Sendable {
     public static var isAvailable: Bool { HKHealthStore.isHealthDataAvailable() }
 
-    private let store: HKHealthStore
+    let store: HKHealthStore
 
     public init(store: HKHealthStore = HKHealthStore()) {
         self.store = store

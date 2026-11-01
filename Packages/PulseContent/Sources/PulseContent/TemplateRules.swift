@@ -35,8 +35,18 @@ enum TemplateRules {
         for exercise in day.exercises {
             issues += exerciseIssues(for: exercise, subject: "\(subject)/\(exercise.exercise)", in: library)
         }
+        issues += duplicateExerciseIssues(for: day, subject: subject)
         issues += supersetIssues(for: day, subject: subject)
         return issues
+    }
+
+    /// Un exercice ne figure qu'une fois dans un même jour.
+    private static func duplicateExerciseIssues(for day: TemplateDay, subject: String) -> [ContentIssue] {
+        let counts = Dictionary(grouping: day.exercises, by: \.exercise).filter { $0.value.count > 1 }
+        return counts.keys.sorted().map {
+            ContentIssue(rule: .duplicateExerciseInDay, subject: "\(subject)/\($0)",
+                         message: "exercice présent plusieurs fois dans le jour")
+        }
     }
 
     private static func exerciseIssues(for exercise: TemplateExercise, subject: String, in library: ContentLibrary) -> [ContentIssue] {

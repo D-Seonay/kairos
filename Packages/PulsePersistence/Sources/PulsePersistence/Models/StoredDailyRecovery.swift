@@ -22,6 +22,7 @@ public final class StoredDailyRecovery {
     public var calibration: Data?
     public var adjustments: Data?
     public var frozenAt: Date?
+    public var originalSessionChosen: Bool?
     public var createdAt: Date = Date()
     public var updatedAt: Date = Date()
     public var deletedAt: Date?
@@ -50,6 +51,7 @@ public final class StoredDailyRecovery {
         calibration = CodableColumn.encode(recovery.calibration)
         adjustments = CodableColumn.encode(recovery.adjustments)
         frozenAt = recovery.frozenAt
+        originalSessionChosen = recovery.originalSessionChosen
         updatedAt = recovery.updatedAt
     }
 
@@ -62,6 +64,6 @@ public final class StoredDailyRecovery {
                       missingFactors: CodableColumn.decode([Factor].self, from: missingFactors, default: []),
                       calibration: CodableColumn.decode(CalibrationState.self, from: calibration, default: .ready),
                       adjustments: CodableColumn.decode([SessionAdjustment].self, from: adjustments, default: []),
-                      frozenAt: frozenAt, createdAt: createdAt, updatedAt: updatedAt)
+                      frozenAt: frozenAt, originalSessionChosen: originalSessionChosen, createdAt: createdAt, updatedAt: updatedAt)
     }
 }
