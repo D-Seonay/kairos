@@ -7,4 +7,11 @@ public enum FocusSplit {
         let endurance = Int((safe * 100).rounded())
         return "\(100 - endurance) / \(endurance)"
     }
+
+    /// `focus` ramené dans 0...1 et arrondi au dixième : le pas du curseur (`FocusSlider`) laisse sinon des écarts de flottants
+    /// du genre 0,30000000000000004 dans le profil enregistré.
+    public static func snapped(_ focus: Double) -> Double {
+        let safe = focus.isNaN ? 0.5 : min(max(focus, 0), 1)
+        return (safe * 10).rounded() / 10
+    }
 }

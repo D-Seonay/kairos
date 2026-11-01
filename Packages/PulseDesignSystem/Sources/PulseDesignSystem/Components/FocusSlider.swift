@@ -10,6 +10,11 @@ public struct FocusSlider: View {
         _focus = focus
     }
 
+    /// Le curseur avance par dixièmes ; ce qu'il écrit dans le profil est arrondi au dixième exact.
+    private var snappedFocus: Binding<Double> {
+        Binding(get: { focus }, set: { focus = FocusSplit.snapped($0) })
+    }
+
     public var body: some View {
         VStack(spacing: 6) {
             HStack {
@@ -25,7 +30,7 @@ public struct FocusSlider: View {
             .font(.system(.subheadline, weight: .bold))
             .foregroundStyle(PulsePalette.text)
 
-            Slider(value: $focus, in: 0...1, step: 0.01)
+            Slider(value: snappedFocus, in: 0...1, step: 0.1)
                 .tint(Color(PulsePalette.accent(for: theme).accent))
                 .accessibilityLabel(String(localized: "Équilibre force endurance", bundle: .module))
                 .accessibilityValue(FocusSplit.label(focus: focus))

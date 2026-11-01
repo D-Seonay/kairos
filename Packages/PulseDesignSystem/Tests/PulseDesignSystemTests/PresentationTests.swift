@@ -44,3 +44,17 @@ import Testing
     #expect(CategoryTone.positive.color(onOpal: true) == PulsePalette.opalOK)
     #expect(CategoryTone.critical.color(onOpal: false) == PulsePalette.bad)
 }
+
+@Test func focusSnapsToCleanTenths() {
+    #expect(FocusSplit.snapped(0.30000000000000004) == 0.3)
+    #expect(FocusSplit.snapped(0.6000000000000001) == 0.6)
+    #expect(FocusSplit.snapped(0.44) == 0.4)
+    #expect(FocusSplit.snapped(0.45) == 0.5)
+    #expect(FocusSplit.snapped(0) == 0 && FocusSplit.snapped(1) == 1)
+}
+
+@Test func focusSnapStaysInRange() {
+    #expect(FocusSplit.snapped(-0.4) == 0)
+    #expect(FocusSplit.snapped(1.7) == 1)
+    #expect(FocusSplit.snapped(.nan) == 0.5)
+}
