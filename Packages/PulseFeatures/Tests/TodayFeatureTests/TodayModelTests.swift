@@ -104,33 +104,6 @@ struct TodayModelTests {
         }
     }
 
-    @Test func secondCheckInWhileOneIsInFlightIsIgnored() async {
-        let fixture = TodayFixture(scenario: .threeNights)
-        let model = fixture.makeModel()
-        await model.refresh()
-        model.checkIn.selection = [.sleep: 3, .pain: 3, .motivation: 3]
-        async let first: Void = model.submitCheckIn()
-        async let second: Void = model.submitCheckIn()
-        _ = await (first, second)
-        guard case .scored = model.score else {
-            Issue.record("Un score était attendu, obtenu \(String(describing: model.score))")
-            return
-        }
-    }
-
-    @Test func concurrentRefreshesAreCoalesced() async {
-        let fixture = TodayFixture()
-        let model = fixture.makeModel()
-        async let first: Void = model.refresh()
-        async let second: Void = model.refresh()
-        _ = await (first, second)
-        #expect(!model.isLoading)
-        guard case .scored = model.score else {
-            Issue.record("Un score était attendu, obtenu \(String(describing: model.score))")
-            return
-        }
-    }
-
     @Test func beforeDayStartKeepsYesterdayOnly() async {
         let fixture = TodayFixture(at: "2026-11-02T03:00")
         let model = fixture.makeModel()

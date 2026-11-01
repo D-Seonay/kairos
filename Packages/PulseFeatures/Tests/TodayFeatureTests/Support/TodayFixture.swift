@@ -90,15 +90,18 @@ struct TodayFixture {
     let clock: MutableClock
     let environment: TodayEnvironment
 
-    init(scenario: HealthScenario = .goodNight, at start: String = "2026-11-02T08:00") {
+    /// `health` remplace la source du scénario (par exemple une source qui compte ses lectures) ; `recovery` le dépôt des scores.
+    init(scenario: HealthScenario = .goodNight, at start: String = "2026-11-02T08:00",
+         health: (any HealthSampleSource)? = nil, recovery: (any RecoveryRepository)? = nil) {
         let calendar = TodayClock.calendar
         let clock = MutableClock(start)
         self.clock = clock
-        source = SwitchableHealthSource(ScenarioHealthSource(scenario: scenario, now: clock.now, calendar: calendar))
+        let scenarioSource = ScenarioHealthSource(scenario: scenario, now: clock.now, calendar: calendar)
+        source = SwitchableHealthSource(health ?? scenarioSource)
         environment = TodayEnvironment(
             profiles: profiles, programs: programs,
             nightHistory: NightHistory(source: source, cache: InMemoryHealthSampleCache(), calendar: calendar),
-            scores: DailyScoreService(recovery: InMemoryRecoveryRepository(calendar: calendar), calendar: calendar),
+            scores: DailyScoreService(recovery: recovery ?? InMemoryRecoveryRepository(calendar: calendar), calendar: calendar),
             library: .bundled, calendar: calendar, now: { clock.now })
     }
 
