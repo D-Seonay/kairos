@@ -48,7 +48,6 @@ public actor SwiftDataHealthSampleCache: HealthSampleCache {
     public func clear() throws {
         try modelContext.delete(model: StoredCachedHealthSample.self)
         try modelContext.delete(model: StoredHealthQueryAnchor.self)
-        try modelContext.delete(model: StoredActiveSessionSnapshot.self)
         try modelContext.save()
     }
 }

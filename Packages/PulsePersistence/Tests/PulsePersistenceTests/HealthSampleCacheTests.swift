@@ -24,3 +24,12 @@ import Testing
     #expect(try await cache.anchor(for: .sleep) == nil)
     #expect(try await cache.samples(kind: .sdnn, from: .distantPast, to: .distantFuture).isEmpty)
 }
+
+/// Reconstruire le cache Apple Santé ne doit jamais toucher à la séance en cours (spec M2 §5.4).
+@Test func cacheClearKeepsTheActiveSession() async throws {
+    let container = try TestContainer.make()
+    let store = SwiftDataActiveSessionStore(modelContainer: container)
+    try await store.save(Sample.snapshot())
+    try await SwiftDataHealthSampleCache(modelContainer: container).clear()
+    #expect(try await store.load() != nil)
+}
