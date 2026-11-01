@@ -26,7 +26,7 @@
 
 /* Begin PBXFileReference section */
 		08C0C5C2A43D096433BA0B8F /* PulseContent */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PulseContent; path = Packages/PulseContent; sourceTree = SOURCE_ROOT; };
-		13FEF2D2118D74C3572DF349 /* Pulse.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Pulse.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		13FEF2D2118D74C3572DF349 /* Pulse.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Pulse.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FBA30D234A433E58E16508B /* PulseTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = PulseTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A70D8B0C52E658248BD5D9C9 /* PulseRecoveryEngine */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PulseRecoveryEngine; path = Packages/PulseRecoveryEngine; sourceTree = SOURCE_ROOT; };
 		AB2D664BC108B8D410A545BF /* PulseDomain */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PulseDomain; path = Packages/PulseDomain; sourceTree = SOURCE_ROOT; };
@@ -333,6 +333,7 @@
 				DEVELOPMENT_TEAM = UP9NVJDBKA;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = Pulse/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.sports";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -352,6 +353,7 @@
 				DEVELOPMENT_TEAM = UP9NVJDBKA;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = Pulse/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.sports";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

@@ -1,7 +1,159 @@
 {
   "sourceLanguage" : "fr",
   "strings" : {
+    "Abdominaux" : {
 
+    },
+    "Abducteurs" : {
+
+    },
+    "Abduction de hanche" : {
+
+    },
+    "Adducteurs" : {
+
+    },
+    "Adduction de hanche" : {
+
+    },
+    "Assisté" : {
+
+    },
+    "Avant-bras" : {
+
+    },
+    "Barre" : {
+
+    },
+    "Barre EZ" : {
+
+    },
+    "Bas du corps" : {
+
+    },
+    "Biceps" : {
+
+    },
+    "Charge externe" : {
+
+    },
+    "Charnière de hanche" : {
+
+    },
+    "Deltoïdes antérieurs" : {
+
+    },
+    "Deltoïdes latéraux" : {
+
+    },
+    "Deltoïdes postérieurs" : {
+
+    },
+    "Écarté" : {
+
+    },
+    "Élastique" : {
+
+    },
+    "Extension du coude" : {
+
+    },
+    "Extension du genou" : {
+
+    },
+    "Fente" : {
+
+    },
+    "Fessiers" : {
+
+    },
+    "Fléchisseurs de hanche" : {
+
+    },
+    "Flexion du coude" : {
+
+    },
+    "Flexion du genou" : {
+
+    },
+    "Flexion du tronc" : {
+
+    },
+    "Gainage" : {
+
+    },
+    "Grands dorsaux" : {
+
+    },
+    "Haltères" : {
+
+    },
+    "Haut du corps" : {
+
+    },
+    "Haut du dos" : {
+
+    },
+    "Ischio-jambiers" : {
+
+    },
+    "Isolation épaules" : {
+
+    },
+    "Kettlebell" : {
+
+    },
+    "Lombaires" : {
+
+    },
+    "Machine" : {
+
+    },
+    "Mollets" : {
+
+    },
+    "Obliques" : {
+
+    },
+    "Pectoraux" : {
+
+    },
+    "Poids du corps" : {
+
+    },
+    "Poulie" : {
+
+    },
+    "Poussée horizontale" : {
+
+    },
+    "Poussée verticale" : {
+
+    },
+    "Quadriceps" : {
+
+    },
+    "Smith machine" : {
+
+    },
+    "Squat" : {
+
+    },
+    "Tirage horizontal" : {
+
+    },
+    "Tirage vertical" : {
+
+    },
+    "Trapèzes" : {
+
+    },
+    "Triceps" : {
+
+    },
+    "Tronc" : {
+
+    }
   },
   "version" : "1.0"
 }
