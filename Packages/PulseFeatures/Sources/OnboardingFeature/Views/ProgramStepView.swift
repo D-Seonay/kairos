@@ -154,6 +154,8 @@ struct WeekPreviewRow: View {
     }
 }
 
+#if DEBUG
 #Preview {
     OnboardingFlowView(model: OnboardingPreviewSupport.model(step: .program))
 }
+#endif

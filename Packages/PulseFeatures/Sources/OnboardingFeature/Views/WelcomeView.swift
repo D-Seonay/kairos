@@ -72,6 +72,7 @@ struct WelcomeView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     ZStack {
         PulsePalette.background.ignoresSafeArea()
@@ -79,3 +80,4 @@ struct WelcomeView: View {
         WelcomeView(model: OnboardingPreviewSupport.model(step: .welcome))
     }
 }
+#endif

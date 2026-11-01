@@ -109,6 +109,8 @@ struct GoalsStepView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     OnboardingFlowView(model: OnboardingPreviewSupport.model(step: .goals))
 }
+#endif

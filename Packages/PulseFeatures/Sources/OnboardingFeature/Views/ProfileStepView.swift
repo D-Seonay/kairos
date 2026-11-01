@@ -167,6 +167,8 @@ struct ProfileStepView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     OnboardingFlowView(model: OnboardingPreviewSupport.model(step: .profile))
 }
+#endif

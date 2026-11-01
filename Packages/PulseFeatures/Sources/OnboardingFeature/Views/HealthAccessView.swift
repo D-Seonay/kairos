@@ -59,6 +59,8 @@ struct HealthAccessView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     OnboardingFlowView(model: OnboardingPreviewSupport.model(step: .health))
 }
+#endif

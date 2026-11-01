@@ -74,6 +74,7 @@ private struct ReadingView: View {
     }
 }
 
+#if DEBUG
 #Preview("Bonne nuit") {
     OnboardingFlowView(model: OnboardingPreviewSupport.model(step: .calibration, scenario: .goodNight))
 }
@@ -81,3 +82,4 @@ private struct ReadingView: View {
 #Preview("Trois nuits") {
     OnboardingFlowView(model: OnboardingPreviewSupport.model(step: .calibration, scenario: .threeNights))
 }
+#endif

@@ -75,6 +75,8 @@ public struct OnboardingFlowView: View {
     }
 }
 
+#if DEBUG
 #Preview("Parcours") {
     OnboardingFlowView(model: OnboardingPreviewSupport.model(step: .welcome))
 }
+#endif
