@@ -103,6 +103,20 @@ struct OnboardingSaveFailureTests {
         #expect(fixture.stepStore.load() == .profile)
     }
 
+    @Test func goingBackClearsTheErrorOfTheStepLeft() async {
+        let (fixture, profiles) = await failingFixture()
+        let model = fixture.makeModel()
+        await model.start()
+        await model.begin()
+        await model.skipHealth()
+        await profiles.setFailsOnSave(true)
+        await model.continueFromProfile()
+        #expect(model.errorMessage != nil)
+        model.goBack()
+        #expect(model.step == .health)
+        #expect(model.errorMessage == nil)
+    }
+
     @Test func retryAfterAFailedSaveAdvancesAndClearsTheError() async {
         let (fixture, profiles) = await failingFixture()
         let model = fixture.makeModel()

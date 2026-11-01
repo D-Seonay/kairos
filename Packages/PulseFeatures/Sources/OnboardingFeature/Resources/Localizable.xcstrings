@@ -1,46 +1,1232 @@
 {
-  "sourceLanguage": "fr",
-  "strings": {
-    "Pulse n'a pas pu accéder à Apple Santé. Tu peux continuer sans.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pulse n'a pas pu accéder à Apple Santé. Tu peux continuer sans."
+  "sourceLanguage" : "fr",
+  "strings" : {
+    "%lld nuits analysées" : {
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld nuit analysée"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld nuits analysées"
+                }
+              }
+            }
           }
         }
       }
     },
-    "Pulse n'a pas pu enregistrer ta progression.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pulse n'a pas pu enregistrer ta progression."
+    "%lld sorties" : {
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld sortie"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld sorties"
+                }
+              }
+            }
           }
         }
       }
     },
-    "Pulse n'a pas pu calculer ton score pour le moment.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pulse n'a pas pu calculer ton score pour le moment."
+    "%lld séances de musculation" : {
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld séance de musculation"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld séances de musculation"
+                }
+              }
+            }
           }
         }
       }
     },
-    "Pulse n'a pas pu enregistrer ton check-in.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pulse n'a pas pu enregistrer ton check-in."
+    "%lld séances par semaine" : {
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld séance par semaine"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld séances par semaine"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "1 à 3 ans" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 à 3 ans"
+          }
+        }
+      }
+    },
+    "Adopter ce programme" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adopter ce programme"
+          }
+        }
+      }
+    },
+    "Aucun matériel" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun matériel"
+          }
+        }
+      }
+    },
+    "Aucune" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune"
+          }
+        }
+      }
+    },
+    "Autoriser dans Apple Santé" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autoriser dans Apple Santé"
+          }
+        }
+      }
+    },
+    "Autre" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autre"
+          }
+        }
+      }
+    },
+    "Barres, machines, poulies" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Barres, machines, poulies"
+          }
+        }
+      }
+    },
+    "Ce score est une estimation. Pulse construira ta ligne de base au fil de tes nuits, dès qu'Apple Santé aura des données à lire." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce score est une estimation. Pulse construira ta ligne de base au fil de tes nuits, dès qu'Apple Santé aura des données à lire."
+          }
+        }
+      }
+    },
+    "Ce sont des données de santé au sens de l'article 9 du RGPD. Tu peux retirer l'accès à tout moment dans les réglages : Pulse bascule alors sur un check-in de trois questions." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce sont des données de santé au sens de l'article 9 du RGPD. Tu peux retirer l'accès à tout moment dans les réglages : Pulse bascule alors sur un check-in de trois questions."
+          }
+        }
+      }
+    },
+    "Commencer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Commencer"
+          }
+        }
+      }
+    },
+    "Continuer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuer"
+          }
+        }
+      }
+    },
+    "Continuer sans montre" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuer sans montre"
+          }
+        }
+      }
+    },
+    "Continuer sans programme" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuer sans programme"
+          }
+        }
+      }
+    },
+    "D" : {
+      "comment" : "Initiale de dimanche",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "D"
+          }
+        }
+      }
+    },
+    "Date de naissance" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date de naissance"
+          }
+        }
+      }
+    },
+    "Des séances qui s'adaptent" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Des séances qui s'adaptent"
+          }
+        }
+      }
+    },
+    "Dimanche" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dimanche"
+          }
+        }
+      }
+    },
+    "Douleurs ou limitations actuelles" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Douleurs ou limitations actuelles"
+          }
+        }
+      }
+    },
+    "Durée, sommeil profond et paradoxal." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Durée, sommeil profond et paradoxal."
+          }
+        }
+      }
+    },
+    "En calibration (%lld nuits)" : {
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "En calibration (%lld nuit)"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "En calibration (%lld nuits)"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Entraînements passés" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entraînements passés"
+          }
+        }
+      }
+    },
+    "Estimé" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimé"
+          }
+        }
+      }
+    },
+    "Expérience en course à pied" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expérience en course à pied"
+          }
+        }
+      }
+    },
+    "Expérience en musculation" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expérience en musculation"
+          }
+        }
+      }
+    },
+    "Facultatif" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Facultatif"
+          }
+        }
+      }
+    },
+    "Femme" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Femme"
+          }
+        }
+      }
+    },
+    "Fréquence au repos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fréquence au repos"
+          }
+        }
+      }
+    },
+    "Fréquence cardiaque au repos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fréquence cardiaque au repos"
+          }
+        }
+      }
+    },
+    "Genoux" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Genoux"
+          }
+        }
+      }
+    },
+    "Haltères, banc, élastiques" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Haltères, banc, élastiques"
+          }
+        }
+      }
+    },
+    "Home gym" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Home gym"
+          }
+        }
+      }
+    },
+    "Homme" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homme"
+          }
+        }
+      }
+    },
+    "Ils servent aux zones cardiaques et aux estimations de charge, rien d'autre." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ils servent aux zones cardiaques et aux estimations de charge, rien d'autre."
+          }
+        }
+      }
+    },
+    "J" : {
+      "comment" : "Initiale de jeudi",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "J"
+          }
+        }
+      }
+    },
+    "Je construis le mien" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Je construis le mien"
+          }
+        }
+      }
+    },
+    "Je cours régulièrement" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Je cours régulièrement"
+          }
+        }
+      }
+    },
+    "Je débute" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Je débute"
+          }
+        }
+      }
+    },
+    "Je prépare des courses" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Je prépare des courses"
+          }
+        }
+      }
+    },
+    "Jeudi" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeudi"
+          }
+        }
+      }
+    },
+    "Jours de repos obligatoires" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jours de repos obligatoires"
+          }
+        }
+      }
+    },
+    "L" : {
+      "comment" : "Initiale de lundi",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L"
+          }
+        }
+      }
+    },
+    "L'iPhone et l'Apple Watch fournissent la SDNN, pas la rMSSD : Pulse construit sa propre ligne de base sur cette mesure." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'iPhone et l'Apple Watch fournissent la SDNN, pas la rMSSD : Pulse construit sa propre ligne de base sur cette mesure."
+          }
+        }
+      }
+    },
+    "Le planificateur espace les jambes lourdes et le fractionné." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le planificateur espace les jambes lourdes et le fractionné."
+          }
+        }
+      }
+    },
+    "Lecture de tes nuits…" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lecture de tes nuits…"
+          }
+        }
+      }
+    },
+    "Les mouvements à risque pour les zones cochées sont remplacés par leur alternative." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les mouvements à risque pour les zones cochées sont remplacés par leur alternative."
+          }
+        }
+      }
+    },
+    "Lombaires" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lombaires"
+          }
+        }
+      }
+    },
+    "Lundi" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lundi"
+          }
+        }
+      }
+    },
+    "M" : {
+      "comment" : "Initiale de mardi",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "M"
+          }
+        }
+      }
+    },
+    "Mardi" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mardi"
+          }
+        }
+      }
+    },
+    "Matériel accessible" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Matériel accessible"
+          }
+        }
+      }
+    },
+    "Me prévenir quand mon score est prêt" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Me prévenir quand mon score est prêt"
+          }
+        }
+      }
+    },
+    "Mercredi" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mercredi"
+          }
+        }
+      }
+    },
+    "Mesurée pendant le sommeil." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mesurée pendant le sommeil."
+          }
+        }
+      }
+    },
+    "Moins d'un an" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moins d'un an"
+          }
+        }
+      }
+    },
+    "Muscu et course réconciliées" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muscu et course réconciliées"
+          }
+        }
+      }
+    },
+    "Où placer le curseur ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Où placer le curseur ?"
+          }
+        }
+      }
+    },
+    "Pas de programme pour l'instant : tu créeras tes propres routines dès que l'éditeur sera disponible." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas de programme pour l'instant : tu créeras tes propres routines dès que l'éditeur sera disponible."
+          }
+        }
+      }
+    },
+    "Pas de période d'apprentissage : Pulse compare chaque nuit à tes 14 dernières, et la ligne de base se précise au fil des semaines." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas de période d'apprentissage : Pulse compare chaque nuit à tes 14 dernières, et la ligne de base se précise au fil des semaines."
+          }
+        }
+      }
+    },
+    "Pas encore de score mesuré" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas encore de score mesuré"
+          }
+        }
+      }
+    },
+    "Phases de sommeil" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Phases de sommeil"
+          }
+        }
+      }
+    },
+    "Plus de 3 ans" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plus de 3 ans"
+          }
+        }
+      }
+    },
+    "Poids actuel" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poids actuel"
+          }
+        }
+      }
+    },
+    "Poids du corps" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poids du corps"
+          }
+        }
+      }
+    },
+    "Poignets" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poignets"
+          }
+        }
+      }
+    },
+    "Pour calculer ta charge des 28 derniers jours dès aujourd'hui." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour calculer ta charge des 28 derniers jours dès aujourd'hui."
+          }
+        }
+      }
+    },
+    "Proposition : %@ et %@ par semaine." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proposition : %@ et %@ par semaine."
+          }
+        }
+      }
+    },
+    "Proposition : %@ par semaine." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proposition : %@ par semaine."
+          }
+        }
+      }
+    },
+    "Prénom affiché" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prénom affiché"
+          }
+        }
+      }
+    },
+    "Pulse a besoin de lire tes nuits" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse a besoin de lire tes nuits"
+          }
+        }
+      }
+    },
+    "Pulse calcule ta récupération de ce matin." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse calcule ta récupération de ce matin."
+          }
+        }
+      }
+    },
+    "Pulse l'adapte à ton matériel, à tes douleurs et à tes jours de repos. Celui qui colle le mieux à ton curseur est en tête." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse l'adapte à ton matériel, à tes douleurs et à tes jours de repos. Celui qui colle le mieux à ton curseur est en tête."
+          }
+        }
+      }
+    },
+    "Pulse lit ta récupération chaque matin et ajuste musculation et course pour que les deux progressent sans se nuire." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse lit ta récupération chaque matin et ajuste musculation et course pour que les deux progressent sans se nuire."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas assez de nuits pour mesurer ta récupération. Trois questions donnent une première estimation, qu'un score mesuré remplacera dès que ta ligne de base sera prête." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas assez de nuits pour mesurer ta récupération. Trois questions donnent une première estimation, qu'un score mesuré remplacera dès que ta ligne de base sera prête."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu accéder à Apple Santé. Tu peux continuer sans." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu accéder à Apple Santé. Tu peux continuer sans."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu calculer ton score pour le moment." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu calculer ton score pour le moment."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu enregistrer ta progression." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu enregistrer ta progression."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu enregistrer ton check-in." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu enregistrer ton check-in."
+          }
+        }
+      }
+    },
+    "Pulse n'est pas un dispositif médical." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'est pas un dispositif médical."
+          }
+        }
+      }
+    },
+    "Pulse répartit tes semaines entre force et endurance selon cet équilibre." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse répartit tes semaines entre force et endurance selon cet équilibre."
+          }
+        }
+      }
+    },
+    "Quelques repères sur toi" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quelques repères sur toi"
+          }
+        }
+      }
+    },
+    "Recommandé" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recommandé"
+          }
+        }
+      }
+    },
+    "Renseigner" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renseigner"
+          }
+        }
+      }
+    },
+    "Retour" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retour"
+          }
+        }
+      }
+    },
+    "S" : {
+      "comment" : "Initiale de samedi",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "S"
+          }
+        }
+      }
+    },
+    "Salle complète" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salle complète"
+          }
+        }
+      }
+    },
+    "Samedi" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Samedi"
+          }
+        }
+      }
+    },
+    "Sans ces données, pas de score de récupération mesuré. Elles restent sur ton iPhone." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sans ces données, pas de score de récupération mesuré. Elles restent sur ton iPhone."
+          }
+        }
+      }
+    },
+    "Sexe" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sexe"
+          }
+        }
+      }
+    },
+    "Sommeil moyen" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sommeil moyen"
+          }
+        }
+      }
+    },
+    "Séances par semaine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séances par semaine"
+          }
+        }
+      }
+    },
+    "Ta ligne de base" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ta ligne de base"
+          }
+        }
+      }
+    },
+    "Ta récupération ce matin" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ta récupération ce matin"
+          }
+        }
+      }
+    },
+    "Taille" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taille"
+          }
+        }
+      }
+    },
+    "Ton corps décide de la séance du jour." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton corps décide de la séance du jour."
+          }
+        }
+      }
+    },
+    "Ton programme" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton programme"
+          }
+        }
+      }
+    },
+    "Un score de récupération chaque matin" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un score de récupération chaque matin"
+          }
+        }
+      }
+    },
+    "Une notification le matin, dès que ta nuit est lue." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une notification le matin, dès que ta nuit est lue."
+          }
+        }
+      }
+    },
+    "Unités" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unités"
+          }
+        }
+      }
+    },
+    "V" : {
+      "comment" : "Initiale de vendredi",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "V"
+          }
+        }
+      }
+    },
+    "Variabilité cardiaque" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Variabilité cardiaque"
+          }
+        }
+      }
+    },
+    "Variabilité cardiaque nocturne" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Variabilité cardiaque nocturne"
+          }
+        }
+      }
+    },
+    "Variabilité cardiaque, fréquence au repos et sommeil, comparés à ta propre moyenne." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Variabilité cardiaque, fréquence au repos et sommeil, comparés à ta propre moyenne."
+          }
+        }
+      }
+    },
+    "Vendredi" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vendredi"
+          }
+        }
+      }
+    },
+    "Voir ma séance du jour" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir ma séance du jour"
+          }
+        }
+      }
+    },
+    "Volume, intensité et repos ajustés avant que tu touches une barre." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Volume, intensité et repos ajustés avant que tu touches une barre."
+          }
+        }
+      }
+    },
+    "cm" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "cm"
+          }
+        }
+      }
+    },
+    "course" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "course"
+          }
+        }
+      }
+    },
+    "kg" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kg"
+          }
+        }
+      }
+    },
+    "lb" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "lb"
+          }
+        }
+      }
+    },
+    "musculation" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "musculation"
+          }
+        }
+      }
+    },
+    "repos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "repos"
+          }
+        }
+      }
+    },
+    "Épaules" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Épaules"
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }

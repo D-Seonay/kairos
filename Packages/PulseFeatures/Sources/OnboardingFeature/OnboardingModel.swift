@@ -165,6 +165,7 @@ public final class OnboardingModel {
     }
 
     public func goBack() {
+        errorMessage = nil
         guard let previous = OnboardingStep(rawValue: step.rawValue - 1) else { return }
         if step == .calibration {
             calibration = .idle
