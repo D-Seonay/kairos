@@ -110,7 +110,7 @@ Un seul fichier `exercises.json` dans les ressources du package. Clés en camelC
 | `isCompound` | booléen | drapeau « base » : échauffement automatique (spec V1 §5.5). |
 | `isUnilateral` | booléen | vrai quand la charge est par côté (affichage M4). |
 | `loadKind` | `external`, `bodyweight`, `assisted` | `bodyweight` : le poids saisi est le lest ajouté ; `assisted` : le poids saisi est l'assistance (machine de tractions assistées). |
-| `defaultIncrementKg` | nombre | incrément de progression par défaut, 2,5 pour le haut et le tronc, 5 pour le bas (spec V1 §6.5), 1,25 autorisé pour les isolations légères. |
+| `defaultIncrementKg` | nombre | incrément de progression par défaut : 5 pour les polyarticulaires lourds du bas à la barre ou à la presse (squats, hack squat, presse, soulevés à la barre, hip thrust, mollets à la presse) ; 2,5 pour le haut, le tronc, les fentes, les exercices aux haltères et les isolations du bas ; 1,25 pour les isolations légères. Précise la règle « 2,5 haut / 5 bas » de la spec V1 §6.5 : 5 kg d'un coup sur une extension de jambes ou un leg curl est un saut trop grand. |
 | `defaultRestSeconds` | entier | 60, 90, 120 ou 180. |
 | `cues` | localisé, tableaux | exactement 3 consignes en `fr`, chacune ≤ 90 caractères. |
 | `mistakes` | localisé, tableaux | 2 ou 3 erreurs fréquentes en `fr`, chacune ≤ 90 caractères. |
