@@ -290,6 +290,46 @@
           }
         }
       }
+    },
+    "sur 100": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sur 100"
+          }
+        }
+      }
+    },
+    "Récupération pas encore calculée": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Récupération pas encore calculée"
+          }
+        }
+      }
+    },
+    "Récupération %lld sur 100": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Récupération %lld sur 100"
+          }
+        }
+      }
+    },
+    "Récupération %lld sur 100, %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Récupération %lld sur 100, %@"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
