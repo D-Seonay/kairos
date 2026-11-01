@@ -1,0 +1,36 @@
+import Foundation
+import PulseDomain
+
+/// Cache d'échantillons en mémoire, même sémantique que `SwiftDataHealthSampleCache`.
+public actor InMemoryHealthSampleCache: HealthSampleCache {
+    private var stored: [CachedHealthSample] = []
+    private var anchors: [HealthSampleKind: Data] = [:]
+
+    public init() {}
+
+    public func samples(kind: HealthSampleKind, from: Date, to: Date) async throws -> [CachedHealthSample] {
+        stored.filter { $0.kind == kind && $0.start >= from && $0.start < to }.sorted { $0.start < $1.start }
+    }
+
+    public func replace(kind: HealthSampleKind, with samples: [CachedHealthSample]) async throws {
+        stored.removeAll { $0.kind == kind }
+        stored += samples
+    }
+
+    public func insert(_ samples: [CachedHealthSample]) async throws {
+        stored += samples
+    }
+
+    public func anchor(for kind: HealthSampleKind) async throws -> Data? {
+        anchors[kind]
+    }
+
+    public func saveAnchor(_ data: Data, for kind: HealthSampleKind) async throws {
+        anchors[kind] = data
+    }
+
+    public func clear() async throws {
+        stored = []
+        anchors = [:]
+    }
+}
