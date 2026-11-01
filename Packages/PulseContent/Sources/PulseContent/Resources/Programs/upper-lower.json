@@ -1,0 +1,257 @@
+{
+  "schemaVersion": 1,
+  "id": "upper-lower",
+  "name": {
+    "fr": "Haut / Bas",
+    "en": "Upper / Lower"
+  },
+  "summary": {
+    "fr": "Deux séances haut du corps et deux séances bas du corps par semaine."
+  },
+  "recommendedFor": {
+    "focus": "balanced",
+    "daysPerWeek": [
+      4
+    ]
+  },
+  "sessionsPerWeek": 4,
+  "days": [
+    {
+      "id": "upper-a",
+      "name": {
+        "fr": "Haut A"
+      },
+      "kind": "strength",
+      "exercises": [
+        {
+          "exercise": "chest-press-machine",
+          "sets": 4,
+          "repsMin": 8,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 90
+        },
+        {
+          "exercise": "lat-pulldown-machine",
+          "sets": 3,
+          "repsMin": 8,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 90
+        },
+        {
+          "exercise": "shoulder-press-machine",
+          "sets": 3,
+          "repsMin": 8,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 90
+        },
+        {
+          "exercise": "seated-cable-row",
+          "sets": 3,
+          "repsMin": 10,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 90
+        },
+        {
+          "exercise": "triceps-pushdown-cable",
+          "sets": 3,
+          "repsMin": 10,
+          "repsMax": 15,
+          "targetRPE": 8,
+          "restSeconds": 60
+        },
+        {
+          "exercise": "cable-curl",
+          "sets": 3,
+          "repsMin": 10,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 60
+        }
+      ]
+    },
+    {
+      "id": "lower-a",
+      "name": {
+        "fr": "Bas A"
+      },
+      "kind": "strength",
+      "exercises": [
+        {
+          "exercise": "leg-press-machine",
+          "sets": 4,
+          "repsMin": 8,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 120
+        },
+        {
+          "exercise": "leg-extension-machine",
+          "sets": 3,
+          "repsMin": 12,
+          "repsMax": 15,
+          "targetRPE": 8,
+          "restSeconds": 60
+        },
+        {
+          "exercise": "lying-leg-curl-machine",
+          "sets": 3,
+          "repsMin": 10,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 90
+        },
+        {
+          "exercise": "walking-lunge-dumbbell",
+          "sets": 3,
+          "repsMin": 10,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 90
+        },
+        {
+          "exercise": "seated-calf-raise-machine",
+          "sets": 4,
+          "repsMin": 12,
+          "repsMax": 15,
+          "targetRPE": 8,
+          "restSeconds": 60
+        },
+        {
+          "exercise": "crunch-machine",
+          "sets": 3,
+          "repsMin": 12,
+          "repsMax": 20,
+          "targetRPE": 8,
+          "restSeconds": 60
+        }
+      ]
+    },
+    {
+      "id": "upper-b",
+      "name": {
+        "fr": "Haut B"
+      },
+      "kind": "strength",
+      "exercises": [
+        {
+          "exercise": "seated-row-machine-iso-lateral",
+          "sets": 4,
+          "repsMin": 8,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 90
+        },
+        {
+          "exercise": "incline-chest-press-machine",
+          "sets": 3,
+          "repsMin": 8,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 90
+        },
+        {
+          "exercise": "lat-pulldown-cable",
+          "sets": 3,
+          "repsMin": 10,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 90
+        },
+        {
+          "exercise": "lateral-raise-machine",
+          "sets": 3,
+          "repsMin": 12,
+          "repsMax": 15,
+          "targetRPE": 8,
+          "restSeconds": 60
+        },
+        {
+          "exercise": "face-pull-cable",
+          "sets": 3,
+          "repsMin": 12,
+          "repsMax": 15,
+          "targetRPE": 8,
+          "restSeconds": 60
+        },
+        {
+          "exercise": "hammer-curl-dumbbell",
+          "sets": 3,
+          "repsMin": 10,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 60
+        }
+      ]
+    },
+    {
+      "id": "lower-b",
+      "name": {
+        "fr": "Bas B"
+      },
+      "kind": "strength",
+      "exercises": [
+        {
+          "exercise": "romanian-deadlift-dumbbell",
+          "sets": 4,
+          "repsMin": 8,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 120
+        },
+        {
+          "exercise": "hip-thrust-barbell",
+          "sets": 3,
+          "repsMin": 8,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 120
+        },
+        {
+          "exercise": "seated-leg-curl-machine",
+          "sets": 3,
+          "repsMin": 10,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 90
+        },
+        {
+          "exercise": "hip-abduction-machine",
+          "sets": 3,
+          "repsMin": 12,
+          "repsMax": 15,
+          "targetRPE": 8,
+          "restSeconds": 60
+        },
+        {
+          "exercise": "standing-calf-raise-machine",
+          "sets": 3,
+          "repsMin": 12,
+          "repsMax": 15,
+          "targetRPE": 8,
+          "restSeconds": 60
+        },
+        {
+          "exercise": "plank",
+          "sets": 3,
+          "repsMin": 1,
+          "repsMax": 1,
+          "targetRPE": 8,
+          "restSeconds": 60
+        }
+      ]
+    }
+  ],
+  "suggestedWeek": [
+    "upper-a",
+    "lower-a",
+    null,
+    "upper-b",
+    "lower-b",
+    null,
+    null
+  ]
+}

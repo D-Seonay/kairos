@@ -2,9 +2,11 @@ import SwiftUI
 
 @main
 struct PulseApp: App {
+    private let dependencies = AppDependencies.live()
+
     var body: some Scene {
         WindowGroup {
-            HealthDiagnosticsView(model: HealthDiagnosticsModel(dependencies: .live()))
+            RootTabView(dependencies: dependencies)
         }
     }
 }

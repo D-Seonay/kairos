@@ -1,3 +1,4 @@
+import PulseDomain
 @testable import PulseRecoveryEngine
 import Testing
 

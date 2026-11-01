@@ -50,6 +50,18 @@ import Testing
         #expect(r.allowsProgressiveOverload == false)
     }
 
+    /// 14 nuits dont 3 avec une SDNN aberrante (0, 400, -5) : seules 11 comptent dans la calibration.
+    @Test func calibrationCountsOnlyValidSDNNNights() throws {
+        var history = fourteenNights
+        history[0].sdnnMs = 0
+        history[5].sdnnMs = 400
+        history[9].sdnnMs = -5
+        let today = NightSample(day: day, sdnnMs: 50, restingHeartRate: 50, sleep: .init(asleepMinutes: 480, deepMinutes: 96))
+        let r = try measured(calculator.compute(day: day, today: today, history: history))
+        #expect(r.calibration == .calibrating(nights: 11))
+        #expect(r.missing.isEmpty)
+    }
+
     @Test func eightNightsIsCalibrating() throws {
         let history = (1...8).map {
             NightSample(day: TestCalendar.shift(day, by: -$0), sdnnMs: 50, restingHeartRate: 50,

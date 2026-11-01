@@ -1,6 +1,42 @@
 {
   "sourceLanguage" : "fr",
   "strings" : {
+    "au lit" : {
+
+    },
+    "Courses" : {
+
+    },
+    "endormi" : {
+
+    },
+    "éveillé" : {
+
+    },
+    "FC au repos" : {
+
+    },
+    "Fréquence cardiaque" : {
+
+    },
+    "léger" : {
+
+    },
+    "paradoxal" : {
+
+    },
+    "Poids" : {
+
+    },
+    "profond" : {
+
+    },
+    "Sommeil" : {
+
+    },
+    "VFC (SDNN)" : {
+
+    }
   },
   "version" : "1.0"
 }

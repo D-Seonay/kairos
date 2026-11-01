@@ -1,0 +1,176 @@
+{
+  "schemaVersion": 1,
+  "id": "runner-strength",
+  "name": {
+    "fr": "Renforcement coureur",
+    "en": "Runner Strength"
+  },
+  "summary": {
+    "fr": "Deux séances de force pour les jambes, les hanches et le tronc, autour de trois courses planifiées."
+  },
+  "recommendedFor": {
+    "focus": "endurance",
+    "daysPerWeek": [
+      5
+    ]
+  },
+  "sessionsPerWeek": 5,
+  "days": [
+    {
+      "id": "easy-run",
+      "name": {
+        "fr": "Course facile"
+      },
+      "kind": "run",
+      "run": {
+        "type": "easy",
+        "targetMinutes": 40
+      }
+    },
+    {
+      "id": "strength-a",
+      "name": {
+        "fr": "Force A"
+      },
+      "kind": "strength",
+      "exercises": [
+        {
+          "exercise": "leg-press-machine",
+          "sets": 3,
+          "repsMin": 8,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 120
+        },
+        {
+          "exercise": "single-leg-romanian-deadlift",
+          "sets": 3,
+          "repsMin": 8,
+          "repsMax": 10,
+          "targetRPE": 8,
+          "restSeconds": 90
+        },
+        {
+          "exercise": "bulgarian-split-squat",
+          "sets": 3,
+          "repsMin": 8,
+          "repsMax": 10,
+          "targetRPE": 8,
+          "restSeconds": 90
+        },
+        {
+          "exercise": "standing-calf-raise-machine",
+          "sets": 3,
+          "repsMin": 12,
+          "repsMax": 15,
+          "targetRPE": 8,
+          "restSeconds": 60
+        },
+        {
+          "exercise": "side-plank",
+          "sets": 3,
+          "repsMin": 1,
+          "repsMax": 1,
+          "targetRPE": 8,
+          "restSeconds": 60
+        },
+        {
+          "exercise": "copenhagen-plank",
+          "sets": 3,
+          "repsMin": 1,
+          "repsMax": 1,
+          "targetRPE": 8,
+          "restSeconds": 60
+        }
+      ]
+    },
+    {
+      "id": "intervals",
+      "name": {
+        "fr": "Fractionné"
+      },
+      "kind": "run",
+      "run": {
+        "type": "intervals",
+        "targetMinutes": 30
+      }
+    },
+    {
+      "id": "strength-b",
+      "name": {
+        "fr": "Force B"
+      },
+      "kind": "strength",
+      "exercises": [
+        {
+          "exercise": "hip-thrust-barbell",
+          "sets": 3,
+          "repsMin": 8,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 120
+        },
+        {
+          "exercise": "lying-leg-curl-machine",
+          "sets": 3,
+          "repsMin": 10,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 90
+        },
+        {
+          "exercise": "step-up-dumbbell",
+          "sets": 3,
+          "repsMin": 8,
+          "repsMax": 10,
+          "targetRPE": 8,
+          "restSeconds": 90
+        },
+        {
+          "exercise": "hip-abduction-machine",
+          "sets": 3,
+          "repsMin": 12,
+          "repsMax": 15,
+          "targetRPE": 8,
+          "restSeconds": 60
+        },
+        {
+          "exercise": "dead-bug",
+          "sets": 3,
+          "repsMin": 8,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 60
+        },
+        {
+          "exercise": "band-lateral-walk",
+          "sets": 3,
+          "repsMin": 12,
+          "repsMax": 15,
+          "targetRPE": 8,
+          "restSeconds": 60
+        }
+      ]
+    },
+    {
+      "id": "long-run",
+      "name": {
+        "fr": "Sortie longue"
+      },
+      "kind": "run",
+      "run": {
+        "type": "long",
+        "targetMinutes": 60
+      }
+    }
+  ],
+  "suggestedWeek": [
+    "easy-run",
+    "strength-a",
+    null,
+    "intervals",
+    "strength-b",
+    null,
+    "long-run"
+  ]
+}

@@ -61,6 +61,7 @@ public struct RecoveryCalculator: Sendable {
         let values = history
             .filter { offset(from: $0, to: day).map { (1...Self.hrvWindowDays).contains($0) } ?? false }
             .compactMap(\.sdnnMs)
+            .filter { HRVBaseline.isValid(sdnnMs: $0) }
         let calibration: CalibrationState = values.count < Self.hrvWindowDays ? .calibrating(nights: values.count) : .ready
 
         guard let baseline = HRVBaseline(sdnnValuesMs: values),

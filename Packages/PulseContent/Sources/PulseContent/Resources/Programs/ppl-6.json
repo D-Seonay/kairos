@@ -1,0 +1,349 @@
+{
+  "schemaVersion": 1,
+  "id": "ppl-6",
+  "name": {
+    "fr": "PPL 6 jours",
+    "en": "PPL 6 days"
+  },
+  "summary": {
+    "fr": "Le même cycle Push / Pull / Legs deux fois par semaine, avec des variantes sur la seconde passe."
+  },
+  "recommendedFor": {
+    "focus": "strength",
+    "daysPerWeek": [
+      6
+    ]
+  },
+  "sessionsPerWeek": 6,
+  "days": [
+    {
+      "id": "push",
+      "name": {
+        "fr": "Push"
+      },
+      "kind": "strength",
+      "exercises": [
+        {
+          "exercise": "bench-press-barbell",
+          "sets": 3,
+          "repsMin": 6,
+          "repsMax": 10,
+          "targetRPE": 8,
+          "restSeconds": 120
+        },
+        {
+          "exercise": "chest-press-machine",
+          "sets": 3,
+          "repsMin": 8,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 90
+        },
+        {
+          "exercise": "pec-deck-machine",
+          "sets": 3,
+          "repsMin": 10,
+          "repsMax": 15,
+          "targetRPE": 8,
+          "restSeconds": 60
+        },
+        {
+          "exercise": "triceps-pushdown-cable",
+          "sets": 3,
+          "repsMin": 10,
+          "repsMax": 15,
+          "targetRPE": 8,
+          "restSeconds": 60,
+          "supersetGroup": 1
+        },
+        {
+          "exercise": "wrist-curl-cable",
+          "sets": 3,
+          "repsMin": 12,
+          "repsMax": 20,
+          "targetRPE": 8,
+          "restSeconds": 60,
+          "supersetGroup": 1
+        },
+        {
+          "exercise": "crunch-machine",
+          "sets": 3,
+          "repsMin": 12,
+          "repsMax": 20,
+          "targetRPE": 8,
+          "restSeconds": 60
+        }
+      ]
+    },
+    {
+      "id": "pull",
+      "name": {
+        "fr": "Pull"
+      },
+      "kind": "strength",
+      "exercises": [
+        {
+          "exercise": "lat-pulldown-machine",
+          "sets": 3,
+          "repsMin": 8,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 90
+        },
+        {
+          "exercise": "seated-row-machine-iso-lateral",
+          "sets": 3,
+          "repsMin": 8,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 90
+        },
+        {
+          "exercise": "lateral-raise-machine",
+          "sets": 3,
+          "repsMin": 12,
+          "repsMax": 15,
+          "targetRPE": 8,
+          "restSeconds": 60
+        },
+        {
+          "exercise": "preacher-curl-machine",
+          "sets": 3,
+          "repsMin": 10,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 60
+        },
+        {
+          "exercise": "hammer-curl-dumbbell",
+          "sets": 3,
+          "repsMin": 10,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 60
+        }
+      ]
+    },
+    {
+      "id": "legs",
+      "name": {
+        "fr": "Legs"
+      },
+      "kind": "strength",
+      "exercises": [
+        {
+          "exercise": "leg-press-machine",
+          "sets": 3,
+          "repsMin": 8,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 120
+        },
+        {
+          "exercise": "lying-leg-curl-machine",
+          "sets": 3,
+          "repsMin": 10,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 90
+        },
+        {
+          "exercise": "hip-abduction-machine",
+          "sets": 3,
+          "repsMin": 12,
+          "repsMax": 15,
+          "targetRPE": 8,
+          "restSeconds": 60
+        },
+        {
+          "exercise": "hip-adduction-machine",
+          "sets": 3,
+          "repsMin": 12,
+          "repsMax": 15,
+          "targetRPE": 8,
+          "restSeconds": 60
+        },
+        {
+          "exercise": "seated-calf-raise-machine",
+          "sets": 3,
+          "repsMin": 12,
+          "repsMax": 15,
+          "targetRPE": 8,
+          "restSeconds": 60
+        },
+        {
+          "exercise": "leg-extension-machine",
+          "sets": 3,
+          "repsMin": 12,
+          "repsMax": 15,
+          "targetRPE": 8,
+          "restSeconds": 60
+        }
+      ]
+    },
+    {
+      "id": "push-2",
+      "name": {
+        "fr": "Push 2"
+      },
+      "kind": "strength",
+      "exercises": [
+        {
+          "exercise": "incline-bench-press-dumbbell",
+          "sets": 3,
+          "repsMin": 8,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 90
+        },
+        {
+          "exercise": "incline-chest-press-machine",
+          "sets": 3,
+          "repsMin": 8,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 90
+        },
+        {
+          "exercise": "cable-crossover",
+          "sets": 3,
+          "repsMin": 12,
+          "repsMax": 15,
+          "targetRPE": 8,
+          "restSeconds": 60
+        },
+        {
+          "exercise": "shoulder-press-machine",
+          "sets": 3,
+          "repsMin": 8,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 90
+        },
+        {
+          "exercise": "overhead-triceps-extension-cable",
+          "sets": 3,
+          "repsMin": 10,
+          "repsMax": 15,
+          "targetRPE": 8,
+          "restSeconds": 60
+        },
+        {
+          "exercise": "cable-crunch",
+          "sets": 3,
+          "repsMin": 12,
+          "repsMax": 20,
+          "targetRPE": 8,
+          "restSeconds": 60
+        }
+      ]
+    },
+    {
+      "id": "pull-2",
+      "name": {
+        "fr": "Pull 2"
+      },
+      "kind": "strength",
+      "exercises": [
+        {
+          "exercise": "lat-pulldown-cable",
+          "sets": 3,
+          "repsMin": 8,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 90
+        },
+        {
+          "exercise": "chest-supported-row-machine",
+          "sets": 3,
+          "repsMin": 8,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 90
+        },
+        {
+          "exercise": "face-pull-cable",
+          "sets": 3,
+          "repsMin": 12,
+          "repsMax": 15,
+          "targetRPE": 8,
+          "restSeconds": 60
+        },
+        {
+          "exercise": "cable-curl",
+          "sets": 3,
+          "repsMin": 10,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 60
+        },
+        {
+          "exercise": "reverse-curl-ez-bar",
+          "sets": 3,
+          "repsMin": 10,
+          "repsMax": 15,
+          "targetRPE": 8,
+          "restSeconds": 60
+        }
+      ]
+    },
+    {
+      "id": "legs-2",
+      "name": {
+        "fr": "Legs 2"
+      },
+      "kind": "strength",
+      "exercises": [
+        {
+          "exercise": "hack-squat-machine",
+          "sets": 3,
+          "repsMin": 8,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 120
+        },
+        {
+          "exercise": "seated-leg-curl-machine",
+          "sets": 3,
+          "repsMin": 10,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 90
+        },
+        {
+          "exercise": "bulgarian-split-squat",
+          "sets": 3,
+          "repsMin": 8,
+          "repsMax": 12,
+          "targetRPE": 8,
+          "restSeconds": 90
+        },
+        {
+          "exercise": "standing-calf-raise-machine",
+          "sets": 3,
+          "repsMin": 12,
+          "repsMax": 15,
+          "targetRPE": 8,
+          "restSeconds": 60
+        },
+        {
+          "exercise": "leg-extension-machine",
+          "sets": 3,
+          "repsMin": 12,
+          "repsMax": 15,
+          "targetRPE": 8,
+          "restSeconds": 60
+        }
+      ]
+    }
+  ],
+  "suggestedWeek": [
+    "push",
+    "pull",
+    "legs",
+    "push-2",
+    "pull-2",
+    "legs-2",
+    null
+  ]
+}

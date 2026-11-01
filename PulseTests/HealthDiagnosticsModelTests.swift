@@ -28,7 +28,7 @@ import Testing
         let cal = Calendar.current
         let today = cal.startOfDay(for: .now)
         let stub = Self.twentyNights(calendar: cal, today: today)
-        let model = HealthDiagnosticsModel(dependencies: .init(health: stub, calendar: cal), today: today)
+        let model = HealthDiagnosticsModel(dependencies: .testing(health: stub, calendar: cal), today: today)
         await model.refresh()
         #expect(model.rows.count == HealthDataType.allCases.count)
         #expect(model.rows.first { $0.type == .hrvSDNN }?.countLast60Days == 20)
@@ -50,7 +50,7 @@ import Testing
 
     @Test func refreshSurfacesErrorsWithoutCrashing() async {
         struct Boom: Error {}
-        let model = HealthDiagnosticsModel(dependencies: .init(health: StubHealthReader(error: Boom()), calendar: .current))
+        let model = HealthDiagnosticsModel(dependencies: .testing(health: StubHealthReader(error: Boom()), calendar: .current))
         await model.refresh()
         #expect(model.errorMessage != nil)
         #expect(model.isLoading == false)

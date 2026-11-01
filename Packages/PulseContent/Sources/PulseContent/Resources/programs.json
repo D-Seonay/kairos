@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "programs": [
+    "ppl-3",
+    "ppl-6",
+    "upper-lower",
+    "full-body",
+    "runner-strength"
+  ]
+}

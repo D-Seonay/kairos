@@ -1,15 +1,4 @@
-/// Réponses du check-in du matin, chacune de 0 à 4, 4 étant le meilleur état.
-public struct CheckInAnswers: Sendable, Equatable, Codable {
-    public var sleep: Int
-    public var pain: Int
-    public var motivation: Int
-
-    public init(sleep: Int, pain: Int, motivation: Int) {
-        self.sleep = sleep
-        self.pain = pain
-        self.motivation = motivation
-    }
-}
+import PulseDomain
 
 /// Score de check-in pondéré sommeil 40 / douleur 35 / motivation 25.
 public enum CheckInScorer {

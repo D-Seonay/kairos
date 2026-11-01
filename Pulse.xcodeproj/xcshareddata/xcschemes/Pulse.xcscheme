@@ -83,6 +83,28 @@
                ReferencedContainer = "container:Packages/PulseHealth">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "PulseContentTests"
+               BuildableName = "PulseContentTests"
+               BlueprintName = "PulseContentTests"
+               ReferencedContainer = "container:Packages/PulseContent">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "PulsePersistenceTests"
+               BuildableName = "PulsePersistenceTests"
+               BlueprintName = "PulsePersistenceTests"
+               ReferencedContainer = "container:Packages/PulsePersistence">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>
