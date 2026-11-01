@@ -46,17 +46,28 @@ struct WeekPreviewDay: Equatable {
 }
 
 enum ProgramWeekPreview {
-    /// Sept jours, du lundi au dimanche ; un jour sans séance ou à l'identifiant inconnu est un repos.
-    static func days(for template: ProgramTemplate) -> [WeekPreviewDay] {
-        Weekday.allCases.enumerated().map { index, weekday in
-            let dayID = template.suggestedWeek.indices.contains(index) ? template.suggestedWeek[index] : nil
-            let kind = dayID.flatMap { id in template.days.first { $0.id == id }?.kind }
-            switch kind {
-            case .strength: return WeekPreviewDay(weekday: weekday, kind: .strength)
-            case .run: return WeekPreviewDay(weekday: weekday, kind: .run)
-            case nil: return WeekPreviewDay(weekday: weekday, kind: .rest)
-            }
+    /// Sept jours, du lundi au dimanche, tels que l'adoption les placera : les séances glissent hors des jours de repos
+    /// imposés (`WeekLayoutArranger`) et une séance sans place disparaît. Un jour sans séance ou à l'identifiant inconnu
+    /// est un repos.
+    static func days(for template: ProgramTemplate, restWeekdays: [Weekday]) -> [WeekPreviewDay] {
+        let kindsByID = Dictionary(template.days.map { ($0.id, $0.kind) }, uniquingKeysWith: { first, _ in first })
+        var kindsBySlot: [UUID: WeekPreviewDay.Kind] = [:]
+        let layout: [UUID?] = Weekday.allCases.indices.map { index in
+            guard template.suggestedWeek.indices.contains(index), let dayID = template.suggestedWeek[index],
+                  let kind = kindsByID[dayID] else { return nil }
+            let slot = UUID()
+            kindsBySlot[slot] = kind == .strength ? .strength : .run
+            return slot
         }
+        let arranged = WeekLayoutArranger.arrange(layout, restWeekdays: restWeekdays)
+        return zip(Weekday.allCases, arranged).map { weekday, slot in
+            WeekPreviewDay(weekday: weekday, kind: slot.flatMap { kindsBySlot[$0] } ?? .rest)
+        }
+    }
+
+    /// Le nombre de séances réellement placées dans la semaine.
+    static func sessionCount(_ days: [WeekPreviewDay]) -> Int {
+        days.filter { $0.kind != .rest }.count
     }
 
     /// « Lundi : musculation, mardi : repos, … », lu par VoiceOver à la place des sept initiales.

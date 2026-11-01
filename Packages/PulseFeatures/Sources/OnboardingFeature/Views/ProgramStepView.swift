@@ -21,7 +21,8 @@ struct ProgramStepView: View {
             VStack(spacing: 10) {
                 ForEach(model.templates) { template in
                     ProgramTemplateCard(
-                        template: template, isRecommended: template.id == model.recommendedTemplateID,
+                        template: template, restWeekdays: model.profile.restWeekdays,
+                        isRecommended: template.id == model.recommendedTemplateID,
                         isSelected: !model.choseCustomProgram && model.selectedTemplateID == template.id
                     ) {
                         model.selectedTemplateID = template.id
@@ -54,6 +55,7 @@ struct ProgramStepView: View {
 /// La carte d'un modèle : nom, badge « Recommandé », résumé, séances par semaine, focus et aperçu de la semaine L à D.
 struct ProgramTemplateCard: View {
     let template: ProgramTemplate
+    let restWeekdays: [Weekday]
     let isRecommended: Bool
     let isSelected: Bool
     let onSelect: () -> Void
@@ -62,6 +64,7 @@ struct ProgramTemplateCard: View {
     var body: some View {
         let palette = PulsePalette.accent(for: theme)
         let shape = RoundedRectangle(cornerRadius: PulseMetrics.radius, style: .continuous)
+        let week = ProgramWeekPreview.days(for: template, restWeekdays: restWeekdays)
         Button {
             guard !isSelected else { return }
             onSelect()
@@ -81,10 +84,10 @@ struct ProgramTemplateCard: View {
                         .foregroundStyle(PulsePalette.text2)
                         .multilineTextAlignment(.leading)
                     HStack(spacing: 8) {
-                        tag(String(localized: "\(template.sessionsPerWeek) séances par semaine", bundle: .module))
+                        tag(String(localized: "\(ProgramWeekPreview.sessionCount(week)) séances par semaine", bundle: .module))
                         tag(template.recommendedFor.focus.localizedName)
                     }
-                    WeekPreviewRow(days: ProgramWeekPreview.days(for: template))
+                    WeekPreviewRow(days: week)
                 }
             }
             .overlay(shape.strokeBorder(isSelected ? Color(palette.accent) : .clear, lineWidth: 2))

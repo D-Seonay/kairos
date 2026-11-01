@@ -64,27 +64,58 @@ struct OnboardingViewSupportTests {
             TemplateDay(id: "a", name: LocalizedText(fr: "A"), kind: .strength),
             TemplateDay(id: "r", name: LocalizedText(fr: "R"), kind: .run)
         ]
-        let preview = ProgramWeekPreview.days(for: template(week: ["a", nil, "r", nil, "a", nil, nil], days: days))
+        let preview = ProgramWeekPreview.days(
+            for: template(week: ["a", nil, "r", nil, "a", nil, nil], days: days), restWeekdays: [])
         #expect(preview.map(\.weekday) == Weekday.allCases)
         #expect(preview.map(\.kind) == [.strength, .rest, .run, .rest, .strength, .rest, .rest])
     }
 
     @Test func weekPreviewPadsAShortWeekAndIgnoresUnknownDays() {
-        let preview = ProgramWeekPreview.days(for: template(week: ["ghost"], days: []))
+        let preview = ProgramWeekPreview.days(for: template(week: ["ghost"], days: []), restWeekdays: [])
         #expect(preview.count == 7)
         #expect(preview.allSatisfy { $0.kind == .rest })
     }
 
     @Test func everyBundledTemplatePreviewsItsSessions() {
         for template in ContentLibrary.bundled.programTemplates {
-            let preview = ProgramWeekPreview.days(for: template)
+            let preview = ProgramWeekPreview.days(for: template, restWeekdays: [])
             #expect(preview.count == 7)
             #expect(preview.filter { $0.kind != .rest }.count == template.sessionsPerWeek, "\(template.id)")
         }
     }
 
+    private func bundled(_ id: String) throws -> ProgramTemplate {
+        try #require(ContentLibrary.bundled.programTemplates.first { $0.id == id })
+    }
+
+    private func sessionWeekdays(_ preview: [WeekPreviewDay]) -> [Weekday] {
+        preview.filter { $0.kind != .rest }.map(\.weekday)
+    }
+
+    @Test func weekPreviewMovesSessionsOffAnImposedRestDay() throws {
+        let preview = ProgramWeekPreview.days(for: try bundled("ppl-3"), restWeekdays: [.wednesday])
+        #expect(sessionWeekdays(preview) == [.monday, .thursday, .friday])
+        #expect(ProgramWeekPreview.sessionCount(preview) == 3)
+    }
+
+    @Test func weekPreviewDropsSessionsThatFindNoRoom() throws {
+        let preview = ProgramWeekPreview.days(for: try bundled("ppl-6"), restWeekdays: [.saturday, .sunday])
+        #expect(sessionWeekdays(preview) == [.monday, .tuesday, .wednesday, .thursday, .friday])
+        #expect(ProgramWeekPreview.sessionCount(preview) == 5)
+    }
+
+    @Test func weekPreviewMatchesTheAdoptedWeek() throws {
+        let template = try bundled("ppl-3")
+        let rest: [Weekday] = [.wednesday, .friday]
+        let adopted = ProgramAdopter(library: .bundled).adopt(
+            template, equipment: .fullGym, painAreas: [], restWeekdays: rest, now: Date(timeIntervalSince1970: 0))
+        let preview = ProgramWeekPreview.days(for: template, restWeekdays: rest)
+        #expect(preview.map { $0.kind != .rest } == adopted.weekLayout.map { $0 != nil })
+    }
+
     @Test func weekPreviewReadsOutEveryDay() {
-        let days = ProgramWeekPreview.days(for: template(week: [nil, nil, nil, nil, nil, nil, nil], days: []))
+        let days = ProgramWeekPreview.days(
+            for: template(week: [nil, nil, nil, nil, nil, nil, nil], days: []), restWeekdays: [])
         let label = ProgramWeekPreview.accessibilityLabel(for: days)
         #expect(label.hasPrefix("Lundi : repos, Mardi : repos"))
         #expect(label.hasSuffix("Dimanche : repos"))
