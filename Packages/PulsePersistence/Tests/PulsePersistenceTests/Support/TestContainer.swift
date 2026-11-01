@@ -118,3 +118,12 @@ extension Sample {
         ActiveSessionSnapshot(startedAt: Fixed.t0, updatedAt: Fixed.t1, payload: Data([1, 2, 3]))
     }
 }
+
+/// Un conteneur en mémoire prêt à l'emploi.
+struct ModelContainerBox {
+    let container: ModelContainer
+
+    init() throws {
+        container = try TestContainer.make()
+    }
+}
