@@ -25,37 +25,35 @@ public struct TodayView: View {
             }
     }
 
-    @ViewBuilder
     private var content: some View {
-        if case .needsCheckIn = model.score {
-            checkInContent
-        } else {
-            ScrollView {
-                VStack(spacing: PulseMetrics.spacing) {
-                    TodayHeader(model: model, onOpenProfile: onOpenProfile)
-                    RecoveryCard(score: model.score, factors: model.factors, marker: model.marker)
-                    SessionCard(plannedDay: model.plannedDay, summary: model.summary)
-                }
-                .padding(PulseMetrics.spacing)
+        ScrollView {
+            VStack(spacing: PulseMetrics.spacing) {
+                TodayHeader(model: model, onOpenProfile: onOpenProfile)
+                recoveryOrCheckIn
+                SessionCard(plannedDay: model.plannedDay, summary: model.summary)
             }
-            .refreshable { await model.refresh() }
+            .padding(PulseMetrics.spacing)
         }
+        .refreshable { await model.refresh() }
     }
 
-    /// Les données ne suffisent pas : le check-in prend la place de la carte, sous l'en-tête.
-    private var checkInContent: some View {
-        VStack(spacing: 0) {
-            TodayHeader(model: model, onOpenProfile: onOpenProfile)
-                .padding([.horizontal, .top], PulseMetrics.spacing)
-            if let message = model.errorMessage {
-                Text(message)
-                    .font(.footnote)
-                    .foregroundStyle(PulsePalette.bad)
-                    .padding(.horizontal, PulseMetrics.spacing)
+    /// Les données ne suffisent pas : le check-in prend la place de la carte de récupération, la séance reste dessous.
+    @ViewBuilder
+    private var recoveryOrCheckIn: some View {
+        if case .needsCheckIn = model.score {
+            VStack(spacing: 12) {
+                if let message = model.errorMessage {
+                    Text(message)
+                        .font(.footnote)
+                        .foregroundStyle(PulsePalette.bad)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                CheckInView(form: model.checkIn, scrollable: false) { _ in
+                    Task { await model.submitCheckIn() }
+                }
             }
-            CheckInView(form: model.checkIn) { _ in
-                Task { await model.submitCheckIn() }
-            }
+        } else {
+            RecoveryCard(score: model.score, factors: model.factors, marker: model.marker)
         }
     }
 }

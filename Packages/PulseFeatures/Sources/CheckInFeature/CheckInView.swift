@@ -6,31 +6,42 @@ import SwiftUI
 @MainActor
 public struct CheckInView: View {
     private let form: CheckInForm
+    private let scrollable: Bool
     private let onSubmit: (CheckInAnswers) -> Void
 
-    public init(form: CheckInForm, onSubmit: @escaping (CheckInAnswers) -> Void) {
+    /// `scrollable: false` : le check-in s'intègre à une page qui défile déjà (l'accueil), sans défilement, marge ni fond propres.
+    public init(form: CheckInForm, scrollable: Bool = true, onSubmit: @escaping (CheckInAnswers) -> Void) {
         self.form = form
+        self.scrollable = scrollable
         self.onSubmit = onSubmit
     }
 
+    @ViewBuilder
     public var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                banner
-                ForEach(CheckInQuestion.allCases, id: \.self) { question in
-                    questionBlock(question)
-                }
-                estimationCard
-                submitButton
-                Text(String(localized: "Un score estimé n'autorise jamais de surcharge progressive.", bundle: .module))
-                    .font(.footnote)
-                    .foregroundStyle(PulsePalette.muted)
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: .infinity)
+        if scrollable {
+            ScrollView {
+                content.padding(PulseMetrics.spacing)
             }
-            .padding(PulseMetrics.spacing)
+            .background(PulsePalette.background)
+        } else {
+            content
         }
-        .background(PulsePalette.background)
+    }
+
+    private var content: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            banner
+            ForEach(CheckInQuestion.allCases, id: \.self) { question in
+                questionBlock(question)
+            }
+            estimationCard
+            submitButton
+            Text(String(localized: "Un score estimé n'autorise jamais de surcharge progressive.", bundle: .module))
+                .font(.footnote)
+                .foregroundStyle(PulsePalette.muted)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+        }
     }
 
     private var banner: some View {
