@@ -26,3 +26,17 @@ import Testing
 @Test func integerWithoutUnit() {
     #expect(PulseFormat.integer(61.6, unit: nil) == "62")
 }
+
+@Test func nonFiniteValuesNeverCrashAndShowADash() {
+    for value in [Double.nan, .infinity, -.infinity] {
+        #expect(PulseFormat.integer(value, unit: "ms") == "\u{2014}")
+        #expect(PulseFormat.integer(value, unit: nil) == "\u{2014}")
+        #expect(PulseFormat.signedPercent(value) == "\u{2014}")
+        #expect(PulseFormat.signedInteger(value, unit: "bpm") == "\u{2014}")
+    }
+}
+
+@Test func outOfRangeValuesShowADash() {
+    #expect(PulseFormat.integer(1e30, unit: "ms") == "\u{2014}")
+    #expect(PulseFormat.signedInteger(-1e30, unit: "bpm") == "\u{2014}")
+}

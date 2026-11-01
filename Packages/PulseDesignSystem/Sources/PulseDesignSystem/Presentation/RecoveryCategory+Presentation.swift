@@ -16,13 +16,9 @@ public enum CategoryTone: Sendable {
         }
     }
 
-    /// Le fond doux de la pastille (`.tag.ok`, `.tag.warn`, `.tag.bad`).
-    var softColor: Color {
-        switch self {
-        case .positive: PulsePalette.okSoft
-        case .caution: PulsePalette.warnSoft
-        case .critical: PulsePalette.badSoft
-        }
+    /// Le fond doux de la pastille (`.tag.ok`, `.tag.warn`, `.tag.bad`) : la teinte du ton à faible opacité.
+    func softColor(onOpal: Bool) -> Color {
+        color(onOpal: onOpal).opacity(onOpal ? 0.12 : 0.16)
     }
 }
 

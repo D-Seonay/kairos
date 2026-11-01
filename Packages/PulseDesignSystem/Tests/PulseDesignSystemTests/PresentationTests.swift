@@ -25,3 +25,22 @@ import Testing
     #expect(FocusSplit.label(focus: -0.3) == "100 / 0")
     #expect(FocusSplit.label(focus: 1.7) == "0 / 100")
 }
+
+@Test func focusSplitTreatsNaNAsBalanced() {
+    #expect(FocusSplit.label(focus: .nan) == "50 / 50")
+    #expect(FocusSplit.label(focus: .infinity) == "0 / 100")
+    #expect(FocusSplit.label(focus: -.infinity) == "100 / 0")
+}
+
+@Test func weekdayLabelsStartOnMonday() {
+    #expect(Weekday.allCases.map(\.initial) == ["L", "M", "M", "J", "V", "S", "D"])
+    #expect(Weekday.allCases.map(\.localizedName)
+        == ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"])
+}
+
+@Test func badgeColorFollowsTheSurface() {
+    #expect(CategoryBadge(category: .optimal).onOpal == false)
+    #expect(CategoryBadge(category: .optimal, onOpal: true).onOpal)
+    #expect(CategoryTone.positive.color(onOpal: true) == PulsePalette.opalOK)
+    #expect(CategoryTone.critical.color(onOpal: false) == PulsePalette.bad)
+}
