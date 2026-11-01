@@ -42,10 +42,14 @@ public final class HealthKitReader: HealthReading, @unchecked Sendable {
         )
     }
 
+    /// Plafond du comptage : au-delà, l'écran affiche « 10 000 » et la requête ne charge pas des années d'échantillons.
+    public static let sampleCountLimit = 10_000
+
     public func sampleCount(of type: HealthDataType, from: Date, to: Date) async throws -> Int {
         let descriptor = HKSampleQueryDescriptor(
             predicates: [Self.predicate(for: type, in: DateInterval(start: from, end: to))],
-            sortDescriptors: []
+            sortDescriptors: [],
+            limit: Self.sampleCountLimit
         )
         return try await descriptor.result(for: store).count
     }
