@@ -29,6 +29,25 @@ import Testing
         #expect(model.didErase && model.counts.values.allSatisfy { $0 == 0 } && model.isBusy == false)
     }
 
+    @Test func eraseFailureStillRefreshesCounts() async {
+        struct HealthEraseFailure: Error {}
+        let model = DataDebugModel(dependencies: .testing(healthEraser: StubHealthEraser(error: HealthEraseFailure())))
+        await model.seedSampleData()
+        #expect(model.counts[.workoutSets] == 9)
+        await model.erase(includeAppleHealth: true)
+        #expect(model.lastError != nil && model.didErase == false && model.isBusy == false)
+        #expect(model.counts.values.allSatisfy { $0 == 0 })
+    }
+
+    @Test func testingDependenciesUseADedicatedPreferencesSuite() async throws {
+        let suite = AppDependencies.testingDefaultsSuite
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defaults.set(true, forKey: "probe")
+        let dependencies = AppDependencies.testing()
+        try await dependencies.eraser.eraseEverything(options: EraseOptions(includeAppleHealth: false))
+        #expect(UserDefaults(suiteName: suite)?.object(forKey: "probe") == nil)
+    }
+
     @Test func liveDependenciesBuildAContainerOnSimulator() {
         let deps = AppDependencies.live()
         #expect(deps.storeMode == .localOnly || deps.storeMode == .inMemory)

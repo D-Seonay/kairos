@@ -3,7 +3,7 @@ import PulseHealth
 import PulseRecoveryEngine
 import SwiftUI
 
-/// Écran de diagnostic M1 : sources Apple Santé, 14 dernières nuits et score provisoire. Sans style : le design system arrive en M3.
+/// Écran de diagnostic M1, ouvert depuis le profil : sources Apple Santé, 14 dernières nuits et score provisoire. Sans style.
 struct HealthDiagnosticsView: View {
     @State private var model: HealthDiagnosticsModel
 
@@ -12,15 +12,13 @@ struct HealthDiagnosticsView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            List {
-                statusSection
-                sourcesSection
-                nightsSection
-                scoreSection
-            }
-            .navigationTitle(String(localized: "Diagnostic Apple Santé"))
+        List {
+            statusSection
+            sourcesSection
+            nightsSection
+            scoreSection
         }
+        .navigationTitle(String(localized: "Diagnostic Apple Santé"))
         .task { await model.refresh() }
     }
 
@@ -145,5 +143,7 @@ struct HealthDiagnosticsView: View {
 }
 
 #Preview {
-    HealthDiagnosticsView(model: HealthDiagnosticsModel(dependencies: .preview()))
+    NavigationStack {
+        HealthDiagnosticsView(model: HealthDiagnosticsModel(dependencies: .preview()))
+    }
 }

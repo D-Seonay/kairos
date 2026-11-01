@@ -1,25 +1,26 @@
 import PulseDomain
 import SwiftUI
 
-/// Onglet « Données » (spec M2 §8). Sans style : le design system arrive en M3.
+/// Écran de debug « Données » (spec M2 §8), ouvert depuis le profil. Sans style : le design system arrive en M3.
 struct DataDebugView: View {
     @State private var model: DataDebugModel
     @State private var showsErase = false
+    private let onErased: () async -> Void
 
-    init(model: DataDebugModel) {
+    /// `onErased` est appelé après une suppression totale réussie.
+    init(model: DataDebugModel, onErased: @escaping () async -> Void) {
         _model = State(initialValue: model)
+        self.onErased = onErased
     }
 
     var body: some View {
-        NavigationStack {
-            List {
-                contentSection
-                storeSection
-                actionsSection
-            }
-            .navigationTitle(String(localized: "Données"))
-            .sheet(isPresented: $showsErase) { EraseConfirmationView(model: model) }
+        List {
+            contentSection
+            storeSection
+            actionsSection
         }
+        .navigationTitle(String(localized: "Données"))
+        .sheet(isPresented: $showsErase) { EraseConfirmationView(model: model, onErased: onErased) }
         .task { await model.refresh() }
     }
 
@@ -63,5 +64,7 @@ struct DataDebugView: View {
 }
 
 #Preview {
-    DataDebugView(model: DataDebugModel(dependencies: .preview()))
+    NavigationStack {
+        DataDebugView(model: DataDebugModel(dependencies: .preview())) {}
+    }
 }

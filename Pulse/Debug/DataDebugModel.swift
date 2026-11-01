@@ -67,7 +67,13 @@ final class DataDebugModel {
         didErase = false
         shareURL = nil
         await run {
-            try await dependencies.eraser.eraseEverything(options: EraseOptions(includeAppleHealth: includeAppleHealth))
+            do {
+                try await dependencies.eraser.eraseEverything(options: EraseOptions(includeAppleHealth: includeAppleHealth))
+            } catch {
+                // Une partie a pu être effacée avant l'échec : les comptes affichés doivent le refléter.
+                if let refreshed = try? await dependencies.inspector.counts() { counts = refreshed }
+                throw error
+            }
             counts = try await dependencies.inspector.counts()
             didErase = true
         }
