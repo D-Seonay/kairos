@@ -44,7 +44,7 @@ public struct ContentIssue: Sendable, Equatable, CustomStringConvertible {
 
 /// Valide une bibliothèque entière et renvoie tous les problèmes d'un coup.
 public enum ContentValidator {
-    static let expectedExerciseCount = 80
+    static let expectedExerciseCount = 84
     static let minimumPerPattern = 4
     static let allowedIncrements: Set<Double> = [1.25, 2.5, 5]
     static let allowedRests: Set<Int> = [60, 90, 120, 180]

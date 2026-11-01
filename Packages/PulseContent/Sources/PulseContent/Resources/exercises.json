@@ -2232,6 +2232,1094 @@
         "romanian-deadlift-dumbbell",
         "deadlift-barbell"
       ]
+    },
+    {
+      "id": "lying-leg-curl-machine",
+      "name": {
+        "fr": "Leg curl allongé",
+        "en": "Lying Leg Curl Machine"
+      },
+      "primaryMuscles": [
+        "hamstrings"
+      ],
+      "secondaryMuscles": [
+        "calves",
+        "glutes"
+      ],
+      "equipment": "machine",
+      "pattern": "kneeFlexion",
+      "region": "lower",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 90,
+      "cues": {
+        "fr": [
+          "Coussinet juste au-dessus des talons, hanches collées au banc.",
+          "Ramener les talons vers les fessiers.",
+          "Redescendre sur deux secondes sans laisser tomber."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Décoller les hanches pour tricher.",
+          "Amplitude courte sur les dernières répétitions."
+        ]
+      },
+      "alternatives": [
+        "seated-leg-curl-machine",
+        "stability-ball-leg-curl",
+        "nordic-hamstring-curl"
+      ]
+    },
+    {
+      "id": "seated-leg-curl-machine",
+      "name": {
+        "fr": "Leg curl assis",
+        "en": "Seated Leg Curl Machine"
+      },
+      "primaryMuscles": [
+        "hamstrings"
+      ],
+      "secondaryMuscles": [
+        "calves"
+      ],
+      "equipment": "machine",
+      "pattern": "kneeFlexion",
+      "region": "lower",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 90,
+      "cues": {
+        "fr": [
+          "Cuisses bloquées sous le coussinet, dos au dossier.",
+          "Fléchir au maximum en serrant les ischios.",
+          "Revenir lentement jusqu'à l'extension presque complète."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Se pencher en avant pour tirer plus lourd.",
+          "Laisser les plaques claquer en haut."
+        ]
+      },
+      "alternatives": [
+        "lying-leg-curl-machine",
+        "stability-ball-leg-curl",
+        "nordic-hamstring-curl"
+      ]
+    },
+    {
+      "id": "nordic-hamstring-curl",
+      "name": {
+        "fr": "Nordic curl",
+        "en": "Nordic Hamstring Curl"
+      },
+      "primaryMuscles": [
+        "hamstrings"
+      ],
+      "secondaryMuscles": [
+        "glutes",
+        "calves"
+      ],
+      "equipment": "bodyweight",
+      "pattern": "kneeFlexion",
+      "region": "lower",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "bodyweight",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 90,
+      "cues": {
+        "fr": [
+          "Chevilles bloquées, corps droit des genoux à la tête.",
+          "Descendre le plus lentement possible vers le sol.",
+          "Se rattraper avec les mains, remonter en s'aidant si besoin."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Plier les hanches pour descendre plus vite.",
+          "Faire trop de répétitions dès la première séance."
+        ]
+      },
+      "alternatives": [
+        "lying-leg-curl-machine",
+        "seated-leg-curl-machine",
+        "stability-ball-leg-curl"
+      ]
+    },
+    {
+      "id": "stability-ball-leg-curl",
+      "name": {
+        "fr": "Leg curl au ballon",
+        "en": "Stability Ball Leg Curl"
+      },
+      "primaryMuscles": [
+        "hamstrings"
+      ],
+      "secondaryMuscles": [
+        "glutes",
+        "abs"
+      ],
+      "equipment": "bodyweight",
+      "pattern": "kneeFlexion",
+      "region": "lower",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "bodyweight",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Allongé, talons sur le ballon, hanches levées.",
+          "Ramener le ballon vers les fessiers sans baisser les hanches.",
+          "Revenir en contrôle, hanches toujours hautes."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Laisser les hanches tomber pendant le mouvement.",
+          "Pousser avec les mains au sol."
+        ]
+      },
+      "alternatives": [
+        "lying-leg-curl-machine",
+        "seated-leg-curl-machine",
+        "nordic-hamstring-curl"
+      ]
+    },
+    {
+      "id": "leg-extension-machine",
+      "name": {
+        "fr": "Extension des jambes",
+        "en": "Leg Extension Machine"
+      },
+      "primaryMuscles": [
+        "quads"
+      ],
+      "secondaryMuscles": [],
+      "equipment": "machine",
+      "pattern": "kneeExtension",
+      "region": "lower",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Genoux alignés avec l'axe de la machine.",
+          "Tendre les jambes en serrant les quadriceps une seconde.",
+          "Redescendre lentement sans reposer la charge."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Lancer la charge avec les hanches.",
+          "Dossier trop reculé, genoux hors de l'axe."
+        ]
+      },
+      "alternatives": [
+        "single-leg-extension-machine",
+        "sissy-squat",
+        "spanish-squat-band"
+      ]
+    },
+    {
+      "id": "single-leg-extension-machine",
+      "name": {
+        "fr": "Extension des jambes unilatérale",
+        "en": "Single-Leg Extension Machine"
+      },
+      "primaryMuscles": [
+        "quads"
+      ],
+      "secondaryMuscles": [],
+      "equipment": "machine",
+      "pattern": "kneeExtension",
+      "region": "lower",
+      "isCompound": false,
+      "isUnilateral": true,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Une jambe à la fois, l'autre relâchée.",
+          "Tendre complètement, marquer un temps en haut.",
+          "Même nombre de répétitions des deux côtés."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Charger comme à deux jambes.",
+          "Tourner le bassin pour aider."
+        ]
+      },
+      "alternatives": [
+        "leg-extension-machine",
+        "sissy-squat",
+        "spanish-squat-band"
+      ]
+    },
+    {
+      "id": "sissy-squat",
+      "name": {
+        "fr": "Sissy squat",
+        "en": "Sissy Squat"
+      },
+      "primaryMuscles": [
+        "quads"
+      ],
+      "secondaryMuscles": [
+        "abs"
+      ],
+      "equipment": "bodyweight",
+      "pattern": "kneeExtension",
+      "region": "lower",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "bodyweight",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Talons levés, corps droit des genoux aux épaules.",
+          "Pencher le corps en arrière en pliant les genoux.",
+          "Remonter en poussant les genoux vers l'arrière."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Casser les hanches et faire un squat.",
+          "Descendre trop bas sans contrôle."
+        ]
+      },
+      "alternatives": [
+        "leg-extension-machine",
+        "spanish-squat-band",
+        "single-leg-extension-machine"
+      ]
+    },
+    {
+      "id": "spanish-squat-band",
+      "name": {
+        "fr": "Squat espagnol à l'élastique",
+        "en": "Spanish Squat"
+      },
+      "primaryMuscles": [
+        "quads"
+      ],
+      "secondaryMuscles": [
+        "glutes"
+      ],
+      "equipment": "band",
+      "pattern": "kneeExtension",
+      "region": "lower",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "bodyweight",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Élastique derrière les genoux, ancré devant.",
+          "S'asseoir en arrière, tibias verticaux.",
+          "Buste droit, pousser dans l'élastique en remontant."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Genoux qui avancent au-delà des pieds.",
+          "Élastique trop lâche, aucune tension."
+        ]
+      },
+      "alternatives": [
+        "leg-extension-machine",
+        "sissy-squat",
+        "single-leg-extension-machine"
+      ]
+    },
+    {
+      "id": "hip-abduction-machine",
+      "name": {
+        "fr": "Abduction de hanche à la machine",
+        "en": "Hip Abduction Machine"
+      },
+      "primaryMuscles": [
+        "abductors",
+        "glutes"
+      ],
+      "secondaryMuscles": [],
+      "equipment": "machine",
+      "pattern": "hipAbduction",
+      "region": "lower",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Dos au dossier, mains sur les poignées.",
+          "Écarter les genoux en contrôle jusqu'à la butée.",
+          "Revenir lentement sans laisser les plaques se toucher."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Se pencher en avant pour écarter plus.",
+          "Mouvement saccadé, charge trop lourde."
+        ]
+      },
+      "alternatives": [
+        "cable-hip-abduction",
+        "band-lateral-walk",
+        "side-lying-hip-abduction"
+      ]
+    },
+    {
+      "id": "cable-hip-abduction",
+      "name": {
+        "fr": "Abduction de hanche à la poulie",
+        "en": "Cable Hip Abduction"
+      },
+      "primaryMuscles": [
+        "abductors",
+        "glutes"
+      ],
+      "secondaryMuscles": [
+        "abs"
+      ],
+      "equipment": "cable",
+      "pattern": "hipAbduction",
+      "region": "lower",
+      "isCompound": false,
+      "isUnilateral": true,
+      "loadKind": "external",
+      "defaultIncrementKg": 1.25,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Sangle à la cheville extérieure, main sur la machine.",
+          "Lever la jambe sur le côté, buste immobile.",
+          "Revenir en croisant légèrement devant la jambe d'appui."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Pencher le buste du côté opposé.",
+          "Tourner le pied vers l'extérieur."
+        ]
+      },
+      "alternatives": [
+        "hip-abduction-machine",
+        "band-lateral-walk",
+        "side-lying-hip-abduction"
+      ]
+    },
+    {
+      "id": "band-lateral-walk",
+      "name": {
+        "fr": "Marche latérale à l'élastique",
+        "en": "Band Lateral Walk"
+      },
+      "primaryMuscles": [
+        "abductors",
+        "glutes"
+      ],
+      "secondaryMuscles": [
+        "abs"
+      ],
+      "equipment": "band",
+      "pattern": "hipAbduction",
+      "region": "lower",
+      "isCompound": false,
+      "isUnilateral": true,
+      "loadKind": "bodyweight",
+      "defaultIncrementKg": 1.25,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Élastique au-dessus des genoux ou aux chevilles.",
+          "Genoux fléchis, pas de côté sans rapprocher les pieds.",
+          "Tension constante, buste droit."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Se redresser et perdre la tension.",
+          "Pieds qui se touchent entre les pas."
+        ]
+      },
+      "alternatives": [
+        "hip-abduction-machine",
+        "cable-hip-abduction",
+        "side-lying-hip-abduction"
+      ]
+    },
+    {
+      "id": "side-lying-hip-abduction",
+      "name": {
+        "fr": "Abduction de hanche allongé",
+        "en": "Side-Lying Hip Abduction"
+      },
+      "primaryMuscles": [
+        "abductors",
+        "glutes"
+      ],
+      "secondaryMuscles": [],
+      "equipment": "bodyweight",
+      "pattern": "hipAbduction",
+      "region": "lower",
+      "isCompound": false,
+      "isUnilateral": true,
+      "loadKind": "bodyweight",
+      "defaultIncrementKg": 1.25,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Allongé sur le côté, corps en ligne droite.",
+          "Lever la jambe du dessus sans basculer le bassin.",
+          "Pointe de pied vers l'avant, mouvement lent."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Tourner le pied vers le plafond.",
+          "Balancer la jambe sans contrôle."
+        ]
+      },
+      "alternatives": [
+        "hip-abduction-machine",
+        "cable-hip-abduction",
+        "band-lateral-walk"
+      ]
+    },
+    {
+      "id": "hip-adduction-machine",
+      "name": {
+        "fr": "Adduction de hanche à la machine",
+        "en": "Hip Adduction Machine"
+      },
+      "primaryMuscles": [
+        "adductors"
+      ],
+      "secondaryMuscles": [],
+      "equipment": "machine",
+      "pattern": "hipAdduction",
+      "region": "lower",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Régler l'ouverture à un étirement confortable.",
+          "Serrer les genoux en contrôle.",
+          "Rouvrir lentement jusqu'au point de départ."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Ouverture trop grande, adducteurs sur-étirés.",
+          "Rebondir en fin de course."
+        ]
+      },
+      "alternatives": [
+        "cable-hip-adduction",
+        "copenhagen-plank",
+        "side-lying-hip-adduction"
+      ]
+    },
+    {
+      "id": "cable-hip-adduction",
+      "name": {
+        "fr": "Adduction de hanche à la poulie",
+        "en": "Cable Hip Adduction"
+      },
+      "primaryMuscles": [
+        "adductors"
+      ],
+      "secondaryMuscles": [
+        "abs"
+      ],
+      "equipment": "cable",
+      "pattern": "hipAdduction",
+      "region": "lower",
+      "isCompound": false,
+      "isUnilateral": true,
+      "loadKind": "external",
+      "defaultIncrementKg": 1.25,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Sangle à la cheville intérieure, poulie basse.",
+          "Ramener la jambe devant l'autre en croisant.",
+          "Buste droit, bassin immobile."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Pencher le buste pour compenser.",
+          "Balancer la jambe avec élan."
+        ]
+      },
+      "alternatives": [
+        "hip-adduction-machine",
+        "copenhagen-plank",
+        "side-lying-hip-adduction"
+      ]
+    },
+    {
+      "id": "copenhagen-plank",
+      "name": {
+        "fr": "Planche de Copenhague",
+        "en": "Copenhagen Plank"
+      },
+      "primaryMuscles": [
+        "adductors"
+      ],
+      "secondaryMuscles": [
+        "obliques",
+        "abs"
+      ],
+      "equipment": "bodyweight",
+      "pattern": "hipAdduction",
+      "region": "lower",
+      "isCompound": false,
+      "isUnilateral": true,
+      "loadKind": "bodyweight",
+      "defaultIncrementKg": 1.25,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Sur l'avant-bras, pied du dessus posé sur un banc.",
+          "Lever les hanches, corps en ligne droite.",
+          "Commencer genou sur le banc, puis progresser vers le pied."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Hanches qui s'affaissent vers le sol.",
+          "Progresser trop vite : les adducteurs se blessent facilement."
+        ]
+      },
+      "alternatives": [
+        "hip-adduction-machine",
+        "cable-hip-adduction",
+        "side-lying-hip-adduction"
+      ]
+    },
+    {
+      "id": "side-lying-hip-adduction",
+      "name": {
+        "fr": "Adduction de hanche allongé",
+        "en": "Side-Lying Hip Adduction"
+      },
+      "primaryMuscles": [
+        "adductors"
+      ],
+      "secondaryMuscles": [],
+      "equipment": "bodyweight",
+      "pattern": "hipAdduction",
+      "region": "lower",
+      "isCompound": false,
+      "isUnilateral": true,
+      "loadKind": "bodyweight",
+      "defaultIncrementKg": 1.25,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Allongé sur le côté, jambe du dessus pliée devant.",
+          "Lever la jambe du dessous, tendue.",
+          "Monter lentement, redescendre sans poser."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Tourner le bassin en arrière.",
+          "Mouvement rapide sans contraction."
+        ]
+      },
+      "alternatives": [
+        "hip-adduction-machine",
+        "cable-hip-adduction",
+        "copenhagen-plank"
+      ]
+    },
+    {
+      "id": "seated-calf-raise-machine",
+      "name": {
+        "fr": "Extension des mollets assis",
+        "en": "Seated Calf Raise Machine"
+      },
+      "primaryMuscles": [
+        "calves"
+      ],
+      "secondaryMuscles": [],
+      "equipment": "machine",
+      "pattern": "calfRaise",
+      "region": "lower",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Coussinets sur le bas des cuisses, avant des pieds sur la marche.",
+          "Monter sur la pointe des pieds le plus haut possible.",
+          "Descendre les talons sous la marche, étirement de deux secondes."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Rebondir en bas du mouvement.",
+          "Amplitude réduite avec trop de charge."
+        ]
+      },
+      "alternatives": [
+        "standing-calf-raise-machine",
+        "leg-press-calf-raise",
+        "single-leg-calf-raise-dumbbell"
+      ]
+    },
+    {
+      "id": "standing-calf-raise-machine",
+      "name": {
+        "fr": "Extension des mollets debout à la machine",
+        "en": "Standing Calf Raise Machine"
+      },
+      "primaryMuscles": [
+        "calves"
+      ],
+      "secondaryMuscles": [],
+      "equipment": "machine",
+      "pattern": "calfRaise",
+      "region": "lower",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Épaules sous les coussinets, jambes tendues.",
+          "Monter sur la pointe des pieds en marquant un temps.",
+          "Descendre jusqu'à l'étirement complet."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Plier les genoux pour aider.",
+          "Mouvement rapide sans pause en haut."
+        ]
+      },
+      "alternatives": [
+        "seated-calf-raise-machine",
+        "leg-press-calf-raise",
+        "single-leg-calf-raise-dumbbell"
+      ]
+    },
+    {
+      "id": "leg-press-calf-raise",
+      "name": {
+        "fr": "Mollets à la presse",
+        "en": "Leg Press Calf Raise"
+      },
+      "primaryMuscles": [
+        "calves"
+      ],
+      "secondaryMuscles": [],
+      "equipment": "machine",
+      "pattern": "calfRaise",
+      "region": "lower",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 5,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Avant des pieds sur le bord bas de la plateforme.",
+          "Pousser avec les orteils sans plier les genoux.",
+          "Laisser la plateforme revenir jusqu'à l'étirement."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Plier les genoux pour tricher.",
+          "Sécurités non enclenchées."
+        ]
+      },
+      "alternatives": [
+        "seated-calf-raise-machine",
+        "standing-calf-raise-machine",
+        "single-leg-calf-raise-dumbbell"
+      ]
+    },
+    {
+      "id": "single-leg-calf-raise-dumbbell",
+      "name": {
+        "fr": "Mollets unijambiste avec haltère",
+        "en": "Single-Leg Dumbbell Calf Raise"
+      },
+      "primaryMuscles": [
+        "calves"
+      ],
+      "secondaryMuscles": [],
+      "equipment": "dumbbell",
+      "pattern": "calfRaise",
+      "region": "lower",
+      "isCompound": false,
+      "isUnilateral": true,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Avant du pied sur une marche, haltère du même côté.",
+          "Monter sur la pointe, marquer un temps.",
+          "Descendre le talon sous la marche en contrôle."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "S'appuyer lourdement sur le support.",
+          "Rebondir en bas."
+        ]
+      },
+      "alternatives": [
+        "seated-calf-raise-machine",
+        "standing-calf-raise-machine",
+        "leg-press-calf-raise"
+      ]
+    },
+    {
+      "id": "crunch-machine",
+      "name": {
+        "fr": "Crunch à la machine",
+        "en": "Crunch Machine"
+      },
+      "primaryMuscles": [
+        "abs"
+      ],
+      "secondaryMuscles": [
+        "obliques"
+      ],
+      "equipment": "machine",
+      "pattern": "coreFlexion",
+      "region": "core",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Dos au dossier, mains ou coudes sur les appuis.",
+          "Enrouler le buste en rapprochant les côtes du bassin.",
+          "Revenir lentement sans reposer la charge."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Tirer avec les bras au lieu des abdominaux.",
+          "Plier les hanches au lieu d'enrouler le buste."
+        ]
+      },
+      "alternatives": [
+        "cable-crunch",
+        "reverse-crunch",
+        "hanging-leg-raise"
+      ]
+    },
+    {
+      "id": "cable-crunch",
+      "name": {
+        "fr": "Crunch à la poulie",
+        "en": "Cable Crunch"
+      },
+      "primaryMuscles": [
+        "abs"
+      ],
+      "secondaryMuscles": [
+        "obliques"
+      ],
+      "equipment": "cable",
+      "pattern": "coreFlexion",
+      "region": "core",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "À genoux, corde derrière la tête, hanches fixes.",
+          "Enrouler le buste vers les genoux.",
+          "Remonter en contrôle sans tirer avec les bras."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Bouger les hanches d'avant en arrière.",
+          "Tirer la corde avec les bras."
+        ]
+      },
+      "alternatives": [
+        "crunch-machine",
+        "reverse-crunch",
+        "hanging-leg-raise"
+      ]
+    },
+    {
+      "id": "hanging-leg-raise",
+      "name": {
+        "fr": "Relevé de jambes suspendu",
+        "en": "Hanging Leg Raise"
+      },
+      "primaryMuscles": [
+        "abs",
+        "hipFlexors"
+      ],
+      "secondaryMuscles": [
+        "obliques",
+        "forearms"
+      ],
+      "equipment": "bodyweight",
+      "pattern": "coreFlexion",
+      "region": "core",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "bodyweight",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Suspendu, épaules engagées, pas de balancement.",
+          "Monter les genoux ou les jambes en enroulant le bassin.",
+          "Redescendre lentement jusqu'à l'extension."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Se balancer pour monter les jambes.",
+          "Monter les jambes sans enrouler le bassin."
+        ]
+      },
+      "alternatives": [
+        "reverse-crunch",
+        "cable-crunch",
+        "crunch-machine"
+      ]
+    },
+    {
+      "id": "reverse-crunch",
+      "name": {
+        "fr": "Crunch inversé",
+        "en": "Reverse Crunch"
+      },
+      "primaryMuscles": [
+        "abs"
+      ],
+      "secondaryMuscles": [
+        "hipFlexors"
+      ],
+      "equipment": "bodyweight",
+      "pattern": "coreFlexion",
+      "region": "core",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "bodyweight",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Allongé, genoux pliés, mains au sol.",
+          "Enrouler le bassin pour décoller les fesses.",
+          "Redescendre en contrôle, lombaires au sol."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Pousser sur les mains pour lever le bassin.",
+          "Balancer les jambes avec élan."
+        ]
+      },
+      "alternatives": [
+        "hanging-leg-raise",
+        "cable-crunch",
+        "crunch-machine"
+      ]
+    },
+    {
+      "id": "plank",
+      "name": {
+        "fr": "Planche",
+        "en": "Plank"
+      },
+      "primaryMuscles": [
+        "abs"
+      ],
+      "secondaryMuscles": [
+        "obliques",
+        "glutes",
+        "frontDelts"
+      ],
+      "equipment": "bodyweight",
+      "pattern": "coreStability",
+      "region": "core",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "bodyweight",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Avant-bras au sol, coudes sous les épaules.",
+          "Corps en ligne droite, fessiers serrés.",
+          "Respirer calmement, tenir le temps prévu."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Hanches qui montent ou qui tombent.",
+          "Retenir sa respiration."
+        ]
+      },
+      "alternatives": [
+        "side-plank",
+        "dead-bug",
+        "pallof-press-cable"
+      ]
+    },
+    {
+      "id": "side-plank",
+      "name": {
+        "fr": "Planche latérale",
+        "en": "Side Plank"
+      },
+      "primaryMuscles": [
+        "obliques"
+      ],
+      "secondaryMuscles": [
+        "abs",
+        "abductors",
+        "frontDelts"
+      ],
+      "equipment": "bodyweight",
+      "pattern": "coreStability",
+      "region": "core",
+      "isCompound": false,
+      "isUnilateral": true,
+      "loadKind": "bodyweight",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Coude sous l'épaule, pieds superposés ou décalés.",
+          "Lever les hanches, corps en ligne droite.",
+          "Tenir le temps prévu de chaque côté."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Hanches qui s'affaissent.",
+          "Buste qui tourne vers le sol."
+        ]
+      },
+      "alternatives": [
+        "plank",
+        "dead-bug",
+        "pallof-press-cable"
+      ]
+    },
+    {
+      "id": "dead-bug",
+      "name": {
+        "fr": "Dead bug",
+        "en": "Dead Bug"
+      },
+      "primaryMuscles": [
+        "abs"
+      ],
+      "secondaryMuscles": [
+        "hipFlexors",
+        "obliques"
+      ],
+      "equipment": "bodyweight",
+      "pattern": "coreStability",
+      "region": "core",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "bodyweight",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Sur le dos, lombaires plaquées au sol.",
+          "Tendre un bras et la jambe opposée sans décoller le dos.",
+          "Revenir lentement et alterner."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Cambrer le bas du dos en tendant la jambe.",
+          "Aller trop vite."
+        ]
+      },
+      "alternatives": [
+        "plank",
+        "side-plank",
+        "pallof-press-cable"
+      ]
+    },
+    {
+      "id": "pallof-press-cable",
+      "name": {
+        "fr": "Pallof press à la poulie",
+        "en": "Cable Pallof Press"
+      },
+      "primaryMuscles": [
+        "obliques",
+        "abs"
+      ],
+      "secondaryMuscles": [
+        "glutes"
+      ],
+      "equipment": "cable",
+      "pattern": "coreStability",
+      "region": "core",
+      "isCompound": false,
+      "isUnilateral": true,
+      "loadKind": "external",
+      "defaultIncrementKg": 1.25,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "De profil à la poulie, poignée contre la poitrine.",
+          "Tendre les bras devant sans laisser le buste tourner.",
+          "Tenir deux secondes, revenir en contrôle."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Laisser le câble tourner les épaules.",
+          "Pieds trop serrés, équilibre instable."
+        ]
+      },
+      "alternatives": [
+        "plank",
+        "side-plank",
+        "dead-bug"
+      ]
     }
   ]
 }

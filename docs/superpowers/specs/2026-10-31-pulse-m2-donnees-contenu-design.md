@@ -11,7 +11,7 @@ Complète : `2026-10-31-pulse-v1-design.md` (la « spec V1 »), qui reste l'auto
 
 M2 donne à Pulse sa mémoire et son contenu, sans encore d'interface finale :
 
-- un package `PulseContent` qui embarque **80 exercices** et **5 modèles de programme** en JSON, chargés et validés par test ;
+- un package `PulseContent` qui embarque **84 exercices** et **5 modèles de programme** en JSON, chargés et validés par test ;
 - un package `PulsePersistence` qui stocke tout ce que l'utilisateur produit dans SwiftData, synchronisé par iCloud (CloudKit privé), derrière des protocoles de dépôt définis dans `PulseDomain` ;
 - l'**export** complet (JSON et CSV) et la **suppression totale**, exigés par l'App Store (spec V1 §11) ;
 - un **écran de debug** temporaire qui montre le contenu chargé, l'état du stockage, et déclenche export, données d'exemple et suppression.
@@ -33,7 +33,7 @@ M2 donne à Pulse sa mémoire et son contenu, sans encore d'interface finale :
 ### Objectifs
 
 - Les dépôts passent leurs tests ; le mapping domaine ↔ SwiftData est testé en aller-retour sur chaque entité.
-- Le contenu est validé par test : 80 exercices exactement, identifiants stables et uniques, alternatives cohérentes, modèles qui ne référencent que des exercices existants.
+- Le contenu est validé par test : 84 exercices exactement (le tableau du §4.2 fait foi), identifiants stables et uniques, alternatives cohérentes, modèles qui ne référencent que des exercices existants.
 - Un export produit deux fichiers lisibles (JSON, zip de CSV) partageables par la feuille de partage iOS.
 - La suppression totale vide tout, local et iCloud, et ramène l'app au premier lancement.
 - Le schéma de données couvre les besoins de M3 à M7 pour que les jalons suivants n'aient qu'à ajouter des champs optionnels (migration légère), jamais à restructurer.
@@ -127,9 +127,9 @@ Un seul fichier `exercises.json` dans les ressources du package. Clés en camelC
 
 Chaque énumération a un libellé français exposé par une extension dans `PulseContent` (`localizedName`), comme `SleepStage.localizedName` en M1.
 
-### 4.2 Les 80 exercices
+### 4.2 Les 84 exercices
 
-Exactement 80, 19 plans de mouvement, au moins 4 exercices par plan pour que chaque exercice ait ses 3 alternatives. Les 17 exercices du PPL de Mathéo sont marqués ★. Les consignes, erreurs et alternatives sont laissées au constructeur dans ces règles ; la liste des identifiants et des noms, elle, est fixée ici.
+Exactement 84 (le tableau ci-dessous fait foi ; la spec V1 disait « environ 80 »), 19 plans de mouvement, au moins 4 exercices par plan pour que chaque exercice ait ses 3 alternatives. Les 17 exercices du PPL de Mathéo sont marqués ★. Les consignes, erreurs et alternatives sont laissées au constructeur dans ces règles ; la liste des identifiants et des noms, elle, est fixée ici.
 
 | Plan | Identifiants (nom FR) |
 | :--- | :--- |
@@ -429,7 +429,7 @@ Temporaire (remplacé par M3 à M7), sans design system, en `List`. L'app passe 
 
 Sections :
 
-1. **Contenu** : version du contenu, `80 exercices`, `5 modèles`. Lien vers une liste des exercices groupés par plan de mouvement (nom FR, matériel, muscle principal, nombre d'alternatives) et une liste des modèles (jours, et pour chaque jour ses exercices résolus avec séries × reps). Un exercice non résolu s'afficherait en rouge ; les tests garantissent qu'il n'y en a pas.
+1. **Contenu** : version du contenu, `84 exercices`, `5 modèles`. Lien vers une liste des exercices groupés par plan de mouvement (nom FR, matériel, muscle principal, nombre d'alternatives) et une liste des modèles (jours, et pour chaque jour ses exercices résolus avec séries × reps). Un exercice non résolu s'afficherait en rouge ; les tests garantissent qu'il n'y en a pas.
 2. **Stockage** : mode du conteneur (`iCloud`, `local`, `mémoire`), état du compte iCloud, nombre d'enregistrements par table, dernière erreur de dépôt.
 3. **Actions** : « Insérer des données d'exemple » (le jeu de §6.3, pour tester l'export avant M4), « Exporter en JSON », « Exporter en CSV » (chacun ouvre la feuille de partage), « Tout supprimer » (parcours §7.1).
 
@@ -440,7 +440,7 @@ Un test de modèle (`DataDebugModel`) vérifie que les comptes se mettent à jou
 ## 9. Tests et qualité
 
 - **PulseDomain** : égalité et `Codable` des nouvelles entités (aller-retour JSON), `ExerciseReference` encodé lisiblement (`{"content":"id"}` / `{"user":"uuid"}`).
-- **PulseContent** (`swift test` sur Mac) : `ContentValidator` ne renvoie aucun problème ; 80 exercices ; identifiants uniques et bien formés ; 3 consignes et 2 à 3 erreurs par exercice ; 3 alternatives existantes, distinctes, de même plan ; au moins 4 exercices par plan ; les 17 exercices ★ présents ; chaque modèle : exercices existants et non retirés, super sets par paires consécutives, `sessionsPerWeek` cohérent avec `suggestedWeek`, `recommendedFor` renseigné ; `ppl-3` reproduit exactement le tableau du §4.4 ; chaque `Muscle`, `Equipment`, `MovementPattern` a un `localizedName` non vide.
+- **PulseContent** (`swift test` sur Mac) : `ContentValidator` ne renvoie aucun problème ; 84 exercices ; identifiants uniques et bien formés ; 3 consignes et 2 à 3 erreurs par exercice ; 3 alternatives existantes, distinctes, de même plan ; au moins 4 exercices par plan ; les 17 exercices ★ présents ; chaque modèle : exercices existants et non retirés, super sets par paires consécutives, `sessionsPerWeek` cohérent avec `suggestedWeek`, `recommendedFor` renseigné ; `ppl-3` reproduit exactement le tableau du §4.4 ; chaque `Muscle`, `Equipment`, `MovementPattern` a un `localizedName` non vide.
 - **PulsePersistence** (conteneur en mémoire) : aller-retour par entité ; chaque dépôt (créer, lire, mettre à jour, supprimer logiquement, exclusion des supprimés, tri) ; `save(Program)` qui retire un jour marque le jour et ses exercices supprimés ; `RecoveryRepository.save` remplace le jour ; `lastSets` renvoie les séries de la dernière séance terminée pour l'exercice ; export (§6.3) ; suppression (§7.3) ; le conteneur se construit avec `PulseSchemaV1` et le plan de migration.
 - **App** : `DataDebugModel` ; `AppDependencies.live()` construit un conteneur sans planter sur simulateur sans compte iCloud.
 - **Lint** : `swiftlint lint --strict` vert ; `file_length` : les fichiers de contenu JSON ne sont pas lintés, mais les tableaux Swift de test non plus ne doivent pas dépasser 400 lignes (découper par thème).
@@ -450,7 +450,7 @@ Un test de modèle (`DataDebugModel`) vérifie que les comptes se mettent à jou
 
 ## 10. Laissé au constructeur
 
-- Les consignes, erreurs et alternatives des 80 exercices, et le détail des quatre modèles autres que PPL 3 jours, dans les cadres du §4.
+- Les consignes, erreurs et alternatives des 84 exercices, et le détail des quatre modèles autres que PPL 3 jours, dans les cadres du §4.
 - L'organisation interne des packages, le nommage des fichiers, la découpe des tests.
 - L'implémentation exacte du zip et de l'écriture des fichiers temporaires.
 - Le choix entre `swift test` sur Mac et le schéma `Pulse` pour les tests de `PulsePersistence`, après essai.

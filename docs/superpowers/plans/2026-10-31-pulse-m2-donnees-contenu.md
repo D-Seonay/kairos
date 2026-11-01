@@ -612,14 +612,14 @@ git commit -m "feat(content): add arm, forearm and lower body exercises"
 
 ---
 
-### Task 9 : Exercices, isolations du bas et tronc (24), et validation complète des 80
+### Task 9 : Exercices, isolations du bas et tronc (28), et validation complète des 84
 
 **Files:**
 - Modify: `Packages/PulseContent/Sources/PulseContent/Resources/exercises.json`
 - Test: `Packages/PulseContent/Tests/PulseContentTests/BundledExercisesTests.swift`
 
 **Interfaces:**
-- Produces : `kneeFlexion` (4), `kneeExtension` (4), `hipAbduction` (4), `hipAdduction` (4), `calfRaise` (4), `coreFlexion` (4), `coreStability` (4) ; catalogue complet de 80.
+- Produces : `kneeFlexion` (4), `kneeExtension` (4), `hipAbduction` (4), `hipAdduction` (4), `calfRaise` (4), `coreFlexion` (4), `coreStability` (4) ; catalogue complet de 84 (le tableau de la spec M2 §4.2 fait foi : 28 + 28 + 28).
 
 - [ ] **Step 1 : Ajouter les tests finaux**
 
@@ -628,8 +628,8 @@ git commit -m "feat(content): add arm, forearm and lower body exercises"
     let lib = try ContentLibrary.load(from: .module)
     let issues = ContentValidator.issues(in: lib, ignoring: Set(ContentRule.allCases.filter { $0.rawValue.hasPrefix("template") || [.superset, .runTarget, .suggestedWeek, .sessionsPerWeek, .dayID].contains($0) }))
     #expect(issues.isEmpty, "\(issues)")
-    #expect(lib.exercises.count == 80)
-    #expect(lib.activeExercises.count == 80)
+    #expect(lib.exercises.count == 84)
+    #expect(lib.activeExercises.count == 84)
     for pattern in MovementPattern.allCases { #expect(lib.exercises.filter { $0.pattern == pattern }.count >= 4, "\(pattern)") }
 }
 
@@ -649,9 +649,9 @@ git commit -m "feat(content): add arm, forearm and lower body exercises"
 - [ ] **Step 2 : Lancer pour vérifier l'échec**
 
 Run : `swift test --package-path Packages/PulseContent --filter BundledExercisesTests`
-Expected : échec sur le compte 80.
+Expected : échec sur le compte 84.
 
-- [ ] **Step 3 : Écrire les 24 exercices**
+- [ ] **Step 3 : Écrire les 28 exercices**
 
 `region: lower` pour les cinq premiers plans, `core` pour `coreFlexion` et `coreStability`. `loadKind: bodyweight` pour `nordic-hamstring-curl`, `stability-ball-leg-curl`, `sissy-squat`, `spanish-squat-band`, `band-lateral-walk`, `side-lying-hip-abduction`, `copenhagen-plank`, `side-lying-hip-adduction`, `hanging-leg-raise`, `reverse-crunch`, `plank`, `side-plank`, `dead-bug`. Incrément 5 pour `leg-press-calf-raise`, 2,5 sinon ; `isUnilateral` pour les unijambistes, allongés, planche latérale, Copenhague. Repos 60 partout sauf `nordic-hamstring-curl` 90.
 
@@ -1242,7 +1242,7 @@ git commit -m "feat(persistence): add total data eraser"
 @Suite struct DataDebugModelTests {
     @Test func contentSummaryComesFromBundledLibrary() {
         let model = DataDebugModel(dependencies: .testing())
-        #expect(model.exerciseCount == 80 && model.templateCount == 5)
+        #expect(model.exerciseCount == 84 && model.templateCount == 5)
         #expect(model.exercisesByPattern.map(\.pattern) == MovementPattern.allCases)
         #expect(model.exerciseName(for: "leg-press-machine") == "Presse à cuisses")
     }
@@ -1285,7 +1285,7 @@ Expected : code de sortie 0 ; `PulseTests` compte les tests M1 plus les trois no
 - [ ] **Step 5 : Vérifier à l'œil sur le simulateur**
 
 Run : `xcrun simctl launch booted fr.seonay.pulse` après `xcodebuild build -scheme Pulse -destination 'platform=iOS Simulator,name=iPhone 17'` et installation (`xcrun simctl install booted <chemin de Pulse.app dans DerivedData>`), puis `xcrun simctl io booted screenshot /tmp/pulse-m2-donnees.png`.
-Expected : l'onglet « Données » affiche « 80 exercices », « 5 modèles », mode « local », comptes à zéro ; après « Insérer des données d'exemple », les comptes sont non nuls.
+Expected : l'onglet « Données » affiche « 84 exercices », « 5 modèles », mode « local », comptes à zéro ; après « Insérer des données d'exemple », les comptes sont non nuls.
 
 - [ ] **Step 6 : Commit**
 

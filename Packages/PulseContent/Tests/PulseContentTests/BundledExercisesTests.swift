@@ -33,3 +33,29 @@ private func expectCounts(_ expected: [MovementPattern: Int], in lib: ContentLib
     let issues = ContentValidator.issues(in: lib, ignoring: sliceRules)
     #expect(issues.isEmpty, Comment(rawValue: issues.map(\.description).joined(separator: "\n")))
 }
+
+@Test func bundledCatalogIsCompleteAndValid() throws {
+    let lib = try ContentLibrary.load(from: ContentLibrary.resourceBundle)
+    let templateRules: Set<ContentRule> = [.templateExercise, .templateSets, .templateReps, .templateRPE, .templateRest,
+                                           .superset, .runTarget, .suggestedWeek, .sessionsPerWeek, .dayID]
+    let issues = ContentValidator.issues(in: lib, ignoring: templateRules)
+    #expect(issues.isEmpty, Comment(rawValue: issues.map(\.description).joined(separator: "\n")))
+    #expect(lib.exercises.count == 84)
+    #expect(lib.activeExercises.count == 84)
+    for pattern in MovementPattern.allCases {
+        #expect(lib.exercises.filter { $0.pattern == pattern }.count >= 4, Comment(rawValue: pattern.rawValue))
+    }
+}
+
+@Test func matheoPPLExercisesArePresent() throws {
+    let ids = ["bench-press-barbell", "chest-press-machine", "pec-deck-machine", "triceps-pushdown-cable", "wrist-curl-cable",
+               "crunch-machine", "lat-pulldown-machine", "seated-row-machine-iso-lateral", "lateral-raise-machine",
+               "preacher-curl-machine", "hammer-curl-dumbbell", "leg-press-machine", "lying-leg-curl-machine",
+               "hip-abduction-machine", "hip-adduction-machine", "seated-calf-raise-machine", "leg-extension-machine"]
+    let lib = try ContentLibrary.load(from: ContentLibrary.resourceBundle)
+    for id in ids { #expect(lib.exercise(id: id) != nil, Comment(rawValue: id)) }
+}
+
+@Test func unknownExerciseResolvesToNil() throws {
+    #expect(try ContentLibrary.load(from: ContentLibrary.resourceBundle).exercise(id: "does-not-exist") == nil)
+}
