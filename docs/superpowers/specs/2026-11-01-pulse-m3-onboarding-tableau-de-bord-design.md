@@ -81,7 +81,7 @@ Fin de M3a : Mathéo peut installer l'app, faire l'onboarding, voir son premier 
 Deux nouveaux packages, conformes à la spec V1 §9 :
 
 - **`PulseDesignSystem`** (dépend de `PulseDomain` pour les énumérations `Muscle` et `RecoveryCategory`) : tokens, composants, carte musculaire (§6). Plateformes `.iOS(.v26)` et `.macOS(.v26)` pour que `swift test` tourne sur le Mac ; tout appel propre à UIKit (haptique) est isolé derrière `#if canImport(UIKit)`.
-- **`PulseFeatures`** (dépend de `PulseDomain`, `PulseRecoveryEngine`, `PulseContent`, `PulseDesignSystem`) avec une cible par feature : `PulseServices` (logique partagée sans interface : adoption de programme, service du score du jour, planification de la séance du jour, données du widget), `OnboardingFeature`, `TodayFeature`. Mêmes plateformes. Chaque feature expose un modèle `@Observable` testable et ses vues.
+- **`PulseFeatures`** (dépend de `PulseDomain`, `PulseRecoveryEngine`, `PulseContent`, `PulseDesignSystem`) avec une cible par feature : `PulseServices` (logique partagée sans interface : adoption de programme, service du score du jour, planification de la séance du jour, données du widget), `CheckInFeature` (le check-in, partagé par l'onboarding et l'accueil), `OnboardingFeature`, `TodayFeature`. Mêmes plateformes. Chaque feature expose un modèle `@Observable` testable et ses vues.
 
 `PulseContent` n'est ni la persistance ni HealthKit : les features peuvent l'importer pour résoudre les noms et muscles des exercices.
 
@@ -89,9 +89,8 @@ Deux nouveaux packages, conformes à la spec V1 §9 :
 
 Les features ne voient que des protocoles Foundation définis dans **`PulseDomain`** **(choix du constructeur)** :
 
-- `HealthAuthorizing` : demander l'autorisation de lecture, savoir si Apple Santé est disponible sur l'appareil.
-- `HealthSyncing` : importer l'historique (60 jours) avec progression, lire les nouveautés de façon incrémentale, et rendre des `NightSample` par jour. Implémenté dans `PulseHealth` au-dessus de `HealthKitReader` et du `HealthSampleCache` de M2.
-- `HealthProfileReading` : sexe, date de naissance, taille, dernier poids, pour pré-remplir le profil.
+- `HealthSampleSource` : demander l'autorisation de lecture, lire les échantillons bruts (SDNN, FC repos, phases de sommeil) sur une période, et lire sexe, date de naissance, taille et dernier poids pour pré-remplir le profil. Implémenté dans `PulseHealth` par `HealthKitReader`, et par la fausse source à scénarios (§16.1). L'import de l'historique, le cache et l'agrégation en `NightSample` vivent dans `PulseServices` (`NightHistory`), au-dessus de cette source et du `HealthSampleCache` de M2 ; M3b y ajoute la lecture ancrée.
+- `NotificationAuthorizing` (M3a) : demander l'autorisation des notifications à la fin de l'onboarding.
 - `NotificationScheduling` (M3b) et `WidgetPublishing` (M3b) : planifier ou annuler la notification du matin ; écrire l'instantané du widget et recharger ses timelines.
 - Les dépôts de M2 (`ProfileRepository`, `ProgramRepository`, `RecoveryRepository`, `HealthSampleCache`, `WorkoutRepository`).
 
@@ -331,9 +330,9 @@ Première migration, légère (`PulseSchemaV2` et une étape dans `PulseMigratio
 
 - `UserProfile.firstName: String?` **(Mathéo)**.
 - `DailyRecovery.originalSessionChosen: Bool?` : vrai quand l'utilisateur a rétabli la séance d'origine ce jour-là. M4 recopiera le choix dans `WorkoutSession.refusedAdjustments` ; M6 s'en servira pour les statistiques d'adhésion **(choix du constructeur)**.
-- `createdAt` et `updatedAt` facultatifs sur `StoredRoutineDay`, `StoredRoutineExercise` et `StoredWorkoutSet` (mineur différé de M2, regroupé dans la même migration).
+Export JSON et CSV mis à jour pour les nouveaux champs. Un test construit un magasin V1 sur disque, l'ouvre avec le plan de migration en V2 et relit les données.
 
-Export JSON et CSV mis à jour pour les nouveaux champs. Un test construit un magasin V1 sur disque, l'ouvre avec le plan de migration en V2 et relit les données. Mathéo doit redéployer le schéma CloudKit en production avant le premier TestFlight qui synchronise (§20).
+Une migration SwiftData exige une copie figée, dans `PulseSchemaV1`, de chaque modèle qui change. `StoredProfile` et `StoredDailyRecovery` n'ont aucune relation, leur copie est courte. Les dates `createdAt` / `updatedAt` des enfants (`StoredRoutineDay`, `StoredRoutineExercise`, `StoredWorkoutSet`, mineur différé de M2) obligeraient à figer aussi tout le graphe des programmes et des séances : elles sont **reportées** à la première migration qui touche ces modèles, au plus tard avant le backend de la V3 **(choix du constructeur)**. Mathéo doit redéployer le schéma CloudKit en production avant le premier TestFlight qui synchronise (§20).
 
 Le contenu (`exercises.json`) gagne `riskAreas` (§8) ; c'est un changement de contenu, sans effet sur le schéma SwiftData.
 
@@ -343,7 +342,7 @@ Le contenu (`exercises.json`) gagne `riskAreas` (§8) ; c'est un changement de c
 
 ### 16.1 Scénarios (M3a)
 
-Une implémentation de `HealthSyncing` et `HealthProfileReading` (dans `PulseHealth` ou `PulseServices`, au choix du constructeur) qui génère 60 jours synthétiques déterministes à partir d'un scénario : `goodNight` (ligne de base stable, nuit du jour bonne, score optimal), `badNight` (VFC −20 %, FC +6, sommeil 5 h, fatigue modérée), `missingHRV` (pas de SDNN cette nuit), `threeNights` (3 nuits seulement → check-in), `noData`. Utilisée par le test d'interface, par les aperçus SwiftUI, et par l'argument `-PulseHealthScenario` en Debug. Les scénarios et leur score attendu sont testés.
+Une implémentation de la source Apple Santé du §5.2, dans `PulseServices` (`PulseHealth` ne compile que pour iOS et ne se teste pas sur le Mac), qui génère 60 jours synthétiques déterministes à partir d'un scénario : `goodNight` (ligne de base stable, nuit du jour bonne, score optimal), `badNight` (VFC −20 %, FC +6, sommeil 5 h, fatigue modérée), `missingHRV` (pas de SDNN cette nuit), `threeNights` (3 nuits seulement → check-in), `noData`. Utilisée par le test d'interface, par les aperçus SwiftUI, et par l'argument `-PulseHealthScenario` en Debug. Les scénarios et leur score attendu sont testés.
 
 ### 16.2 Test d'interface (M3a)
 
@@ -385,12 +384,10 @@ Parce que M3 touche ces fichiers :
 - `SwiftDataRecoveryRepository` : calendrier injecté (celui d'`AppDependencies`) au lieu de `Calendar.current`.
 - `ProfileRepository.load()` : départage par `id` à `createdAt` égal.
 - `AppDependencies.testing()` : suite `UserDefaults` dédiée pour l'effaceur.
-- Mode iCloud choisi par la présence de l'entitlement (ou d'un réglage de build qui la reflète) et non par `targetEnvironment(simulator)`.
 - `DataDebugModel.erase` : comptes rafraîchis même si l'effacement Apple Santé échoue ; feuille de suppression non fermable pendant l'opération.
-- Enfants SwiftData sans `createdAt` / `updatedAt` : dans la migration V2 (§15).
 - `PulseContent` : `.process("Resources")` qui aplatit `Programs/` corrigé ; règle de validation contre un même exercice deux fois dans un jour ; alternatives du curl pupitre machine sans la barre EZ avant la poulie.
 
-Ne sont **pas** traités en M3 : la suppression d'un complément qui laisse ses prises dans l'export (M5), l'optimisation de `WorkoutRepository.lastSets(for:)` et l'implémentation de `HealthErasing` côté HealthKit (M4).
+Ne sont **pas** traités en M3 : la suppression d'un complément qui laisse ses prises dans l'export (M5), l'optimisation de `WorkoutRepository.lastSets(for:)` et l'implémentation de `HealthErasing` côté HealthKit (M4), les dates des enfants SwiftData (§15), et le choix du mode iCloud par l'entitlement : iOS n'offre pas de lecture fiable de ses propres entitlements à l'exécution, et le simulateur porte les mêmes entitlements que l'iPhone ; la règle `targetEnvironment(simulator)` reste donc en place **(choix du constructeur)**.
 
 ---
 
