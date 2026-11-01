@@ -189,6 +189,24 @@ enum OnboardingCopy {
         }
     }
 
+    /// Pourquoi le check-in remplace le score mesuré : Apple Santé ignoré à l'écran 2, ou pas assez de nuits pour la ligne de base.
+    static func calibrationExplanation(healthSkipped: Bool) -> String {
+        if healthSkipped {
+            return String(
+                localized: """
+                    Sans Apple Santé, Pulse estime ta récupération avec trois questions. Tu pourras autoriser l'accès plus tard \
+                    dans Réglages › Santé.
+                    """,
+                bundle: .module)
+        }
+        return String(
+            localized: """
+                Pulse n'a pas assez de nuits pour mesurer ta récupération. Trois questions donnent une première estimation, \
+                qu'un score mesuré remplacera dès que ta ligne de base sera prête.
+                """,
+            bundle: .module)
+    }
+
     /// « Estimé » pour un score issu du check-in, « En calibration (9 nuits) » tant que la ligne de base VFC se construit.
     static func marker(for recovery: DailyRecovery) -> String? {
         if recovery.isEstimated { return String(localized: "Estimé", bundle: .module) }

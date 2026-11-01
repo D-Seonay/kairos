@@ -45,12 +45,7 @@ struct CalibrationView: View {
     }
 
     private var explanation: String {
-        String(
-            localized: """
-                Pulse n'a pas assez de nuits pour mesurer ta récupération. Trois questions donnent une première estimation, \
-                qu'un score mesuré remplacera dès que ta ligne de base sera prête.
-                """,
-            bundle: .module)
+        OnboardingCopy.calibrationExplanation(healthSkipped: model.healthSkipped)
     }
 }
 

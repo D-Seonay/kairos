@@ -121,6 +121,20 @@ struct OnboardingViewSupportTests {
         #expect(label.hasSuffix("Dimanche : repos"))
     }
 
+    // MARK: - Calibration
+
+    @Test func calibrationExplanationNamesTheSkippedHealthAccess() {
+        let skipped = OnboardingCopy.calibrationExplanation(healthSkipped: true)
+        #expect(skipped.contains("Sans Apple Santé"))
+        #expect(skipped.contains("Réglages › Santé"))
+        #expect(!skipped.contains("pas assez de nuits"))
+    }
+
+    @Test func calibrationExplanationKeepsTheNotEnoughNightsText() {
+        let explanation = OnboardingCopy.calibrationExplanation(healthSkipped: false)
+        #expect(explanation.hasPrefix("Pulse n'a pas assez de nuits"))
+    }
+
     // MARK: - Ligne de base
 
     @Test func baselineRowsKeepOnlyTheKnownValues() {

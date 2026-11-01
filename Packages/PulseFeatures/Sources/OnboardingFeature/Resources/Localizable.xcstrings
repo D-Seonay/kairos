@@ -966,6 +966,16 @@
         }
       }
     },
+    "Sans Apple Santé, Pulse estime ta récupération avec trois questions. Tu pourras autoriser l'accès plus tard dans Réglages › Santé." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sans Apple Santé, Pulse estime ta récupération avec trois questions. Tu pourras autoriser l'accès plus tard dans Réglages › Santé."
+          }
+        }
+      }
+    },
     "Sans ces données, pas de score de récupération mesuré. Elles restent sur ton iPhone." : {
       "localizations" : {
         "fr" : {
