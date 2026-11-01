@@ -71,3 +71,50 @@ enum Sample {
                      createdAt: Fixed.t1, updatedAt: Fixed.t2)
     }
 }
+
+extension Sample {
+    static func recovery(day: Date = Fixed.t0, score: Double = 72, estimated: Bool = false) -> DailyRecovery {
+        DailyRecovery(day: day, score: score, category: RecoveryCategory(score: score), isEstimated: estimated,
+                      hrvScore: estimated ? nil : 80, restingHeartRateScore: estimated ? nil : 60, sleepScore: 70,
+                      sdnnMs: 50, sdnnBaselineMs: 48, restingHeartRate: 52, restingHeartRateBaseline: 50,
+                      asleepMinutes: 420, deepMinutes: 80,
+                      missingFactors: estimated ? [.hrv, .restingHeartRate] : [], calibration: .calibrating(nights: 7),
+                      adjustments: [SessionAdjustment(kind: .rest, reason: "Repos +45 s", value: 45)], frozenAt: nil,
+                      createdAt: Fixed.t1, updatedAt: Fixed.t2)
+    }
+
+    static func checkIn(day: Date = Fixed.t0) -> CheckIn {
+        CheckIn(day: day, answers: CheckInAnswers(sleep: 3, pain: 4, motivation: 2), score: 77.5, createdAt: Fixed.t1, updatedAt: Fixed.t2)
+    }
+
+    static func supplement(name: String = "Créatine", order: Int = 0, archived: Bool = false) -> Supplement {
+        Supplement(name: name, form: .powder, dose: 5, unit: .gram, timing: .afterWorkout, timeOfDayMinutes: nil, days: .custom,
+                   customWeekdays: [.monday, .thursday], stockDoses: 60, lowStockThreshold: 10, reminderEnabled: true,
+                   healthKitType: nil, isArchived: archived, order: order, createdAt: Fixed.t1, updatedAt: Fixed.t2)
+    }
+
+    static func intake(supplementID: UUID, takenAt: Date = Fixed.t0) -> SupplementIntake {
+        SupplementIntake(supplementID: supplementID, takenAt: takenAt, dose: 5, writtenToHealthKit: false, healthKitUUID: nil,
+                         createdAt: Fixed.t1, updatedAt: Fixed.t2)
+    }
+
+    static func measurement(date: Date = Fixed.t0) -> BodyMeasurement {
+        BodyMeasurement(date: date, weightKg: 78.4, bodyFatPercent: 15.2, source: .appleHealth, healthKitUUID: "ABC",
+                        createdAt: Fixed.t1, updatedAt: Fixed.t2)
+    }
+
+    static func record(exercise: ExerciseReference = .content(id: "bench-press-barbell"), date: Date = Fixed.t0) -> PersonalRecord {
+        PersonalRecord(exercise: exercise, exerciseName: "Développé couché", kind: .repsAtWeight, value: 10, weightKg: 80, date: date,
+                       sessionID: UUID(), setID: UUID(), createdAt: Fixed.t1, updatedAt: Fixed.t2)
+    }
+
+    static func cachedSample(kind: HealthSampleKind = .sdnn, start: Date = Fixed.t0) -> CachedHealthSample {
+        CachedHealthSample(kind: kind, start: start, end: start.addingTimeInterval(60), value: kind == .sleep ? nil : 50,
+                           sleepStage: kind == .sleep ? .deep : nil, distanceMeters: nil, averageHeartRate: nil, durationMinutes: nil,
+                           healthKitUUID: "HK", sourceBundleID: "com.fitbit.FitbitMobile", fetchedAt: Fixed.t2)
+    }
+
+    static func snapshot() -> ActiveSessionSnapshot {
+        ActiveSessionSnapshot(startedAt: Fixed.t0, updatedAt: Fixed.t1, payload: Data([1, 2, 3]))
+    }
+}

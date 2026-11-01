@@ -14,11 +14,12 @@ public enum PersistenceStack {
 
     public static var syncedModels: [any PersistentModel.Type] {
         [StoredProfile.self, StoredProgram.self, StoredRoutineDay.self, StoredRoutineExercise.self, StoredUserExercise.self,
-         StoredWorkoutSession.self, StoredWorkoutSet.self, StoredScheduledDay.self]
+         StoredWorkoutSession.self, StoredWorkoutSet.self, StoredScheduledDay.self, StoredDailyRecovery.self, StoredCheckIn.self,
+         StoredSupplement.self, StoredSupplementIntake.self, StoredBodyMeasurement.self, StoredPersonalRecord.self]
     }
 
     public static var localModels: [any PersistentModel.Type] {
-        []
+        [StoredCachedHealthSample.self, StoredHealthQueryAnchor.self, StoredActiveSessionSnapshot.self]
     }
 
     public static func makeContainer(mode: StoreMode) throws -> ModelContainer {
