@@ -8,7 +8,7 @@ import Testing
     @Test func contentSummaryComesFromBundledLibrary() {
         let model = DataDebugModel(dependencies: .testing())
         #expect(model.exerciseCount == 84 && model.templateCount == 5)
-        #expect(model.contentVersion == "1.0.0")
+        #expect(model.contentVersion == "1.1.0")
         #expect(model.exercisesByPattern.map(\.pattern) == MovementPattern.allCases)
         #expect(model.exerciseName(for: "leg-press-machine") == "Presse à cuisses")
         #expect(model.exerciseName(for: "ghost") == nil)

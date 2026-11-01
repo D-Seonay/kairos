@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "1.0.0",
+  "contentVersion": "1.1.0",
   "exercises": [
     {
       "id": "bench-press-barbell",
@@ -242,6 +242,9 @@
         "bench-press-dumbbell",
         "chest-press-machine",
         "bench-press-barbell"
+      ],
+      "riskAreas": [
+        "wrists"
       ]
     },
     {
@@ -359,6 +362,9 @@
         "pec-deck-machine",
         "cable-crossover",
         "low-to-high-cable-fly"
+      ],
+      "riskAreas": [
+        "shoulders"
       ]
     },
     {
@@ -440,6 +446,9 @@
         "shoulder-press-machine",
         "seated-dumbbell-shoulder-press",
         "arnold-press"
+      ],
+      "riskAreas": [
+        "shoulders"
       ]
     },
     {
@@ -480,6 +489,9 @@
         "shoulder-press-machine",
         "arnold-press",
         "overhead-press-barbell"
+      ],
+      "riskAreas": [
+        "shoulders"
       ]
     },
     {
@@ -520,6 +532,9 @@
         "seated-dumbbell-shoulder-press",
         "overhead-press-barbell",
         "arnold-press"
+      ],
+      "riskAreas": [
+        "shoulders"
       ]
     },
     {
@@ -560,6 +575,9 @@
         "seated-dumbbell-shoulder-press",
         "shoulder-press-machine",
         "overhead-press-barbell"
+      ],
+      "riskAreas": [
+        "shoulders"
       ]
     },
     {
@@ -1042,6 +1060,9 @@
         "chest-supported-row-machine",
         "seated-row-machine-iso-lateral",
         "one-arm-dumbbell-row"
+      ],
+      "riskAreas": [
+        "lowerBack"
       ]
     },
     {
@@ -1160,8 +1181,8 @@
         ]
       },
       "alternatives": [
-        "ez-bar-preacher-curl",
         "cable-curl",
+        "ez-bar-preacher-curl",
         "hammer-curl-dumbbell"
       ]
     },
@@ -1240,6 +1261,9 @@
         "ez-bar-preacher-curl",
         "cable-curl",
         "preacher-curl-machine"
+      ],
+      "riskAreas": [
+        "wrists"
       ]
     },
     {
@@ -1509,6 +1533,9 @@
         "close-grip-bench-press",
         "triceps-pushdown-cable",
         "overhead-triceps-extension-cable"
+      ],
+      "riskAreas": [
+        "shoulders"
       ]
     },
     {
@@ -1583,6 +1610,9 @@
         "wrist-curl-cable",
         "reverse-wrist-curl-barbell",
         "reverse-curl-ez-bar"
+      ],
+      "riskAreas": [
+        "wrists"
       ]
     },
     {
@@ -1620,6 +1650,9 @@
         "wrist-curl-barbell",
         "wrist-curl-cable",
         "reverse-curl-ez-bar"
+      ],
+      "riskAreas": [
+        "wrists"
       ]
     },
     {
@@ -1701,6 +1734,9 @@
         "hack-squat-machine",
         "leg-press-machine",
         "goblet-squat"
+      ],
+      "riskAreas": [
+        "lowerBack"
       ]
     },
     {
@@ -1742,6 +1778,10 @@
         "hack-squat-machine",
         "goblet-squat",
         "leg-press-machine"
+      ],
+      "riskAreas": [
+        "lowerBack",
+        "wrists"
       ]
     },
     {
@@ -1902,6 +1942,9 @@
         "reverse-lunge-dumbbell",
         "bulgarian-split-squat",
         "step-up-dumbbell"
+      ],
+      "riskAreas": [
+        "knees"
       ]
     },
     {
@@ -1943,6 +1986,9 @@
         "reverse-lunge-dumbbell",
         "walking-lunge-dumbbell",
         "step-up-dumbbell"
+      ],
+      "riskAreas": [
+        "knees"
       ]
     },
     {
@@ -1983,6 +2029,9 @@
         "walking-lunge-dumbbell",
         "bulgarian-split-squat",
         "step-up-dumbbell"
+      ],
+      "riskAreas": [
+        "knees"
       ]
     },
     {
@@ -2067,6 +2116,9 @@
         "romanian-deadlift-barbell",
         "hip-thrust-barbell",
         "romanian-deadlift-dumbbell"
+      ],
+      "riskAreas": [
+        "lowerBack"
       ]
     },
     {
@@ -2108,6 +2160,9 @@
         "romanian-deadlift-dumbbell",
         "single-leg-romanian-deadlift",
         "hip-thrust-barbell"
+      ],
+      "riskAreas": [
+        "lowerBack"
       ]
     },
     {
@@ -2427,6 +2482,9 @@
         "single-leg-extension-machine",
         "sissy-squat",
         "spanish-squat-band"
+      ],
+      "riskAreas": [
+        "knees"
       ]
     },
     {
@@ -2464,6 +2522,9 @@
         "leg-extension-machine",
         "sissy-squat",
         "spanish-squat-band"
+      ],
+      "riskAreas": [
+        "knees"
       ]
     },
     {
@@ -2503,6 +2564,9 @@
         "leg-extension-machine",
         "spanish-squat-band",
         "single-leg-extension-machine"
+      ],
+      "riskAreas": [
+        "knees"
       ]
     },
     {

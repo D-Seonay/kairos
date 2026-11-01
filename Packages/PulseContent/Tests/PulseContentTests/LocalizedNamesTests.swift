@@ -16,3 +16,8 @@ private func check(_ raw: String, _ name: String) {
     #expect(Equipment.cable.localizedName == "Poulie")
     #expect(MovementPattern.horizontalPull.localizedName == "Tirage horizontal")
 }
+
+@Test func runTypeAndFocusHaveFrenchNames() {
+    #expect(RunType.allCases.map(\.localizedName) == ["Sortie facile", "Fractionné", "Sortie longue"])
+    #expect(TrainingFocus.allCases.map(\.localizedName) == ["Force", "Équilibré", "Endurance"])
+}

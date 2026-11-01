@@ -15,7 +15,12 @@ let package = Package(
         .target(
             name: "PulseContent",
             dependencies: ["PulseDomain"],
-            resources: [.process("Resources")],
+            resources: [
+                .process("Resources/Localizable.xcstrings"),
+                .process("Resources/exercises.json"),
+                .process("Resources/programs.json"),
+                .copy("Resources/Programs")
+            ],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(

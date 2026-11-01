@@ -34,6 +34,9 @@ enum ExerciseRules {
         if !ContentValidator.allowedRests.contains(exercise.defaultRestSeconds) {
             add(.rest, "repos attendu : 60, 90, 120 ou 180 s")
         }
+        if Set(exercise.riskAreas).count != exercise.riskAreas.count {
+            add(.riskAreas, "zones à risque en double")
+        }
         issues += alternativeIssues(for: exercise, in: library)
         return issues
     }

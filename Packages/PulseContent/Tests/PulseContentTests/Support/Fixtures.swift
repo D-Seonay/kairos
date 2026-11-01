@@ -5,13 +5,14 @@ import PulseDomain
 enum Fixtures {
     static func exercise(id: String, pattern: MovementPattern = .squat, alternatives: [String] = [], retired: Bool = false,
                          cues: Int = 3, mistakes: Int = 2, increment: Double = 2.5, rest: Int = 90,
-                         primary: [Muscle] = [.quads], secondary: [Muscle] = [.glutes]) -> Exercise {
+                         primary: [Muscle] = [.quads], secondary: [Muscle] = [.glutes],
+                         riskAreas: [PainArea] = []) -> Exercise {
         Exercise(id: id, name: LocalizedText(fr: "Nom \(id)", en: "Name \(id)"), primaryMuscles: primary, secondaryMuscles: secondary,
                  equipment: .machine, pattern: pattern, region: .lower, isCompound: false, isUnilateral: false, loadKind: .external,
                  defaultIncrementKg: increment, defaultRestSeconds: rest,
                  cues: LocalizedList(fr: (0..<cues).map { "Consigne \($0)." }),
                  mistakes: LocalizedList(fr: (0..<mistakes).map { "Erreur \($0)." }),
-                 alternatives: alternatives, retired: retired)
+                 alternatives: alternatives, riskAreas: riskAreas, retired: retired)
     }
 
     /// Quatre exercices `<prefix>-1…4` d'un même plan qui se citent mutuellement.

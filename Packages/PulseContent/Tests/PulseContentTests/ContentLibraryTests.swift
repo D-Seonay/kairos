@@ -13,7 +13,7 @@ private final class Marker {}
 
 @Test func bundledLibraryLoads() throws {
     let lib = try ContentLibrary.load(from: ContentLibrary.resourceBundle)
-    #expect(lib.contentVersion == "1.0.0")
+    #expect(lib.contentVersion == "1.1.0")
     #expect(lib.exercise(id: "does-not-exist") == nil)
     #expect(lib.programTemplate(id: "does-not-exist") == nil)
 }
@@ -25,4 +25,8 @@ private final class Marker {}
     #expect(lib.exercises.count == 4)
     #expect(lib.activeExercises.map(\.id) == ["p-2", "p-3", "p-4"])
     #expect(lib.exercise(id: "p-1")?.retired == true)
+}
+
+@Test func programsKeepTheirSubdirectory() {
+    #expect(ContentLibrary.resourceBundle.url(forResource: "ppl-3", withExtension: "json", subdirectory: "Programs") != nil)
 }
