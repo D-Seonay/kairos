@@ -42,7 +42,7 @@ enum Sample {
     }
 
     static func session(startedAt: Date = Fixed.t0, status: SessionStatus = .completed, sets: Int = 9) -> WorkoutSession {
-        var all = (1...sets).map { set(order: $0) }
+        var all = (0..<sets).map { set(order: $0 + 1) }
         if !all.isEmpty {
             all[0].setType = .warmup
             all[all.count - 1].replacedExercise = .content(id: "chest-press-machine")
