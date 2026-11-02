@@ -17,3 +17,20 @@ et retour","Tapis de Course",,"",0,"normal",,,1.4,600,
 """
 }
 // swiftlint:enable line_length
+
+extension HevyFixtures {
+    /// L'en-tête Hevy suivi des lignes données (voir `row`).
+    static func csv(_ lines: String...) -> String {
+        (["\"title\",\"start_time\",\"end_time\",\"description\",\"exercise_title\",\"superset_id\",\"exercise_notes\","
+          + "\"set_index\",\"set_type\",\"weight_kg\",\"reps\",\"distance_km\",\"duration_seconds\",\"rpe\""] + lines)
+            .joined(separator: "\n")
+    }
+
+    /// Une ligne de série ; par défaut, la séance « Test » du 3 nov. 2026 (10:00 – 11:00) et tous les champs de la série vides.
+    static func row(_ exercise: String, title: String = "Test", start: String = "3 nov. 2026, 10:00",
+                    end: String = "3 nov. 2026, 11:00", superset: String = "", notes: String = "", type: String = "normal",
+                    weight: String = "", reps: String = "", distance: String = "", seconds: String = "") -> String {
+        "\"\(title)\",\"\(start)\",\"\(end)\",\"\",\"\(exercise)\",\(superset),\"\(notes)\",0,\"\(type)\",\(weight),\(reps),"
+            + "\(distance),\(seconds),"
+    }
+}
