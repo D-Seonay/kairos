@@ -61,9 +61,8 @@ final class AppRootModel {
     /// correspondent plus à aucune séance en cours (spec M4 §15.3).
     func refreshLiveSession() async {
         await liveSession?.refresh()
-        // Lue au service, pas au coordinateur : un démarrage en cours y passe d'abord, et son activité n'est pas fermée.
-        let current = await dependencies.liveSession.current()
-        await dependencies.sessionActivity.endAll(except: current?.id)
+        // Lue au service, pas au coordinateur, en une seule opération : un démarrage en cours n'a pas son activité fermée.
+        await dependencies.liveSession.closeStaleActivities()
     }
 
     /// L'onboarding a enregistré le profil terminé : on passe aux onglets et on relit le profil pour l'ambiance.

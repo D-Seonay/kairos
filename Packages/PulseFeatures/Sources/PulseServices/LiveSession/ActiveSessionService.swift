@@ -63,6 +63,14 @@ public final class ActiveSessionService: Sendable {
         return resumed ?? nil
     }
 
+    /// Termine les Live Activities de séance qui ne correspondent plus à la séance en cours (spec M4 §15.3). Le snapshot est lu
+    /// dans la même opération de la file : un démarrage qui passe juste avant garde son activité.
+    public func closeStaleActivities() async {
+        _ = try? await queue.run {
+            await self.activity.endAll(except: try? await self.loadSession()?.id)
+        }
+    }
+
     /// Planifie la séance, l'enregistre, puis démarre la Live Activity. Une séance lisible déjà en cours bloque le départ ; un
     /// snapshot illisible, qui ne pourra jamais être repris, est effacé avec sa Live Activity et sa notification.
     public func start(_ launch: SessionLaunch) async throws -> LiveSession {

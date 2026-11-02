@@ -197,4 +197,12 @@ struct ActiveSessionServiceTests {
         let validated = try await service.apply(.validate(exercise: bench.id, set: bench.sets[0].id))
         #expect(try await fixture.stored() == validated)
     }
+
+    @Test func closingStaleActivitiesKeepsOnlyTheRunningSession() async throws {
+        let service = fixture.makeService()
+        await service.closeStaleActivities()
+        let session = try await service.start(ActiveSessionFixture.pushLaunch)
+        await service.closeStaleActivities()
+        #expect(await fixture.activity.endAllCalls == [nil, session.id])
+    }
 }
