@@ -14,6 +14,9 @@ public final class StoredUserExercise {
     public var isUnilateral: Bool = false
     public var defaultIncrementKg: Double = 2.5
     public var defaultRestSeconds: Int = 90
+    public var loadKind: String = LoadKind.external.rawValue
+    public var isCompound: Bool = false
+    public var tracksDuration: Bool = false
     public var isArchived: Bool = false
     public var createdAt: Date = Date()
     public var updatedAt: Date = Date()
@@ -35,6 +38,9 @@ public final class StoredUserExercise {
         isUnilateral = exercise.isUnilateral
         defaultIncrementKg = exercise.defaultIncrementKg
         defaultRestSeconds = exercise.defaultRestSeconds
+        loadKind = exercise.loadKind.rawValue
+        isCompound = exercise.isCompound
+        tracksDuration = exercise.tracksDuration
         isArchived = exercise.isArchived
         updatedAt = exercise.updatedAt
     }
@@ -44,6 +50,8 @@ public final class StoredUserExercise {
                      secondaryMuscles: CodableColumn.decode([Muscle].self, from: secondaryMuscles, default: []),
                      equipment: .stored(equipment, default: .machine), pattern: .stored(pattern, default: .horizontalPush),
                      region: .stored(region, default: .upper), isUnilateral: isUnilateral, defaultIncrementKg: defaultIncrementKg,
-                     defaultRestSeconds: defaultRestSeconds, isArchived: isArchived, createdAt: createdAt, updatedAt: updatedAt)
+                     defaultRestSeconds: defaultRestSeconds, loadKind: .stored(loadKind, default: .external),
+                     isCompound: isCompound, tracksDuration: tracksDuration, isArchived: isArchived,
+                     createdAt: createdAt, updatedAt: updatedAt)
     }
 }

@@ -15,6 +15,7 @@ public final class StoredWorkoutSet {
     public var plannedReps: Int?
     public var actualWeightKg: Double?
     public var actualReps: Int?
+    public var durationSeconds: Int?
     public var rpe: Double?
     public var restSeconds: Int?
     public var completedAt: Date?
@@ -23,14 +24,18 @@ public final class StoredWorkoutSet {
     public var replacedUserExerciseID: UUID?
     public var replacementReason: String?
     public var session: StoredWorkoutSession?
+    public var createdAt: Date = Date()
+    public var updatedAt: Date = Date()
     public var deletedAt: Date?
 
-    public init(_ set: WorkoutSet) {
+    /// `updatedAt` : celui de la séance, seule source des dates d'une série.
+    public init(_ set: WorkoutSet, updatedAt: Date) {
         id = set.id
-        apply(set)
+        createdAt = updatedAt
+        apply(set, updatedAt: updatedAt)
     }
 
-    public func apply(_ set: WorkoutSet) {
+    public func apply(_ set: WorkoutSet, updatedAt: Date) {
         order = set.order
         contentExerciseID = set.exercise.contentID
         userExerciseID = set.exercise.userID
@@ -41,6 +46,7 @@ public final class StoredWorkoutSet {
         plannedReps = set.plannedReps
         actualWeightKg = set.actualWeightKg
         actualReps = set.actualReps
+        durationSeconds = set.durationSeconds
         rpe = set.rpe
         restSeconds = set.restSeconds
         completedAt = set.completedAt
@@ -48,6 +54,7 @@ public final class StoredWorkoutSet {
         replacedContentExerciseID = set.replacedExercise?.contentID
         replacedUserExerciseID = set.replacedExercise?.userID
         replacementReason = set.replacementReason?.rawValue
+        self.updatedAt = updatedAt
     }
 
     public func toDomain() -> WorkoutSet {
@@ -55,7 +62,8 @@ public final class StoredWorkoutSet {
                    exercise: ExerciseReference(contentID: contentExerciseID, userID: userExerciseID) ?? .content(id: ""),
                    exerciseName: exerciseName, setType: .stored(setType, default: .working), supersetGroup: supersetGroup,
                    plannedWeightKg: plannedWeightKg, plannedReps: plannedReps, actualWeightKg: actualWeightKg, actualReps: actualReps,
-                   rpe: rpe, restSeconds: restSeconds, completedAt: completedAt, isPersonalRecord: isPersonalRecord,
+                   durationSeconds: durationSeconds, rpe: rpe, restSeconds: restSeconds, completedAt: completedAt,
+                   isPersonalRecord: isPersonalRecord,
                    replacedExercise: ExerciseReference(contentID: replacedContentExerciseID, userID: replacedUserExerciseID),
                    replacementReason: replacementReason.flatMap { ReplacementReason(rawValue: $0) })
     }

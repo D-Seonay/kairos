@@ -78,6 +78,10 @@ enum Sample {
                      defaultRestSeconds: 90, isArchived: archived,
                      createdAt: Fixed.t1, updatedAt: Fixed.t2)
     }
+
+    static func exerciseSettings(exercise: ExerciseReference = .content(id: "bench-press-barbell")) -> ExerciseSettings {
+        ExerciseSettings(exercise: exercise, incrementKg: 1.25, warmupSetCount: 2, createdAt: Fixed.t1, updatedAt: Fixed.t2)
+    }
 }
 
 extension Sample {

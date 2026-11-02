@@ -8,11 +8,12 @@ import SwiftData
 public enum PulseSchemaV1: VersionedSchema {
     public static let versionIdentifier = Schema.Version(1, 0, 0)
 
-    /// Les modèles actuels, sauf ceux qui ont changé depuis la V1, remplacés par leur copie figée.
+    /// Les modèles actuels, sauf ceux qui ont changé depuis la V1, remplacés par leur copie figée : les six modèles
+    /// d'entraînement modifiés en V3 n'avaient pas changé entre V1 et V2, d'où leurs copies figées V2.
     public static var models: [any PersistentModel.Type] {
-        [StoredProfile.self, PulsePersistence.StoredProgram.self, PulsePersistence.StoredRoutineDay.self,
-         PulsePersistence.StoredRoutineExercise.self, PulsePersistence.StoredUserExercise.self,
-         PulsePersistence.StoredWorkoutSession.self, PulsePersistence.StoredWorkoutSet.self, PulsePersistence.StoredScheduledDay.self,
+        [StoredProfile.self, PulseSchemaV2.StoredProgram.self, PulseSchemaV2.StoredRoutineDay.self,
+         PulseSchemaV2.StoredRoutineExercise.self, PulseSchemaV2.StoredUserExercise.self,
+         PulseSchemaV2.StoredWorkoutSession.self, PulseSchemaV2.StoredWorkoutSet.self, PulsePersistence.StoredScheduledDay.self,
          StoredDailyRecovery.self, PulsePersistence.StoredCheckIn.self, PulsePersistence.StoredSupplement.self,
          PulsePersistence.StoredSupplementIntake.self, PulsePersistence.StoredBodyMeasurement.self,
          PulsePersistence.StoredPersonalRecord.self] + PersistenceStack.localModels
