@@ -1,5 +1,6 @@
 import Foundation
 import PulseDomain
+import Synchronization
 
 /// Doublures en mémoire des dépôts d'entraînement de SwiftData : exercices de l'utilisateur, réglages par exercice et records.
 
@@ -92,5 +93,22 @@ public actor InMemoryPersonalRecordRepository: PersonalRecordRepository {
     /// Identité d'un record d'un recalcul à l'autre : la série, le type et la charge.
     private static func sameKey(_ lhs: PersonalRecord, _ rhs: PersonalRecord) -> Bool {
         lhs.setID == rhs.setID && lhs.kind == rhs.kind && lhs.weightKg == rhs.weightKg
+    }
+}
+
+/// Les choix de correspondance Hevy en mémoire, pour les tests et les aperçus.
+public final class InMemoryHevyMappingStore: HevyMappingStore {
+    private let stored: Mutex<[String: HevyMappingChoice]>
+
+    public init(_ choices: [String: HevyMappingChoice] = [:]) {
+        stored = Mutex(choices)
+    }
+
+    public func load() -> [String: HevyMappingChoice] {
+        stored.withLock { $0 }
+    }
+
+    public func save(_ choices: [String: HevyMappingChoice]) {
+        stored.withLock { $0 = choices }
     }
 }

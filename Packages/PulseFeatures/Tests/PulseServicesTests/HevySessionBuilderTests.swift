@@ -95,6 +95,13 @@ struct HevySessionBuilderTests {
         #expect(session.durationMinutes == 0)
     }
 
+    @Test func endNeverPrecedesStartAcrossTheAutumnDSTChange() throws {
+        let text = HevyFixtures.csv(HevyFixtures.row("Bench", start: "25 oct. 2026, 02:30", end: "25 oct. 2026, 02:10",
+                                                     weight: "50", reps: "5"))
+        let session = try #require(try build(text, references: ["Bench": bench]))
+        #expect(session.endedAt == session.startedAt)
+    }
+
     @Test func assistedExercisesDoNotAddTonnage() throws {
         let text = HevyFixtures.csv(HevyFixtures.row("Dips", weight: "30", reps: "10"))
         let session = try #require(try build(text, references: ["Dips": .content(id: "assisted-dips-machine")]))

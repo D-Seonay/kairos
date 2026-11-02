@@ -33,9 +33,9 @@ public enum HevyImportPlanner {
     public static func preview(rows: [HevyRow], existing: [WorkoutSession], library: ContentLibrary, userExercises: [UserExercise],
                                remembered: [String: HevyMappingChoice]) throws -> HevyImportPreview {
         guard !rows.isEmpty else { throw HevyImportError.empty }
-        let imported = Set(existing.filter { $0.source == .hevy }.map { SessionKey(title: $0.title, minute: minute($0.startedAt)) })
+        let imported = Set(existing.filter { $0.source == .hevy }.map { SessionKey(title: $0.title, startedAt: $0.startedAt) })
         let workouts = HevyWorkouts.group(rows)
-        let fresh = workouts.filter { !imported.contains(SessionKey(title: $0.title, minute: minute($0.startedAt))) }
+        let fresh = workouts.filter { !imported.contains(SessionKey(title: $0.title, startedAt: $0.startedAt)) }
         let resolver = Resolver(library: library, userExercises: userExercises, remembered: remembered)
         let names = summaries(of: fresh, resolver: resolver)
         let cardioNames = Set(names.filter(\.isCardio).map(\.name))
@@ -48,9 +48,26 @@ public enum HevyImportPlanner {
             period: starts.min().flatMap { first in starts.max().map { first...$0 } }, names: names)
     }
 
+    /// La minute où commence `workout` : son import déjà enregistré a commencé dans cet intervalle.
+    static func startMinute(of workout: HevyWorkout) -> Range<Date> {
+        let start = Date(timeIntervalSince1970: Double(minute(workout.startedAt)) * 60)
+        return start..<start.addingTimeInterval(60)
+    }
+
+    /// Vrai quand `session` est l'import de `workout` : source Hevy, même titre, début dans la même minute.
+    static func isImport(_ session: WorkoutSession, of workout: HevyWorkout) -> Bool {
+        let key = SessionKey(title: workout.title, startedAt: workout.startedAt)
+        return session.source == .hevy && SessionKey(title: session.title, startedAt: session.startedAt) == key
+    }
+
     private struct SessionKey: Hashable {
         let title: String
         let minute: Int
+
+        init(title: String, startedAt: Date) {
+            self.title = title
+            minute = HevyImportPlanner.minute(startedAt)
+        }
     }
 
     private static func minute(_ date: Date) -> Int {

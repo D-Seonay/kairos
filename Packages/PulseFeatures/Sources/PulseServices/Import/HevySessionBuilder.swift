@@ -24,13 +24,15 @@ public enum HevySessionBuilder {
             if let text = block.notes { notes.append(ExerciseNote(exercise: reference, text: text)) }
         }
         guard !sets.isEmpty else { return nil }
-        // L'export n'a pas de décalage horaire : autour du passage à l'heure d'hiver, la fin peut précéder le début.
-        let seconds = max(0, workout.endedAt.timeIntervalSince(workout.startedAt))
+        // L'export n'a pas de décalage horaire : autour du passage à l'heure d'hiver, la fin peut précéder le début. Elle est
+        // ramenée au début, pour que l'intervalle de la séance ne soit jamais inversé.
+        let endedAt = max(workout.endedAt, workout.startedAt)
         return WorkoutSession(
-            startedAt: workout.startedAt, endedAt: workout.endedAt, kind: .strength, source: .hevy, status: .completed,
+            startedAt: workout.startedAt, endedAt: endedAt, kind: .strength, source: .hevy, status: .completed,
             title: workout.title, note: workout.description,
-            tonnageKg: SessionTonnage.kilograms(of: sets, loadKind: directory.loadKind(of:)), durationMinutes: seconds / 60,
-            exerciseNotes: notes, sets: sets, createdAt: now, updatedAt: now)
+            tonnageKg: SessionTonnage.kilograms(of: sets, loadKind: directory.loadKind(of:)),
+            durationMinutes: endedAt.timeIntervalSince(workout.startedAt) / 60, exerciseNotes: notes, sets: sets,
+            createdAt: now, updatedAt: now)
     }
 
     private static func hasValues(_ row: HevyRow) -> Bool {
