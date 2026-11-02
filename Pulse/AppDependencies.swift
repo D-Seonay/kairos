@@ -160,10 +160,10 @@ struct AppDependencies: Sendable {
         let calendar = wiring.calendar
         let exporter = SwiftDataExporter(container: container, appVersion: appVersion, contentVersion: content.contentVersion,
                                          exerciseNames: { content.exercise(id: $0)?.name.fr })
-        let eraser = SwiftDataEraser(container: container, defaultsSuite: wiring.defaultsSuite,
-                                     defaultsDomain: wiring.defaultsSuite ?? Bundle.main.bundleIdentifier ?? "fr.seonay.pulse",
-                                     healthEraser: wiring.healthEraser, notifications: wiring.notificationCanceling,
-                                     widgets: wiring.widgets, exportsDirectory: SwiftDataExporter.exportsDirectory)
+        let storeEraser = SwiftDataEraser(container: container, defaultsSuite: wiring.defaultsSuite,
+                                          defaultsDomain: wiring.defaultsSuite ?? Bundle.main.bundleIdentifier ?? "fr.seonay.pulse",
+                                          healthEraser: wiring.healthEraser, notifications: wiring.notificationCanceling,
+                                          widgets: wiring.widgets, exportsDirectory: SwiftDataExporter.exportsDirectory)
         let recovery = SwiftDataRecoveryRepository(modelContainer: container, calendar: calendar)
         let profiles = SwiftDataProfileRepository(modelContainer: container)
         let programs = SwiftDataProgramRepository(modelContainer: container)
@@ -175,6 +175,8 @@ struct AppDependencies: Sendable {
             nightHistory: NightHistory(source: wiring.healthSource, cache: healthCache, calendar: calendar), scores: scores,
             widgets: wiring.widgets, notifications: wiring.morningScore, activity: activity,
             calendar: calendar, now: wiring.now)
+        // La suppression totale attend la fin d'un rafraîchissement en cours, qui republierait l'instantané effacé.
+        let eraser = SerializedDataEraser(refresher: refresher, inner: storeEraser)
         return AppDependencies(
             health: wiring.health, healthSource: wiring.healthSource, notifications: wiring.notifications,
             onboardingSteps: UserDefaultsOnboardingStepStore(suiteName: wiring.defaultsSuite),

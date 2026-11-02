@@ -69,6 +69,11 @@ public final class DayRefresher: Sendable {
         }
     }
 
+    /// Efface tout avec `eraser`, dans la file : après le passage en cours, et avant le suivant.
+    public func eraseEverything(using eraser: any DataEraser, options: EraseOptions) async throws {
+        try await queue.run { try await eraser.eraseEverything(options: options) }
+    }
+
     // MARK: - Interne
 
     private func pass(_ origin: Origin) async -> DayRefresh {

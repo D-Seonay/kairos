@@ -67,6 +67,21 @@ struct HoldingNotificationScheduler: NotificationScheduling {
     }
 }
 
+/// Un publicateur qui suspend chaque publication derrière une porte avant de la confier à la doublure.
+struct HoldingWidgetPublisher: WidgetPublishing {
+    let inner: StubWidgetPublisher
+    let gate: Gate
+
+    func publish(_ snapshot: WidgetSnapshot) async {
+        await gate.pass()
+        await inner.publish(snapshot)
+    }
+
+    func clear() async {
+        await inner.clear()
+    }
+}
+
 /// Un rafraîchisseur du jour au-dessus de dépôts et de doublures en mémoire, que le test peut relire.
 struct RefresherFixture {
     let profiles = InMemoryProfileRepository()
@@ -79,8 +94,10 @@ struct RefresherFixture {
     let clock: MutableClock
     let refresher: DayRefresher
 
-    /// Sans `adopt`, il n'y a ni profil ni programme. Avec `gate`, chaque notification planifiée attend que la porte s'ouvre.
-    init(scenario: HealthScenario, at start: String = "2026-11-02T08:00", holdingNotificationsAt gate: Gate? = nil) {
+    /// Sans `adopt`, il n'y a ni profil ni programme. Avec `gate`, chaque notification planifiée attend que la porte s'ouvre ;
+    /// avec `publishGate`, chaque publication de l'instantané.
+    init(scenario: HealthScenario, at start: String = "2026-11-02T08:00", holdingNotificationsAt gate: Gate? = nil,
+         holdingPublishesAt publishGate: Gate? = nil) {
         let calendar = TestClock.calendar
         let clock = MutableClock(start)
         let recovery = InMemoryRecoveryRepository(calendar: calendar)
@@ -88,6 +105,10 @@ struct RefresherFixture {
         let notifications = StubNotificationScheduler()
         let scheduler: any NotificationScheduling = gate.map { HoldingNotificationScheduler(inner: notifications, gate: $0) }
             ?? notifications
+        var publisher: any WidgetPublishing = widgets
+        if let publishGate {
+            publisher = HoldingWidgetPublisher(inner: widgets, gate: publishGate)
+        }
         self.clock = clock
         self.recovery = recovery
         self.source = source
@@ -96,7 +117,7 @@ struct RefresherFixture {
             profiles: profiles, programs: programs, recovery: recovery,
             nightHistory: NightHistory(source: source, cache: InMemoryHealthSampleCache(), calendar: calendar),
             scores: DailyScoreService(recovery: recovery, calendar: calendar),
-            widgets: widgets, notifications: scheduler, activity: activity,
+            widgets: publisher, notifications: scheduler, activity: activity,
             calendar: calendar, now: { clock.now })
     }
 
