@@ -53,8 +53,10 @@ public final class TodayModel {
         dateText = Self.dateText(environment.now(), calendar: environment.calendar)
     }
 
-    /// Le contenu embarqué, pour les feuilles et écrans de l'accueil.
-    var library: ContentLibrary { environment.library }
+    /// Les lignes de la séance à suivre en salle, nommées par l'annuaire : les exercices de l'utilisateur gardent leur nom.
+    func planLines(for day: RoutineDay) -> [SessionPlanLine] {
+        SessionPlanLine.lines(for: day, directory: directory)
+    }
 
     /// L'heure de la dernière lecture d'Apple Santé réussie, « 08:00 ».
     public var lastSyncText: String? {
@@ -174,7 +176,8 @@ public final class TodayModel {
             isShowingWhy = false
             return
         }
-        why = WhyContent.make(recovery: recovery, session: session, checkIn: recovery.isEstimated ? todayCheckIn : nil, library: library)
+        why = WhyContent.make(recovery: recovery, session: session, checkIn: recovery.isEstimated ? todayCheckIn : nil,
+                               directory: directory)
     }
 
     private func resetCheckInOnNewDay(_ now: Date) {

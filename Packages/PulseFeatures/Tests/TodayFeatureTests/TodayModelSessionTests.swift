@@ -42,6 +42,8 @@ struct TodayModelSessionTests {
         await model.refresh()
         let card = try #require(strength(model))
         #expect(card.summary.muscleWeights[.traps] == 4)
+        let day = try #require(model.session?.activeDay)
+        #expect(model.planLines(for: day).last?.name == "Shrug (Haltère)")
     }
 
     @Test func chooseOriginalSessionSwitchesTheCard() async throws {

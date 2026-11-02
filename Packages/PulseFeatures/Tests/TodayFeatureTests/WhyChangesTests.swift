@@ -47,6 +47,20 @@ struct WhyChangesTests {
         #expect(content.changes[0].detail == "Des séries en moins sur : \(bench).")
     }
 
+    /// Un exercice de l'utilisateur est nommé dans les séries perdues et les repos rallongés.
+    @Test func customExercisesAreNamed() throws {
+        let now = TodayClock.date("2026-11-02T08:00")
+        let shrug = UserExercise(
+            name: "Shrug (Haltère)", primaryMuscle: .traps, secondaryMuscles: [], equipment: .dumbbell, pattern: .shoulderIsolation,
+            region: .upper, isUnilateral: false, defaultIncrementKg: 2.5, defaultRestSeconds: 60, createdAt: now, updatedAt: now)
+        let day = RoutineDay(order: 0, name: "Épaules", kind: .strength, exercises: [
+            RoutineExercise(order: 0, exercise: .user(id: shrug.id), sets: 8, repsMin: 10, repsMax: 12, targetRPE: 7, restSeconds: 60)
+        ])
+        let content = try WhyFixture.content(WhyFixture.recovery(), plannedDay: .strength(day), userExercises: [shrug])
+        #expect(content.changes[0].detail == "Des séries en moins sur : Shrug (Haltère).")
+        #expect(content.changes.first { $0.pill == "+45" }?.detail == "1 min 45 au lieu de 1 min sur Shrug (Haltère).")
+    }
+
     @Test func optimalHasNothingToLighten() throws {
         let content = try WhyFixture.content(WhyFixture.recovery(score: 95))
         #expect(content.changes == [Change(pill: "✓", title: "Rien à alléger aujourd'hui.", detail: nil)])

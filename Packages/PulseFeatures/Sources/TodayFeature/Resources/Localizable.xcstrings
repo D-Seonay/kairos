@@ -409,6 +409,16 @@
         }
       }
     },
+    "Exercice inconnu" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exercice inconnu"
+          }
+        }
+      }
+    },
     "Exercice personnel" : {
       "localizations" : {
         "fr" : {
