@@ -191,4 +191,39 @@ struct DayRefresherTests {
         }
         #expect(await fixture.widgets.published.isEmpty)
     }
+
+    @Test func programReadFailureKeepsTheStoredAdjustments() async throws {
+        let fixture = RefresherFixture(scenario: .badNight, at: "2026-11-02T07:00")
+        try await fixture.adopt()
+        let early = try recovery(await fixture.refresher.refresh(origin: .foreground))
+        #expect(early.adjustments.map(\.kind) == [.volume, .rpeCap, .rest])
+
+        await fixture.programs.setFails(true)
+        fixture.clock.set("2026-11-02T09:00")
+        let later = await fixture.refresher.refresh(origin: .foreground)
+
+        #expect(try recovery(later).adjustments.map(\.kind) == [.volume, .rpeCap, .rest])
+        #expect(try await fixture.score(on: "2026-11-02T00:00")?.adjustments.map(\.kind) == [.volume, .rpeCap, .rest])
+        #expect(later.plannedDay == .noProgram)
+    }
+
+    @Test func editedProgramAfterFreezeKeepsTheFrozenScore() async throws {
+        let fixture = RefresherFixture(scenario: .badNight, at: "2026-11-02T13:00")
+        try await fixture.adopt()
+        let frozen = try recovery(await fixture.refresher.refresh(origin: .foreground))
+        #expect(frozen.frozenAt != nil)
+        #expect(frozen.adjustments.map(\.kind) == [.volume, .rpeCap, .rest])
+
+        let profile = try #require(await fixture.profiles.load())
+        let programID = try #require(profile.activeProgramID)
+        let program = try #require(await fixture.programs.program(id: programID))
+        let edited = ProgramEditor.assign(nil, to: .monday, in: program, now: fixture.clock.now)
+        try await fixture.programs.save(edited)
+        let refresh = await fixture.refresher.refresh(origin: .foreground)
+
+        #expect(refresh.score == .scored(frozen))
+        #expect(refresh.plannedDay == TodayPlanner.plan(program: edited, on: fixture.clock.now, calendar: TestClock.calendar))
+        guard case .rest(let next?) = refresh.plannedDay else { throw RefreshTestFailure.notScored(refresh.score) }
+        #expect(next.weekday == .wednesday)
+    }
 }

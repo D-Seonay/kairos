@@ -22,6 +22,13 @@ public final class DayRefresher: Sendable {
     private let now: @Sendable () -> Date
     private let queue = SerialTaskQueue()
 
+    /// Ce que le programme prévoit : `display` sert à l'écran, `forScore` au score du jour, `nil` quand le profil ou le programme
+    /// n'a pas pu être lu, pour que le score garde les ajustements déjà enregistrés.
+    private struct DayPlan {
+        var display: PlannedDay
+        var forScore: PlannedDay?
+    }
+
     public init(profiles: any ProfileRepository, programs: any ProgramRepository, recovery: any RecoveryRepository,
                 nightHistory: NightHistory, scores: DailyScoreService, widgets: any WidgetPublishing,
                 notifications: any NotificationScheduling, activity: any DayActivityLog, calendar: Calendar,
@@ -51,9 +58,9 @@ public final class DayRefresher: Sendable {
     public func saveCheckIn(_ answers: CheckInAnswers) async throws -> DailyRecovery {
         try await queue.run {
             let now = self.now()
-            let plannedDay = await self.currentPlannedDay(now: now)
-            let saved = try await self.scores.saveCheckIn(answers, plannedDay: plannedDay, now: now)
-            await self.publish(saved, plannedDay: plannedDay)
+            let plan = await self.currentPlan(now: now)
+            let saved = try await self.scores.saveCheckIn(answers, plannedDay: plan.forScore, now: now)
+            await self.publish(saved, plannedDay: plan.display)
             return saved
         }
     }
@@ -62,9 +69,9 @@ public final class DayRefresher: Sendable {
     public func chooseOriginalSession(_ chosen: Bool) async throws -> DailyRecovery {
         try await queue.run {
             let now = self.now()
-            let plannedDay = await self.currentPlannedDay(now: now)
+            let plan = await self.currentPlan(now: now)
             let saved = try await self.scores.chooseOriginalSession(chosen, now: now)
-            await self.publish(saved, plannedDay: plannedDay)
+            await self.publish(saved, plannedDay: plan.display)
             return saved
         }
     }
@@ -78,7 +85,7 @@ public final class DayRefresher: Sendable {
 
     private func pass(_ origin: Origin) async -> DayRefresh {
         let now = now()
-        let profile = try? await profiles.load()
+        let (profile, profileReadFailed) = await loadProfile()
         if origin == .background, profile?.onboardingCompletedAt == nil {
             return .empty(profile: profile)
         }
@@ -86,9 +93,10 @@ public final class DayRefresher: Sendable {
             activity.markOpened(at: now)
             await notifications.cancelMorningScore()
         }
-        let plannedDay = await plannedDay(for: profile, now: now)
+        let plan = await plan(for: profile, readFailed: profileReadFailed, now: now)
+        let plannedDay = plan.display
         let history = await nightHistory.refresh(now: now)
-        let score = try? await scores.update(nights: history.nights, plannedDay: plannedDay, now: now)
+        let score = try? await scores.update(nights: history.nights, plannedDay: plan.forScore, now: now)
         let scored: DailyRecovery? = if case .scored(let recovery)? = score { recovery } else { nil }
         let session = TodaySession(plannedDay: plannedDay, recovery: scored)
         if let scored {
@@ -115,17 +123,33 @@ public final class DayRefresher: Sendable {
         await widgets.publish(WidgetSnapshot(recovery: scored, session: session))
     }
 
-    /// Ce que le programme actif du profil enregistré prévoit à `now`.
-    private func currentPlannedDay(now: Date) async -> PlannedDay {
-        await plannedDay(for: try? await profiles.load(), now: now)
+    /// Le profil enregistré, et si sa lecture a échoué : un profil absent n'est pas un profil illisible.
+    private func loadProfile() async -> (profile: UserProfile?, readFailed: Bool) {
+        do {
+            return (try await profiles.load(), false)
+        } catch {
+            return (nil, true)
+        }
     }
 
-    private func plannedDay(for profile: UserProfile?, now: Date) async -> PlannedDay {
+    /// Ce que le programme actif du profil enregistré prévoit à `now`.
+    private func currentPlan(now: Date) async -> DayPlan {
+        let (profile, readFailed) = await loadProfile()
+        return await plan(for: profile, readFailed: readFailed, now: now)
+    }
+
+    private func plan(for profile: UserProfile?, readFailed: Bool, now: Date) async -> DayPlan {
+        guard !readFailed else { return DayPlan(display: .noProgram, forScore: nil) }
         var program: Program?
         if let id = profile?.activeProgramID {
-            program = try? await programs.program(id: id)
+            do {
+                program = try await programs.program(id: id)
+            } catch {
+                return DayPlan(display: .noProgram, forScore: nil)
+            }
         }
-        return TodayPlanner.plan(program: program, on: now, calendar: calendar)
+        let planned = TodayPlanner.plan(program: program, on: now, calendar: calendar)
+        return DayPlan(display: planned, forScore: planned)
     }
 
     /// Le check-in du jour, quand le score en est estimé.
