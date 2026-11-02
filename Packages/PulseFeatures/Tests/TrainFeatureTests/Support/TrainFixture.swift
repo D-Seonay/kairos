@@ -42,7 +42,8 @@ struct TrainFixture {
     let environment: TrainEnvironment
     let now: Date
 
-    init(profiles: any ProfileRepository = InMemoryProfileRepository(), now: Date = TrainClock.date(day: 2, hour: 9)) {
+    init(profiles: any ProfileRepository = InMemoryProfileRepository(), now: Date = TrainClock.date(day: 2, hour: 9),
+         exerciseSettings: any ExerciseSettingsRepository = InMemoryExerciseSettingsRepository()) {
         self.profiles = profiles
         self.now = now
         let library = ContentLibrary.bundled
@@ -57,7 +58,7 @@ struct TrainFixture {
                                     mappings: InMemoryHevyMappingStore(), library: library, calendar: calendar, now: clock)
         environment = TrainEnvironment(
             profiles: profiles, programs: programs, recovery: recovery, workouts: workouts, userExercises: userExercises,
-            exerciseSettings: InMemoryExerciseSettingsRepository(), personalRecords: personalRecords, records: records,
+            exerciseSettings: exerciseSettings, personalRecords: personalRecords, records: records,
             importer: importer, library: library, calendar: calendar, now: clock)
     }
 

@@ -69,8 +69,9 @@ public final class RoutineEditorModel {
         let userExercises = try await environment.userExercises.all(includeArchived: true)
         directory = ExerciseDirectory(library: environment.library, userExercises: userExercises)
         profile = try await environment.profiles.load()
+        // Deux réglages du même exercice (restauration iCloud) : le plus récent, comme `settings(for:)`.
         settings = Dictionary(try await environment.exerciseSettings.all().map { ($0.exercise, $0) },
-                              uniquingKeysWith: { first, _ in first })
+                              uniquingKeysWith: { lhs, rhs in rhs.updatedAt > lhs.updatedAt ? rhs : lhs })
     }
 
     /// La bibliothèque en choix multiple, sur le même environnement que l'éditeur.

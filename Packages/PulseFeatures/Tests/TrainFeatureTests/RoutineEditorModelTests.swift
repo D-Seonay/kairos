@@ -36,15 +36,26 @@ private actor FlakyProgramRepository: ProgramRepository {
     func delete(id: UUID) async throws { try await base.delete(id: id) }
 }
 
+/// Deux réglages pour le même exercice, comme après une restauration iCloud : le plus ancien d'abord.
+private struct DuplicatedSettingsRepository: ExerciseSettingsRepository {
+    let older: ExerciseSettings
+    let newer: ExerciseSettings
+
+    func all() async throws -> [ExerciseSettings] { [older, newer] }
+    func settings(for exercise: ExerciseReference) async throws -> ExerciseSettings? { exercise == newer.exercise ? newer : nil }
+    func save(_ settings: ExerciseSettings) async throws {}
+}
+
 /// Un programme actif de deux routines vides, « Push » et « Pull », et le modèle chargé sur « Push ».
 @MainActor
 private struct RoutineSetup {
-    let fixture = TrainFixture()
+    let fixture: TrainFixture
     let program: Program
     let push: UUID
     let pull: UUID
 
-    init() async throws {
+    init(fixture: TrainFixture = TrainFixture()) async throws {
+        self.fixture = fixture
         let now = fixture.now
         let (withPush, push) = ProgramEditor.addDay(named: "Push", exercises: [], to: ProgramEditor.emptyProgram(name: "PPL", now: now),
                                                     now: now)
@@ -203,6 +214,17 @@ private struct RoutineSetup {
     // Un autre éditeur relit le réglage.
     let other = await setup.model()
     #expect(other.increment(for: bench) == 20)
+}
+
+/// Deux réglages du même exercice : l'éditeur garde le plus récent, comme `settings(for:)`.
+@MainActor @Test func duplicatedSettingsKeepTheLatest() async throws {
+    let date = TrainClock.date(day: 1, hour: 9)
+    let older = ExerciseSettings(exercise: bench, incrementKg: 5, createdAt: date, updatedAt: date)
+    let newer = ExerciseSettings(exercise: bench, incrementKg: 1.25, createdAt: date, updatedAt: date.addingTimeInterval(60))
+    let setup = try await RoutineSetup(fixture: TrainFixture(exerciseSettings: DuplicatedSettingsRepository(older: older, newer: newer)))
+    let model = await setup.model()
+    model.add([bench])
+    #expect(model.increment(for: bench) == 1.25)
 }
 
 @MainActor @Test func aMissingOrRunningDayIsNotEditable() async throws {
