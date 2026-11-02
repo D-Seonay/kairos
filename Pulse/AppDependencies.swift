@@ -43,6 +43,8 @@ struct AppDependencies: Sendable {
     let activity: any DayActivityLog
     /// Le seul passage qui lit Apple Santé et met le score du jour à jour, au premier plan comme en arrière-plan.
     let refresher: DayRefresher
+    /// Les réveils d'Apple Santé ; `nil` sans Apple Santé, avec un scénario de lancement et en mode mémoire.
+    let backgroundDelivery: HealthKitBackgroundDelivery?
     let activeSession: any ActiveSessionStore
     let inspector: any StoreInspector
     let exporter: any DataExporter
@@ -57,11 +59,28 @@ struct AppDependencies: Sendable {
         var healthEraser: any HealthErasing
         /// Le groupe d'apps de l'app réelle ; une doublure en mode mémoire et dans les tests.
         var widgets: any WidgetPublishing
+        /// La notification du matin ; une doublure en mode mémoire et dans les tests.
+        var morningScore: any NotificationScheduling
+        /// `nil` : la suppression totale n'a aucune notification à retirer.
+        var notificationCanceling: (any NotificationCanceling)?
+        var backgroundDelivery: HealthKitBackgroundDelivery?
+        /// `nil` : l'inspecteur du magasin SwiftData.
+        var inspector: (any StoreInspector)?
         /// `nil` : `UserDefaults.standard`.
         var defaultsSuite: String?
         var calendar: Calendar
         var now: @Sendable () -> Date
         var launch: LaunchOptions
+
+        /// Le mode mémoire n'écrit ni dans les préférences, ni dans le groupe d'apps, ni dans les notifications de l'app réelle.
+        mutating func useMemoryDoubles(defaultsSuite suite: String) {
+            defaultsSuite = suite
+            notifications = StubNotificationAuthorizer(granted: false)
+            widgets = StubWidgetPublisher()
+            morningScore = StubNotificationScheduler()
+            notificationCanceling = nil
+            backgroundDelivery = nil
+        }
     }
 
     /// Apple Santé réel quand l'appareil le permet ; iCloud sur appareil, fichier local sur simulateur, mémoire en dernier recours.
@@ -88,15 +107,16 @@ struct AppDependencies: Sendable {
         } else {
             healthSource = UnavailableHealthSource()
         }
+        let scheduler = UserNotificationScheduler()
         var wiring = Wiring(health: reader ?? StubHealthReader(), healthSource: healthSource,
                             notifications: UserNotificationAuthorizer(), healthEraser: StubHealthEraser(),
                             widgets: AppGroupWidgetPublisher(file: WidgetSnapshotFile.appGroup()),
-                            defaultsSuite: nil, calendar: calendar, now: now, launch: launch)
+                            morningScore: scheduler, notificationCanceling: scheduler,
+                            backgroundDelivery: launch.healthScenario == nil ? reader.map(HealthKitBackgroundDelivery.init) : nil,
+                            inspector: nil, defaultsSuite: nil, calendar: calendar, now: now, launch: launch)
         if launch.storeInMemory {
             UserDefaults(suiteName: memoryDefaultsSuite)?.removePersistentDomain(forName: memoryDefaultsSuite)
-            wiring.defaultsSuite = memoryDefaultsSuite
-            wiring.notifications = StubNotificationAuthorizer(granted: false)
-            wiring.widgets = StubWidgetPublisher()
+            wiring.useMemoryDoubles(defaultsSuite: memoryDefaultsSuite)
             guard let memory = try? make(wiring, mode: .inMemory, error: nil) else { crash(nil) }
             return memory
         }
@@ -120,13 +140,16 @@ struct AppDependencies: Sendable {
 
     /// Conteneur en mémoire, doublures et suite de préférences dédiée, pour les tests et les aperçus.
     static func testing(health: any HealthReading = StubHealthReader(), healthSource: (any HealthSampleSource)? = nil,
-                        healthEraser: any HealthErasing = StubHealthEraser(), calendar: Calendar = .current) -> AppDependencies {
+                        healthEraser: any HealthErasing = StubHealthEraser(), calendar: Calendar = .current,
+                        inspector: (any StoreInspector)? = nil) -> AppDependencies {
         let now: @Sendable () -> Date = { Date.now }
         let wiring = Wiring(
             health: health,
             healthSource: healthSource ?? ScenarioHealthSource(scenario: .noData, now: now(), calendar: calendar),
             notifications: StubNotificationAuthorizer(granted: false), healthEraser: healthEraser,
-            widgets: StubWidgetPublisher(), defaultsSuite: testingDefaultsSuite, calendar: calendar, now: now, launch: LaunchOptions())
+            widgets: StubWidgetPublisher(), morningScore: StubNotificationScheduler(), notificationCanceling: nil,
+            backgroundDelivery: nil, inspector: inspector, defaultsSuite: testingDefaultsSuite, calendar: calendar, now: now,
+            launch: LaunchOptions())
         guard let dependencies = try? make(wiring, mode: .inMemory, error: nil) else { crash(nil) }
         return dependencies
     }
@@ -139,7 +162,7 @@ struct AppDependencies: Sendable {
                                          exerciseNames: { content.exercise(id: $0)?.name.fr })
         let eraser = SwiftDataEraser(container: container, defaultsSuite: wiring.defaultsSuite,
                                      defaultsDomain: wiring.defaultsSuite ?? Bundle.main.bundleIdentifier ?? "fr.seonay.pulse",
-                                     healthEraser: wiring.healthEraser, notifications: nil,
+                                     healthEraser: wiring.healthEraser, notifications: wiring.notificationCanceling,
                                      widgets: wiring.widgets, exportsDirectory: SwiftDataExporter.exportsDirectory)
         let recovery = SwiftDataRecoveryRepository(modelContainer: container, calendar: calendar)
         let profiles = SwiftDataProfileRepository(modelContainer: container)
@@ -147,11 +170,10 @@ struct AppDependencies: Sendable {
         let scores = DailyScoreService(recovery: recovery, calendar: calendar)
         let healthCache = SwiftDataHealthSampleCache(modelContainer: container)
         let activity = UserDefaultsDayActivityLog(suiteName: wiring.defaultsSuite)
-        // La notification du matin est une doublure jusqu'à la tâche 15.
         let refresher = DayRefresher(
             profiles: profiles, programs: programs, recovery: recovery,
             nightHistory: NightHistory(source: wiring.healthSource, cache: healthCache, calendar: calendar), scores: scores,
-            widgets: wiring.widgets, notifications: StubNotificationScheduler(), activity: activity,
+            widgets: wiring.widgets, notifications: wiring.morningScore, activity: activity,
             calendar: calendar, now: wiring.now)
         return AppDependencies(
             health: wiring.health, healthSource: wiring.healthSource, notifications: wiring.notifications,
@@ -166,9 +188,9 @@ struct AppDependencies: Sendable {
             supplements: SwiftDataSupplementRepository(modelContainer: container),
             bodyMeasurements: SwiftDataBodyMeasurementRepository(modelContainer: container),
             personalRecords: SwiftDataPersonalRecordRepository(modelContainer: container),
-            healthCache: healthCache, activity: activity, refresher: refresher,
+            healthCache: healthCache, activity: activity, refresher: refresher, backgroundDelivery: wiring.backgroundDelivery,
             activeSession: SwiftDataActiveSessionStore(modelContainer: container),
-            inspector: SwiftDataStoreInspector(container: container, cloudEnabled: mode == .cloud),
+            inspector: wiring.inspector ?? SwiftDataStoreInspector(container: container, cloudEnabled: mode == .cloud),
             exporter: exporter, eraser: eraser, seeder: SampleDataSeeder(container: container, calendar: calendar))
     }
 

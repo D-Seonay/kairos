@@ -2,11 +2,11 @@ import SwiftUI
 
 @main
 struct PulseApp: App {
-    private let dependencies = AppDependencies.live()
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
     var body: some Scene {
         WindowGroup {
-            AppRootView(dependencies: dependencies)
+            AppRootView(dependencies: appDelegate.dependencies, router: appDelegate.router)
         }
     }
 }
