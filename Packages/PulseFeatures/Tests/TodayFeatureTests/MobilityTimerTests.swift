@@ -55,6 +55,7 @@ struct MobilityTimerTests {
     }
 }
 
+@MainActor
 struct MobilitySheetTests {
     @Test func spokenTextNamesMinutesAndSeconds() {
         #expect(MobilitySheet.spokenText(1135) == "Temps restant 18 minutes 55 secondes")
