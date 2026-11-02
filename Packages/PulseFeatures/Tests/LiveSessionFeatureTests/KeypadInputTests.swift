@@ -113,3 +113,13 @@ import Testing
     for digit in 1...6 { _ = input.apply(.digit(digit)) }
     #expect(input.text == "123")
 }
+
+@Test func aCommaOnRepsOrSecondsKeepsTheValueThatWaitsToBeReplaced() {
+    for field in [KeypadField.Kind.reps, .duration] {
+        var input = KeypadInput(field: field, increment: 2.5)
+        input.start(with: 8)
+        #expect(input.apply(.comma) == 8)
+        #expect(input.text == "8")
+        #expect(input.apply(.digit(5)) == 5)
+    }
+}

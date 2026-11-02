@@ -72,7 +72,10 @@ public final class LiveSessionModel {
             advance(from: focus)
             return
         }
+        let before = keypad.text
         let value = keypad.apply(key)
+        // Une touche sans effet (virgule sur des répétitions, effacement d'un champ vide) ne modifie pas la série.
+        guard keypad.text != before else { return }
         haptics.light()
         switch focus.kind {
         case .weight:

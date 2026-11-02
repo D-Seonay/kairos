@@ -80,7 +80,7 @@ let package = Package(
         ),
         .testTarget(
             name: "LiveSessionFeatureTests",
-            dependencies: ["LiveSessionFeature", "TrainFeature", "PulseServices", domain, content, designSystem],
+            dependencies: ["LiveSessionFeature", "TrainFeature", "PulseServices", domain, recoveryEngine, content],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(

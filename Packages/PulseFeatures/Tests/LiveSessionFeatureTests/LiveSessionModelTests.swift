@@ -214,3 +214,17 @@ private func field(_ model: LiveSessionModel, exercise: Int = 0, set: Int, _ kin
     #expect(model.errorMessage != nil)
     #expect(model.session == before)
 }
+
+@MainActor @Test func aKeyThatChangesNothingSendsNoEdit() async throws {
+    let fixture = LiveFixture()
+    try await fixture.seedBenchHistory()
+    let model = try await fixture.startedModel()
+    let before = model.session
+    model.focus(field(model, set: 0, .reps))
+    await model.keypadKey(.comma)
+    #expect(model.session == before)
+    #expect(!model.session.exercises[0].sets[0].isEdited)
+    #expect(fixture.haptics.light == 0)
+    await model.keypadKey(.digit(9))
+    #expect(model.session.exercises[0].sets[0].reps == 9)
+}

@@ -148,3 +148,27 @@ import Testing
     #expect(coordinator.notice == nil)
     #expect(await fixture.authorizer.requestCount == 1)
 }
+
+@MainActor @Test func presentingAnExistingSessionNeitherAsksNorWarnsAboutNotifications() async throws {
+    let fixture = LiveFixture(notificationsGranted: false)
+    _ = try await fixture.service.start(LiveFixture.pushLaunch)
+    let coordinator = fixture.coordinator()
+    await coordinator.refresh()
+    await coordinator.start(LiveFixture.plankLaunch)
+    #expect(coordinator.isPresented)
+    #expect(coordinator.notice == nil)
+    #expect(await fixture.authorizer.requestCount == 0)
+    let unseen = fixture.coordinator()
+    await unseen.start(LiveFixture.plankLaunch)
+    #expect(unseen.isPresented)
+    #expect(unseen.notice == nil)
+    #expect(await fixture.authorizer.requestCount == 0)
+}
+
+@MainActor @Test func theFirstFreshStartAfterAnExistingOneStillAsks() async throws {
+    let fixture = LiveFixture(notificationsGranted: false)
+    let coordinator = fixture.coordinator()
+    await coordinator.start(LiveFixture.pushLaunch)
+    #expect(coordinator.notice != nil)
+    #expect(await fixture.authorizer.requestCount == 1)
+}

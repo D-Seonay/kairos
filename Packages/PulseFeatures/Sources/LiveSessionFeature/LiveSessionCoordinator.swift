@@ -38,22 +38,30 @@ public final class LiveSessionCoordinator {
         }
     }
 
-    /// Présente la séance en cours si elle existe, sinon en démarre une. Un second appel pendant un démarrage est ignoré. À
-    /// la première séance du lancement, demande l'autorisation des notifications et signale un refus une fois.
+    /// Présente la séance en cours si elle existe, sinon en démarre une. Un second appel pendant un démarrage est ignoré. Une
+    /// séance neuve demande l'autorisation des notifications (une fois par lancement) et signale un refus une fois ; présenter
+    /// une séance déjà en cours n'y touche pas.
     public func start(_ launch: SessionLaunch) async {
         guard !isStarting else { return }
         isStarting = true
-        defer { isStarting = false }
-        await requestNotificationsOnce()
+        let isFresh = await begin(launch)
+        isStarting = false
+        // La séance existe avant la demande système, et le garde n'est pas tenu pendant qu'elle s'affiche.
+        if isFresh { await requestNotificationsOnce() }
+    }
+
+    /// Présente la séance en cours ou en démarre une ; vrai si elle vient d'être créée.
+    private func begin(_ launch: SessionLaunch) async -> Bool {
         if current != nil {
             isPresented = true
-            return
+            return false
         }
         do {
             current = try await environment.service.start(launch)
             liveModel = nil
             errorMessage = nil
             isPresented = true
+            return true
         } catch ActiveSessionError.alreadyInProgress {
             // Une séance enregistrée que le bandeau n'a pas encore montrée : on la reprend.
             current = await environment.service.current()
@@ -61,6 +69,7 @@ public final class LiveSessionCoordinator {
         } catch {
             errorMessage = String(localized: "Pulse n'a pas pu démarrer la séance.", bundle: .module)
         }
+        return false
     }
 
     public func resume() {

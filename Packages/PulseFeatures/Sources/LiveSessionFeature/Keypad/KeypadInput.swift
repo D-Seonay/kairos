@@ -80,6 +80,8 @@ public struct KeypadInput: Sendable, Equatable {
     private var maxDecimals: Int { field == .weight ? 2 : 0 }
 
     private mutating func append(_ character: String) {
+        // Une virgule refusée ne touche pas au tampon : elle n'efface pas la valeur qui attend d'être remplacée.
+        if character == ",", maxDecimals == 0 { return }
         if replacesOnNextKey {
             text = ""
             replacesOnNextKey = false
@@ -88,7 +90,7 @@ public struct KeypadInput: Sendable, Equatable {
         let integer = parts.first.map(String.init) ?? ""
         let decimals = parts.count > 1 ? String(parts[1]) : nil
         if character == "," {
-            guard maxDecimals > 0, decimals == nil else { return }
+            guard decimals == nil else { return }
             text = (integer.isEmpty ? "0" : integer) + ","
         } else if let decimals {
             guard decimals.count < maxDecimals else { return }
