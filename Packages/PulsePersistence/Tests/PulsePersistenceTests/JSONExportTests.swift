@@ -17,7 +17,7 @@ private func makeExporter(_ container: ModelContainerBox, directory: URL? = nil)
     #expect(url.lastPathComponent.hasPrefix("Pulse-") && url.pathExtension == "json")
     let doc = try ExportCoding.decoder().decode(ExportDocument.self, from: Data(contentsOf: url))
     let snapshot = try await ExportSnapshotLoader(modelContainer: box.container).snapshot()
-    #expect(doc.format == "pulse-export" && doc.formatVersion == 1 && doc.schemaVersion == 1 && doc.contentVersion == "1.0.0")
+    #expect(doc.format == "pulse-export" && doc.formatVersion == 1 && doc.schemaVersion == 3 && doc.contentVersion == "1.0.0")
     #expect(doc.appVersion == "1.0 (1)" && doc.units.weight == "kg")
     #expect(doc.workoutSessions.count == 1 && doc.workoutSessions[0].sets.count == 9)
     // Le format est à la seconde près : on compare au document attendu passé par le même encodage.
@@ -30,7 +30,7 @@ private func makeExporter(_ container: ModelContainerBox, directory: URL? = nil)
     #expect(doc.programs.count == 1 && doc.programs[0].days.count == 3 && doc.scheduledDays.count == 1)
     #expect(doc.dailyRecoveries.count == 2 && doc.checkIns.count == 1 && doc.supplements.count == 1)
     #expect(doc.supplementIntakes.count == 2 && doc.bodyMeasurements.count == 1 && doc.personalRecords.count == 1)
-    #expect(doc.userExercises.count == 1 && doc.profile?.heightCm == 180)
+    #expect(doc.userExercises.count == 1 && doc.profile?.heightCm == 180 && doc.exerciseSettings.count == 1)
     #expect(doc.contentExercises["bench-press-barbell"] == "Développé couché à la barre")
     #expect(doc.contentExercises.count == 1)
 }
@@ -74,4 +74,19 @@ private func makeExporter(_ container: ModelContainerBox, directory: URL? = nil)
     _ = try await exporter.exportJSON()
     _ = try await exporter.exportJSON()
     #expect(try FileManager.default.contentsOfDirectory(atPath: directory.path).count == 1)
+}
+
+@Test func exportCarriesExerciseSettingsAndTheV3Fields() async throws {
+    let box = try ModelContainerBox()
+    try await SampleDataSeeder(container: box.container, calendar: Fixed.calendar).seed(now: Fixed.t0)
+    var session = Sample.session(startedAt: Fixed.t1, sets: 2)
+    session.exerciseNotes = [ExerciseNote(exercise: .content(id: "bench-press-barbell"), text: "Coudes serrés")]
+    session.sets[1].durationSeconds = 45
+    try await SwiftDataWorkoutRepository(modelContainer: box.container).save(session)
+    let url = try await makeExporter(box).exportJSON()
+    let doc = try ExportCoding.decoder().decode(ExportDocument.self, from: Data(contentsOf: url))
+    #expect(doc.schemaVersion == 3)
+    #expect(doc.exerciseSettings.count == 1)
+    #expect(doc.workoutSessions.flatMap(\.sets).contains { $0.durationSeconds == 45 })
+    #expect(doc.workoutSessions.flatMap(\.exerciseNotes).map(\.text) == ["Coudes serrés"])
 }

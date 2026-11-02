@@ -7,6 +7,7 @@ public struct ExportSnapshot: Sendable {
     public var profile: UserProfile?
     public var programs: [Program] = []
     public var userExercises: [UserExercise] = []
+    public var exerciseSettings: [ExerciseSettings] = []
     public var workoutSessions: [WorkoutSession] = []
     public var scheduledDays: [ScheduledDay] = []
     public var dailyRecoveries: [DailyRecovery] = []
@@ -23,6 +24,7 @@ public struct ExportSnapshot: Sendable {
         var ids = Set<String>()
         for program in programs { ids.formUnion(program.days.flatMap(\.exercises).compactMap(\.exercise.contentID)) }
         for session in workoutSessions { ids.formUnion(session.sets.compactMap(\.exercise.contentID)) }
+        ids.formUnion(exerciseSettings.compactMap(\.exercise.contentID))
         ids.formUnion(personalRecords.compactMap(\.exercise.contentID))
         return ids
     }
@@ -39,6 +41,8 @@ public actor ExportSnapshotLoader {
                                       [SortDescriptor(\.createdAt), SortDescriptor(\.name)]).map { $0.toDomain() }
         snapshot.userExercises = try fetch(StoredUserExercise.self, #Predicate { $0.deletedAt == nil },
                                            [SortDescriptor(\.name), SortDescriptor(\.createdAt)]).map { $0.toDomain() }
+        snapshot.exerciseSettings = try fetch(StoredExerciseSettings.self, #Predicate { $0.deletedAt == nil },
+                                              [SortDescriptor(\.createdAt), SortDescriptor(\.id)]).map { $0.toDomain() }
         snapshot.workoutSessions = try fetch(StoredWorkoutSession.self, #Predicate { $0.deletedAt == nil },
                                              [SortDescriptor(\.startedAt), SortDescriptor(\.createdAt)]).map { $0.toDomain() }
         snapshot.scheduledDays = try fetch(StoredScheduledDay.self, #Predicate { $0.deletedAt == nil },

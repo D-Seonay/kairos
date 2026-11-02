@@ -50,7 +50,8 @@ enum CSVColumns {
         .init(name: "user_exercise_id") { $1.uuid($0.1.exercise.userID) }, .init(name: "sets") { $1.int($0.1.sets) },
         .init(name: "reps_min") { $1.int($0.1.repsMin) }, .init(name: "reps_max") { $1.int($0.1.repsMax) },
         .init(name: "target_rpe") { $1.num($0.1.targetRPE) }, .init(name: "rest_seconds") { $1.int($0.1.restSeconds) },
-        .init(name: "superset_group") { $1.int($0.1.supersetGroup) }
+        .init(name: "superset_group") { $1.int($0.1.supersetGroup) },
+        .init(name: "set_targets") { $1.json($0.1.setTargets) }
     ]
 
     static let userExercises: [CSVColumn<UserExercise>] = [
@@ -59,7 +60,16 @@ enum CSVColumns {
         .init(name: "equipment") { $1.raw($0.equipment) }, .init(name: "pattern") { $1.raw($0.pattern) },
         .init(name: "region") { $1.raw($0.region) }, .init(name: "is_unilateral") { $1.bool($0.isUnilateral) },
         .init(name: "default_increment_kg") { $1.num($0.defaultIncrementKg) },
-        .init(name: "default_rest_seconds") { $1.int($0.defaultRestSeconds) }, .init(name: "is_archived") { $1.bool($0.isArchived) },
+        .init(name: "default_rest_seconds") { $1.int($0.defaultRestSeconds) }, .init(name: "load_kind") { $1.raw($0.loadKind) },
+        .init(name: "is_compound") { $1.bool($0.isCompound) }, .init(name: "tracks_duration") { $1.bool($0.tracksDuration) },
+        .init(name: "is_archived") { $1.bool($0.isArchived) },
+        .init(name: "created_at") { $1.date($0.createdAt) }, .init(name: "updated_at") { $1.date($0.updatedAt) }
+    ]
+
+    static let exerciseSettings: [CSVColumn<ExerciseSettings>] = [
+        .init(name: "id") { $1.uuid($0.id) }, .init(name: "content_exercise_id") { item, _ in item.exercise.contentID },
+        .init(name: "user_exercise_id") { $1.uuid($0.exercise.userID) }, .init(name: "increment_kg") { $1.num($0.incrementKg) },
+        .init(name: "warmup_set_count") { $1.int($0.warmupSetCount) },
         .init(name: "created_at") { $1.date($0.createdAt) }, .init(name: "updated_at") { $1.date($0.updatedAt) }
     ]
 
@@ -74,6 +84,7 @@ enum CSVColumns {
         .init(name: "duration_minutes") { $1.num($0.durationMinutes) }, .init(name: "distance_meters") { $1.num($0.distanceMeters) },
         .init(name: "average_heart_rate") { $1.num($0.averageHeartRate) }, .init(name: "estimated_rpe") { $1.num($0.estimatedRPE) },
         .init(name: "health_kit_uuid") { item, _ in item.healthKitUUID },
+        .init(name: "exercise_notes") { $1.json($0.exerciseNotes) },
         .init(name: "created_at") { $1.date($0.createdAt) }, .init(name: "updated_at") { $1.date($0.updatedAt) }
     ]
 
@@ -88,6 +99,7 @@ enum CSVColumns {
         .init(name: "completed_at") { $1.date($0.1.completedAt) }, .init(name: "is_personal_record") { $1.bool($0.1.isPersonalRecord) },
         .init(name: "replaced_content_exercise_id") { item, _ in item.1.replacedExercise?.contentID },
         .init(name: "replaced_user_exercise_id") { $1.uuid($0.1.replacedExercise?.userID) },
-        .init(name: "replacement_reason") { $1.raw($0.1.replacementReason) }
+        .init(name: "replacement_reason") { $1.raw($0.1.replacementReason) },
+        .init(name: "duration_seconds") { $1.int($0.1.durationSeconds) }
     ]
 }

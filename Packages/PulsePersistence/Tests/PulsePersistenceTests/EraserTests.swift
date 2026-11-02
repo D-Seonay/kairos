@@ -39,9 +39,11 @@ private struct EraseFixture {
     try await SwiftDataActiveSessionStore(modelContainer: fixture.box.container).save(Sample.snapshot())
     try await SwiftDataHealthSampleCache(modelContainer: fixture.box.container).saveAnchor(Data([1]), for: .sleep)
     #expect(try await fixture.counts().values.contains { $0 > 0 })
+    #expect(try await fixture.counts()[.exerciseSettings] == 1)
     try await fixture.eraser().eraseEverything(options: EraseOptions(includeAppleHealth: false))
     let counts = try await fixture.counts()
     #expect(counts.count == StoreTable.allCases.count && counts.values.allSatisfy { $0 == 0 })
+    #expect(counts[.exerciseSettings] == 0)
     #expect(fixture.defaults.object(forKey: "onboardingCompleted") == nil)
     #expect(!FileManager.default.fileExists(atPath: fixture.exports.path))
     #expect(fixture.health.callCount == 0)
@@ -117,6 +119,6 @@ private struct EraseFixture {
         guard case .delete(let deletion) = change else { return nil }
         return deletion.changedPersistentIdentifier.entityName
     }
-    #expect(syncedCount == 31, "jeu d'exemple : 31 enregistrements synchronisés sur les 14 tables")
+    #expect(syncedCount == 32, "jeu d'exemple : 32 enregistrements synchronisés sur les 15 tables")
     #expect(deletes.filter { syncedEntities.contains($0) }.count == syncedCount)
 }

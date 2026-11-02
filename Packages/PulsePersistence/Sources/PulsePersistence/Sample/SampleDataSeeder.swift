@@ -18,6 +18,9 @@ public struct SampleDataSeeder: Sendable {
         let program = Program(template: Self.template, now: now)
         try await SwiftDataProgramRepository(modelContainer: container).save(program)
         try await SwiftDataUserExerciseRepository(modelContainer: container).save(userExercise(now: now))
+        let benchSettings = ExerciseSettings(exercise: .content(id: "bench-press-barbell"), incrementKg: 1.25, warmupSetCount: 2,
+                                             createdAt: now, updatedAt: now)
+        try await SwiftDataExerciseSettingsRepository(modelContainer: container).save(benchSettings)
         let session = session(startedAt: yesterday, program: program, now: now)
         try await SwiftDataWorkoutRepository(modelContainer: container).save(session)
         try await SwiftDataScheduledDayRepository(modelContainer: container).save(scheduledDay(date: yesterday, program: program,

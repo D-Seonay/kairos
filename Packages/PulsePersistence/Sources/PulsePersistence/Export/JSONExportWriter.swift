@@ -24,10 +24,11 @@ public enum JSONExportWriter {
         for id in snapshot.referencedContentExerciseIDs {
             if let name = exerciseNames(id) { names[id] = name }
         }
-        return ExportDocument(schemaVersion: Int(PulseSchemaV1.versionIdentifier.major), contentVersion: metadata.contentVersion,
+        return ExportDocument(schemaVersion: Int(PulseSchemaV3.versionIdentifier.major), contentVersion: metadata.contentVersion,
                               appVersion: metadata.appVersion, exportedAt: metadata.exportedAt, locale: metadata.locale,
                               profile: snapshot.profile,
                               programs: snapshot.programs, userExercises: snapshot.userExercises,
+                              exerciseSettings: snapshot.exerciseSettings,
                               workoutSessions: snapshot.workoutSessions, scheduledDays: snapshot.scheduledDays,
                               dailyRecoveries: snapshot.dailyRecoveries, checkIns: snapshot.checkIns,
                               supplements: snapshot.supplements, supplementIntakes: snapshot.supplementIntakes,
