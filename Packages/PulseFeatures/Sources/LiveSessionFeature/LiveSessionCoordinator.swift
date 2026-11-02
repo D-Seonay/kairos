@@ -26,13 +26,15 @@ public final class LiveSessionCoordinator {
     }
 
     /// Relit la séance enregistrée : au lancement et au retour au premier plan. Le modèle ouvert reprend les changements faits
-    /// ailleurs (boutons de la Live Activity) ; une séance finie ailleurs ferme l'écran.
+    /// ailleurs (boutons de la Live Activity) ; une séance finie ailleurs ferme l'écran. Revenir sur l'écran de séance resté
+    /// ouvert est une reprise : une séance oubliée y propose d'être close (spec M4 §16).
     public func refresh() async {
         guard !isStarting else { return }
         let stored = await environment.service.current()
         current = stored
         if let stored {
             liveModel?.sync(with: stored)
+            if isPresented { await offerToCloseIfForgotten() }
         } else {
             dropModels()
             isPresented = false
@@ -81,10 +83,14 @@ public final class LiveSessionCoordinator {
 
     /// Rouvre la séance en cours. Laissée ouverte plus de 3 h, elle s'ouvre sur l'alerte de la séance oubliée (spec M4 §16).
     private func presentExisting() async {
-        if let suggested = await environment.service.suggestedEnd() {
-            finishFlow().offerToClose(at: suggested)
-        }
+        await offerToCloseIfForgotten()
         isPresented = true
+    }
+
+    /// L'alerte de la séance oubliée si le service propose une heure de fin, et si la séance est toujours là une fois l'heure lue.
+    private func offerToCloseIfForgotten() async {
+        guard let suggested = await environment.service.suggestedEnd(), current != nil else { return }
+        finishFlow().offerToClose(at: suggested)
     }
 
     /// « Abandonner » du bandeau : garde les séries validées. Une séance laissée ouverte plus de 3 h se clôt à l'heure proposée

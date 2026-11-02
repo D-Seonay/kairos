@@ -35,6 +35,9 @@ public final class FinishFlowModel {
 
     @ObservationIgnored private let live: LiveSessionModel
     @ObservationIgnored private var isProceeding = false
+    /// La dernière action de la séance quand « Continuer la séance » a répondu à la reprise : tant qu'elle n'a pas bougé, la
+    /// question n'est pas reposée.
+    @ObservationIgnored private var continuedAfter: Date?
     @ObservationIgnored private let onFinished: @MainActor () -> Void
 
     public init(live: LiveSessionModel, onFinished: @escaping @MainActor () -> Void) {
@@ -81,9 +84,10 @@ public final class FinishFlowModel {
     }
 
     /// La séance oubliée vient d'être rouverte (spec M4 §16) : l'alerte propose de la clore à `suggestedEnd`, ce qui mène au
-    /// récap, ou de continuer, ce que fait aussi sa fermeture sans bouton (`cancelForgotten()`).
+    /// récap, ou de continuer, ce que fait aussi sa fermeture sans bouton (`cancelForgotten()`). Déjà affichée, ou déjà
+    /// écartée sans action depuis, elle n'est pas reposée.
     public func offerToClose(at suggestedEnd: Date) {
-        guard isIdle else { return }
+        guard isIdle, live.session.lastActionAt != continuedAfter else { return }
         forgotten = ForgottenPrompt(intent: .finish, suggestedEnd: suggestedEnd, isOnResume: true)
     }
 
@@ -101,6 +105,7 @@ public final class FinishFlowModel {
     /// rien n'est enregistré ni abandonné. C'est le choix sûr, car ni l'heure proposée ni celle de maintenant n'ont été
     /// voulues ; « Terminer » rouvre l'alerte.
     public func cancelForgotten() {
+        if forgotten?.isOnResume == true { continuedAfter = live.session.lastActionAt }
         forgotten = nil
     }
 

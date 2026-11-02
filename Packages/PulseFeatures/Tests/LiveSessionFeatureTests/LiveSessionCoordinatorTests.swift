@@ -166,6 +166,52 @@ private func leftOpenSession(_ fixture: LiveFixture, until time: String) async t
     #expect(unseen.finishFlow().forgotten?.suggestedEnd == LiveClock.date("2026-11-02T08:02"))
 }
 
+/// Spec M4 §16 : revenir au premier plan sur l'écran de séance resté ouvert est une reprise.
+@MainActor @Test func returningToTheOpenScreenOffersToCloseAForgottenSessionOnce() async throws {
+    let fixture = LiveFixture()
+    let coordinator = try await leftOpenSession(fixture, until: "2026-11-03T07:30")
+    coordinator.isPresented = true
+    await coordinator.refresh()
+    let flow = coordinator.finishFlow()
+    let prompt = try #require(flow.forgotten)
+    #expect(prompt.suggestedEnd == LiveClock.date("2026-11-02T08:02") && prompt.isOnResume)
+    await coordinator.refresh()
+    #expect(flow.forgotten == prompt)
+    await flow.chooseEnd(usingSuggestion: true)?.value
+    #expect(flow.recap?.recap?.endedAt == LiveClock.date("2026-11-02T08:02"))
+}
+
+@MainActor @Test func continuingIsNotAskedAgainUntilANewGap() async throws {
+    let fixture = LiveFixture()
+    let coordinator = try await leftOpenSession(fixture, until: "2026-11-03T07:30")
+    coordinator.isPresented = true
+    await coordinator.refresh()
+    let flow = coordinator.finishFlow()
+    flow.cancelForgotten()
+    // Ni le retour suivant au premier plan, ni une reprise par le bandeau ne la reposent.
+    fixture.clock.set("2026-11-03T07:40")
+    await coordinator.refresh()
+    #expect(flow.forgotten == nil)
+    coordinator.isPresented = false
+    await coordinator.resume()
+    #expect(flow.forgotten == nil && coordinator.isPresented)
+    // Une série validée à 07:45 (repos 120 s), puis plus de 3 h sans rien : la question revient.
+    fixture.clock.set("2026-11-03T07:45")
+    let model = coordinator.model()
+    await model.tap(set: model.session.exercises[0].sets[1].id)
+    fixture.clock.set("2026-11-03T11:00")
+    await coordinator.refresh()
+    #expect(flow.forgotten?.suggestedEnd == LiveClock.date("2026-11-03T07:47"))
+}
+
+@MainActor @Test func returningToTheTabsDoesNotAsk() async throws {
+    let fixture = LiveFixture()
+    let coordinator = try await leftOpenSession(fixture, until: "2026-11-03T07:30")
+    await coordinator.refresh()
+    #expect(!coordinator.isPresented)
+    #expect(coordinator.finishFlow().forgotten == nil)
+}
+
 @MainActor @Test func didFinishDropsTheSessionAndItsModel() async throws {
     let fixture = LiveFixture()
     let coordinator = fixture.coordinator()
