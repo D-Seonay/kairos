@@ -31,6 +31,8 @@ public struct RoutineEditorView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             } else if model.hasLoaded {
                 list
+            } else if let message = model.errorMessage {
+                loadFailure(message)
             } else {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -66,6 +68,20 @@ public struct RoutineEditorView: View {
             }
         }
         .task { await model.load() }
+    }
+
+    /// La lecture a échoué : le message et de quoi réessayer, plutôt qu'un indicateur sans fin.
+    private func loadFailure(_ message: String) -> some View {
+        VStack(spacing: 12) {
+            Text(message)
+                .font(.subheadline)
+                .foregroundStyle(PulsePalette.bad)
+                .multilineTextAlignment(.center)
+            Button(String(localized: "Réessayer", bundle: .module)) { Task { await model.load() } }
+                .buttonStyle(SecondaryButtonStyle())
+        }
+        .padding(PulseMetrics.spacing)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var list: some View {

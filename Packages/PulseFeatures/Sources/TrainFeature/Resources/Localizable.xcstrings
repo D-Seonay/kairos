@@ -1661,6 +1661,16 @@
         }
       }
     },
+    "Réessayer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réessayer"
+          }
+        }
+      }
+    },
     "Région" : {
       "localizations" : {
         "fr" : {

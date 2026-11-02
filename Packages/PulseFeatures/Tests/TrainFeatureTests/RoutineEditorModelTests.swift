@@ -8,6 +8,34 @@ private let bench = ExerciseReference.content(id: "bench-press-barbell")
 private let chestPress = ExerciseReference.content(id: "chest-press-machine")
 private let plank = ExerciseReference.content(id: "plank")
 
+/// Un dépôt de programmes qui échoue à la lecture tant que `isFailing` est vrai.
+private actor FlakyProgramRepository: ProgramRepository {
+    enum Failure: Error { case unreadable }
+
+    private let base: InMemoryProgramRepository
+    private var isFailing = true
+
+    init(base: InMemoryProgramRepository) {
+        self.base = base
+    }
+
+    func recover() {
+        isFailing = false
+    }
+
+    func programs(includeArchived: Bool) async throws -> [Program] {
+        try await base.programs(includeArchived: includeArchived)
+    }
+
+    func program(id: UUID) async throws -> Program? {
+        if isFailing { throw Failure.unreadable }
+        return try await base.program(id: id)
+    }
+
+    func save(_ program: Program) async throws { try await base.save(program) }
+    func delete(id: UUID) async throws { try await base.delete(id: id) }
+}
+
 /// Un programme actif de deux routines vides, « Push » et « Pull », et le modèle chargé sur « Push ».
 @MainActor
 private struct RoutineSetup {
@@ -191,4 +219,23 @@ private struct RoutineSetup {
     let running = RoutineEditorModel(environment: setup.fixture.environment, programID: program.id, dayID: run.id)
     await running.load()
     #expect(running.isMissing)
+}
+
+@MainActor @Test func aFailedLoadReportsAnErrorAndCanBeRetried() async throws {
+    let setup = try await RoutineSetup()
+    let flaky = FlakyProgramRepository(base: setup.fixture.programs)
+    var environment = setup.fixture.environment
+    environment.programs = flaky
+    let model = RoutineEditorModel(environment: environment, programID: setup.program.id, dayID: setup.push)
+    await model.load()
+    // L'écran sort de l'indicateur : un message, ni routine lue ni routine introuvable.
+    #expect(model.errorMessage != nil)
+    #expect(!model.hasLoaded)
+    #expect(!model.isMissing)
+    await flaky.recover()
+    await model.load()
+    #expect(model.hasLoaded)
+    #expect(!model.isMissing)
+    #expect(model.errorMessage == nil)
+    #expect(model.day.name == "Push")
 }
