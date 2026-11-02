@@ -90,19 +90,26 @@ public final class HevyImporter: Sendable {
     }
 
     /// Crée un exercice perso pour chaque `.create` et rend les choix des noms de l'aperçu, les créations devenues `.user`.
-    /// Chaque création est retenue aussitôt, pour qu'une reprise ne recrée pas l'exercice ; puis tous les choix le sont.
+    /// Un exercice déjà là est repris plutôt que recréé (aperçu relancé, reprise après une erreur). Chaque création est retenue
+    /// aussitôt, pour qu'une reprise ne recrée pas l'exercice ; puis tous les choix le sont.
     private func resolve(_ preview: HevyImportPreview, choices: [String: HevyMappingChoice],
                          now: Date) async throws -> (choices: [String: HevyMappingChoice], created: Int) {
         var remembered = mappings.load()
+        var existing = try await userExercises.all(includeArchived: true)
         var resolved: [String: HevyMappingChoice] = [:]
         var created = 0
         for summary in preview.names {
             guard var choice = choices[summary.name] else { continue }
             if case .create(let draft) = choice {
-                let exercise = draft.userExercise(id: UUID(), now: now)
-                try await userExercises.save(exercise)
-                choice = .user(id: exercise.id)
-                created += 1
+                if let id = Self.existingExercise(for: summary.name, draft: draft, remembered: remembered, in: existing) {
+                    choice = .user(id: id)
+                } else {
+                    let exercise = draft.userExercise(id: UUID(), now: now)
+                    try await userExercises.save(exercise)
+                    existing.append(exercise)
+                    choice = .user(id: exercise.id)
+                    created += 1
+                }
                 remembered[summary.name] = choice
                 mappings.save(remembered)
             }
@@ -110,6 +117,15 @@ public final class HevyImporter: Sendable {
         }
         mappings.save(remembered.merging(resolved) { _, chosen in chosen })
         return (resolved, created)
+    }
+
+    /// L'exercice perso qui tient déjà lieu de la création : celui retenu pour le nom s'il existe encore, sinon un exercice non
+    /// archivé dont le nom replié est celui du brouillon (la règle de l'aperçu).
+    private static func existingExercise(for name: String, draft: UserExerciseDraft, remembered: [String: HevyMappingChoice],
+                                         in exercises: [UserExercise]) -> UUID? {
+        if case .user(let id) = remembered[name], exercises.contains(where: { $0.id == id }) { return id }
+        let folded = SearchText.fold(draft.name)
+        return exercises.first { !$0.isArchived && SearchText.fold($0.name) == folded }?.id
     }
 
     /// Vrai quand la séance est déjà en base : source Hevy, même titre, début dans la même minute.

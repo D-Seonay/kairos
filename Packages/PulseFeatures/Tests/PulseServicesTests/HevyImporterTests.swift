@@ -104,6 +104,59 @@ struct HevyImporterTests {
         #expect(try await allSessions().count == 2)
     }
 
+    private func tricepsReferences() async throws -> Set<ExerciseReference> {
+        Set(try await allSessions().flatMap(\.sets).filter { $0.exerciseName == triceps }.map(\.exercise))
+    }
+
+    @Test func runningTheSamePreviewTwiceReusesTheCreatedExercise() async throws {
+        let importer = makeImporter()
+        let preview = try await importer.preview(data)
+        var choices = proposed(preview)
+        choices[triceps] = .create(HevyNameGuesser.draft(for: triceps))
+        _ = try await importer.run(preview, choices: choices, progress: { _ in })
+        try await workouts.delete(id: try #require(try await allSessions().first { $0.title == "Pull" }?.id))
+
+        let again = try await importer.run(preview, choices: choices, progress: { _ in })
+        #expect(again.createdExercises == 0 && again.importedSessions == 1)
+        let created = try await userExercises.all(includeArchived: true)
+        #expect(created.count == 1)
+        #expect(try await tricepsReferences() == [.user(id: try #require(created.first?.id))])
+    }
+
+    @Test func retryingAFailedRunReusesTheCreatedExercise() async throws {
+        let failing = CountingWorkoutRepository(inner: workouts, failingAtSave: 2)
+        let interrupted = makeImporter(workouts: failing)
+        let preview = try await interrupted.preview(data)
+        var choices = proposed(preview)
+        choices[triceps] = .create(HevyNameGuesser.draft(for: triceps))
+        // « Push » est enregistrée, « Pull » (qui porte l'exercice créé) échoue.
+        await #expect(throws: CountingWorkoutRepository.Failure.self) {
+            _ = try await interrupted.run(preview, choices: choices, progress: { _ in })
+        }
+
+        let retried = try await makeImporter().run(preview, choices: choices, progress: { _ in })
+        #expect(retried.createdExercises == 0 && retried.importedSessions == 1)
+        let created = try await userExercises.all(includeArchived: true)
+        #expect(created.count == 1)
+        #expect(mappings.load()[triceps] == .user(id: try #require(created.first?.id)))
+        #expect(try await tricepsReferences() == [.user(id: try #require(created.first?.id))])
+    }
+
+    @Test func aCreationMatchingAnExistingExerciseByNameReusesIt() async throws {
+        var existing = HevyNameGuesser.draft(for: triceps).userExercise(id: UUID(), now: .t0)
+        existing.name = "extension triceps poulie haute"
+        try await userExercises.save(existing)
+        let importer = makeImporter()
+        let preview = try await importer.preview(data)
+        var choices = proposed(preview)
+        choices[triceps] = .create(HevyNameGuesser.draft(for: triceps))
+
+        let result = try await importer.run(preview, choices: choices, progress: { _ in })
+        #expect(result.createdExercises == 0)
+        #expect(try await userExercises.all(includeArchived: true).map(\.id) == [existing.id])
+        #expect(mappings.load()[triceps] == .user(id: existing.id))
+    }
+
     @Test func removingImportedSessionsRecomputesRecords() async throws {
         let bench = ExerciseReference.content(id: "bench-press-barbell")
         let set = WorkoutSet(order: 0, exercise: bench, exerciseName: "Développé couché à la barre", setType: .working,
