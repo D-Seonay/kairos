@@ -56,27 +56,27 @@ let package = Package(
         ),
         .testTarget(
             name: "PulseServicesTests",
-            dependencies: ["PulseServices"],
+            dependencies: ["PulseServices", domain, recoveryEngine, content],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(
             name: "CheckInFeatureTests",
-            dependencies: ["CheckInFeature"],
+            dependencies: ["CheckInFeature", domain],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(
             name: "OnboardingFeatureTests",
-            dependencies: ["OnboardingFeature"],
+            dependencies: ["OnboardingFeature", "PulseServices", "CheckInFeature", domain, content],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(
             name: "TodayFeatureTests",
-            dependencies: ["TodayFeature"],
+            dependencies: ["TodayFeature", "PulseServices", "CheckInFeature", domain, recoveryEngine, content],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(
             name: "WidgetFeatureTests",
-            dependencies: ["WidgetFeature"],
+            dependencies: ["WidgetFeature", domain],
             swiftSettings: [.swiftLanguageMode(.v6)]
         )
     ]
