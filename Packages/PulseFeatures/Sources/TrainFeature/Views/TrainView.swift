@@ -163,15 +163,8 @@ public struct TrainView: View {
                 path.append(.routine(program: program, day: day))
             }
         case .hevyImport:
-            // Tâche 17 : l'import Hevy.
-            pending(String(localized: "Importer depuis Hevy", bundle: .module))
+            HevyImportFlow(model: model.hevyImportModel(), onShowHistory: { path = [.history] }, onFinish: { path = [] })
         }
-    }
-
-    private func pending(_ title: String) -> some View {
-        ComingSoonView(title: title, milestone: "M4")
-            .background(PulsePalette.background)
-            .navigationTitle(title)
     }
 }
 

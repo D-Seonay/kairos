@@ -141,6 +141,16 @@
         }
       }
     },
+    "%@, %@. Choix : %@%@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, %@. Choix : %@%@"
+          }
+        }
+      }
+    },
     "%lld exercices" : {
       "localizations" : {
         "fr" : {
@@ -315,12 +325,44 @@
         }
       }
     },
+    "%lld à vérifier : Pulse a deviné leur type." : {
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld à vérifier : Pulse a deviné son type."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld à vérifier : Pulse a deviné leur type."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "+ Nouvelle" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "+ Nouvelle"
+          }
+        }
+      }
+    },
+    ", à vérifier" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ", à vérifier"
           }
         }
       }
@@ -575,6 +617,16 @@
         }
       }
     },
+    "Associe tes exercices" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Associe tes exercices"
+          }
+        }
+      }
+    },
     "Aucun exercice ne correspond à ta recherche." : {
       "localizations" : {
         "fr" : {
@@ -695,6 +747,26 @@
         }
       }
     },
+    "Ce fichier n'est pas un export de séances Hevy." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce fichier n'est pas un export de séances Hevy."
+          }
+        }
+      }
+    },
+    "Ce fichier ne contient aucune séance." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce fichier ne contient aucune séance."
+          }
+        }
+      }
+    },
     "Ce que ton corps peut encaisser aujourd'hui" : {
       "localizations" : {
         "fr" : {
@@ -735,6 +807,26 @@
         }
       }
     },
+    "Change l'exercice associé" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change l'exercice associé"
+          }
+        }
+      }
+    },
+    "Chaque exercice de Hevy a déjà un choix. Touche une ligne pour le changer." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chaque exercice de Hevy a déjà un choix. Touche une ligne pour le changer."
+          }
+        }
+      }
+    },
     "Charge" : {
       "localizations" : {
         "fr" : {
@@ -745,12 +837,52 @@
         }
       }
     },
+    "Choisir le fichier" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir le fichier"
+          }
+        }
+      }
+    },
+    "Choisir un autre fichier" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir un autre fichier"
+          }
+        }
+      }
+    },
+    "Choisir un exercice Pulse" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir un exercice Pulse"
+          }
+        }
+      }
+    },
     "Choisir une routine ou le repos" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Choisir une routine ou le repos"
+          }
+        }
+      }
+    },
+    "Choisis « Exporter les données » et garde le format CSV." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisis « Exporter les données » et garde le format CSV."
           }
         }
       }
@@ -781,6 +913,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Continuer à modifier"
+          }
+        }
+      }
+    },
+    "Correspondances sûres" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Correspondances sûres"
           }
         }
       }
@@ -845,12 +987,42 @@
         }
       }
     },
+    "Créer un exercice perso" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer un exercice perso"
+          }
+        }
+      }
+    },
     "Créer un programme vide" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Créer un programme vide"
+          }
+        }
+      }
+    },
+    "Créer « %@ »" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer « %@ »"
+          }
+        }
+      }
+    },
+    "Dans Hevy, ouvre ton profil puis les réglages." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans Hevy, ouvre ton profil puis les réglages."
           }
         }
       }
@@ -945,6 +1117,16 @@
         }
       }
     },
+    "Enregistre le fichier dans l'app Fichiers, puis choisis-le ici." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistre le fichier dans l'app Fichiers, puis choisis-le ici."
+          }
+        }
+      }
+    },
     "Enregistrer" : {
       "localizations" : {
         "fr" : {
@@ -1025,12 +1207,32 @@
         }
       }
     },
+    "Exercices créés" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exercices créés"
+          }
+        }
+      }
+    },
     "Fiches, consignes et tes exercices perso" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fiches, consignes et tes exercices perso"
+          }
+        }
+      }
+    },
+    "Garde l'écran ouvert jusqu'à la fin." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Garde l'écran ouvert jusqu'à la fin."
           }
         }
       }
@@ -1055,6 +1257,36 @@
         }
       }
     },
+    "Ignorer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ignorer"
+          }
+        }
+      }
+    },
+    "Ignoré" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ignoré"
+          }
+        }
+      }
+    },
+    "Ignorés" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ignorés"
+          }
+        }
+      }
+    },
     "Il ne sera plus actif ni proposé, mais tes séances le gardent." : {
       "localizations" : {
         "fr" : {
@@ -1071,6 +1303,48 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Il ne sera plus proposé, mais tes anciennes séances le gardent."
+          }
+        }
+      }
+    },
+    "Import en cours…" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import en cours…"
+          }
+        }
+      }
+    },
+    "Import terminé" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import terminé"
+          }
+        }
+      }
+    },
+    "Importer %lld séances" : {
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Importer %lld séance"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Importer %lld séances"
+                }
+              }
+            }
           }
         }
       }
@@ -1115,6 +1389,46 @@
         }
       }
     },
+    "La date de la ligne %@ du fichier est illisible." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La date de la ligne %@ du fichier est illisible."
+          }
+        }
+      }
+    },
+    "La ligne %@ du fichier est illisible." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La ligne %@ du fichier est illisible."
+          }
+        }
+      }
+    },
+    "Le cardio est proposé en « Ignoré » à l'étape suivante, où tu peux le changer." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le cardio est proposé en « Ignoré » à l'étape suivante, où tu peux le changer."
+          }
+        }
+      }
+    },
+    "Le fichier est lu sur cet appareil : il n'est envoyé nulle part." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le fichier est lu sur cet appareil : il n'est envoyé nulle part."
+          }
+        }
+      }
+    },
     "Le modèle devient ton programme actif ; l'actuel reste dans tes programmes." : {
       "localizations" : {
         "fr" : {
@@ -1125,12 +1439,32 @@
         }
       }
     },
+    "Lecture du fichier…" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lecture du fichier…"
+          }
+        }
+      }
+    },
     "Les courses ne se modifient pas encore" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Les courses ne se modifient pas encore"
+          }
+        }
+      }
+    },
+    "Lignes de cardio détectées" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lignes de cardio détectées"
           }
         }
       }
@@ -1595,6 +1929,16 @@
         }
       }
     },
+    "Pulse lit l'export de tes séances Hevy et les ajoute à ton historique, avec tes records." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse lit l'export de tes séances Hevy et les ajoute à ton historique, avec tes records."
+          }
+        }
+      }
+    },
     "Pulse n'a pas pu archiver l'exercice." : {
       "localizations" : {
         "fr" : {
@@ -1661,6 +2005,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pulse n'a pas pu enregistrer la routine."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu importer les séances. Réessaie." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu importer les séances. Réessaie."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu lire ce fichier." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu lire ce fichier."
           }
         }
       }
@@ -1755,6 +2119,16 @@
         }
       }
     },
+    "Période" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Période"
+          }
+        }
+      }
+    },
     "RPE %@" : {
       "localizations" : {
         "fr" : {
@@ -1791,6 +2165,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rechercher (ex. developpe)"
+          }
+        }
+      }
+    },
+    "Records" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Records"
           }
         }
       }
@@ -1885,12 +2269,52 @@
         }
       }
     },
+    "Reprendre la proposition" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprendre la proposition"
+          }
+        }
+      }
+    },
+    "Reprends ton historique" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprends ton historique"
+          }
+        }
+      }
+    },
     "Retirer de la routine" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Retirer de la routine"
+          }
+        }
+      }
+    },
+    "Retour au résumé" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retour au résumé"
+          }
+        }
+      }
+    },
+    "Revenir aux correspondances" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Revenir aux correspondances"
           }
         }
       }
@@ -2065,6 +2489,36 @@
         }
       }
     },
+    "Séances déjà présentes" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séances déjà présentes"
+          }
+        }
+      }
+    },
+    "Séances importées" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séances importées"
+          }
+        }
+      }
+    },
+    "Séances à importer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séances à importer"
+          }
+        }
+      }
+    },
     "Série %lld" : {
       "localizations" : {
         "fr" : {
@@ -2101,6 +2555,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tenu en secondes"
+          }
+        }
+      }
+    },
+    "Terminer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminer"
           }
         }
       }
@@ -2175,6 +2639,16 @@
         }
       }
     },
+    "Toutes les séances de ce fichier sont déjà dans Pulse : il n'y a rien à ajouter." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toutes les séances de ce fichier sont déjà dans Pulse : il n'y a rien à ajouter."
+          }
+        }
+      }
+    },
     "Tu as signalé : %@. Cet exercice peut les solliciter : ajuste la charge ou prends une alternative." : {
       "localizations" : {
         "fr" : {
@@ -2205,6 +2679,36 @@
         }
       }
     },
+    "Voilà ce que contient ton export" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voilà ce que contient ton export"
+          }
+        }
+      }
+    },
+    "Voir l'historique" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir l'historique"
+          }
+        }
+      }
+    },
+    "Vérifier les correspondances" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vérifier les correspondances"
+          }
+        }
+      }
+    },
     "abandonnée" : {
       "localizations" : {
         "fr" : {
@@ -2221,6 +2725,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "dimanche"
+          }
+        }
+      }
+    },
+    "du %@ au %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "du %@ au %@"
           }
         }
       }
@@ -2375,12 +2889,32 @@
         }
       }
     },
+    "À choisir" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À choisir"
+          }
+        }
+      }
+    },
     "À l'échec" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "À l'échec"
+          }
+        }
+      }
+    },
+    "À vérifier" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À vérifier"
           }
         }
       }
@@ -2401,6 +2935,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Échauffement"
+          }
+        }
+      }
+    },
+    "Étape %lld : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Étape %lld : %@"
           }
         }
       }

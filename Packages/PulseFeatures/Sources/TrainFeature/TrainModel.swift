@@ -88,6 +88,11 @@ public final class TrainModel {
         HistoryModel(environment: environment)
     }
 
+    /// Le modèle du parcours d'import de l'historique Hevy.
+    public func hevyImportModel() -> HevyImportModel {
+        HevyImportModel(environment: environment)
+    }
+
     /// Le modèle du détail de la séance `sessionID`.
     public func sessionDetailModel(sessionID: UUID) -> SessionDetailModel {
         SessionDetailModel(environment: environment, sessionID: sessionID)
