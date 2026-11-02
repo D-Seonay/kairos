@@ -2,6 +2,8 @@ import Foundation
 import PulseServices
 import Testing
 
+/// En série : les deux tests UserDefaults partagent une suite et la vident.
+@Suite(.serialized)
 struct DayActivityLogTests {
     private let suite = "fr.seonay.pulse.tests.day-activity-log"
     private let opened = TestClock.date("2026-11-02T07:00")
