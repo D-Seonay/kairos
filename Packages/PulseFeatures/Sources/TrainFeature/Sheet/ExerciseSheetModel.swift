@@ -20,8 +20,6 @@ public final class ExerciseSheetModel {
     private static let recentSessionCount = 10
     private static let chartDays = 90
     private static let changeDays = 30
-    private static let incrementRange = 0.25...20.0
-    private static let incrementStep = 0.25
     /// Niveaux de la carte musculaire : principaux au plus haut, secondaires à la moitié.
     private static let primaryWeight = 4.0
     private static let secondaryWeight = 2.0
@@ -74,16 +72,10 @@ public final class ExerciseSheetModel {
     /// Enregistre l'incrément de l'exercice, arrondi au quart de kilo entre 0,25 et 20 kg. Les autres réglages sont gardés.
     public func setIncrement(_ kg: Double) async {
         let previous = increment
-        let clamped = min(max((kg / Self.incrementStep).rounded() * Self.incrementStep, Self.incrementRange.lowerBound),
-                          Self.incrementRange.upperBound)
+        let clamped = IncrementStore.clamped(kg)
         increment = clamped
-        let now = environment.now()
         do {
-            var settings = try await environment.exerciseSettings.settings(for: reference)
-                ?? ExerciseSettings(exercise: reference, createdAt: now, updatedAt: now)
-            settings.incrementKg = clamped
-            settings.updatedAt = now
-            try await environment.exerciseSettings.save(settings)
+            try await IncrementStore(settings: environment.exerciseSettings).save(clamped, for: reference, now: environment.now())
             errorMessage = nil
         } catch {
             increment = previous

@@ -8,4 +8,9 @@ public enum TrainIdentifiers {
     public static let exerciseRowPrefix = "train.exercise."
     public static let history = "train.history"
     public static let hevyImport = "train.import"
+    public static let programLink = "train.program"
+    public static let routineCreate = "train.routine.create"
+    public static let weekdayPrefix = "program.weekday."
+    public static let routineSave = "routine.save"
+    public static let routineAddExercises = "routine.add"
 }

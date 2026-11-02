@@ -103,3 +103,22 @@ private func pplProgram(withRun run: Bool = false) -> Program {
     #expect(model.today == nil)
 }
 // swiftlint:enable force_unwrapping
+
+@MainActor @Test func trainModelAddsARoutineToTheActiveProgram() async throws {
+    let fixture = TrainFixture()
+    let now = fixture.now
+    try await fixture.activate(ProgramEditor.emptyProgram(name: "PPL", now: now))
+    let model = TrainModel(environment: fixture.environment)
+    await model.refresh()
+    #expect(model.routines.isEmpty)
+    let id = try await model.addRoutine(named: "Nouvelle routine")
+    #expect(model.routines.map(\.day.id) == [id])
+    #expect(model.routines.first?.day.name == "Nouvelle routine")
+    #expect(model.routines.first?.weekdays.isEmpty == true)
+}
+
+@MainActor @Test func trainModelCannotAddARoutineWithoutAProgram() async throws {
+    let fixture = TrainFixture()
+    let model = TrainModel(environment: fixture.environment)
+    await #expect(throws: ProgramEditorError.noProgram) { try await model.addRoutine(named: "Push") }
+}

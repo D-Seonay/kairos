@@ -73,6 +73,25 @@ public final class TrainModel {
         LibraryModel(environment: environment, mode: mode)
     }
 
+    /// Le modèle de l'éditeur de programme, sur le même environnement que l'onglet.
+    public func programEditorModel() -> ProgramEditorModel {
+        ProgramEditorModel(environment: environment)
+    }
+
+    /// Le modèle de l'éditeur de la routine `dayID` du programme `programID`.
+    public func routineEditorModel(programID: UUID, dayID: UUID) -> RoutineEditorModel {
+        RoutineEditorModel(environment: environment, programID: programID, dayID: dayID)
+    }
+
+    /// Ajoute une routine vide au programme actif, relit l'onglet et rend l'identifiant de la routine.
+    public func addRoutine(named name: String) async throws -> UUID {
+        let editor = programEditorModel()
+        await editor.load()
+        let id = try await editor.addRoutine(named: name)
+        await refresh()
+        return id
+    }
+
     // MARK: - Interne
 
     /// Les exercices de l'utilisateur, archivés compris : une routine peut encore les nommer. Si la lecture échoue,

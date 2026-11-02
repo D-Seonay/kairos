@@ -1,6 +1,26 @@
 {
   "sourceLanguage" : "fr",
   "strings" : {
+    "%@ : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ : %@"
+          }
+        }
+      }
+    },
+    "%@ : %@, course" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ : %@, course"
+          }
+        }
+      }
+    },
     "%@ kg le %@" : {
       "localizations" : {
         "fr" : {
@@ -37,6 +57,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ · RPE %@"
+          }
+        }
+      }
+    },
+    "%@ · RPE %@ · repos %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · RPE %@ · repos %@"
           }
         }
       }
@@ -133,6 +163,28 @@
         }
       }
     },
+    "%lld routines" : {
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld routine"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld routines"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld répétitions" : {
       "localizations" : {
         "fr" : {
@@ -173,6 +225,48 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "%lld séances par semaine" : {
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld séance par semaine"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld séances par semaine"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld × %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld × %@"
+          }
+        }
+      }
+    },
+    "+ Nouvelle" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ Nouvelle"
           }
         }
       }
@@ -237,6 +331,56 @@
         }
       }
     },
+    "Abandonner" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abandonner"
+          }
+        }
+      }
+    },
+    "Abandonner les modifications ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abandonner les modifications ?"
+          }
+        }
+      }
+    },
+    "Adopte ce modèle comme programme actif" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adopte ce modèle comme programme actif"
+          }
+        }
+      }
+    },
+    "Adopter" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adopter"
+          }
+        }
+      }
+    },
+    "Adopter « %@ » ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adopter « %@ » ?"
+          }
+        }
+      }
+    },
     "Ajoute l'exercice au choix ou l'en retire" : {
       "localizations" : {
         "fr" : {
@@ -267,6 +411,26 @@
         }
       }
     },
+    "Ajouter des exercices" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter des exercices"
+          }
+        }
+      }
+    },
+    "Ajouter une routine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter une routine"
+          }
+        }
+      }
+    },
     "Alternatives" : {
       "localizations" : {
         "fr" : {
@@ -293,6 +457,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Archiver"
+          }
+        }
+      }
+    },
+    "Archiver ce programme" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archiver ce programme"
+          }
+        }
+      }
+    },
+    "Archiver ce programme ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archiver ce programme ?"
           }
         }
       }
@@ -343,6 +527,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucun programme actif pour l'instant."
+          }
+        }
+      }
+    },
+    "Aucun programme actif. Adopte un modèle ou crée un programme vide." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun programme actif. Adopte un modèle ou crée un programme vide."
           }
         }
       }
@@ -437,12 +631,32 @@
         }
       }
     },
+    "Cette routine est introuvable ou ne peut pas être modifiée ici." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette routine est introuvable ou ne peut pas être modifiée ici."
+          }
+        }
+      }
+    },
     "Charge" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Charge"
+          }
+        }
+      }
+    },
+    "Choisir une routine ou le repos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir une routine ou le repos"
           }
         }
       }
@@ -463,6 +677,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Consignes qui comptent"
+          }
+        }
+      }
+    },
+    "Continuer à modifier" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuer à modifier"
           }
         }
       }
@@ -497,12 +721,42 @@
         }
       }
     },
+    "Course · modifiable plus tard" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Course · modifiable plus tard"
+          }
+        }
+      }
+    },
+    "Créer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer"
+          }
+        }
+      }
+    },
     "Créer un exercice" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Créer un exercice"
+          }
+        }
+      }
+    },
+    "Créer un programme vide" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer un programme vide"
           }
         }
       }
@@ -527,6 +781,46 @@
         }
       }
     },
+    "Descendre" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descendre"
+          }
+        }
+      }
+    },
+    "Dupliquer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dupliquer"
+          }
+        }
+      }
+    },
+    "Déplie les réglages" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déplie les réglages"
+          }
+        }
+      }
+    },
+    "Elle sort aussi de la semaine. Tes anciennes séances la gardent." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elle sort aussi de la semaine. Tes anciennes séances la gardent."
+          }
+        }
+      }
+    },
     "Enregistrer" : {
       "localizations" : {
         "fr" : {
@@ -537,12 +831,52 @@
         }
       }
     },
+    "Entre 1 et 10 séries." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entre 1 et 10 séries."
+          }
+        }
+      }
+    },
+    "Entre 1 et 30 répétitions, le minimum sous le maximum." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entre 1 et 30 répétitions, le minimum sous le maximum."
+          }
+        }
+      }
+    },
+    "Entre 5 et 600 secondes, le minimum sous le maximum." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entre 5 et 600 secondes, le minimum sous le maximum."
+          }
+        }
+      }
+    },
     "Exercice" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Exercice"
+          }
+        }
+      }
+    },
+    "Exercice inconnu" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exercice inconnu"
           }
         }
       }
@@ -573,6 +907,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Historique"
+          }
+        }
+      }
+    },
+    "Il ne sera plus actif ni proposé, mais tes séances le gardent." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il ne sera plus actif ni proposé, mais tes séances le gardent."
           }
         }
       }
@@ -617,12 +961,52 @@
         }
       }
     },
+    "Jour de repos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jour de repos"
+          }
+        }
+      }
+    },
+    "Le modèle devient ton programme actif ; l'actuel reste dans tes programmes." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le modèle devient ton programme actif ; l'actuel reste dans tes programmes."
+          }
+        }
+      }
+    },
+    "Les courses ne se modifient pas encore" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les courses ne se modifient pas encore"
+          }
+        }
+      }
+    },
     "Matériel" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Matériel"
+          }
+        }
+      }
+    },
+    "Maximum : %lld %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maximum : %lld %@"
           }
         }
       }
@@ -637,12 +1021,32 @@
         }
       }
     },
+    "Mes programmes" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mes programmes"
+          }
+        }
+      }
+    },
     "Mes routines" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mes routines"
+          }
+        }
+      }
+    },
+    "Minimum : %lld %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minimum : %lld %@"
           }
         }
       }
@@ -663,6 +1067,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Modifier l'exercice"
+          }
+        }
+      }
+    },
+    "Modèles" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modèles"
+          }
+        }
+      }
+    },
+    "Mon programme" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mon programme"
+          }
+        }
+      }
+    },
+    "Monter" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monter"
           }
         }
       }
@@ -777,12 +1211,82 @@
         }
       }
     },
+    "Nom de la routine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nom de la routine"
+          }
+        }
+      }
+    },
+    "Nom de la routine (ex. Push)" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nom de la routine (ex. Push)"
+          }
+        }
+      }
+    },
+    "Nom du programme" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nom du programme"
+          }
+        }
+      }
+    },
+    "Nouveau programme" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouveau programme"
+          }
+        }
+      }
+    },
     "Nouvel exercice" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nouvel exercice"
+          }
+        }
+      }
+    },
+    "Nouvelle routine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouvelle routine"
+          }
+        }
+      }
+    },
+    "OK" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        }
+      }
+    },
+    "Ordonner" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordonner"
           }
         }
       }
@@ -817,6 +1321,26 @@
         }
       }
     },
+    "Par série" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Par série"
+          }
+        }
+      }
+    },
+    "Par série · %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Par série · %@"
+          }
+        }
+      }
+    },
     "Plan de mouvement" : {
       "localizations" : {
         "fr" : {
@@ -847,6 +1371,16 @@
         }
       }
     },
+    "Programme actif" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Programme actif"
+          }
+        }
+      }
+    },
     "Progression" : {
       "localizations" : {
         "fr" : {
@@ -863,6 +1397,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pulse n'a pas pu archiver l'exercice."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu créer la routine." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu créer la routine."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu enregistrer cette modification." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu enregistrer cette modification."
           }
         }
       }
@@ -887,12 +1441,42 @@
         }
       }
     },
+    "Pulse n'a pas pu enregistrer la routine." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu enregistrer la routine."
+          }
+        }
+      }
+    },
     "Pulse n'a pas pu lire cette fiche." : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pulse n'a pas pu lire cette fiche."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu lire cette routine." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu lire cette routine."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu lire tes programmes." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu lire tes programmes."
           }
         }
       }
@@ -917,12 +1501,92 @@
         }
       }
     },
+    "RPE cible : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RPE cible : %@"
+          }
+        }
+      }
+    },
+    "RPE entre 6 et 10, par pas de 0,5." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RPE entre 6 et 10, par pas de 0,5."
+          }
+        }
+      }
+    },
     "Rechercher (ex. developpe)" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rechercher (ex. developpe)"
+          }
+        }
+      }
+    },
+    "Rend ce programme actif" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rend ce programme actif"
+          }
+        }
+      }
+    },
+    "Renomme le programme" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renomme le programme"
+          }
+        }
+      }
+    },
+    "Renommer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renommer"
+          }
+        }
+      }
+    },
+    "Renommer le programme" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renommer le programme"
+          }
+        }
+      }
+    },
+    "Replie les réglages" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replie les réglages"
+          }
+        }
+      }
+    },
+    "Repos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repos"
           }
         }
       }
@@ -947,12 +1611,42 @@
         }
       }
     },
+    "Repos entre 0 et 5 min, par pas de 15 s." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repos entre 0 et 5 min, par pas de 15 s."
+          }
+        }
+      }
+    },
+    "Retirer de la routine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer de la routine"
+          }
+        }
+      }
+    },
     "Routine" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Routine"
+          }
+        }
+      }
+    },
+    "Routines" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Routines"
           }
         }
       }
@@ -1007,6 +1701,46 @@
         }
       }
     },
+    "Semaine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Semaine"
+          }
+        }
+      }
+    },
+    "Super set avec l'exercice suivant" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Super set avec l'exercice suivant"
+          }
+        }
+      }
+    },
+    "Supprimer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer"
+          }
+        }
+      }
+    },
+    "Supprimer « %@ » ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer « %@ » ?"
+          }
+        }
+      }
+    },
     "Séance" : {
       "localizations" : {
         "fr" : {
@@ -1023,6 +1757,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Séance du jour"
+          }
+        }
+      }
+    },
+    "Série %lld" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Série %lld"
+          }
+        }
+      }
+    },
+    "Séries : %lld" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séries : %lld"
           }
         }
       }
@@ -1103,6 +1857,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tu as signalé : %@. Cet exercice peut les solliciter : ajuste la charge ou prends une alternative."
+          }
+        }
+      }
+    },
+    "Une fourchette par série, le minimum sous le maximum." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une fourchette par série, le minimum sous le maximum."
           }
         }
       }
@@ -1213,6 +1977,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "record"
+          }
+        }
+      }
+    },
+    "reps" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "reps"
+          }
+        }
+      }
+    },
+    "s" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "s"
           }
         }
       }
