@@ -55,24 +55,14 @@ actor SwitchableHealthSource: HealthSampleSource {
     }
 
     private func check() throws {
-        if fails { throw FailingHealthSource.Failure.unavailable }
+        if fails { throw UnavailableHealthSource.Failure.unavailable }
     }
 
     func requestAuthorization() async throws { try check() }
 
-    func sdnnSamples(from: Date, to: Date) async throws -> [TimedSample] {
+    func changes(of signal: NightSignal, since anchor: Data?, from start: Date) async throws -> HealthSampleChanges {
         try check()
-        return try await inner.sdnnSamples(from: from, to: to)
-    }
-
-    func restingHeartRateSamples(from: Date, to: Date) async throws -> [TimedSample] {
-        try check()
-        return try await inner.restingHeartRateSamples(from: from, to: to)
-    }
-
-    func sleepIntervals(from: Date, to: Date) async throws -> [SleepInterval] {
-        try check()
-        return try await inner.sleepIntervals(from: from, to: to)
+        return try await inner.changes(of: signal, since: anchor, from: start)
     }
 
     func profileHints() async throws -> HealthProfileHints {

@@ -12,11 +12,6 @@ public actor InMemoryHealthSampleCache: HealthSampleCache {
         stored.filter { $0.kind == kind && $0.start >= from && $0.start < to }.sorted { $0.start < $1.start }
     }
 
-    public func replace(kind: HealthSampleKind, with samples: [CachedHealthSample]) async throws {
-        stored.removeAll { $0.kind == kind }
-        stored += samples
-    }
-
     public func insert(_ samples: [CachedHealthSample]) async throws {
         stored += samples
     }

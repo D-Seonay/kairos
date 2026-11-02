@@ -77,7 +77,7 @@ struct AppDependencies: Sendable {
         } else if let reader {
             healthSource = reader
         } else {
-            healthSource = FailingHealthSource()
+            healthSource = UnavailableHealthSource()
         }
         var wiring = Wiring(health: reader ?? StubHealthReader(), healthSource: healthSource,
                             notifications: UserNotificationAuthorizer(), healthEraser: StubHealthEraser(),

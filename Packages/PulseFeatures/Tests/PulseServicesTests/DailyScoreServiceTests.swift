@@ -265,10 +265,14 @@ struct DailyScoreServiceTests {
         let first = await NightHistory(source: measuredSource, cache: cache, calendar: calendar).refresh(now: morning)
         let stored = try scored(try await fixture.service.update(nights: first.nights, now: morning))
 
-        // Accès Santé révoqué : HealthKit répond sans erreur et sans échantillon.
+        // Lecture complète sans erreur et sans échantillon : Santé a perdu l'ancre et ne montre plus rien.
         let later = TestClock.date("2026-11-02T10:00")
-        let revokedSource = ScenarioHealthSource(scenario: .noData, now: later, calendar: calendar)
-        let empty = await NightHistory(source: revokedSource, cache: cache, calendar: calendar).refresh(now: later)
+        let emptySource = ScriptedHealthSource()
+        for signal in NightSignal.allCases {
+            let nothing = HealthSampleChanges(kind: signal.kind, added: [], deletedHealthKitUUIDs: [], anchor: Data([2]), isFullRead: true)
+            await emptySource.enqueue(.success(nothing), for: signal)
+        }
+        let empty = await NightHistory(source: emptySource, cache: cache, calendar: calendar).refresh(now: later)
         #expect(empty.readAt == later)
         #expect(empty.nights.allSatisfy { $0.sdnnMs == nil && $0.restingHeartRate == nil && $0.sleep == nil })
         let result = try await fixture.service.update(nights: empty.nights, now: later)

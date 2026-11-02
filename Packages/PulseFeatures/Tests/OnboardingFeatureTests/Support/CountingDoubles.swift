@@ -50,18 +50,12 @@ struct CountingHealthSource: HealthSampleSource {
         try await inner.requestAuthorization()
     }
 
-    func sdnnSamples(from: Date, to: Date) async throws -> [TimedSample] {
-        reads.increment()
-        await gate.wait()
-        return try await inner.sdnnSamples(from: from, to: to)
-    }
-
-    func restingHeartRateSamples(from: Date, to: Date) async throws -> [TimedSample] {
-        try await inner.restingHeartRateSamples(from: from, to: to)
-    }
-
-    func sleepIntervals(from: Date, to: Date) async throws -> [SleepInterval] {
-        try await inner.sleepIntervals(from: from, to: to)
+    func changes(of signal: NightSignal, since anchor: Data?, from start: Date) async throws -> HealthSampleChanges {
+        if signal == .sdnn {
+            reads.increment()
+            await gate.wait()
+        }
+        return try await inner.changes(of: signal, since: anchor, from: start)
     }
 
     func profileHints() async throws -> HealthProfileHints {

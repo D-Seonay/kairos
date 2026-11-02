@@ -13,15 +13,6 @@ public actor SwiftDataHealthSampleCache: HealthSampleCache {
         return try modelContext.fetch(descriptor).map { $0.toDomain() }
     }
 
-    public func replace(kind: HealthSampleKind, with samples: [CachedHealthSample]) throws {
-        let raw = kind.rawValue
-        try modelContext.delete(model: StoredCachedHealthSample.self, where: #Predicate { $0.kind == raw })
-        for sample in samples {
-            modelContext.insert(StoredCachedHealthSample(sample))
-        }
-        try modelContext.save()
-    }
-
     public func insert(_ samples: [CachedHealthSample]) throws {
         for sample in samples {
             modelContext.insert(StoredCachedHealthSample(sample))
