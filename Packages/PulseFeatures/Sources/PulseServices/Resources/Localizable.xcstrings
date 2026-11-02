@@ -80,6 +80,106 @@
           }
         }
       }
+    },
+    "Séance libre": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Séance libre"
+          }
+        }
+      }
+    },
+    "%lld s": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld s"
+          }
+        }
+      }
+    },
+    "%@ × %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ × %@"
+          }
+        }
+      }
+    },
+    "Dernière fois %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dernière fois %@"
+          }
+        }
+      }
+    },
+    "Même charge": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Même charge"
+          }
+        }
+      }
+    },
+    "une série en moins": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "une série en moins"
+          }
+        }
+      }
+    },
+    "%lld séries en moins": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld séries en moins"
+          }
+        }
+      }
+    },
+    "RPE %@ max": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "RPE %@ max"
+          }
+        }
+      }
+    },
+    "repos %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "repos %@"
+          }
+        }
+      }
+    },
+    "Exercice inconnu": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exercice inconnu"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
