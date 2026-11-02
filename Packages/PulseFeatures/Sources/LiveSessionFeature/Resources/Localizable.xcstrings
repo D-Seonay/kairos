@@ -1,0 +1,1316 @@
+{
+  "sourceLanguage" : "fr",
+  "strings" : {
+    "%@ : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ : %@"
+          }
+        }
+      }
+    },
+    "%@ kg" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kg"
+          }
+        }
+      }
+    },
+    "%@ kilo" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kilo"
+          }
+        }
+      }
+    },
+    "%@ kilos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kilos"
+          }
+        }
+      }
+    },
+    "%@ · Série %lld · %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · Série %lld · %@"
+          }
+        }
+      }
+    },
+    "%@ · Série %lld · RPE" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · Série %lld · RPE"
+          }
+        }
+      }
+    },
+    "%@, série %lld" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, série %lld"
+          }
+        }
+      }
+    },
+    "%lld répétitions" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld répétitions"
+          }
+        }
+      }
+    },
+    "%lld secondes" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld secondes"
+          }
+        }
+      }
+    },
+    "%lld séries" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld séries"
+          }
+        }
+      }
+    },
+    "%lld séries faites sur %lld" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld séries faites sur %lld"
+          }
+        }
+      }
+    },
+    "%lld sur 10, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld sur 10, %@"
+          }
+        }
+      }
+    },
+    "+ Ajouter un exercice" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ Ajouter un exercice"
+          }
+        }
+      }
+    },
+    "+ Ajouter une série" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ Ajouter une série"
+          }
+        }
+      }
+    },
+    "+30 s" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+30 s"
+          }
+        }
+      }
+    },
+    "+kg" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+kg"
+          }
+        }
+      }
+    },
+    "1 répétition" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 répétition"
+          }
+        }
+      }
+    },
+    "1 seconde" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 seconde"
+          }
+        }
+      }
+    },
+    "1 série" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 série"
+          }
+        }
+      }
+    },
+    "1 série faite sur %lld" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 série faite sur %lld"
+          }
+        }
+      }
+    },
+    "1 très facile" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 très facile"
+          }
+        }
+      }
+    },
+    "10 maximal" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "10 maximal"
+          }
+        }
+      }
+    },
+    "−30 s" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "−30 s"
+          }
+        }
+      }
+    },
+    "Abandon impossible" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abandon impossible"
+          }
+        }
+      }
+    },
+    "Abandonner la séance ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abandonner la séance ?"
+          }
+        }
+      }
+    },
+    "Clore à %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clore à %@"
+          }
+        }
+      }
+    },
+    "Comment s'est passée la séance ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comment s'est passée la séance ?"
+          }
+        }
+      }
+    },
+    "Continuer la séance" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuer la séance"
+          }
+        }
+      }
+    },
+    "dur" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "dur"
+          }
+        }
+      }
+    },
+    "Effort global ressenti" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effort global ressenti"
+          }
+        }
+      }
+    },
+    "Enregistre la séance avec l'effort proposé" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistre la séance avec l'effort proposé"
+          }
+        }
+      }
+    },
+    "facile" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "facile"
+          }
+        }
+      }
+    },
+    "Garder l'heure actuelle" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Garder l'heure actuelle"
+          }
+        }
+      }
+    },
+    "Il reste %lld séries prévues" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il reste %lld séries prévues"
+          }
+        }
+      }
+    },
+    "Il reste 1 série prévue" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il reste 1 série prévue"
+          }
+        }
+      }
+    },
+    "−kg" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "−kg"
+          }
+        }
+      }
+    },
+    "Abandonner" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abandonner"
+          }
+        }
+      }
+    },
+    "Ajouter %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter %@"
+          }
+        }
+      }
+    },
+    "Ajouter 30 secondes" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter 30 secondes"
+          }
+        }
+      }
+    },
+    "Annule la validation de la série" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annule la validation de la série"
+          }
+        }
+      }
+    },
+    "Annuler" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annuler"
+          }
+        }
+      }
+    },
+    "assistance de %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "assistance de %@"
+          }
+        }
+      }
+    },
+    "charge à saisir" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "charge à saisir"
+          }
+        }
+      }
+    },
+    "Descendre" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descendre"
+          }
+        }
+      }
+    },
+    "Durée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Durée"
+          }
+        }
+      }
+    },
+    "durée à saisir" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "durée à saisir"
+          }
+        }
+      }
+    },
+    "dégressive" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "dégressive"
+          }
+        }
+      }
+    },
+    "Dégressive" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dégressive"
+          }
+        }
+      }
+    },
+    "Effacer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effacer"
+          }
+        }
+      }
+    },
+    "Effacer le RPE" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effacer le RPE"
+          }
+        }
+      }
+    },
+    "Enregistrer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrer"
+          }
+        }
+      }
+    },
+    "Fermer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fermer"
+          }
+        }
+      }
+    },
+    "Fermer le choix du RPE" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fermer le choix du RPE"
+          }
+        }
+      }
+    },
+    "Fermer le clavier" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fermer le clavier"
+          }
+        }
+      }
+    },
+    "Incrément" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incrément"
+          }
+        }
+      }
+    },
+    "kg" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kg"
+          }
+        }
+      }
+    },
+    "kg soulevés" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kg soulevés"
+          }
+        }
+      }
+    },
+    "Les séries validées sont gardées, les autres ne sont pas enregistrées." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les séries validées sont gardées, les autres ne sont pas enregistrées."
+          }
+        }
+      }
+    },
+    "lest de %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "lest de %@"
+          }
+        }
+      }
+    },
+    "maximal" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "maximal"
+          }
+        }
+      }
+    },
+    "Menu de la séance" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menu de la séance"
+          }
+        }
+      }
+    },
+    "modéré" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "modéré"
+          }
+        }
+      }
+    },
+    "Monter" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monter"
+          }
+        }
+      }
+    },
+    "Muscles travaillés" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muscles travaillés"
+          }
+        }
+      }
+    },
+    "Muscles travaillés : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muscles travaillés : %@"
+          }
+        }
+      }
+    },
+    "non validée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "non validée"
+          }
+        }
+      }
+    },
+    "normale" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "normale"
+          }
+        }
+      }
+    },
+    "Normale" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normale"
+          }
+        }
+      }
+    },
+    "Note" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Note"
+          }
+        }
+      }
+    },
+    "Note de l'exercice" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Note de l'exercice"
+          }
+        }
+      }
+    },
+    "Notifications désactivées : la fin du repos ne sonnera pas écran verrouillé. Tu peux les activer dans Réglages." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notifications désactivées : la fin du repos ne sonnera pas écran verrouillé. Tu peux les activer dans Réglages."
+          }
+        }
+      }
+    },
+    "OK" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        }
+      }
+    },
+    "Options de %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Options de %@"
+          }
+        }
+      }
+    },
+    "Ouvre la fiche de l'exercice" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvre la fiche de l'exercice"
+          }
+        }
+      }
+    },
+    "Pas de série précédente" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas de série précédente"
+          }
+        }
+      }
+    },
+    "Passer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passer"
+          }
+        }
+      }
+    },
+    "Passer le repos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passer le repos"
+          }
+        }
+      }
+    },
+    "Plus tard" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plus tard"
+          }
+        }
+      }
+    },
+    "presque maximal" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "presque maximal"
+          }
+        }
+      }
+    },
+    "proposé %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "proposé %@"
+          }
+        }
+      }
+    },
+    "Précédent" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Précédent"
+          }
+        }
+      }
+    },
+    "Précédent %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Précédent %@"
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu abandonner la séance." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu abandonner la séance."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu démarrer la séance." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu démarrer la séance."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu enregistrer la séance. Elle est gardée : tu peux réessayer." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu enregistrer la séance. Elle est gardée : tu peux réessayer."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu enregistrer ta séance." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu enregistrer ta séance."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu préparer le récap de la séance." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu préparer le récap de la séance."
+          }
+        }
+      }
+    },
+    "Record" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Record"
+          }
+        }
+      }
+    },
+    "Records" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Records"
+          }
+        }
+      }
+    },
+    "Réessayer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réessayer"
+          }
+        }
+      }
+    },
+    "Repos restant" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repos restant"
+          }
+        }
+      }
+    },
+    "Reps" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reps"
+          }
+        }
+      }
+    },
+    "Retirer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer"
+          }
+        }
+      }
+    },
+    "Retirer %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer %@"
+          }
+        }
+      }
+    },
+    "Retirer 30 secondes" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer 30 secondes"
+          }
+        }
+      }
+    },
+    "Retirer cet exercice ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer cet exercice ?"
+          }
+        }
+      }
+    },
+    "RPE" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RPE"
+          }
+        }
+      }
+    },
+    "RPE %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RPE %@"
+          }
+        }
+      }
+    },
+    "RPE %@ max" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RPE %@ max"
+          }
+        }
+      }
+    },
+    "Répétitions" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Répétitions"
+          }
+        }
+      }
+    },
+    "répétitions à saisir" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "répétitions à saisir"
+          }
+        }
+      }
+    },
+    "Séance commencée il y a longtemps : la clore à %@ ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance commencée il y a longtemps : la clore à %@ ?"
+          }
+        }
+      }
+    },
+    "Séance terminée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance terminée"
+          }
+        }
+      }
+    },
+    "Sec" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sec"
+          }
+        }
+      }
+    },
+    "Secondes" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Secondes"
+          }
+        }
+      }
+    },
+    "séries" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "séries"
+          }
+        }
+      }
+    },
+    "Ses séries sont retirées de la séance." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ses séries sont retirées de la séance."
+          }
+        }
+      }
+    },
+    "soutenu" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "soutenu"
+          }
+        }
+      }
+    },
+    "Suivant" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suivant"
+          }
+        }
+      }
+    },
+    "Super set %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Super set %@"
+          }
+        }
+      }
+    },
+    "Supprimer la série" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer la série"
+          }
+        }
+      }
+    },
+    "Séance" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance"
+          }
+        }
+      }
+    },
+    "Série" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Série"
+          }
+        }
+      }
+    },
+    "Série %lld" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Série %lld"
+          }
+        }
+      }
+    },
+    "Série suivante : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Série suivante : %@"
+          }
+        }
+      }
+    },
+    "Séries" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séries"
+          }
+        }
+      }
+    },
+    "Terminer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminer"
+          }
+        }
+      }
+    },
+    "Terminer quand même" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminer quand même"
+          }
+        }
+      }
+    },
+    "Tonnage" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tonnage"
+          }
+        }
+      }
+    },
+    "très dur" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "très dur"
+          }
+        }
+      }
+    },
+    "très facile" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "très facile"
+          }
+        }
+      }
+    },
+    "Type de la série %lld" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type de la série %lld"
+          }
+        }
+      }
+    },
+    "Type de série" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type de série"
+          }
+        }
+      }
+    },
+    "Valide la série" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valide la série"
+          }
+        }
+      }
+    },
+    "validée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "validée"
+          }
+        }
+      }
+    },
+    "vide" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "vide"
+          }
+        }
+      }
+    },
+    "Virgule" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Virgule"
+          }
+        }
+      }
+    },
+    "à l'échec" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "à l'échec"
+          }
+        }
+      }
+    },
+    "À l'échec" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À l'échec"
+          }
+        }
+      }
+    },
+    "Échauffement" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Échauffement"
+          }
+        }
+      }
+    },
+    "échauffement" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "échauffement"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

@@ -37,6 +37,15 @@ public final class StoredPersonalRecord {
         updatedAt = record.updatedAt
     }
 
+    /// Vrai si le record n'apporte aucune valeur nouvelle : `updatedAt` n'entre pas en compte.
+    func holds(_ record: PersonalRecord) -> Bool {
+        var comparable = record
+        comparable.id = id
+        comparable.createdAt = createdAt
+        comparable.updatedAt = updatedAt
+        return comparable == toDomain()
+    }
+
     public func toDomain() -> PersonalRecord {
         PersonalRecord(id: id, exercise: ExerciseReference(contentID: contentExerciseID, userID: userExerciseID) ?? .content(id: ""),
                        exerciseName: exerciseName, kind: .stored(kind, default: .maxWeight), value: value, weightKg: weightKg, date: date,

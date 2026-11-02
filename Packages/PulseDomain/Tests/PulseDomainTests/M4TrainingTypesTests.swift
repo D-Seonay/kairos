@@ -45,6 +45,14 @@ private enum Fixtures {
     #expect(exercise.repRange(forSet: 5) == 4...12)
 }
 
+@Test func anInvertedRangeNeverTraps() {
+    var exercise = RoutineExercise(order: 0, exercise: .content(id: "bench-press-barbell"), sets: 2, repsMin: 12, repsMax: 4,
+                                   targetRPE: 8, restSeconds: 120)
+    #expect(exercise.repRange(forSet: 0) == 4...12)
+    exercise.setTargets = [SetTarget(repsMin: 6, repsMax: 4), SetTarget(repsMin: 10, repsMax: 12)]
+    #expect(exercise.repRange(forSet: 0) == 4...6)
+}
+
 @Test func exerciseWithoutTracksDurationDecodesAsReps() throws {
     // JSON d'un exercice du contenu sans la clé tracksDuration (format du contenu 1.1.0).
     let exercise = try JSONDecoder().decode(Exercise.self, from: Data(Fixtures.benchPressJSON.utf8))

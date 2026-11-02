@@ -23,7 +23,7 @@ public final class TodayModel {
     private(set) var load: LoadCardContent = .hidden
     /// Les tuiles de tendance sur 14 jours : variabilité, FC repos, sommeil. Vides avant la première lecture.
     private(set) var trends: [TrendTile] = []
-    /// La feuille ouverte depuis la carte de la séance : séance à suivre en salle, ou mobilité.
+    /// La feuille ouverte depuis la carte de la séance : les 20 min de mobilité.
     public var sheet: TodaySheet?
     /// L'écran « Pourquoi » du score du jour ; nul tant qu'il n'y a pas de score du jour.
     private(set) var why: WhyContent?
@@ -45,17 +45,16 @@ public final class TodayModel {
     @ObservationIgnored private var todayCheckIn: CheckIn?
     /// Le jour de la dernière actualisation : un jour de plus et le formulaire du check-in repart de zéro.
     @ObservationIgnored private var lastRefreshDay: Date?
+    /// Le profil de la dernière actualisation : il règle la hausse de charge et le lancement de la séance.
+    @ObservationIgnored private(set) var profile: UserProfile?
+    /// La séance en cours, le bilan du jour et l'historique des exercices, relus à chaque actualisation.
+    @ObservationIgnored private var live = LiveReading()
 
     public init(environment: TodayEnvironment) {
         self.environment = environment
         directory = ExerciseDirectory(library: environment.library, userExercises: [])
         greeting = Self.greeting(firstName: nil)
         dateText = Self.dateText(environment.now(), calendar: environment.calendar)
-    }
-
-    /// Les lignes de la séance à suivre en salle, nommées par l'annuaire : les exercices de l'utilisateur gardent leur nom.
-    func planLines(for day: RoutineDay) -> [SessionPlanLine] {
-        SessionPlanLine.lines(for: day, directory: directory)
     }
 
     /// L'heure de la dernière lecture d'Apple Santé réussie, « 08:00 ».
@@ -76,6 +75,8 @@ public final class TodayModel {
 
         let day = await environment.refresher.refresh(origin: .foreground)
         await refreshDirectory()
+        profile = day.profile
+        live = await environment.readLive(plannedDay: day.plannedDay, previous: live)
         greeting = Self.greeting(firstName: day.profile?.firstName)
         if let readAt = day.readAt {
             lastSync = readAt
@@ -159,13 +160,14 @@ public final class TodayModel {
         show(TodaySession(plannedDay: session?.plannedDay ?? .noProgram, recovery: recovery))
     }
 
-    private var scoredToday: DailyRecovery? {
+    var scoredToday: DailyRecovery? {
         if case .scored(let recovery) = score { recovery } else { nil }
     }
 
     private func show(_ session: TodaySession) {
         self.session = session
-        card = SessionCardState.make(session: session, score: score, directory: directory)
+        card = SessionCardState.make(session: session, score: score, directory: directory, done: live.done,
+                                     inProgressTitle: live.inProgressTitle)
         updateWhy()
     }
 
@@ -176,8 +178,19 @@ public final class TodayModel {
             isShowingWhy = false
             return
         }
+        let loads = LoadPreview.adjustments(session: session, recovery: recovery, profile: profile, reading: live,
+                                            directory: directory, now: environment.now())
         why = WhyContent.make(recovery: recovery, session: session, checkIn: recovery.isEstimated ? todayCheckIn : nil,
-                               directory: directory)
+                               directory: directory, loadAdjustments: loads, progress: whyProgress)
+    }
+
+    /// La séance de la carte vue par l'écran « Pourquoi ».
+    private var whyProgress: WhyContent.Progress {
+        switch card {
+        case .inProgress: .inProgress
+        case .done: .done
+        default: .toStart
+        }
     }
 
     private func resetCheckInOnNewDay(_ now: Date) {

@@ -37,12 +37,30 @@ enum SessionCardState: Equatable {
     /// `suggestsMobility` : le score du jour est sous 65, la carte propose 20 min de mobilité.
     case rest(next: NextSession?, suggestsMobility: Bool)
     case noProgram
+    /// La séance de musculation du jour est terminée : son bilan remplace « Démarrer ».
+    case done(DoneCard)
+    /// Une séance est en cours : la carte propose de la reprendre.
+    case inProgress(title: String)
 
     static let mobilityThreshold = 65.0
 
+    /// Une séance en cours prime sur tout le reste. Le bilan de la séance faite ne remplace que la carte de musculation : un jour de
+    /// repos, de course ou de mobilité garde la sienne.
+    static func make(session: TodaySession, score: TodayScore?, directory: ExerciseDirectory, done: DoneCard? = nil,
+                     inProgressTitle: String? = nil) -> SessionCardState {
+        if let inProgressTitle {
+            return .inProgress(title: inProgressTitle)
+        }
+        let state = planned(session: session, score: score, directory: directory)
+        if case .strength = state, let done {
+            return .done(done)
+        }
+        return state
+    }
+
     /// Sans score du jour (avant 4 h, check-in à faire), la séance reste planifiée : aucun ajustement n'est proposé,
     /// et « Séance d'origine » serait refusée faute de score à modifier.
-    static func make(session: TodaySession, score: TodayScore?, directory: ExerciseDirectory) -> SessionCardState {
+    private static func planned(session: TodaySession, score: TodayScore?, directory: ExerciseDirectory) -> SessionCardState {
         let today: DailyRecovery? = if case .scored(let recovery)? = score { recovery } else { nil }
         let status = today == nil ? .planned : session.status
         switch session.plannedDay {

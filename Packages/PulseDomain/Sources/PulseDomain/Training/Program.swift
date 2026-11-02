@@ -29,11 +29,13 @@ public struct RoutineExercise: Sendable, Equatable, Codable, Identifiable {
     }
 
     /// Fourchette de répétitions de la série `index` (à partir de 0) : sa cible propre si elle existe, sinon `repsMin...repsMax`.
+    /// Une fourchette saisie à l'envers est rendue dans l'ordre : elle ne fait jamais planter.
     public func repRange(forSet index: Int) -> ClosedRange<Int> {
         if let setTargets, setTargets.indices.contains(index) {
-            return setTargets[index].repsMin...setTargets[index].repsMax
+            let target = setTargets[index]
+            return min(target.repsMin, target.repsMax)...max(target.repsMin, target.repsMax)
         }
-        return repsMin...repsMax
+        return min(repsMin, repsMax)...max(repsMin, repsMax)
     }
 }
 

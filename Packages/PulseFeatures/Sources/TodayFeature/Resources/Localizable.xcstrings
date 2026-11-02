@@ -21,6 +21,16 @@
         }
       }
     },
+    "%@ kg" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kg"
+          }
+        }
+      }
+    },
     "%@ km" : {
       "localizations" : {
         "fr" : {
@@ -81,6 +91,9 @@
         }
       }
     },
+    "%lld" : {
+
+    },
     "%lld minutes" : {
       "localizations" : {
         "fr" : {
@@ -99,6 +112,16 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "%lld records" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld records"
           }
         }
       }
@@ -147,12 +170,62 @@
         }
       }
     },
+    "Exercice inconnu" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exercice inconnu"
+          }
+        }
+      }
+    },
+    "~ %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "~ %@"
+          }
+        }
+      }
+    },
+    "1 série" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 série"
+          }
+        }
+      }
+    },
+    "1 record" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 record"
+          }
+        }
+      }
+    },
     "20 min de mobilité" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "20 min de mobilité"
+          }
+        }
+      }
+    },
+    "À 90 et plus, la séance prévue reste telle quelle." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À 90 et plus, la séance prévue reste telle quelle."
           }
         }
       }
@@ -267,6 +340,16 @@
         }
       }
     },
+    "Charges de la dernière fois : aucune série n'a atteint le haut de sa fourchette" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Charges de la dernière fois : aucune série n'a atteint le haut de sa fourchette"
+          }
+        }
+      }
+    },
     "Charges inchangées" : {
       "localizations" : {
         "fr" : {
@@ -293,16 +376,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Colonne thoracique : 10 rotations à quatre pattes de chaque côté."
-          }
-        }
-      }
-    },
-    "Des séries en moins sur : %@." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Des séries en moins sur : %@."
           }
         }
       }
@@ -347,12 +420,22 @@
         }
       }
     },
-    "En attendant, voici ta séance à suivre en salle :" : {
+    "Des séries en moins sur : %@." : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "En attendant, voici ta séance à suivre en salle :"
+            "value" : "Des séries en moins sur : %@."
+          }
+        }
+      }
+    },
+    "dimanche" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "dimanche"
           }
         }
       }
@@ -399,6 +482,16 @@
         }
       }
     },
+    "Épaules : 10 passages de bâton ou d'élastique devant puis derrière." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Épaules : 10 passages de bâton ou d'élastique devant puis derrière."
+          }
+        }
+      }
+    },
     "Estimé" : {
       "localizations" : {
         "fr" : {
@@ -409,22 +502,22 @@
         }
       }
     },
-    "Exercice inconnu" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Exercice inconnu"
-          }
-        }
-      }
-    },
     "Exercice personnel" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Exercice personnel"
+          }
+        }
+      }
+    },
+    "Fatigue modérée : remplace le fractionné par une sortie facile de même durée." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fatigue modérée : remplace le fractionné par une sortie facile de même durée."
           }
         }
       }
@@ -459,16 +552,6 @@
         }
       }
     },
-    "Fatigue modérée : remplace le fractionné par une sortie facile de même durée." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fatigue modérée : remplace le fractionné par une sortie facile de même durée."
-          }
-        }
-      }
-    },
     "Fermer" : {
       "localizations" : {
         "fr" : {
@@ -489,6 +572,16 @@
         }
       }
     },
+    "jeudi" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "jeudi"
+          }
+        }
+      }
+    },
     "L'éditeur de routines arrive avec la séance en direct." : {
       "localizations" : {
         "fr" : {
@@ -505,16 +598,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "La jauge de charge apparaîtra après 28 jours d'entraînement : elle compare ta dernière semaine à ton mois."
-          }
-        }
-      }
-    },
-    "La séance en direct arrive bientôt" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La séance en direct arrive bientôt"
           }
         }
       }
@@ -569,6 +652,56 @@
         }
       }
     },
+    "ligne de base en cours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ligne de base en cours"
+          }
+        }
+      }
+    },
+    "ligne de base en cours, %lld sur %lld nuits" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ligne de base en cours, %lld sur %lld nuits"
+          }
+        }
+      }
+    },
+    "lundi" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "lundi"
+          }
+        }
+      }
+    },
+    "mardi" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mardi"
+          }
+        }
+      }
+    },
+    "mercredi" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mercredi"
+          }
+        }
+      }
+    },
     "Motivation" : {
       "localizations" : {
         "fr" : {
@@ -585,6 +718,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Muscles sollicités : %@"
+          }
+        }
+      }
+    },
+    "pas de donnée cette nuit" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pas de donnée cette nuit"
           }
         }
       }
@@ -619,22 +762,22 @@
         }
       }
     },
-    "Pas de sommeil enregistré cette nuit : le score repose sur la variabilité et la fréquence au repos." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pas de sommeil enregistré cette nuit : le score repose sur la variabilité et la fréquence au repos."
-          }
-        }
-      }
-    },
     "Pas de séance aujourd'hui : rien à ajuster." : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pas de séance aujourd'hui : rien à ajuster."
+          }
+        }
+      }
+    },
+    "Pas de sommeil enregistré cette nuit : le score repose sur la variabilité et la fréquence au repos." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas de sommeil enregistré cette nuit : le score repose sur la variabilité et la fréquence au repos."
           }
         }
       }
@@ -665,6 +808,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pause"
+          }
+        }
+      }
+    },
+    "phases inconnues" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "phases inconnues"
           }
         }
       }
@@ -729,6 +882,16 @@
         }
       }
     },
+    "profond %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "profond %@"
+          }
+        }
+      }
+    },
     "Pulse n'a pas pu enregistrer ton check-in." : {
       "localizations" : {
         "fr" : {
@@ -739,22 +902,22 @@
         }
       }
     },
-    "RPE max %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "RPE max %@"
-          }
-        }
-      }
-    },
     "Ratio aigu / chronique %@. %@" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ratio aigu / chronique %@. %@"
+          }
+        }
+      }
+    },
+    "Récupération" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Récupération"
           }
         }
       }
@@ -779,12 +942,32 @@
         }
       }
     },
+    "repos %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "repos %@"
+          }
+        }
+      }
+    },
     "Reprendre" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Reprendre"
+          }
+        }
+      }
+    },
+    "Reprendre la séance" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprendre la séance"
           }
         }
       }
@@ -799,22 +982,22 @@
         }
       }
     },
+    "Rétablir la séance d'origine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rétablir la séance d'origine"
+          }
+        }
+      }
+    },
     "Revenir à l'ajustée" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Revenir à l'ajustée"
-          }
-        }
-      }
-    },
-    "Rien n'est enregistré : la mobilité ne compte ni dans la charge ni dans ta série." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rien n'est enregistré : la mobilité ne compte ni dans la charge ni dans ta série."
           }
         }
       }
@@ -829,6 +1012,16 @@
         }
       }
     },
+    "Rien n'est enregistré : la mobilité ne compte ni dans la charge ni dans ta série." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien n'est enregistré : la mobilité ne compte ni dans la charge ni dans ta série."
+          }
+        }
+      }
+    },
     "Risque de blessure" : {
       "localizations" : {
         "fr" : {
@@ -839,22 +1032,22 @@
         }
       }
     },
-    "Récupération" : {
+    "RPE max %@" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Récupération"
+            "value" : "RPE max %@"
           }
         }
       }
     },
-    "Rétablir la séance d'origine" : {
+    "samedi" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rétablir la séance d'origine"
+            "value" : "samedi"
           }
         }
       }
@@ -909,6 +1102,56 @@
         }
       }
     },
+    "Séance d'origine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance d'origine"
+          }
+        }
+      }
+    },
+    "Séance du jour" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance du jour"
+          }
+        }
+      }
+    },
+    "Séance faite" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance faite"
+          }
+        }
+      }
+    },
+    "Séance en cours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance en cours"
+          }
+        }
+      }
+    },
+    "Séance terminée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance terminée"
+          }
+        }
+      }
+    },
     "Sommeil" : {
       "localizations" : {
         "fr" : {
@@ -949,6 +1192,26 @@
         }
       }
     },
+    "super set · %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "super set · %@"
+          }
+        }
+      }
+    },
+    "super set, sans repos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "super set, sans repos"
+          }
+        }
+      }
+    },
     "Surmenage : repos conseillé aujourd'hui, la course peut attendre." : {
       "localizations" : {
         "fr" : {
@@ -969,36 +1232,6 @@
         }
       }
     },
-    "Séance d'origine" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Séance d'origine"
-          }
-        }
-      }
-    },
-    "Séance du jour" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Séance du jour"
-          }
-        }
-      }
-    },
-    "Séance terminée" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Séance terminée"
-          }
-        }
-      }
-    },
     "Ta charge a bondi : allège les prochains jours." : {
       "localizations" : {
         "fr" : {
@@ -1015,6 +1248,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ta charge monte vite : surveille ta récupération."
+          }
+        }
+      }
+    },
+    "ta fréquence au repos a baissé de %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ta fréquence au repos a baissé de %@"
+          }
+        }
+      }
+    },
+    "ta fréquence au repos a pris %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ta fréquence au repos a pris %@"
+          }
+        }
+      }
+    },
+    "ta fréquence au repos est stable" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ta fréquence au repos est stable"
           }
         }
       }
@@ -1045,6 +1308,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ta récupération est correcte."
+          }
+        }
+      }
+    },
+    "ta variabilité cardiaque est %@ au-dessus de ta moyenne de 14 jours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ta variabilité cardiaque est %@ au-dessus de ta moyenne de 14 jours"
+          }
+        }
+      }
+    },
+    "ta variabilité cardiaque est %@ sous ta moyenne de 14 jours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ta variabilité cardiaque est %@ sous ta moyenne de 14 jours"
+          }
+        }
+      }
+    },
+    "ta variabilité cardiaque est proche de ta moyenne de 14 jours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ta variabilité cardiaque est proche de ta moyenne de 14 jours"
           }
         }
       }
@@ -1109,6 +1402,16 @@
         }
       }
     },
+    "tu as dormi %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "tu as dormi %@"
+          }
+        }
+      }
+    },
     "Tu as gardé la séance d'origine." : {
       "localizations" : {
         "fr" : {
@@ -1145,6 +1448,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tu gardes toujours le dernier mot."
+          }
+        }
+      }
+    },
+    "tu n'as dormi que %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "tu n'as dormi que %@"
           }
         }
       }
@@ -1209,236 +1522,6 @@
         }
       }
     },
-    "Zone optimale" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zone optimale"
-          }
-        }
-      }
-    },
-    "dimanche" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "dimanche"
-          }
-        }
-      }
-    },
-    "jeudi" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "jeudi"
-          }
-        }
-      }
-    },
-    "ligne de base en cours" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ligne de base en cours"
-          }
-        }
-      }
-    },
-    "ligne de base en cours, %lld sur %lld nuits" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ligne de base en cours, %lld sur %lld nuits"
-          }
-        }
-      }
-    },
-    "lundi" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "lundi"
-          }
-        }
-      }
-    },
-    "mardi" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "mardi"
-          }
-        }
-      }
-    },
-    "mercredi" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "mercredi"
-          }
-        }
-      }
-    },
-    "pas de donnée cette nuit" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "pas de donnée cette nuit"
-          }
-        }
-      }
-    },
-    "phases inconnues" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "phases inconnues"
-          }
-        }
-      }
-    },
-    "profond %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "profond %@"
-          }
-        }
-      }
-    },
-    "repos %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "repos %@"
-          }
-        }
-      }
-    },
-    "samedi" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "samedi"
-          }
-        }
-      }
-    },
-    "super set · %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "super set · %@"
-          }
-        }
-      }
-    },
-    "super set, sans repos" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "super set, sans repos"
-          }
-        }
-      }
-    },
-    "ta fréquence au repos a baissé de %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ta fréquence au repos a baissé de %@"
-          }
-        }
-      }
-    },
-    "ta fréquence au repos a pris %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ta fréquence au repos a pris %@"
-          }
-        }
-      }
-    },
-    "ta fréquence au repos est stable" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ta fréquence au repos est stable"
-          }
-        }
-      }
-    },
-    "ta variabilité cardiaque est %@ au-dessus de ta moyenne de 14 jours" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ta variabilité cardiaque est %@ au-dessus de ta moyenne de 14 jours"
-          }
-        }
-      }
-    },
-    "ta variabilité cardiaque est %@ sous ta moyenne de 14 jours" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ta variabilité cardiaque est %@ sous ta moyenne de 14 jours"
-          }
-        }
-      }
-    },
-    "ta variabilité cardiaque est proche de ta moyenne de 14 jours" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ta variabilité cardiaque est proche de ta moyenne de 14 jours"
-          }
-        }
-      }
-    },
-    "tu as dormi %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "tu as dormi %@"
-          }
-        }
-      }
-    },
-    "tu n'as dormi que %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "tu n'as dormi que %@"
-          }
-        }
-      }
-    },
     "vendredi" : {
       "localizations" : {
         "fr" : {
@@ -1449,32 +1532,12 @@
         }
       }
     },
-    "~ %@" : {
+    "Zone optimale" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "~ %@"
-          }
-        }
-      }
-    },
-    "À 90 et plus, la séance prévue reste telle quelle." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "À 90 et plus, la séance prévue reste telle quelle."
-          }
-        }
-      }
-    },
-    "Épaules : 10 passages de bâton ou d'élastique devant puis derrière." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Épaules : 10 passages de bâton ou d'élastique devant puis derrière."
+            "value" : "Zone optimale"
           }
         }
       }

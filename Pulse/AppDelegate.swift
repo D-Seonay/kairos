@@ -7,6 +7,8 @@ import UserNotifications
 final class AppDelegate: NSObject, UIApplicationDelegate {
     let dependencies = AppDependencies.live()
     let router = AppRouter()
+    /// Les boutons de la Live Activity, branchés avant toute scène : un bouton peut réveiller l'app en arrière-plan.
+    private(set) lazy var sessionIntents = SessionIntentWiring(service: dependencies.liveSession)
     /// Le centre de notifications ne retient pas son délégué : c'est l'app qui le garde.
     private var notificationRouter: NotificationRouter?
 
@@ -15,6 +17,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         let notificationRouter = NotificationRouter(router: router)
         UNUserNotificationCenter.current().delegate = notificationRouter
         self.notificationRouter = notificationRouter
+        sessionIntents.install()
         let refresher = dependencies.refresher
         dependencies.backgroundDelivery?.start {
             // L'app ouverte lit elle-même au premier plan : une lecture d'arrière-plan l'annoncerait pendant qu'on la regarde.

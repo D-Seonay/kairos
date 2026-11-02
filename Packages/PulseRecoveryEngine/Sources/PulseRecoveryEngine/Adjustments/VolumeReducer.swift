@@ -2,6 +2,7 @@ import PulseDomain
 
 /// Retire environ 20 % des séries d'une séance de musculation, en gardant l'ordre et l'identité des exercices.
 /// Les membres d'un même super set perdent leurs séries ensemble (spec M3 §9.3).
+/// Chaque série retirée emporte sa cible de répétitions : la dernière d'abord.
 enum VolumeReducer {
     struct Result: Equatable {
         var exercises: [RoutineExercise]
@@ -20,7 +21,10 @@ enum VolumeReducer {
             for unit in orderedUnits(units, in: remaining) {
                 let reducible = unit.allSatisfy { remaining[$0].sets > 1 }
                 guard reducible, removed + unit.count <= target else { continue }
-                for index in unit { remaining[index].sets -= 1 }
+                for index in unit {
+                    remaining[index].sets -= 1
+                    _ = remaining[index].setTargets?.popLast()
+                }
                 removed += unit.count
                 removedThisRound = true
             }

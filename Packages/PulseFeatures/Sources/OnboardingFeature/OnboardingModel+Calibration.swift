@@ -74,10 +74,15 @@ extension OnboardingModel {
     }
 
     /// Ce que le programme adopté prévoit aujourd'hui, pour que le premier score porte déjà les ajustements de sa séance.
-    private func plannedDay(at now: Date) async -> PlannedDay {
+    /// `nil` quand le programme est illisible : le score garde alors les ajustements déjà enregistrés (spec M4 §20).
+    private func plannedDay(at now: Date) async -> PlannedDay? {
         var program: Program?
         if let id = profile.activeProgramID {
-            program = try? await environment.programs.program(id: id)
+            do {
+                program = try await environment.programs.program(id: id)
+            } catch {
+                return nil
+            }
         }
         return TodayPlanner.plan(program: program, on: now, calendar: environment.calendar)
     }

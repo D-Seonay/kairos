@@ -8,6 +8,8 @@ import SwiftUI
 struct TrainTiles: View {
     let model: TrainModel
     let onOpenToday: () -> Void
+    /// Lance la séance du jour ; `nil` quand il n'y a pas de séance de musculation à lancer aujourd'hui.
+    let onStart: (() -> Void)?
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
@@ -15,38 +17,48 @@ struct TrainTiles: View {
             ? AnyLayout(VStackLayout(spacing: 12))
             : AnyLayout(HStackLayout(alignment: .top, spacing: 12))
         layout {
-            StrengthTile(subtitle: model.strengthSubtitle, onOpenToday: onOpenToday)
+            StrengthTile(subtitle: model.strengthSubtitle, onOpenToday: onOpenToday, onStart: onStart)
             RunTile(nextRun: model.nextRun, daysUntil: model.nextRun.flatMap { model.daysUntil($0.weekday) })
         }
     }
 }
 
-/// La séance de musculation du jour. M4a ne démarre rien d'ici : toucher la tuile ouvre l'accueil, où la séance se démarre.
+/// La séance de musculation du jour : toucher la tuile ouvre l'accueil, « Démarrer » lance la séance (un bouton à part).
 private struct StrengthTile: View {
     let subtitle: String
     let onOpenToday: () -> Void
+    let onStart: (() -> Void)?
 
     var body: some View {
-        Button(action: onOpenToday) {
-            OpalCard {
-                VStack(alignment: .leading, spacing: 10) {
-                    TileIcon(systemName: "dumbbell.fill", foreground: PulsePalette.opal, background: PulsePalette.opalInk)
-                    Text(String(localized: "Musculation", bundle: .module))
-                        .font(.headline)
-                    Text(subtitle)
-                        .font(.footnote)
-                        .foregroundStyle(PulsePalette.opalMuted)
-                        .fixedSize(horizontal: false, vertical: true)
+        OpalCard {
+            VStack(alignment: .leading, spacing: 10) {
+                Button(action: onOpenToday) {
+                    VStack(alignment: .leading, spacing: 10) {
+                        TileIcon(systemName: "dumbbell.fill", foreground: PulsePalette.opal, background: PulsePalette.opalInk)
+                        Text(String(localized: "Musculation", bundle: .module))
+                            .font(.headline)
+                        Text(subtitle)
+                            .font(.footnote)
+                            .foregroundStyle(PulsePalette.opalMuted)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 110, alignment: .topLeading)
+                    .contentShape(Rectangle())
                 }
-                .frame(maxWidth: .infinity, minHeight: 110, alignment: .topLeading)
+                .buttonStyle(.plain)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(String(localized: "Musculation : \(subtitle)", bundle: .module))
+                .accessibilityHint(String(localized: "Ouvre l'accueil, où démarrer la séance du jour", bundle: .module))
+                .accessibilityAddTraits(.isButton)
+                .accessibilityIdentifier(TrainIdentifiers.strengthTile)
+                if let onStart {
+                    Button(String(localized: "Démarrer", bundle: .module), action: onStart)
+                        .buttonStyle(PrimaryButtonStyle())
+                        .accessibilityLabel(String(localized: "Démarrer la séance du jour", bundle: .module))
+                        .accessibilityIdentifier(TrainIdentifiers.strengthStart)
+                }
             }
         }
-        .buttonStyle(.plain)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(String(localized: "Musculation : \(subtitle)", bundle: .module))
-        .accessibilityHint(String(localized: "Ouvre l'accueil, où démarrer la séance du jour", bundle: .module))
-        .accessibilityAddTraits(.isButton)
-        .accessibilityIdentifier(TrainIdentifiers.strengthTile)
     }
 }
 

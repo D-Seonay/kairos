@@ -84,9 +84,17 @@ enum TodayPreviewSupport {
             scores: DailyScoreService(recovery: recovery, calendar: calendar),
             widgets: StubWidgetPublisher(), notifications: StubNotificationScheduler(), activity: InMemoryDayActivityLog(),
             calendar: calendar, now: { now })
+        let userExercises = InMemoryUserExerciseRepository()
+        let settings = InMemoryExerciseSettingsRepository()
+        let records = RecordsService(workouts: workouts, records: InMemoryPersonalRecordRepository(), userExercises: userExercises,
+                                     library: library, now: { now })
+        let activeSession = ActiveSessionService(
+            store: InMemoryActiveSessionStore(), workouts: workouts, profiles: profiles, settings: settings,
+            userExercises: userExercises, records: records, library: library, restNotifier: StubRestTimerNotifier(),
+            activity: StubSessionActivityController(), calendar: calendar, now: { now })
         return TodayModel(environment: TodayEnvironment(
-            refresher: refresher, workouts: workouts, userExercises: InMemoryUserExerciseRepository(), library: library,
-            calendar: calendar, now: { now }))
+            refresher: refresher, workouts: workouts, userExercises: userExercises, exerciseSettings: settings,
+            activeSession: activeSession, library: library, calendar: calendar, now: { now }))
     }
 
     /// Un score estimé de surmenage (check-in très bas), lundi 2 novembre.
@@ -109,7 +117,7 @@ struct TodayPreviewHost: View {
     var body: some View {
         Group {
             if let model {
-                TodayView(model: model, onOpenProfile: {})
+                TodayView(model: model, onOpenProfile: {}, onStartSession: { _ in }, onResumeSession: {})
             } else {
                 ProgressView()
             }

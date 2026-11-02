@@ -11,16 +11,6 @@
         }
       }
     },
-    "%lld · %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld · %@"
-          }
-        }
-      }
-    },
     "%lld sem. · %lld/%lld" : {
       "localizations" : {
         "fr" : {
@@ -37,6 +27,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld sur %lld cette semaine"
+          }
+        }
+      }
+    },
+    "%lld · %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld · %@"
+          }
+        }
+      }
+    },
+    "+30 s" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+30 s"
           }
         }
       }
@@ -107,6 +117,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ACWR"
+          }
+        }
+      }
+    },
+    "Ajouter 30 secondes de repos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter 30 secondes de repos"
           }
         }
       }
@@ -251,6 +271,26 @@
         }
       }
     },
+    "Passer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passer"
+          }
+        }
+      }
+    },
+    "Passer le repos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passer le repos"
+          }
+        }
+      }
+    },
     "Pectoraux et triceps" : {
       "localizations" : {
         "fr" : {
@@ -301,6 +341,26 @@
         }
       }
     },
+    "Repos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repos"
+          }
+        }
+      }
+    },
+    "Retirer 30 secondes de repos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer 30 secondes de repos"
+          }
+        }
+      }
+    },
     "Récupération" : {
       "localizations" : {
         "fr" : {
@@ -321,22 +381,22 @@
         }
       }
     },
-    "Récupération active" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Récupération active"
-          }
-        }
-      }
-    },
     "Récupération : score pas encore prêt" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Récupération : score pas encore prêt"
+          }
+        }
+      }
+    },
+    "Récupération active" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Récupération active"
           }
         }
       }
@@ -367,6 +427,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Surmenage"
+          }
+        }
+      }
+    },
+    "Séance %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance %@"
           }
         }
       }
@@ -437,6 +507,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Série de %lld semaines, %lld séances sur %lld cette semaine"
+          }
+        }
+      }
+    },
+    "Série suivante" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Série suivante"
           }
         }
       }
@@ -547,6 +627,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "semaines"
+          }
+        }
+      }
+    },
+    "série suivante : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "série suivante : %@"
+          }
+        }
+      }
+    },
+    "−30 s" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "−30 s"
           }
         }
       }

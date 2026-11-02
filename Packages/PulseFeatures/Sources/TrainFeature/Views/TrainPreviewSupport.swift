@@ -22,7 +22,8 @@ enum TrainPreviewSupport {
 
     /// Un modèle prêt à rafraîchir : profil et programme `templateID` déjà enregistrés (`nil` : sans programme),
     /// et un score du jour de catégorie `category` s'il y en a une.
-    static func model(now: Date, templateID: String? = "ppl-3", category: RecoveryCategory? = nil) async -> TrainModel {
+    static func model(now: Date, templateID: String? = "ppl-3", category: RecoveryCategory? = nil,
+                      sessionRunning: Bool = false) async -> TrainModel {
         let library = ContentLibrary.bundled
         let profiles = InMemoryProfileRepository()
         let programs = InMemoryProgramRepository()
@@ -39,7 +40,12 @@ enum TrainPreviewSupport {
             try? await recovery.save(DailyRecovery(day: calendar.startOfDay(for: now), score: 60, category: category,
                                                    isEstimated: false, calibration: .ready, createdAt: now, updatedAt: now))
         }
-        return TrainModel(environment: environment(profiles: profiles, programs: programs, recovery: recovery, now: now))
+        let preview = environment(profiles: profiles, programs: programs, recovery: recovery, now: now)
+        let model = TrainModel(environment: preview)
+        if sessionRunning {
+            _ = try? await preview.activeSession.start(model.freeLaunch())
+        }
+        return model
     }
 
     static func environment(profiles: any ProfileRepository, programs: any ProgramRepository,
@@ -53,10 +59,15 @@ enum TrainPreviewSupport {
                                      library: library, now: clock)
         let importer = HevyImporter(workouts: workouts, userExercises: userExercises, records: records,
                                     mappings: InMemoryHevyMappingStore(), library: library, calendar: calendar, now: clock)
+        let exerciseSettings = InMemoryExerciseSettingsRepository()
+        let activeSession = ActiveSessionService(
+            store: InMemoryActiveSessionStore(), workouts: workouts, profiles: profiles, settings: exerciseSettings,
+            userExercises: userExercises, records: records, library: library, restNotifier: StubRestTimerNotifier(),
+            activity: StubSessionActivityController(), calendar: calendar, now: clock)
         return TrainEnvironment(
             profiles: profiles, programs: programs, recovery: recovery, workouts: workouts, userExercises: userExercises,
-            exerciseSettings: InMemoryExerciseSettingsRepository(), personalRecords: personalRecords, records: records,
-            importer: importer, library: library, calendar: calendar, now: clock)
+            exerciseSettings: exerciseSettings, personalRecords: personalRecords, records: records,
+            importer: importer, library: library, activeSession: activeSession, calendar: calendar, now: clock)
     }
 }
 
@@ -65,18 +76,20 @@ struct TrainPreviewHost: View {
     let now: Date
     var templateID: String? = "ppl-3"
     var category: RecoveryCategory?
+    var sessionRunning = false
     @State private var model: TrainModel?
 
     var body: some View {
         Group {
             if let model {
-                TrainView(model: model)
+                TrainView(model: model, onOpenToday: {}, onStartSession: { _ in }, onResumeSession: {})
             } else {
                 ProgressView()
             }
         }
         .task {
-            model = await TrainPreviewSupport.model(now: now, templateID: templateID, category: category)
+            model = await TrainPreviewSupport.model(now: now, templateID: templateID, category: category,
+                                                    sessionRunning: sessionRunning)
         }
         .preferredColorScheme(.dark)
     }
@@ -96,6 +109,10 @@ struct TrainPreviewHost: View {
 
 #Preview("Course et musculation") {
     TrainPreviewHost(now: TrainPreviewSupport.date(day: 2, hour: 9), templateID: "runner-strength")
+}
+
+#Preview("Séance en cours") {
+    TrainPreviewHost(now: TrainPreviewSupport.date(day: 2, hour: 9), sessionRunning: true)
 }
 
 #Preview("Sans programme") {

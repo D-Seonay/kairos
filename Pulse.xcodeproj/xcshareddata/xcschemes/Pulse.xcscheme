@@ -154,6 +154,17 @@
             parallelizable = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "LiveSessionFeatureTests"
+               BuildableName = "LiveSessionFeatureTests"
+               BlueprintName = "LiveSessionFeatureTests"
+               ReferencedContainer = "container:Packages/PulseFeatures">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "OnboardingFeatureTests"
                BuildableName = "OnboardingFeatureTests"
                BlueprintName = "OnboardingFeatureTests"

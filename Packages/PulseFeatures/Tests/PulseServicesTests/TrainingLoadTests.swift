@@ -46,11 +46,11 @@ struct TrainingLoadTests {
         #expect(result.acute == 300)
     }
 
-    @Test func unfinishedSessionsDoNotCount() throws {
-        let counted = session(daysAgo: 1)
-        let sessions = [counted, session(daysAgo: 2, status: .inProgress), session(daysAgo: 3, status: .abandoned)]
+    /// Spec M4 §14.6 : une séance abandonnée compte, sans RPE noté (6 par défaut) ; une séance encore en cours, jamais.
+    @Test func abandonedSessionsCountButNotInProgressOnes() throws {
+        let sessions = [session(daysAgo: 1), session(daysAgo: 2, status: .inProgress), session(daysAgo: 3, rpe: nil, status: .abandoned)]
         let result = try #require(TrainingLoad.acwr(sessions: sessions, onboardingCompletedAt: daysAgo(40), now: now, calendar: calendar))
-        #expect(result.acute == 420)
+        #expect(result.acute == 420 + 360)
     }
 
     @Test func missingValuesFallBack() throws {

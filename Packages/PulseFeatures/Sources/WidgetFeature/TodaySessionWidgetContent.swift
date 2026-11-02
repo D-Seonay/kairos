@@ -142,13 +142,13 @@ public struct TodaySessionWidgetContent: Sendable, Equatable {
             return [.chest: 4, .triceps: 3, .frontDeltoid: 2]
         }
         if lower.contains("pull") || lower.contains("dos") || lower.contains("tirage") {
-            return [.upperBack: 4, .lats: 3, .biceps: 2]
+            return [.upperBack: 4, .trapezius: 3, .biceps: 2]
         }
         if lower.contains("leg") || lower.contains("jambe") || lower.contains("squat") {
-            return [.quadriceps: 4, .hamstrings: 3, .glutes: 3, .calves: 2]
+            return [.quadriceps: 4, .hamstring: 3, .gluteal: 3, .calves: 2]
         }
         if lower.contains("run") || lower.contains("course") || lower.contains("endurance") {
-            return [.quadriceps: 3, .calves: 3, .glutes: 2]
+            return [.quadriceps: 3, .calves: 3, .gluteal: 2]
         }
         return [.chest: 4, .triceps: 3, .frontDeltoid: 2]
     }

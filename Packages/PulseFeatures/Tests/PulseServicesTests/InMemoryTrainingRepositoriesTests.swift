@@ -71,4 +71,54 @@ struct InMemoryTrainingRepositoriesTests {
         try await repository.delete(id: newer.id)
         #expect(try await repository.records(for: nil).map(\.id).contains(newer.id) == false)
     }
+
+    @Test func replaceAllLeavesIdenticalRecordsUntouched() async throws {
+        let repository = InMemoryPersonalRecordRepository()
+        let (setA, setB) = (UUID(), UUID())
+        let kept = record(.maxWeight, value: 80, weight: 80, set: setA)
+        let changed = record(.maxWeight, value: 60, weight: 60, set: setB)
+        try await repository.replaceAll(with: [kept, changed])
+        var restamped = kept
+        restamped.updatedAt = TestClock.date("2026-11-09T08:00")
+        var raised = changed
+        raised.value = 62.5
+        raised.updatedAt = TestClock.date("2026-11-09T08:00")
+        try await repository.replaceAll(with: [restamped, raised])
+        let stored = try await repository.records(for: nil)
+        #expect(try #require(stored.first { $0.setID == setA }).updatedAt == kept.updatedAt)
+        #expect(try #require(stored.first { $0.setID == setB }).updatedAt == raised.updatedAt)
+    }
+
+    private func benchSet(_ order: Int, reps: Int, type: SetType = .working) -> WorkoutSet {
+        WorkoutSet(order: order, exercise: .content(id: "bench-press-barbell"), exerciseName: "Développé couché", setType: type,
+                   actualWeightKg: 60, actualReps: reps)
+    }
+
+    private func benchSession(_ start: String, status: SessionStatus, sets: [WorkoutSet]) -> WorkoutSession {
+        WorkoutSession(startedAt: TestClock.date(start), kind: .strength, source: .pulse, status: status, title: "Push",
+                       sets: sets, createdAt: .t0, updatedAt: .t0)
+    }
+
+    @Test func lastSetsComeFromTheLatestCompletedOrAbandonedSessionWithoutWarmups() async throws {
+        let repository = InMemoryWorkoutRepository()
+        let completed = benchSession("2026-10-12T07:00", status: .completed,
+                                     sets: [benchSet(1, reps: 10, type: .warmup), benchSet(2, reps: 12), benchSet(3, reps: 5)])
+        let abandoned = benchSession("2026-10-20T07:00", status: .abandoned,
+                                     sets: [benchSet(3, reps: 8, type: .failure), benchSet(2, reps: 10, type: .drop)])
+        let live = benchSession("2026-10-25T07:00", status: .inProgress, sets: [benchSet(1, reps: 8)])
+        for session in [completed, abandoned, live] { try await repository.save(session) }
+        let bench = ExerciseReference.content(id: "bench-press-barbell")
+        #expect(try await repository.lastSets(for: bench).map(\.actualReps) == [10, 8])
+        try await repository.delete(id: abandoned.id)
+        #expect(try await repository.lastSets(for: bench).map(\.actualReps) == [12, 5])
+        #expect(try await repository.lastSets(for: .content(id: "unknown")).isEmpty)
+    }
+
+    @Test func aNewerSessionWithOnlyWarmupsOfTheExerciseDoesNotHideLastTime() async throws {
+        let repository = InMemoryWorkoutRepository()
+        let older = benchSession("2026-10-12T07:00", status: .completed, sets: [benchSet(1, reps: 9), benchSet(2, reps: 7)])
+        let warmupOnly = benchSession("2026-10-20T07:00", status: .abandoned, sets: [benchSet(1, reps: 15, type: .warmup)])
+        for session in [older, warmupOnly] { try await repository.save(session) }
+        #expect(try await repository.lastSets(for: .content(id: "bench-press-barbell")).map(\.actualReps) == [9, 7])
+    }
 }

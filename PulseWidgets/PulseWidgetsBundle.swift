@@ -12,5 +12,6 @@ struct PulseWidgetsBundle: WidgetBundle {
         NextWorkoutWidget()
         LaunchSessionControlWidget()
         RecoveryScoreControlWidget()
+        SessionLiveActivity()
     }
 }

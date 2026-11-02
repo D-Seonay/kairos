@@ -39,3 +39,8 @@ import Testing
     #expect(PulseMetrics.radius == 22 && PulseMetrics.radiusSmall == 14 && PulseMetrics.radiusTiny == 10)
     #expect(PulseMetrics.minButtonHeight == 50 && PulseMetrics.spacing == 16)
 }
+
+@Test func liveSessionBackgroundIsPureBlack() {
+    #expect(PulsePalette.liveBackgroundRGBA == PulseRGBA(hex: 0x000000))
+    #expect(PulsePalette.liveBackgroundRGBA.opacity == 1)
+}

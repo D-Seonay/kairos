@@ -1,28 +1,31 @@
 import Foundation
 import PulseDomain
+import PulseServices
 
 /// Une feuille ouverte depuis la carte « Séance du jour ».
 public enum TodaySheet: Identifiable, Equatable {
-    /// La séance de musculation à suivre en salle, telle qu'elle est à faire aujourd'hui.
-    case start(RoutineDay)
     case mobility
 
     public var id: String {
         switch self {
-        case .start(let day): "start-\(day.id.uuidString)"
         case .mobility: "mobility"
         }
     }
 }
 
 extension TodayModel {
-    /// Ouvre la séance de musculation affichée : l'ajustée sous le badge « Ajustée », l'originale sinon.
-    /// Sans effet hors d'une carte de musculation (mobilité ou repos, course, repos, sans programme).
-    public func startSession() {
-        guard case .strength(let strength) = card else { return }
-        let day = strength.badge == .adjusted ? session?.activeDay : session?.originalDay
-        guard let day else { return }
-        sheet = .start(day)
+    /// Ce que « Démarrer la séance » lance : le jour ajusté, ou le jour prévu quand `startsOriginal` (« Séance d'origine »,
+    /// « Démarrer quand même ») avec les ajustements de la catégorie refusés. `nil` hors d'une carte de musculation à démarrer
+    /// (mobilité ou repos, course, repos, sans programme, séance faite ou en cours).
+    public func sessionLaunch(startsOriginal: Bool) -> SessionLaunch? {
+        guard case .strength = card, let day = session?.originalDay else { return nil }
+        return SessionLaunch.routine(day, programID: profile?.activeProgramID, recovery: scoredToday,
+                                     originalChosen: startsOriginal, profile: profile)
+    }
+
+    /// La séance telle que la carte la montre : l'originale si elle a été rétablie, l'ajustée sinon.
+    func shownSessionLaunch() -> SessionLaunch? {
+        sessionLaunch(startsOriginal: session?.status == .restored)
     }
 
     /// Ouvre les 20 min de mobilité. Rien n'est enregistré.

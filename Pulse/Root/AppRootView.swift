@@ -11,8 +11,8 @@ struct AppRootView: View {
     let router: AppRouter
     @Environment(\.scenePhase) private var scenePhase
 
-    init(dependencies: AppDependencies, router: AppRouter) {
-        _model = State(initialValue: AppRootModel(dependencies: dependencies))
+    init(dependencies: AppDependencies, router: AppRouter, sessionIntents: SessionIntentWiring? = nil) {
+        _model = State(initialValue: AppRootModel(dependencies: dependencies, sessionIntents: sessionIntents))
         self.router = router
     }
 
@@ -24,14 +24,9 @@ struct AppRootView: View {
             .task { await model.load() }
             .onOpenURL { AppLink(url: $0).map(router.open) }
             .onChange(of: scenePhase) { _, phase in
-                // Chaque retour au premier plan rafraîchit « Aujourd'hui », quel que soit l'onglet affiché, puis « Séance »,
-                // qui relit le score du jour qu'« Aujourd'hui » vient d'enregistrer.
-                guard phase == .active, model.destination == .main, let today = model.today else { return }
-                let train = model.train
-                Task {
-                    await today.refresh()
-                    await train?.refresh()
-                }
+                // Chaque retour au premier plan relit la séance en cours, « Aujourd'hui » et « Séance », quel que soit l'onglet.
+                guard phase == .active else { return }
+                Task { await model.becameActive() }
             }
     }
 
@@ -52,9 +47,9 @@ struct AppRootView: View {
                     }
             }
         case .main:
-            if let today = model.today, let train = model.train {
+            if let today = model.today, let train = model.train, let liveSession = model.liveSession {
                 MainTabView(dependencies: model.dependencies, router: router, today: today, train: train,
-                            firstName: model.profile?.firstName) {
+                            liveSession: liveSession, firstName: model.profile?.firstName) {
                     await model.dataErased()
                 }
                 .id(ObjectIdentifier(today))

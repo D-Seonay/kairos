@@ -1,5 +1,6 @@
 import PulseDesignSystem
 import PulseDomain
+import PulseServices
 import SwiftUI
 
 /// Un écran poussé depuis l'onglet « Séance ».
@@ -14,20 +15,27 @@ enum TrainDestination: Hashable {
     case hevyImport
 }
 
-/// L'onglet « Séance » : la tuile Musculation (qui renvoie à l'accueil pour démarrer), la tuile Course, « Mes routines »
-/// (avec « Mon programme » et « + Nouvelle »), puis la bibliothèque d'exercices, l'historique et l'import Hevy, poussés dans
-/// sa pile de navigation.
+/// L'onglet « Séance » : « Reprendre la séance » pendant une séance, la tuile Musculation (« Démarrer »), la tuile Course,
+/// « Mes routines » (« Lancer », « Mon programme » et « + Nouvelle »), puis la bibliothèque d'exercices, l'historique,
+/// « Séance libre » et l'import Hevy, poussés dans sa pile de navigation. Lancer une séance la rend à l'app, qui ouvre
+/// l'écran en direct ; s'il y en a déjà une en cours, l'onglet propose de la reprendre.
 public struct TrainView: View {
     private let model: TrainModel
     private let onOpenToday: () -> Void
+    private let onStartSession: (SessionLaunch) -> Void
+    private let onResumeSession: () -> Void
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var path: [TrainDestination] = []
     @State private var creationFailed = false
+    @State private var offersResume = false
 
-    /// `onOpenToday` affiche l'accueil, où la séance du jour se démarre.
-    public init(model: TrainModel, onOpenToday: @escaping () -> Void = {}) {
+    /// `onOpenToday` affiche l'accueil ; `onStartSession` démarre la séance rendue ; `onResumeSession` rouvre celle en cours.
+    public init(model: TrainModel, onOpenToday: @escaping () -> Void, onStartSession: @escaping (SessionLaunch) -> Void,
+                onResumeSession: @escaping () -> Void) {
         self.model = model
         self.onOpenToday = onOpenToday
+        self.onStartSession = onStartSession
+        self.onResumeSession = onResumeSession
     }
 
     public var body: some View {
@@ -41,18 +49,41 @@ public struct TrainView: View {
         .task { await model.refresh() }
         // Revenir d'un éditeur relit le programme : la séance du jour et les routines ont pu changer.
         .onChange(of: path) { Task { await model.refresh() } }
+        .confirmationDialog(String(localized: "Une séance est déjà en cours", bundle: .module), isPresented: $offersResume,
+                            titleVisibility: .visible) {
+            Button(String(localized: "Reprendre la séance", bundle: .module), action: onResumeSession)
+            Button(String(localized: "Annuler", bundle: .module), role: .cancel) {}
+        } message: {
+            if let title = model.activeSessionTitle {
+                Text(String(localized: "« \(title) » est en cours : reprends-la avant d'en lancer une autre.", bundle: .module))
+            }
+        }
+    }
+
+    /// Lance `launch` ; avec une séance déjà en cours, propose de la reprendre à la place.
+    private func start(_ launch: SessionLaunch?) {
+        guard let launch else { return }
+        if model.activeSessionTitle == nil {
+            onStartSession(launch)
+        } else {
+            offersResume = true
+        }
     }
 
     private var content: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: PulseMetrics.spacing) {
                 TrainHeader()
+                if let title = model.activeSessionTitle {
+                    ResumeSessionBanner(title: title, startedAt: model.activeSessionStartedAt, onResume: onResumeSession)
+                }
                 if let message = model.errorMessage {
                     Text(message)
                         .font(.footnote)
                         .foregroundStyle(PulsePalette.bad)
                 }
-                TrainTiles(model: model, onOpenToday: onOpenToday)
+                TrainTiles(model: model, onOpenToday: onOpenToday,
+                           onStart: model.launchToday() == nil ? nil : { start(model.launchToday()) })
                 routines
                 entries
             }
@@ -75,7 +106,7 @@ public struct TrainView: View {
                     .foregroundStyle(PulsePalette.text2)
             }
             ForEach(model.routines) { routine in
-                routineLink(routine)
+                routineRow(routine)
             }
         }
     }
@@ -103,17 +134,10 @@ public struct TrainView: View {
         .buttonStyle(.plain)
     }
 
-    @ViewBuilder
-    private func routineLink(_ routine: RoutineSummary) -> some View {
-        if routine.day.kind == .run {
-            // Les courses ne se modifient pas avant M6.
-            RoutineRow(routine: routine)
-        } else if let programID = model.program?.id {
-            NavigationLink(value: TrainDestination.routine(program: programID, day: routine.day.id)) {
-                RoutineRow(routine: routine)
-            }
-            .buttonStyle(.plain)
-        }
+    private func routineRow(_ routine: RoutineSummary) -> some View {
+        let isStrength = routine.day.kind == .strength
+        return RoutineRow(routine: routine, programID: isStrength ? model.program?.id : nil,
+                          onLaunch: isStrength ? { start(model.launch(routine: routine.day.id)) } : nil)
     }
 
     /// Crée une routine vide dans le programme actif et ouvre son éditeur.
@@ -140,6 +164,10 @@ public struct TrainView: View {
                      title: String(localized: "Historique", bundle: .module),
                      detail: String(localized: "Tes séances passées et tes records", bundle: .module),
                      identifier: TrainIdentifiers.history)
+            EntryButton(systemImage: "figure.strengthtraining.traditional",
+                        title: String(localized: "Séance libre", bundle: .module),
+                        detail: String(localized: "Sans routine : tu ajoutes les exercices au fil de la séance", bundle: .module),
+                        identifier: TrainIdentifiers.freeSession) { start(model.freeLaunch()) }
             EntryRow(destination: .hevyImport, systemImage: "square.and.arrow.down",
                      title: String(localized: "Importer depuis Hevy", bundle: .module),
                      detail: String(localized: "Ton historique, depuis un export CSV", bundle: .module),
@@ -219,25 +247,7 @@ private struct EntryRow: View {
 
     var body: some View {
         NavigationLink(value: destination) {
-            ObsidianCard {
-                HStack(spacing: 12) {
-                    TileIcon(systemName: systemImage, foreground: PulsePalette.text2, background: PulsePalette.surface2)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(title)
-                            .font(.headline)
-                            .foregroundStyle(PulsePalette.text)
-                        Text(detail)
-                            .font(.footnote)
-                            .foregroundStyle(PulsePalette.text2)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    Image(systemName: "chevron.right")
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(PulsePalette.muted)
-                        .accessibilityHidden(true)
-                }
-                .frame(minHeight: 44)
-            }
+            EntryCard(systemImage: systemImage, title: title, detail: detail)
         }
         .buttonStyle(.plain)
         .accessibilityElement(children: .ignore)
@@ -245,6 +255,55 @@ private struct EntryRow: View {
         .accessibilityHint(detail)
         .accessibilityAddTraits(.isButton)
         .accessibilityIdentifier(identifier)
+    }
+}
+
+/// Une ligne d'entrée qui fait une action au lieu d'ouvrir un écran.
+private struct EntryButton: View {
+    let systemImage: String
+    let title: String
+    let detail: String
+    let identifier: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            EntryCard(systemImage: systemImage, title: title, detail: detail)
+        }
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(title)
+        .accessibilityHint(detail)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityIdentifier(identifier)
+    }
+}
+
+private struct EntryCard: View {
+    let systemImage: String
+    let title: String
+    let detail: String
+
+    var body: some View {
+        ObsidianCard {
+            HStack(spacing: 12) {
+                TileIcon(systemName: systemImage, foreground: PulsePalette.text2, background: PulsePalette.surface2)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.headline)
+                        .foregroundStyle(PulsePalette.text)
+                    Text(detail)
+                        .font(.footnote)
+                        .foregroundStyle(PulsePalette.text2)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(PulsePalette.muted)
+                    .accessibilityHidden(true)
+            }
+            .frame(minHeight: 44)
+        }
     }
 }
 

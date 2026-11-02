@@ -9,11 +9,12 @@ public enum TrainingLoad {
     /// Le vélo pèse moins sur le corps que sa durée ne le laisserait croire : son RPE compté ne dépasse pas ce plafond.
     static let rideRPECap = 5.0
 
-    /// Seules les séances terminées comptent. L'historique commence à la fin de l'onboarding ou à la plus ancienne séance lue,
-    /// la plus ancienne des deux ; sous 28 jours d'historique, ou sans charge, il n'y a pas de ratio.
+    /// Les séances terminées et abandonnées comptent (spec M4 §14.6), jamais une séance encore en cours. L'historique commence
+    /// à la fin de l'onboarding ou à la plus ancienne séance lue, la plus ancienne des deux ; sous 28 jours d'historique, ou
+    /// sans charge, il n'y a pas de ratio.
     public static func acwr(sessions: [WorkoutSession], onboardingCompletedAt: Date?, now: Date, calendar: Calendar) -> ACWRResult? {
         let historyStart = ([onboardingCompletedAt] + sessions.map(\.startedAt)).compactMap { $0 }.min() ?? now
-        let counted = sessions.filter { $0.status == .completed }.compactMap(loadSession)
+        let counted = sessions.filter { $0.status == .completed || $0.status == .abandoned }.compactMap(loadSession)
         return LoadCalculator(calendar: calendar).acwr(sessions: counted, asOf: now, historyStart: historyStart)
     }
 

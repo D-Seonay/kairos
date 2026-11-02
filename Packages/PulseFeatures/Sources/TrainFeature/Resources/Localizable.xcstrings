@@ -1097,6 +1097,26 @@
         }
       }
     },
+    "Démarrer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Démarrer"
+          }
+        }
+      }
+    },
+    "Démarrer la séance du jour" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Démarrer la séance du jour"
+          }
+        }
+      }
+    },
     "Depuis une séance passée" : {
       "localizations" : {
         "fr" : {
@@ -1465,6 +1485,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "La ligne %@ du fichier est illisible."
+          }
+        }
+      }
+    },
+    "Lancer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lancer"
+          }
+        }
+      }
+    },
+    "Lancer %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lancer %@"
           }
         }
       }
@@ -2209,6 +2249,16 @@
         }
       }
     },
+    "Reprendre la séance" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprendre la séance"
+          }
+        }
+      }
+    },
     "Retirer %@ de la routine ?" : {
       "localizations" : {
         "fr" : {
@@ -2465,6 +2515,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Réglages"
+          }
+        }
+      }
+    },
+    "Sans routine : tu ajoutes les exercices au fil de la séance" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sans routine : tu ajoutes les exercices au fil de la séance"
+          }
+        }
+      }
+    },
+    "Séance en cours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance en cours"
+          }
+        }
+      }
+    },
+    "Séance libre" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance libre"
           }
         }
       }
@@ -2759,6 +2839,16 @@
         }
       }
     },
+    "Une séance est déjà en cours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une séance est déjà en cours"
+          }
+        }
+      }
+    },
     "Unilatéral" : {
       "localizations" : {
         "fr" : {
@@ -3045,6 +3135,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "épaules"
+          }
+        }
+      }
+    },
+    "« %@ » est en cours : reprends-la avant d'en lancer une autre." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "« %@ » est en cours : reprends-la avant d'en lancer une autre."
           }
         }
       }

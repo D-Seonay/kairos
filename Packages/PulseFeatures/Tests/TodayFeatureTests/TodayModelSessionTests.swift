@@ -42,8 +42,6 @@ struct TodayModelSessionTests {
         await model.refresh()
         let card = try #require(strength(model))
         #expect(card.summary.muscleWeights[.traps] == 4)
-        let day = try #require(model.session?.activeDay)
-        #expect(model.planLines(for: day).last?.name == "Shrug (Haltère)")
     }
 
     @Test func chooseOriginalSessionSwitchesTheCard() async throws {
@@ -75,14 +73,111 @@ struct TodayModelSessionTests {
         #expect(model.session?.status == .restored)
     }
 
-    @Test func startOpensTheSheetWithTheActiveDay() async throws {
+    /// Un jour de fatigue : la carte lance le jour ajusté, avec le volume, le plafond de RPE et les repos appliqués.
+    @Test func startingFromTheCardLaunchesTheAdjustedDay() async throws {
+        let fixture = TodayFixture(scenario: .badNight)
+        let program = try await fixture.adopt("ppl-3")
+        let model = fixture.makeModel()
+        await model.refresh()
+        let adjusted = try #require(model.session?.adjusted?.day)
+        let launch = try #require(model.sessionLaunch(startsOriginal: false))
+        #expect(launch.day == adjusted)
+        #expect(launch.plannedDay == model.session?.originalDay)
+        #expect(launch.programID == program.id)
+        #expect(launch.applied.map(\.kind) == [.volume, .rpeCap, .rest])
+        #expect(launch.refused.isEmpty)
+        #expect(!launch.policy.allowsIncrease)
+    }
+
+    /// « Séance d'origine » : le jour prévu est lancé et les ajustements de la catégorie sont refusés.
+    @Test func originalChoiceLaunchesTheOriginalAndRefusesAdjustments() async throws {
+        let fixture = TodayFixture(scenario: .badNight)
+        try await fixture.adopt("ppl-3")
+        let model = fixture.makeModel()
+        await model.refresh()
+        await model.chooseOriginalSession(true)
+        let original = try #require(model.session?.originalDay)
+        let launch = try #require(model.sessionLaunch(startsOriginal: true))
+        #expect(launch.day == original)
+        #expect(launch.applied.isEmpty)
+        #expect(launch.refused.map(\.kind) == [.volume, .rpeCap, .rest])
+    }
+
+    /// Le chemin de la vue : la séance affichée est l'ajustée, puis l'originale une fois rétablie.
+    @Test func theShownLaunchFollowsTheChosenSession() async throws {
         let fixture = TodayFixture(scenario: .badNight)
         try await fixture.adopt("ppl-3")
         let model = fixture.makeModel()
         await model.refresh()
         let adjusted = try #require(model.session?.adjusted?.day)
-        model.startSession()
-        #expect(model.sheet == .start(adjusted))
+        let original = try #require(model.session?.originalDay)
+        let shown = try #require(model.shownSessionLaunch())
+        #expect(shown.day == adjusted)
+        #expect(shown.refused.isEmpty)
+
+        await model.chooseOriginalSession(true)
+        let restored = try #require(model.shownSessionLaunch())
+        #expect(restored.day == original)
+        #expect(restored.applied.isEmpty)
+        #expect(!restored.refused.isEmpty)
+    }
+
+    @Test func noLaunchWithoutAStrengthCard() async throws {
+        let fixture = TodayFixture(at: "2026-11-03T08:00")
+        try await fixture.adopt("ppl-3")
+        let model = fixture.makeModel()
+        await model.refresh()
+        #expect(model.sessionLaunch(startsOriginal: false) == nil)
+    }
+
+    /// Une séance terminée aujourd'hui remplace « Démarrer » par son bilan ; celle d'hier ou une séance abandonnée, non.
+    @Test func aDoneSessionReplacesStart() async throws {
+        let fixture = TodayFixture(scenario: .goodNight)
+        try await fixture.adopt("ppl-3")
+        let bench = ExerciseReference.content(id: "bench-press-barbell")
+        let sets = (0..<4).map { index in
+            WorkoutSet(order: index, exercise: bench, exerciseName: "Développé couché", setType: .working, actualWeightKg: 60,
+                       actualReps: 10, completedAt: TodayClock.date("2026-11-02T06:40"), isPersonalRecord: index == 3)
+        }
+        let warmUp = WorkoutSet(order: 4, exercise: bench, exerciseName: "Développé couché", setType: .warmup, actualWeightKg: 20,
+                                actualReps: 10, completedAt: TodayClock.date("2026-11-02T06:35"), isPersonalRecord: true)
+        let start = TodayClock.date("2026-11-02T06:30")
+        let done = WorkoutSession(startedAt: start, endedAt: TodayClock.date("2026-11-02T07:25"), kind: .strength, source: .pulse,
+                                  status: .completed, title: "Push", tonnageKg: 2_400, durationMinutes: 55,
+                                  sets: sets + [warmUp], createdAt: start, updatedAt: start)
+        let yesterday = TodayClock.date("2026-11-01T18:00")
+        try await fixture.workouts.save(done)
+        try await fixture.workouts.save(WorkoutSession(
+            startedAt: yesterday, endedAt: yesterday.addingTimeInterval(3_600), kind: .strength, source: .pulse, status: .completed,
+            title: "Hier", durationMinutes: 60, createdAt: yesterday, updatedAt: yesterday))
+        let model = fixture.makeModel()
+        await model.refresh()
+        #expect(model.card == .done(DoneCard(title: "Push", durationMinutes: 55, setCount: 4, tonnageKg: 2_400, recordCount: 1)))
+    }
+
+    @Test func anAbandonedSessionDoesNotReplaceStart() async throws {
+        let fixture = TodayFixture(scenario: .goodNight)
+        try await fixture.adopt("ppl-3")
+        let start = TodayClock.date("2026-11-02T06:30")
+        try await fixture.workouts.save(WorkoutSession(
+            startedAt: start, endedAt: TodayClock.date("2026-11-02T06:50"), kind: .strength, source: .pulse, status: .abandoned,
+            title: "Push", durationMinutes: 20, createdAt: start, updatedAt: start))
+        let model = fixture.makeModel()
+        await model.refresh()
+        #expect(try #require(strength(model)).startButton == "Démarrer la séance")
+    }
+
+    /// Une séance en cours remplace la carte par « Reprendre la séance », quel que soit le jour.
+    @Test func aStoredLiveSessionShowsResume() async throws {
+        let fixture = TodayFixture(scenario: .goodNight)
+        try await fixture.adopt("ppl-3")
+        let model = fixture.makeModel()
+        await model.refresh()
+        let launch = try #require(model.sessionLaunch(startsOriginal: false))
+        _ = try await fixture.liveSession.start(launch)
+        await model.refresh()
+        #expect(model.card == .inProgress(title: "Push"))
+        #expect(model.sessionLaunch(startsOriginal: false) == nil)
     }
 
     @Test func startMobilityOpensTheSheet() async throws {
@@ -117,14 +212,14 @@ struct TodayModelSessionTests {
         model.checkIn.selection = [.sleep: 1, .pain: 1, .motivation: 1]
         await model.submitCheckIn()
         #expect(model.card == .mobilityOrRest(dayName: "Push"))
-        model.startSession()
-        #expect(model.sheet == nil)
+        #expect(model.sessionLaunch(startsOriginal: false) == nil)
 
         await model.chooseOriginalSession(true)
         let restored = try #require(strength(model))
         #expect(restored.startButton == "Démarrer quand même")
-        model.startSession()
-        #expect(model.sheet == .start(try #require(model.session?.originalDay)))
+        let launch = try #require(model.sessionLaunch(startsOriginal: true))
+        #expect(launch.day == model.session?.originalDay)
+        #expect(launch.refused.map(\.kind) == [.replaceWithMobility])
     }
 
     /// Un score mesuré arrivé entre-temps refuse le check-in : l'accueil se relit au lieu d'afficher une erreur.

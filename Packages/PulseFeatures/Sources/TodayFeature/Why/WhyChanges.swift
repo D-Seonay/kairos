@@ -4,23 +4,26 @@ import PulseDomain
 import PulseRecoveryEngine
 import PulseServices
 
-/// Une ligne par ajustement du moteur, avec ce qu'il change en pratique ; ou la raison pour laquelle il n'y en a pas.
+/// Une ligne par ajustement du moteur, avec ce qu'il change en pratique ; ou la raison pour laquelle il n'y en a pas. Les jours
+/// optimaux et normaux, les hausses de charge du jour suivent ; un jour de fatigue, les charges restent celles de la dernière fois.
 enum WhyChanges {
     typealias Change = WhyContent.Change
 
-    static func make(recovery: DailyRecovery, session: TodaySession, directory: ExerciseDirectory) -> [Change] {
+    /// `listsLoads` faux : la séance est faite, les charges du jour ne sont plus d'actualité.
+    static func make(recovery: DailyRecovery, session: TodaySession, directory: ExerciseDirectory,
+                     loadAdjustments: [SessionAdjustment]?, listsLoads: Bool = true) -> [Change] {
         guard let original = session.originalDay else {
             return [Change(pill: "✓", title: String(localized: "Pas de séance aujourd'hui : rien à ajuster.", bundle: .module),
                            detail: nil)]
         }
         guard let adjusted = session.adjusted, !adjusted.adjustments.isEmpty else {
-            return [Change(pill: "✓", title: String(localized: "Rien à alléger aujourd'hui.", bundle: .module), detail: nil)]
+            let nothing = Change(pill: "✓", title: String(localized: "Rien à alléger aujourd'hui.", bundle: .module), detail: nil)
+            return [nothing] + (listsLoads ? loadChanges(recovery.category, plannedDay: session.plannedDay,
+                                                         adjustments: loadAdjustments) : [])
         }
-        var changes = adjusted.adjustments.map { change(for: $0, adjusted: adjusted, original: original, directory: directory) }
-        if keepsLoads(recovery.category, plannedDay: session.plannedDay) {
-            changes.append(unchangedLoads)
-        }
-        return changes
+        let changes = adjusted.adjustments.map { change(for: $0, adjusted: adjusted, original: original, directory: directory) }
+        return changes + (listsLoads ? loadChanges(recovery.category, plannedDay: session.plannedDay,
+                                                   adjustments: loadAdjustments) : [])
     }
 
     private static func change(for adjustment: SessionAdjustment, adjusted: AdjustedSession, original: RoutineDay,
@@ -45,8 +48,10 @@ enum WhyChanges {
             return Change(pill: "→", title: title, detail: nil)
         case .suggestRest:
             return Change(pill: "0", title: title, detail: nil)
-        case .load, .deload:
-            // Le moteur ne les produit pas encore : la raison seule est montrée.
+        case .load:
+            return loadChange(adjustment)
+        case .deload:
+            // Le moteur ne le produit pas encore : la raison seule est montrée.
             return Change(pill: "•", title: title, detail: nil)
         }
     }
@@ -81,10 +86,36 @@ enum WhyChanges {
 
     // MARK: - Charges
 
-    /// Un score normal ou en fatigue un jour de musculation garde les charges, sans surcharge progressive.
-    private static func keepsLoads(_ category: RecoveryCategory, plannedDay: PlannedDay) -> Bool {
-        guard case .strength = plannedDay else { return false }
-        return category == .normal || category == .moderateFatigue
+    /// Les jours optimaux et normaux de musculation disent les hausses du jour, ou pourquoi il n'y en a pas ; sans calcul des
+    /// charges (hausse bloquée par un score estimé), un jour normal garde « Charges inchangées ». Un jour de fatigue aussi.
+    private static func loadChanges(_ category: RecoveryCategory, plannedDay: PlannedDay,
+                                    adjustments: [SessionAdjustment]?) -> [Change] {
+        guard case .strength = plannedDay else { return [] }
+        switch category {
+        case .optimal, .normal:
+            guard let adjustments else { return category == .normal ? [unchangedLoads] : [] }
+            return adjustments.isEmpty ? [noIncrease] : adjustments.map(loadChange)
+        case .moderateFatigue:
+            return [unchangedLoads]
+        case .overreached:
+            return []
+        }
+    }
+
+    /// La raison porte le nom de l'exercice ; la pastille, l'écart de charge : « +2,5 », « −5 » (assistance), « 0 ».
+    private static func loadChange(_ adjustment: SessionAdjustment) -> Change {
+        let delta = adjustment.value ?? 0
+        let pill = switch delta {
+        case ..<0: "\u{2212}" + PulseFormat.decimal(-delta, maxFractionDigits: 2)
+        case 0: "0"
+        default: "+" + PulseFormat.decimal(delta, maxFractionDigits: 2)
+        }
+        return Change(pill: pill, title: adjustment.reason, detail: nil)
+    }
+
+    private static var noIncrease: Change {
+        Change(pill: "=", title: String(localized: "Charges de la dernière fois : aucune série n'a atteint le haut de sa fourchette",
+                                        bundle: .module), detail: nil)
     }
 
     private static var unchangedLoads: Change {

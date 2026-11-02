@@ -40,6 +40,7 @@ struct TrainFixture {
     let programs = InMemoryProgramRepository()
     let recovery = InMemoryRecoveryRepository(calendar: TrainClock.calendar)
     let environment: TrainEnvironment
+    let activeSession: ActiveSessionService
     let now: Date
 
     init(profiles: any ProfileRepository = InMemoryProfileRepository(), now: Date = TrainClock.date(day: 2, hour: 9),
@@ -56,10 +57,14 @@ struct TrainFixture {
                                      library: library, now: clock)
         let importer = HevyImporter(workouts: workouts, userExercises: userExercises, records: records,
                                     mappings: InMemoryHevyMappingStore(), library: library, calendar: calendar, now: clock)
+        activeSession = ActiveSessionService(
+            store: InMemoryActiveSessionStore(), workouts: workouts, profiles: profiles, settings: exerciseSettings,
+            userExercises: userExercises, records: records, library: library, restNotifier: StubRestTimerNotifier(),
+            activity: StubSessionActivityController(), calendar: calendar, now: clock)
         environment = TrainEnvironment(
             profiles: profiles, programs: programs, recovery: recovery, workouts: workouts, userExercises: userExercises,
             exerciseSettings: exerciseSettings, personalRecords: personalRecords, records: records,
-            importer: importer, library: library, calendar: calendar, now: clock)
+            importer: importer, library: library, activeSession: activeSession, calendar: calendar, now: clock)
     }
 
     /// Enregistre `program` et le rend actif.
@@ -69,11 +74,11 @@ struct TrainFixture {
                                             createdAt: now, updatedAt: now))
     }
 
-    /// Un score « normal » enregistré pour aujourd'hui.
-    func scoreToday(_ category: RecoveryCategory) async throws {
+    /// Un score enregistré pour aujourd'hui, avec « Séance d'origine » choisie si `originalChosen`.
+    func scoreToday(_ category: RecoveryCategory, originalChosen: Bool? = nil) async throws {
         try await recovery.save(DailyRecovery(
             day: TrainClock.calendar.startOfDay(for: now), score: 72, category: category, isEstimated: false,
-            calibration: .ready, createdAt: now, updatedAt: now))
+            calibration: .ready, originalSessionChosen: originalChosen, createdAt: now, updatedAt: now))
     }
 
     /// Enregistre un profil dont les zones douloureuses sont `painAreas`.

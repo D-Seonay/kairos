@@ -135,6 +135,50 @@ struct SessionCardStateTests {
         #expect(state(.needsCheckIn(missing: Factor.allCases)) == .rest(next: next, suggestsMobility: false))
     }
 
+    // MARK: - Séance faite ou en cours
+
+    private let doneCard = DoneCard(title: "Push", durationMinutes: 55, setCount: 18, tonnageKg: 6_420, recordCount: 2)
+
+    private func card(_ templateID: String = "ppl-3", on text: String = "2026-11-02T08:00", score: Double,
+                      done: DoneCard? = nil, inProgress: String? = nil) throws -> SessionCardState {
+        let scored = recovery(score)
+        let session = TodaySession(plannedDay: try plan(templateID, on: text), recovery: scored)
+        return SessionCardState.make(session: session, score: .scored(scored), directory: directory, done: done,
+                                     inProgressTitle: inProgress)
+    }
+
+    @Test func aDoneSessionReplacesTheStrengthCard() throws {
+        #expect(try card(score: 94, done: doneCard) == .done(doneCard))
+        #expect(try card(score: 50, done: doneCard) == .done(doneCard))
+    }
+
+    @Test func aRunningSessionWinsOverEverything() throws {
+        #expect(try card(score: 94, done: doneCard, inProgress: "Push") == .inProgress(title: "Push"))
+        #expect(try card("runner-strength", on: "2026-11-05T08:00", score: 50, inProgress: "Séance libre")
+            == .inProgress(title: "Séance libre"))
+        #expect(try card(score: 30, inProgress: "Push") == .inProgress(title: "Push"))
+    }
+
+    /// Un bilan ne remplace que « Démarrer » : un jour de repos garde sa carte.
+    @Test func aDoneSessionLeavesARestDayAlone() throws {
+        let state = try card(on: "2026-11-03T08:00", score: 80, done: doneCard)
+        guard case .rest = state else {
+            Issue.record("Un repos était attendu, obtenu \(state)")
+            return
+        }
+    }
+
+    @Test func doneCardTexts() {
+        #expect(doneCard.durationText == "55 min")
+        #expect(doneCard.setsText == "18 séries")
+        #expect(doneCard.tonnageText == "6420 kg")
+        #expect(doneCard.recordsText == "2 records")
+        #expect(DoneCard(title: "", durationMinutes: 60, setCount: 1, tonnageKg: 80.5, recordCount: 1).setsText == "1 série")
+        #expect(DoneCard(title: "", durationMinutes: 60, setCount: 1, tonnageKg: 80.5, recordCount: 1).recordsText == "1 record")
+        #expect(DoneCard(title: "", durationMinutes: 60, setCount: 1, tonnageKg: 80.5, recordCount: 0).recordsText == nil)
+        #expect(DoneCard(title: "", durationMinutes: 75, setCount: 1, tonnageKg: 80.5, recordCount: 0).durationText == "1 h 15")
+    }
+
     @Test func noProgramCard() {
         let session = TodaySession(plannedDay: .noProgram, recovery: recovery(50))
         #expect(SessionCardState.make(session: session, score: .scored(recovery(50)), directory: directory) == .noProgram)

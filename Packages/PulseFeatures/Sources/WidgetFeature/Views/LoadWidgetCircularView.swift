@@ -21,6 +21,6 @@ public struct LoadWidgetCircularView: View {
     }
 }
 
-#Preview("Circulaire Charge", as: .accessoryCircular) {
+#Preview("Circulaire Charge") {
     LoadWidgetCircularView(content: .sample(at: .now, calendar: .current))
 }

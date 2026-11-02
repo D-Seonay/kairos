@@ -65,4 +65,46 @@ struct RecordsServiceTests {
         #expect(try await service.recomputeAll() == 2)
         #expect(try await records.records(for: nil).map(\.id) == before)
     }
+
+    @Test func recomputeAppliesFlagsToAFreshCopy() async throws {
+        let first = session("2026-10-20T07:00", weight: 60)
+        let record = session("2026-10-22T07:00", weight: 70)
+        let edited = EditedNoteWorkoutRepository(inner: store, note: "Modifiée pendant le recalcul")
+        let service = RecordsService(workouts: edited, records: records, userExercises: InMemoryUserExerciseRepository(),
+                                     library: .bundled, now: { now })
+        for seeded in [first, record] { try await store.save(seeded) }
+
+        #expect(try await service.recomputeAll() == 4)
+        let resaved = try #require(try await store.session(id: record.id))
+        #expect(resaved.sets.map(\.isPersonalRecord) == [true])
+        #expect(resaved.note == "Modifiée pendant le recalcul")
+    }
+}
+
+/// Un dépôt dont la lecture d'une séance rend une note modifiée depuis la lecture de l'historique.
+private struct EditedNoteWorkoutRepository: WorkoutRepository {
+    let inner: any WorkoutRepository
+    let note: String
+
+    func sessions(from: Date, to: Date) async throws -> [WorkoutSession] {
+        try await inner.sessions(from: from, to: to)
+    }
+
+    func session(id: UUID) async throws -> WorkoutSession? {
+        guard var session = try await inner.session(id: id) else { return nil }
+        session.note = note
+        return session
+    }
+
+    func save(_ session: WorkoutSession) async throws {
+        try await inner.save(session)
+    }
+
+    func delete(id: UUID) async throws {
+        try await inner.delete(id: id)
+    }
+
+    func lastSets(for exercise: ExerciseReference) async throws -> [WorkoutSet] {
+        try await inner.lastSets(for: exercise)
+    }
 }

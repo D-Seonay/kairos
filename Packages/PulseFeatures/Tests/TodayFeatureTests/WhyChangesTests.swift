@@ -37,6 +37,43 @@ struct WhyChangesTests {
         #expect(content.changes[0].detail == "2 min 15 au lieu de 2 min sur \(bench).")
     }
 
+    // MARK: - Charges
+
+    private let benchIncrease = SessionAdjustment(
+        kind: .load, reason: "Développé couché : +2,5 kg sur 4 séries, 10 répétitions atteintes la dernière fois", value: 2.5)
+
+    /// Un jour normal : les hausses de charge du jour prennent la place de « Charges inchangées ».
+    @Test func normalDayWhyListsTheLoadIncreases() throws {
+        let assisted = SessionAdjustment(kind: .load, reason: "Tractions assistées : assistance −5 kg sur 3 séries", value: -5)
+        let content = try WhyFixture.content(WhyFixture.recovery(score: 75), loadAdjustments: [benchIncrease, assisted])
+        #expect(pills(content) == ["+15", "+2,5", "\u{2212}5"])
+        #expect(content.changes[1] == Change(pill: "+2,5", title: benchIncrease.reason, detail: nil))
+        #expect(!content.changes.contains { $0.title == "Charges inchangées" })
+    }
+
+    @Test func optimalDayListsTheLoadIncreasesAfterTheNothingToLightenLine() throws {
+        let content = try WhyFixture.content(WhyFixture.recovery(score: 95), loadAdjustments: [benchIncrease])
+        #expect(pills(content) == ["✓", "+2,5"])
+    }
+
+    @Test func normalDayWithoutIncreaseSaysWhy() throws {
+        let content = try WhyFixture.content(WhyFixture.recovery(score: 75), loadAdjustments: [])
+        #expect(content.changes.last == Change(
+            pill: "=", title: "Charges de la dernière fois : aucune série n'a atteint le haut de sa fourchette", detail: nil))
+    }
+
+    @Test func fatigueDayKeepsTheLoadsEvenWithIncreasesGiven() throws {
+        let content = try WhyFixture.content(WhyFixture.recovery(), loadAdjustments: [benchIncrease])
+        #expect(content.changes.last?.title == "Charges inchangées")
+        #expect(!pills(content).contains("+2,5"))
+    }
+
+    /// Sans calcul des charges (score estimé, calibration en cours : la hausse est bloquée), la ligne d'origine reste.
+    @Test func normalDayWithoutLoadsKeepsTheUnchangedLine() throws {
+        let content = try WhyFixture.content(WhyFixture.recovery(score: 75))
+        #expect(content.changes.last?.title == "Charges inchangées")
+    }
+
     @Test func manyLostSetsOnOneExerciseSaySeveral() throws {
         let day = RoutineDay(order: 0, name: "Jambes", kind: .strength, exercises: [
             RoutineExercise(order: 0, exercise: .content(id: "bench-press-barbell"), sets: 8, repsMin: 6, repsMax: 10,
