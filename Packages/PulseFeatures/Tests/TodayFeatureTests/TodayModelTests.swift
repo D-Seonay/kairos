@@ -7,7 +7,7 @@ import Testing
 
 @MainActor
 struct TodayModelTests {
-    @Test func refreshScoresAndPlansMonday() async throws {
+    @Test func refreshScoresAndShowsMondayPush() async throws {
         let fixture = TodayFixture()
         let program = try await fixture.adopt("ppl-3")
         let model = fixture.makeModel()
@@ -17,9 +17,14 @@ struct TodayModelTests {
             return
         }
         #expect(recovery.category == .optimal)
-        #expect(model.plannedDay == .strength(program.days[0]))
-        #expect(program.days[0].name == "Push")
-        #expect(model.summary?.setCount == 19)
+        #expect(model.session?.plannedDay == .strength(program.days[0]))
+        guard case .strength(let card) = model.card else {
+            Issue.record("Une carte de musculation était attendue, obtenu \(model.card)")
+            return
+        }
+        #expect(card.title == "Push")
+        #expect(card.badge == .planned)
+        #expect(card.summary.setCount == 19)
         #expect(model.factors.count == 3)
         #expect(model.marker == nil)
         #expect(model.lastSync == TodayClock.date("2026-11-02T08:00"))
@@ -32,21 +37,45 @@ struct TodayModelTests {
         try await fixture.profiles.save(UserProfile(createdAt: fixture.clock.now))
         let model = fixture.makeModel()
         await model.refresh()
-        #expect(model.plannedDay == .noProgram)
-        #expect(model.summary == nil)
+        #expect(model.session?.plannedDay == .noProgram)
+        #expect(model.card == .noProgram)
     }
 
-    @Test func restDayHasNoSummary() async throws {
+    @Test func restDayShowsTheNextSession() async throws {
         let fixture = TodayFixture(at: "2026-11-03T08:00")
         try await fixture.adopt("ppl-3")
         let model = fixture.makeModel()
         await model.refresh()
-        guard case .rest(let next) = model.plannedDay else {
-            Issue.record("Un repos était attendu, obtenu \(model.plannedDay)")
+        guard case .rest(let next, let suggestsMobility) = model.card else {
+            Issue.record("Un repos était attendu, obtenu \(model.card)")
             return
         }
         #expect(next?.weekday == .wednesday)
-        #expect(model.summary == nil)
+        #expect(!suggestsMobility)
+    }
+
+    @Test func refreshFillsLoadAndTrends() async {
+        let model = TodayFixture().makeModel()
+        await model.refresh()
+        #expect(model.load == .hidden)
+        #expect(model.trends.count == 3)
+    }
+
+    @Test func refreshShowsTheLoadRatioAfterFourWeeks() async throws {
+        let fixture = TodayFixture()
+        let calendar = TodayClock.calendar
+        let onboarded = try #require(calendar.date(byAdding: .day, value: -40, to: fixture.clock.now))
+        try await fixture.profiles.save(UserProfile(onboardingCompletedAt: onboarded, createdAt: onboarded, updatedAt: onboarded))
+        for offset in [1, 8, 15, 22] {
+            let start = try #require(calendar.date(byAdding: .day, value: -offset, to: fixture.clock.now))
+            try await fixture.workouts.save(WorkoutSession(
+                startedAt: start, endedAt: start.addingTimeInterval(3_600), kind: .strength, source: .pulse, status: .completed,
+                title: "Push", overallRPE: 7, durationMinutes: 60, createdAt: start, updatedAt: start))
+        }
+        let model = fixture.makeModel()
+        await model.refresh()
+        let advice = "Tu peux maintenir ce rythme cette semaine."
+        #expect(model.load == .ratio(value: 1, valueText: "1", zoneTitle: "Zone optimale", advice: advice))
     }
 
     @Test func greetingWithoutFirstName() async {
@@ -169,5 +198,22 @@ struct TodayModelTests {
         let model = TodayFixture().makeModel()
         await model.refresh()
         #expect(model.dateText == "lundi 2 novembre")
+    }
+
+    @Test func whyIsAvailableOnceScored() async throws {
+        let scored = TodayFixture()
+        try await scored.adopt("ppl-3")
+        let model = scored.makeModel()
+        #expect(model.why == nil)
+        await model.refresh()
+        #expect(model.why != nil)
+        model.showWhy()
+        #expect(model.isShowingWhy)
+
+        let empty = TodayFixture(scenario: .noData).makeModel()
+        await empty.refresh()
+        #expect(empty.why == nil)
+        empty.showWhy()
+        #expect(!empty.isShowingWhy)
     }
 }

@@ -23,28 +23,6 @@
         }
       }
     },
-    "%lld sorties" : {
-      "localizations" : {
-        "fr" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld sortie"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld sorties"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "%lld séances de musculation" : {
       "localizations" : {
         "fr" : {
@@ -82,6 +60,28 @@
                 "stringUnit" : {
                   "state" : "translated",
                   "value" : "%lld séances par semaine"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld sorties" : {
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld sortie"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld sorties"
                 }
               }
             }
@@ -179,6 +179,16 @@
         }
       }
     },
+    "cm" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "cm"
+          }
+        }
+      }
+    },
     "Commencer" : {
       "localizations" : {
         "fr" : {
@@ -215,6 +225,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Continuer sans programme"
+          }
+        }
+      }
+    },
+    "course" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "course"
           }
         }
       }
@@ -308,6 +328,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Entraînements passés"
+          }
+        }
+      }
+    },
+    "Épaules" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Épaules"
           }
         }
       }
@@ -503,6 +533,16 @@
         }
       }
     },
+    "kg" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kg"
+          }
+        }
+      }
+    },
     "L" : {
       "comment" : "Initiale de lundi",
       "localizations" : {
@@ -520,6 +560,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "L'iPhone et l'Apple Watch fournissent la SDNN, pas la rMSSD : Pulse construit sa propre ligne de base sur cette mesure."
+          }
+        }
+      }
+    },
+    "lb" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "lb"
           }
         }
       }
@@ -554,6 +604,16 @@
         }
       }
     },
+    "ligne de base en cours, %lld sur %lld nuits" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ligne de base en cours, %lld sur %lld nuits"
+          }
+        }
+      }
+    },
     "Lombaires" : {
       "localizations" : {
         "fr" : {
@@ -575,7 +635,7 @@
       }
     },
     "M" : {
-      "comment" : "Initiale de mardi",
+      "comment" : "Initiale de mardi\nInitiale de mercredi",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -655,6 +715,16 @@
         }
       }
     },
+    "musculation" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "musculation"
+          }
+        }
+      }
+    },
     "Où placer le curseur ?" : {
       "localizations" : {
         "fr" : {
@@ -665,22 +735,22 @@
         }
       }
     },
-    "Pas de programme pour l'instant : tu créeras tes propres routines dès que l'éditeur sera disponible." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pas de programme pour l'instant : tu créeras tes propres routines dès que l'éditeur sera disponible."
-          }
-        }
-      }
-    },
     "Pas de période d'apprentissage : Pulse compare chaque nuit à tes 14 dernières, et la ligne de base se précise au fil des semaines." : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pas de période d'apprentissage : Pulse compare chaque nuit à tes 14 dernières, et la ligne de base se précise au fil des semaines."
+          }
+        }
+      }
+    },
+    "Pas de programme pour l'instant : tu créeras tes propres routines dès que l'éditeur sera disponible." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas de programme pour l'instant : tu créeras tes propres routines dès que l'éditeur sera disponible."
           }
         }
       }
@@ -755,6 +825,16 @@
         }
       }
     },
+    "Prénom affiché" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prénom affiché"
+          }
+        }
+      }
+    },
     "Proposition : %@ et %@ par semaine." : {
       "localizations" : {
         "fr" : {
@@ -771,16 +851,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Proposition : %@ par semaine."
-          }
-        }
-      }
-    },
-    "Prénom affiché" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prénom affiché"
           }
         }
       }
@@ -925,6 +995,16 @@
         }
       }
     },
+    "repos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "repos"
+          }
+        }
+      }
+    },
     "Retour" : {
       "localizations" : {
         "fr" : {
@@ -986,6 +1066,16 @@
         }
       }
     },
+    "Séances par semaine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séances par semaine"
+          }
+        }
+      }
+    },
     "Sexe" : {
       "localizations" : {
         "fr" : {
@@ -1002,16 +1092,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sommeil moyen"
-          }
-        }
-      }
-    },
-    "Séances par semaine" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Séances par semaine"
           }
         }
       }
@@ -1163,86 +1243,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Volume, intensité et repos ajustés avant que tu touches une barre."
-          }
-        }
-      }
-    },
-    "cm" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "cm"
-          }
-        }
-      }
-    },
-    "course" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "course"
-          }
-        }
-      }
-    },
-    "kg" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "kg"
-          }
-        }
-      }
-    },
-    "lb" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "lb"
-          }
-        }
-      }
-    },
-    "ligne de base en cours, %lld sur %lld nuits" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ligne de base en cours, %lld sur %lld nuits"
-          }
-        }
-      }
-    },
-    "musculation" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "musculation"
-          }
-        }
-      }
-    },
-    "repos" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "repos"
-          }
-        }
-      }
-    },
-    "Épaules" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Épaules"
           }
         }
       }

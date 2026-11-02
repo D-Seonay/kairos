@@ -1,13 +1,18 @@
 import OnboardingFeature
 import PulseDesignSystem
+import PulseDomain
 import SwiftUI
+import TodayFeature
 
 /// La racine : écran de chargement, onboarding tant que le profil n'est pas terminé, puis les onglets. Toujours en sombre.
 struct AppRootView: View {
     @State private var model: AppRootModel
+    let router: AppRouter
+    @Environment(\.scenePhase) private var scenePhase
 
-    init(dependencies: AppDependencies) {
+    init(dependencies: AppDependencies, router: AppRouter) {
         _model = State(initialValue: AppRootModel(dependencies: dependencies))
+        self.router = router
     }
 
     var body: some View {
@@ -16,6 +21,12 @@ struct AppRootView: View {
             .tint(Color(PulsePalette.accent(for: model.theme).accent))
             .environment(\.pulseTheme, model.theme)
             .task { await model.load() }
+            .onOpenURL { AppLink(url: $0).map(router.open) }
+            .onChange(of: scenePhase) { _, phase in
+                // Chaque retour au premier plan rafraîchit « Aujourd'hui », quel que soit l'onglet affiché.
+                guard phase == .active, model.destination == .main, let today = model.today else { return }
+                Task { await today.refresh() }
+            }
     }
 
     @ViewBuilder
@@ -28,12 +39,15 @@ struct AppRootView: View {
                 OnboardingFlowView(model: onboarding)
                     .id(ObjectIdentifier(onboarding))
                     .onChange(of: onboarding.isFinished, initial: true) { _, finished in
-                        if finished { model.onboardingFinished() }
+                        guard finished else { return }
+                        // Après une suppression totale, les onglets repartent d'« Aujourd'hui ».
+                        router.open(.today)
+                        model.onboardingFinished()
                     }
             }
         case .main:
             if let today = model.today {
-                MainTabView(dependencies: model.dependencies, today: today, firstName: model.profile?.firstName) {
+                MainTabView(dependencies: model.dependencies, router: router, today: today, firstName: model.profile?.firstName) {
                     await model.dataErased()
                 }
                 .id(ObjectIdentifier(today))

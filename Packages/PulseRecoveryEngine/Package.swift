@@ -3,6 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "PulseRecoveryEngine",
+    defaultLocalization: "fr",
     platforms: [.iOS(.v26), .macOS(.v15)],
     products: [
         .library(name: "PulseRecoveryEngine", targets: ["PulseRecoveryEngine"])
@@ -14,6 +15,7 @@ let package = Package(
         .target(
             name: "PulseRecoveryEngine",
             dependencies: ["PulseDomain"],
+            resources: [.process("Resources")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(

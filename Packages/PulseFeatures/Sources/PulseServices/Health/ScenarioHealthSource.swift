@@ -2,12 +2,13 @@ import Foundation
 import PulseDomain
 
 /// Source Apple Santé factice et déterministe : 60 nuits finissant au jour de `now`, selon un `HealthScenario`.
+///
+/// L'ancre est le jour des données générées, en texte (`"2026-11-02"`) : la même ancre ne ramène rien, une autre ramène tout.
 public struct ScenarioHealthSource: HealthSampleSource {
     static let nightCount = 60
 
-    private let sdnn: [TimedSample]
-    private let restingHeartRate: [TimedSample]
-    private let sleep: [SleepInterval]
+    private let samples: [HealthSampleKind: [CachedHealthSample]]
+    private let dayAnchor: Data
     private let hints: HealthProfileHints
 
     public init(scenario: HealthScenario, now: Date, calendar: Calendar) {
@@ -18,28 +19,29 @@ public struct ScenarioHealthSource: HealthSampleSource {
             let night = index == Self.nightCount - 1 ? Self.todayNight(for: scenario) : Self.historyNight(index)
             builder.add(night, on: day)
         }
-        sdnn = builder.sdnn
-        restingHeartRate = builder.restingHeartRate
-        sleep = builder.sleep
+        samples = builder.samples
+        dayAnchor = Data(Self.dayText(today, calendar: calendar).utf8)
         hints = scenario == .noData ? HealthProfileHints() : Self.hints(calendar: calendar)
     }
 
     public func requestAuthorization() async throws {}
 
-    public func sdnnSamples(from: Date, to: Date) async throws -> [TimedSample] {
-        sdnn.filter { $0.date >= from && $0.date < to }
-    }
-
-    public func restingHeartRateSamples(from: Date, to: Date) async throws -> [TimedSample] {
-        restingHeartRate.filter { $0.date >= from && $0.date < to }
-    }
-
-    public func sleepIntervals(from: Date, to: Date) async throws -> [SleepInterval] {
-        sleep.filter { $0.end > from && $0.start < to }
+    /// Sans ancre, ou avec l'ancre d'un autre jour : tous les échantillons commençant à `start` ou après. Avec l'ancre du jour : rien.
+    public func changes(of signal: NightSignal, since anchor: Data?, from start: Date) async throws -> HealthSampleChanges {
+        guard anchor != dayAnchor else {
+            return HealthSampleChanges(kind: signal.kind, added: [], deletedHealthKitUUIDs: [], anchor: dayAnchor, isFullRead: false)
+        }
+        let added = (samples[signal.kind] ?? []).filter { $0.start >= start }
+        return HealthSampleChanges(kind: signal.kind, added: added, deletedHealthKitUUIDs: [], anchor: dayAnchor, isFullRead: true)
     }
 
     public func profileHints() async throws -> HealthProfileHints {
         hints
+    }
+
+    private static func dayText(_ day: Date, calendar: Calendar) -> String {
+        let parts = calendar.dateComponents([.year, .month, .day], from: day)
+        return String(format: "%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
     }
 
     // MARK: - Nuits
@@ -93,21 +95,28 @@ public struct ScenarioHealthSource: HealthSampleSource {
 
     private struct Builder {
         let calendar: Calendar
-        var sdnn: [TimedSample] = []
-        var restingHeartRate: [TimedSample] = []
-        var sleep: [SleepInterval] = []
+        var samples: [HealthSampleKind: [CachedHealthSample]] = [:]
 
         mutating func add(_ night: Night, on day: Date) {
             if let value = night.sdnnMs {
-                sdnn += ScenarioHealthSource.sdnnMinutes.map { TimedSample(date: moment(day, $0), value: value) }
+                for minute in ScenarioHealthSource.sdnnMinutes {
+                    append(.sdnn, start: moment(day, minute), end: moment(day, minute), value: value)
+                }
             }
-            restingHeartRate.append(TimedSample(date: moment(day, ScenarioHealthSource.restingHeartRateMinute),
-                                                value: night.restingHeartRate))
+            let measuredAt = moment(day, ScenarioHealthSource.restingHeartRateMinute)
+            append(.restingHeartRate, start: measuredAt, end: measuredAt, value: night.restingHeartRate)
             var minute = night.sleepStartMinute
             for (stage, minutes) in night.stages {
-                sleep.append(SleepInterval(start: moment(day, minute), end: moment(day, minute + minutes), stage: stage))
+                append(.sleep, start: moment(day, minute), end: moment(day, minute + minutes), stage: stage)
                 minute += minutes
             }
+        }
+
+        /// Les UUID suivent l'ordre de génération de chaque type : `scenario.sdnn.0`, `scenario.sdnn.1`…
+        private mutating func append(_ kind: HealthSampleKind, start: Date, end: Date, value: Double? = nil, stage: SleepStage? = nil) {
+            let uuid = "scenario.\(kind.rawValue).\(samples[kind, default: []].count)"
+            samples[kind, default: []].append(CachedHealthSample(
+                kind: kind, start: start, end: end, value: value, sleepStage: stage, healthKitUUID: uuid, fetchedAt: end))
         }
 
         private func moment(_ day: Date, _ minutes: Int) -> Date {

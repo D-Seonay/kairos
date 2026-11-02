@@ -40,3 +40,21 @@ import Testing
     #expect(PulseFormat.integer(1e30, unit: "ms") == "\u{2014}")
     #expect(PulseFormat.signedInteger(-1e30, unit: "bpm") == "\u{2014}")
 }
+
+@Test func restDurations() {
+    #expect(PulseFormat.restDuration(seconds: 45) == "45 s")
+    #expect(PulseFormat.restDuration(seconds: 120) == "2 min")
+    #expect(PulseFormat.restDuration(seconds: 165) == "2 min 45")
+    #expect(PulseFormat.restDuration(seconds: 65) == "1 min 05")
+}
+
+@Test func decimals() {
+    #expect(PulseFormat.decimal(1.123, maxFractionDigits: 2) == "1,12")
+    #expect(PulseFormat.decimal(7.5, maxFractionDigits: 1) == "7,5")
+    #expect(PulseFormat.decimal(8, maxFractionDigits: 1) == "8")
+}
+
+@Test func nonFiniteDecimalsShowADash() {
+    #expect(PulseFormat.decimal(.nan, maxFractionDigits: 1) == "\u{2014}")
+    #expect(PulseFormat.decimal(.infinity, maxFractionDigits: 1) == "\u{2014}")
+}

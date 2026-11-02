@@ -39,6 +39,14 @@ import Testing
         #expect(model.counts.values.allSatisfy { $0 == 0 })
     }
 
+    @Test func eraseReportsSuccessBeforeTheRecount() async {
+        let model = DataDebugModel(dependencies: .testing(inspector: RecountFailingInspector()))
+        await model.refresh()
+        #expect(model.lastError == nil)
+        await model.erase(includeAppleHealth: false)
+        #expect(model.didErase && model.lastError != nil && model.isBusy == false)
+    }
+
     @Test func testingDependenciesUseADedicatedPreferencesSuite() async throws {
         let suite = AppDependencies.testingDefaultsSuite
         let defaults = try #require(UserDefaults(suiteName: suite))
@@ -52,5 +60,22 @@ import Testing
         let deps = AppDependencies.live()
         #expect(deps.storeMode == .localOnly || deps.storeMode == .inMemory)
         #expect(deps.storeError == nil)
+    }
+}
+
+/// Inspecteur dont le premier comptage réussit et tous les suivants échouent : le recomptage après effacement échoue.
+private actor RecountFailingInspector: StoreInspector {
+    struct RecountFailure: Error {}
+
+    private var countCalls = 0
+
+    func counts() async throws -> [StoreTable: Int] {
+        countCalls += 1
+        guard countCalls == 1 else { throw RecountFailure() }
+        return [:]
+    }
+
+    func cloudAccountStatus() async -> CloudAccountStatus {
+        .unknown
     }
 }

@@ -18,8 +18,8 @@ public struct HealthProfileHints: Sendable, Equatable {
 /// Lecture des échantillons d'Apple Santé. Implémenté par `PulseHealth` ; le moteur et les fonctionnalités n'en voient que le protocole.
 public protocol HealthSampleSource: Sendable {
     func requestAuthorization() async throws
-    func sdnnSamples(from: Date, to: Date) async throws -> [TimedSample]
-    func restingHeartRateSamples(from: Date, to: Date) async throws -> [TimedSample]
-    func sleepIntervals(from: Date, to: Date) async throws -> [SleepInterval]
     func profileHints() async throws -> HealthProfileHints
+    /// Ce qui a changé dans Apple Santé pour un signal depuis `anchor`, en ne regardant que les échantillons postérieurs à `start`.
+    /// Sans ancre utilisable, la réponse est une lecture complète (`isFullRead`).
+    func changes(of signal: NightSignal, since anchor: Data?, from start: Date) async throws -> HealthSampleChanges
 }

@@ -171,6 +171,17 @@
                ReferencedContainer = "container:Packages/PulseFeatures">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "WidgetFeatureTests"
+               BuildableName = "WidgetFeatureTests"
+               BlueprintName = "WidgetFeatureTests"
+               ReferencedContainer = "container:Packages/PulseFeatures">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>

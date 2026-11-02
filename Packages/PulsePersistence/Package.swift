@@ -19,6 +19,7 @@ let package = Package(
         .testTarget(
             name: "PulsePersistenceTests",
             dependencies: ["PulsePersistence"],
+            resources: [.copy("Fixtures")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         )
     ]

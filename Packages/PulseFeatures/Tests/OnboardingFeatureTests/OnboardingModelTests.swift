@@ -63,7 +63,7 @@ struct OnboardingModelTests {
     }
 
     @Test func allowHealthFailureShowsAMessageAndStillAdvances() async {
-        let model = OnboardingFixture(health: FailingHealthSource()).makeModel()
+        let model = OnboardingFixture(health: UnavailableHealthSource()).makeModel()
         await model.start()
         await model.allowHealth()
         #expect(model.step == .profile)

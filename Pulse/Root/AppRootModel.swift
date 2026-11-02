@@ -38,6 +38,8 @@ final class AppRootModel {
     /// L'onboarding a enregistré le profil terminé : on passe aux onglets et on relit le profil pour l'ambiance.
     func onboardingFinished() {
         show(.main)
+        // L'onboarding vient de demander l'accès à Apple Santé : les observateurs lancés au démarrage, avant, ont échoué.
+        dependencies.backgroundDelivery?.restart()
         Task { await reloadProfile() }
     }
 

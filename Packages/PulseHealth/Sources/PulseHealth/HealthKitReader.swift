@@ -15,15 +15,7 @@ public final class HealthKitReader: HealthReading, @unchecked Sendable {
     // MARK: - HealthReading
 
     public func requestReadAuthorization() async throws {
-        let types: Set<HKObjectType> = [
-            HKCategoryType(.sleepAnalysis),
-            HKQuantityType(.heartRateVariabilitySDNN),
-            HKQuantityType(.restingHeartRate),
-            HKQuantityType(.heartRate),
-            HKQuantityType(.bodyMass),
-            HKWorkoutType.workoutType()
-        ]
-        try await store.requestAuthorization(toShare: [], read: types)
+        try await store.requestAuthorization(toShare: [], read: HealthKitTypes.read)
     }
 
     public func latestSample(of type: HealthDataType) async throws -> HealthSamplePoint? {
@@ -85,7 +77,7 @@ public final class HealthKitReader: HealthReading, @unchecked Sendable {
         }
     }
 
-    private static let beatsPerMinute = HKUnit.count().unitDivided(by: .minute())
+    static let beatsPerMinute = HKUnit.count().unitDivided(by: .minute())
 
     private static func datePredicate(from: Date, to: Date) -> NSPredicate {
         HKQuery.predicateForSamples(withStart: from, end: to, options: [])
@@ -113,7 +105,7 @@ public final class HealthKitReader: HealthReading, @unchecked Sendable {
 
     // MARK: - Conversions
 
-    private static func stage(for value: HKCategoryValueSleepAnalysis) -> SleepStage? {
+    static func stage(for value: HKCategoryValueSleepAnalysis) -> SleepStage? {
         switch value {
         case .inBed: .inBed
         case .awake: .awake

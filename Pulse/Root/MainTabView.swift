@@ -13,16 +13,17 @@ struct MainTabView: View {
     }
 
     let dependencies: AppDependencies
+    /// L'onglet affiché : un lien du widget ou la notification du matin le change aussi.
+    @Bindable var router: AppRouter
     let today: TodayModel
     let firstName: String?
     /// Appelé après une suppression totale réussie depuis l'écran « Données ».
     let onErased: () async -> Void
-    @State private var selection = Item.today
 
     var body: some View {
-        TabView(selection: $selection) {
+        TabView(selection: $router.selectedTab) {
             Tab(String(localized: "Aujourd'hui"), systemImage: "sun.max", value: Item.today) {
-                TodayView(model: today) { selection = .profile }
+                TodayView(model: today) { router.selectedTab = .profile }
             }
             Tab(String(localized: "Planning"), systemImage: "calendar", value: Item.planning) {
                 comingSoon(String(localized: "Planning"), milestone: "M6")

@@ -14,7 +14,8 @@ let package = Package(
         .library(name: "PulseServices", targets: ["PulseServices"]),
         .library(name: "CheckInFeature", targets: ["CheckInFeature"]),
         .library(name: "OnboardingFeature", targets: ["OnboardingFeature"]),
-        .library(name: "TodayFeature", targets: ["TodayFeature"])
+        .library(name: "TodayFeature", targets: ["TodayFeature"]),
+        .library(name: "WidgetFeature", targets: ["WidgetFeature"])
     ],
     dependencies: [
         .package(path: "../PulseDomain"),
@@ -26,6 +27,7 @@ let package = Package(
         .target(
             name: "PulseServices",
             dependencies: [domain, recoveryEngine, content],
+            resources: [.process("Resources")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .target(
@@ -42,28 +44,39 @@ let package = Package(
         ),
         .target(
             name: "TodayFeature",
-            dependencies: ["PulseServices", "CheckInFeature", designSystem, domain, content],
+            dependencies: ["PulseServices", "CheckInFeature", designSystem, domain, recoveryEngine, content],
+            resources: [.process("Resources")],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .target(
+            name: "WidgetFeature",
+            dependencies: [domain, designSystem],
             resources: [.process("Resources")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(
             name: "PulseServicesTests",
-            dependencies: ["PulseServices"],
+            dependencies: ["PulseServices", domain, recoveryEngine, content],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(
             name: "CheckInFeatureTests",
-            dependencies: ["CheckInFeature"],
+            dependencies: ["CheckInFeature", domain],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(
             name: "OnboardingFeatureTests",
-            dependencies: ["OnboardingFeature"],
+            dependencies: ["OnboardingFeature", "PulseServices", "CheckInFeature", domain, content],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(
             name: "TodayFeatureTests",
-            dependencies: ["TodayFeature"],
+            dependencies: ["TodayFeature", "PulseServices", "CheckInFeature", domain, recoveryEngine, content],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .testTarget(
+            name: "WidgetFeatureTests",
+            dependencies: ["WidgetFeature", domain],
             swiftSettings: [.swiftLanguageMode(.v6)]
         )
     ]

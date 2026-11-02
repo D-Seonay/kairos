@@ -8,13 +8,18 @@
 
 /* Begin PBXBuildFile section */
 		040A86C6285D90BF16F5B5AA /* PulseRecoveryEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 6B02FCA8EE3E67636F42D06C /* PulseRecoveryEngine */; };
+		1FBA94A654E8F834B581EDD8 /* PulseDomain in Frameworks */ = {isa = PBXBuildFile; productRef = D496246F4F0D75412E1528B3 /* PulseDomain */; };
 		41A0C7A70FCDB1E786FF3D21 /* OnboardingFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 23A0449ABFD0F90FCF52CB7E /* OnboardingFeature */; };
 		5024563D1C977796CEC6C4D2 /* PulseContent in Frameworks */ = {isa = PBXBuildFile; productRef = CADDF951A0B30D2BE04A2F29 /* PulseContent */; };
 		64068CB54DF03A28FE132C72 /* CheckInFeature in Frameworks */ = {isa = PBXBuildFile; productRef = A9C8BCE68F5B531CBD349FDB /* CheckInFeature */; };
 		69CB165197E173B96333A3CA /* PulsePersistence in Frameworks */ = {isa = PBXBuildFile; productRef = BA7396E5B28E53EE5BB52EFE /* PulsePersistence */; };
 		6D0C4ACE8C0C1D8A460ECC91 /* PulseDesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 778E32CCFEBB1FE604B7373D /* PulseDesignSystem */; };
+		770C98D2B3BAC63B9D4FEFD6 /* WidgetFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 39C9A66A915380930D00B1BB /* WidgetFeature */; };
 		926156F0D2A1BA89FCB63479 /* PulseHealth in Frameworks */ = {isa = PBXBuildFile; productRef = F4BAF19749CA79DDDA8F7559 /* PulseHealth */; };
 		B7C03201C860D0561958042A /* TodayFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 2CBD7AA3EB8955404F12F8BD /* TodayFeature */; };
+		B8172B2AEC365494E49651D8 /* PulseDesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 0304F45AA4EED5FE2D4D284C /* PulseDesignSystem */; };
+		EACE9CBEB97038B976FC39A3 /* PulseWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 9EB175B708FA8903888C60A1 /* PulseWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		EFF3DE79CAEEE2351E8EB80C /* WidgetFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 7CBDB83896B464F56F24DBCD /* WidgetFeature */; };
 		F50A07489A5904474C44FB45 /* PulseServices in Frameworks */ = {isa = PBXBuildFile; productRef = 9941CEBC4406D825833E5CB8 /* PulseServices */; };
 		FF152BDE6343A10B8627BC3C /* PulseDomain in Frameworks */ = {isa = PBXBuildFile; productRef = 8C27DDA66D90C7A34759B03B /* PulseDomain */; };
 /* End PBXBuildFile section */
@@ -27,6 +32,13 @@
 			remoteGlobalIDString = CF79B1BAD3D70F54153FE0B3;
 			remoteInfo = Pulse;
 		};
+		9721ECCA40FA7DB2D77FFA0A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 84FEC84833EC6BF77563A3F6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DE3AE688686C38C844125D4B;
+			remoteInfo = PulseWidgets;
+		};
 		EE9EFEEC20EB618CA7451ADB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 84FEC84833EC6BF77563A3F6 /* Project object */;
@@ -36,11 +48,26 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		44496BD1ABC9EFB9A195FCD8 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				EACE9CBEB97038B976FC39A3 /* PulseWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		08C0C5C2A43D096433BA0B8F /* PulseContent */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PulseContent; path = Packages/PulseContent; sourceTree = SOURCE_ROOT; };
 		13FEF2D2118D74C3572DF349 /* Pulse.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Pulse.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		401063C8184B4A8F0651DCAB /* PulseDesignSystem */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PulseDesignSystem; path = Packages/PulseDesignSystem; sourceTree = SOURCE_ROOT; };
 		4FBA30D234A433E58E16508B /* PulseTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = PulseTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		9EB175B708FA8903888C60A1 /* PulseWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = PulseWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		A70D8B0C52E658248BD5D9C9 /* PulseRecoveryEngine */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PulseRecoveryEngine; path = Packages/PulseRecoveryEngine; sourceTree = SOURCE_ROOT; };
 		AB2D664BC108B8D410A545BF /* PulseDomain */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PulseDomain; path = Packages/PulseDomain; sourceTree = SOURCE_ROOT; };
 		C038C8A3EE9A6E3AF29E18F4 /* PulsePersistence */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PulsePersistence; path = Packages/PulsePersistence; sourceTree = SOURCE_ROOT; };
@@ -50,7 +77,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		C9BD4A9A33AA4579CDB23D6E /* Exceptions for "Pulse" folder in "Pulse" target */ = {
+		9BB6D589009B5518946696BF /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = DE3AE688686C38C844125D4B /* PulseWidgets */;
+		};
+		C9BD4A9A33AA4579CDB23D6E /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -60,20 +94,44 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		52B1409109A07797286C6D2C /* PulseWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				9BB6D589009B5518946696BF /* PBXFileSystemSynchronizedBuildFileExceptionSet */,
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = PulseWidgets;
+			sourceTree = "<group>";
+		};
 		BE553024BFA22B3A91E57AAE /* PulseTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
 			path = PulseTests;
 			sourceTree = "<group>";
 		};
 		F25C064D337B30DFBA7B9655 /* PulseUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
 			path = PulseUITests;
 			sourceTree = "<group>";
 		};
 		F43F5B3DCF8CA4AA62083E92 /* Pulse */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				C9BD4A9A33AA4579CDB23D6E /* Exceptions for "Pulse" folder in "Pulse" target */,
+				C9BD4A9A33AA4579CDB23D6E /* PBXFileSystemSynchronizedBuildFileExceptionSet */,
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
 			);
 			path = Pulse;
 			sourceTree = "<group>";
@@ -81,6 +139,16 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		1B5A47F244A39518B3C4561A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1FBA94A654E8F834B581EDD8 /* PulseDomain in Frameworks */,
+				B8172B2AEC365494E49651D8 /* PulseDesignSystem in Frameworks */,
+				770C98D2B3BAC63B9D4FEFD6 /* WidgetFeature in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1C9078D005D61D91A0E0C7F8 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -95,6 +163,7 @@
 				64068CB54DF03A28FE132C72 /* CheckInFeature in Frameworks */,
 				41A0C7A70FCDB1E786FF3D21 /* OnboardingFeature in Frameworks */,
 				B7C03201C860D0561958042A /* TodayFeature in Frameworks */,
+				EFF3DE79CAEEE2351E8EB80C /* WidgetFeature in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -107,6 +176,7 @@
 				13FEF2D2118D74C3572DF349 /* Pulse.app */,
 				4FBA30D234A433E58E16508B /* PulseTests.xctest */,
 				FE8D92E6665E742A48BC43D2 /* PulseUITests.xctest */,
+				9EB175B708FA8903888C60A1 /* PulseWidgets.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -132,6 +202,7 @@
 				F43F5B3DCF8CA4AA62083E92 /* Pulse */,
 				BE553024BFA22B3A91E57AAE /* PulseTests */,
 				F25C064D337B30DFBA7B9655 /* PulseUITests */,
+				52B1409109A07797286C6D2C /* PulseWidgets */,
 				1FEE830988994786371D8E45 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -190,10 +261,12 @@
 				D70CFAE236269B6E146109F4 /* Sources */,
 				606EBA1EB03BF3A2D7674713 /* Resources */,
 				1C9078D005D61D91A0E0C7F8 /* Frameworks */,
+				44496BD1ABC9EFB9A195FCD8 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				0AF47B9729F2AC2C8586086B /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				F43F5B3DCF8CA4AA62083E92 /* Pulse */,
@@ -210,10 +283,36 @@
 				A9C8BCE68F5B531CBD349FDB /* CheckInFeature */,
 				23A0449ABFD0F90FCF52CB7E /* OnboardingFeature */,
 				2CBD7AA3EB8955404F12F8BD /* TodayFeature */,
+				7CBDB83896B464F56F24DBCD /* WidgetFeature */,
 			);
 			productName = Pulse;
 			productReference = 13FEF2D2118D74C3572DF349 /* Pulse.app */;
 			productType = "com.apple.product-type.application";
+		};
+		DE3AE688686C38C844125D4B /* PulseWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B3683676DAFA9B667EA64C01 /* Build configuration list for PBXNativeTarget "PulseWidgets" */;
+			buildPhases = (
+				AEB54D8B38FA64F1969F1F1D /* Sources */,
+				A3C00E161B8B10BAFB63E07E /* Resources */,
+				1B5A47F244A39518B3C4561A /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				52B1409109A07797286C6D2C /* PulseWidgets */,
+			);
+			name = PulseWidgets;
+			packageProductDependencies = (
+				D496246F4F0D75412E1528B3 /* PulseDomain */,
+				0304F45AA4EED5FE2D4D284C /* PulseDesignSystem */,
+				39C9A66A915380930D00B1BB /* WidgetFeature */,
+			);
+			productName = PulseWidgets;
+			productReference = 9EB175B708FA8903888C60A1 /* PulseWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -232,6 +331,10 @@
 						TestTargetID = CF79B1BAD3D70F54153FE0B3;
 					};
 					CF79B1BAD3D70F54153FE0B3 = {
+						DevelopmentTeam = UP9NVJDBKA;
+						ProvisioningStyle = Automatic;
+					};
+					DE3AE688686C38C844125D4B = {
 						DevelopmentTeam = UP9NVJDBKA;
 						ProvisioningStyle = Automatic;
 					};
@@ -261,6 +364,7 @@
 			projectRoot = "";
 			targets = (
 				CF79B1BAD3D70F54153FE0B3 /* Pulse */,
+				DE3AE688686C38C844125D4B /* PulseWidgets */,
 				26CB5097CD9CC52FD2F253AB /* PulseTests */,
 				AD188051DBF61C8291631068 /* PulseUITests */,
 			);
@@ -289,6 +393,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A3C00E161B8B10BAFB63E07E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -306,6 +417,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AEB54D8B38FA64F1969F1F1D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D70CFAE236269B6E146109F4 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -316,6 +434,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		0AF47B9729F2AC2C8586086B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DE3AE688686C38C844125D4B /* PulseWidgets */;
+			targetProxy = 9721ECCA40FA7DB2D77FFA0A /* PBXContainerItemProxy */;
+		};
 		24C65BB34EBACEED26C327CD /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = CF79B1BAD3D70F54153FE0B3 /* Pulse */;
@@ -420,6 +543,46 @@
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		3B83BEA6ED4E1001BAB57ABE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = PulseWidgets/PulseWidgets.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = UP9NVJDBKA;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = PulseWidgets/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = fr.seonay.pulse.widgets;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		6212840DB4D8ED9B9DCE7A19 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = PulseWidgets/PulseWidgets.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = UP9NVJDBKA;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = PulseWidgets/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = fr.seonay.pulse.widgets;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -585,6 +748,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
+		B3683676DAFA9B667EA64C01 /* Build configuration list for PBXNativeTarget "PulseWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3B83BEA6ED4E1001BAB57ABE /* Debug */,
+				6212840DB4D8ED9B9DCE7A19 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		EEDF49BCEEFCC0E6884EE85E /* Build configuration list for PBXNativeTarget "PulseUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -637,6 +809,10 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		0304F45AA4EED5FE2D4D284C /* PulseDesignSystem */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PulseDesignSystem;
+		};
 		23A0449ABFD0F90FCF52CB7E /* OnboardingFeature */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = OnboardingFeature;
@@ -645,6 +821,10 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = TodayFeature;
 		};
+		39C9A66A915380930D00B1BB /* WidgetFeature */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = WidgetFeature;
+		};
 		6B02FCA8EE3E67636F42D06C /* PulseRecoveryEngine */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = PulseRecoveryEngine;
@@ -652,6 +832,10 @@
 		778E32CCFEBB1FE604B7373D /* PulseDesignSystem */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = PulseDesignSystem;
+		};
+		7CBDB83896B464F56F24DBCD /* WidgetFeature */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = WidgetFeature;
 		};
 		8C27DDA66D90C7A34759B03B /* PulseDomain */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -672,6 +856,10 @@
 		CADDF951A0B30D2BE04A2F29 /* PulseContent */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = PulseContent;
+		};
+		D496246F4F0D75412E1528B3 /* PulseDomain */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PulseDomain;
 		};
 		F4BAF19749CA79DDDA8F7559 /* PulseHealth */ = {
 			isa = XCSwiftPackageProductDependency;

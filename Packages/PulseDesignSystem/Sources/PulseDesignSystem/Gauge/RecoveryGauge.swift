@@ -4,6 +4,7 @@ import SwiftUI
 /// La jauge de récupération : un arc filaire rouge → ambre → vert, un repère au score, le score au centre. Pas d'aiguille.
 /// La couleur du texte et de l'arc de fond suit le `foregroundStyle` de l'environnement (encre sur carte opale, blanc sur widget).
 /// `cardColor` détoure le repère : le fond sur lequel la jauge est posée.
+/// `animatesReveal` à `false` pose le repère d'emblée sur le score : WidgetKit rend une image fixe, sans `onAppear` ni animation.
 public struct RecoveryGauge: View {
     public enum Style: Sendable {
         case large
@@ -45,15 +46,24 @@ public struct RecoveryGauge: View {
     private let category: RecoveryCategory?
     private let style: Style
     private let cardColor: Color
+    private let animatesReveal: Bool
 
-    @State private var shownScore: Double = 0
+    @State private var shownScore: Double
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    public init(score: Double?, category: RecoveryCategory?, style: Style, cardColor: Color = PulsePalette.opal) {
+    public init(
+        score: Double?,
+        category: RecoveryCategory?,
+        style: Style,
+        cardColor: Color = PulsePalette.opal,
+        animatesReveal: Bool = true
+    ) {
         self.score = score
         self.category = category
         self.style = style
         self.cardColor = cardColor
+        self.animatesReveal = animatesReveal
+        _shownScore = State(initialValue: Self.initialScore(score: score, animatesReveal: animatesReveal))
     }
 
     public var body: some View {
@@ -154,12 +164,18 @@ public struct RecoveryGauge: View {
     // MARK: Animation
 
     private func reveal() {
-        let target = score ?? 0
-        if reduceMotion {
+        let target = Self.initialScore(score: score, animatesReveal: false)
+        if reduceMotion || !animatesReveal {
             shownScore = target
         } else {
             withAnimation(.easeOut(duration: 0.9)) { shownScore = target }
         }
+    }
+
+    /// Le score où le repère se trouve au premier rendu, borné à 0…100 : 0 si la jauge s'anime ensuite, sinon le score lui-même.
+    nonisolated static func initialScore(score: Double?, animatesReveal: Bool) -> Double {
+        guard !animatesReveal, let score, score.isFinite else { return 0 }
+        return min(max(score, 0), 100)
     }
 
     // MARK: Accessibilité

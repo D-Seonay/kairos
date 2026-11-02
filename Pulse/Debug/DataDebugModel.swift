@@ -74,8 +74,9 @@ final class DataDebugModel {
                 if let refreshed = try? await dependencies.inspector.counts() { counts = refreshed }
                 throw error
             }
-            counts = try await dependencies.inspector.counts()
+            // L'effacement a réussi : un recomptage en échec ne doit pas le faire passer pour un échec.
             didErase = true
+            counts = try await dependencies.inspector.counts()
         }
     }
 

@@ -85,7 +85,11 @@ struct TodayModelConcurrencyTests {
         #expect(estimated.isEstimated)
     }
 
-    @Test func refreshStartedBeforeACheckInDoesNotReplaceTheEstimate() async {
+    /// Un check-in envoyé pendant une actualisation attend qu'elle finisse, et l'accueil finit sur le score estimé.
+    /// Le rafraîchisseur sérialise ses opérations : l'actualisation rend son « check-in à faire » avant que le check-in
+    /// ne commence. Ce test ne couvre donc pas la garde du modèle (`scoreEpoch`) : elle ne peut plus écarter une lecture
+    /// périmée, et reste en défense (elle peut écarter sans dommage un résultat plus récent que le score écrit).
+    @Test func checkInSubmittedDuringARefreshEndsOnTheEstimate() async {
         let recovery = Self.recoveries()
         let fixture = TodayFixture(scenario: .threeNights, recovery: recovery)
         let model = fixture.makeModel()
@@ -95,16 +99,18 @@ struct TodayModelConcurrencyTests {
             return
         }
 
-        // La lecture du score du jour est suspendue après avoir vu « pas de score » : sa réponse devient périmée.
+        // L'actualisation est suspendue dans le rafraîchisseur, sur la lecture du score du jour. Le check-in lancé pendant
+        // ce temps passe derrière elle dans la file, puis enregistre l'estimation.
         let gate = Gate()
         await recovery.holdNextRead(at: gate)
         let staleRefresh = Task { await model.refresh() }
         await gate.waitForArrival()
 
         model.checkIn.selection = [.sleep: 3, .pain: 3, .motivation: 3]
-        await model.submitCheckIn()
+        let checkIn = Task { await model.submitCheckIn() }
         await gate.open()
         await staleRefresh.value
+        await checkIn.value
 
         guard case .scored(let estimated) = model.score else {
             Issue.record("Le score estimé devait rester affiché, obtenu \(String(describing: model.score))")

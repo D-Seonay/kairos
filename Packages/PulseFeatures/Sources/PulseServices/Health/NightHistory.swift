@@ -13,7 +13,7 @@ public struct NightHistorySnapshot: Sendable, Equatable {
     }
 }
 
-/// Lit 60 jours d'échantillons bruts, met à jour le cache local et agrège les nuits ; se replie sur le cache si la lecture échoue.
+/// Met à jour le cache local par lectures ancrées d'Apple Santé, un signal à la fois, puis agrège les 60 dernières nuits depuis ce cache.
 public struct NightHistory: Sendable {
     public static let historyDays = 60
 
@@ -33,47 +33,44 @@ public struct NightHistory: Sendable {
         var sleep: [SleepInterval]
     }
 
-    /// Une lecture qui aboutit remplace le cache, même vide. Quand l'accès à Santé est révoqué, HealthKit ne signale aucune
-    /// erreur : il répond sans échantillon, le cache est vidé et `readAt` est renseigné. C'est voulu : l'utilisateur retombe
-    /// sur le check-in, et le score déjà enregistré pour aujourd'hui est conservé par `DailyScoreService`.
+    /// Chaque signal repart de l'ancre gardée dans le cache : sans ancre (premier lancement, cache de M3a) la lecture est complète et
+    /// remplace le cache du signal, sinon elle n'apporte que les changements. Un signal qui échoue garde son ancre et son cache,
+    /// les autres avancent, et `readAt` reste `nil`. Quand l'accès à Santé est révoqué, HealthKit ne signale aucune erreur : il ne
+    /// renvoie rien de nouveau, et les nuits continuent d'être construites depuis le cache.
     public func refresh(now: Date, progress: @Sendable (Double) -> Void = { _ in }) async -> NightHistorySnapshot {
         let today = calendar.startOfDay(for: now)
         let start = calendar.date(byAdding: .day, value: -Self.historyDays, to: today) ?? today
         let end = calendar.date(byAdding: .day, value: 1, to: today) ?? today
         let days = (0..<Self.historyDays).compactMap { calendar.date(byAdding: .day, value: $0 - (Self.historyDays - 1), to: today) }
 
-        let raw: RawSamples
-        let readAt: Date?
-        do {
-            raw = try await read(from: start, to: end, progress: progress)
-            await store(raw, fetchedAt: now)
-            readAt = now
-        } catch {
-            raw = await cached(from: start, to: end)
-            readAt = nil
+        var allSucceeded = true
+        for (index, signal) in NightSignal.allCases.enumerated() {
+            let succeeded = await sync(signal, from: start, fetchedAt: now)
+            allSucceeded = allSucceeded && succeeded
+            progress(Double(index + 1) * 0.25)
         }
         progress(1)
+        let raw = await cached(from: start, to: end)
         let nights = NightAggregator(calendar: calendar)
             .nights(days: days, sdnn: raw.sdnn, restingHeartRate: raw.restingHeartRate, sleep: raw.sleep)
-        return NightHistorySnapshot(nights: nights, readAt: readAt)
+        return NightHistorySnapshot(nights: nights, readAt: allSucceeded ? now : nil)
     }
 
-    private func read(from: Date, to: Date, progress: @Sendable (Double) -> Void) async throws -> RawSamples {
-        let sdnn = try await source.sdnnSamples(from: from, to: to)
-        progress(0.25)
-        let restingHeartRate = try await source.restingHeartRateSamples(from: from, to: to)
-        progress(0.5)
-        let sleep = try await source.sleepIntervals(from: from, to: to)
-        progress(0.75)
-        return RawSamples(sdnn: sdnn, restingHeartRate: restingHeartRate, sleep: sleep)
-    }
-
-    /// Le cache est un confort : une écriture qui échoue n'invalide pas la lecture qui vient de réussir.
-    private func store(_ raw: RawSamples, fetchedAt: Date) async {
-        try? await cache.replace(kind: .sdnn, with: CachedSampleMapping.cached(raw.sdnn, kind: .sdnn, fetchedAt: fetchedAt))
-        try? await cache.replace(kind: .restingHeartRate,
-                                 with: CachedSampleMapping.cached(raw.restingHeartRate, kind: .restingHeartRate, fetchedAt: fetchedAt))
-        try? await cache.replace(kind: .sleep, with: CachedSampleMapping.cached(raw.sleep, fetchedAt: fetchedAt))
+    /// Lit les changements d'un signal depuis l'ancre du cache et les y applique en une écriture ; vrai si les deux ont réussi.
+    private func sync(_ signal: NightSignal, from start: Date, fetchedAt: Date) async -> Bool {
+        let anchor = try? await cache.anchor(for: signal.kind)
+        do {
+            var changes = try await source.changes(of: signal, since: anchor, from: start)
+            changes.added = changes.added.map { sample in
+                var stamped = sample
+                stamped.fetchedAt = fetchedAt
+                return stamped
+            }
+            try await cache.apply(changes)
+            return true
+        } catch {
+            return false
+        }
     }
 
     private func cached(from: Date, to: Date) async -> RawSamples {

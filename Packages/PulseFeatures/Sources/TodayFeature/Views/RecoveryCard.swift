@@ -3,12 +3,13 @@ import PulseDomain
 import PulseServices
 import SwiftUI
 
-/// La carte opale de récupération : catégorie, jauge, marqueur et les trois facteurs de la nuit.
+/// La carte opale de récupération : catégorie, jauge, marqueur et les trois facteurs de la nuit ; la toucher ouvre l'écran « Pourquoi ».
 /// Avant 4 h, elle montre le score de la veille. `.needsCheckIn` n'est pas une carte : l'accueil affiche alors le check-in.
 struct RecoveryCard: View {
     let score: TodayScore?
     let factors: [FactorDisplay]
     let marker: String?
+    var onWhy: () -> Void = {}
 
     var body: some View {
         switch score {
@@ -23,6 +24,8 @@ struct RecoveryCard: View {
 
     // MARK: - Score du jour
 
+    /// Toucher la carte ouvre « Pourquoi ». La jauge reste un texte à part (les tests d'interface la lisent) : VoiceOver y trouve
+    /// l'action « Pourquoi ce score ? ».
     private func scoredCard(_ recovery: DailyRecovery) -> some View {
         OpalCard {
             VStack(spacing: 16) {
@@ -31,9 +34,12 @@ struct RecoveryCard: View {
                     .frame(maxWidth: .infinity)
                     .accessibilityAddTraits(.isStaticText)
                     .accessibilityIdentifier(TodayIdentifiers.score)
+                    .accessibilityAction(named: Text(String(localized: "Pourquoi ce score ?", bundle: .module)), onWhy)
                 FactorColumns(factors: factors)
             }
         }
+        .contentShape(RoundedRectangle(cornerRadius: PulseMetrics.radius, style: .continuous))
+        .onTapGesture(perform: onWhy)
     }
 
     // MARK: - Veille

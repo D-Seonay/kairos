@@ -3,6 +3,8 @@ import PulseDomain
 import SwiftData
 
 /// Première version du schéma, figée. Tout changement ultérieur passe par une nouvelle version et une étape de migration.
+/// Avant de modifier un modèle partagé, figer sa copie dans la version précédente et ajouter une version :
+/// le test d'empreinte échoue sinon.
 public enum PulseSchemaV1: VersionedSchema {
     public static let versionIdentifier = Schema.Version(1, 0, 0)
 

@@ -12,13 +12,17 @@ public actor InMemoryHealthSampleCache: HealthSampleCache {
         stored.filter { $0.kind == kind && $0.start >= from && $0.start < to }.sorted { $0.start < $1.start }
     }
 
-    public func replace(kind: HealthSampleKind, with samples: [CachedHealthSample]) async throws {
-        stored.removeAll { $0.kind == kind }
+    public func insert(_ samples: [CachedHealthSample]) async throws {
         stored += samples
     }
 
-    public func insert(_ samples: [CachedHealthSample]) async throws {
-        stored += samples
+    public func apply(_ changes: HealthSampleChanges) async throws {
+        let removed = Set(changes.deletedHealthKitUUIDs + changes.added.compactMap(\.healthKitUUID))
+        stored.removeAll { sample in
+            sample.kind == changes.kind && (changes.isFullRead || sample.healthKitUUID.map(removed.contains) == true)
+        }
+        stored += changes.added
+        anchors[changes.kind] = changes.anchor
     }
 
     public func anchor(for kind: HealthSampleKind) async throws -> Data? {

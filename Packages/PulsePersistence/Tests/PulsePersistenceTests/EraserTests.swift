@@ -25,7 +25,7 @@ private struct EraseFixture {
 
     func eraser() -> SwiftDataEraser {
         SwiftDataEraser(container: box.container, defaultsSuite: suite, defaultsDomain: suite, healthEraser: health,
-                        notifications: nil, exportsDirectory: exports)
+                        notifications: nil, widgets: nil, exportsDirectory: exports)
     }
 
     func counts() async throws -> [StoreTable: Int] {
@@ -72,9 +72,33 @@ private struct EraseFixture {
     let fixture = try EraseFixture()
     let canceller = Canceller()
     let eraser = SwiftDataEraser(container: fixture.box.container, defaultsSuite: fixture.suite, defaultsDomain: fixture.suite,
-                                 healthEraser: fixture.health, notifications: canceller, exportsDirectory: fixture.exports)
+                                 healthEraser: fixture.health, notifications: canceller, widgets: nil,
+                                 exportsDirectory: fixture.exports)
     try await eraser.eraseEverything(options: EraseOptions(includeAppleHealth: false))
     #expect(canceller.calls == 1)
+}
+
+@Test func eraseClearsTheWidgetSnapshot() async throws {
+    let fixture = try EraseFixture()
+    let widgets = StubWidgetPublisher()
+    let eraser = SwiftDataEraser(container: fixture.box.container, defaultsSuite: fixture.suite, defaultsDomain: fixture.suite,
+                                 healthEraser: fixture.health, notifications: nil, widgets: widgets,
+                                 exportsDirectory: fixture.exports)
+    try await eraser.eraseEverything(options: EraseOptions(includeAppleHealth: false))
+    #expect(await widgets.clearCount == 1)
+}
+
+@Test func healthEraseFailureStillClearsTheWidgetSnapshot() async throws {
+    struct Boom: Error {}
+    let fixture = try EraseFixture(health: StubHealthEraser(error: Boom()))
+    let widgets = StubWidgetPublisher()
+    let eraser = SwiftDataEraser(container: fixture.box.container, defaultsSuite: fixture.suite, defaultsDomain: fixture.suite,
+                                 healthEraser: fixture.health, notifications: nil, widgets: widgets,
+                                 exportsDirectory: fixture.exports)
+    await #expect(throws: Boom.self) {
+        try await eraser.eraseEverything(options: EraseOptions(includeAppleHealth: true))
+    }
+    #expect(await widgets.clearCount == 1)
 }
 // swiftlint:enable force_unwrapping
 
