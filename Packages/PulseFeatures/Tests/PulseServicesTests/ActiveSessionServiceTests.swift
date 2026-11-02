@@ -158,12 +158,26 @@ struct ActiveSessionServiceTests {
         await #expect(throws: ActiveSessionError.noSession) { try await service.newExercises([Fix.bench]) }
     }
 
-    @Test func anUnreadableSnapshotIsNoSessionButBlocksANewOne() async throws {
-        try await fixture.store.save(ActiveSessionSnapshot(startedAt: .t0, updatedAt: .t0, payload: Data("{}".utf8)))
+    @Test(arguments: ["pas du JSON", "{\"formatVersion\":2,\"exercises\":\"autre chose\"}"])
+    func anUnreadableSnapshotDoesNotBlockANewSession(payload: String) async throws {
+        try await fixture.store.save(ActiveSessionSnapshot(startedAt: .t0, updatedAt: .t0, payload: Data(payload.utf8)))
         let service = fixture.makeService()
         #expect(await service.current() == nil)
         await #expect(throws: ActiveSessionError.noSession) { try await service.apply(.skipRest) }
+        // Elle ne pourra jamais être reprise : le départ l'efface avec sa Live Activity et sa notification.
+        let session = try await service.start(ActiveSessionFixture.pushLaunch)
+        #expect(try await fixture.stored() == session)
+        #expect(try await fixture.store.load()?.id == session.id)
+        #expect(await fixture.activity.endAllCalls == [nil])
+        #expect(await fixture.notifier.cancelCount == 1)
+        #expect(await service.current() == session)
+    }
+
+    @Test func aReadableSessionStillBlocksANewOne() async throws {
+        let (service, session) = try await fixture.startPush()
         await #expect(throws: ActiveSessionError.alreadyInProgress) { try await service.start(ActiveSessionFixture.pushLaunch) }
+        #expect(try await fixture.stored() == session)
+        #expect(await fixture.activity.endAllCalls.isEmpty)
     }
 
     @Test func aFailedSaveThrowsAndLeavesTheStoredSessionAlone() async throws {

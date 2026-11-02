@@ -63,20 +63,21 @@ public final class ActiveSessionService: Sendable {
         return resumed ?? nil
     }
 
-    /// Planifie la séance, l'enregistre, puis démarre la Live Activity.
+    /// Planifie la séance, l'enregistre, puis démarre la Live Activity. Une séance lisible déjà en cours bloque le départ ; un
+    /// snapshot illisible, qui ne pourra jamais être repris, est effacé avec sa Live Activity et sa notification.
     public func start(_ launch: SessionLaunch) async throws -> LiveSession {
         try await queue.run {
-            guard try await self.store.load() == nil else { throw ActiveSessionError.alreadyInProgress }
+            try await self.discardUnreadableSnapshot()
             let directory = try await self.directory()
             let profile = try await self.profiles.load()
             var history: [ExerciseReference: [WorkoutSet]] = [:]
-            var settings: [ExerciseReference: ExerciseSettings] = [:]
+            var settingsByExercise: [ExerciseReference: ExerciseSettings] = [:]
             for reference in launch.day?.exercises.map(\.exercise) ?? [] where history[reference] == nil {
                 history[reference] = try await self.workouts.lastSets(for: reference)
-                settings[reference] = try await self.settings.settings(for: reference)
+                settingsByExercise[reference] = try await self.settings.settings(for: reference)
             }
-            let session = LiveSessionPlanner.session(for: launch, directory: directory, history: history, settings: settings,
-                                                     profile: profile, now: self.now())
+            let session = LiveSessionPlanner.session(for: launch, directory: directory, history: history,
+                                                     settings: settingsByExercise, profile: profile, now: self.now())
             try await self.save(session, at: session.startedAt)
             await self.activity.start(Self.activityState(for: session))
             return session
@@ -121,6 +122,16 @@ public final class ActiveSessionService: Sendable {
     func loadSession() async throws -> LiveSession? {
         guard let snapshot = try await store.load() else { return nil }
         return LiveSession.decode(snapshot.payload)
+    }
+
+    /// Lève `alreadyInProgress` si une séance lisible est enregistrée ; efface un snapshot illisible (format inconnu, écriture
+    /// corrompue), termine toute Live Activity de séance et annule la notification de repos.
+    private func discardUnreadableSnapshot() async throws {
+        guard let snapshot = try await store.load() else { return }
+        guard LiveSession.decode(snapshot.payload) == nil else { throw ActiveSessionError.alreadyInProgress }
+        try await store.clear()
+        await activity.endAll(except: nil)
+        await restNotifier.cancelRestEnd()
     }
 
     func save(_ session: LiveSession, at date: Date) async throws {
