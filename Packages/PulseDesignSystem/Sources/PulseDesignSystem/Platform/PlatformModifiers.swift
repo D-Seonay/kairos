@@ -1,6 +1,7 @@
 import SwiftUI
 
 #if os(iOS)
+import AudioToolbox
 import UIKit
 #endif
 
@@ -10,6 +11,35 @@ public enum PulseHaptics {
     public static func selection() {
         #if os(iOS)
         UISelectionFeedbackGenerator().selectionChanged()
+        #endif
+    }
+
+    /// Légère, à la modification d'une valeur en séance.
+    @MainActor
+    public static func light() {
+        #if os(iOS)
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        #endif
+    }
+
+    /// Double, à la validation d'une série.
+    @MainActor
+    public static func validation() {
+        #if os(iOS)
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(90))
+            generator.impactOccurred()
+        }
+        #endif
+    }
+
+    /// Longue, à la fin du repos.
+    @MainActor
+    public static func restEnded() {
+        #if os(iOS)
+        AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
         #endif
     }
 }

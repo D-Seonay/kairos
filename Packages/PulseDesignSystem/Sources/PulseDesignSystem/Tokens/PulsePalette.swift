@@ -27,11 +27,14 @@ public enum PulsePalette {
     public static let surfaceRGBA = PulseRGBA(hex: 0x13151C)
     public static let surface2RGBA = PulseRGBA(hex: 0x1B1E27)
     public static let lineRGBA = PulseRGBA(hex: 0xFFFFFF, opacity: 0.08)
+    /// Le noir pur de l'écran de séance (spec M4 §14.2).
+    public static let liveBackgroundRGBA = PulseRGBA(hex: 0x000000)
     public static let page = Color(pageRGBA)
     public static let background = Color(backgroundRGBA)
     public static let surface = Color(surfaceRGBA)
     public static let surface2 = Color(surface2RGBA)
     public static let line = Color(lineRGBA)
+    public static let liveBackground = Color(liveBackgroundRGBA)
 
     // Texte
     public static let textRGBA = PulseRGBA(hex: 0xF4F5F7)

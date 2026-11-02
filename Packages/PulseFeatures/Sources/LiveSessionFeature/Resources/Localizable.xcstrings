@@ -1,0 +1,46 @@
+{
+  "sourceLanguage" : "fr",
+  "strings" : {
+    "Notifications désactivées : la fin du repos ne sonnera pas écran verrouillé. Tu peux les activer dans Réglages." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notifications désactivées : la fin du repos ne sonnera pas écran verrouillé. Tu peux les activer dans Réglages."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu abandonner la séance." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu abandonner la séance."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu démarrer la séance." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu démarrer la séance."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu enregistrer ta séance." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu enregistrer ta séance."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

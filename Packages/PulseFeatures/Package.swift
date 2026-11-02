@@ -13,6 +13,7 @@ let package = Package(
     products: [
         .library(name: "PulseServices", targets: ["PulseServices"]),
         .library(name: "CheckInFeature", targets: ["CheckInFeature"]),
+        .library(name: "LiveSessionFeature", targets: ["LiveSessionFeature"]),
         .library(name: "OnboardingFeature", targets: ["OnboardingFeature"]),
         .library(name: "TodayFeature", targets: ["TodayFeature"]),
         .library(name: "TrainFeature", targets: ["TrainFeature"]),
@@ -34,6 +35,12 @@ let package = Package(
         .target(
             name: "CheckInFeature",
             dependencies: [domain, recoveryEngine, designSystem],
+            resources: [.process("Resources")],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .target(
+            name: "LiveSessionFeature",
+            dependencies: ["PulseServices", "TrainFeature", domain, recoveryEngine, content, designSystem],
             resources: [.process("Resources")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
@@ -69,6 +76,11 @@ let package = Package(
         .testTarget(
             name: "CheckInFeatureTests",
             dependencies: ["CheckInFeature", domain],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .testTarget(
+            name: "LiveSessionFeatureTests",
+            dependencies: ["LiveSessionFeature", "TrainFeature", "PulseServices", domain, content, designSystem],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(
