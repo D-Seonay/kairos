@@ -86,23 +86,31 @@ struct CountingRecoveryRepository: RecoveryRepository {
     }
 }
 
-/// Un dépôt de programmes dont la suppression échoue à la demande.
+/// Un dépôt de programmes dont la suppression et la lecture échouent à la demande.
 actor FlakyProgramRepository: ProgramRepository {
     struct DeleteFailure: Error {}
+    struct ReadFailure: Error {}
 
     private let inner = InMemoryProgramRepository()
     private var failsOnDelete = false
+    private var failsOnRead = false
 
     func setFailsOnDelete(_ value: Bool) {
         failsOnDelete = value
     }
 
+    func setFailsOnRead(_ value: Bool) {
+        failsOnRead = value
+    }
+
     func programs(includeArchived: Bool) async throws -> [Program] {
-        try await inner.programs(includeArchived: includeArchived)
+        if failsOnRead { throw ReadFailure() }
+        return try await inner.programs(includeArchived: includeArchived)
     }
 
     func program(id: UUID) async throws -> Program? {
-        try await inner.program(id: id)
+        if failsOnRead { throw ReadFailure() }
+        return try await inner.program(id: id)
     }
 
     func save(_ program: Program) async throws {

@@ -36,14 +36,22 @@ public final class RecordsService: Sendable {
         let result = RecordBook.compute(sessions: sessions, loadKind: directory.loadKind(of:), now: now)
         try await records.replaceAll(with: result.records)
         for session in sessions where session.status == .completed || session.status == .abandoned {
-            var marked = session
-            for index in marked.sets.indices {
-                marked.sets[index].isPersonalRecord = result.recordSetIDs.contains(marked.sets[index].id)
-            }
-            guard marked.sets != session.sets else { continue }
+            guard Self.marked(session, with: result.recordSetIDs) != session else { continue }
+            // Les marques sont posées sur une copie relue à l'instant : une modification faite pendant le calcul n'est pas écrasée.
+            guard let fresh = try await workouts.session(id: session.id) else { continue }
+            var marked = Self.marked(fresh, with: result.recordSetIDs)
+            guard marked != fresh else { continue }
             marked.updatedAt = now
             try await workouts.save(marked)
         }
         return result.records.count
+    }
+
+    private static func marked(_ session: WorkoutSession, with recordSetIDs: Set<UUID>) -> WorkoutSession {
+        var marked = session
+        for index in marked.sets.indices {
+            marked.sets[index].isPersonalRecord = recordSetIDs.contains(marked.sets[index].id)
+        }
+        return marked
     }
 }

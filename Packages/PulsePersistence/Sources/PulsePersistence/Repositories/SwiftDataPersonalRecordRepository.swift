@@ -40,7 +40,7 @@ public actor SwiftDataPersonalRecordRepository: PersonalRecordRepository {
             stamped.updatedAt = now
             if let existing = unmatched[Key(record), default: []].first {
                 unmatched[Key(record)]?.removeFirst()
-                existing.apply(stamped)
+                if !existing.holds(record) { existing.apply(stamped) }
             } else {
                 modelContext.insert(StoredPersonalRecord(stamped))
             }

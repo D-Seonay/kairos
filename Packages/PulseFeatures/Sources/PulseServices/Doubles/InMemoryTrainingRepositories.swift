@@ -84,10 +84,18 @@ public actor InMemoryPersonalRecordRepository: PersonalRecordRepository {
                 let existing = unmatched.remove(at: index)
                 replacement.id = existing.id
                 replacement.createdAt = existing.createdAt
+                if Self.holdsSameValues(existing, replacement) { replacement = existing }
             }
             result.append(replacement)
         }
         stored = result
+    }
+
+    /// Vrai si le recalcul n'apporte rien de nouveau : seule la date de mise à jour diffère.
+    private static func holdsSameValues(_ existing: PersonalRecord, _ replacement: PersonalRecord) -> Bool {
+        var comparable = replacement
+        comparable.updatedAt = existing.updatedAt
+        return comparable == existing
     }
 
     /// Identité d'un record d'un recalcul à l'autre : la série, le type et la charge.

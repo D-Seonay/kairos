@@ -129,13 +129,13 @@ public actor InMemoryWorkoutRepository: WorkoutRepository {
         stored[id] = nil
     }
 
-    /// Séries de travail de la dernière séance terminée contenant l'exercice, dans l'ordre.
+    /// Séries hors échauffement de la dernière séance terminée ou abandonnée contenant l'exercice, dans l'ordre.
     public func lastSets(for exercise: ExerciseReference) async throws -> [WorkoutSet] {
-        let completed = stored.values.filter { $0.status == .completed }.sorted { $0.startedAt > $1.startedAt }
-        for session in completed {
-            let sets = session.sets.filter { $0.exercise == exercise }
+        let finished = stored.values.filter { $0.status != .inProgress }.sorted { $0.startedAt > $1.startedAt }
+        for session in finished {
+            let sets = session.sets.filter { $0.exercise == exercise && $0.setType != .warmup }
             if !sets.isEmpty {
-                return sets.filter { $0.setType == .working }.sorted { $0.order < $1.order }
+                return sets.sorted { $0.order < $1.order }
             }
         }
         return []

@@ -39,18 +39,25 @@ public actor SwiftDataWorkoutRepository: WorkoutRepository {
         try modelContext.save()
     }
 
-    /// Séries de travail de la dernière séance terminée contenant l'exercice, dans l'ordre.
+    /// Séries hors échauffement de la dernière séance terminée ou abandonnée contenant l'exercice, dans l'ordre.
+    /// Lit les séries de l'exercice (et non chaque séance) : seules les séries à retenir deviennent des valeurs du domaine.
     public func lastSets(for exercise: ExerciseReference) throws -> [WorkoutSet] {
-        let completed = SessionStatus.completed.rawValue
-        let descriptor = FetchDescriptor<StoredWorkoutSession>(
-            predicate: #Predicate { $0.deletedAt == nil && $0.status == completed },
-            sortBy: [SortDescriptor(\.startedAt, order: .reverse)])
-        for stored in try modelContext.fetch(descriptor) {
-            let sets = stored.toDomain().sets.filter { $0.exercise == exercise }
-            if !sets.isEmpty {
-                return sets.filter { $0.setType == .working }
-            }
+        let contentID = exercise.contentID
+        let userID = exercise.userID
+        let inProgress = SessionStatus.inProgress.rawValue
+        let descriptor = FetchDescriptor<StoredWorkoutSet>(predicate: #Predicate {
+            $0.deletedAt == nil && $0.contentExerciseID == contentID && $0.userExerciseID == userID
+                && $0.session != nil && $0.session?.deletedAt == nil && $0.session?.status != inProgress
+        })
+        let candidates = try modelContext.fetch(descriptor).compactMap { stored in
+            stored.session.map { (session: $0, set: stored) }
         }
-        return []
+        guard let latest = candidates.map(\.session).max(by: Self.isEarlier) else { return [] }
+        return candidates.filter { $0.session === latest }.map { $0.set.toDomain() }
+            .filter { $0.setType != .warmup }.sorted { $0.order < $1.order }
+    }
+
+    private static func isEarlier(_ lhs: StoredWorkoutSession, _ rhs: StoredWorkoutSession) -> Bool {
+        (lhs.startedAt, lhs.createdAt) < (rhs.startedAt, rhs.createdAt)
     }
 }

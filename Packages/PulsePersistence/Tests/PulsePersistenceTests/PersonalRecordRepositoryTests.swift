@@ -45,3 +45,25 @@ import Testing
     try await repo.replaceAll(with: [])
     #expect(try await repo.records(for: nil).isEmpty)
 }
+
+@Test func replaceAllLeavesIdenticalRecordsUntouched() async throws {
+    let repo = SwiftDataPersonalRecordRepository(modelContainer: try TestContainer.make())
+    let (setA, setB) = (UUID(), UUID())
+    func record(set: UUID, value: Double) -> PersonalRecord {
+        PersonalRecord(exercise: .content(id: "bench-press-barbell"), exerciseName: "Développé couché", kind: .maxWeight, value: value,
+                       date: Fixed.t0, sessionID: UUID(), setID: set, createdAt: Fixed.t1, updatedAt: Fixed.t1)
+    }
+    let (keep, change) = (record(set: setA, value: 70), record(set: setB, value: 60))
+    try await repo.replaceAll(with: [keep, change])
+    let first = try await repo.records(for: nil)
+    var changed = change
+    changed.value = 62.5
+    try await repo.replaceAll(with: [keep, changed])
+    let second = try await repo.records(for: nil)
+    func stored(_ records: [PersonalRecord], _ set: UUID) throws -> PersonalRecord {
+        try #require(records.first { $0.setID == set })
+    }
+    #expect(try stored(second, setA).updatedAt == stored(first, setA).updatedAt)
+    #expect(try stored(second, setB).updatedAt > stored(first, setB).updatedAt)
+    #expect(try stored(second, setB).value == 62.5)
+}

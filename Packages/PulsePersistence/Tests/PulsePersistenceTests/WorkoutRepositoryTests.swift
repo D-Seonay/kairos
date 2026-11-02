@@ -49,3 +49,51 @@ private let day: TimeInterval = 86_400
     #expect(sets.count == 3 && sets.allSatisfy { $0.setType == .working } && sets.map(\.order) == [2, 3, 4])
     #expect(try await repo.lastSets(for: .content(id: "unknown")).isEmpty)
 }
+
+private func benchSet(order: Int, reps: Int, type: SetType = .working) -> WorkoutSet {
+    var set = Sample.set(order: order, type: type)
+    set.actualReps = reps
+    return set
+}
+
+private func benchSession(day offset: Int, status: SessionStatus, sets: [WorkoutSet]) -> WorkoutSession {
+    var session = Sample.session(startedAt: Fixed.t0.addingTimeInterval(TimeInterval(offset) * day), status: status, sets: 0)
+    session.sets = sets
+    return session
+}
+
+@Test func lastSetsComeFromTheLatestCompletedOrAbandonedSessionWithoutWarmups() async throws {
+    let repo = SwiftDataWorkoutRepository(modelContainer: try TestContainer.make())
+    let completed = benchSession(day: 1, status: .completed, sets: [benchSet(order: 1, reps: 10, type: .warmup),
+                                                                    benchSet(order: 2, reps: 12), benchSet(order: 3, reps: 5)])
+    let abandoned = benchSession(day: 9, status: .abandoned, sets: [benchSet(order: 1, reps: 10)])
+    let live = benchSession(day: 14, status: .inProgress, sets: [benchSet(order: 1, reps: 8)])
+    let deleted = benchSession(day: 15, status: .completed, sets: [benchSet(order: 1, reps: 6)])
+    for session in [completed, abandoned, live, deleted] { try await repo.save(session) }
+    try await repo.delete(id: deleted.id)
+
+    let bench = ExerciseReference.content(id: "bench-press-barbell")
+    #expect(try await repo.lastSets(for: bench).map(\.actualReps) == [10])
+    try await repo.delete(id: abandoned.id)
+    #expect(try await repo.lastSets(for: bench).map(\.actualReps) == [12, 5])
+}
+
+@Test func failureAndDropSetsCountAsLastTime() async throws {
+    let repo = SwiftDataWorkoutRepository(modelContainer: try TestContainer.make())
+    let session = benchSession(day: 1, status: .completed, sets: [
+        benchSet(order: 4, reps: 4, type: .failure), benchSet(order: 1, reps: 10, type: .warmup), benchSet(order: 2, reps: 8),
+        benchSet(order: 3, reps: 6, type: .drop)])
+    try await repo.save(session)
+    let sets = try await repo.lastSets(for: .content(id: "bench-press-barbell"))
+    #expect(sets.map(\.setType) == [.working, .drop, .failure] && sets.map(\.order) == [2, 3, 4])
+}
+
+@Test func lastSetsFindsAUserExerciseAndIgnoresOtherExercises() async throws {
+    let repo = SwiftDataWorkoutRepository(modelContainer: try TestContainer.make())
+    let custom = ExerciseReference.user(id: UUID())
+    var session = benchSession(day: 1, status: .completed, sets: [benchSet(order: 1, reps: 9)])
+    session.sets.append(Sample.set(order: 2, exercise: custom))
+    try await repo.save(session)
+    #expect(try await repo.lastSets(for: custom).map(\.order) == [2])
+    #expect(try await repo.lastSets(for: .user(id: UUID())).isEmpty)
+}
