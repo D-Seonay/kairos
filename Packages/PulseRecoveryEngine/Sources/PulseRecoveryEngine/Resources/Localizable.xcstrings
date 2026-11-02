@@ -1,0 +1,24 @@
+{
+  "sourceLanguage" : "fr",
+  "strings" : {
+    "Effort plafonné à RPE 7,5" : {
+
+    },
+    "Fractionné remplacé par une sortie facile" : {
+
+    },
+    "Repos conseillé plutôt que la course" : {
+
+    },
+    "Repos rallongés de %lld secondes" : {
+
+    },
+    "Séance remplacée par %lld min de mobilité ou du repos, au choix" : {
+
+    },
+    "Volume réduit de %lld à %lld séries" : {
+
+    }
+  },
+  "version" : "1.0"
+}
