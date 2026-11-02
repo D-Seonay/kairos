@@ -2129,6 +2129,26 @@
         }
       }
     },
+    "Retirer %@ de la routine ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer %@ de la routine ?"
+          }
+        }
+      }
+    },
+    "Retirer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer"
+          }
+        }
+      }
+    },
     "RPE %@" : {
       "localizations" : {
         "fr" : {

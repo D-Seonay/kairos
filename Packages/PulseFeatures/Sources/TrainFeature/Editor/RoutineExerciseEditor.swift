@@ -10,6 +10,7 @@ struct RoutineExerciseEditor: View {
     let index: Int
     let isExpanded: Bool
     let onToggle: () -> Void
+    @State private var confirmsRemoval = false
 
     var body: some View {
         if model.day.exercises.indices.contains(index) {
@@ -21,6 +22,14 @@ struct RoutineExerciseEditor: View {
                 }
             }
             .padding(.vertical, 4)
+            .confirmationDialog(String(localized: "Retirer \(model.name(of: exercise.exercise)) de la routine ?", bundle: .module),
+                                isPresented: $confirmsRemoval, titleVisibility: .visible) {
+                Button(String(localized: "Retirer", bundle: .module), role: .destructive) {
+                    onToggle()
+                    model.remove(at: index)
+                }
+                Button(String(localized: "Annuler", bundle: .module), role: .cancel) {}
+            }
         }
     }
 
@@ -55,6 +64,7 @@ struct RoutineExerciseEditor: View {
             .frame(minHeight: 44)
             .contentShape(Rectangle())
         }
+        // Un style explicite : seul l'en-tête répond à l'appui, pas les commandes de la ligne.
         .buttonStyle(.plain)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(String(localized: "\(name), \(summary)", bundle: .module))
@@ -115,12 +125,13 @@ struct RoutineExerciseEditor: View {
                 .font(.footnote)
                 .foregroundStyle(PulsePalette.bad)
         }
+        // Sans style sans bordure, un bouton dans une ligne de liste prend toute la ligne : un appui sur un pas à pas le déclencherait.
         Button(role: .destructive) {
-            onToggle()
-            model.remove(at: index)
+            confirmsRemoval = true
         } label: {
             Label(String(localized: "Retirer de la routine", bundle: .module), systemImage: "trash")
         }
+        .buttonStyle(.borderless)
         .frame(minHeight: 44)
     }
 
