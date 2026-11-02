@@ -99,6 +99,18 @@ struct RoutineFromSessionTests {
         #expect(exercise.sets == 2 && exercise.repsMin == 8 && exercise.repsMax == 12 && exercise.setTargets == nil)
     }
 
+    @Test func aSessionOfZeroRepSetsGetsAValidRange() {
+        let reps = day([set(bench, reps: 0), set(bench, reps: 0)]).exercises[0]
+        #expect(reps.sets == 2 && reps.repsMin == 8 && reps.repsMax == 12 && reps.setTargets == nil)
+        let seconds = day([set(plank, seconds: 0)]).exercises[0]
+        #expect(seconds.repsMin == 30 && seconds.repsMax == 60)
+        let mixed = day([set(bench, reps: 0), set(bench, reps: 6)]).exercises[0]
+        #expect(mixed.sets == 2 && mixed.repsMin == 2 && mixed.repsMax == 6 && mixed.setTargets == nil)
+        for exercise in [reps, seconds, mixed] {
+            for index in 0..<exercise.sets { #expect(exercise.repRange(forSet: index).lowerBound <= exercise.repsMax) }
+        }
+    }
+
     @Test func theDayCarriesTheRequestedOrderAndANewIdentity() {
         let first = day([set(bench, reps: 8)], order: 3)
         let second = day([set(bench, reps: 8)], order: 3)

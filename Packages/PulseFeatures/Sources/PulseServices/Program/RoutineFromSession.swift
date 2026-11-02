@@ -28,7 +28,7 @@ public enum RoutineFromSession {
                                  directory: ExerciseDirectory) -> RoutineExercise {
         let info = directory.info(reference)
         let held = info?.tracksDuration ?? false
-        let values = sets.compactMap { held ? $0.durationSeconds : $0.actualReps }
+        let values = sets.compactMap { held ? $0.durationSeconds : $0.actualReps }.filter { $0 > 0 }
         var exercise = RoutineExercise(
             order: position, exercise: reference, sets: sets.count, repsMin: held ? 30 : 8, repsMax: held ? 60 : 12,
             targetRPE: 8, restSeconds: info?.defaultRestSeconds ?? RoutineEditor.fallbackRestSeconds)
