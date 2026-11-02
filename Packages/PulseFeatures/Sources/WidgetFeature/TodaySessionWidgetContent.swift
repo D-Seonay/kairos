@@ -25,6 +25,7 @@ public struct TodaySessionWidgetContent: Sendable, Equatable {
     public var accessoryTitle: String
     public var accessorySubtitle: String
     public var accessoryDetail: String
+    public var inlineText: String
     public var accessibilityLabel: String
 
     public init(
@@ -38,6 +39,7 @@ public struct TodaySessionWidgetContent: Sendable, Equatable {
         accessoryTitle: String,
         accessorySubtitle: String,
         accessoryDetail: String,
+        inlineText: String,
         accessibilityLabel: String
     ) {
         self.title = title
@@ -50,6 +52,7 @@ public struct TodaySessionWidgetContent: Sendable, Equatable {
         self.accessoryTitle = accessoryTitle
         self.accessorySubtitle = accessorySubtitle
         self.accessoryDetail = accessoryDetail
+        self.inlineText = inlineText
         self.accessibilityLabel = accessibilityLabel
     }
 
@@ -73,6 +76,7 @@ public struct TodaySessionWidgetContent: Sendable, Equatable {
                 accessoryTitle: restTitle,
                 accessorySubtitle: restMeta,
                 accessoryDetail: String(localized: "Aucune séance", bundle: .module),
+                inlineText: restTitle,
                 accessibilityLabel: spoken
             )
         }
@@ -84,6 +88,7 @@ public struct TodaySessionWidgetContent: Sendable, Equatable {
             ? String(localized: "14 séries · allégée", bundle: .module)
             : String(localized: "14 séries · 55 min", bundle: .module)
         let detail = String(localized: "RPE max 7,5", bundle: .module)
+        let inline = "\(sessionTitle) · 14 séries"
         let spoken = String(
             localized: "Séance du jour : \(sessionTitle), 14 séries, 55 minutes, RPE 7,5",
             bundle: .module
@@ -100,6 +105,7 @@ public struct TodaySessionWidgetContent: Sendable, Equatable {
             accessoryTitle: sessionTitle,
             accessorySubtitle: sub,
             accessoryDetail: detail,
+            inlineText: inline,
             accessibilityLabel: spoken
         )
     }
@@ -109,11 +115,11 @@ public struct TodaySessionWidgetContent: Sendable, Equatable {
         let meta = String(localized: "14 séries · 55 min · RPE 7,5", bundle: .module)
         let sub = String(localized: "14 séries · allégée", bundle: .module)
         let detail = String(localized: "RPE max 7,5", bundle: .module)
+        let inline = "\(title) · 14 séries"
         let spoken = String(
             localized: "Séance du jour : \(title), 14 séries, 55 minutes, RPE 7,5",
             bundle: .module
         )
-
         return TodaySessionWidgetContent(
             title: title,
             isAdjusted: true,
@@ -121,10 +127,11 @@ public struct TodaySessionWidgetContent: Sendable, Equatable {
             isRest: false,
             metaText: meta,
             buttonText: String(localized: "Démarrer", bundle: .module),
-            muscleLevels: [.chest: 4, .triceps: 3, .frontDeltoid: 2],
+            muscleLevels: defaultMuscleLevels(for: title),
             accessoryTitle: title,
             accessorySubtitle: sub,
             accessoryDetail: detail,
+            inlineText: inline,
             accessibilityLabel: spoken
         )
     }

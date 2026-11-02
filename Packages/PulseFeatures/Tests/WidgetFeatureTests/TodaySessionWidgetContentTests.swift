@@ -18,6 +18,7 @@ struct TodaySessionWidgetContentTests {
         #expect(content.buttonText == "Démarrer")
         #expect(content.accessoryTitle == "Push")
         #expect(content.accessorySubtitle == "14 séries · allégée")
+        #expect(content.inlineText == "Push · 14 séries")
         #expect(!content.muscleLevels.isEmpty)
     }
 
@@ -29,6 +30,7 @@ struct TodaySessionWidgetContentTests {
         #expect(content.title == "Jour de repos")
         #expect(content.muscleLevels.isEmpty)
         #expect(content.accessorySubtitle == "Récupération active")
+        #expect(content.inlineText == "Jour de repos")
     }
 
     @Test func galleryLabels() {

@@ -21,6 +21,16 @@
         }
       }
     },
+    "%lld sem. · %lld/%lld" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld sem. · %lld/%lld"
+          }
+        }
+      }
+    },
     "%lld sur %lld cette semaine" : {
       "localizations" : {
         "fr" : {
@@ -87,6 +97,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "3 sur 5"
+          }
+        }
+      }
+    },
+    "ACWR" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ACWR"
           }
         }
       }

@@ -26,6 +26,7 @@ public struct StreakWidgetContent: Sendable, Equatable {
     public var targetThisWeek: Int
     public var weekDays: [DayState]
     public var subtitle: String
+    public var inlineText: String
     public var accessibilityLabel: String
 
     public init(
@@ -34,6 +35,7 @@ public struct StreakWidgetContent: Sendable, Equatable {
         targetThisWeek: Int,
         weekDays: [DayState],
         subtitle: String,
+        inlineText: String,
         accessibilityLabel: String
     ) {
         self.streakWeeks = streakWeeks
@@ -41,6 +43,7 @@ public struct StreakWidgetContent: Sendable, Equatable {
         self.targetThisWeek = targetThisWeek
         self.weekDays = weekDays
         self.subtitle = subtitle
+        self.inlineText = inlineText
         self.accessibilityLabel = accessibilityLabel
     }
 
@@ -54,6 +57,7 @@ public struct StreakWidgetContent: Sendable, Equatable {
         let completed = 3
         let target = 5
         let subtitleText = String(localized: "\(completed) sur \(target) cette semaine", bundle: .module)
+        let inline = String(localized: "\(weeks) sem. · \(completed)/\(target)", bundle: .module)
         let label = String(localized: "Série de \(weeks) semaines, \(completed) séances sur \(target) cette semaine", bundle: .module)
         return StreakWidgetContent(
             streakWeeks: weeks,
@@ -61,6 +65,7 @@ public struct StreakWidgetContent: Sendable, Equatable {
             targetThisWeek: target,
             weekDays: days,
             subtitle: subtitleText,
+            inlineText: inline,
             accessibilityLabel: label
         )
     }

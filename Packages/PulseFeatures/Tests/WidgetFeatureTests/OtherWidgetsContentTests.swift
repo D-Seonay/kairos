@@ -32,5 +32,6 @@ struct OtherWidgetsContentTests {
         #expect(NextWorkoutWidgetContent.displayName == "Prochaine séance")
         #expect(content.timingText == "Demain · 8:00")
         #expect(content.activeZone == 2)
+        #expect(content.inlineText == "Endurance 45 min · Demain · 8:00")
     }
 }

@@ -13,6 +13,7 @@ struct StreakWidgetContentTests {
         #expect(content.weekDays[0] == .completed)
         #expect(content.weekDays[4] == .today)
         #expect(content.subtitle == "3 sur 5 cette semaine")
+        #expect(content.inlineText == "14 sem. · 3/5")
         #expect(content.accessibilityLabel.contains("14"))
     }
 
