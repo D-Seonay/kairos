@@ -68,6 +68,27 @@ enum LiveSessionText {
         return String(localized: "Dernière fois \(list)", bundle: .module)
     }
 
+    /// Les valeurs prévues d'une série en séance, pour la notification et la Live Activity : « 70 kg × 5 », « +10 kg × 8 »,
+    /// « 8 rép. », « 30 s » ; `nil` sans valeur.
+    static func planned(_ set: LiveSet, of exercise: LiveExercise) -> String? {
+        let weightKg = set.weightKg ?? 0
+        let weight: String? = switch exercise.loadKind {
+        case .external: set.weightKg.map(decimal)
+        case .bodyweight: weightKg > 0 ? "+" + decimal(weightKg) : nil
+        case .assisted: weightKg > 0 ? "−" + decimal(weightKg) : nil
+        }
+        let load = weight.map { String(localized: "\($0) kg", bundle: .module) }
+        let value: String? = exercise.tracksDuration
+            ? set.durationSeconds.map { String(localized: "\($0) s", bundle: .module) }
+            : set.reps.map { "\($0)" }
+        switch (load, value) {
+        case let (load?, value?): return String(localized: "\(load) × \(value)", bundle: .module)
+        case let (load?, nil): return load
+        case (nil, _) where exercise.tracksDuration: return value
+        case (nil, _): return set.reps.map { String(localized: "\($0) rép.", bundle: .module) }
+        }
+    }
+
     /// Ce que le jour a changé pour un exercice, dans l'ordre : charge, séries, RPE, repos. `planned` : l'exercice avant les
     /// ajustements de la catégorie (`nil` pour un exercice ajouté en séance). `nil` si rien n'a changé.
     static func dayNote(loadAdjustment: SessionAdjustment?, hasHistory: Bool, policy: ProgressionPolicy,

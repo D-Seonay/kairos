@@ -16,13 +16,16 @@ public struct LiveSession: Sendable, Equatable, Codable, Identifiable {
     public var routineDayID: UUID?
     public var appliedAdjustments: [SessionAdjustment]
     public var refusedAdjustments: [SessionAdjustment]
+    /// La règle de hausse du jour : elle sert encore aux exercices ajoutés en séance, après une relance.
+    public var policy: ProgressionPolicy
     public var exercises: [LiveExercise]
     public var rest: LiveRest?
 
     public init(formatVersion: Int = LiveSession.currentFormat, id: UUID = UUID(), title: String, startedAt: Date,
                 lastActionAt: Date, programID: UUID? = nil, routineDayID: UUID? = nil,
                 appliedAdjustments: [SessionAdjustment] = [], refusedAdjustments: [SessionAdjustment] = [],
-                exercises: [LiveExercise] = [], rest: LiveRest? = nil) {
+                policy: ProgressionPolicy = ProgressionPolicy(allowsIncrease: true), exercises: [LiveExercise] = [],
+                rest: LiveRest? = nil) {
         self.formatVersion = formatVersion
         self.id = id
         self.title = title
@@ -32,6 +35,7 @@ public struct LiveSession: Sendable, Equatable, Codable, Identifiable {
         self.routineDayID = routineDayID
         self.appliedAdjustments = appliedAdjustments
         self.refusedAdjustments = refusedAdjustments
+        self.policy = policy
         self.exercises = exercises
         self.rest = rest
     }

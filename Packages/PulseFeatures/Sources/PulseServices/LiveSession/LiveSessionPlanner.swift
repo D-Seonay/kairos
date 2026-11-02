@@ -36,7 +36,7 @@ public enum LiveSessionPlanner {
         }
         return LiveSession(title: launch.title, startedAt: now, lastActionAt: now, programID: launch.programID,
                            routineDayID: launch.day?.id, appliedAdjustments: applied, refusedAdjustments: launch.refused,
-                           exercises: exercises)
+                           policy: launch.policy, exercises: exercises)
     }
     // swiftlint:enable function_parameter_count
 

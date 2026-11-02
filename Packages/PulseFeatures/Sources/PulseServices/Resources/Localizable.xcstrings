@@ -180,6 +180,76 @@
           }
         }
       }
+    },
+    "Repos terminé": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repos terminé"
+          }
+        }
+      }
+    },
+    "%@, série %lld : %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, série %lld : %@"
+          }
+        }
+      }
+    },
+    "%@, série %lld": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, série %lld"
+          }
+        }
+      }
+    },
+    "%@ · série %lld · %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · série %lld · %@"
+          }
+        }
+      }
+    },
+    "%@ · série %lld": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · série %lld"
+          }
+        }
+      }
+    },
+    "%@ kg": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kg"
+          }
+        }
+      }
+    },
+    "%lld rép.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld rép."
+          }
+        }
+      }
     }
   },
   "version": "1.0"
