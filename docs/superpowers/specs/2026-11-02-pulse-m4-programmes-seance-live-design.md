@@ -147,7 +147,7 @@ Un champ facultatif `tracksDuration: Bool` (défaut faux) dans `exercises.json`,
 
 ### 7.3 Exercices ajoutés pour l'historique de Mathéo
 
-Un exercice importé reste rattaché pour toujours à l'identifiant choisi à l'import : il n'existe pas de fusion d'exercices en M4. Les mouvements fréquents de Mathéo qui ont une identité claire entrent donc dans le contenu plutôt que de devenir des exercices perso. Ils gagnent ainsi consignes, alternatives et drapeau `isCompound` **(choix du constructeur)**. Neuf ajouts, ce qui porte le contenu à 93 exercices et `contentVersion` à `1.1.0`. Chacun respecte les règles de la spec M2 §4.1 (trois consignes, deux ou trois erreurs, trois alternatives du même plan, `riskAreas`), et les tests de comptage passent à 93 :
+Un exercice importé reste rattaché pour toujours à l'identifiant choisi à l'import : il n'existe pas de fusion d'exercices en M4. Les mouvements fréquents de Mathéo qui ont une identité claire entrent donc dans le contenu plutôt que de devenir des exercices perso. Ils gagnent ainsi consignes, alternatives et drapeau `isCompound` **(choix du constructeur)**. Neuf ajouts, ce qui porte le contenu à 93 exercices et `contentVersion` de `1.1.0` à `1.2.0`. Chacun respecte les règles de la spec M2 §4.1 (trois consignes, deux ou trois erreurs, trois alternatives du même plan, `riskAreas`), et les tests de comptage passent à 93 :
 
 | Identifiant (nom FR) | Plan | Nom Hevy repris |
 | :--- | :--- | :--- |
