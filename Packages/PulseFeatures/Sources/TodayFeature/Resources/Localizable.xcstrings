@@ -21,6 +21,50 @@
         }
       }
     },
+    "%lld minutes" : {
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld minute"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld minutes"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld secondes" : {
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld seconde"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld secondes"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld séries" : {
       "localizations" : {
         "fr" : {
@@ -39,6 +83,16 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "20 min de mobilité" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "20 min de mobilité"
           }
         }
       }
@@ -83,6 +137,36 @@
         }
       }
     },
+    "Chevilles : 10 flexions du genou vers l'avant par cheville, talon au sol." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chevilles : 10 flexions du genou vers l'avant par cheville, talon au sol."
+          }
+        }
+      }
+    },
+    "Colonne thoracique : 10 rotations à quatre pattes de chaque côté." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Colonne thoracique : 10 rotations à quatre pattes de chaque côté."
+          }
+        }
+      }
+    },
+    "Démarrer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Démarrer"
+          }
+        }
+      }
+    },
     "En calibration (%lld nuits)" : {
       "localizations" : {
         "fr" : {
@@ -121,6 +205,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "FC repos"
+          }
+        }
+      }
+    },
+    "Fermer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fermer"
+          }
+        }
+      }
+    },
+    "Hanches : 10 cercles lents de chaque côté, puis 1 min en fente basse par jambe." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hanches : 10 cercles lents de chaque côté, puis 1 min en fente basse par jambe."
           }
         }
       }
@@ -171,6 +275,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pas encore synchronisé"
+          }
+        }
+      }
+    },
+    "Pause" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause"
           }
         }
       }
@@ -235,6 +349,36 @@
         }
       }
     },
+    "Reprendre" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprendre"
+          }
+        }
+      }
+    },
+    "Respiration : 2 min allongé, inspire 4 s, expire 6 s." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Respiration : 2 min allongé, inspire 4 s, expire 6 s."
+          }
+        }
+      }
+    },
+    "Rien n'est enregistré : la mobilité ne compte ni dans la charge ni dans ta série." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien n'est enregistré : la mobilité ne compte ni dans la charge ni dans ta série."
+          }
+        }
+      }
+    },
     "Récupération" : {
       "localizations" : {
         "fr" : {
@@ -281,6 +425,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Séance du jour"
+          }
+        }
+      }
+    },
+    "Séance terminée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance terminée"
+          }
+        }
+      }
+    },
+    "Temps restant %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temps restant %@"
+          }
+        }
+      }
+    },
+    "Terminer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminer"
           }
         }
       }
@@ -421,6 +595,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "~ %@"
+          }
+        }
+      }
+    },
+    "Épaules : 10 passages de bâton ou d'élastique devant puis derrière." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Épaules : 10 passages de bâton ou d'élastique devant puis derrière."
           }
         }
       }
