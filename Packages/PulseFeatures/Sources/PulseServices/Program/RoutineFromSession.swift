@@ -24,21 +24,26 @@ public enum RoutineFromSession {
         return RoutineEditor.normalized(day)
     }
 
+    /// Les séries, répétitions et secondes sont ramenées dans les bornes de `RoutineRules` : la routine s'enregistre telle quelle.
+    /// Un exercice tenu garde une seule fourchette : des écarts de quelques secondes ne font pas une progression par série.
     private static func exercise(at position: Int, reference: ExerciseReference, sets: [WorkoutSet],
                                  directory: ExerciseDirectory) -> RoutineExercise {
         let info = directory.info(reference)
         let held = info?.tracksDuration ?? false
-        let values = sets.compactMap { held ? $0.durationSeconds : $0.actualReps }.filter { $0 > 0 }
+        let bounds = held ? RoutineRules.seconds : RoutineRules.reps
+        let count = min(sets.count, RoutineRules.sets.upperBound)
+        let performed = sets.compactMap { held ? $0.durationSeconds : $0.actualReps }.filter { $0 > 0 }
+        let values = performed.prefix(count).map { min(max($0, bounds.lowerBound), bounds.upperBound) }
         var exercise = RoutineExercise(
-            order: position, exercise: reference, sets: sets.count, repsMin: held ? 30 : 8, repsMax: held ? 60 : 12,
+            order: position, exercise: reference, sets: count, repsMin: held ? 30 : 8, repsMax: held ? 60 : 12,
             targetRPE: 8, restSeconds: info?.defaultRestSeconds ?? RoutineEditor.fallbackRestSeconds)
         guard let low = values.min(), let high = values.max() else { return exercise }
-        if high - low > perSetSpread, values.count == sets.count {
+        if !held, high - low > perSetSpread, performed.count == sets.count {
             exercise.setTargets = values.map(perSetRange)
             exercise.repsMin = exercise.setTargets?.map(\.repsMin).min() ?? low
             exercise.repsMax = exercise.setTargets?.map(\.repsMax).max() ?? high
         } else {
-            exercise.repsMin = max(1, min(low, high - singleRangeWidth))
+            exercise.repsMin = max(bounds.lowerBound, min(low, high - singleRangeWidth))
             exercise.repsMax = high
         }
         return exercise

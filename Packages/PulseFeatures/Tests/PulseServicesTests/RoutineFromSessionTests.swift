@@ -72,6 +72,36 @@ struct RoutineFromSessionTests {
         #expect(exercise.restSeconds == 60)
     }
 
+    /// Un exercice tenu garde une seule fourchette, même quand les durées s'écartent d'une série à l'autre.
+    @Test func heldExercisesKeepASingleRange() {
+        let exercise = day([set(plank, seconds: 30), set(plank, seconds: 60), set(plank, seconds: 90)]).exercises[0]
+        #expect(exercise.setTargets == nil && exercise.repsMin == 30 && exercise.repsMax == 90)
+        #expect(RoutineRules.issues(in: exercise, tracksDuration: true).isEmpty)
+    }
+
+    /// Une séance hors des bornes de l'éditeur donne une routine valide : séries, répétitions et secondes ramenées dans les bornes.
+    @Test func outOfRangeValuesAreClampedToTheRoutineRules() {
+        let many = day(Array(repeating: set(bench, reps: 8), count: 12)).exercises[0]
+        #expect(many.sets == 10)
+        #expect(RoutineRules.issues(in: many, tracksDuration: false).isEmpty)
+
+        let ramp = day((0..<12).map { set(bench, reps: $0.isMultiple(of: 2) ? 12 : 5) }).exercises[0]
+        #expect(ramp.sets == 10 && ramp.setTargets?.count == 10)
+        #expect(RoutineRules.issues(in: ramp, tracksDuration: false).isEmpty)
+
+        let heavy = day([set(bench, reps: 40), set(bench, reps: 40)]).exercises[0]
+        #expect(heavy.repsMin == 26 && heavy.repsMax == 30)
+        #expect(RoutineRules.issues(in: heavy, tracksDuration: false).isEmpty)
+
+        let spread = day([set(bench, reps: 50), set(bench, reps: 5)]).exercises[0]
+        #expect(spread.setTargets == [SetTarget(repsMin: 28, repsMax: 30), SetTarget(repsMin: 4, repsMax: 6)])
+        #expect(RoutineRules.issues(in: spread, tracksDuration: false).isEmpty)
+
+        let held = day([set(plank, seconds: 2), set(plank, seconds: 900)]).exercises[0]
+        #expect(held.repsMin == 5 && held.repsMax == 600 && held.setTargets == nil)
+        #expect(RoutineRules.issues(in: held, tracksDuration: true).isEmpty)
+    }
+
     @Test func exercisesKeepTheirFirstAppearanceOrderAndWarmupOnlyOnesAreDropped() {
         let day = day([set(pecDeck, .warmup, reps: 15), set(bench, reps: 8), set(pecDeck, reps: 10), set(bench, reps: 8)])
         #expect(day.exercises.map(\.exercise) == [bench, pecDeck])
