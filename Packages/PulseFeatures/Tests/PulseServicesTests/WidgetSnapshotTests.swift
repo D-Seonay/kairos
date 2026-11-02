@@ -27,6 +27,14 @@ struct WidgetSnapshotTests {
         #expect(Set(object.keys) == ["day", "score", "category", "isEstimated", "sessionTitle", "isLightened"])
     }
 
+    @Test func restDaySnapshotHasNoSessionTitle() throws {
+        let fatigue = recovery(58.4)
+        let restDay = TodaySession(plannedDay: .rest(next: nil), recovery: fatigue)
+        let data = try JSONEncoder().encode(WidgetSnapshot(recovery: fatigue, session: restDay))
+        let object = try #require(try JSONSerialization.jsonObject(with: data) as? [String: Any])
+        #expect(Set(object.keys) == ["day", "score", "category", "isEstimated", "isLightened"])
+    }
+
     @Test func snapshotRoundsTheScore() throws {
         let low = recovery(58.4)
         let high = recovery(64.5, .normal)

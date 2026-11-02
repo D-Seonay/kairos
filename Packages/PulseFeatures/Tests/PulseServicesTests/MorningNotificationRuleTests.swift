@@ -72,4 +72,22 @@ struct MorningNotificationRuleTests {
     @Test func yesterdaysScoreIsNotAnnounced() throws {
         #expect(try message(recovery(day: "2026-11-01T00:00")) == nil)
     }
+
+    /// Les bornes sont des heures de l'horloge locale : 10 h reste 10 h le jour du passage à l'heure d'hiver ou d'été.
+    @Test func deadlineFollowsTheWallClockOnDSTDays() throws {
+        let autumn = recovery(day: "2026-10-25T00:00")
+        #expect(try message(autumn, now: "2026-10-25T09:30") != nil)
+        #expect(try message(autumn, now: "2026-10-25T10:00") == nil)
+        let spring = recovery(day: "2026-03-29T00:00")
+        #expect(try message(spring, now: "2026-03-29T09:30") != nil)
+        #expect(try message(spring, now: "2026-03-29T10:30") == nil)
+    }
+
+    @Test func fourOClockFollowsTheWallClockOnDSTDays() throws {
+        let autumn = recovery(day: "2026-10-25T00:00")
+        #expect(try message(autumn, lastOpenedAt: TestClock.date("2026-10-25T03:30"), now: "2026-10-25T07:30") != nil)
+        #expect(try message(autumn, lastOpenedAt: TestClock.date("2026-10-25T04:30"), now: "2026-10-25T07:30") == nil)
+        let spring = recovery(day: "2026-03-29T00:00")
+        #expect(try message(spring, lastOpenedAt: TestClock.date("2026-03-29T04:30"), now: "2026-03-29T07:30") == nil)
+    }
 }
