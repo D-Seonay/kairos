@@ -144,12 +144,12 @@ private func savedSessions(_ fixture: LiveFixture) async throws -> [WorkoutSessi
     // Il reste des séries prévues : la confirmation d'abord.
     #expect(flow.confirmation == .unfinished(remaining: 4))
     #expect(flow.forgotten == nil)
-    await flow.confirm()
+    await flow.confirm()?.value
     let prompt = try #require(flow.forgotten)
     #expect(prompt.intent == .finish)
     #expect(FinishFlowModel.timeText(prompt.suggestedEnd, calendar: LiveClock.calendar) == "08:02")
 
-    await flow.chooseEnd(usingSuggestion: true)
+    await flow.chooseEnd(usingSuggestion: true)?.value
     #expect(flow.forgotten == nil)
     let recap = try #require(flow.recap)
     #expect(recap.recap?.endedAt == prompt.suggestedEnd)
@@ -168,8 +168,8 @@ private func savedSessions(_ fixture: LiveFixture) async throws -> [WorkoutSessi
     fixture.clock.set("2026-11-02T14:00")
     let flow = FinishFlowModel(live: live, onFinished: {})
     await flow.finishTapped()
-    await flow.confirm()
-    await flow.chooseEnd(usingSuggestion: false)
+    await flow.confirm()?.value
+    await flow.chooseEnd(usingSuggestion: false)?.value
     #expect(flow.recap?.recap?.endedAt == LiveClock.date("2026-11-02T14:00"))
 }
 
@@ -195,10 +195,10 @@ private func savedSessions(_ fixture: LiveFixture) async throws -> [WorkoutSessi
     let flow = FinishFlowModel(live: live, onFinished: { finished += 1 })
     flow.abandonTapped()
     #expect(flow.confirmation == .abandon)
-    await flow.confirm()
+    await flow.confirm()?.value
     let prompt = try #require(flow.forgotten)
     #expect(prompt.intent == .abandon)
-    await flow.chooseEnd(usingSuggestion: true)
+    await flow.chooseEnd(usingSuggestion: true)?.value
     #expect(finished == 1)
     #expect(flow.recap == nil)
     let sessions = try await savedSessions(fixture)
@@ -244,4 +244,73 @@ private func savedSessions(_ fixture: LiveFixture) async throws -> [WorkoutSessi
     #expect(RecapView.subtitle(title: "", endedAt: ended, calendar: LiveClock.calendar) == "lundi 2 novembre")
     #expect(RecapView.setsText(1) == "1 série")
     #expect(RecapView.setsText(9) == "9 séries")
+}
+
+@MainActor @Test func aConfirmationClosedWithoutAButtonLeavesTheFlowAbleToPresentAgain() async throws {
+    let fixture = LiveFixture()
+    let live = try await fixture.startedModel()
+    let flow = FinishFlowModel(live: live, onFinished: {})
+    await flow.finishTapped()
+    #expect(flow.confirmation != nil)
+    // Le système ferme la fenêtre sans bouton : la liaison appelle `cancelConfirmation`.
+    flow.cancelConfirmation()
+    #expect(flow.confirmation == nil)
+    await flow.finishTapped()
+    #expect(flow.confirmation != nil)
+    flow.cancelConfirmation()
+    flow.abandonTapped()
+    #expect(flow.confirmation == .abandon)
+}
+
+@MainActor @Test func aButtonResolvesTheConfirmationBeforeTheWindowClosesAfterIt() async throws {
+    let fixture = LiveFixture()
+    try await fixture.seedBenchHistory()
+    let live = try await fixture.startedModel()
+    await validateBench(live, rpes: [nil])
+    let flow = FinishFlowModel(live: live, onFinished: {})
+    await flow.finishTapped()
+    let task = flow.confirm()
+    // La fermeture de la fenêtre arrive après le bouton, avant que la tâche ne tourne.
+    flow.cancelConfirmation()
+    // Un second « Terminer » ou « Abandonner » attend la fin du premier.
+    await flow.finishTapped()
+    flow.abandonTapped()
+    #expect(flow.confirmation == nil)
+    await task?.value
+    #expect(flow.recap != nil)
+}
+
+@MainActor @Test func aForgottenAlertClosedWithoutAButtonKeepsTheSessionOpenAndPresentsAgain() async throws {
+    let fixture = LiveFixture()
+    try await fixture.seedBenchHistory()
+    let live = try await fixture.startedModel()
+    await validateBench(live, rpes: [nil, nil, nil])
+    fixture.clock.set("2026-11-02T14:00")
+    let flow = FinishFlowModel(live: live, onFinished: {})
+    flow.abandonTapped()
+    await flow.confirm()?.value
+    #expect(flow.forgotten != nil)
+    flow.cancelForgotten()
+    #expect(flow.forgotten == nil)
+    #expect(flow.recap == nil)
+    #expect(await fixture.service.current() != nil)
+    flow.abandonTapped()
+    #expect(flow.confirmation == .abandon)
+}
+
+@MainActor @Test func aButtonChoosesTheEndBeforeTheAlertClosesAfterIt() async throws {
+    let fixture = LiveFixture()
+    try await fixture.seedBenchHistory()
+    let live = try await fixture.startedModel()
+    await validateBench(live, rpes: [nil])
+    fixture.clock.set("2026-11-02T14:00")
+    var finished = 0
+    let flow = FinishFlowModel(live: live, onFinished: { finished += 1 })
+    flow.abandonTapped()
+    await flow.confirm()?.value
+    let task = flow.chooseEnd(usingSuggestion: true)
+    flow.cancelForgotten()
+    await task?.value
+    #expect(finished == 1)
+    #expect(await fixture.service.current() == nil)
 }

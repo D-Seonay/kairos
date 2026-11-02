@@ -46,36 +46,52 @@ public final class FinishFlowModel {
 
     /// « Terminer » : une confirmation s'il reste des séries de travail prévues non validées, sinon la suite.
     public func finishTapped() async {
+        guard isIdle else { return }
         let remaining = live.session.plannedWorkingSets - live.session.doneWorkingSets
         if remaining > 0 {
             confirmation = .unfinished(remaining: remaining)
         } else {
-            await proceed(.finish)
+            isProceeding = true
+            defer { isProceeding = false }
+            await start(.finish)
         }
     }
 
     /// « Abandonner » : toujours une confirmation.
     public func abandonTapped() {
+        guard isIdle else { return }
         confirmation = .abandon
     }
 
+    /// La confirmation se ferme sans choix (le système peut la fermer sans passer par un bouton) : la séance reste telle quelle.
     public func cancelConfirmation() {
         confirmation = nil
     }
 
-    /// Le oui de la confirmation en attente.
-    public func confirm() async {
-        guard let pending = confirmation else { return }
+    /// Le oui de la confirmation en attente. L'état est lu et effacé tout de suite : la fermeture de la fenêtre qui suit ne le
+    /// retrouve plus. La tâche rendue est la suite, que les tests attendent.
+    @discardableResult
+    public func confirm() -> Task<Void, Never>? {
+        guard let pending = confirmation, !isProceeding else { return nil }
         confirmation = nil
-        await proceed(pending == .abandon ? .abandon : .finish)
+        let intent: Intent = pending == .abandon ? .abandon : .finish
+        return run { await $0.start(intent) }
     }
 
-    /// Le choix de l'alerte de la séance oubliée : l'heure proposée (le choix par défaut) ou celle de maintenant.
-    public func chooseEnd(usingSuggestion: Bool) async {
-        guard let prompt = forgotten else { return }
+    /// Le choix de l'alerte de la séance oubliée : l'heure proposée (le choix par défaut) ou celle de maintenant. Même règle que
+    /// `confirm()` : le choix est pris avant la fermeture de l'alerte.
+    @discardableResult
+    public func chooseEnd(usingSuggestion: Bool) -> Task<Void, Never>? {
+        guard let prompt = forgotten, !isProceeding else { return nil }
         forgotten = nil
         let endedAt = usingSuggestion ? prompt.suggestedEnd : live.environment.now()
-        await complete(prompt.intent, endedAt: endedAt)
+        return run { await $0.complete(prompt.intent, endedAt: endedAt) }
+    }
+
+    /// L'alerte de la séance oubliée se ferme sans bouton : la séance reste ouverte, rien n'est enregistré ni abandonné. C'est le
+    /// choix sûr, car ni l'heure proposée ni celle de maintenant n'ont été voulues ; « Terminer » rouvre l'alerte.
+    public func cancelForgotten() {
+        forgotten = nil
     }
 
     /// « Enregistrer » ou « Plus tard » du récap, une fois la séance écrite.
@@ -90,12 +106,22 @@ public final class FinishFlowModel {
 
     // MARK: Suite
 
-    /// L'heure de fin : celle que propose le service pour une séance oubliée, sinon maintenant.
-    private func proceed(_ intent: Intent) async {
-        // Un second appui sur « Terminer » pendant la lecture de l'heure proposée ne rouvre pas la suite.
-        guard !isProceeding, forgotten == nil, recap == nil else { return }
+    /// Aucune étape en cours : ni confirmation, ni alerte, ni récap, ni suite qui s'exécute.
+    private var isIdle: Bool {
+        !isProceeding && confirmation == nil && forgotten == nil && recap == nil
+    }
+
+    /// Lance la suite, qui tient `isProceeding` du geste jusqu'à son terme : un second « Terminer » ou « Abandonner » attend.
+    private func run(_ work: @escaping @MainActor (FinishFlowModel) async -> Void) -> Task<Void, Never> {
         isProceeding = true
-        defer { isProceeding = false }
+        return Task { [self] in
+            defer { isProceeding = false }
+            await work(self)
+        }
+    }
+
+    /// L'heure de fin : celle que propose le service pour une séance oubliée, sinon maintenant.
+    private func start(_ intent: Intent) async {
         errorMessage = nil
         if let suggested = await live.environment.service.suggestedEnd() {
             forgotten = ForgottenPrompt(intent: intent, suggestedEnd: suggested)

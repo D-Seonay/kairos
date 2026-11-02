@@ -48,15 +48,11 @@ public struct FinishFlow: View {
     @ViewBuilder
     private var confirmationActions: some View {
         if flow.confirmation == .abandon {
-            Button(String(localized: "Abandonner", bundle: .module), role: .destructive) { confirm() }
+            Button(String(localized: "Abandonner", bundle: .module), role: .destructive) { flow.confirm() }
         } else {
-            Button(String(localized: "Terminer quand même", bundle: .module)) { confirm() }
+            Button(String(localized: "Terminer quand même", bundle: .module)) { flow.confirm() }
         }
         Button(String(localized: "Continuer la séance", bundle: .module), role: .cancel) { flow.cancelConfirmation() }
-    }
-
-    private func confirm() {
-        Task { await flow.confirm() }
     }
 
     // MARK: Séance oubliée
@@ -71,25 +67,21 @@ public struct FinishFlow: View {
     private var forgottenActions: some View {
         if let prompt = flow.forgotten {
             let time = FinishFlowModel.timeText(prompt.suggestedEnd, calendar: flow.calendar)
-            Button(String(localized: "Clore à \(time)", bundle: .module)) {
-                Task { await flow.chooseEnd(usingSuggestion: true) }
-            }
+            Button(String(localized: "Clore à \(time)", bundle: .module)) { flow.chooseEnd(usingSuggestion: true) }
             .keyboardShortcut(.defaultAction)
-            Button(String(localized: "Garder l'heure actuelle", bundle: .module)) {
-                Task { await flow.chooseEnd(usingSuggestion: false) }
-            }
+            Button(String(localized: "Garder l'heure actuelle", bundle: .module)) { flow.chooseEnd(usingSuggestion: false) }
         }
     }
 
     // MARK: Liaisons
 
-    // Les boutons résolvent eux-mêmes l'état : la fermeture de la fenêtre ne doit pas l'effacer avant que leur tâche le lise.
+    // Un bouton résout l'état avant que la fenêtre se ferme ; une fermeture sans bouton annule.
     private var isShowingConfirmation: Binding<Bool> {
-        Binding(get: { flow.confirmation != nil }, set: { _ in })
+        Binding(get: { flow.confirmation != nil }, set: { if !$0 { flow.cancelConfirmation() } })
     }
 
     private var isShowingForgotten: Binding<Bool> {
-        Binding(get: { flow.forgotten != nil }, set: { _ in })
+        Binding(get: { flow.forgotten != nil }, set: { if !$0 { flow.cancelForgotten() } })
     }
 
     private var isShowingError: Binding<Bool> {
