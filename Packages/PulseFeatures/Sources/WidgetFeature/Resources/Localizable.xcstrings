@@ -1,6 +1,26 @@
 {
   "sourceLanguage" : "fr",
   "strings" : {
+    "%@ et %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ et %@"
+          }
+        }
+      }
+    },
+    "%@ restantes" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ restantes"
+          }
+        }
+      }
+    },
     "%@ · estimé" : {
       "localizations" : {
         "fr" : {
@@ -21,12 +41,72 @@
         }
       }
     },
+    "+30 s" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+30 s"
+          }
+        }
+      }
+    },
+    "Ajouter 30 secondes de repos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter 30 secondes de repos"
+          }
+        }
+      }
+    },
     "Pas de séance aujourd'hui" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pas de séance aujourd'hui"
+          }
+        }
+      }
+    },
+    "Passer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passer"
+          }
+        }
+      }
+    },
+    "Passer le repos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passer le repos"
+          }
+        }
+      }
+    },
+    "Repos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repos"
+          }
+        }
+      }
+    },
+    "Retirer 30 secondes de repos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer 30 secondes de repos"
           }
         }
       }
@@ -71,6 +151,16 @@
         }
       }
     },
+    "Séance %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance %@"
+          }
+        }
+      }
+    },
     "Séance allégée" : {
       "localizations" : {
         "fr" : {
@@ -91,6 +181,16 @@
         }
       }
     },
+    "Série suivante" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Série suivante"
+          }
+        }
+      }
+    },
     "Ton score du matin et ta séance du jour." : {
       "localizations" : {
         "fr" : {
@@ -107,6 +207,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "estimé"
+          }
+        }
+      }
+    },
+    "série suivante : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "série suivante : %@"
+          }
+        }
+      }
+    },
+    "−30 s" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "−30 s"
           }
         }
       }
