@@ -1,26 +1,6 @@
 {
   "sourceLanguage" : "fr",
   "strings" : {
-    "%@ et %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ et %@"
-          }
-        }
-      }
-    },
-    "%@ restantes" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ restantes"
-          }
-        }
-      }
-    },
     "%@ · estimé" : {
       "localizations" : {
         "fr" : {

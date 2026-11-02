@@ -10,16 +10,25 @@ enum SessionActivityStyle {
     static let accentInk = Color(PulsePalette.accent(for: .amber).accentInk)
 }
 
-extension PulseSessionAttributes.ContentState {
+/// L'état affiché de l'activité. Une activité périmée (`staleDate` = fin du repos) compte comme hors repos : l'écran verrouillé et
+/// la Dynamic Island n'attendent pas une mise à jour de l'app pour cacher le repos fini et ses boutons.
+struct SessionActivityModel {
+    let content: PulseSessionAttributes.ContentState
+    let isStale: Bool
+
+    var title: String { content.title }
+    var startedAt: Date { content.startedAt }
+    var nextSet: String? { content.nextSet }
+
     /// L'intervalle du repos en cours ; `nil` hors repos. Les comptes à rebours partent des dates, jamais d'un compteur.
     var restInterval: ClosedRange<Date>? {
-        guard let restEndsAt else { return nil }
-        return min(restStartedAt ?? restEndsAt, restEndsAt)...restEndsAt
+        guard !isStale, let restEndsAt = content.restEndsAt else { return nil }
+        return min(content.restStartedAt ?? restEndsAt, restEndsAt)...restEndsAt
     }
 
-    /// La phrase lue par VoiceOver pour toute l'activité ; la date de rendu sert seulement à arrondir le temps restant.
+    /// Ce que VoiceOver lit pour le titre et la série suivante ; le minuteur système lit lui-même le temps.
     var spokenLabel: String {
-        SessionActivityText.accessibilityLabel(title: title, restEndsAt: restEndsAt, nextSet: nextSet, now: .now)
+        SessionActivityText.accessibilityLabel(title: title, isResting: restInterval != nil, nextSet: nextSet)
     }
 }
 
@@ -41,7 +50,7 @@ struct SessionRestRing: View {
 
 /// Le temps restant du repos, ou la durée écoulée depuis le début de la séance, en minuteur système.
 struct SessionClockText: View {
-    let state: PulseSessionAttributes.ContentState
+    let state: SessionActivityModel
 
     var body: some View {
         Group {
@@ -110,16 +119,34 @@ struct SessionNextSetText: View {
     }
 }
 
+/// Le titre (« Repos » pendant un repos, celui de la séance sinon) et la série suivante, lus d'un seul tenant par VoiceOver.
+struct SessionTitleAndNextSet: View {
+    let state: SessionActivityModel
+    let spacing: CGFloat
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: spacing) {
+            Text(state.restInterval == nil ? state.title : SessionActivityText.restTitle)
+                .font(.headline)
+                .foregroundStyle(.white)
+                .lineLimit(1)
+            if let nextSet = state.nextSet {
+                SessionNextSetText(nextSet: nextSet)
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(state.spokenLabel)
+    }
+}
+
 /// L'écran verrouillé : anneau, temps restant, série suivante et boutons pendant un repos ; titre, durée écoulée et série suivante
 /// sinon.
 struct SessionLockScreenView: View {
-    let state: PulseSessionAttributes.ContentState
+    let state: SessionActivityModel
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             header
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel(state.spokenLabel)
             if state.restInterval != nil {
                 SessionRestButtons()
             }
@@ -140,15 +167,7 @@ struct SessionLockScreenView: View {
                     .frame(width: 44, height: 44)
                     .accessibilityHidden(true)
             }
-            VStack(alignment: .leading, spacing: 4) {
-                Text(state.restInterval == nil ? state.title : SessionActivityText.restTitle)
-                    .font(.headline)
-                    .foregroundStyle(.white)
-                    .lineLimit(1)
-                if let nextSet = state.nextSet {
-                    SessionNextSetText(nextSet: nextSet)
-                }
-            }
+            SessionTitleAndNextSet(state: state, spacing: 4)
             Spacer(minLength: 8)
             SessionClockText(state: state)
                 .font(.system(.title, design: .rounded, weight: .heavy))
@@ -159,7 +178,7 @@ struct SessionLockScreenView: View {
 
 /// À gauche de la Dynamic Island étendue : l'anneau du repos, ou l'icône hors repos.
 struct SessionIslandLeading: View {
-    let state: PulseSessionAttributes.ContentState
+    let state: SessionActivityModel
 
     var body: some View {
         if let interval = state.restInterval {
@@ -176,29 +195,22 @@ struct SessionIslandLeading: View {
 
 /// À droite de la Dynamic Island étendue : le temps restant, ou la durée écoulée.
 struct SessionIslandTrailing: View {
-    let state: PulseSessionAttributes.ContentState
+    let state: SessionActivityModel
 
     var body: some View {
         SessionClockText(state: state)
             .font(.system(.title2, design: .rounded, weight: .heavy))
             .foregroundStyle(SessionActivityStyle.accent)
-            .accessibilityLabel(state.spokenLabel)
     }
 }
 
 /// Sous la Dynamic Island étendue : le titre du repos ou de la séance, la série suivante et les boutons.
 struct SessionIslandBottom: View {
-    let state: PulseSessionAttributes.ContentState
+    let state: SessionActivityModel
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(state.restInterval == nil ? state.title : SessionActivityText.restTitle)
-                .font(.headline)
-                .foregroundStyle(.white)
-                .lineLimit(1)
-            if let nextSet = state.nextSet {
-                SessionNextSetText(nextSet: nextSet)
-            }
+            SessionTitleAndNextSet(state: state, spacing: 2)
             if state.restInterval != nil {
                 SessionRestButtons()
             }
@@ -210,7 +222,7 @@ struct SessionIslandBottom: View {
 
 /// À droite de la Dynamic Island compacte : le temps restant du repos, ou la durée écoulée.
 struct SessionCompactTime: View {
-    let state: PulseSessionAttributes.ContentState
+    let state: SessionActivityModel
 
     var body: some View {
         SessionClockText(state: state)
@@ -218,13 +230,12 @@ struct SessionCompactTime: View {
             .foregroundStyle(SessionActivityStyle.accent)
             .multilineTextAlignment(.trailing)
             .frame(maxWidth: 52, alignment: .trailing)
-            .accessibilityLabel(state.spokenLabel)
     }
 }
 
 /// La Dynamic Island minimale : l'anneau du repos, ou l'icône hors repos.
 struct SessionMinimalView: View {
-    let state: PulseSessionAttributes.ContentState
+    let state: SessionActivityModel
 
     var body: some View {
         if let interval = state.restInterval {

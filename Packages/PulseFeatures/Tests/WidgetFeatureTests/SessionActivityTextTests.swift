@@ -3,7 +3,6 @@ import Testing
 @testable import WidgetFeature
 
 struct SessionActivityTextTests {
-    private let now = WidgetClock.date("2026-11-02T18:00")
     private let nextSet = "Développé couché à la barre · série 2 · 70 kg × 5"
 
     @Test func fixedTexts() {
@@ -20,26 +19,21 @@ struct SessionActivityTextTests {
         #expect(SessionActivityText.skipLabel == "Passer le repos")
     }
 
-    @Test func restReadsTimeLeftAndNextSet() {
-        let label = SessionActivityText.accessibilityLabel(
-            title: "Push", restEndsAt: now.addingTimeInterval(112), nextSet: nextSet, now: now)
-        #expect(label == "Repos, 1 minute et 52 secondes restantes, série suivante : \(nextSet)")
+    @Test func restReadsRestAndNextSet() {
+        let label = SessionActivityText.accessibilityLabel(title: "Push", isResting: true, nextSet: nextSet)
+        #expect(label == "Repos, série suivante : \(nextSet)")
     }
 
-    @Test func restUnderAMinuteReadsSeconds() {
-        let label = SessionActivityText.accessibilityLabel(
-            title: "Push", restEndsAt: now.addingTimeInterval(45), nextSet: nil, now: now)
-        #expect(label == "Repos, 45 secondes restantes")
+    @Test func restWithoutNextSet() {
+        #expect(SessionActivityText.accessibilityLabel(title: "Push", isResting: true, nextSet: nil) == "Repos")
     }
 
     @Test func outsideRestReadsTitleAndNextSet() {
-        let label = SessionActivityText.accessibilityLabel(title: "Push", restEndsAt: nil, nextSet: nextSet, now: now)
+        let label = SessionActivityText.accessibilityLabel(title: "Push", isResting: false, nextSet: nextSet)
         #expect(label == "Séance Push, série suivante : \(nextSet)")
     }
 
-    @Test func finishedRestIsOutsideRest() {
-        let label = SessionActivityText.accessibilityLabel(
-            title: "Push", restEndsAt: now.addingTimeInterval(-5), nextSet: nil, now: now)
-        #expect(label == "Séance Push")
+    @Test func outsideRestWithoutNextSetReadsTheTitle() {
+        #expect(SessionActivityText.accessibilityLabel(title: "Push", isResting: false, nextSet: nil) == "Séance Push")
     }
 }

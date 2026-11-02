@@ -10,31 +10,38 @@ import WidgetKit
 struct SessionLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: PulseSessionAttributes.self) { context in
-            SessionLockScreenView(state: context.state)
+            SessionLockScreenView(state: context.model)
                 .activityBackgroundTint(PulsePalette.liveBackground)
                 .activitySystemActionForegroundColor(.white)
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    SessionIslandLeading(state: context.state)
+                    SessionIslandLeading(state: context.model)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    SessionIslandTrailing(state: context.state)
+                    SessionIslandTrailing(state: context.model)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    SessionIslandBottom(state: context.state)
+                    SessionIslandBottom(state: context.model)
                 }
             } compactLeading: {
                 Image(systemName: "dumbbell.fill")
                     .foregroundStyle(SessionActivityStyle.accent)
                     .accessibilityHidden(true)
             } compactTrailing: {
-                SessionCompactTime(state: context.state)
+                SessionCompactTime(state: context.model)
             } minimal: {
-                SessionMinimalView(state: context.state)
+                SessionMinimalView(state: context.model)
             }
             .keylineTint(SessionActivityStyle.accent)
         }
+    }
+}
+
+extension ActivityViewContext<PulseSessionAttributes> {
+    /// L'état affiché : une activité périmée (fin du repos passée) est hors repos.
+    fileprivate var model: SessionActivityModel {
+        SessionActivityModel(content: state, isStale: isStale)
     }
 }
 

@@ -14,35 +14,13 @@ public enum SessionActivityText {
     public static var plus30Label: String { String(localized: "Ajouter 30 secondes de repos", bundle: .module) }
     public static var skipLabel: String { String(localized: "Passer le repos", bundle: .module) }
 
-    /// Ce que VoiceOver lit pour toute l'activité : le repos restant et la série suivante, ou le titre de la séance hors repos.
-    /// Un repos dont la date est passée compte comme hors repos.
-    public static func accessibilityLabel(title: String, restEndsAt: Date?, nextSet: String?, now: Date) -> String {
-        var parts: [String]
-        if let restEndsAt, restEndsAt > now {
-            let left = String(localized: "\(spokenDuration(restEndsAt.timeIntervalSince(now))) restantes", bundle: .module)
-            parts = [restTitle, left]
-        } else {
-            parts = [String(localized: "Séance \(title)", bundle: .module)]
-        }
+    /// Ce que VoiceOver lit pour le titre et la série suivante de l'activité. Le temps n'y est pas : le minuteur système le porte, et
+    /// il reste juste pendant que l'activité est affichée.
+    public static func accessibilityLabel(title: String, isResting: Bool, nextSet: String?) -> String {
+        var parts = [isResting ? restTitle : String(localized: "Séance \(title)", bundle: .module)]
         if let nextSet {
             parts.append(String(localized: "série suivante : \(nextSet)", bundle: .module))
         }
         return parts.joined(separator: ", ")
-    }
-
-    /// « 1 minute et 52 secondes », « 45 secondes » : arrondi à la seconde supérieure, comme le minuteur système.
-    private static func spokenDuration(_ interval: TimeInterval) -> String {
-        let total = Int(interval.rounded(.up))
-        let (minutes, seconds) = total.quotientAndRemainder(dividingBy: 60)
-        let style = { (unit: Duration.UnitsFormatStyle.Unit, value: Int) in
-            Duration.seconds(value * (unit == .minutes ? 60 : 1))
-                .formatted(.units(allowed: [unit], width: .wide).locale(Locale(identifier: "fr_FR")))
-                .replacingOccurrences(of: "\u{202F}", with: " ").replacingOccurrences(of: "\u{00A0}", with: " ")
-        }
-        switch (minutes, seconds) {
-        case (0, _): return style(.seconds, seconds)
-        case (_, 0): return style(.minutes, minutes)
-        default: return String(localized: "\(style(.minutes, minutes)) et \(style(.seconds, seconds))", bundle: .module)
-        }
     }
 }

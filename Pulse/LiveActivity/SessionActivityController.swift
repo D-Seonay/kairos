@@ -40,6 +40,7 @@ struct SessionActivityController: SessionActivityControlling {
     }
 
     private static func content(for state: SessionActivityState) -> ActivityContent<PulseSessionAttributes.ContentState> {
-        ActivityContent(state: contentState(for: state), staleDate: nil)
+        // À la fin du repos, l'activité devient périmée : l'écran verrouillé repasse hors repos sans attendre l'app.
+        ActivityContent(state: contentState(for: state), staleDate: state.restEndsAt)
     }
 }
