@@ -29,7 +29,7 @@ struct MainTabView: View {
     var body: some View {
         VStack(spacing: 0) {
             if let session = liveSession.current, !liveSession.isPresented {
-                ResumeSessionBar(title: session.title, startedAt: session.startedAt, onResume: liveSession.resume,
+                ResumeSessionBar(title: session.title, startedAt: session.startedAt, onResume: resume,
                                  onAbandon: { Task { await liveSession.abandonFromBanner() } })
                     .padding(.horizontal, PulseMetrics.spacing)
                     .padding(.bottom, 8)
@@ -38,7 +38,7 @@ struct MainTabView: View {
         }
         .background(PulsePalette.background)
         .fullScreenCover(isPresented: $liveSession.isPresented, onDismiss: refreshTabs) {
-            FinishFlow(model: liveSession.model(), onFinished: liveSession.didFinish)
+            FinishFlow(model: liveSession.model(), flow: liveSession.finishFlow())
                 .alert(liveSession.notice ?? "", isPresented: isShowingNotice) {
                     Button(String(localized: "OK")) { liveSession.dismissNotice() }
                 }
@@ -54,14 +54,14 @@ struct MainTabView: View {
         TabView(selection: $router.selectedTab) {
             Tab(String(localized: "Aujourd'hui"), systemImage: "sun.max", value: Item.today) {
                 TodayView(model: today, onOpenProfile: { router.selectedTab = .profile }, onStartSession: start,
-                          onResumeSession: liveSession.resume)
+                          onResumeSession: resume)
             }
             Tab(String(localized: "Planning"), systemImage: "calendar", value: Item.planning) {
                 comingSoon(String(localized: "Planning"), milestone: "M6")
             }
             Tab(String(localized: "Séance"), systemImage: "dumbbell", value: Item.session) {
                 TrainView(model: train, onOpenToday: { router.selectedTab = .today }, onStartSession: start,
-                          onResumeSession: liveSession.resume)
+                          onResumeSession: resume)
             }
             Tab(String(localized: "Stats"), systemImage: "chart.bar", value: Item.stats) {
                 comingSoon(String(localized: "Stats"), milestone: "M7")
@@ -75,6 +75,11 @@ struct MainTabView: View {
     /// Démarre la séance, ou présente celle déjà en cours (le coordinateur ne démarre jamais une seconde séance).
     private func start(_ launch: SessionLaunch) {
         Task { await liveSession.start(launch) }
+    }
+
+    /// Rouvre la séance en cours, sur l'alerte de la séance oubliée si elle est restée ouverte plus de 3 h.
+    private func resume() {
+        Task { await liveSession.resume() }
     }
 
     private func refreshTabs() {

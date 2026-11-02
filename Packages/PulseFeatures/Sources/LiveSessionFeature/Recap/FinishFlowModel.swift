@@ -20,10 +20,12 @@ public final class FinishFlowModel {
         case abandon
     }
 
-    /// La séance est restée ouverte plus de 3 h : l'heure de fin proposée, celle de la dernière série plus son repos.
+    /// La séance est restée ouverte plus de 3 h : l'heure de fin proposée, celle de la dernière série plus son repos. À la
+    /// reprise, l'autre choix est de continuer la séance plutôt que de la clore maintenant.
     public struct ForgottenPrompt: Sendable, Equatable {
         public var intent: Intent
         public var suggestedEnd: Date
+        public var isOnResume = false
     }
 
     public private(set) var confirmation: Confirmation?
@@ -78,6 +80,13 @@ public final class FinishFlowModel {
         return run { await $0.start(intent) }
     }
 
+    /// La séance oubliée vient d'être rouverte (spec M4 §16) : l'alerte propose de la clore à `suggestedEnd`, ce qui mène au
+    /// récap, ou de continuer, ce que fait aussi sa fermeture sans bouton (`cancelForgotten()`).
+    public func offerToClose(at suggestedEnd: Date) {
+        guard isIdle else { return }
+        forgotten = ForgottenPrompt(intent: .finish, suggestedEnd: suggestedEnd, isOnResume: true)
+    }
+
     /// Le choix de l'alerte de la séance oubliée : l'heure proposée (le choix par défaut) ou celle de maintenant. Même règle que
     /// `confirm()` : le choix est pris avant la fermeture de l'alerte.
     @discardableResult
@@ -88,8 +97,9 @@ public final class FinishFlowModel {
         return run { await $0.complete(prompt.intent, endedAt: endedAt) }
     }
 
-    /// L'alerte de la séance oubliée se ferme sans bouton : la séance reste ouverte, rien n'est enregistré ni abandonné. C'est le
-    /// choix sûr, car ni l'heure proposée ni celle de maintenant n'ont été voulues ; « Terminer » rouvre l'alerte.
+    /// L'alerte de la séance oubliée se ferme sans bouton, ou « Continuer la séance » à la reprise : la séance reste ouverte,
+    /// rien n'est enregistré ni abandonné. C'est le choix sûr, car ni l'heure proposée ni celle de maintenant n'ont été
+    /// voulues ; « Terminer » rouvre l'alerte.
     public func cancelForgotten() {
         forgotten = nil
     }

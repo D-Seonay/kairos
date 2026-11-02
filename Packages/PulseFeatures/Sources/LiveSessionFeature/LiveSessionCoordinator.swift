@@ -17,6 +17,7 @@ public final class LiveSessionCoordinator {
 
     @ObservationIgnored private let environment: LiveSessionEnvironment
     @ObservationIgnored private var liveModel: LiveSessionModel?
+    @ObservationIgnored private var flowModel: FinishFlowModel?
     @ObservationIgnored private var isStarting = false
     @ObservationIgnored private var hasRequestedAuthorization = false
 
@@ -33,7 +34,7 @@ public final class LiveSessionCoordinator {
         if let stored {
             liveModel?.sync(with: stored)
         } else {
-            liveModel = nil
+            dropModels()
             isPresented = false
         }
     }
@@ -53,27 +54,36 @@ public final class LiveSessionCoordinator {
     /// Présente la séance en cours ou en démarre une ; vrai si elle vient d'être créée.
     private func begin(_ launch: SessionLaunch) async -> Bool {
         if current != nil {
-            isPresented = true
+            await presentExisting()
             return false
         }
         do {
             current = try await environment.service.start(launch)
-            liveModel = nil
+            dropModels()
             errorMessage = nil
             isPresented = true
             return true
         } catch ActiveSessionError.alreadyInProgress {
             // Une séance enregistrée que le bandeau n'a pas encore montrée : on la reprend.
             current = await environment.service.current()
-            isPresented = current != nil
+            if current != nil { await presentExisting() }
         } catch {
             errorMessage = String(localized: "Pulse n'a pas pu démarrer la séance.", bundle: .module)
         }
         return false
     }
 
-    public func resume() {
+    /// « Reprendre » du bandeau, de l'accueil ou de l'onglet Séance.
+    public func resume() async {
         guard current != nil else { return }
+        await presentExisting()
+    }
+
+    /// Rouvre la séance en cours. Laissée ouverte plus de 3 h, elle s'ouvre sur l'alerte de la séance oubliée (spec M4 §16).
+    private func presentExisting() async {
+        if let suggested = await environment.service.suggestedEnd() {
+            finishFlow().offerToClose(at: suggested)
+        }
         isPresented = true
     }
 
@@ -101,11 +111,24 @@ public final class LiveSessionCoordinator {
         return model
     }
 
+    /// La suite de « Terminer » et d'« Abandonner » de la séance en cours, créée une fois avec son modèle.
+    public func finishFlow() -> FinishFlowModel {
+        if let flowModel { return flowModel }
+        let flow = FinishFlowModel(live: model(), onFinished: { [weak self] in self?.didFinish() })
+        flowModel = flow
+        return flow
+    }
+
     /// La séance est terminée ou abandonnée : plus de bandeau, plus d'écran, plus de modèle.
     public func didFinish() {
         current = nil
-        liveModel = nil
+        dropModels()
         isPresented = false
+    }
+
+    private func dropModels() {
+        liveModel = nil
+        flowModel = nil
     }
 
     public func dismissNotice() {

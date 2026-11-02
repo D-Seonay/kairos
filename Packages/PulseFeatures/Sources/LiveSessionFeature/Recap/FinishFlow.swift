@@ -9,8 +9,13 @@ public struct FinishFlow: View {
     @State private var flow: FinishFlowModel
 
     public init(model: LiveSessionModel, onFinished: @escaping @MainActor () -> Void) {
+        self.init(model: model, flow: FinishFlowModel(live: model, onFinished: onFinished))
+    }
+
+    /// La suite tenue par `LiveSessionCoordinator.finishFlow()`, qui peut s'ouvrir sur l'alerte de la séance oubliée.
+    public init(model: LiveSessionModel, flow: FinishFlowModel) {
         self.model = model
-        _flow = State(initialValue: FinishFlowModel(live: model, onFinished: onFinished))
+        _flow = State(initialValue: flow)
     }
 
     public var body: some View {
@@ -69,7 +74,11 @@ public struct FinishFlow: View {
             let time = FinishFlowModel.timeText(prompt.suggestedEnd, calendar: flow.calendar)
             Button(String(localized: "Clore à \(time)", bundle: .module)) { flow.chooseEnd(usingSuggestion: true) }
             .keyboardShortcut(.defaultAction)
-            Button(String(localized: "Garder l'heure actuelle", bundle: .module)) { flow.chooseEnd(usingSuggestion: false) }
+            if prompt.isOnResume {
+                Button(String(localized: "Continuer la séance", bundle: .module), role: .cancel) { flow.cancelForgotten() }
+            } else {
+                Button(String(localized: "Garder l'heure actuelle", bundle: .module)) { flow.chooseEnd(usingSuggestion: false) }
+            }
         }
     }
 

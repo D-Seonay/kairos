@@ -48,7 +48,7 @@ import Testing
     await coordinator.refresh()
     #expect(coordinator.current == stored)
     #expect(!coordinator.isPresented)
-    coordinator.resume()
+    await coordinator.resume()
     #expect(coordinator.isPresented)
     #expect(coordinator.model().session == stored)
 }
@@ -106,6 +106,64 @@ import Testing
     await coordinator.abandonFromBanner()
     let saved = try await fixture.workouts.sessions(from: .distantPast, to: .distantFuture)
     #expect(saved.first { $0.status == .abandoned }?.endedAt == LiveClock.date("2026-11-02T08:02"))
+}
+
+/// Une séance poussée avec la première série du bench validée à 08:00 (repos 120 s), laissée de côté, puis l'horloge à `time`.
+@MainActor
+private func leftOpenSession(_ fixture: LiveFixture, until time: String) async throws -> LiveSessionCoordinator {
+    try await fixture.seedBenchHistory()
+    let coordinator = fixture.coordinator()
+    await coordinator.start(LiveFixture.pushLaunch)
+    let model = coordinator.model()
+    await model.tap(set: model.session.exercises[0].sets[0].id)
+    coordinator.isPresented = false
+    fixture.clock.set(time)
+    return coordinator
+}
+
+/// Spec M4 §16 : la reprise d'une séance laissée ouverte plus de 3 h propose d'abord de la clore à l'heure proposée.
+@MainActor @Test func resumingAForgottenSessionOffersToCloseItAtTheSuggestedEnd() async throws {
+    let fixture = LiveFixture()
+    let coordinator = try await leftOpenSession(fixture, until: "2026-11-03T07:30")
+    await coordinator.resume()
+    #expect(coordinator.isPresented)
+    let flow = coordinator.finishFlow()
+    let prompt = try #require(flow.forgotten)
+    #expect(prompt.suggestedEnd == LiveClock.date("2026-11-02T08:02") && prompt.isOnResume)
+    await flow.chooseEnd(usingSuggestion: true)?.value
+    #expect(flow.forgotten == nil)
+    #expect(flow.recap?.recap?.endedAt == LiveClock.date("2026-11-02T08:02"))
+}
+
+@MainActor @Test func continuingAForgottenSessionKeepsItOpen() async throws {
+    let fixture = LiveFixture()
+    let coordinator = try await leftOpenSession(fixture, until: "2026-11-03T07:30")
+    await coordinator.resume()
+    coordinator.finishFlow().cancelForgotten()
+    #expect(coordinator.finishFlow().forgotten == nil && coordinator.finishFlow().recap == nil)
+    #expect(coordinator.isPresented && coordinator.current != nil)
+    #expect(await fixture.service.current() != nil)
+}
+
+@MainActor @Test func resumingWithinThreeHoursOpensTheSessionDirectly() async throws {
+    let fixture = LiveFixture()
+    let coordinator = try await leftOpenSession(fixture, until: "2026-11-02T10:30")
+    await coordinator.resume()
+    #expect(coordinator.isPresented)
+    #expect(coordinator.finishFlow().forgotten == nil)
+}
+
+@MainActor @Test func presentingAForgottenSessionOffersToCloseIt() async throws {
+    let fixture = LiveFixture()
+    let coordinator = try await leftOpenSession(fixture, until: "2026-11-03T07:30")
+    await coordinator.start(LiveFixture.plankLaunch)
+    #expect(coordinator.isPresented)
+    #expect(coordinator.finishFlow().forgotten?.suggestedEnd == LiveClock.date("2026-11-02T08:02"))
+    // Une séance enregistrée que ce coordinateur n'a pas encore montrée : même alerte.
+    let unseen = fixture.coordinator()
+    await unseen.start(LiveFixture.plankLaunch)
+    #expect(unseen.isPresented)
+    #expect(unseen.finishFlow().forgotten?.suggestedEnd == LiveClock.date("2026-11-02T08:02"))
 }
 
 @MainActor @Test func didFinishDropsTheSessionAndItsModel() async throws {
