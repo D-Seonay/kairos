@@ -10,22 +10,26 @@ struct ActiveSessionFixture {
     let store: any ActiveSessionStore
     let memoryStore = InMemoryActiveSessionStore()
     let workouts = InMemoryWorkoutRepository()
+    /// Le dépôt de séances du service : `workouts`, ou une doublure posée dessus qui lève à la `failingWorkoutSaveAt`-ième écriture.
+    let workoutStore: any WorkoutRepository
     let profiles = InMemoryProfileRepository()
     let settings = InMemoryExerciseSettingsRepository()
     let userExercises = InMemoryUserExerciseRepository()
     let notifier = StubRestTimerNotifier()
     let activity = StubSessionActivityController()
 
-    init(store: (any ActiveSessionStore)? = nil) {
+    init(store: (any ActiveSessionStore)? = nil, failingWorkoutSaveAt: Int? = nil) {
         self.store = store ?? memoryStore
+        let workouts = workouts
+        workoutStore = failingWorkoutSaveAt.map { CountingWorkoutRepository(inner: workouts, failingAtSave: $0) } ?? workouts
     }
 
     /// Un service neuf sur les mêmes dépôts : ce que l'app retrouve après une relance.
     func makeService() -> ActiveSessionService {
         let clock = clock
-        let records = RecordsService(workouts: workouts, records: InMemoryPersonalRecordRepository(), userExercises: userExercises,
+        let records = RecordsService(workouts: workoutStore, records: InMemoryPersonalRecordRepository(), userExercises: userExercises,
                                      library: .bundled, now: { clock.now })
-        return ActiveSessionService(store: store, workouts: workouts, profiles: profiles, settings: settings,
+        return ActiveSessionService(store: store, workouts: workoutStore, profiles: profiles, settings: settings,
                                     userExercises: userExercises, records: records, library: .bundled, restNotifier: notifier,
                                     activity: activity, calendar: TestClock.calendar, now: { clock.now })
     }

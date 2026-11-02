@@ -250,6 +250,66 @@
           }
         }
       }
+    },
+    "Charge de la séance : %lld min × %lld = %lld.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Charge de la séance : %lld min × %lld = %lld."
+          }
+        }
+      }
+    },
+    "Ratio aigu / chronique après la séance : %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ratio aigu / chronique après la séance : %@."
+          }
+        }
+      }
+    },
+    "%@ : %@ kg, nouveau record de charge": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : %@ kg, nouveau record de charge"
+          }
+        }
+      }
+    },
+    "%@ : 1RM estimé %@ kg, nouveau record": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : 1RM estimé %@ kg, nouveau record"
+          }
+        }
+      }
+    },
+    "%@ : %lld répétitions au poids du corps, nouveau record": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : %lld répétitions au poids du corps, nouveau record"
+          }
+        }
+      }
+    },
+    "%@ : %lld répétitions à %@ kg, nouveau record": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : %lld répétitions à %@ kg, nouveau record"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
