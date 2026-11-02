@@ -1,0 +1,76 @@
+{
+  "sourceLanguage": "fr",
+  "strings": {
+    "Ton score du matin est prêt": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ton score du matin est prêt"
+          }
+        }
+      }
+    },
+    "%@, volume allégé": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, volume allégé"
+          }
+        }
+      }
+    },
+    "%@, séance allégée": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, séance allégée"
+          }
+        }
+      }
+    },
+    "forme optimale": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "forme optimale"
+          }
+        }
+      }
+    },
+    "forme normale": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "forme normale"
+          }
+        }
+      }
+    },
+    "fatigue modérée": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "fatigue modérée"
+          }
+        }
+      }
+    },
+    "surmenage": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "surmenage"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

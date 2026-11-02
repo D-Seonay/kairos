@@ -27,6 +27,7 @@ let package = Package(
         .target(
             name: "PulseServices",
             dependencies: [domain, recoveryEngine, content],
+            resources: [.process("Resources")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .target(
