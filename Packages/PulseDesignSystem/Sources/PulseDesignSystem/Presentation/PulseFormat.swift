@@ -21,6 +21,31 @@ public enum PulseFormat {
         return String(localized: "\(hours) h \(padded)", bundle: .module)
     }
 
+    /// « 45 s », « 2 min », « 2 min 45 », « 1 min 05 ».
+    public static func restDuration(seconds: Int) -> String {
+        let minutes = seconds / 60
+        let rest = seconds % 60
+        if minutes == 0 {
+            return String(localized: "\(rest) s", bundle: .module)
+        }
+        if rest == 0 {
+            return String(localized: "\(minutes) min", bundle: .module)
+        }
+        let padded = rest < 10 ? "0\(rest)" : "\(rest)"
+        return String(localized: "\(minutes) min \(padded)", bundle: .module)
+    }
+
+    /// « 1,12 », « 7,5 », « 8 » : virgule décimale, aucune décimale superflue, pas de séparateur de milliers.
+    /// Une valeur non finie donne « — ».
+    public static func decimal(_ value: Double, maxFractionDigits: Int) -> String {
+        guard value.isFinite else { return dash }
+        let style = FloatingPointFormatStyle<Double>.number
+            .locale(Locale(identifier: "fr_FR"))
+            .precision(.fractionLength(0...max(0, maxFractionDigits)))
+            .grouping(.never)
+        return value.formatted(style)
+    }
+
     /// « +3 % », « −18 % », « 0 % ».
     public static func signedPercent(_ value: Double) -> String {
         guard let number = signed(value) else { return dash }

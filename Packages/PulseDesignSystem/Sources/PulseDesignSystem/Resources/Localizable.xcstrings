@@ -31,6 +31,36 @@
         }
       }
     },
+    "%lld min %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld min %@"
+          }
+        }
+      }
+    },
+    "%lld s" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld s"
+          }
+        }
+      }
+    },
+    "0,8 à 1,3" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "0,8 à 1,3"
+          }
+        }
+      }
+    },
     "100 % musculation" : {
       "localizations" : {
         "fr" : {
@@ -275,6 +305,16 @@
         }
       }
     },
+    "Risque" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Risque"
+          }
+        }
+      }
+    },
     "S" : {
       "comment" : "Initiale de samedi",
       "localizations" : {
@@ -292,6 +332,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Samedi"
+          }
+        }
+      }
+    },
+    "Sous-entraînement" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sous-entraînement"
           }
         }
       }
