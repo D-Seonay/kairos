@@ -39,6 +39,18 @@ struct SessionAdjusterTests {
         return RoutineDay(id: UUID(), order: 0, name: "Push", kind: .strength, exercises: exercises)
     }
 
+    /// Push de 6 exercices à 3 séries (18 séries) : le développé couché a une fourchette par série, les autres non.
+    private func pushWithSetTargets() -> RoutineDay {
+        let ids = ["bench-press-barbell", "chest-press-machine", "pec-deck-machine", "triceps-pushdown-cable", "wrist-curl-cable",
+                   "crunch-machine"]
+        let exercises = ids.enumerated().map { index, id in
+            RoutineExercise(order: index, exercise: .content(id: id), sets: 3, repsMin: 8, repsMax: 12, targetRPE: 8, restSeconds: 90,
+                            setTargets: index == 0 ? [SetTarget(repsMin: 10, repsMax: 12), SetTarget(repsMin: 4, repsMax: 6),
+                                                      SetTarget(repsMin: 4, repsMax: 6)] : nil)
+        }
+        return RoutineDay(id: UUID(), order: 0, name: "Push", kind: .strength, exercises: exercises)
+    }
+
     private func runDay(_ type: RunType) -> RoutineDay {
         RoutineDay(id: UUID(), order: 1, name: "Course", kind: .run, runType: type, runTargetMinutes: 40)
     }
@@ -78,6 +90,14 @@ struct SessionAdjusterTests {
             SessionAdjustment(kind: .rpeCap, reason: "Effort plafonné à RPE 7,5", value: 7.5),
             SessionAdjustment(kind: .rest, reason: "Repos rallongés de 45 secondes", value: 45)
         ])
+    }
+
+    @Test func fatigueRemovesTheLastPerSetTargets() {
+        let adjusted = SessionAdjuster.adjust(pushWithSetTargets(), category: .moderateFatigue)
+        let bench = adjusted.day.exercises[0]
+        #expect(bench.sets == 2)
+        #expect(bench.setTargets == [SetTarget(repsMin: 10, repsMax: 12), SetTarget(repsMin: 4, repsMax: 6)])
+        #expect(adjusted.day.exercises.allSatisfy { $0.setTargets == nil || $0.setTargets?.count == $0.sets })
     }
 
     @Test func supersetLosesSetsTogether() {
