@@ -103,7 +103,7 @@ StoredProfile.upperIncrementKg: Double
 StoredProfile.weightKg: Optional<Double>
 StoredProfile.weightUnit: String
 StoredProgram.createdAt: Date
-StoredProgram.days -> StoredRoutineDay [to-many, cascade]
+StoredProgram.days -> StoredRoutineDay [to-many, cascade, inverse: program]
 StoredProgram.deletedAt: Optional<Date>
 StoredProgram.id: UUID
 StoredProgram.isArchived: Bool
@@ -113,17 +113,17 @@ StoredProgram.templateID: Optional<String>
 StoredProgram.updatedAt: Date
 StoredProgram.weekLayout: Optional<Data>
 StoredRoutineDay.deletedAt: Optional<Date>
-StoredRoutineDay.exercises -> StoredRoutineExercise [to-many, cascade]
+StoredRoutineDay.exercises -> StoredRoutineExercise [to-many, cascade, inverse: day]
 StoredRoutineDay.id: UUID
 StoredRoutineDay.kind: String
 StoredRoutineDay.name: String
 StoredRoutineDay.order: Int
-StoredRoutineDay.program -> StoredProgram [to-one, nullify]
+StoredRoutineDay.program -> StoredProgram [to-one, nullify, inverse: days]
 StoredRoutineDay.runTargetKm: Optional<Double>
 StoredRoutineDay.runTargetMinutes: Optional<Int>
 StoredRoutineDay.runType: Optional<String>
 StoredRoutineExercise.contentExerciseID: Optional<String>
-StoredRoutineExercise.day -> StoredRoutineDay [to-one, nullify]
+StoredRoutineExercise.day -> StoredRoutineDay [to-one, nullify, inverse: exercises]
 StoredRoutineExercise.deletedAt: Optional<Date>
 StoredRoutineExercise.id: UUID
 StoredRoutineExercise.order: Int
@@ -206,7 +206,7 @@ StoredWorkoutSession.overallRPE: Optional<Double>
 StoredWorkoutSession.programID: Optional<UUID>
 StoredWorkoutSession.refusedAdjustments: Optional<Data>
 StoredWorkoutSession.routineDayID: Optional<UUID>
-StoredWorkoutSession.sets -> StoredWorkoutSet [to-many, cascade]
+StoredWorkoutSession.sets -> StoredWorkoutSet [to-many, cascade, inverse: session]
 StoredWorkoutSession.source: String
 StoredWorkoutSession.startedAt: Date
 StoredWorkoutSession.status: String
@@ -229,7 +229,7 @@ StoredWorkoutSet.replacedUserExerciseID: Optional<UUID>
 StoredWorkoutSet.replacementReason: Optional<String>
 StoredWorkoutSet.restSeconds: Optional<Int>
 StoredWorkoutSet.rpe: Optional<Double>
-StoredWorkoutSet.session -> StoredWorkoutSession [to-one, nullify]
+StoredWorkoutSet.session -> StoredWorkoutSession [to-one, nullify, inverse: sets]
 StoredWorkoutSet.setType: String
 StoredWorkoutSet.supersetGroup: Optional<Int>
 StoredWorkoutSet.userExerciseID: Optional<UUID>

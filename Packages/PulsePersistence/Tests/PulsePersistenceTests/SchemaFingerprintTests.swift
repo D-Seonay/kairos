@@ -21,6 +21,18 @@ private let drift = "Un modèle partagé a changé : figer sa copie dans la vers
         == ["StoredDailyRecovery.originalSessionChosen", "StoredProfile.firstName"])
 }
 
+@Test func fingerprintNamesTheInverseOfEachRelationship() {
+    let lines = SchemaFingerprint.lines(Schema(versionedSchema: PulseSchemaV2.self))
+    #expect(lines.contains { $0.hasPrefix("StoredProgram.days -> StoredRoutineDay") && $0.contains("inverse: program") })
+    #expect(lines.contains { $0.hasPrefix("StoredRoutineDay.program -> StoredProgram") && $0.contains("inverse: days") })
+    #expect(lines.contains { $0.hasPrefix("StoredWorkoutSession.sets -> StoredWorkoutSet") && $0.contains("inverse: session") })
+}
+
+@Test func fingerprintListsAttributeOptions() {
+    let lines = SchemaFingerprint.lines(Schema([FingerprintProbe.self]))
+    #expect(lines.contains { $0.hasPrefix("FingerprintProbe.blob:") && $0.contains("externalStorage") })
+}
+
 /// Compare l'empreinte au fichier de référence, ou l'écrit à côté des sources avec `PULSE_WRITE_SCHEMA_FIXTURES=1`.
 private func checkFingerprint(of schema: Schema, against name: String, filePath: String = #filePath) throws {
     let contents = SchemaFingerprint.fileContents(schema)
