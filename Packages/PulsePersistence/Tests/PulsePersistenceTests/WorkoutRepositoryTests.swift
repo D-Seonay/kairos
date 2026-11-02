@@ -97,3 +97,11 @@ private func benchSession(day offset: Int, status: SessionStatus, sets: [Workout
     #expect(try await repo.lastSets(for: custom).map(\.order) == [2])
     #expect(try await repo.lastSets(for: .user(id: UUID())).isEmpty)
 }
+
+@Test func aNewerSessionWithOnlyWarmupsOfTheExerciseDoesNotHideLastTime() async throws {
+    let repo = SwiftDataWorkoutRepository(modelContainer: try TestContainer.make())
+    let older = benchSession(day: 1, status: .completed, sets: [benchSet(order: 1, reps: 9), benchSet(order: 2, reps: 7)])
+    let warmupOnly = benchSession(day: 5, status: .abandoned, sets: [benchSet(order: 1, reps: 15, type: .warmup)])
+    for session in [older, warmupOnly] { try await repo.save(session) }
+    #expect(try await repo.lastSets(for: .content(id: "bench-press-barbell")).map(\.actualReps) == [9, 7])
+}

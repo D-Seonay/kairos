@@ -40,21 +40,22 @@ public actor SwiftDataWorkoutRepository: WorkoutRepository {
     }
 
     /// Séries hors échauffement de la dernière séance terminée ou abandonnée contenant l'exercice, dans l'ordre.
+    /// Une séance qui ne contient que des échauffements de l'exercice est ignorée.
     /// Lit les séries de l'exercice (et non chaque séance) : seules les séries à retenir deviennent des valeurs du domaine.
     public func lastSets(for exercise: ExerciseReference) throws -> [WorkoutSet] {
         let contentID = exercise.contentID
         let userID = exercise.userID
         let inProgress = SessionStatus.inProgress.rawValue
+        let warmup = SetType.warmup.rawValue
         let descriptor = FetchDescriptor<StoredWorkoutSet>(predicate: #Predicate {
-            $0.deletedAt == nil && $0.contentExerciseID == contentID && $0.userExerciseID == userID
+            $0.deletedAt == nil && $0.setType != warmup && $0.contentExerciseID == contentID && $0.userExerciseID == userID
                 && $0.session != nil && $0.session?.deletedAt == nil && $0.session?.status != inProgress
         })
         let candidates = try modelContext.fetch(descriptor).compactMap { stored in
             stored.session.map { (session: $0, set: stored) }
         }
         guard let latest = candidates.map(\.session).max(by: Self.isEarlier) else { return [] }
-        return candidates.filter { $0.session === latest }.map { $0.set.toDomain() }
-            .filter { $0.setType != .warmup }.sorted { $0.order < $1.order }
+        return candidates.filter { $0.session === latest }.map { $0.set.toDomain() }.sorted { $0.order < $1.order }
     }
 
     private static func isEarlier(_ lhs: StoredWorkoutSession, _ rhs: StoredWorkoutSession) -> Bool {

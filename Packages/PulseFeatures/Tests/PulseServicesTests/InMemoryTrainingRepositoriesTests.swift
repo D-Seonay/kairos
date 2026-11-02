@@ -113,4 +113,12 @@ struct InMemoryTrainingRepositoriesTests {
         #expect(try await repository.lastSets(for: bench).map(\.actualReps) == [12, 5])
         #expect(try await repository.lastSets(for: .content(id: "unknown")).isEmpty)
     }
+
+    @Test func aNewerSessionWithOnlyWarmupsOfTheExerciseDoesNotHideLastTime() async throws {
+        let repository = InMemoryWorkoutRepository()
+        let older = benchSession("2026-10-12T07:00", status: .completed, sets: [benchSet(1, reps: 9), benchSet(2, reps: 7)])
+        let warmupOnly = benchSession("2026-10-20T07:00", status: .abandoned, sets: [benchSet(1, reps: 15, type: .warmup)])
+        for session in [older, warmupOnly] { try await repository.save(session) }
+        #expect(try await repository.lastSets(for: .content(id: "bench-press-barbell")).map(\.actualReps) == [9, 7])
+    }
 }
