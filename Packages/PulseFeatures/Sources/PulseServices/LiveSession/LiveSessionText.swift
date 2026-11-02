@@ -118,3 +118,11 @@ enum LiveSessionText {
         return notes.joined(separator: ", ")
     }
 }
+
+public extension LiveExercise {
+    /// Les valeurs prévues d'une de ses séries : « 70 kg × 5 », « +10 kg × 8 », « 8 rép. », « 30 s » ; `nil` sans valeur. La même
+    /// phrase pour la notification de fin de repos et la ligne « série suivante » du bandeau de l'écran.
+    func plannedText(for set: LiveSet) -> String? {
+        LiveSessionText.planned(set, of: self)
+    }
+}

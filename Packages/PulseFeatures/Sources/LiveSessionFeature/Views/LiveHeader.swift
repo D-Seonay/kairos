@@ -68,8 +68,11 @@ struct LiveHeader: View {
         .accessibilityIdentifier(LiveSessionIdentifiers.menuButton)
     }
 
+    /// Une statistique. Avec `spoken`, VoiceOver lit cette phrase ; sans elle, il lit le nom puis la valeur (la durée, que
+    /// `Text(timerInterval:)` met à jour seul).
+    @ViewBuilder
     private func stat(_ name: String, spoken: String? = nil, @ViewBuilder value: () -> some View) -> some View {
-        VStack(spacing: 0) {
+        let content = VStack(spacing: 0) {
             Text(name).font(.caption2.weight(.semibold)).foregroundStyle(PulsePalette.muted)
             value()
                 .font(.headline.monospacedDigit())
@@ -78,9 +81,14 @@ struct LiveHeader: View {
                 .minimumScaleFactor(0.6)
         }
         .frame(maxWidth: .infinity)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(name)
-        .accessibilityValue(spoken ?? "")
+        if let spoken {
+            content
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(name)
+                .accessibilityValue(spoken)
+        } else {
+            content.accessibilityElement(children: .combine)
+        }
     }
 }
 

@@ -61,16 +61,6 @@
         }
       }
     },
-    "%@ × %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ × %@"
-          }
-        }
-      }
-    },
     "%@, série %lld" : {
       "localizations" : {
         "fr" : {
@@ -81,32 +71,12 @@
         }
       }
     },
-    "%lld rép." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld rép."
-          }
-        }
-      }
-    },
     "%lld répétitions" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld répétitions"
-          }
-        }
-      }
-    },
-    "%lld s" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld s"
           }
         }
       }
@@ -201,22 +171,22 @@
         }
       }
     },
-    "\\u{2212}30 s" : {
+    "−30 s" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\\u{2212}30 s"
+            "value" : "−30 s"
           }
         }
       }
     },
-    "\\u{2212}kg" : {
+    "−kg" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\\u{2212}kg"
+            "value" : "−kg"
           }
         }
       }

@@ -15,11 +15,15 @@ struct RestBanner: View {
     var body: some View {
         TimelineView(.periodic(from: rest.startedAt, by: 1)) { context in
             let isOver = context.date >= rest.endsAt
-            Group {
+            ZStack {
                 if !isOver { banner(fraction: Self.remainingFraction(of: rest, at: context.date)) }
-            }
-            .onChange(of: isOver) { _, over in
-                if over { model.didReachRestEnd() }
+                // Hors du `if` : la vue qui voit passer la fin du repos ne disparaît pas avec le bandeau.
+                Color.clear
+                    .frame(width: 0, height: 0)
+                    .accessibilityHidden(true)
+                    .onChange(of: isOver) { _, over in
+                        if over { model.didReachRestEnd() }
+                    }
             }
         }
     }
@@ -56,12 +60,13 @@ struct RestBanner: View {
     private func ring(fraction: Double) -> some View {
         let accent = Color(PulsePalette.accent(for: theme).accent)
         return ZStack {
-            Circle().stroke(PulsePalette.line, lineWidth: 4)
+            Circle().stroke(PulsePalette.line, lineWidth: 4).accessibilityHidden(true)
             Circle()
                 .trim(from: 0, to: fraction)
                 .stroke(accent, style: StrokeStyle(lineWidth: 4, lineCap: .round))
                 .rotationEffect(.degrees(-90))
                 .animation(reduceMotion ? nil : .linear(duration: 1), value: fraction)
+                .accessibilityHidden(true)
             Text(timerInterval: rest.startedAt...rest.endsAt, pauseTime: nil, countsDown: true, showsHours: false)
                 .font(.subheadline.weight(.bold).monospacedDigit())
                 .foregroundStyle(PulsePalette.text)
@@ -70,8 +75,9 @@ struct RestBanner: View {
                 .padding(6)
         }
         .frame(width: LiveSetRow.targetHeight, height: LiveSetRow.targetHeight)
+        // Le temps restant est lu tel quel (`Text(timerInterval:)`) ; l'indication dit ce que c'est.
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(String(localized: "Repos restant", bundle: .module))
+        .accessibilityHint(String(localized: "Repos restant", bundle: .module))
     }
 
     private var buttons: some View {
@@ -116,7 +122,7 @@ extension RestBanner {
         let exercise = session.exercises[next.exerciseIndex]
         let set = exercise.sets[next.setIndex]
         let title = String(localized: "\(exercise.name), série \(next.setIndex + 1)", bundle: .module)
-        guard let planned = LiveSetRow.plannedText(set, loadKind: exercise.loadKind, tracksDuration: exercise.tracksDuration) else {
+        guard let planned = exercise.plannedText(for: set) else {
             return title
         }
         return String(localized: "\(title) : \(planned)", bundle: .module)

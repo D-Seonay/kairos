@@ -118,27 +118,4 @@ extension LiveSetRow {
         count == 1 ? String(localized: "1 seconde", bundle: .module)
             : String(localized: "\(count) secondes", bundle: .module)
     }
-
-    // MARK: Série prévue
-
-    /// Les valeurs d'une série, pour la ligne « série suivante » : « 70 kg × 5 », « +10 kg × 8 », « 8 rép. », « 30 s ».
-    /// La même règle que la notification de fin de repos ; `nil` sans valeur.
-    nonisolated static func plannedText(_ set: LiveSet, loadKind: LoadKind, tracksDuration: Bool) -> String? {
-        let weightKg = set.weightKg ?? 0
-        let weight: String? = switch loadKind {
-        case .external: set.weightKg.map { PulseFormat.decimal($0, maxFractionDigits: 2) }
-        case .bodyweight: weightKg > 0 ? "+" + PulseFormat.decimal(weightKg, maxFractionDigits: 2) : nil
-        case .assisted: weightKg > 0 ? "\u{2212}" + PulseFormat.decimal(weightKg, maxFractionDigits: 2) : nil
-        }
-        let load = weight.map { String(localized: "\($0) kg", bundle: .module) }
-        let value: String? = tracksDuration
-            ? set.durationSeconds.map { String(localized: "\($0) s", bundle: .module) }
-            : set.reps.map { "\($0)" }
-        switch (load, value) {
-        case let (load?, value?): return String(localized: "\(load) × \(value)", bundle: .module)
-        case let (load?, nil): return load
-        case (nil, _) where tracksDuration: return value
-        case (nil, _): return set.reps.map { String(localized: "\($0) rép.", bundle: .module) }
-        }
-    }
 }

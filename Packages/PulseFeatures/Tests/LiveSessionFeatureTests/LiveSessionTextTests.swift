@@ -137,15 +137,6 @@ import Testing
         #expect(RestBanner.nextSetText(in: live) == nil)
     }
 
-    @Test func plannedTextCoversEveryLoadKind() {
-        let bodyweight = set(weight: 10, reps: 8)
-        #expect(LiveSetRow.plannedText(bodyweight, loadKind: .bodyweight, tracksDuration: false) == "+10 kg × 8")
-        let assisted = set(weight: 20, reps: 6)
-        #expect(LiveSetRow.plannedText(assisted, loadKind: .assisted, tracksDuration: false) == "\u{2212}20 kg × 6")
-        #expect(LiveSetRow.plannedText(set(reps: 12), loadKind: .bodyweight, tracksDuration: false) == "12 rép.")
-        #expect(LiveSetRow.plannedText(set(), loadKind: .external, tracksDuration: false) == nil)
-    }
-
     @Test func restRingEmptiesWithTheTime() {
         let start = LiveClock.date("2026-11-02T08:10")
         let rest = LiveRest(startedAt: start, endsAt: start.addingTimeInterval(120), exerciseID: UUID())
