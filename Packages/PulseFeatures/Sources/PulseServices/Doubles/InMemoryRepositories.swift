@@ -103,3 +103,41 @@ public actor InMemoryRecoveryRepository: RecoveryRepository {
         checkInsByDay[stamped.day] = stamped
     }
 }
+
+/// Les séances en mémoire : `sessions(from:to:)` renvoie celles dont `startedAt` est dans `[from, to)`, de la plus ancienne
+/// à la plus récente.
+public actor InMemoryWorkoutRepository: WorkoutRepository {
+    private var stored: [UUID: WorkoutSession] = [:]
+
+    public init() {}
+
+    public func sessions(from: Date, to: Date) async throws -> [WorkoutSession] {
+        stored.values
+            .filter { $0.startedAt >= from && $0.startedAt < to }
+            .sorted { lhs, rhs in lhs.startedAt != rhs.startedAt ? lhs.startedAt < rhs.startedAt : lhs.createdAt < rhs.createdAt }
+    }
+
+    public func session(id: UUID) async throws -> WorkoutSession? {
+        stored[id]
+    }
+
+    public func save(_ session: WorkoutSession) async throws {
+        stored[session.id] = session
+    }
+
+    public func delete(id: UUID) async throws {
+        stored[id] = nil
+    }
+
+    /// Séries de travail de la dernière séance terminée contenant l'exercice, dans l'ordre.
+    public func lastSets(for exercise: ExerciseReference) async throws -> [WorkoutSet] {
+        let completed = stored.values.filter { $0.status == .completed }.sorted { $0.startedAt > $1.startedAt }
+        for session in completed {
+            let sets = session.sets.filter { $0.exercise == exercise }
+            if !sets.isEmpty {
+                return sets.filter { $0.setType == .working }.sorted { $0.order < $1.order }
+            }
+        }
+        return []
+    }
+}

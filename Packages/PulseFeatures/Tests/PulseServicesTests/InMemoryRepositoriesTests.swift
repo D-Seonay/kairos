@@ -98,3 +98,20 @@ private func allSamples(_ cache: InMemoryHealthSampleCache, _ kind: HealthSample
     #expect(try await cache.anchor(for: .sleep) == nil)
     #expect(try await cache.anchor(for: .sdnn) == Data([1]))
 }
+
+@Test func workoutSessionsAreFilteredByStartAndSorted() async throws {
+    let repository = InMemoryWorkoutRepository()
+    func session(_ text: String) -> WorkoutSession {
+        let start = TestClock.date(text)
+        return WorkoutSession(startedAt: start, kind: .strength, source: .pulse, status: .completed, title: text,
+                              createdAt: start, updatedAt: start)
+    }
+    let late = session("2026-11-02T18:00")
+    let early = session("2026-11-01T08:00")
+    let outside = session("2026-11-03T00:00")
+    for item in [late, outside, early] { try await repository.save(item) }
+    let found = try await repository.sessions(from: TestClock.date("2026-11-01T08:00"), to: TestClock.date("2026-11-03T00:00"))
+    #expect(found.map(\.id) == [early.id, late.id])
+    try await repository.delete(id: early.id)
+    #expect(try await repository.session(id: early.id) == nil)
+}

@@ -76,6 +76,7 @@ actor SwitchableHealthSource: HealthSampleSource {
 struct TodayFixture {
     let profiles = InMemoryProfileRepository()
     let programs = InMemoryProgramRepository()
+    let workouts = InMemoryWorkoutRepository()
     let recovery: any RecoveryRepository
     let source: SwitchableHealthSource
     let clock: MutableClock
@@ -97,7 +98,7 @@ struct TodayFixture {
             scores: DailyScoreService(recovery: recovery, calendar: calendar),
             widgets: StubWidgetPublisher(), notifications: StubNotificationScheduler(), activity: InMemoryDayActivityLog(),
             calendar: calendar, now: { clock.now })
-        environment = TodayEnvironment(refresher: refresher, library: .bundled, calendar: calendar, now: { clock.now })
+        environment = TodayEnvironment(refresher: refresher, workouts: workouts, library: .bundled, calendar: calendar, now: { clock.now })
     }
 
     func makeModel() -> TodayModel {

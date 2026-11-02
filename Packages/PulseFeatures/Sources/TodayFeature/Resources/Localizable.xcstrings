@@ -51,6 +51,36 @@
         }
       }
     },
+    "%@, aucune donnée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, aucune donnée"
+          }
+        }
+      }
+    },
+    "%@, dernière valeur %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, dernière valeur %@"
+          }
+        }
+      }
+    },
+    "%@, moyenne %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, moyenne %@"
+          }
+        }
+      }
+    },
     "%lld minutes" : {
       "localizations" : {
         "fr" : {
@@ -203,6 +233,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Celles de ta dernière séance, sans surcharge progressive aujourd'hui."
+          }
+        }
+      }
+    },
+    "Charge d'entraînement" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Charge d'entraînement"
+          }
+        }
+      }
+    },
+    "Charge d'entraînement : ratio %@, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Charge d'entraînement : ratio %@, %@"
+          }
+        }
+      }
+    },
+    "Charge élevée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Charge élevée"
           }
         }
       }
@@ -379,6 +439,16 @@
         }
       }
     },
+    "FC repos, 14 jours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FC repos, 14 jours"
+          }
+        }
+      }
+    },
     "Fatigue modérée : remplace le fractionné par une sortie facile de même durée." : {
       "localizations" : {
         "fr" : {
@@ -415,6 +485,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "L'éditeur de routines arrive avec la séance en direct."
+          }
+        }
+      }
+    },
+    "La jauge de charge apparaîtra après 28 jours d'entraînement : elle compare ta dernière semaine à ton mois." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La jauge de charge apparaîtra après 28 jours d'entraînement : elle compare ta dernière semaine à ton mois."
           }
         }
       }
@@ -659,6 +739,16 @@
         }
       }
     },
+    "Ratio aigu / chronique %@. %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ratio aigu / chronique %@. %@"
+          }
+        }
+      }
+    },
     "Relit tes données Apple Santé" : {
       "localizations" : {
         "fr" : {
@@ -725,6 +815,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rien à alléger aujourd'hui."
+          }
+        }
+      }
+    },
+    "Risque de blessure" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Risque de blessure"
           }
         }
       }
@@ -809,12 +909,32 @@
         }
       }
     },
+    "Sommeil, 14 jours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sommeil, 14 jours"
+          }
+        }
+      }
+    },
     "Sous 40, la séance laisse place à 20 minutes de mobilité ou à du repos, au choix." : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sous 40, la séance laisse place à 20 minutes de mobilité ou à du repos, au choix."
+          }
+        }
+      }
+    },
+    "Sous-entraînement" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sous-entraînement"
           }
         }
       }
@@ -865,6 +985,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Séance terminée"
+          }
+        }
+      }
+    },
+    "Ta charge a bondi : allège les prochains jours." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ta charge a bondi : allège les prochains jours."
+          }
+        }
+      }
+    },
+    "Ta charge monte vite : surveille ta récupération." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ta charge monte vite : surveille ta récupération."
           }
         }
       }
@@ -959,6 +1099,26 @@
         }
       }
     },
+    "Tu peux augmenter progressivement ta charge." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu peux augmenter progressivement ta charge."
+          }
+        }
+      }
+    },
+    "Tu peux maintenir ce rythme cette semaine." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu peux maintenir ce rythme cette semaine."
+          }
+        }
+      }
+    },
     "Une série en moins sur : %@." : {
       "localizations" : {
         "fr" : {
@@ -985,6 +1145,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Variabilité"
+          }
+        }
+      }
+    },
+    "Variabilité, 14 jours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Variabilité, 14 jours"
+          }
+        }
+      }
+    },
+    "Zone optimale" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zone optimale"
           }
         }
       }

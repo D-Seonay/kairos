@@ -3,8 +3,8 @@ import PulseDesignSystem
 import PulseServices
 import SwiftUI
 
-/// L'onglet « Aujourd'hui » : en-tête, carte de récupération (ou check-in) et séance du jour, avec ses feuilles et l'écran « Pourquoi »,
-/// poussé dans sa pile de navigation.
+/// L'onglet « Aujourd'hui » : en-tête, carte de récupération (ou check-in), séance du jour, charge d'entraînement et tendances,
+/// avec ses feuilles et l'écran « Pourquoi », poussé dans sa pile de navigation.
 public struct TodayView: View {
     private let model: TodayModel
     private let onOpenProfile: () -> Void
@@ -43,6 +43,8 @@ public struct TodayView: View {
                 TodayHeader(model: model, onOpenProfile: onOpenProfile)
                 recoveryOrCheckIn
                 SessionCard(model: model, onWhy: model.showWhy)
+                LoadCard(content: model.load)
+                TrendTilesView(tiles: model.trends)
             }
             .padding(PulseMetrics.spacing)
         }

@@ -3,6 +3,7 @@ import Foundation
 import Observation
 import PulseContent
 import PulseDomain
+import PulseRecoveryEngine
 import PulseServices
 
 /// L'état de l'onglet « Aujourd'hui » : salutation, score du jour et ses facteurs, carte de la séance du jour,
@@ -18,6 +19,10 @@ public final class TodayModel {
     public private(set) var marker: String?
     public private(set) var session: TodaySession?
     private(set) var card: SessionCardState = .noProgram
+    /// La carte de charge d'entraînement : cachée tant que l'historique ne couvre pas 28 jours.
+    private(set) var load: LoadCardContent = .hidden
+    /// Les tuiles de tendance sur 14 jours : variabilité, FC repos, sommeil. Vides avant la première lecture.
+    private(set) var trends: [TrendTile] = []
     /// La feuille ouverte depuis la carte de la séance : séance à suivre en salle, ou mobilité.
     public var sheet: TodaySheet?
     /// L'écran « Pourquoi » du score du jour ; nul tant qu'il n'y a pas de score du jour.
@@ -69,15 +74,10 @@ public final class TodayModel {
         if let readAt = day.readAt {
             lastSync = readAt
         }
-        guard epoch == scoreEpoch else { return }
-        if let updated = day.score {
-            apply(updated)
-            todayCheckIn = day.checkIn
-            show(day.session)
-        } else {
-            // Le calcul a échoué : le score affiché reste, la séance suit le programme relu.
-            show(TodaySession(plannedDay: day.plannedDay, recovery: scoredToday))
+        if epoch == scoreEpoch {
+            showScoreAndSession(of: day)
         }
+        await updateLoadAndTrends(day: day, now: now)
     }
 
     /// Enregistre les réponses du check-in. Sans effet hors du cas « check-in à faire », avec des réponses incomplètes
@@ -113,6 +113,31 @@ public final class TodayModel {
     }
 
     // MARK: - Interne
+
+    /// Affiche le score lu par le rafraîchissement et la séance qu'il ajuste.
+    private func showScoreAndSession(of day: DayRefresh) {
+        if let updated = day.score {
+            apply(updated)
+            todayCheckIn = day.checkIn
+            show(day.session)
+        } else {
+            // Le calcul a échoué : le score affiché reste, la séance suit le programme relu.
+            show(TodaySession(plannedDay: day.plannedDay, recovery: scoredToday))
+        }
+    }
+
+    /// Les nuits lues font les tendances ; les séances des 28 derniers jours font le ratio de charge. Si les séances ne se lisent
+    /// pas, la carte garde son dernier contenu.
+    private func updateLoadAndTrends(day: DayRefresh, now: Date) async {
+        let calendar = environment.calendar
+        let today = calendar.startOfDay(for: now)
+        trends = TrendTile.make(nights: day.nights, day: today, calendar: calendar)
+        guard let start = calendar.date(byAdding: .day, value: -(LoadCalculator.requiredHistoryDays - 1), to: today),
+              let end = calendar.date(byAdding: .day, value: 1, to: today),
+              let sessions = try? await environment.workouts.sessions(from: start, to: end) else { return }
+        load = LoadCardContent.make(TrainingLoad.acwr(
+            sessions: sessions, onboardingCompletedAt: day.profile?.onboardingCompletedAt, now: now, calendar: calendar))
+    }
 
     /// Affiche un score que l'accueil vient d'écrire, et la séance qu'il ajuste.
     func applyWritten(_ recovery: DailyRecovery) {

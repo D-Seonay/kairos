@@ -54,6 +54,30 @@ struct TodayModelTests {
         #expect(!suggestsMobility)
     }
 
+    @Test func refreshFillsLoadAndTrends() async {
+        let model = TodayFixture().makeModel()
+        await model.refresh()
+        #expect(model.load == .hidden)
+        #expect(model.trends.count == 3)
+    }
+
+    @Test func refreshShowsTheLoadRatioAfterFourWeeks() async throws {
+        let fixture = TodayFixture()
+        let calendar = TodayClock.calendar
+        let onboarded = try #require(calendar.date(byAdding: .day, value: -40, to: fixture.clock.now))
+        try await fixture.profiles.save(UserProfile(onboardingCompletedAt: onboarded, createdAt: onboarded, updatedAt: onboarded))
+        for offset in [1, 8, 15, 22] {
+            let start = try #require(calendar.date(byAdding: .day, value: -offset, to: fixture.clock.now))
+            try await fixture.workouts.save(WorkoutSession(
+                startedAt: start, endedAt: start.addingTimeInterval(3_600), kind: .strength, source: .pulse, status: .completed,
+                title: "Push", overallRPE: 7, durationMinutes: 60, createdAt: start, updatedAt: start))
+        }
+        let model = fixture.makeModel()
+        await model.refresh()
+        let advice = "Tu peux maintenir ce rythme cette semaine."
+        #expect(model.load == .ratio(value: 1, valueText: "1", zoneTitle: "Zone optimale", advice: advice))
+    }
+
     @Test func greetingWithoutFirstName() async {
         let model = TodayFixture().makeModel()
         await model.refresh()
