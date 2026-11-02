@@ -15,12 +15,17 @@ import WidgetFeature
 struct AppDependencies: Sendable {
     /// Préférences du mode mémoire (`-PulseStore inMemory`), vidées à chaque lancement.
     static let memoryDefaultsSuite = "fr.seonay.pulse.memory"
+    /// Préférences du mode disque (`-PulseStore disk`), conservées entre deux lancements et vidées avec `-PulseResetStore YES`.
+    static let diskDefaultsSuite = "fr.seonay.pulse.disk"
     /// Préférences des tests de la cible app, jamais celles de l'app réelle.
     static let testingDefaultsSuite = "fr.seonay.pulse.tests"
 
     let health: any HealthReading
     let healthSource: any HealthSampleSource
     let notifications: any NotificationAuthorizing
+    /// L'autorisation que l'écran en direct demande ; celle des tests d'interface est accordée, pour que l'avis « notifications
+    /// désactivées » ne couvre pas l'écran.
+    let liveSessionNotifications: any NotificationAuthorizing
     let onboardingSteps: any OnboardingStepStore
     let now: @Sendable () -> Date
     let launch: LaunchOptions
@@ -68,6 +73,7 @@ struct AppDependencies: Sendable {
         var health: any HealthReading
         var healthSource: any HealthSampleSource
         var notifications: any NotificationAuthorizing
+        var liveSessionNotifications: any NotificationAuthorizing
         var healthEraser: any HealthErasing
         /// Le groupe d'apps de l'app réelle ; une doublure en mode mémoire et dans les tests.
         var widgets: any WidgetPublishing
@@ -88,10 +94,12 @@ struct AppDependencies: Sendable {
         var now: @Sendable () -> Date
         var launch: LaunchOptions
 
-        /// Le mode mémoire n'écrit ni dans les préférences, ni dans le groupe d'apps, ni dans les notifications de l'app réelle.
+        /// Les modes des tests d'interface (mémoire, disque) n'écrivent ni dans les préférences, ni dans le groupe d'apps, ni dans
+        /// les notifications de l'app réelle. L'écran en direct y a l'autorisation ; l'onboarding garde le refus.
         mutating func useMemoryDoubles(defaultsSuite suite: String) {
             defaultsSuite = suite
             notifications = StubNotificationAuthorizer(granted: false)
+            liveSessionNotifications = StubNotificationAuthorizer(granted: true)
             widgets = StubWidgetPublisher()
             morningScore = StubNotificationScheduler()
             restNotifier = StubRestTimerNotifier()
@@ -126,19 +134,17 @@ struct AppDependencies: Sendable {
             healthSource = UnavailableHealthSource()
         }
         let scheduler = UserNotificationScheduler(now: now)
+        let authorizer = UserNotificationAuthorizer()
         var wiring = Wiring(health: reader ?? StubHealthReader(), healthSource: healthSource,
-                            notifications: UserNotificationAuthorizer(), healthEraser: StubHealthEraser(),
+                            notifications: authorizer, liveSessionNotifications: authorizer, healthEraser: StubHealthEraser(),
                             widgets: AppGroupWidgetPublisher(file: WidgetSnapshotFile.appGroup()),
                             morningScore: scheduler, restNotifier: scheduler, sessionActivity: SessionActivityController(),
                             notificationCanceling: scheduler,
                             backgroundDelivery: launch.healthScenario == nil ? reader.map(HealthKitBackgroundDelivery.init) : nil,
                             inspector: nil, defaultsSuite: nil, calendar: calendar, now: now, launch: launch)
-        if launch.storeInMemory {
-            UserDefaults(suiteName: memoryDefaultsSuite)?.removePersistentDomain(forName: memoryDefaultsSuite)
-            wiring.useMemoryDoubles(defaultsSuite: memoryDefaultsSuite)
-            guard let memory = try? make(wiring, mode: .inMemory, error: nil) else { crash(nil) }
-            return memory
-        }
+        #if DEBUG
+        if let tested = launchStore(&wiring) { return tested }
+        #endif
         #if targetEnvironment(simulator)
         let preferred = StoreMode.localOnly
         #else
@@ -165,7 +171,8 @@ struct AppDependencies: Sendable {
         let wiring = Wiring(
             health: health,
             healthSource: healthSource ?? ScenarioHealthSource(scenario: .noData, now: now(), calendar: calendar),
-            notifications: StubNotificationAuthorizer(granted: false), healthEraser: healthEraser,
+            notifications: StubNotificationAuthorizer(granted: false),
+            liveSessionNotifications: StubNotificationAuthorizer(granted: false), healthEraser: healthEraser,
             widgets: StubWidgetPublisher(), morningScore: StubNotificationScheduler(), restNotifier: StubRestTimerNotifier(),
             sessionActivity: StubSessionActivityController(), notificationCanceling: nil,
             backgroundDelivery: nil, inspector: inspector, defaultsSuite: testingDefaultsSuite, calendar: calendar, now: now,
@@ -175,7 +182,11 @@ struct AppDependencies: Sendable {
     }
 
     private static func make(_ wiring: Wiring, mode: StoreMode, error: String?) throws -> AppDependencies {
-        let container = try PersistenceStack.makeContainer(mode: mode)
+        try make(wiring, container: PersistenceStack.makeContainer(mode: mode), mode: mode, error: error)
+    }
+
+    private static func make(_ wiring: Wiring, container: ModelContainer, mode: StoreMode,
+                             error: String?) throws -> AppDependencies {
         let content = ContentLibrary.bundled
         let calendar = wiring.calendar
         let recovery = SwiftDataRecoveryRepository(modelContainer: container, calendar: calendar)
@@ -203,6 +214,7 @@ struct AppDependencies: Sendable {
             calendar: calendar, now: wiring.now)
         return AppDependencies(
             health: wiring.health, healthSource: wiring.healthSource, notifications: wiring.notifications,
+            liveSessionNotifications: wiring.liveSessionNotifications,
             onboardingSteps: UserDefaultsOnboardingStepStore(suiteName: wiring.defaultsSuite),
             now: wiring.now, launch: wiring.launch,
             calendar: calendar, content: content, container: container, storeMode: mode, storeError: error,
@@ -242,6 +254,33 @@ struct AppDependencies: Sendable {
         return "\(short) (\(build))"
     }
 
+    #if DEBUG
+    /// Le mode mémoire ou le mode disque des tests d'interface, avec les doublures ; `nil` pour l'app réelle. Le mode disque
+    /// garde ses données et ses préférences d'un lancement à l'autre, sauf avec `-PulseResetStore YES`.
+    private static func launchStore(_ wiring: inout Wiring) -> AppDependencies? {
+        let launch = wiring.launch
+        if launch.storeInMemory {
+            UserDefaults(suiteName: memoryDefaultsSuite)?.removePersistentDomain(forName: memoryDefaultsSuite)
+            wiring.useMemoryDoubles(defaultsSuite: memoryDefaultsSuite)
+            guard let memory = try? make(wiring, mode: .inMemory, error: nil) else { crash(nil) }
+            return memory
+        }
+        guard launch.storeOnDisk else { return nil }
+        let directory = FileManager.default.temporaryDirectory.appending(path: "PulseUITestStore", directoryHint: .isDirectory)
+        if launch.resetsStore {
+            UserDefaults(suiteName: diskDefaultsSuite)?.removePersistentDomain(forName: diskDefaultsSuite)
+            try? FileManager.default.removeItem(at: directory)
+        }
+        wiring.useMemoryDoubles(defaultsSuite: diskDefaultsSuite)
+        do {
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            return try make(wiring, container: PersistenceStack.makeContainer(directory: directory), mode: .localOnly, error: nil)
+        } catch {
+            crash(error)
+        }
+    }
+    #endif
+
     private static func crash(_ error: (any Error)?) -> Never {
         fatalError("Impossible de créer le conteneur SwiftData : \(error.map { String(describing: $0) } ?? "inconnu")")
     }
@@ -273,9 +312,9 @@ extension AppDependencies {
     }
 
     /// L'écran en direct passe par le même service que l'accueil et l'onglet Séance ; il demande l'autorisation des notifications
-    /// par l'autorisateur de l'app (une doublure en mode mémoire et dans les tests).
+    /// par l'autorisateur de l'app (une doublure accordée dans les modes des tests d'interface, refusée dans les tests).
     func liveSessionEnvironment() -> LiveSessionEnvironment {
-        LiveSessionEnvironment(service: liveSession, train: trainEnvironment(), notifications: notifications, calendar: calendar,
-                               now: now)
+        LiveSessionEnvironment(service: liveSession, train: trainEnvironment(), notifications: liveSessionNotifications,
+                               calendar: calendar, now: now)
     }
 }

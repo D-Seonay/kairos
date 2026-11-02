@@ -40,6 +40,9 @@ final class AppRootModel {
     }
 
     func load() async {
+        #if DEBUG
+        await dependencies.applyLaunchSeed()
+        #endif
         await resolve()
         await refreshLiveSession()
     }
