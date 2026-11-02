@@ -196,3 +196,30 @@ private func benchFixture() async throws -> TrainFixture {
     await empty.load()
     #expect(empty.chartSummary == nil)
 }
+
+/// Tractions assistées : la meilleure série est la moins assistée, l'assistance ne compte pas dans le tonnage et s'affiche en
+/// négatif.
+@MainActor @Test func assistedSetsRankByTheLeastAssistance() async throws {
+    let fixture = TrainFixture()
+    let assisted = ExerciseReference.content(id: "assisted-pull-up-machine")
+    try await fixture.log(assisted, on: TrainClock.date(month: 10, day: 12, hour: 18), sets: [
+        LoggedSet(weightKg: 25, reps: 10), LoggedSet(weightKg: 15, reps: 6), LoggedSet(weightKg: 15, reps: 8)
+    ])
+    try await fixture.log(assisted, on: TrainClock.date(month: 10, day: 26, hour: 18), sets: [
+        LoggedSet(weightKg: 40, reps: 12), LoggedSet(weightKg: 25, reps: 8)
+    ])
+    let model = ExerciseSheetModel(environment: fixture.environment, reference: assisted)
+    await model.load()
+    let best = try #require(model.bestSet)
+    #expect(best == BestSet(weightKg: 15, reps: 8, date: TrainClock.date(month: 10, day: 12, hour: 18), isAssisted: true))
+    #expect(best.text == "−15 × 8")
+    #expect(model.recentSessions.map(\.setsText) == ["−40 × 12 · −25 × 8", "−25 × 10 · −15 × 6 · 8"])
+    #expect(model.recentSessions.map(\.tonnageKg) == [0, 0])
+}
+
+@MainActor @Test func bestSetTextReadsTheLoad() {
+    let date = TrainClock.date(month: 10, day: 26, hour: 18)
+    #expect(BestSet(weightKg: 72.5, reps: 5, date: date).text == "72,5 × 5")
+    #expect(BestSet(weightKg: 0, reps: 12, date: date).text == "12 répétitions")
+    #expect(BestSet(weightKg: 0, reps: 12, date: date, isAssisted: true).text == "12 répétitions")
+}

@@ -45,11 +45,9 @@ struct ProgressionPane: View {
         return change > 0 ? PulsePalette.ok : (change < 0 ? PulsePalette.bad : PulsePalette.text2)
     }
 
-    /// « 72,5 × 5 » ; « 12 répétitions » sans charge ; « — » sans série.
+    /// « 72,5 × 5 », « −15 × 8 » assisté ; « 12 répétitions » sans charge ; « — » sans série.
     private var bestSetText: String {
-        guard let best = model.bestSet else { return "—" }
-        guard best.weightKg > 0 else { return String(localized: "\(best.reps) répétitions", bundle: .module) }
-        return "\(PulseFormat.decimal(best.weightKg, maxFractionDigits: 2)) × \(best.reps)"
+        model.bestSet?.text ?? "—"
     }
 
     // MARK: - Courbe

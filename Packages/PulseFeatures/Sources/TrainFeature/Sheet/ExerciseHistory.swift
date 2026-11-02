@@ -39,14 +39,23 @@ public struct ExerciseHistoryLine: Identifiable, Equatable, Sendable {
 
 /// Une série retenue comme la meilleure : sa charge, ses répétitions et la date de sa séance.
 public struct BestSet: Equatable, Sendable {
+    /// La charge saisie ; pour un exercice assisté, l'assistance.
     public var weightKg: Double
     public var reps: Int
     public var date: Date
+    public var isAssisted: Bool
 
-    public init(weightKg: Double, reps: Int, date: Date) {
+    public init(weightKg: Double, reps: Int, date: Date, isAssisted: Bool = false) {
         self.weightKg = weightKg
         self.reps = reps
         self.date = date
+        self.isAssisted = isAssisted
+    }
+
+    /// « 72,5 × 5 », « −15 × 8 » pour une assistance ; « 12 répétitions » sans charge.
+    public var text: String {
+        guard weightKg > 0 else { return String(localized: "\(reps) répétitions", bundle: .module) }
+        return "\(ExerciseHistory.weightText(weightKg, isAssisted: isAssisted)) × \(reps)"
     }
 }
 
@@ -59,12 +68,12 @@ struct ExerciseHistory {
     }
 
     private let performances: [Performance]
-    private let isExternalLoad: Bool
+    private let loadKind: LoadKind
 
     /// Les séances de `sessions` où `exercise` a été fait, de la plus récente à la plus ancienne. Le 1RM estimé ne vaut que pour
     /// une charge externe, comme pour les records.
     init(sessions: [WorkoutSession], exercise: ExerciseReference, loadKind: LoadKind) {
-        isExternalLoad = loadKind == .external
+        self.loadKind = loadKind
         performances = sessions
             .filter { $0.status == .completed || $0.status == .abandoned }
             .compactMap { session -> Performance? in
@@ -92,15 +101,17 @@ struct ExerciseHistory {
     }
 
     /// La série au plus fort 1RM estimé, puis à la plus lourde charge, puis aux plus nombreuses répétitions ; la plus récente à égalité.
+    /// Pour un exercice assisté, la moins assistée, puis aux plus nombreuses répétitions.
     var bestSet: BestSet? {
+        let isAssisted = loadKind == .assisted
         var best: (set: BestSet, key: [Double])?
         for performance in performances.reversed() {
             for set in performance.sets {
                 guard let reps = set.actualReps, reps > 0 else { continue }
                 let weight = set.actualWeightKg ?? 0
-                let key = [estimate(weight: weight, reps: reps) ?? 0, weight, Double(reps)]
+                let key = isAssisted ? [-weight, Double(reps)] : [estimate(weight: weight, reps: reps) ?? 0, weight, Double(reps)]
                 if best == nil || !key.lexicographicallyPrecedes(best?.key ?? []) {
-                    best = (BestSet(weightKg: weight, reps: reps, date: performance.session.startedAt), key)
+                    best = (BestSet(weightKg: weight, reps: reps, date: performance.session.startedAt, isAssisted: isAssisted), key)
                 }
             }
         }
@@ -108,12 +119,20 @@ struct ExerciseHistory {
     }
 
     func lines(limit: Int) -> [ExerciseHistoryLine] {
-        performances.prefix(limit).map { performance in
+        let loadKind = self.loadKind
+        return performances.prefix(limit).map { performance in
             ExerciseHistoryLine(
-                id: performance.session.id, date: performance.session.startedAt, setsText: Self.setsText(performance.sets),
-                maxRPE: performance.sets.compactMap(\.rpe).max(), tonnageKg: Self.tonnage(performance.sets),
+                id: performance.session.id, date: performance.session.startedAt,
+                setsText: Self.setsText(performance.sets, isAssisted: loadKind == .assisted),
+                maxRPE: performance.sets.compactMap(\.rpe).max(),
+                tonnageKg: SessionTonnage.kilograms(of: performance.sets) { _ in loadKind },
                 hasRecord: performance.sets.contains(where: \.isPersonalRecord))
         }
+    }
+
+    /// « 72,5 », ou « −15 » pour une assistance.
+    static func weightText(_ weight: Double, isAssisted: Bool) -> String {
+        (isAssisted ? "\u{2212}" : "") + PulseFormat.decimal(weight, maxFractionDigits: 2)
     }
 
     // MARK: - Interne
@@ -123,20 +142,16 @@ struct ExerciseHistory {
     }
 
     private func estimate(weight: Double, reps: Int) -> Double? {
-        isExternalLoad ? OneRepMax.brzycki(weightKg: weight, reps: reps) : nil
+        loadKind == .external ? OneRepMax.brzycki(weightKg: weight, reps: reps) : nil
     }
 
     private func bestEstimate(in sets: [WorkoutSet]) -> Double? {
         sets.compactMap { set in set.actualReps.flatMap { estimate(weight: set.actualWeightKg ?? 0, reps: $0) } }.max()
     }
 
-    private static func tonnage(_ sets: [WorkoutSet]) -> Double {
-        sets.reduce(0) { $0 + ($1.actualWeightKg ?? 0) * Double($1.actualReps ?? 0) }
-    }
-
-    /// Les séries de même charge se suivent derrière une seule charge : « 70 × 5 · 5 ». Une série sans charge n'affiche que ses
-    /// répétitions, une série chronométrée que sa durée.
-    private static func setsText(_ sets: [WorkoutSet]) -> String {
+    /// Les séries de même charge se suivent derrière une seule charge : « 70 × 5 · 5 », « −25 × 8 » pour une assistance. Une série
+    /// sans charge n'affiche que ses répétitions, une série chronométrée que sa durée.
+    private static func setsText(_ sets: [WorkoutSet], isAssisted: Bool) -> String {
         var groups: [(weight: Double, tokens: [String])] = []
         for set in sets {
             let weight = set.actualWeightKg ?? 0
@@ -150,7 +165,7 @@ struct ExerciseHistory {
         return groups.map { group in
             let tokens = group.tokens.joined(separator: " · ")
             guard group.weight > 0 else { return tokens }
-            return "\(PulseFormat.decimal(group.weight, maxFractionDigits: 2)) × \(tokens)"
+            return "\(weightText(group.weight, isAssisted: isAssisted)) × \(tokens)"
         }.joined(separator: " · ")
     }
 }
