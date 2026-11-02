@@ -27,6 +27,7 @@ public enum ContentRule: String, Sendable, CaseIterable {
     case suggestedWeek
     case sessionsPerWeek
     case dayID
+    case hevyNames
 }
 
 /// Un problème de contenu, avec l'identifiant concerné et un message lisible.
@@ -46,7 +47,7 @@ public struct ContentIssue: Sendable, Equatable, CustomStringConvertible {
 
 /// Valide une bibliothèque entière et renvoie tous les problèmes d'un coup.
 public enum ContentValidator {
-    static let expectedExerciseCount = 84
+    static let expectedExerciseCount = 93
     static let minimumPerPattern = 4
     static let allowedIncrements: Set<Double> = [1.25, 2.5, 5]
     static let allowedRests: Set<Int> = [60, 90, 120, 180]
@@ -73,10 +74,21 @@ public enum ContentValidator {
             issues += ExerciseRules.issues(for: exercise, in: library)
         }
         issues += patternPopulationIssues(in: library)
+        issues += hevyNameIssues(in: library)
         for template in library.programTemplates {
             issues += TemplateRules.issues(for: template, in: library)
         }
         return issues.filter { !ignoring.contains($0.rule) }
+    }
+
+    /// Chaque cible de la table des noms Hevy existe et n'est pas retirée.
+    private static func hevyNameIssues(in library: ContentLibrary) -> [ContentIssue] {
+        library.hevyNames.sorted { $0.key < $1.key }.compactMap { name, id in
+            guard let target = library.exercise(id: id) else {
+                return ContentIssue(rule: .hevyNames, subject: name, message: "cible inconnue : \(id)")
+            }
+            return target.retired ? ContentIssue(rule: .hevyNames, subject: name, message: "cible retirée : \(id)") : nil
+        }
     }
 
     /// Chaque plan utilisé par au moins un exercice doit en avoir au moins 4 non retirés.

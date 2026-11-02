@@ -13,7 +13,7 @@ private final class Marker {}
 
 @Test func bundledLibraryLoads() throws {
     let lib = try ContentLibrary.load(from: ContentLibrary.resourceBundle)
-    #expect(lib.contentVersion == "1.1.0")
+    #expect(lib.contentVersion == "1.2.0")
     #expect(lib.exercise(id: "does-not-exist") == nil)
     #expect(lib.programTemplate(id: "does-not-exist") == nil)
 }
@@ -29,4 +29,13 @@ private final class Marker {}
 
 @Test func programsKeepTheirSubdirectory() {
     #expect(ContentLibrary.resourceBundle.url(forResource: "ppl-3", withExtension: "json", subdirectory: "Programs") != nil)
+}
+
+@Test func hevyNamesAreFoldedAtInit() {
+    let catalog = ExerciseCatalog(schemaVersion: 1, contentVersion: "1.0.0", exercises: Fixtures.fourExercises(pattern: .squat))
+    let lib = ContentLibrary(catalog: catalog, templates: [], hevyNames: ["Écarté (Machine)": "p-1"])
+    #expect(lib.hevyNames == ["ecarte machine": "p-1"])
+    #expect(lib.exerciseID(forHevyName: "  ECARTE   (machine) ") == "p-1")
+    #expect(lib.exerciseID(forHevyName: "Écarté") == nil)
+    #expect(Fixtures.library(exercises: []).hevyNames.isEmpty)
 }

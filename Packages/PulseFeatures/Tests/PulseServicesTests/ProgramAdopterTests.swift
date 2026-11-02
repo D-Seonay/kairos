@@ -34,7 +34,7 @@ struct ProgramAdopterTests {
         let program = adopter.adopt(try template("ppl-3"), equipment: .homeGym, painAreas: [], restWeekdays: [], now: now)
         let push = try #require(program.days.first)
         #expect(contentIDs(push) == ["bench-press-dumbbell", "incline-bench-press-dumbbell", "dumbbell-fly", "dips",
-                                     "wrist-curl-cable", "reverse-crunch"])
+                                     "seated-wrist-curl-dumbbell", "reverse-crunch"])
         for day in program.days {
             let ids = contentIDs(day)
             #expect(Set(ids).count == ids.count)
