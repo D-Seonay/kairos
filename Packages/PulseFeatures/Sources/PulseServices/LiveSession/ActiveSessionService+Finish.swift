@@ -9,12 +9,12 @@ extension ActiveSessionService {
     static let forgottenAfter: TimeInterval = 3 * 3_600
 
     /// Pour une séance laissée ouverte plus de 3 h sans action, l'heure de fin proposée : la dernière série validée plus son
-    /// repos. `nil` sinon, sans séance lisible ou sans série validée.
+    /// repos, ou la dernière action sans série validée. `nil` sinon, ou sans séance lisible.
     public func suggestedEnd() async -> Date? {
         let suggested = try? await queue.run { () async throws -> Date? in
             guard let session = try await self.loadSession(),
                   self.now().timeIntervalSince(session.lastActionAt) > Self.forgottenAfter else { return nil }
-            return session.lastValidatedSetEnd
+            return session.lastValidatedSetEnd ?? session.lastActionAt
         }
         return suggested ?? nil
     }
@@ -98,17 +98,14 @@ extension ActiveSessionService {
 }
 
 extension LiveSession {
-    /// La fin du repos de la dernière série validée : 60 s pour un échauffement, le repos de l'exercice sinon.
+    /// La fin du repos de la série validée la dernière : 60 s pour un échauffement, le repos de son exercice sinon.
     var lastValidatedSetEnd: Date? {
         let validated = exercises.flatMap { exercise in
-            exercise.sets.compactMap { set in
-                set.completedAt.map { completedAt in
-                    completedAt.addingTimeInterval(set.setType == .warmup
-                        ? ActiveSessionService.warmUpRestSeconds : TimeInterval(exercise.restSeconds))
-                }
-            }
+            exercise.sets.compactMap { set in set.completedAt.map { (completedAt: $0, set: set, exercise: exercise) } }
         }
-        return validated.max()
+        guard let last = validated.max(by: { $0.completedAt < $1.completedAt }) else { return nil }
+        return last.completedAt.addingTimeInterval(last.set.setType == .warmup
+            ? ActiveSessionService.warmUpRestSeconds : TimeInterval(last.exercise.restSeconds))
     }
 
     /// La séance telle qu'elle s'enregistre : séries validées seulement, numérotées de 0 à n − 1 dans l'ordre de la séance,

@@ -120,10 +120,19 @@ struct ActiveSessionFinishTests {
         #expect(await service.suggestedEnd() == nil)
     }
 
-    @Test func aForgottenSessionWithoutValidatedSetsSuggestsNothing() async throws {
-        let service = try await fixture.resume(Fix.session([Fix.bench([Fix.set(60, 12)])], lastActionAt: "2026-11-02T08:00"))
+    @Test func theLastSetCheckedGivesTheEndEvenWithAShorterRest() async throws {
+        // Tractions validées à 8:39 avec 180 s de repos (fin 8:42), bench à 8:40 avec 90 s : la dernière série validée décide.
+        var pullUp = Fix.pullUp([Fix.set(nil, 8, at: "2026-11-02T08:39")])
+        pullUp.restSeconds = 180
+        let service = try await fixture.resume(Fix.session([pullUp, Fix.bench(Fix.benchSets())]))
         fixture.clock.set("2026-11-02T12:00")
-        #expect(await service.suggestedEnd() == nil)
+        #expect(await service.suggestedEnd() == TestClock.date("2026-11-02T08:40").addingTimeInterval(90))
+    }
+
+    @Test func aForgottenSessionWithoutValidatedSetsSuggestsItsLastAction() async throws {
+        let service = try await fixture.resume(Fix.session([Fix.bench([Fix.set(60, 12)])], lastActionAt: "2026-11-02T08:05"))
+        fixture.clock.set("2026-11-02T12:00")
+        #expect(await service.suggestedEnd() == TestClock.date("2026-11-02T08:05"))
     }
 
     @Test func discardAfterEraseEndsActivitiesAndTheRestWithoutWriting() async throws {
