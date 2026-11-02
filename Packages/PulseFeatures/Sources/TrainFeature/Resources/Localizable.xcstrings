@@ -1087,6 +1087,16 @@
         }
       }
     },
+    "demain" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "demain"
+          }
+        }
+      }
+    },
     "Depuis une séance passée" : {
       "localizations" : {
         "fr" : {
@@ -2185,6 +2195,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Records établis"
+          }
+        }
+      }
+    },
+    "Repos · prochaine : %@, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repos · prochaine : %@, %@"
           }
         }
       }

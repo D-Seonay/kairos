@@ -15,16 +15,15 @@ struct TrainTiles: View {
             ? AnyLayout(VStackLayout(spacing: 12))
             : AnyLayout(HStackLayout(alignment: .top, spacing: 12))
         layout {
-            StrengthTile(session: model.today, directory: model.directory, onOpenToday: onOpenToday)
-            RunTile(nextRun: model.nextRun, weekday: model.weekday)
+            StrengthTile(subtitle: model.strengthSubtitle, onOpenToday: onOpenToday)
+            RunTile(nextRun: model.nextRun, daysUntil: model.nextRun.flatMap { model.daysUntil($0.weekday) })
         }
     }
 }
 
 /// La séance de musculation du jour. M4a ne démarre rien d'ici : toucher la tuile ouvre l'accueil, où la séance se démarre.
 private struct StrengthTile: View {
-    let session: TodaySession?
-    let directory: ExerciseDirectory
+    let subtitle: String
     let onOpenToday: () -> Void
 
     var body: some View {
@@ -49,31 +48,13 @@ private struct StrengthTile: View {
         .accessibilityAddTraits(.isButton)
         .accessibilityIdentifier(TrainIdentifiers.strengthTile)
     }
-
-    /// « Push · ajustée · ~ 55 min », « Repos aujourd'hui », « Course aujourd'hui », « Aucun programme actif ».
-    private var subtitle: String {
-        guard let session else { return String(localized: "Séance du jour", bundle: .module) }
-        switch session.plannedDay {
-        case .noProgram:
-            return String(localized: "Aucun programme actif", bundle: .module)
-        case .rest:
-            return String(localized: "Repos aujourd'hui", bundle: .module)
-        case .run:
-            return String(localized: "Course aujourd'hui", bundle: .module)
-        case .strength(let day):
-            let active = session.activeDay ?? day
-            let minutes = SessionSummary.make(day: active, directory: directory).estimatedMinutes
-            let duration = String(localized: "~ \(minutes) min", bundle: .module)
-            guard session.status == .adjusted else { return String(localized: "\(day.name) · \(duration)", bundle: .module) }
-            return String(localized: "\(day.name) · ajustée · \(duration)", bundle: .module)
-        }
-    }
 }
 
 /// La course du jour ou la prochaine de la semaine type. Rien à lancer en M4a : la tuile informe.
 private struct RunTile: View {
     let nextRun: NextSession?
-    let weekday: Weekday?
+    /// Les jours d'ici la prochaine course : 0 aujourd'hui, 1 demain.
+    let daysUntil: Int?
 
     var body: some View {
         ObsidianCard {
@@ -97,16 +78,11 @@ private struct RunTile: View {
     private var subtitle: String {
         guard let nextRun else { return String(localized: "Aucune course au programme", bundle: .module) }
         let title = nextRun.day.runType?.localizedName ?? nextRun.day.name
-        switch daysUntil(nextRun.weekday) {
+        switch daysUntil {
         case 0: return String(localized: "\(title) · aujourd'hui", bundle: .module)
         case 1: return String(localized: "\(title) · prévue demain", bundle: .module)
         default: return String(localized: "\(title) · prévue \(nextRun.weekday.trainName)", bundle: .module)
         }
-    }
-
-    private func daysUntil(_ target: Weekday) -> Int? {
-        guard let weekday else { return nil }
-        return (target.index - weekday.index + Weekday.allCases.count) % Weekday.allCases.count
     }
 }
 

@@ -69,7 +69,7 @@ public struct TrainView: View {
                     .font(.footnote)
                     .foregroundStyle(PulsePalette.bad)
             }
-            if model.routines.isEmpty {
+            if model.showsNoProgram {
                 Text(String(localized: "Aucun programme actif pour l'instant.", bundle: .module))
                     .font(.subheadline)
                     .foregroundStyle(PulsePalette.text2)

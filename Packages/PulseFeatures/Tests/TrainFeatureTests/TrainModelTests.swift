@@ -101,8 +101,41 @@ private func pplProgram(withRun run: Bool = false) -> Program {
     #expect(model.errorMessage != nil)
     #expect(model.routines.isEmpty)
     #expect(model.today == nil)
+    #expect(!model.showsNoProgram)
 }
 // swiftlint:enable force_unwrapping
+
+@MainActor @Test func trainModelSaysWhenThereIsNoProgram() async throws {
+    let fixture = TrainFixture()
+    try await fixture.profiles.save(UserProfile(onboardingCompletedAt: fixture.now, createdAt: fixture.now, updatedAt: fixture.now))
+    let model = TrainModel(environment: fixture.environment)
+    await model.refresh()
+    #expect(model.showsNoProgram)
+    #expect(model.strengthSubtitle == "Aucun programme actif")
+}
+
+/// Samedi et dimanche sont des jours de repos : la tuile annonce la prochaine séance, Push le lundi.
+@MainActor @Test func trainModelNamesTheNextSessionOnARestDay() async throws {
+    let saturday = TrainFixture(now: TrainClock.date(day: 7, hour: 9))
+    try await saturday.activate(pplProgram())
+    let model = TrainModel(environment: saturday.environment)
+    await model.refresh()
+    #expect(model.strengthSubtitle == "Repos · prochaine : Push, lundi")
+
+    let sunday = TrainFixture(now: TrainClock.date(day: 8, hour: 9))
+    try await sunday.activate(pplProgram())
+    let next = TrainModel(environment: sunday.environment)
+    await next.refresh()
+    #expect(next.strengthSubtitle == "Repos · prochaine : Push, demain")
+}
+
+@MainActor @Test func trainModelSummarisesTodaysStrengthSession() async throws {
+    let fixture = TrainFixture()
+    try await fixture.activate(pplProgram())
+    let model = TrainModel(environment: fixture.environment)
+    await model.refresh()
+    #expect(model.strengthSubtitle == "Push · ~ 15 min")
+}
 
 @MainActor @Test func trainModelAddsARoutineToTheActiveProgram() async throws {
     let fixture = TrainFixture()
