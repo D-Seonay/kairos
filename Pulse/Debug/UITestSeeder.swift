@@ -12,6 +12,10 @@ struct UITestSeeder: Sendable {
     let library: ContentLibrary
     let now: @Sendable () -> Date
 
+    enum SeedError: Error {
+        case missingTemplate(String)
+    }
+
     func seed(_ seed: LaunchSeed) async throws {
         guard try await profiles.load() == nil else { return }
         switch seed {
@@ -24,7 +28,7 @@ struct UITestSeeder: Sendable {
         let date = now()
         var profile = UserProfile(createdAt: date, updatedAt: date)
         profile.onboardingCompletedAt = date
-        guard let template = library.programTemplate(id: "ppl-3") else { return }
+        guard let template = library.programTemplate(id: "ppl-3") else { throw SeedError.missingTemplate("ppl-3") }
         let program = ProgramAdopter(library: library).adopt(
             template, equipment: profile.equipmentAccess, painAreas: profile.painAreas,
             restWeekdays: profile.restWeekdays, now: date)
@@ -35,9 +39,10 @@ struct UITestSeeder: Sendable {
 }
 
 extension AppDependencies {
-    /// Crée les données demandées par `-PulseSeed`, avant que la racine ne lise le profil.
+    /// Crée les données demandées par `-PulseSeed`, avant que la racine ne lise le profil. Jamais dans le magasin réel : il
+    /// faut un des magasins des tests d'interface (mémoire ou disque).
     func applyLaunchSeed() async {
-        guard let seed = launch.seed else { return }
+        guard let seed = launch.seed, launch.storeInMemory || launch.storeOnDisk else { return }
         let seeder = UITestSeeder(profiles: profiles, programs: programs, library: content, now: now)
         do {
             try await seeder.seed(seed)

@@ -22,9 +22,15 @@ final class LiveSessionResumeUITests: XCTestCase {
         app.launch()
 
         tapWhenHittable(app.buttons["today.session.start"], in: app, timeout: 15)
-        tapWhenHittable(app.buttons["live.exercise.0.set.0.check"], in: app, timeout: 15)
-        tapWhenHittable(app.buttons["live.exercise.0.set.1.check"], in: app)
-        XCTAssertTrue(isValidated(app.buttons["live.exercise.0.set.1.check"]))
+        // Sans historique, le développé couché n'a pas de charge proposée : la première coche ouvre le clavier.
+        enterFirstSet(in: app, weight: [6, 0], reps: [8])
+        let firstCheck = app.buttons["live.exercise.0.set.0.check"]
+        tapWhenHittable(firstCheck, in: app)
+        waitUntilValidated(firstCheck)
+        // La première série validée sert de référence aux suivantes : une seule touche valide la deuxième.
+        let secondCheck = app.buttons["live.exercise.0.set.1.check"]
+        tapWhenHittable(secondCheck, in: app)
+        waitUntilValidated(secondCheck)
 
         // Arrêt forcé, puis relance sans effacer le magasin.
         app.terminate()
@@ -32,11 +38,13 @@ final class LiveSessionResumeUITests: XCTestCase {
         app.launch()
 
         tapWhenHittable(app.buttons["session.resume"], in: app, timeout: 15)
-        XCTAssertTrue(app.buttons["live.exercise.0.set.0.check"].waitForExistence(timeout: 10))
-        XCTAssertTrue(isValidated(app.buttons["live.exercise.0.set.0.check"]), "Série 1 non validée après la reprise")
-        XCTAssertTrue(isValidated(app.buttons["live.exercise.0.set.1.check"]), "Série 2 non validée après la reprise")
+        XCTAssertTrue(firstCheck.waitForExistence(timeout: 10))
+        waitUntilValidated(firstCheck, "Série 1 non validée après la reprise")
+        waitUntilValidated(secondCheck, "Série 2 non validée après la reprise")
 
-        tapWhenHittable(app.buttons["live.exercise.0.set.2.check"], in: app)
+        let thirdCheck = app.buttons["live.exercise.0.set.2.check"]
+        tapWhenHittable(thirdCheck, in: app)
+        waitUntilValidated(thirdCheck)
         tapWhenHittable(app.buttons["live.finish"], in: app)
         // Il reste des séries prévues : « Terminer quand même » confirme.
         tapWhenHittable(app.buttons["Terminer quand même"], in: app)
@@ -46,10 +54,39 @@ final class LiveSessionResumeUITests: XCTestCase {
             .waitForExistence(timeout: 15))
     }
 
-    /// L'étiquette d'une coche finit par « validée » (et non « non validée ») une fois la série validée.
+    /// La coche de la première série ouvre le clavier sur la charge : on la saisit, « Suivant » passe aux répétitions, qu'on saisit
+    /// aussi (la proposition éventuelle s'efface au premier chiffre), puis on ferme le clavier pour ne pas couvrir les coches.
     @MainActor
-    private func isValidated(_ check: XCUIElement) -> Bool {
-        check.label.hasSuffix(", validée")
+    private func enterFirstSet(in app: XCUIApplication, weight: [Int], reps: [Int]) {
+        tapWhenHittable(app.buttons["live.exercise.0.set.0.check"], in: app, timeout: 15)
+        typeDigits(weight, in: app)
+        tapKey("next", in: app)
+        typeDigits(reps, in: app)
+        let close = app.buttons["Fermer le clavier"]
+        XCTAssertTrue(close.waitForExistence(timeout: 5))
+        close.tap()
+        XCTAssertTrue(app.buttons["live.key.next"].waitForNonExistence(timeout: 5), "Le clavier reste ouvert")
+    }
+
+    @MainActor
+    private func typeDigits(_ digits: [Int], in app: XCUIApplication) {
+        digits.forEach { tapKey("\($0)", in: app) }
+    }
+
+    @MainActor
+    private func tapKey(_ name: String, in app: XCUIApplication) {
+        let key = app.buttons["live.key.\(name)"]
+        XCTAssertTrue(key.waitForExistence(timeout: 5), "Touche introuvable : \(name)")
+        key.tap()
+    }
+
+    /// La validation passe par le service : l'étiquette de la coche change après le toucher. On attend qu'elle finisse par
+    /// « validée » (et non « non validée »).
+    @MainActor
+    private func waitUntilValidated(_ check: XCUIElement, _ message: String = "Série non validée", timeout: TimeInterval = 10) {
+        let validated = NSPredicate(format: "label ENDSWITH %@", ", validée")
+        let expectation = XCTNSPredicateExpectation(predicate: validated, object: check)
+        XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: timeout), .completed, "\(message) : \(check.label)")
     }
 
     /// Attend l'élément, le fait défiler vers le haut jusqu'à ce qu'il soit touchable (au plus `maxSwipes` fois), puis le touche.

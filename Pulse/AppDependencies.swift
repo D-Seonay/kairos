@@ -13,10 +13,12 @@ import WidgetFeature
 
 /// Les dépendances externes de l'app, assemblées une fois au lancement.
 struct AppDependencies: Sendable {
+    #if DEBUG
     /// Préférences du mode mémoire (`-PulseStore inMemory`), vidées à chaque lancement.
     static let memoryDefaultsSuite = "fr.seonay.pulse.memory"
     /// Préférences du mode disque (`-PulseStore disk`), conservées entre deux lancements et vidées avec `-PulseResetStore YES`.
     static let diskDefaultsSuite = "fr.seonay.pulse.disk"
+    #endif
     /// Préférences des tests de la cible app, jamais celles de l'app réelle.
     static let testingDefaultsSuite = "fr.seonay.pulse.tests"
 
@@ -94,6 +96,7 @@ struct AppDependencies: Sendable {
         var now: @Sendable () -> Date
         var launch: LaunchOptions
 
+        #if DEBUG
         /// Les modes des tests d'interface (mémoire, disque) n'écrivent ni dans les préférences, ni dans le groupe d'apps, ni dans
         /// les notifications de l'app réelle. L'écran en direct y a l'autorisation ; l'onboarding garde le refus.
         mutating func useMemoryDoubles(defaultsSuite suite: String) {
@@ -107,6 +110,7 @@ struct AppDependencies: Sendable {
             notificationCanceling = nil
             backgroundDelivery = nil
         }
+        #endif
     }
 
     /// Apple Santé réel quand l'appareil le permet ; iCloud sur appareil, fichier local sur simulateur, mémoire en dernier recours.
