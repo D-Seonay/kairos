@@ -1,8 +1,10 @@
 import Foundation
 import PulseDesignSystem
 import PulseDomain
+import PulseServices
 
-/// La lecture de la nuit en français : ce que chaque facteur a dit, ce qui manque, la ligne de base, puis la conclusion de la catégorie.
+/// La lecture de la nuit en français : ce que chaque facteur a dit, ce qui manque, la ligne de base, puis la conclusion de la catégorie,
+/// accordée à la séance du jour.
 enum WhyReading {
     /// Sous ce sommeil, la phrase dit « tu n'as dormi que ».
     private static let shortSleepMinutes = 420
@@ -11,14 +13,14 @@ enum WhyReading {
     /// À partir de cet écart arrondi, la FC au repos est dite en hausse ou en baisse.
     private static let heartRateThresholdBpm = 2
 
-    static func make(recovery: DailyRecovery) -> String {
+    static func make(recovery: DailyRecovery, session: TodaySession) -> String {
         var sentences: [String]
         if recovery.isEstimated {
             sentences = [String(localized: "Pas de données de nuit : ce score vient de ton check-in.", bundle: .module)]
         } else {
             sentences = measured(recovery)
         }
-        sentences.append(conclusion(recovery.category))
+        sentences.append(contentsOf: conclusion(recovery.category, session: session))
         return sentences.joined(separator: " ")
     }
 
@@ -104,7 +106,21 @@ enum WhyReading {
 
     // MARK: - Conclusion
 
-    private static func conclusion(_ category: RecoveryCategory) -> String {
+    /// La conclusion qui parle de la séance ne vaut que pour une séance de musculation allégée, ou prévue telle quelle au score
+    /// optimal ; un jour de repos, de course, sans programme ou après « Séance d'origine » garde la phrase neutre.
+    private static func conclusion(_ category: RecoveryCategory, session: TodaySession) -> [String] {
+        let isStrength = if case .strength = session.plannedDay { true } else { false }
+        if isStrength, session.status == .adjusted || (session.status == .planned && category == .optimal) {
+            return [sessionConclusion(category)]
+        }
+        var sentences = [neutralConclusion(category)]
+        if session.status == .restored {
+            sentences.append(String(localized: "Tu as gardé la séance d'origine.", bundle: .module))
+        }
+        return sentences
+    }
+
+    private static func sessionConclusion(_ category: RecoveryCategory) -> String {
         switch category {
         case .optimal:
             String(localized: "Tu es en pleine forme : la séance prévue reste telle quelle.", bundle: .module)
@@ -112,6 +128,19 @@ enum WhyReading {
             String(localized: "Ta récupération est correcte : la séance reste la même, avec un peu plus de repos.", bundle: .module)
         case .moderateFatigue:
             String(localized: "Ton système nerveux est sous tension : la séance est allégée.", bundle: .module)
+        case .overreached:
+            String(localized: "Ton corps demande du repos : mobilité douce ou repos complet aujourd'hui.", bundle: .module)
+        }
+    }
+
+    private static func neutralConclusion(_ category: RecoveryCategory) -> String {
+        switch category {
+        case .optimal:
+            String(localized: "Tu es en pleine forme.", bundle: .module)
+        case .normal:
+            String(localized: "Ta récupération est correcte.", bundle: .module)
+        case .moderateFatigue:
+            String(localized: "Ton système nerveux est sous tension : vas-y doucement aujourd'hui.", bundle: .module)
         case .overreached:
             String(localized: "Ton corps demande du repos : mobilité douce ou repos complet aujourd'hui.", bundle: .module)
         }

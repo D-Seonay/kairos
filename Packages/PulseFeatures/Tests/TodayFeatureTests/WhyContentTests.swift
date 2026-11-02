@@ -1,5 +1,6 @@
 import PulseDomain
 import PulseRecoveryEngine
+import PulseServices
 import Testing
 @testable import TodayFeature
 
@@ -130,6 +131,31 @@ struct WhyContentTests {
     func readingEndsOnTheCategoryConclusion(score: Double, conclusion: String) throws {
         let content = try WhyFixture.content(WhyFixture.recovery(score: score))
         #expect(content.reading.hasSuffix(" " + conclusion))
+    }
+
+    /// Hors d'un Push allégé, la conclusion ne parle pas de séance allégée : un jour de repos ou sans programme garde la phrase neutre.
+    @Test(arguments: [PlannedDay.noProgram, nil])
+    func restDayUnderFatigueDoesNotLightenASession(plannedDay: PlannedDay?) throws {
+        let day = try plannedDay ?? WhyFixture.plannedDay(on: "2026-11-03T08:00")
+        let content = try WhyFixture.content(WhyFixture.recovery(), plannedDay: day)
+        #expect(content.reading.hasSuffix(". Ton système nerveux est sous tension : vas-y doucement aujourd'hui."))
+    }
+
+    @Test func restoredPushUnderFatigueSaysTheOriginalWasKept() throws {
+        let night = WhyFixture.recovery { $0.originalSessionChosen = true }
+        let content = try WhyFixture.content(night)
+        #expect(content.reading.hasSuffix(
+            ". Ton système nerveux est sous tension : vas-y doucement aujourd'hui. Tu as gardé la séance d'origine."))
+    }
+
+    @Test func runDayUnderFatigueDoesNotLightenASession() throws {
+        let run = try WhyFixture.plannedDay("runner-strength", on: "2026-11-05T08:00")
+        guard case .run = run else {
+            Issue.record("runner-strength doit prévoir une course le jeudi")
+            return
+        }
+        let content = try WhyFixture.content(WhyFixture.recovery(), plannedDay: run)
+        #expect(content.reading.hasSuffix(". Ton système nerveux est sous tension : vas-y doucement aujourd'hui."))
     }
 
     // MARK: - Signaux

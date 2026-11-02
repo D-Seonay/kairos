@@ -42,7 +42,7 @@ struct WhyContent: Equatable, Sendable {
     static func make(recovery: DailyRecovery, session: TodaySession, checkIn: CheckIn?, library: ContentLibrary) -> WhyContent {
         let signals = WhySignals.make(recovery: recovery, checkIn: checkIn)
         return WhyContent(
-            reading: WhyReading.make(recovery: recovery),
+            reading: WhyReading.make(recovery: recovery, session: session),
             changes: WhyChanges.make(recovery: recovery, session: session, library: library),
             signals: signals.signals,
             formula: signals.formula,

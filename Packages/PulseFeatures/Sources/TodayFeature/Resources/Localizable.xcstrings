@@ -1029,6 +1029,16 @@
         }
       }
     },
+    "Ta récupération est correcte." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ta récupération est correcte."
+          }
+        }
+      }
+    },
     "Temps restant %@" : {
       "localizations" : {
         "fr" : {
@@ -1079,12 +1089,42 @@
         }
       }
     },
+    "Ton système nerveux est sous tension : vas-y doucement aujourd'hui." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton système nerveux est sous tension : vas-y doucement aujourd'hui."
+          }
+        }
+      }
+    },
+    "Tu as gardé la séance d'origine." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu as gardé la séance d'origine."
+          }
+        }
+      }
+    },
     "Tu es en pleine forme : la séance prévue reste telle quelle." : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tu es en pleine forme : la séance prévue reste telle quelle."
+          }
+        }
+      }
+    },
+    "Tu es en pleine forme." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu es en pleine forme."
           }
         }
       }
