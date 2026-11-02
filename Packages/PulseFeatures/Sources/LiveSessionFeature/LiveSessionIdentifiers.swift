@@ -15,6 +15,9 @@ public enum LiveSessionIdentifiers {
     public static let restSkip = "live.rest.skip"
     public static let addSet = "live.addSet"
     public static let addExercise = "live.addExercise"
+    public static let recapSave = "recap.save"
+    public static let recapLater = "recap.later"
+    public static let recapRPE = "recap.rpe"
 
     /// « live.exercise.0.set.1.check » : la coche de la deuxième série du premier exercice.
     public static func check(exercise: Int, set: Int) -> String { setField(exercise, set, "check") }

@@ -91,12 +91,32 @@
         }
       }
     },
+    "%lld séries" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld séries"
+          }
+        }
+      }
+    },
     "%lld séries faites sur %lld" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld séries faites sur %lld"
+          }
+        }
+      }
+    },
+    "%lld sur 10, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld sur 10, %@"
           }
         }
       }
@@ -161,6 +181,16 @@
         }
       }
     },
+    "1 série" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 série"
+          }
+        }
+      }
+    },
     "1 série faite sur %lld" : {
       "localizations" : {
         "fr" : {
@@ -171,12 +201,152 @@
         }
       }
     },
+    "1 très facile" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 très facile"
+          }
+        }
+      }
+    },
+    "10 maximal" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "10 maximal"
+          }
+        }
+      }
+    },
     "−30 s" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "−30 s"
+          }
+        }
+      }
+    },
+    "Abandon impossible" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abandon impossible"
+          }
+        }
+      }
+    },
+    "Abandonner la séance ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abandonner la séance ?"
+          }
+        }
+      }
+    },
+    "Clore à %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clore à %@"
+          }
+        }
+      }
+    },
+    "Comment s'est passée la séance ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comment s'est passée la séance ?"
+          }
+        }
+      }
+    },
+    "Continuer la séance" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuer la séance"
+          }
+        }
+      }
+    },
+    "dur" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "dur"
+          }
+        }
+      }
+    },
+    "Effort global ressenti" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effort global ressenti"
+          }
+        }
+      }
+    },
+    "Enregistre la séance avec l'effort proposé" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistre la séance avec l'effort proposé"
+          }
+        }
+      }
+    },
+    "facile" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "facile"
+          }
+        }
+      }
+    },
+    "Garder l'heure actuelle" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Garder l'heure actuelle"
+          }
+        }
+      }
+    },
+    "Il reste %lld séries prévues" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il reste %lld séries prévues"
+          }
+        }
+      }
+    },
+    "Il reste 1 série prévue" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il reste 1 série prévue"
           }
         }
       }
@@ -391,12 +561,42 @@
         }
       }
     },
+    "kg soulevés" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kg soulevés"
+          }
+        }
+      }
+    },
+    "Les séries validées sont gardées, les autres ne sont pas enregistrées." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les séries validées sont gardées, les autres ne sont pas enregistrées."
+          }
+        }
+      }
+    },
     "lest de %@" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "lest de %@"
+          }
+        }
+      }
+    },
+    "maximal" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "maximal"
           }
         }
       }
@@ -411,12 +611,42 @@
         }
       }
     },
+    "modéré" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "modéré"
+          }
+        }
+      }
+    },
     "Monter" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Monter"
+          }
+        }
+      }
+    },
+    "Muscles travaillés" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muscles travaillés"
+          }
+        }
+      }
+    },
+    "Muscles travaillés : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muscles travaillés : %@"
           }
         }
       }
@@ -481,6 +711,16 @@
         }
       }
     },
+    "OK" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        }
+      }
+    },
     "Options de %@" : {
       "localizations" : {
         "fr" : {
@@ -527,6 +767,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Passer le repos"
+          }
+        }
+      }
+    },
+    "Plus tard" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plus tard"
+          }
+        }
+      }
+    },
+    "presque maximal" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "presque maximal"
           }
         }
       }
@@ -581,12 +841,62 @@
         }
       }
     },
+    "Pulse n'a pas pu enregistrer la séance. Elle est gardée : tu peux réessayer." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu enregistrer la séance. Elle est gardée : tu peux réessayer."
+          }
+        }
+      }
+    },
     "Pulse n'a pas pu enregistrer ta séance." : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pulse n'a pas pu enregistrer ta séance."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu préparer le récap de la séance." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu préparer le récap de la séance."
+          }
+        }
+      }
+    },
+    "Record" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Record"
+          }
+        }
+      }
+    },
+    "Records" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Records"
+          }
+        }
+      }
+    },
+    "Réessayer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réessayer"
           }
         }
       }
@@ -701,6 +1011,26 @@
         }
       }
     },
+    "Séance commencée il y a longtemps : la clore à %@ ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance commencée il y a longtemps : la clore à %@ ?"
+          }
+        }
+      }
+    },
+    "Séance terminée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance terminée"
+          }
+        }
+      }
+    },
     "Sec" : {
       "localizations" : {
         "fr" : {
@@ -721,12 +1051,32 @@
         }
       }
     },
+    "séries" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "séries"
+          }
+        }
+      }
+    },
     "Ses séries sont retirées de la séance." : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ses séries sont retirées de la séance."
+          }
+        }
+      }
+    },
+    "soutenu" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "soutenu"
           }
         }
       }
@@ -821,12 +1171,42 @@
         }
       }
     },
+    "Terminer quand même" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminer quand même"
+          }
+        }
+      }
+    },
     "Tonnage" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tonnage"
+          }
+        }
+      }
+    },
+    "très dur" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "très dur"
+          }
+        }
+      }
+    },
+    "très facile" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "très facile"
           }
         }
       }

@@ -29,7 +29,7 @@ enum LivePreviewSupport {
 
     private static let bench = ExerciseReference.content(id: "bench-press-barbell")
 
-    private static let launch = SessionLaunch(
+    static let launch = SessionLaunch(
         title: "Pectoraux et triceps",
         day: RoutineDay(order: 0, name: "Pectoraux et triceps", kind: .strength, exercises: [
             RoutineExercise(order: 0, exercise: bench, sets: 3, repsMin: 8, repsMax: 12, targetRPE: 7.5, restSeconds: 165),
@@ -44,6 +44,15 @@ enum LivePreviewSupport {
 
     /// Le modèle d'une séance démarrée. L'horloge est celle du mur : le repos de l'aperçu doit courir pour de bon.
     static func model(_ scenario: Scenario) async -> LiveSessionModel? {
+        let environment = await environment()
+        guard let session = try? await environment.service.start(launch) else { return nil }
+        let model = LiveSessionModel(session: session, environment: environment)
+        await apply(scenario, to: model)
+        return model
+    }
+
+    /// Un service sur des dépôts en mémoire, avec l'historique de développé couché.
+    static func environment() async -> LiveSessionEnvironment {
         let clock: @Sendable () -> Date = { Date() }
         let library = ContentLibrary.bundled
         let workouts = InMemoryWorkoutRepository()
@@ -63,13 +72,9 @@ enum LivePreviewSupport {
             profiles: profiles, programs: InMemoryProgramRepository(), recovery: InMemoryRecoveryRepository(calendar: calendar),
             workouts: workouts, userExercises: userExercises, exerciseSettings: settings, personalRecords: personalRecords,
             records: records, importer: importer, library: library, calendar: calendar, now: clock)
-        let environment = LiveSessionEnvironment(service: service, train: train, notifications: StubNotificationAuthorizer(granted: true),
-                                                 calendar: calendar, now: clock)
         await seedBenchHistory(into: workouts)
-        guard let session = try? await service.start(launch) else { return nil }
-        let model = LiveSessionModel(session: session, environment: environment)
-        await apply(scenario, to: model)
-        return model
+        return LiveSessionEnvironment(service: service, train: train, notifications: StubNotificationAuthorizer(granted: true),
+                                      calendar: calendar, now: clock)
     }
 
     private static func apply(_ scenario: Scenario, to model: LiveSessionModel) async {
