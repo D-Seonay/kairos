@@ -85,7 +85,11 @@ struct TodayModelConcurrencyTests {
         #expect(estimated.isEstimated)
     }
 
-    @Test func refreshStartedBeforeACheckInDoesNotReplaceTheEstimate() async {
+    /// Un check-in envoyé pendant une actualisation attend qu'elle finisse, et l'accueil finit sur le score estimé.
+    /// Le rafraîchisseur sérialise ses opérations : l'actualisation rend son « check-in à faire » avant que le check-in
+    /// ne commence. Ce test ne couvre donc pas la garde contre une lecture périmée du modèle (`scoreEpoch`), que
+    /// cette sérialisation rend inatteignable ; elle reste en défense.
+    @Test func checkInSubmittedDuringARefreshEndsOnTheEstimate() async {
         let recovery = Self.recoveries()
         let fixture = TodayFixture(scenario: .threeNights, recovery: recovery)
         let model = fixture.makeModel()
@@ -95,8 +99,8 @@ struct TodayModelConcurrencyTests {
             return
         }
 
-        // La lecture du score du jour est suspendue après avoir vu « pas de score ». Le service étant sérialisé,
-        // le check-in lancé pendant ce temps attend la fin de ce calcul, puis enregistre l'estimation.
+        // L'actualisation est suspendue dans le rafraîchisseur, sur la lecture du score du jour. Le check-in lancé pendant
+        // ce temps passe derrière elle dans la file, puis enregistre l'estimation.
         let gate = Gate()
         await recovery.holdNextRead(at: gate)
         let staleRefresh = Task { await model.refresh() }

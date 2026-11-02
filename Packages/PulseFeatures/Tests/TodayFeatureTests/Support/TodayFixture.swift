@@ -71,11 +71,12 @@ actor SwitchableHealthSource: HealthSampleSource {
     }
 }
 
-/// Les doublures d'un écran d'accueil, et le modèle construit dessus.
+/// Les doublures d'un écran d'accueil, le rafraîchisseur du jour construit dessus, et le modèle.
 @MainActor
 struct TodayFixture {
     let profiles = InMemoryProfileRepository()
     let programs = InMemoryProgramRepository()
+    let recovery: any RecoveryRepository
     let source: SwitchableHealthSource
     let clock: MutableClock
     let environment: TodayEnvironment
@@ -88,11 +89,15 @@ struct TodayFixture {
         self.clock = clock
         let scenarioSource = ScenarioHealthSource(scenario: scenario, now: clock.now, calendar: calendar)
         source = SwitchableHealthSource(health ?? scenarioSource)
-        environment = TodayEnvironment(
-            profiles: profiles, programs: programs,
+        let recovery = recovery ?? InMemoryRecoveryRepository(calendar: calendar)
+        self.recovery = recovery
+        let refresher = DayRefresher(
+            profiles: profiles, programs: programs, recovery: recovery,
             nightHistory: NightHistory(source: source, cache: InMemoryHealthSampleCache(), calendar: calendar),
-            scores: DailyScoreService(recovery: recovery ?? InMemoryRecoveryRepository(calendar: calendar), calendar: calendar),
-            library: .bundled, calendar: calendar, now: { clock.now })
+            scores: DailyScoreService(recovery: recovery, calendar: calendar),
+            widgets: StubWidgetPublisher(), notifications: StubNotificationScheduler(), activity: InMemoryDayActivityLog(),
+            calendar: calendar, now: { clock.now })
+        environment = TodayEnvironment(refresher: refresher, library: .bundled, calendar: calendar, now: { clock.now })
     }
 
     func makeModel() -> TodayModel {

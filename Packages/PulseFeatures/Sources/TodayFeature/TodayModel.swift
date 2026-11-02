@@ -4,7 +4,8 @@ import Observation
 import PulseDomain
 import PulseServices
 
-/// L'état de l'onglet « Aujourd'hui » : salutation, score du jour et ses facteurs, séance prévue, check-in si les données manquent.
+/// L'état de l'onglet « Aujourd'hui » : salutation, score du jour et ses facteurs, carte de la séance du jour,
+/// check-in si les données manquent. Toutes les lectures et écritures passent par le rafraîchisseur du jour.
 @MainActor
 @Observable
 public final class TodayModel {
@@ -14,15 +15,18 @@ public final class TodayModel {
     public private(set) var score: TodayScore?
     public private(set) var factors: [FactorDisplay] = []
     public private(set) var marker: String?
-    public private(set) var plannedDay: PlannedDay = .noProgram
-    public private(set) var summary: SessionSummary?
+    public private(set) var session: TodaySession?
+    private(set) var card: SessionCardState = .noProgram
+    /// La feuille ouverte depuis la carte de la séance : séance à suivre en salle, ou mobilité.
+    public var sheet: TodaySheet?
     public private(set) var isLoading = false
     public private(set) var errorMessage: String?
     public let checkIn = CheckInForm()
 
-    @ObservationIgnored private let environment: TodayEnvironment
+    @ObservationIgnored let environment: TodayEnvironment
     @ObservationIgnored private var isSubmittingCheckIn = false
-    /// Change à chaque check-in enregistré : une lecture qui a commencé avant lui n'écrase pas le score estimé.
+    /// Change à chaque écriture du score (check-in, choix de la séance) : une lecture commencée avant elle n'écrase pas
+    /// le score qu'elle a produit. Le rafraîchisseur sérialisant ses opérations, la garde ne sert qu'en défense.
     @ObservationIgnored private var scoreEpoch = 0
     /// Le jour de la dernière actualisation : un jour de plus et le formulaire du check-in repart de zéro.
     @ObservationIgnored private var lastRefreshDay: Date?
@@ -38,8 +42,8 @@ public final class TodayModel {
         lastSync.map { Self.timeText($0, calendar: environment.calendar) }
     }
 
-    /// Relit le profil, le programme actif et Apple Santé, puis recalcule le score. Un appel pendant une lecture est ignoré :
-    /// l'activation de la scène ne peut pas courir contre une actualisation manuelle.
+    /// Relit le profil, le programme actif et Apple Santé, recalcule le score et la séance. Un appel pendant une lecture
+    /// est ignoré : l'activation de la scène ne peut pas courir contre une actualisation manuelle.
     public func refresh() async {
         guard !isLoading else { return }
         isLoading = true
@@ -49,17 +53,19 @@ public final class TodayModel {
         dateText = Self.dateText(now, calendar: environment.calendar)
         resetCheckInOnNewDay(now)
 
-        let profile = try? await environment.profiles.load()
-        greeting = Self.greeting(firstName: profile?.firstName)
-        await plan(for: profile, now: now)
-
-        let snapshot = await environment.nightHistory.refresh(now: now)
-        if let readAt = snapshot.readAt {
+        let day = await environment.refresher.refresh(origin: .foreground)
+        greeting = Self.greeting(firstName: day.profile?.firstName)
+        if let readAt = day.readAt {
             lastSync = readAt
         }
-        guard let updated = try? await environment.scores.update(nights: snapshot.nights, plannedDay: plannedDay, now: now),
-              epoch == scoreEpoch else { return }
-        apply(updated)
+        guard epoch == scoreEpoch else { return }
+        if let updated = day.score {
+            apply(updated)
+            show(day.session)
+        } else {
+            // Le calcul a échoué : le score affiché reste, la séance suit le programme relu.
+            show(TodaySession(plannedDay: day.plannedDay, recovery: scoredToday))
+        }
     }
 
     /// Enregistre les réponses du check-in. Sans effet hors du cas « check-in à faire », avec des réponses incomplètes
@@ -69,11 +75,14 @@ public final class TodayModel {
         isSubmittingCheckIn = true
         defer { isSubmittingCheckIn = false }
         do {
-            let estimated = try await environment.scores.saveCheckIn(answers, plannedDay: plannedDay, now: environment.now())
-            scoreEpoch += 1
+            let estimated = try await environment.refresher.saveCheckIn(answers)
             errorMessage = nil
             checkIn.selection = [:]
-            apply(.scored(estimated))
+            applyWritten(estimated)
+        } catch DailyScoreError.alreadyMeasured {
+            // Un score mesuré est arrivé entre-temps : il remplace le check-in, l'accueil se relit.
+            errorMessage = nil
+            await refresh()
         } catch {
             errorMessage = String(localized: "Pulse n'a pas pu enregistrer ton check-in.", bundle: .module)
         }
@@ -81,25 +90,28 @@ public final class TodayModel {
 
     // MARK: - Interne
 
+    /// Affiche un score que l'accueil vient d'écrire, et la séance qu'il ajuste.
+    func applyWritten(_ recovery: DailyRecovery) {
+        scoreEpoch += 1
+        apply(.scored(recovery))
+        show(TodaySession(plannedDay: session?.plannedDay ?? .noProgram, recovery: recovery))
+    }
+
+    private var scoredToday: DailyRecovery? {
+        if case .scored(let recovery) = score { recovery } else { nil }
+    }
+
+    private func show(_ session: TodaySession) {
+        self.session = session
+        card = SessionCardState.make(session: session, score: score, library: environment.library)
+    }
+
     private func resetCheckInOnNewDay(_ now: Date) {
         let day = environment.calendar.startOfDay(for: now)
         if let lastRefreshDay, lastRefreshDay != day {
             checkIn.selection = [:]
         }
         lastRefreshDay = day
-    }
-
-    private func plan(for profile: UserProfile?, now: Date) async {
-        var program: Program?
-        if let id = profile?.activeProgramID {
-            program = try? await environment.programs.program(id: id)
-        }
-        plannedDay = TodayPlanner.plan(program: program, on: now, calendar: environment.calendar)
-        if case .strength(let day) = plannedDay {
-            summary = SessionSummary.make(day: day, library: environment.library)
-        } else {
-            summary = nil
-        }
     }
 
     private func apply(_ updated: TodayScore) {

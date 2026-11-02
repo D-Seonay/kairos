@@ -20,12 +20,15 @@ enum TodayPreviewSupport {
         return components.date ?? Date(timeIntervalSinceReferenceDate: 0)
     }
 
-    /// Un modèle prêt à rafraîchir : profil et programme `templateID` déjà enregistrés (`nil` : « Je construis le mien »).
-    static func model(scenario: HealthScenario, now: Date, templateID: String? = "ppl-3") async -> TodayModel {
+    /// Un modèle prêt à rafraîchir : profil et programme `templateID` déjà enregistrés (`nil` : « Je construis le mien »),
+    /// et `seeded` comme score du jour déjà enregistré (un score estimé reste tant que les nuits ne suffisent pas).
+    static func model(scenario: HealthScenario, now: Date, templateID: String? = "ppl-3",
+                      seeded: DailyRecovery? = nil) async -> TodayModel {
         let calendar = calendar
         let library = ContentLibrary.bundled
         let profiles = InMemoryProfileRepository()
         let programs = InMemoryProgramRepository()
+        let recovery = InMemoryRecoveryRepository(calendar: calendar)
         var profile = UserProfile(firstName: "Mathéo", onboardingCompletedAt: now, createdAt: now, updatedAt: now)
         if let template = templateID.flatMap({ library.programTemplate(id: $0) }) {
             let program = ProgramAdopter(library: library).adopt(
@@ -34,13 +37,24 @@ enum TodayPreviewSupport {
             profile.activeProgramID = program.id
         }
         try? await profiles.save(profile)
+        if let seeded {
+            try? await recovery.save(seeded)
+        }
         let source = ScenarioHealthSource(scenario: scenario, now: now, calendar: calendar)
-        let environment = TodayEnvironment(
-            profiles: profiles, programs: programs,
+        let refresher = DayRefresher(
+            profiles: profiles, programs: programs, recovery: recovery,
             nightHistory: NightHistory(source: source, cache: InMemoryHealthSampleCache(), calendar: calendar),
-            scores: DailyScoreService(recovery: InMemoryRecoveryRepository(calendar: calendar), calendar: calendar),
-            library: library, calendar: calendar, now: { now })
-        return TodayModel(environment: environment)
+            scores: DailyScoreService(recovery: recovery, calendar: calendar),
+            widgets: StubWidgetPublisher(), notifications: StubNotificationScheduler(), activity: InMemoryDayActivityLog(),
+            calendar: calendar, now: { now })
+        return TodayModel(environment: TodayEnvironment(refresher: refresher, library: library, calendar: calendar, now: { now }))
+    }
+
+    /// Un score estimé de surmenage (check-in très bas), lundi 2 novembre.
+    static var overreached: DailyRecovery {
+        let now = date(day: 2, hour: 8)
+        return DailyRecovery(day: calendar.startOfDay(for: now), score: 25, category: .overreached, isEstimated: true,
+                             missingFactors: Factor.allCases, calibration: .calibrating(nights: 0), createdAt: now, updatedAt: now)
     }
 }
 
@@ -49,6 +63,7 @@ struct TodayPreviewHost: View {
     let scenario: HealthScenario
     let now: Date
     var templateID: String? = "ppl-3"
+    var seeded: DailyRecovery?
     @State private var model: TodayModel?
 
     var body: some View {
@@ -59,13 +74,31 @@ struct TodayPreviewHost: View {
                 ProgressView()
             }
         }
-        .task { model = await TodayPreviewSupport.model(scenario: scenario, now: now, templateID: templateID) }
+        .task {
+            model = await TodayPreviewSupport.model(scenario: scenario, now: now, templateID: templateID, seeded: seeded)
+        }
         .preferredColorScheme(.dark)
     }
 }
 
 #Preview("Bonne nuit, lundi Push") {
     TodayPreviewHost(scenario: .goodNight, now: TodayPreviewSupport.date(day: 2, hour: 8))
+}
+
+#Preview("Mauvaise nuit, Push allégé") {
+    TodayPreviewHost(scenario: .badNight, now: TodayPreviewSupport.date(day: 2, hour: 8))
+}
+
+#Preview("Surmenage, mobilité ou repos") {
+    TodayPreviewHost(scenario: .threeNights, now: TodayPreviewSupport.date(day: 2, hour: 8), seeded: TodayPreviewSupport.overreached)
+}
+
+#Preview("Repos sous 65") {
+    TodayPreviewHost(scenario: .badNight, now: TodayPreviewSupport.date(day: 3, hour: 8))
+}
+
+#Preview("Fractionné en fatigue") {
+    TodayPreviewHost(scenario: .badNight, now: TodayPreviewSupport.date(day: 5, hour: 8), templateID: "runner-strength")
 }
 
 #Preview("Sans VFC") {

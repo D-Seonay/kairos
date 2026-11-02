@@ -3,7 +3,7 @@ import PulseDesignSystem
 import PulseServices
 import SwiftUI
 
-/// L'onglet « Aujourd'hui », version simple : en-tête, carte de récupération (ou check-in) et séance du jour.
+/// L'onglet « Aujourd'hui » : en-tête, carte de récupération (ou check-in) et séance du jour, avec ses feuilles.
 public struct TodayView: View {
     private let model: TodayModel
     private let onOpenProfile: () -> Void
@@ -15,8 +15,15 @@ public struct TodayView: View {
     }
 
     public var body: some View {
+        @Bindable var model = model
         content
             .background(PulsePalette.background)
+            .sheet(item: $model.sheet) { sheet in
+                switch sheet {
+                case .start(let day): StartSessionSheet(day: day, library: model.environment.library)
+                case .mobility: MobilitySheet()
+                }
+            }
             .task { await model.refresh() }
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active {
@@ -30,7 +37,7 @@ public struct TodayView: View {
             VStack(spacing: PulseMetrics.spacing) {
                 TodayHeader(model: model, onOpenProfile: onOpenProfile)
                 recoveryOrCheckIn
-                SessionCard(plannedDay: model.plannedDay, summary: model.summary)
+                SessionCard(model: model)
             }
             .padding(PulseMetrics.spacing)
         }

@@ -38,6 +38,10 @@ struct AppDependencies: Sendable {
     let bodyMeasurements: any BodyMeasurementRepository
     let personalRecords: any PersonalRecordRepository
     let healthCache: any HealthSampleCache
+    /// Dernière ouverture et dernier jour annoncé, dans la suite de préférences que la suppression totale vide.
+    let activity: any DayActivityLog
+    /// Le seul passage qui lit Apple Santé et met le score du jour à jour, au premier plan comme en arrière-plan.
+    let refresher: DayRefresher
     let activeSession: any ActiveSessionStore
     let inspector: any StoreInspector
     let exporter: any DataExporter
@@ -133,21 +137,31 @@ struct AppDependencies: Sendable {
                                      healthEraser: wiring.healthEraser, notifications: nil,
                                      exportsDirectory: SwiftDataExporter.exportsDirectory)
         let recovery = SwiftDataRecoveryRepository(modelContainer: container, calendar: calendar)
+        let profiles = SwiftDataProfileRepository(modelContainer: container)
+        let programs = SwiftDataProgramRepository(modelContainer: container)
+        let scores = DailyScoreService(recovery: recovery, calendar: calendar)
+        let healthCache = SwiftDataHealthSampleCache(modelContainer: container)
+        let activity = UserDefaultsDayActivityLog(suiteName: wiring.defaultsSuite)
+        // Le widget et la notification du matin sont des doublures jusqu'à leurs tâches (14 et 15).
+        let refresher = DayRefresher(
+            profiles: profiles, programs: programs, recovery: recovery,
+            nightHistory: NightHistory(source: wiring.healthSource, cache: healthCache, calendar: calendar), scores: scores,
+            widgets: StubWidgetPublisher(), notifications: StubNotificationScheduler(), activity: activity,
+            calendar: calendar, now: wiring.now)
         return AppDependencies(
             health: wiring.health, healthSource: wiring.healthSource, notifications: wiring.notifications,
             onboardingSteps: UserDefaultsOnboardingStepStore(suiteName: wiring.defaultsSuite),
             now: wiring.now, launch: wiring.launch,
             calendar: calendar, content: content, container: container, storeMode: mode, storeError: error,
-            profiles: SwiftDataProfileRepository(modelContainer: container),
-            programs: SwiftDataProgramRepository(modelContainer: container),
+            profiles: profiles, programs: programs,
             userExercises: SwiftDataUserExerciseRepository(modelContainer: container),
             workouts: SwiftDataWorkoutRepository(modelContainer: container),
             scheduledDays: SwiftDataScheduledDayRepository(modelContainer: container),
-            recovery: recovery, scores: DailyScoreService(recovery: recovery, calendar: calendar),
+            recovery: recovery, scores: scores,
             supplements: SwiftDataSupplementRepository(modelContainer: container),
             bodyMeasurements: SwiftDataBodyMeasurementRepository(modelContainer: container),
             personalRecords: SwiftDataPersonalRecordRepository(modelContainer: container),
-            healthCache: SwiftDataHealthSampleCache(modelContainer: container),
+            healthCache: healthCache, activity: activity, refresher: refresher,
             activeSession: SwiftDataActiveSessionStore(modelContainer: container),
             inspector: SwiftDataStoreInspector(container: container, cloudEnabled: mode == .cloud),
             exporter: exporter, eraser: eraser, seeder: SampleDataSeeder(container: container, calendar: calendar))
@@ -179,7 +193,6 @@ extension AppDependencies {
     }
 
     func todayEnvironment() -> TodayEnvironment {
-        TodayEnvironment(profiles: profiles, programs: programs, nightHistory: nightHistory, scores: scores,
-                         library: content, calendar: calendar, now: now)
+        TodayEnvironment(refresher: refresher, library: content, calendar: calendar, now: now)
     }
 }

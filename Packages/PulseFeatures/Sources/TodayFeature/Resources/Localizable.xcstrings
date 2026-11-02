@@ -97,6 +97,16 @@
         }
       }
     },
+    "Ajustée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajustée"
+          }
+        }
+      }
+    },
     "Aucune autre séance prévue cette semaine." : {
       "localizations" : {
         "fr" : {
@@ -167,6 +177,36 @@
         }
       }
     },
+    "Démarrer la séance" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Démarrer la séance"
+          }
+        }
+      }
+    },
+    "Démarrer quand même" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Démarrer quand même"
+          }
+        }
+      }
+    },
+    "En attendant, voici ta séance à suivre en salle :" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En attendant, voici ta séance à suivre en salle :"
+          }
+        }
+      }
+    },
     "En calibration (%lld nuits)" : {
       "localizations" : {
         "fr" : {
@@ -199,12 +239,32 @@
         }
       }
     },
+    "Exercice personnel" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exercice personnel"
+          }
+        }
+      }
+    },
     "FC repos" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "FC repos"
+          }
+        }
+      }
+    },
+    "Fatigue modérée : remplace le fractionné par une sortie facile de même durée." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fatigue modérée : remplace le fractionné par une sortie facile de même durée."
           }
         }
       }
@@ -235,6 +295,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "L'éditeur de routines arrive avec la séance en direct."
+          }
+        }
+      }
+    },
+    "La séance en direct arrive bientôt" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La séance en direct arrive bientôt"
           }
         }
       }
@@ -285,6 +355,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pause"
+          }
+        }
+      }
+    },
+    "Planifiée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planifiée"
+          }
+        }
+      }
+    },
+    "Pourquoi ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pourquoi ?"
           }
         }
       }
@@ -369,6 +459,16 @@
         }
       }
     },
+    "Revenir à l'ajustée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Revenir à l'ajustée"
+          }
+        }
+      }
+    },
     "Rien n'est enregistré : la mobilité ne compte ni dans la charge ni dans ta série." : {
       "localizations" : {
         "fr" : {
@@ -399,6 +499,16 @@
         }
       }
     },
+    "Score sous 65 : 20 min de mobilité t'aideront à récupérer." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Score sous 65 : 20 min de mobilité t'aideront à récupérer."
+          }
+        }
+      }
+    },
     "Sommeil" : {
       "localizations" : {
         "fr" : {
@@ -409,12 +519,32 @@
         }
       }
     },
+    "Surmenage : repos conseillé aujourd'hui, la course peut attendre." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Surmenage : repos conseillé aujourd'hui, la course peut attendre."
+          }
+        }
+      }
+    },
     "Synchro %@" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Synchro %@"
+          }
+        }
+      }
+    },
+    "Séance d'origine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance d'origine"
           }
         }
       }
@@ -455,6 +585,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Terminer"
+          }
+        }
+      }
+    },
+    "Ton corps a besoin de récupérer : 20 min de mobilité ou repos complet, au choix." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton corps a besoin de récupérer : 20 min de mobilité ou repos complet, au choix."
           }
         }
       }
@@ -569,12 +709,42 @@
         }
       }
     },
+    "repos %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "repos %@"
+          }
+        }
+      }
+    },
     "samedi" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "samedi"
+          }
+        }
+      }
+    },
+    "super set · %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "super set · %@"
+          }
+        }
+      }
+    },
+    "super set, sans repos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "super set, sans repos"
           }
         }
       }

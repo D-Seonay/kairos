@@ -44,7 +44,7 @@ let package = Package(
         ),
         .target(
             name: "TodayFeature",
-            dependencies: ["PulseServices", "CheckInFeature", designSystem, domain, content],
+            dependencies: ["PulseServices", "CheckInFeature", designSystem, domain, recoveryEngine, content],
             resources: [.process("Resources")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),

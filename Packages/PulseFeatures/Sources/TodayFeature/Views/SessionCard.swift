@@ -4,18 +4,25 @@ import PulseDomain
 import PulseServices
 import SwiftUI
 
-/// La carte « Séance du jour » : musculation avec sa mini-carte musculaire, course, repos ou aucun programme.
+/// La carte « Séance du jour » : musculation (ajustée, planifiée ou rétablie), mobilité ou repos au choix, course, repos
+/// ou aucun programme.
 struct SessionCard: View {
-    let plannedDay: PlannedDay
-    let summary: SessionSummary?
+    let model: TodayModel
+    /// L'écran « Pourquoi », quand il existe.
+    var onWhy: (() -> Void)?
 
     var body: some View {
         ObsidianCard {
             VStack(alignment: .leading, spacing: 12) {
-                switch plannedDay {
-                case .strength(let day): strength(day)
-                case .run(let day): run(day)
-                case .rest(let next): rest(next)
+                switch model.card {
+                case .strength(let card):
+                    StrengthSessionCard(
+                        card: card, onWhy: onWhy,
+                        onOrigin: { choose(original: card.badge == .adjusted) },
+                        onStart: model.startSession)
+                case .mobilityOrRest(let dayName): mobilityOrRest(dayName)
+                case .run(let card): run(card)
+                case .rest(let next, let suggestsMobility): rest(next, suggestsMobility: suggestsMobility)
                 case .noProgram: noProgram
                 }
             }
@@ -23,58 +30,52 @@ struct SessionCard: View {
         }
     }
 
-    // MARK: - Musculation
+    private func choose(original: Bool) {
+        Task { await model.chooseOriginalSession(original) }
+    }
 
+    // MARK: - Mobilité ou repos
+
+    /// Choisir le repos, c'est ne rien faire : aucun bouton, rien n'est enregistré.
     @ViewBuilder
-    private func strength(_ day: RoutineDay) -> some View {
-        eyebrow(String(localized: "Séance du jour", bundle: .module))
-        title(day.name)
-        if let summary {
-            SessionOverview(summary: summary)
-        }
+    private func mobilityOrRest(_ dayName: String) -> some View {
+        SessionCardHeader(title: dayName, badge: .adjusted)
+        detail(String(localized: "Ton corps a besoin de récupérer : 20 min de mobilité ou repos complet, au choix.", bundle: .module))
+        Button(String(localized: "20 min de mobilité", bundle: .module), action: model.startMobility)
+            .buttonStyle(PrimaryButtonStyle())
+            .accessibilityIdentifier(TodayIdentifiers.sessionStart)
+        Button(String(localized: "Séance d'origine", bundle: .module)) { choose(original: true) }
+            .buttonStyle(SecondaryButtonStyle())
+            .accessibilityIdentifier(TodayIdentifiers.sessionOrigin)
     }
 
     // MARK: - Course
 
     @ViewBuilder
-    private func run(_ day: RoutineDay) -> some View {
-        eyebrow(String(localized: "Séance du jour", bundle: .module))
-        HStack(spacing: 10) {
-            Image(systemName: "figure.run")
-                .font(.title2)
-                .foregroundStyle(PulsePalette.run)
-                .accessibilityHidden(true)
-            title(day.runType?.localizedName ?? day.name)
+    private func run(_ card: RunCard) -> some View {
+        SessionCardHeader(title: card.title, runIcon: true)
+        if let target = card.target {
+            detail(target)
         }
-        if let target = Self.runTarget(day) {
-            Text(target)
-                .font(.subheadline)
-                .foregroundStyle(PulsePalette.text2)
+        if let suggestion = card.suggestion {
+            Text(suggestion)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(PulsePalette.text)
         }
-    }
-
-    /// « 40 min », « 8 km » ou « 40 min · 8 km » ; `nil` sans cible.
-    static func runTarget(_ day: RoutineDay) -> String? {
-        var parts: [String] = []
-        if let minutes = day.runTargetMinutes {
-            parts.append(PulseFormat.duration(minutes: minutes))
-        }
-        if let km = day.runTargetKm {
-            let number = km.formatted(.number.locale(Locale(identifier: "fr_FR")).precision(.fractionLength(0...1)))
-            parts.append(String(localized: "\(number) km", bundle: .module))
-        }
-        return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 
     // MARK: - Repos
 
     @ViewBuilder
-    private func rest(_ next: NextSession?) -> some View {
-        eyebrow(String(localized: "Séance du jour", bundle: .module))
-        title(String(localized: "Repos", bundle: .module))
-        Text(next.map(Self.nextSessionText) ?? String(localized: "Aucune autre séance prévue cette semaine.", bundle: .module))
-            .font(.subheadline)
-            .foregroundStyle(PulsePalette.text2)
+    private func rest(_ next: NextSession?, suggestsMobility: Bool) -> some View {
+        SessionCardHeader(title: String(localized: "Repos", bundle: .module))
+        detail(next.map(Self.nextSessionText) ?? String(localized: "Aucune autre séance prévue cette semaine.", bundle: .module))
+        if suggestsMobility {
+            detail(String(localized: "Score sous 65 : 20 min de mobilité t'aideront à récupérer.", bundle: .module))
+            Button(String(localized: "20 min de mobilité", bundle: .module), action: model.startMobility)
+                .buttonStyle(SecondaryButtonStyle())
+                .accessibilityIdentifier(TodayIdentifiers.sessionStart)
+        }
     }
 
     /// « Prochaine séance : Pull, mercredi ».
@@ -86,65 +87,14 @@ struct SessionCard: View {
 
     @ViewBuilder
     private var noProgram: some View {
-        eyebrow(String(localized: "Séance du jour", bundle: .module))
-        title(String(localized: "Aucune séance prévue.", bundle: .module))
-        Text(String(localized: "L'éditeur de routines arrive avec la séance en direct.", bundle: .module))
+        SessionCardHeader(title: String(localized: "Aucune séance prévue.", bundle: .module))
+        detail(String(localized: "L'éditeur de routines arrive avec la séance en direct.", bundle: .module))
+    }
+
+    private func detail(_ text: String) -> some View {
+        Text(text)
             .font(.subheadline)
             .foregroundStyle(PulsePalette.text2)
-    }
-
-    // MARK: - Éléments
-
-    private func eyebrow(_ text: String) -> some View {
-        Text(text)
-            .font(.caption.weight(.semibold))
-            .foregroundStyle(PulsePalette.muted)
-    }
-
-    private func title(_ text: String) -> some View {
-        Text(text)
-            .font(.title3.weight(.bold))
-            .foregroundStyle(PulsePalette.text)
-            .accessibilityAddTraits(.isHeader)
-            .accessibilityIdentifier(TodayIdentifiers.sessionTitle)
-    }
-}
-
-/// Mini-carte musculaire, séries, durée, RPE maximum et trois muscles principaux ; empilés aux tailles d'accessibilité.
-private struct SessionOverview: View {
-    let summary: SessionSummary
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-
-    var body: some View {
-        let layout = dynamicTypeSize.isAccessibilitySize
-            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12))
-            : AnyLayout(HStackLayout(alignment: .top, spacing: 16))
-        layout {
-            MuscleMapView(levels: MuscleIntensity.levels(weights: summary.muscleWeights), label: musclesLabel, height: 110)
-            VStack(alignment: .leading, spacing: 6) {
-                Text(statsText)
-                    .font(.subheadline.weight(.semibold).monospacedDigit())
-                    .foregroundStyle(PulsePalette.text)
-                if !summary.topMuscles.isEmpty {
-                    Text(summary.topMuscles.map(\.localizedName).joined(separator: " · "))
-                        .font(.footnote)
-                        .foregroundStyle(PulsePalette.text2)
-                }
-            }
-        }
-    }
-
-    private var musclesLabel: String {
-        let names = summary.topMuscles.map(\.localizedName).joined(separator: ", ")
-        return String(localized: "Muscles sollicités : \(names)", bundle: .module)
-    }
-
-    /// « 19 séries · ~ 55 min · RPE max 8 ».
-    private var statsText: String {
-        let sets = String(localized: "\(summary.setCount) séries", bundle: .module)
-        let duration = String(localized: "~ \(PulseFormat.duration(minutes: summary.estimatedMinutes))", bundle: .module)
-        let rpe = summary.maxRPE.formatted(.number.locale(Locale(identifier: "fr_FR")).precision(.fractionLength(0...1)))
-        return [sets, duration, String(localized: "RPE max \(rpe)", bundle: .module)].joined(separator: " · ")
     }
 }
 
