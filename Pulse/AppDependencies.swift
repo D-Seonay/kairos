@@ -7,6 +7,7 @@ import PulsePersistence
 import PulseServices
 import SwiftData
 import TodayFeature
+import WidgetFeature
 
 /// Les dépendances externes de l'app, assemblées une fois au lancement.
 struct AppDependencies: Sendable {
@@ -54,6 +55,8 @@ struct AppDependencies: Sendable {
         var healthSource: any HealthSampleSource
         var notifications: any NotificationAuthorizing
         var healthEraser: any HealthErasing
+        /// Le groupe d'apps de l'app réelle ; une doublure en mode mémoire et dans les tests.
+        var widgets: any WidgetPublishing
         /// `nil` : `UserDefaults.standard`.
         var defaultsSuite: String?
         var calendar: Calendar
@@ -87,11 +90,13 @@ struct AppDependencies: Sendable {
         }
         var wiring = Wiring(health: reader ?? StubHealthReader(), healthSource: healthSource,
                             notifications: UserNotificationAuthorizer(), healthEraser: StubHealthEraser(),
+                            widgets: AppGroupWidgetPublisher(file: WidgetSnapshotFile.appGroup()),
                             defaultsSuite: nil, calendar: calendar, now: now, launch: launch)
         if launch.storeInMemory {
             UserDefaults(suiteName: memoryDefaultsSuite)?.removePersistentDomain(forName: memoryDefaultsSuite)
             wiring.defaultsSuite = memoryDefaultsSuite
             wiring.notifications = StubNotificationAuthorizer(granted: false)
+            wiring.widgets = StubWidgetPublisher()
             guard let memory = try? make(wiring, mode: .inMemory, error: nil) else { crash(nil) }
             return memory
         }
@@ -121,7 +126,7 @@ struct AppDependencies: Sendable {
             health: health,
             healthSource: healthSource ?? ScenarioHealthSource(scenario: .noData, now: now(), calendar: calendar),
             notifications: StubNotificationAuthorizer(granted: false), healthEraser: healthEraser,
-            defaultsSuite: testingDefaultsSuite, calendar: calendar, now: now, launch: LaunchOptions())
+            widgets: StubWidgetPublisher(), defaultsSuite: testingDefaultsSuite, calendar: calendar, now: now, launch: LaunchOptions())
         guard let dependencies = try? make(wiring, mode: .inMemory, error: nil) else { crash(nil) }
         return dependencies
     }
@@ -135,18 +140,18 @@ struct AppDependencies: Sendable {
         let eraser = SwiftDataEraser(container: container, defaultsSuite: wiring.defaultsSuite,
                                      defaultsDomain: wiring.defaultsSuite ?? Bundle.main.bundleIdentifier ?? "fr.seonay.pulse",
                                      healthEraser: wiring.healthEraser, notifications: nil,
-                                     exportsDirectory: SwiftDataExporter.exportsDirectory)
+                                     widgets: wiring.widgets, exportsDirectory: SwiftDataExporter.exportsDirectory)
         let recovery = SwiftDataRecoveryRepository(modelContainer: container, calendar: calendar)
         let profiles = SwiftDataProfileRepository(modelContainer: container)
         let programs = SwiftDataProgramRepository(modelContainer: container)
         let scores = DailyScoreService(recovery: recovery, calendar: calendar)
         let healthCache = SwiftDataHealthSampleCache(modelContainer: container)
         let activity = UserDefaultsDayActivityLog(suiteName: wiring.defaultsSuite)
-        // Le widget et la notification du matin sont des doublures jusqu'à leurs tâches (14 et 15).
+        // La notification du matin est une doublure jusqu'à la tâche 15.
         let refresher = DayRefresher(
             profiles: profiles, programs: programs, recovery: recovery,
             nightHistory: NightHistory(source: wiring.healthSource, cache: healthCache, calendar: calendar), scores: scores,
-            widgets: StubWidgetPublisher(), notifications: StubNotificationScheduler(), activity: activity,
+            widgets: wiring.widgets, notifications: StubNotificationScheduler(), activity: activity,
             calendar: calendar, now: wiring.now)
         return AppDependencies(
             health: wiring.health, healthSource: wiring.healthSource, notifications: wiring.notifications,

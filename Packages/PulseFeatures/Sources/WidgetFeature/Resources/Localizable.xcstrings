@@ -1,1 +1,116 @@
-{"sourceLanguage":"fr","strings":{},"version":"1.0"}
+{
+  "sourceLanguage" : "fr",
+  "strings" : {
+    "%@ · estimé" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · estimé"
+          }
+        }
+      }
+    },
+    "%lld · %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld · %@"
+          }
+        }
+      }
+    },
+    "Pas de séance aujourd'hui" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas de séance aujourd'hui"
+          }
+        }
+      }
+    },
+    "Récupération" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Récupération"
+          }
+        }
+      }
+    },
+    "Récupération %lld sur 100" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Récupération %lld sur 100"
+          }
+        }
+      }
+    },
+    "Récupération : score pas encore prêt" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Récupération : score pas encore prêt"
+          }
+        }
+      }
+    },
+    "Score pas encore prêt" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Score pas encore prêt"
+          }
+        }
+      }
+    },
+    "Séance allégée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance allégée"
+          }
+        }
+      }
+    },
+    "Séance normale" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance normale"
+          }
+        }
+      }
+    },
+    "Ton score du matin et ta séance du jour." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton score du matin et ta séance du jour."
+          }
+        }
+      }
+    },
+    "estimé" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "estimé"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
