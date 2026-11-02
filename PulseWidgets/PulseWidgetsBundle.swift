@@ -10,5 +10,7 @@ struct PulseWidgetsBundle: WidgetBundle {
         WeekWidget()
         LoadWidget()
         NextWorkoutWidget()
+        LaunchSessionControlWidget()
+        RecoveryScoreControlWidget()
     }
 }
