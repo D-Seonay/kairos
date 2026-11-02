@@ -14,7 +14,8 @@ let package = Package(
         .library(name: "PulseServices", targets: ["PulseServices"]),
         .library(name: "CheckInFeature", targets: ["CheckInFeature"]),
         .library(name: "OnboardingFeature", targets: ["OnboardingFeature"]),
-        .library(name: "TodayFeature", targets: ["TodayFeature"])
+        .library(name: "TodayFeature", targets: ["TodayFeature"]),
+        .library(name: "WidgetFeature", targets: ["WidgetFeature"])
     ],
     dependencies: [
         .package(path: "../PulseDomain"),
@@ -46,6 +47,12 @@ let package = Package(
             resources: [.process("Resources")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
+        .target(
+            name: "WidgetFeature",
+            dependencies: [domain, designSystem],
+            resources: [.process("Resources")],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
         .testTarget(
             name: "PulseServicesTests",
             dependencies: ["PulseServices"],
@@ -64,6 +71,11 @@ let package = Package(
         .testTarget(
             name: "TodayFeatureTests",
             dependencies: ["TodayFeature"],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .testTarget(
+            name: "WidgetFeatureTests",
+            dependencies: ["WidgetFeature"],
             swiftSettings: [.swiftLanguageMode(.v6)]
         )
     ]
