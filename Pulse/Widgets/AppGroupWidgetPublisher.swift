@@ -24,6 +24,6 @@ struct AppGroupWidgetPublisher: WidgetPublishing {
     }
 
     private func reloadTimelines() {
-        WidgetCenter.shared.reloadTimelines(ofKind: RecoveryWidgetContent.kind)
+        WidgetCenter.shared.reloadAllTimelines()
     }
 }

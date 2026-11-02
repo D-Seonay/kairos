@@ -1,7 +1,22 @@
 {
   "sourceLanguage" : "fr",
   "strings" : {
+    "·" : {
 
+    },
+    "%@" : {
+
+    },
+    "%@ · %@ × %@ à %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · %2$@ × %3$@ à %4$@"
+          }
+        }
+      }
+    }
   },
   "version" : "1.0"
 }

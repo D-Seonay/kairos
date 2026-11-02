@@ -2,9 +2,11 @@ import PulseDesignSystem
 import PulseDomain
 import SwiftUI
 
-/// Le petit widget de l'écran d'accueil (maquette `ios-accueil`) : « Récupération », la jauge compacte, la catégorie en gras, la séance.
-/// Les couleurs suivent le `foregroundStyle` de l'environnement : l'extension pose l'encre sur le fond opale, et laisse le système
-/// teinter en monochrome (En veille la nuit) ; la lisibilité ne repose que sur la luminance, jamais sur la couleur seule.
+/// Le petit widget de l'écran d'accueil (maquette `ios-accueil`) : « Récupération »,
+/// la jauge compacte, la catégorie en gras, la séance.
+/// Les couleurs suivent le `foregroundStyle` de l'environnement : l'extension pose l'encre sur le fond opale,
+/// et laisse le système teinter en monochrome (En veille la nuit) ; la lisibilité ne repose que sur la luminance,
+/// jamais sur la couleur seule.
 public struct RecoveryWidgetSmallView: View {
     private let content: RecoveryWidgetContent
 

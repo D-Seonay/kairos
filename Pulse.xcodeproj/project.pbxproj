@@ -82,14 +82,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		9BB6D589009B5518946696BF /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+		9BB6D589009B5518946696BF /* Exceptions for "PulseWidgets" folder in "PulseWidgets" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
 			target = DE3AE688686C38C844125D4B /* PulseWidgets */;
 		};
-		C9BD4A9A33AA4579CDB23D6E /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+		C9BD4A9A33AA4579CDB23D6E /* Exceptions for "Pulse" folder in "Pulse" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -102,41 +102,25 @@
 		52B1409109A07797286C6D2C /* PulseWidgets */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				9BB6D589009B5518946696BF /* PBXFileSystemSynchronizedBuildFileExceptionSet */,
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
+				9BB6D589009B5518946696BF /* Exceptions for "PulseWidgets" folder in "PulseWidgets" target */,
 			);
 			path = PulseWidgets;
 			sourceTree = "<group>";
 		};
 		BE553024BFA22B3A91E57AAE /* PulseTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
 			path = PulseTests;
 			sourceTree = "<group>";
 		};
 		F25C064D337B30DFBA7B9655 /* PulseUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
 			path = PulseUITests;
 			sourceTree = "<group>";
 		};
 		F43F5B3DCF8CA4AA62083E92 /* Pulse */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				C9BD4A9A33AA4579CDB23D6E /* PBXFileSystemSynchronizedBuildFileExceptionSet */,
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
+				C9BD4A9A33AA4579CDB23D6E /* Exceptions for "Pulse" folder in "Pulse" target */,
 			);
 			path = Pulse;
 			sourceTree = "<group>";

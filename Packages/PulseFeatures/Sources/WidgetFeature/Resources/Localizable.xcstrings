@@ -11,6 +11,26 @@
         }
       }
     },
+    "%lld sem. · %lld/%lld" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld sem. · %lld/%lld"
+          }
+        }
+      }
+    },
+    "%lld sur %lld cette semaine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld sur %lld cette semaine"
+          }
+        }
+      }
+    },
     "%lld · %@" : {
       "localizations" : {
         "fr" : {
@@ -31,12 +51,212 @@
         }
       }
     },
+    "1,12 · zone optimale" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1,12 · zone optimale"
+          }
+        }
+      }
+    },
+    "14 séries · 55 min" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "14 séries · 55 min"
+          }
+        }
+      }
+    },
+    "14 séries · 55 min · RPE 7,5" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "14 séries · 55 min · RPE 7,5"
+          }
+        }
+      }
+    },
+    "14 séries · ajustée, RPE 7,5" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "14 séries · ajustée, RPE 7,5"
+          }
+        }
+      }
+    },
+    "14 séries · allégée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "14 séries · allégée"
+          }
+        }
+      }
+    },
+    "3 sur 5" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 sur 5"
+          }
+        }
+      }
+    },
+    "ACWR" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ACWR"
+          }
+        }
+      }
+    },
     "Ajouter 30 secondes de repos" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ajouter 30 secondes de repos"
+          }
+        }
+      }
+    },
+    "Ajustée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajustée"
+          }
+        }
+      }
+    },
+    "Aucune séance" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune séance"
+          }
+        }
+      }
+    },
+    "Aujourd'hui" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aujourd'hui"
+          }
+        }
+      }
+    },
+    "Cette semaine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette semaine"
+          }
+        }
+      }
+    },
+    "Cette semaine : 3 séances sur 5 faites. Aujourd'hui : %@. Charge 1,12 en zone optimale. %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette semaine : 3 séances sur 5 faites. Aujourd'hui : %@. Charge 1,12 en zone optimale. %@"
+          }
+        }
+      }
+    },
+    "Charge" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Charge"
+          }
+        }
+      }
+    },
+    "Charge 7 j / 28 j" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Charge 7 j / 28 j"
+          }
+        }
+      }
+    },
+    "Charge d'entraînement %@, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Charge d'entraînement %@, %@"
+          }
+        }
+      }
+    },
+    "Demain : endurance 45 min, zone 2" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demain : endurance 45 min, zone 2"
+          }
+        }
+      }
+    },
+    "Demain · 8:00" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demain · 8:00"
+          }
+        }
+      }
+    },
+    "Démarrer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Démarrer"
+          }
+        }
+      }
+    },
+    "Endurance 45 min" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Endurance 45 min"
+          }
+        }
+      }
+    },
+    "Jour de repos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jour de repos"
           }
         }
       }
@@ -67,6 +287,56 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Passer le repos"
+          }
+        }
+      }
+    },
+    "Pectoraux et triceps" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pectoraux et triceps"
+          }
+        }
+      }
+    },
+    "Prochaine séance" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prochaine séance"
+          }
+        }
+      }
+    },
+    "Prochaine séance : %@, %@, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prochaine séance : %@, %@, %@"
+          }
+        }
+      }
+    },
+    "RPE max 7,5" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RPE max 7,5"
+          }
+        }
+      }
+    },
+    "Recovery" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Récupération"
           }
         }
       }
@@ -121,12 +391,42 @@
         }
       }
     },
+    "Récupération active" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Récupération active"
+          }
+        }
+      }
+    },
     "Score pas encore prêt" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Score pas encore prêt"
+          }
+        }
+      }
+    },
+    "Sous-entraînement" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sous-entraînement"
+          }
+        }
+      }
+    },
+    "Surmenage" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Surmenage"
           }
         }
       }
@@ -151,12 +451,62 @@
         }
       }
     },
+    "Séance du jour" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance du jour"
+          }
+        }
+      }
+    },
+    "Séance du jour : %@, 14 séries, 55 minutes, RPE 7,5" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance du jour : %@, 14 séries, 55 minutes, RPE 7,5"
+          }
+        }
+      }
+    },
+    "Séance du jour : jour de repos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance du jour : jour de repos"
+          }
+        }
+      }
+    },
     "Séance normale" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Séance normale"
+          }
+        }
+      }
+    },
+    "Série" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Série"
+          }
+        }
+      }
+    },
+    "Série de %lld semaines, %lld séances sur %lld cette semaine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Série de %lld semaines, %lld séances sur %lld cette semaine"
           }
         }
       }
@@ -171,6 +521,56 @@
         }
       }
     },
+    "Ta prochaine séance prévue dans ton programme." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ta prochaine séance prévue dans ton programme."
+          }
+        }
+      }
+    },
+    "Ta séance prévue, ses muscles ciblés et son volume." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ta séance prévue, ses muscles ciblés et son volume."
+          }
+        }
+      }
+    },
+    "Ton planning de la semaine, la séance du jour et ta charge." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton planning de la semaine, la séance du jour et ta charge."
+          }
+        }
+      }
+    },
+    "Ton ratio de charge aiguë sur chronique (ACWR)." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton ratio de charge aiguë sur chronique (ACWR)."
+          }
+        }
+      }
+    },
+    "Ton rythme d'entraînement et ta régularité." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton rythme d'entraînement et ta régularité."
+          }
+        }
+      }
+    },
     "Ton score du matin et ta séance du jour." : {
       "localizations" : {
         "fr" : {
@@ -181,12 +581,52 @@
         }
       }
     },
+    "Voir" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir"
+          }
+        }
+      }
+    },
+    "Zone 2 · 5:45 à 6:05 /km" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zone 2 · 5:45 à 6:05 /km"
+          }
+        }
+      }
+    },
+    "Zone optimale" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zone optimale"
+          }
+        }
+      }
+    },
     "estimé" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "estimé"
+          }
+        }
+      }
+    },
+    "semaines" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "semaines"
           }
         }
       }
