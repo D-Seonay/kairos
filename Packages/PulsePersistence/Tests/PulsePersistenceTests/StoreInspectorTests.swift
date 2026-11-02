@@ -13,8 +13,9 @@ import Testing
     let deleted = Sample.session(sets: 2)
     try await workouts.save(deleted)
     try await workouts.delete(id: deleted.id)
+    try await SwiftDataExerciseSettingsRepository(modelContainer: container).save(Sample.exerciseSettings())
     let counts = try await inspector.counts()
     #expect(counts.count == StoreTable.allCases.count)
     #expect(counts[.profile] == 1 && counts[.workoutSessions] == 1 && counts[.workoutSets] == 3)
-    #expect(counts[.programs] == 0 && counts[.cachedHealthSamples] == 0)
+    #expect(counts[.exerciseSettings] == 1 && counts[.programs] == 0 && counts[.cachedHealthSamples] == 0)
 }

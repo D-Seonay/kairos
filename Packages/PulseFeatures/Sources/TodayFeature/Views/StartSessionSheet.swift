@@ -1,12 +1,9 @@
-import PulseContent
 import PulseDesignSystem
-import PulseDomain
 import SwiftUI
 
 /// En attendant la séance en direct : la séance du jour à suivre en salle, exercice par exercice.
 struct StartSessionSheet: View {
-    let day: RoutineDay
-    let library: ContentLibrary
+    let lines: [SessionPlanLine]
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -23,7 +20,7 @@ struct StartSessionSheet: View {
                         .foregroundStyle(PulsePalette.text2)
                     ObsidianCard {
                         VStack(alignment: .leading, spacing: 0) {
-                            ForEach(Array(SessionPlanLine.lines(for: day, library: library).enumerated()), id: \.offset) { index, line in
+                            ForEach(Array(lines.enumerated()), id: \.offset) { index, line in
                                 if index > 0 {
                                     Divider().overlay(PulsePalette.line)
                                 }

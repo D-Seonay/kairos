@@ -1,0 +1,3054 @@
+{
+  "sourceLanguage" : "fr",
+  "strings" : {
+    "%@ : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ : %@"
+          }
+        }
+      }
+    },
+    "%@ : %@, course" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ : %@, course"
+          }
+        }
+      }
+    },
+    "%@ kg le %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kg le %@"
+          }
+        }
+      }
+    },
+    "%@ km" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ km"
+          }
+        }
+      }
+    },
+    "%@ · %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · %@"
+          }
+        }
+      }
+    },
+    "%@ · RPE %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · RPE %@"
+          }
+        }
+      }
+    },
+    "%@ · RPE %@ · repos %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · RPE %@ · repos %@"
+          }
+        }
+      }
+    },
+    "%@ · ajustée · %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · ajustée · %@"
+          }
+        }
+      }
+    },
+    "%@ · aujourd'hui" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · aujourd'hui"
+          }
+        }
+      }
+    },
+    "%@ · prévue %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · prévue %@"
+          }
+        }
+      }
+    },
+    "%@ · prévue demain" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · prévue demain"
+          }
+        }
+      }
+    },
+    "%@ à %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ à %@"
+          }
+        }
+      }
+    },
+    "%@%@ kg en 30 jours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@%@ kg en 30 jours"
+          }
+        }
+      }
+    },
+    "%@, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, %@"
+          }
+        }
+      }
+    },
+    "%@, %@. Choix : %@%@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, %@. Choix : %@%@"
+          }
+        }
+      }
+    },
+    "%lld exercices" : {
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld exercice"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld exercices"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld min" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld min"
+          }
+        }
+      }
+    },
+    "%lld records" : {
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld record"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld records"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld routines" : {
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld routine"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld routines"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld répétitions" : {
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld répétition"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld répétitions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld séances" : {
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld séance"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld séances"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld séances de cardio seul non importées" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld séances de cardio seul non importées"
+          }
+        }
+      }
+    },
+    "%lld séances par semaine" : {
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld séance par semaine"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld séances par semaine"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld séances sans exercice retenu non importées" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld séances sans exercice retenu non importées"
+          }
+        }
+      }
+    },
+    "%lld séries" : {
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld série"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld séries"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld × %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld × %@"
+          }
+        }
+      }
+    },
+    "%lld à vérifier : Pulse a deviné leur type." : {
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld à vérifier : Pulse a deviné son type."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld à vérifier : Pulse a deviné leur type."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "+ Nouvelle" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ Nouvelle"
+          }
+        }
+      }
+    },
+    ", à vérifier" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ", à vérifier"
+          }
+        }
+      }
+    },
+    "1 séance sans exercice retenu non importée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 séance sans exercice retenu non importée"
+          }
+        }
+      }
+    },
+    "1 séance de cardio seul non importée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 séance de cardio seul non importée"
+          }
+        }
+      }
+    },
+    "1RM %@ kg" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1RM %@ kg"
+          }
+        }
+      }
+    },
+    "1RM estimé" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1RM estimé"
+          }
+        }
+      }
+    },
+    "1RM estimé (kg)" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1RM estimé (kg)"
+          }
+        }
+      }
+    },
+    "1RM estimé, %@ : %@, puis %@." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1RM estimé, %@ : %@, puis %@."
+          }
+        }
+      }
+    },
+    "1RM estimé, %@ : %@." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1RM estimé, %@ : %@."
+          }
+        }
+      }
+    },
+    "1RM estimé, 90 jours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1RM estimé, 90 jours"
+          }
+        }
+      }
+    },
+    "Abandonner" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abandonner"
+          }
+        }
+      }
+    },
+    "Abandonner les modifications ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abandonner les modifications ?"
+          }
+        }
+      }
+    },
+    "Abandonnée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abandonnée"
+          }
+        }
+      }
+    },
+    "Adopte ce modèle comme programme actif" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adopte ce modèle comme programme actif"
+          }
+        }
+      }
+    },
+    "Adopter" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adopter"
+          }
+        }
+      }
+    },
+    "Adopter « %@ » ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adopter « %@ » ?"
+          }
+        }
+      }
+    },
+    "Ajoute l'exercice au choix ou l'en retire" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajoute l'exercice au choix ou l'en retire"
+          }
+        }
+      }
+    },
+    "Ajoute les exercices de cette séance à ton programme" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajoute les exercices de cette séance à ton programme"
+          }
+        }
+      }
+    },
+    "Ajouter" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter"
+          }
+        }
+      }
+    },
+    "Ajouter (%lld)" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter (%lld)"
+          }
+        }
+      }
+    },
+    "Ajouter des exercices" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter des exercices"
+          }
+        }
+      }
+    },
+    "Ajouter une routine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter une routine"
+          }
+        }
+      }
+    },
+    "Alternatives" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alternatives"
+          }
+        }
+      }
+    },
+    "Annuler" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annuler"
+          }
+        }
+      }
+    },
+    "Archiver" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archiver"
+          }
+        }
+      }
+    },
+    "Archiver ce programme" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archiver ce programme"
+          }
+        }
+      }
+    },
+    "Archiver ce programme ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archiver ce programme ?"
+          }
+        }
+      }
+    },
+    "Archiver cet exercice" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archiver cet exercice"
+          }
+        }
+      }
+    },
+    "Archiver cet exercice ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archiver cet exercice ?"
+          }
+        }
+      }
+    },
+    "Associe tes exercices" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Associe tes exercices"
+          }
+        }
+      }
+    },
+    "Aucun exercice ne correspond à ta recherche." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun exercice ne correspond à ta recherche."
+          }
+        }
+      }
+    },
+    "Aucun programme actif" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun programme actif"
+          }
+        }
+      }
+    },
+    "Aucun programme actif pour l'instant." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun programme actif pour l'instant."
+          }
+        }
+      }
+    },
+    "Aucun programme actif. Adopte un modèle ou crée un programme vide." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun programme actif. Adopte un modèle ou crée un programme vide."
+          }
+        }
+      }
+    },
+    "Aucune alternative pour cet exercice." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune alternative pour cet exercice."
+          }
+        }
+      }
+    },
+    "Aucune course au programme" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune course au programme"
+          }
+        }
+      }
+    },
+    "Aucune séance de charge sur 90 jours : la courbe apparaîtra avec la prochaine." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune séance de charge sur 90 jours : la courbe apparaîtra avec la prochaine."
+          }
+        }
+      }
+    },
+    "Aucune séance enregistrée avec cet exercice." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune séance enregistrée avec cet exercice."
+          }
+        }
+      }
+    },
+    "Aucune séance pour l'instant. Tes séances terminées apparaîtront ici." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune séance pour l'instant. Tes séances terminées apparaîtront ici."
+          }
+        }
+      }
+    },
+    "Autres exercices" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autres exercices"
+          }
+        }
+      }
+    },
+    "Bibliothèque d'exercices" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bibliothèque d'exercices"
+          }
+        }
+      }
+    },
+    "Brzycki" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brzycki"
+          }
+        }
+      }
+    },
+    "Ce fichier n'est pas un export de séances Hevy." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce fichier n'est pas un export de séances Hevy."
+          }
+        }
+      }
+    },
+    "Ce fichier ne contient aucune séance de musculation à importer." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce fichier ne contient aucune séance de musculation à importer."
+          }
+        }
+      }
+    },
+    "Ce fichier ne contient aucune séance." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce fichier ne contient aucune séance."
+          }
+        }
+      }
+    },
+    "Ce que ton corps peut encaisser aujourd'hui" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce que ton corps peut encaisser aujourd'hui"
+          }
+        }
+      }
+    },
+    "Cet exercice est introuvable." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cet exercice est introuvable."
+          }
+        }
+      }
+    },
+    "Cette routine est introuvable ou ne peut pas être modifiée ici." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette routine est introuvable ou ne peut pas être modifiée ici."
+          }
+        }
+      }
+    },
+    "Cette séance est introuvable. Elle a peut-être été supprimée." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette séance est introuvable. Elle a peut-être été supprimée."
+          }
+        }
+      }
+    },
+    "Change l'exercice associé" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change l'exercice associé"
+          }
+        }
+      }
+    },
+    "Chaque exercice de Hevy a déjà un choix. Touche une ligne pour le changer." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chaque exercice de Hevy a déjà un choix. Touche une ligne pour le changer."
+          }
+        }
+      }
+    },
+    "Charge" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Charge"
+          }
+        }
+      }
+    },
+    "Choisir le fichier" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir le fichier"
+          }
+        }
+      }
+    },
+    "Choisir un autre fichier" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir un autre fichier"
+          }
+        }
+      }
+    },
+    "Choisir un exercice Pulse" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir un exercice Pulse"
+          }
+        }
+      }
+    },
+    "Choisir une routine ou le repos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir une routine ou le repos"
+          }
+        }
+      }
+    },
+    "Choisis « Exporter les données » et garde le format CSV." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisis « Exporter les données » et garde le format CSV."
+          }
+        }
+      }
+    },
+    "Consigne %lld : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Consigne %lld : %@"
+          }
+        }
+      }
+    },
+    "Consignes qui comptent" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Consignes qui comptent"
+          }
+        }
+      }
+    },
+    "Continuer à modifier" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuer à modifier"
+          }
+        }
+      }
+    },
+    "Correspondances sûres" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Correspondances sûres"
+          }
+        }
+      }
+    },
+    "Course" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Course"
+          }
+        }
+      }
+    },
+    "Course : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Course : %@"
+          }
+        }
+      }
+    },
+    "Course aujourd'hui" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Course aujourd'hui"
+          }
+        }
+      }
+    },
+    "Course · modifiable plus tard" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Course · modifiable plus tard"
+          }
+        }
+      }
+    },
+    "Créer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer"
+          }
+        }
+      }
+    },
+    "Créer un exercice" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer un exercice"
+          }
+        }
+      }
+    },
+    "Créer un exercice perso" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer un exercice perso"
+          }
+        }
+      }
+    },
+    "Créer un programme vide" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer un programme vide"
+          }
+        }
+      }
+    },
+    "Créer « %@ »" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer « %@ »"
+          }
+        }
+      }
+    },
+    "Dans Hevy, ouvre ton profil puis les réglages." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans Hevy, ouvre ton profil puis les réglages."
+          }
+        }
+      }
+    },
+    "Date" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date"
+          }
+        }
+      }
+    },
+    "demain" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "demain"
+          }
+        }
+      }
+    },
+    "Depuis une séance passée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Depuis une séance passée"
+          }
+        }
+      }
+    },
+    "Dernières séances" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dernières séances"
+          }
+        }
+      }
+    },
+    "Descendre" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descendre"
+          }
+        }
+      }
+    },
+    "Dupliquer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dupliquer"
+          }
+        }
+      }
+    },
+    "Dégressive" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dégressive"
+          }
+        }
+      }
+    },
+    "Déplie les réglages" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déplie les réglages"
+          }
+        }
+      }
+    },
+    "Elle disparaît de ton historique et tes records sont recalculés." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elle disparaît de ton historique et tes records sont recalculés."
+          }
+        }
+      }
+    },
+    "Elle sort aussi de la semaine. Tes anciennes séances la gardent." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elle sort aussi de la semaine. Tes anciennes séances la gardent."
+          }
+        }
+      }
+    },
+    "Enregistre le fichier dans l'app Fichiers, puis choisis-le ici." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistre le fichier dans l'app Fichiers, puis choisis-le ici."
+          }
+        }
+      }
+    },
+    "Enregistrer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrer"
+          }
+        }
+      }
+    },
+    "Enregistrer comme routine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrer comme routine"
+          }
+        }
+      }
+    },
+    "Entre 1 et 10 séries." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entre 1 et 10 séries."
+          }
+        }
+      }
+    },
+    "Entre 1 et 30 répétitions, le minimum sous le maximum." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entre 1 et 30 répétitions, le minimum sous le maximum."
+          }
+        }
+      }
+    },
+    "Entre 5 et 600 secondes, le minimum sous le maximum." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entre 5 et 600 secondes, le minimum sous le maximum."
+          }
+        }
+      }
+    },
+    "Exercice" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exercice"
+          }
+        }
+      }
+    },
+    "Exercice inconnu" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exercice inconnu"
+          }
+        }
+      }
+    },
+    "Exercices" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exercices"
+          }
+        }
+      }
+    },
+    "Exercices créés" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exercices créés"
+          }
+        }
+      }
+    },
+    "Fiches, consignes et tes exercices perso" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fiches, consignes et tes exercices perso"
+          }
+        }
+      }
+    },
+    "Garde l'écran ouvert jusqu'à la fin." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Garde l'écran ouvert jusqu'à la fin."
+          }
+        }
+      }
+    },
+    "Hevy" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hevy"
+          }
+        }
+      }
+    },
+    "Historique" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Historique"
+          }
+        }
+      }
+    },
+    "Ignorer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ignorer"
+          }
+        }
+      }
+    },
+    "Ignoré" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ignoré"
+          }
+        }
+      }
+    },
+    "Ignorés" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ignorés"
+          }
+        }
+      }
+    },
+    "Il ne sera plus actif ni proposé, mais tes séances le gardent." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il ne sera plus actif ni proposé, mais tes séances le gardent."
+          }
+        }
+      }
+    },
+    "Il ne sera plus proposé, mais tes anciennes séances le gardent." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il ne sera plus proposé, mais tes anciennes séances le gardent."
+          }
+        }
+      }
+    },
+    "Import en cours…" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import en cours…"
+          }
+        }
+      }
+    },
+    "Import terminé" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import terminé"
+          }
+        }
+      }
+    },
+    "Importer %lld séances" : {
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Importer %lld séance"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Importer %lld séances"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Importer depuis Hevy" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importer depuis Hevy"
+          }
+        }
+      }
+    },
+    "Incrément : %@ kg" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incrément : %@ kg"
+          }
+        }
+      }
+    },
+    "Incrément de charge" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incrément de charge"
+          }
+        }
+      }
+    },
+    "Jour de repos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jour de repos"
+          }
+        }
+      }
+    },
+    "La date de la ligne %@ du fichier est illisible." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La date de la ligne %@ du fichier est illisible."
+          }
+        }
+      }
+    },
+    "La ligne %@ du fichier est illisible." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La ligne %@ du fichier est illisible."
+          }
+        }
+      }
+    },
+    "Le cardio est proposé en « Ignoré » à l'étape suivante, où tu peux le changer." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le cardio est proposé en « Ignoré » à l'étape suivante, où tu peux le changer."
+          }
+        }
+      }
+    },
+    "Le fichier est lu sur cet appareil : il n'est envoyé nulle part." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le fichier est lu sur cet appareil : il n'est envoyé nulle part."
+          }
+        }
+      }
+    },
+    "Le modèle devient ton programme actif ; l'actuel reste dans tes programmes." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le modèle devient ton programme actif ; l'actuel reste dans tes programmes."
+          }
+        }
+      }
+    },
+    "Lecture du fichier…" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lecture du fichier…"
+          }
+        }
+      }
+    },
+    "Les courses ne se modifient pas encore" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les courses ne se modifient pas encore"
+          }
+        }
+      }
+    },
+    "Lignes de cardio détectées" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lignes de cardio détectées"
+          }
+        }
+      }
+    },
+    "Matériel" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Matériel"
+          }
+        }
+      }
+    },
+    "Maximum : %lld %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maximum : %lld %@"
+          }
+        }
+      }
+    },
+    "Meilleure série" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meilleure série"
+          }
+        }
+      }
+    },
+    "Mes programmes" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mes programmes"
+          }
+        }
+      }
+    },
+    "Mes routines" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mes routines"
+          }
+        }
+      }
+    },
+    "Minimum : %lld %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minimum : %lld %@"
+          }
+        }
+      }
+    },
+    "Modifier" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modifier"
+          }
+        }
+      }
+    },
+    "Modifier l'exercice" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modifier l'exercice"
+          }
+        }
+      }
+    },
+    "Modèles" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modèles"
+          }
+        }
+      }
+    },
+    "Mon programme" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mon programme"
+          }
+        }
+      }
+    },
+    "Monter" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monter"
+          }
+        }
+      }
+    },
+    "Mouvement" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mouvement"
+          }
+        }
+      }
+    },
+    "Muscle principal" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muscle principal"
+          }
+        }
+      }
+    },
+    "Muscles" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muscles"
+          }
+        }
+      }
+    },
+    "Muscles secondaires" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muscles secondaires"
+          }
+        }
+      }
+    },
+    "Muscles sollicités" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muscles sollicités"
+          }
+        }
+      }
+    },
+    "Muscles sollicités par la séance" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muscles sollicités par la séance"
+          }
+        }
+      }
+    },
+    "Muscles sollicités. Principaux : %@." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muscles sollicités. Principaux : %@."
+          }
+        }
+      }
+    },
+    "Muscles sollicités. Principaux : %@. Secondaires : %@." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muscles sollicités. Principaux : %@. Secondaires : %@."
+          }
+        }
+      }
+    },
+    "Musculation" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Musculation"
+          }
+        }
+      }
+    },
+    "Musculation : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Musculation : %@"
+          }
+        }
+      }
+    },
+    "Nature de la charge" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nature de la charge"
+          }
+        }
+      }
+    },
+    "Nom" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nom"
+          }
+        }
+      }
+    },
+    "Nom de l'exercice" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nom de l'exercice"
+          }
+        }
+      }
+    },
+    "Nom de la routine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nom de la routine"
+          }
+        }
+      }
+    },
+    "Nom de la routine (ex. Push)" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nom de la routine (ex. Push)"
+          }
+        }
+      }
+    },
+    "Nom du programme" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nom du programme"
+          }
+        }
+      }
+    },
+    "Note : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Note : %@"
+          }
+        }
+      }
+    },
+    "Notes" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notes"
+          }
+        }
+      }
+    },
+    "Nouveau programme" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouveau programme"
+          }
+        }
+      }
+    },
+    "Nouvel exercice" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouvel exercice"
+          }
+        }
+      }
+    },
+    "Nouvelle routine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouvelle routine"
+          }
+        }
+      }
+    },
+    "OK" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        }
+      }
+    },
+    "Ordonner" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordonner"
+          }
+        }
+      }
+    },
+    "Ouvre l'accueil, où démarrer la séance du jour" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvre l'accueil, où démarrer la séance du jour"
+          }
+        }
+      }
+    },
+    "Ouvre l'historique : choisis une séance à enregistrer comme routine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvre l'historique : choisis une séance à enregistrer comme routine"
+          }
+        }
+      }
+    },
+    "Ouvre l'éditeur de la routine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvre l'éditeur de la routine"
+          }
+        }
+      }
+    },
+    "Ouvre la fiche de l'exercice" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvre la fiche de l'exercice"
+          }
+        }
+      }
+    },
+    "Par série" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Par série"
+          }
+        }
+      }
+    },
+    "Par série · %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Par série · %@"
+          }
+        }
+      }
+    },
+    "Plan de mouvement" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plan de mouvement"
+          }
+        }
+      }
+    },
+    "Polyarticulaire" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Polyarticulaire"
+          }
+        }
+      }
+    },
+    "Pour annuler un import raté." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour annuler un import raté."
+          }
+        }
+      }
+    },
+    "Principaux : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Principaux : %@"
+          }
+        }
+      }
+    },
+    "Programme actif" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Programme actif"
+          }
+        }
+      }
+    },
+    "Progression" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Progression"
+          }
+        }
+      }
+    },
+    "Pulse lit l'export de tes séances Hevy et les ajoute à ton historique, avec tes records." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse lit l'export de tes séances Hevy et les ajoute à ton historique, avec tes records."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu archiver l'exercice." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu archiver l'exercice."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu créer la routine." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu créer la routine."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu enregistrer cette modification." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu enregistrer cette modification."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu enregistrer cette routine." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu enregistrer cette routine."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu enregistrer l'exercice." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu enregistrer l'exercice."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu enregistrer l'incrément." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu enregistrer l'incrément."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu enregistrer la routine." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu enregistrer la routine."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu importer les séances. Réessaie." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu importer les séances. Réessaie."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu lire ce fichier." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu lire ce fichier."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu lire cette fiche." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu lire cette fiche."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu lire cette routine." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu lire cette routine."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu lire cette séance." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu lire cette séance."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu lire tes programmes." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu lire tes programmes."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu lire ton historique." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu lire ton historique."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu lire ton programme." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu lire ton programme."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu lire toute la bibliothèque." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu lire toute la bibliothèque."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu supprimer cette séance." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu supprimer cette séance."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu supprimer les séances importées." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu supprimer les séances importées."
+          }
+        }
+      }
+    },
+    "Période" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Période"
+          }
+        }
+      }
+    },
+    "Records établis" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Records établis"
+          }
+        }
+      }
+    },
+    "Repos · prochaine : %@, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repos · prochaine : %@, %@"
+          }
+        }
+      }
+    },
+    "Retirer %@ de la routine ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer %@ de la routine ?"
+          }
+        }
+      }
+    },
+    "Retirer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer"
+          }
+        }
+      }
+    },
+    "RPE %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RPE %@"
+          }
+        }
+      }
+    },
+    "RPE cible : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RPE cible : %@"
+          }
+        }
+      }
+    },
+    "RPE entre 6 et 10, par pas de 0,5." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RPE entre 6 et 10, par pas de 0,5."
+          }
+        }
+      }
+    },
+    "Rechercher (ex. developpe)" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechercher (ex. developpe)"
+          }
+        }
+      }
+    },
+    "Rend ce programme actif" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rend ce programme actif"
+          }
+        }
+      }
+    },
+    "Renomme le programme" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renomme le programme"
+          }
+        }
+      }
+    },
+    "Renommer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renommer"
+          }
+        }
+      }
+    },
+    "Renommer le programme" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renommer le programme"
+          }
+        }
+      }
+    },
+    "Replie les réglages" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replie les réglages"
+          }
+        }
+      }
+    },
+    "Repos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repos"
+          }
+        }
+      }
+    },
+    "Repos : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repos : %@"
+          }
+        }
+      }
+    },
+    "Repos aujourd'hui" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repos aujourd'hui"
+          }
+        }
+      }
+    },
+    "Repos entre 0 et 5 min, par pas de 15 s." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repos entre 0 et 5 min, par pas de 15 s."
+          }
+        }
+      }
+    },
+    "Reprendre la proposition" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprendre la proposition"
+          }
+        }
+      }
+    },
+    "Reprends ton historique" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprends ton historique"
+          }
+        }
+      }
+    },
+    "Retirer de la routine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer de la routine"
+          }
+        }
+      }
+    },
+    "Retour au résumé" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retour au résumé"
+          }
+        }
+      }
+    },
+    "Revenir aux correspondances" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Revenir aux correspondances"
+          }
+        }
+      }
+    },
+    "Routine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Routine"
+          }
+        }
+      }
+    },
+    "Routines" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Routines"
+          }
+        }
+      }
+    },
+    "Récents" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Récents"
+          }
+        }
+      }
+    },
+    "Réessayer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réessayer"
+          }
+        }
+      }
+    },
+    "Région" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Région"
+          }
+        }
+      }
+    },
+    "Réglages" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réglages"
+          }
+        }
+      }
+    },
+    "Secondaires : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Secondaires : %@"
+          }
+        }
+      }
+    },
+    "Sections de la fiche" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sections de la fiche"
+          }
+        }
+      }
+    },
+    "Semaine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Semaine"
+          }
+        }
+      }
+    },
+    "Super set avec l'exercice suivant" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Super set avec l'exercice suivant"
+          }
+        }
+      }
+    },
+    "Supprimer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer"
+          }
+        }
+      }
+    },
+    "Supprimer cette séance ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer cette séance ?"
+          }
+        }
+      }
+    },
+    "Supprimer les séances importées de Hevy ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer les séances importées de Hevy ?"
+          }
+        }
+      }
+    },
+    "Supprimer toutes les séances importées de Hevy" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer toutes les séances importées de Hevy"
+          }
+        }
+      }
+    },
+    "Supprimer « %@ » ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer « %@ » ?"
+          }
+        }
+      }
+    },
+    "Séance" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance"
+          }
+        }
+      }
+    },
+    "Séance du jour" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance du jour"
+          }
+        }
+      }
+    },
+    "Séances déjà présentes" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séances déjà présentes"
+          }
+        }
+      }
+    },
+    "Séances importées" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séances importées"
+          }
+        }
+      }
+    },
+    "Séances à importer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séances à importer"
+          }
+        }
+      }
+    },
+    "Série %lld" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Série %lld"
+          }
+        }
+      }
+    },
+    "Séries : %lld" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séries : %lld"
+          }
+        }
+      }
+    },
+    "Technique" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Technique"
+          }
+        }
+      }
+    },
+    "Tenu en secondes" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tenu en secondes"
+          }
+        }
+      }
+    },
+    "Terminer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminer"
+          }
+        }
+      }
+    },
+    "Tes séances Pulse restent. Tes records sont recalculés." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tes séances Pulse restent. Tes records sont recalculés."
+          }
+        }
+      }
+    },
+    "Tes séances passées et tes records" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tes séances passées et tes records"
+          }
+        }
+      }
+    },
+    "Ton historique, depuis un export CSV" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton historique, depuis un export CSV"
+          }
+        }
+      }
+    },
+    "Tous" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tous"
+          }
+        }
+      }
+    },
+    "Tous les exercices" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tous les exercices"
+          }
+        }
+      }
+    },
+    "Tout matériel" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tout matériel"
+          }
+        }
+      }
+    },
+    "Tout supprimer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tout supprimer"
+          }
+        }
+      }
+    },
+    "Toutes les séances de ce fichier sont déjà dans Pulse : il n'y a rien à ajouter." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toutes les séances de ce fichier sont déjà dans Pulse : il n'y a rien à ajouter."
+          }
+        }
+      }
+    },
+    "Tu as signalé : %@. Cet exercice peut les solliciter : ajuste la charge ou prends une alternative." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu as signalé : %@. Cet exercice peut les solliciter : ajuste la charge ou prends une alternative."
+          }
+        }
+      }
+    },
+    "Une fourchette par série, le minimum sous le maximum." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une fourchette par série, le minimum sous le maximum."
+          }
+        }
+      }
+    },
+    "Unilatéral" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unilatéral"
+          }
+        }
+      }
+    },
+    "Voilà ce que contient ton export" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voilà ce que contient ton export"
+          }
+        }
+      }
+    },
+    "Voir l'historique" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir l'historique"
+          }
+        }
+      }
+    },
+    "Vérifier les correspondances" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vérifier les correspondances"
+          }
+        }
+      }
+    },
+    "abandonnée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "abandonnée"
+          }
+        }
+      }
+    },
+    "dimanche" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "dimanche"
+          }
+        }
+      }
+    },
+    "du %@ au %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "du %@ au %@"
+          }
+        }
+      }
+    },
+    "genoux" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "genoux"
+          }
+        }
+      }
+    },
+    "hors semaine type" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hors semaine type"
+          }
+        }
+      }
+    },
+    "importée de Hevy" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "importée de Hevy"
+          }
+        }
+      }
+    },
+    "jeudi" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "jeudi"
+          }
+        }
+      }
+    },
+    "lombaires" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "lombaires"
+          }
+        }
+      }
+    },
+    "lundi" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "lundi"
+          }
+        }
+      }
+    },
+    "mardi" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mardi"
+          }
+        }
+      }
+    },
+    "mercredi" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mercredi"
+          }
+        }
+      }
+    },
+    "poignets" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "poignets"
+          }
+        }
+      }
+    },
+    "record" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "record"
+          }
+        }
+      }
+    },
+    "reps" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "reps"
+          }
+        }
+      }
+    },
+    "s" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "s"
+          }
+        }
+      }
+    },
+    "samedi" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "samedi"
+          }
+        }
+      }
+    },
+    "vendredi" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "vendredi"
+          }
+        }
+      }
+    },
+    "~ %lld min" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "~ %lld min"
+          }
+        }
+      }
+    },
+    "À choisir" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À choisir"
+          }
+        }
+      }
+    },
+    "À l'échec" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À l'échec"
+          }
+        }
+      }
+    },
+    "À vérifier" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À vérifier"
+          }
+        }
+      }
+    },
+    "À éviter" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À éviter"
+          }
+        }
+      }
+    },
+    "Échauffement" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Échauffement"
+          }
+        }
+      }
+    },
+    "Étape %lld : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Étape %lld : %@"
+          }
+        }
+      }
+    },
+    "épaules" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "épaules"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

@@ -33,9 +33,9 @@ public final class StoredProgram {
         for day in program.days {
             if let existing = remaining.removeValue(forKey: day.id) {
                 existing.deletedAt = nil
-                existing.apply(day)
+                existing.apply(day, updatedAt: updatedAt)
             } else {
-                let stored = StoredRoutineDay(day)
+                let stored = StoredRoutineDay(day, updatedAt: updatedAt)
                 stored.program = self
                 days = (days ?? []) + [stored]
             }

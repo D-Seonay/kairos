@@ -110,4 +110,35 @@ struct DailyScoreSessionTests: DailyScoreTesting {
         await #expect(throws: DailyScoreError.alreadyMeasured) { try await checkIn.value }
         #expect(try await repository.dailyRecoveries(from: now.addingTimeInterval(-86_400), to: now.addingTimeInterval(86_400)).count == 1)
     }
+
+    @Test func unreadableProgramKeepsTheStoredAdjustmentsOnRecompute() async throws {
+        let fixture = fixture()
+        let early = TestClock.date("2026-11-02T07:00")
+        let monday = try plannedDay(at: early)
+        _ = try await fixture.service.update(nights: await nights(.badNight, at: early), plannedDay: monday, now: early)
+        let later = TestClock.date("2026-11-02T09:00")
+        let recomputed = try scored(try await fixture.service.update(nights: await nights(.badNight, at: later), plannedDay: nil,
+                                                                     now: later))
+        #expect(recomputed.adjustments.map(\.kind) == [.volume, .rpeCap, .rest])
+        #expect(try await records(fixture, on: "2026-11-02T00:00").first?.adjustments.map(\.kind) == [.volume, .rpeCap, .rest])
+    }
+
+    @Test func unreadableProgramWithoutAStoredScoreStoresNoAdjustment() async throws {
+        let fixture = fixture()
+        let now = TestClock.date("2026-11-02T08:00")
+        let recovery = try scored(try await fixture.service.update(nights: await nights(.badNight, at: now), plannedDay: nil, now: now))
+        #expect(recovery.category == .moderateFatigue)
+        #expect(recovery.adjustments.isEmpty)
+    }
+
+    @Test func unreadableProgramKeepsTheStoredAdjustmentsOnCheckIn() async throws {
+        let fixture = fixture()
+        let early = TestClock.date("2026-11-02T07:00")
+        let monday = try plannedDay(at: early)
+        let answers = CheckInAnswers(sleep: 1, pain: 1, motivation: 1)
+        let first = try await fixture.service.saveCheckIn(answers, plannedDay: monday, now: early)
+        #expect(first.adjustments.isEmpty == false)
+        let again = try await fixture.service.saveCheckIn(answers, plannedDay: nil, now: TestClock.date("2026-11-02T09:00"))
+        #expect(again.adjustments == first.adjustments)
+    }
 }

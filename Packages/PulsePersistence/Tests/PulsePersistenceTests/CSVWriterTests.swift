@@ -17,7 +17,8 @@ import Testing
     #expect(tables[.workoutSets]?.header == [
         "id", "session_id", "order", "content_exercise_id", "user_exercise_id", "exercise_name", "set_type", "superset_group",
         "planned_weight_kg", "planned_reps", "actual_weight_kg", "actual_reps", "rpe", "rest_seconds", "completed_at",
-        "is_personal_record", "replaced_content_exercise_id", "replaced_user_exercise_id", "replacement_reason"
+        "is_personal_record", "replaced_content_exercise_id", "replaced_user_exercise_id", "replacement_reason",
+        "duration_seconds"
     ])
     #expect(tables[.profile]?.header.first == "id")
     #expect(tables[.routineExercises]?.header.prefix(3) == ["id", "routine_day_id", "order"])

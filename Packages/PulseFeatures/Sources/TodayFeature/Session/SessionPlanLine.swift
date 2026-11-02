@@ -1,35 +1,38 @@
 import Foundation
-import PulseContent
 import PulseDesignSystem
 import PulseDomain
+import PulseServices
 
-/// Une ligne de la séance à suivre en salle : l'exercice, « 3 × 6–10 » et le repos qui suit.
+/// Une ligne de la séance à suivre en salle : l'exercice, « 3 × 6–10 » (« 3 × 30–60 s » tenu en secondes) et le repos qui suit.
 struct SessionPlanLine: Equatable {
     var name: String
     var prescription: String
     var rest: String
 
     /// Les exercices dans l'ordre de la séance. Dans un super set, on enchaîne sans repos jusqu'au dernier membre du groupe.
-    static func lines(for day: RoutineDay, library: ContentLibrary) -> [SessionPlanLine] {
+    static func lines(for day: RoutineDay, directory: ExerciseDirectory) -> [SessionPlanLine] {
         let exercises = day.exercises.sorted { $0.order < $1.order }
         return exercises.enumerated().map { index, exercise in
             let next = exercises.indices.contains(index + 1) ? exercises[index + 1] : nil
-            return SessionPlanLine(name: name(of: exercise.exercise, library: library),
-                                   prescription: prescription(exercise), rest: rest(exercise, next: next))
+            let held = directory.info(exercise.exercise)?.tracksDuration ?? false
+            return SessionPlanLine(name: name(of: exercise.exercise, directory: directory),
+                                   prescription: prescription(exercise, held: held), rest: rest(exercise, next: next))
         }
     }
 
-    static func name(of reference: ExerciseReference, library: ContentLibrary) -> String {
-        switch reference {
-        case .content(let id): library.exercise(id: id)?.name.fr ?? id
+    /// Le nom de l'annuaire, archivés compris ; un nom générique pour une référence qu'il ne connaît pas.
+    static func name(of reference: ExerciseReference, directory: ExerciseDirectory) -> String {
+        let fallback = switch reference {
+        case .content: String(localized: "Exercice inconnu", bundle: .module)
         case .user: String(localized: "Exercice personnel", bundle: .module)
         }
+        return directory.name(of: reference, fallback: fallback)
     }
 
-    /// « 3 × 6–10 », ou « 4 × 8 » quand la fourchette n'en est pas une.
-    private static func prescription(_ exercise: RoutineExercise) -> String {
+    /// « 3 × 6–10 », ou « 4 × 8 » quand la fourchette n'en est pas une ; « 3 × 30–60 s » pour un exercice tenu en secondes.
+    private static func prescription(_ exercise: RoutineExercise, held: Bool) -> String {
         let reps = exercise.repsMin == exercise.repsMax ? "\(exercise.repsMin)" : "\(exercise.repsMin)–\(exercise.repsMax)"
-        return "\(exercise.sets) × \(reps)"
+        return "\(exercise.sets) × \(reps)" + (held ? " s" : "")
     }
 
     /// « repos 2 min 45 » ; « super set, sans repos » avant un autre membre du groupe, « super set · repos 1 min » après le dernier.

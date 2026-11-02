@@ -35,6 +35,8 @@ public final class TodayModel {
 
     @ObservationIgnored private let environment: TodayEnvironment
     @ObservationIgnored private var isSubmittingCheckIn = false
+    /// Le contenu et les exercices de l'utilisateur, relus à chaque actualisation pour nommer et compter les muscles des séances.
+    @ObservationIgnored private var directory: ExerciseDirectory
     /// Change à chaque écriture du score (check-in, choix de la séance). Le rafraîchisseur sérialisant ses opérations, la garde
     /// ne peut plus écarter une lecture périmée : elle ne sert qu'en défense, et peut au pire écarter sans dommage un résultat
     /// plus récent que le score écrit.
@@ -46,12 +48,15 @@ public final class TodayModel {
 
     public init(environment: TodayEnvironment) {
         self.environment = environment
+        directory = ExerciseDirectory(library: environment.library, userExercises: [])
         greeting = Self.greeting(firstName: nil)
         dateText = Self.dateText(environment.now(), calendar: environment.calendar)
     }
 
-    /// Le contenu embarqué, pour les feuilles et écrans de l'accueil.
-    var library: ContentLibrary { environment.library }
+    /// Les lignes de la séance à suivre en salle, nommées par l'annuaire : les exercices de l'utilisateur gardent leur nom.
+    func planLines(for day: RoutineDay) -> [SessionPlanLine] {
+        SessionPlanLine.lines(for: day, directory: directory)
+    }
 
     /// L'heure de la dernière lecture d'Apple Santé réussie, « 08:00 ».
     public var lastSyncText: String? {
@@ -70,6 +75,7 @@ public final class TodayModel {
         resetCheckInOnNewDay(now)
 
         let day = await environment.refresher.refresh(origin: .foreground)
+        await refreshDirectory()
         greeting = Self.greeting(firstName: day.profile?.firstName)
         if let readAt = day.readAt {
             lastSync = readAt
@@ -114,6 +120,13 @@ public final class TodayModel {
 
     // MARK: - Interne
 
+    /// Relit les exercices de l'utilisateur, archivés compris : une séance planifiée peut encore les nommer. Si la lecture échoue,
+    /// l'annuaire précédent est gardé.
+    private func refreshDirectory() async {
+        guard let userExercises = try? await environment.userExercises.all(includeArchived: true) else { return }
+        directory = ExerciseDirectory(library: environment.library, userExercises: userExercises)
+    }
+
     /// Affiche le score lu par le rafraîchissement et la séance qu'il ajuste.
     private func showScoreAndSession(of day: DayRefresh) {
         if let updated = day.score {
@@ -152,7 +165,7 @@ public final class TodayModel {
 
     private func show(_ session: TodaySession) {
         self.session = session
-        card = SessionCardState.make(session: session, score: score, library: library)
+        card = SessionCardState.make(session: session, score: score, directory: directory)
         updateWhy()
     }
 
@@ -163,7 +176,8 @@ public final class TodayModel {
             isShowingWhy = false
             return
         }
-        why = WhyContent.make(recovery: recovery, session: session, checkIn: recovery.isEstimated ? todayCheckIn : nil, library: library)
+        why = WhyContent.make(recovery: recovery, session: session, checkIn: recovery.isEstimated ? todayCheckIn : nil,
+                               directory: directory)
     }
 
     private func resetCheckInOnNewDay(_ now: Date) {

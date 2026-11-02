@@ -5,6 +5,7 @@ public enum StoreTable: String, Sendable, CaseIterable {
     case routineDays
     case routineExercises
     case userExercises
+    case exerciseSettings
     case workoutSessions
     case workoutSets
     case scheduledDays

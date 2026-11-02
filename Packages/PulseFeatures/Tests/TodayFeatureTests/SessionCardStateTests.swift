@@ -9,6 +9,7 @@ import Testing
 /// runner-strength pour la course (jeudi 5 novembre = Fractionné).
 struct SessionCardStateTests {
     private let library = ContentLibrary.bundled
+    private var directory: ExerciseDirectory { ExerciseDirectory(library: library, userExercises: []) }
 
     private func plan(_ templateID: String, on text: String) throws -> PlannedDay {
         let now = TodayClock.date(text)
@@ -29,7 +30,7 @@ struct SessionCardStateTests {
                       originalChosen: Bool? = nil) throws -> SessionCardState {
         let scored = recovery(score, originalChosen: originalChosen)
         let session = TodaySession(plannedDay: try plan(templateID, on: text), recovery: scored)
-        return SessionCardState.make(session: session, score: .scored(scored), library: library)
+        return SessionCardState.make(session: session, score: .scored(scored), directory: directory)
     }
 
     private func strength(_ state: SessionCardState) -> StrengthCard? {
@@ -73,7 +74,7 @@ struct SessionCardStateTests {
     @Test func beforeFourTheCardIsPlanned() throws {
         let yesterday = recovery(50)
         let session = TodaySession(plannedDay: try plan("ppl-3", on: "2026-11-02T03:00"), recovery: yesterday)
-        let state = SessionCardState.make(session: session, score: .beforeDayStart(yesterday: yesterday), library: library)
+        let state = SessionCardState.make(session: session, score: .beforeDayStart(yesterday: yesterday), directory: directory)
         let card = try #require(strength(state))
         #expect(card.title == "Push")
         #expect(card.badge == .planned)
@@ -124,7 +125,7 @@ struct SessionCardStateTests {
         #expect(next?.weekday == .wednesday)
         func state(_ score: TodayScore) -> SessionCardState {
             let scored: DailyRecovery? = if case .scored(let recovery) = score { recovery } else { nil }
-            return SessionCardState.make(session: TodaySession(plannedDay: rest, recovery: scored), score: score, library: library)
+            return SessionCardState.make(session: TodaySession(plannedDay: rest, recovery: scored), score: score, directory: directory)
         }
         #expect(state(.scored(recovery(58))) == .rest(next: next, suggestsMobility: true))
         // 64,6 s'affiche « 65 » mais reste une fatigue modérée : la suggestion suit le score brut.
@@ -136,6 +137,6 @@ struct SessionCardStateTests {
 
     @Test func noProgramCard() {
         let session = TodaySession(plannedDay: .noProgram, recovery: recovery(50))
-        #expect(SessionCardState.make(session: session, score: .scored(recovery(50)), library: library) == .noProgram)
+        #expect(SessionCardState.make(session: session, score: .scored(recovery(50)), directory: directory) == .noProgram)
     }
 }

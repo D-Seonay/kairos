@@ -25,6 +25,7 @@ public struct WorkoutSet: Sendable, Equatable, Codable, Identifiable {
     public var plannedReps: Int?
     public var actualWeightKg: Double?
     public var actualReps: Int?
+    public var durationSeconds: Int?
     public var rpe: Double?
     public var restSeconds: Int?
     public var completedAt: Date?
@@ -34,9 +35,9 @@ public struct WorkoutSet: Sendable, Equatable, Codable, Identifiable {
 
     public init(id: UUID = UUID(), order: Int, exercise: ExerciseReference, exerciseName: String, setType: SetType,
                 supersetGroup: Int? = nil, plannedWeightKg: Double? = nil, plannedReps: Int? = nil,
-                actualWeightKg: Double? = nil, actualReps: Int? = nil, rpe: Double? = nil, restSeconds: Int? = nil,
-                completedAt: Date? = nil, isPersonalRecord: Bool = false, replacedExercise: ExerciseReference? = nil,
-                replacementReason: ReplacementReason? = nil) {
+                actualWeightKg: Double? = nil, actualReps: Int? = nil, durationSeconds: Int? = nil, rpe: Double? = nil,
+                restSeconds: Int? = nil, completedAt: Date? = nil, isPersonalRecord: Bool = false,
+                replacedExercise: ExerciseReference? = nil, replacementReason: ReplacementReason? = nil) {
         self.id = id
         self.order = order
         self.exercise = exercise
@@ -47,6 +48,7 @@ public struct WorkoutSet: Sendable, Equatable, Codable, Identifiable {
         self.plannedReps = plannedReps
         self.actualWeightKg = actualWeightKg
         self.actualReps = actualReps
+        self.durationSeconds = durationSeconds
         self.rpe = rpe
         self.restSeconds = restSeconds
         self.completedAt = completedAt

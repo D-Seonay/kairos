@@ -24,7 +24,7 @@ public struct TodayView: View {
         }
         .sheet(item: $model.sheet) { sheet in
             switch sheet {
-            case .start(let day): StartSessionSheet(day: day, library: model.library)
+            case .start(let day): StartSessionSheet(lines: model.planLines(for: day))
             case .mobility: MobilitySheet()
             }
         }

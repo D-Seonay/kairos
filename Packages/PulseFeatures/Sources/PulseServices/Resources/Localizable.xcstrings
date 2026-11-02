@@ -1,6 +1,16 @@
 {
   "sourceLanguage": "fr",
   "strings": {
+    "%@ (copie)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ (copie)"
+          }
+        }
+      }
+    },
     "Ton score du matin est prêt": {
       "localizations": {
         "fr": {

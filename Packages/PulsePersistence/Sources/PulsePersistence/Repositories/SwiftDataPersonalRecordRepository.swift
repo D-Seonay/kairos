@@ -30,4 +30,37 @@ public actor SwiftDataPersonalRecordRepository: PersonalRecordRepository {
         stored.deletedAt = Date()
         try modelContext.save()
     }
+
+    public func replaceAll(with records: [PersonalRecord]) throws {
+        let now = Date()
+        var unmatched = Dictionary(grouping: try modelContext.fetch(FetchDescriptor<StoredPersonalRecord>(
+            predicate: #Predicate { $0.deletedAt == nil }, sortBy: [SortDescriptor(\.createdAt)])), by: Key.init)
+        for record in records {
+            var stamped = record
+            stamped.updatedAt = now
+            if let existing = unmatched[Key(record), default: []].first {
+                unmatched[Key(record)]?.removeFirst()
+                existing.apply(stamped)
+            } else {
+                modelContext.insert(StoredPersonalRecord(stamped))
+            }
+        }
+        for leftover in unmatched.values.joined() { leftover.deletedAt = now }
+        try modelContext.save()
+    }
+
+    /// Identité d'un record d'un recalcul à l'autre : la série, le type et la charge.
+    private struct Key: Hashable {
+        let setID: UUID?
+        let kind: String
+        let weightKg: Double?
+
+        init(_ stored: StoredPersonalRecord) {
+            (setID, kind, weightKg) = (stored.setID, stored.kind, stored.weightKg)
+        }
+
+        init(_ record: PersonalRecord) {
+            (setID, kind, weightKg) = (record.setID, record.kind.rawValue, record.weightKg)
+        }
+    }
 }

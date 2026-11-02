@@ -20,13 +20,14 @@ public final class DailyScoreService: Sendable {
         self.calendar = calendar
     }
 
-    public func update(nights: [NightSample], plannedDay: PlannedDay, now: Date) async throws -> TodayScore {
+    /// `plannedDay` à `nil` veut dire « programme illisible » : le score est calculé, les ajustements déjà enregistrés sont gardés.
+    public func update(nights: [NightSample], plannedDay: PlannedDay?, now: Date) async throws -> TodayScore {
         try await queue.run { try await self.score(nights: nights, plannedDay: plannedDay, now: now) }
     }
 
     /// Enregistre le check-in et le score estimé qu'il produit ; il sera remplacé par un score mesuré avant midi.
     /// Refusé une fois le jour figé ou mesuré.
-    public func saveCheckIn(_ answers: CheckInAnswers, plannedDay: PlannedDay, now: Date) async throws -> DailyRecovery {
+    public func saveCheckIn(_ answers: CheckInAnswers, plannedDay: PlannedDay?, now: Date) async throws -> DailyRecovery {
         try await queue.run { try await self.estimate(answers, plannedDay: plannedDay, now: now) }
     }
 
@@ -46,7 +47,7 @@ public final class DailyScoreService: Sendable {
 
     // MARK: - Interne
 
-    private func score(nights: [NightSample], plannedDay: PlannedDay, now: Date) async throws -> TodayScore {
+    private func score(nights: [NightSample], plannedDay: PlannedDay?, now: Date) async throws -> TodayScore {
         let day = calendar.startOfDay(for: now)
         let hour = calendar.component(.hour, from: now)
         let isAfterFreeze = hour >= Self.freezeHour
@@ -74,7 +75,7 @@ public final class DailyScoreService: Sendable {
             var measured = DailyRecovery(result: result, night: tonight, now: now)
             measured.id = existing?.id ?? measured.id
             measured.createdAt = existing?.createdAt ?? now
-            measured.adjustments = Self.adjustments(for: plannedDay, category: measured.category)
+            measured.adjustments = Self.adjustments(for: plannedDay, category: measured.category, keeping: existing)
             measured.originalSessionChosen = existing?.originalSessionChosen
             measured.frozenAt = isAfterFreeze ? now : nil
             if let existing, existing.isSameMeasure(as: measured) { return .scored(existing) }
@@ -85,7 +86,7 @@ public final class DailyScoreService: Sendable {
         }
     }
 
-    private func estimate(_ answers: CheckInAnswers, plannedDay: PlannedDay, now: Date) async throws -> DailyRecovery {
+    private func estimate(_ answers: CheckInAnswers, plannedDay: PlannedDay?, now: Date) async throws -> DailyRecovery {
         let day = calendar.startOfDay(for: now)
         let existing = try await stored(on: day)
         if existing?.frozenAt != nil {
@@ -100,7 +101,7 @@ public final class DailyScoreService: Sendable {
         let estimated = DailyRecovery(
             id: existing?.id ?? UUID(), day: day, score: score, category: category, isEstimated: true,
             missingFactors: Factor.allCases, calibration: .calibrating(nights: 0),
-            adjustments: Self.adjustments(for: plannedDay, category: category),
+            adjustments: Self.adjustments(for: plannedDay, category: category, keeping: existing),
             frozenAt: calendar.component(.hour, from: now) >= Self.freezeHour ? now : nil,
             originalSessionChosen: existing?.originalSessionChosen,
             createdAt: existing?.createdAt ?? now, updatedAt: now)
@@ -109,7 +110,10 @@ public final class DailyScoreService: Sendable {
     }
 
     /// Les ajustements que la catégorie impose à la séance prévue ; aucun un jour de repos ou sans programme.
-    private static func adjustments(for plannedDay: PlannedDay, category: RecoveryCategory) -> [SessionAdjustment] {
+    /// Un programme illisible (`plannedDay` à `nil`) garde ceux du score déjà enregistré.
+    private static func adjustments(for plannedDay: PlannedDay?, category: RecoveryCategory,
+                                    keeping existing: DailyRecovery?) -> [SessionAdjustment] {
+        guard let plannedDay else { return existing?.adjustments ?? [] }
         guard let day = plannedDay.routineDay else { return [] }
         return SessionAdjuster.adjust(day, category: category).adjustments
     }

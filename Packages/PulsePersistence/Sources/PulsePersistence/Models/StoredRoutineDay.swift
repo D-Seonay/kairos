@@ -13,27 +13,32 @@ public final class StoredRoutineDay {
     public var runTargetKm: Double?
     public var program: StoredProgram?
     @Relationship(deleteRule: .cascade, inverse: \StoredRoutineExercise.day) public var exercises: [StoredRoutineExercise]? = []
+    public var createdAt: Date = Date()
+    public var updatedAt: Date = Date()
     public var deletedAt: Date?
 
-    public init(_ day: RoutineDay) {
+    /// `updatedAt` : celui du programme, seule source des dates d'un jour et de ses exercices.
+    public init(_ day: RoutineDay, updatedAt: Date) {
         id = day.id
-        apply(day)
+        createdAt = updatedAt
+        apply(day, updatedAt: updatedAt)
     }
 
-    public func apply(_ day: RoutineDay) {
+    public func apply(_ day: RoutineDay, updatedAt: Date) {
         order = day.order
         name = day.name
         kind = day.kind.rawValue
         runType = day.runType?.rawValue
         runTargetMinutes = day.runTargetMinutes
         runTargetKm = day.runTargetKm
+        self.updatedAt = updatedAt
         var remaining = Dictionary((exercises ?? []).map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         for exercise in day.exercises {
             if let existing = remaining.removeValue(forKey: exercise.id) {
                 existing.deletedAt = nil
-                existing.apply(exercise)
+                existing.apply(exercise, updatedAt: updatedAt)
             } else {
-                let stored = StoredRoutineExercise(exercise)
+                let stored = StoredRoutineExercise(exercise, updatedAt: updatedAt)
                 stored.day = self
                 exercises = (exercises ?? []) + [stored]
             }

@@ -85,7 +85,7 @@ struct HoldingWidgetPublisher: WidgetPublishing {
 /// Un rafraîchisseur du jour au-dessus de dépôts et de doublures en mémoire, que le test peut relire.
 struct RefresherFixture {
     let profiles = InMemoryProfileRepository()
-    let programs = InMemoryProgramRepository()
+    let programs = FailingProgramRepository()
     let recovery: InMemoryRecoveryRepository
     let source: SwitchableHealthSource
     let widgets = StubWidgetPublisher()

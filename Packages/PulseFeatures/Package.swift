@@ -15,6 +15,7 @@ let package = Package(
         .library(name: "CheckInFeature", targets: ["CheckInFeature"]),
         .library(name: "OnboardingFeature", targets: ["OnboardingFeature"]),
         .library(name: "TodayFeature", targets: ["TodayFeature"]),
+        .library(name: "TrainFeature", targets: ["TrainFeature"]),
         .library(name: "WidgetFeature", targets: ["WidgetFeature"])
     ],
     dependencies: [
@@ -49,6 +50,12 @@ let package = Package(
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .target(
+            name: "TrainFeature",
+            dependencies: ["PulseServices", domain, recoveryEngine, content, designSystem],
+            resources: [.process("Resources")],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .target(
             name: "WidgetFeature",
             dependencies: [domain, designSystem],
             resources: [.process("Resources")],
@@ -72,6 +79,11 @@ let package = Package(
         .testTarget(
             name: "TodayFeatureTests",
             dependencies: ["TodayFeature", "PulseServices", "CheckInFeature", domain, recoveryEngine, content],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .testTarget(
+            name: "TrainFeatureTests",
+            dependencies: ["TrainFeature", "PulseServices", domain, content, designSystem],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(

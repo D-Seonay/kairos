@@ -13,6 +13,7 @@
 		5024563D1C977796CEC6C4D2 /* PulseContent in Frameworks */ = {isa = PBXBuildFile; productRef = CADDF951A0B30D2BE04A2F29 /* PulseContent */; };
 		64068CB54DF03A28FE132C72 /* CheckInFeature in Frameworks */ = {isa = PBXBuildFile; productRef = A9C8BCE68F5B531CBD349FDB /* CheckInFeature */; };
 		69CB165197E173B96333A3CA /* PulsePersistence in Frameworks */ = {isa = PBXBuildFile; productRef = BA7396E5B28E53EE5BB52EFE /* PulsePersistence */; };
+		6BD6F7154BFC6A570DFAD9A4 /* TrainFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 46B53139D9C2719CD05324D4 /* TrainFeature */; };
 		6D0C4ACE8C0C1D8A460ECC91 /* PulseDesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 778E32CCFEBB1FE604B7373D /* PulseDesignSystem */; };
 		770C98D2B3BAC63B9D4FEFD6 /* WidgetFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 39C9A66A915380930D00B1BB /* WidgetFeature */; };
 		926156F0D2A1BA89FCB63479 /* PulseHealth in Frameworks */ = {isa = PBXBuildFile; productRef = F4BAF19749CA79DDDA8F7559 /* PulseHealth */; };
@@ -163,6 +164,7 @@
 				64068CB54DF03A28FE132C72 /* CheckInFeature in Frameworks */,
 				41A0C7A70FCDB1E786FF3D21 /* OnboardingFeature in Frameworks */,
 				B7C03201C860D0561958042A /* TodayFeature in Frameworks */,
+				6BD6F7154BFC6A570DFAD9A4 /* TrainFeature in Frameworks */,
 				EFF3DE79CAEEE2351E8EB80C /* WidgetFeature in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -283,6 +285,7 @@
 				A9C8BCE68F5B531CBD349FDB /* CheckInFeature */,
 				23A0449ABFD0F90FCF52CB7E /* OnboardingFeature */,
 				2CBD7AA3EB8955404F12F8BD /* TodayFeature */,
+				46B53139D9C2719CD05324D4 /* TrainFeature */,
 				7CBDB83896B464F56F24DBCD /* WidgetFeature */,
 			);
 			productName = Pulse;
@@ -824,6 +827,10 @@
 		39C9A66A915380930D00B1BB /* WidgetFeature */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WidgetFeature;
+		};
+		46B53139D9C2719CD05324D4 /* TrainFeature */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TrainFeature;
 		};
 		6B02FCA8EE3E67636F42D06C /* PulseRecoveryEngine */ = {
 			isa = XCSwiftPackageProductDependency;

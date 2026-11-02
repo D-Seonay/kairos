@@ -27,6 +27,25 @@ struct TodayModelSessionTests {
         #expect(model.session?.status == .adjusted)
     }
 
+    @Test func customExercisesCountInTheSessionSummary() async throws {
+        let fixture = TodayFixture(scenario: .goodNight)
+        var program = try await fixture.adopt("ppl-3")
+        let shrug = UserExercise(
+            name: "Shrug (Haltère)", primaryMuscle: .traps, secondaryMuscles: [], equipment: .dumbbell, pattern: .shoulderIsolation,
+            region: .upper, isUnilateral: false, defaultIncrementKg: 2.5, defaultRestSeconds: 60,
+            createdAt: fixture.clock.now, updatedAt: fixture.clock.now)
+        try await fixture.userExercises.save(shrug)
+        program.days[0].exercises.append(RoutineExercise(
+            order: 99, exercise: .user(id: shrug.id), sets: 4, repsMin: 10, repsMax: 12, targetRPE: 8, restSeconds: 60))
+        try await fixture.programs.save(program)
+        let model = fixture.makeModel()
+        await model.refresh()
+        let card = try #require(strength(model))
+        #expect(card.summary.muscleWeights[.traps] == 4)
+        let day = try #require(model.session?.activeDay)
+        #expect(model.planLines(for: day).last?.name == "Shrug (Haltère)")
+    }
+
     @Test func chooseOriginalSessionSwitchesTheCard() async throws {
         let fixture = TodayFixture(scenario: .badNight)
         try await fixture.adopt("ppl-3")

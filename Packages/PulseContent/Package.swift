@@ -18,6 +18,7 @@ let package = Package(
             resources: [
                 .process("Resources/Localizable.xcstrings"),
                 .process("Resources/exercises.json"),
+                .process("Resources/hevy-exercises.json"),
                 .process("Resources/programs.json"),
                 .copy("Resources/Programs")
             ],

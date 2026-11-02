@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "1.1.0",
+  "contentVersion": "1.2.0",
   "exercises": [
     {
       "id": "bench-press-barbell",
@@ -2878,7 +2878,8 @@
         "hip-adduction-machine",
         "cable-hip-adduction",
         "side-lying-hip-adduction"
-      ]
+      ],
+      "tracksDuration": true
     },
     {
       "id": "side-lying-hip-adduction",
@@ -3262,7 +3263,8 @@
         "side-plank",
         "dead-bug",
         "pallof-press-cable"
-      ]
+      ],
+      "tracksDuration": true
     },
     {
       "id": "side-plank",
@@ -3303,7 +3305,8 @@
         "plank",
         "dead-bug",
         "pallof-press-cable"
-      ]
+      ],
+      "tracksDuration": true
     },
     {
       "id": "dead-bug",
@@ -3383,6 +3386,370 @@
         "plank",
         "side-plank",
         "dead-bug"
+      ]
+    },
+    {
+      "id": "assisted-dips-machine",
+      "name": {
+        "fr": "Dips assistés à la machine",
+        "en": "Assisted Dip Machine"
+      },
+      "primaryMuscles": [
+        "triceps",
+        "chest"
+      ],
+      "secondaryMuscles": [
+        "frontDelts"
+      ],
+      "equipment": "machine",
+      "pattern": "elbowExtension",
+      "region": "upper",
+      "isCompound": true,
+      "isUnilateral": false,
+      "loadKind": "assisted",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 90,
+      "cues": {
+        "fr": [
+          "Genoux sur le support, buste légèrement penché vers l'avant.",
+          "Descendre jusqu'à l'angle droit des coudes, épaules basses.",
+          "Pousser jusqu'à l'extension sans verrouiller brutalement les coudes."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Descendre trop bas et tirer sur les épaules.",
+          "Hausser les épaules vers les oreilles."
+        ]
+      },
+      "alternatives": [
+        "dips",
+        "triceps-extension-machine",
+        "close-grip-bench-press"
+      ],
+      "riskAreas": [
+        "shoulders"
+      ]
+    },
+    {
+      "id": "close-grip-lat-pulldown-cable",
+      "name": {
+        "fr": "Tirage vertical prise serrée à la poulie",
+        "en": "Close-Grip Lat Pulldown"
+      },
+      "primaryMuscles": [
+        "lats"
+      ],
+      "secondaryMuscles": [
+        "biceps",
+        "upperBack"
+      ],
+      "equipment": "cable",
+      "pattern": "verticalPull",
+      "region": "upper",
+      "isCompound": true,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 90,
+      "cues": {
+        "fr": [
+          "Prise serrée neutre, poitrine sortie, légèrement en arrière.",
+          "Tirer les coudes vers les côtés jusqu'en haut de la poitrine.",
+          "Remonter la barre lentement, bras presque tendus."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Se balancer pour aider la traction.",
+          "Tirer avec les bras sans engager les dorsaux.",
+          "Casser les poignets en fin de mouvement."
+        ]
+      },
+      "alternatives": [
+        "lat-pulldown-cable",
+        "lat-pulldown-machine",
+        "assisted-pull-up-machine"
+      ]
+    },
+    {
+      "id": "dumbbell-curl",
+      "name": {
+        "fr": "Curl aux haltères",
+        "en": "Dumbbell Curl"
+      },
+      "primaryMuscles": [
+        "biceps"
+      ],
+      "secondaryMuscles": [
+        "forearms"
+      ],
+      "equipment": "dumbbell",
+      "pattern": "elbowFlexion",
+      "region": "upper",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Coudes collés aux flancs, poignets droits.",
+          "Monter jusqu'à la contraction en gardant les épaules basses.",
+          "Descendre en 2 à 3 secondes, bras presque tendus."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Balancer le buste pour monter la charge.",
+          "Avancer les coudes pendant la montée."
+        ]
+      },
+      "alternatives": [
+        "hammer-curl-dumbbell",
+        "cable-curl",
+        "preacher-curl-machine"
+      ]
+    },
+    {
+      "id": "rope-pushdown-cable",
+      "name": {
+        "fr": "Extension triceps à la corde",
+        "en": "Rope Triceps Pushdown"
+      },
+      "primaryMuscles": [
+        "triceps"
+      ],
+      "secondaryMuscles": [],
+      "equipment": "cable",
+      "pattern": "elbowExtension",
+      "region": "upper",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Coudes collés aux flancs, buste légèrement penché.",
+          "Pousser jusqu'à l'extension en écartant la corde en bas.",
+          "Remonter jusqu'à l'angle droit, sans lever les coudes."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Écarter les coudes et pousser avec les épaules.",
+          "Se pencher sur la charge pour la descendre."
+        ]
+      },
+      "alternatives": [
+        "triceps-pushdown-cable",
+        "overhead-triceps-extension-cable",
+        "triceps-extension-machine"
+      ]
+    },
+    {
+      "id": "triceps-extension-machine",
+      "name": {
+        "fr": "Extension triceps à la machine",
+        "en": "Machine Triceps Extension"
+      },
+      "primaryMuscles": [
+        "triceps"
+      ],
+      "secondaryMuscles": [],
+      "equipment": "machine",
+      "pattern": "elbowExtension",
+      "region": "upper",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Dos calé contre le dossier, coudes alignés sur l'axe de la machine.",
+          "Pousser jusqu'à l'extension complète en serrant les triceps.",
+          "Revenir lentement sans laisser la charge se poser."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Décoller les épaules du dossier pour pousser.",
+          "Rebondir en bas du mouvement."
+        ]
+      },
+      "alternatives": [
+        "triceps-pushdown-cable",
+        "rope-pushdown-cable",
+        "assisted-dips-machine"
+      ]
+    },
+    {
+      "id": "decline-chest-press-machine",
+      "name": {
+        "fr": "Développé décliné à la machine",
+        "en": "Decline Chest Press Machine"
+      },
+      "primaryMuscles": [
+        "chest"
+      ],
+      "secondaryMuscles": [
+        "triceps",
+        "frontDelts"
+      ],
+      "equipment": "machine",
+      "pattern": "horizontalPush",
+      "region": "upper",
+      "isCompound": true,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 90,
+      "cues": {
+        "fr": [
+          "Dos plaqué, poignées au bas des pectoraux, omoplates serrées.",
+          "Pousser en gardant les épaules basses et les poignets droits.",
+          "Revenir lentement jusqu'à l'étirement sans relâcher la tension."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Hausser les épaules pendant la poussée.",
+          "Rebondir en bas du mouvement.",
+          "Verrouiller brutalement les coudes en haut."
+        ]
+      },
+      "alternatives": [
+        "chest-press-machine",
+        "incline-chest-press-machine",
+        "bench-press-dumbbell"
+      ]
+    },
+    {
+      "id": "back-extension-machine",
+      "name": {
+        "fr": "Extension du dos à la machine",
+        "en": "Back Extension Machine"
+      },
+      "primaryMuscles": [
+        "lowerBack"
+      ],
+      "secondaryMuscles": [
+        "glutes",
+        "hamstrings"
+      ],
+      "equipment": "machine",
+      "pattern": "hinge",
+      "region": "lower",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 90,
+      "cues": {
+        "fr": [
+          "Hanches calées sur le support, pieds bien appuyés.",
+          "Remonter en gardant le dos gainé, jusqu'à l'alignement du corps.",
+          "Descendre lentement, sans arrondir le bas du dos."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Se cambrer au-delà de l'alignement en haut.",
+          "Prendre de l'élan avec le buste."
+        ]
+      },
+      "alternatives": [
+        "hyperextension",
+        "romanian-deadlift-dumbbell",
+        "hip-thrust-barbell"
+      ],
+      "riskAreas": [
+        "lowerBack"
+      ]
+    },
+    {
+      "id": "hyperextension",
+      "name": {
+        "fr": "Hyperextension lestée",
+        "en": "Weighted Back Extension"
+      },
+      "primaryMuscles": [
+        "lowerBack"
+      ],
+      "secondaryMuscles": [
+        "glutes",
+        "hamstrings"
+      ],
+      "equipment": "bodyweight",
+      "pattern": "hinge",
+      "region": "lower",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "bodyweight",
+      "defaultIncrementKg": 2.5,
+      "defaultRestSeconds": 90,
+      "cues": {
+        "fr": [
+          "Hanches au bord du banc, disque tenu contre la poitrine.",
+          "Charnière aux hanches, dos plat, jusqu'à l'alignement du corps.",
+          "Serrer les fessiers en haut, descendre en contrôle."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Se cambrer en haut au lieu de s'arrêter à l'alignement.",
+          "Descendre trop vite et rebondir en bas."
+        ]
+      },
+      "alternatives": [
+        "back-extension-machine",
+        "romanian-deadlift-dumbbell",
+        "single-leg-romanian-deadlift"
+      ],
+      "riskAreas": [
+        "lowerBack"
+      ]
+    },
+    {
+      "id": "seated-wrist-curl-dumbbell",
+      "name": {
+        "fr": "Flexion des poignets assis aux haltères",
+        "en": "Seated Dumbbell Wrist Curl"
+      },
+      "primaryMuscles": [
+        "forearms"
+      ],
+      "secondaryMuscles": [],
+      "equipment": "dumbbell",
+      "pattern": "forearm",
+      "region": "upper",
+      "isCompound": false,
+      "isUnilateral": false,
+      "loadKind": "external",
+      "defaultIncrementKg": 1.25,
+      "defaultRestSeconds": 60,
+      "cues": {
+        "fr": [
+          "Avant-bras posés sur les cuisses, paumes vers le haut.",
+          "Enrouler les poignets vers soi, sans bouger les avant-bras.",
+          "Laisser l'haltère descendre jusqu'à l'ouverture des doigts."
+        ]
+      },
+      "mistakes": {
+        "fr": [
+          "Soulever les avant-bras pour aider.",
+          "Aller trop vite et perdre la tension."
+        ]
+      },
+      "alternatives": [
+        "wrist-curl-cable",
+        "wrist-curl-barbell",
+        "reverse-wrist-curl-barbell"
+      ],
+      "riskAreas": [
+        "wrists"
       ]
     }
   ]

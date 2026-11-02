@@ -11,9 +11,11 @@ public struct RoutineExercise: Sendable, Equatable, Codable, Identifiable {
     public var targetRPE: Double
     public var restSeconds: Int
     public var supersetGroup: Int?
+    /// Fourchette par série, quand elle diffère de `repsMin...repsMax` ; l'index est celui de la série, à partir de 0.
+    public var setTargets: [SetTarget]?
 
     public init(id: UUID = UUID(), order: Int, exercise: ExerciseReference, sets: Int, repsMin: Int, repsMax: Int,
-                targetRPE: Double, restSeconds: Int, supersetGroup: Int? = nil) {
+                targetRPE: Double, restSeconds: Int, supersetGroup: Int? = nil, setTargets: [SetTarget]? = nil) {
         self.id = id
         self.order = order
         self.exercise = exercise
@@ -23,6 +25,15 @@ public struct RoutineExercise: Sendable, Equatable, Codable, Identifiable {
         self.targetRPE = targetRPE
         self.restSeconds = restSeconds
         self.supersetGroup = supersetGroup
+        self.setTargets = setTargets
+    }
+
+    /// Fourchette de répétitions de la série `index` (à partir de 0) : sa cible propre si elle existe, sinon `repsMin...repsMax`.
+    public func repRange(forSet index: Int) -> ClosedRange<Int> {
+        if let setTargets, setTargets.indices.contains(index) {
+            return setTargets[index].repsMin...setTargets[index].repsMax
+        }
+        return repsMin...repsMax
     }
 }
 

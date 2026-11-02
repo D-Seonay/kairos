@@ -7,6 +7,7 @@ import PulsePersistence
 import PulseServices
 import SwiftData
 import TodayFeature
+import TrainFeature
 import WidgetFeature
 
 /// Les dépendances externes de l'app, assemblées une fois au lancement.
@@ -38,6 +39,12 @@ struct AppDependencies: Sendable {
     let supplements: any SupplementRepository
     let bodyMeasurements: any BodyMeasurementRepository
     let personalRecords: any PersonalRecordRepository
+    let exerciseSettings: any ExerciseSettingsRepository
+    /// Le seul recalcul des records : l'import Hevy et les écrans de l'historique le partagent, ses recalculs passent par une même file.
+    let records: RecordsService
+    /// Les correspondances Hevy retenues, dans la suite de préférences que la suppression totale vide.
+    let hevyMappings: UserDefaultsHevyMappingStore
+    let hevyImporter: HevyImporter
     let healthCache: any HealthSampleCache
     /// Dernière ouverture et dernier jour annoncé, dans la suite de préférences que la suppression totale vide.
     let activity: any DayActivityLog
@@ -177,19 +184,28 @@ struct AppDependencies: Sendable {
             calendar: calendar, now: wiring.now)
         // La suppression totale attend la fin d'un rafraîchissement en cours, qui republierait l'instantané effacé.
         let eraser = SerializedDataEraser(refresher: refresher, inner: storeEraser)
+        let userExercises = SwiftDataUserExerciseRepository(modelContainer: container)
+        let workouts = SwiftDataWorkoutRepository(modelContainer: container)
+        let personalRecords = SwiftDataPersonalRecordRepository(modelContainer: container)
+        let records = RecordsService(workouts: workouts, records: personalRecords, userExercises: userExercises,
+                                     library: content, now: wiring.now)
+        let hevyMappings = UserDefaultsHevyMappingStore(suiteName: wiring.defaultsSuite)
         return AppDependencies(
             health: wiring.health, healthSource: wiring.healthSource, notifications: wiring.notifications,
             onboardingSteps: UserDefaultsOnboardingStepStore(suiteName: wiring.defaultsSuite),
             now: wiring.now, launch: wiring.launch,
             calendar: calendar, content: content, container: container, storeMode: mode, storeError: error,
             profiles: profiles, programs: programs,
-            userExercises: SwiftDataUserExerciseRepository(modelContainer: container),
-            workouts: SwiftDataWorkoutRepository(modelContainer: container),
+            userExercises: userExercises, workouts: workouts,
             scheduledDays: SwiftDataScheduledDayRepository(modelContainer: container),
             recovery: recovery, scores: scores,
             supplements: SwiftDataSupplementRepository(modelContainer: container),
             bodyMeasurements: SwiftDataBodyMeasurementRepository(modelContainer: container),
-            personalRecords: SwiftDataPersonalRecordRepository(modelContainer: container),
+            personalRecords: personalRecords,
+            exerciseSettings: SwiftDataExerciseSettingsRepository(modelContainer: container),
+            records: records, hevyMappings: hevyMappings,
+            hevyImporter: HevyImporter(workouts: workouts, userExercises: userExercises, records: records, mappings: hevyMappings,
+                                       library: content, calendar: calendar, now: wiring.now),
             healthCache: healthCache, activity: activity, refresher: refresher, backgroundDelivery: wiring.backgroundDelivery,
             activeSession: SwiftDataActiveSessionStore(modelContainer: container),
             inspector: wiring.inspector ?? SwiftDataStoreInspector(container: container, cloudEnabled: mode == .cloud),
@@ -222,6 +238,13 @@ extension AppDependencies {
     }
 
     func todayEnvironment() -> TodayEnvironment {
-        TodayEnvironment(refresher: refresher, workouts: workouts, library: content, calendar: calendar, now: now)
+        TodayEnvironment(refresher: refresher, workouts: workouts, userExercises: userExercises, library: content, calendar: calendar,
+                         now: now)
+    }
+
+    func trainEnvironment() -> TrainEnvironment {
+        TrainEnvironment(profiles: profiles, programs: programs, recovery: recovery, workouts: workouts, userExercises: userExercises,
+                         exerciseSettings: exerciseSettings, personalRecords: personalRecords, records: records,
+                         importer: hevyImporter, library: content, calendar: calendar, now: now)
     }
 }

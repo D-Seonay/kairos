@@ -10,6 +10,7 @@ actor StoreWiper {
         try modelContext.delete(model: StoredRoutineDay.self)
         try modelContext.delete(model: StoredRoutineExercise.self)
         try modelContext.delete(model: StoredUserExercise.self)
+        try modelContext.delete(model: StoredExerciseSettings.self)
         try modelContext.delete(model: StoredWorkoutSession.self)
         try modelContext.delete(model: StoredWorkoutSet.self)
         try modelContext.delete(model: StoredScheduledDay.self)

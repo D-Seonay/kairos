@@ -1,5 +1,4 @@
 import Foundation
-import PulseContent
 import PulseDomain
 import PulseServices
 
@@ -39,11 +38,11 @@ struct WhyContent: Equatable, Sendable {
     var restoreTitle: String?
 
     /// `checkIn` : le check-in du jour, qui sert à lire un score estimé.
-    static func make(recovery: DailyRecovery, session: TodaySession, checkIn: CheckIn?, library: ContentLibrary) -> WhyContent {
+    static func make(recovery: DailyRecovery, session: TodaySession, checkIn: CheckIn?, directory: ExerciseDirectory) -> WhyContent {
         let signals = WhySignals.make(recovery: recovery, checkIn: checkIn)
         return WhyContent(
             reading: WhyReading.make(recovery: recovery, session: session),
-            changes: WhyChanges.make(recovery: recovery, session: session, library: library),
+            changes: WhyChanges.make(recovery: recovery, session: session, directory: directory),
             signals: signals.signals,
             formula: signals.formula,
             rule: rule(for: recovery.category),

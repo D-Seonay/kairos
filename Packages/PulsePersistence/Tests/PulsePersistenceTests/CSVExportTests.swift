@@ -47,3 +47,22 @@ import Testing
     let recoveries = try String(contentsOf: folder.appendingPathComponent("daily_recoveries.csv"), encoding: .utf8)
     #expect(recoveries.contains("frozen_at,original_session_chosen"))
 }
+
+@Test func csvCarriesExerciseSettingsAndTheV3Columns() async throws {
+    let box = try ModelContainerBox()
+    try await SampleDataSeeder(container: box.container, calendar: Fixed.calendar).seed(now: Fixed.t0)
+    let snapshot = try await ExportSnapshotLoader(modelContainer: box.container).snapshot()
+    let metadata = ExportMetadata(appVersion: "1.0 (1)", contentVersion: "1.0.0", locale: "fr_FR", exportedAt: Fixed.t0)
+    let document = JSONExportWriter.document(from: snapshot, metadata: metadata, exerciseNames: { _ in nil })
+    let tables = CSVTables.tables(from: document, timeZone: Fixed.calendar.timeZone)
+    let settings = try #require(tables[.exerciseSettings])
+    #expect(settings.header == ["id", "content_exercise_id", "user_exercise_id", "increment_kg", "warmup_set_count",
+                                "created_at", "updated_at"])
+    #expect(settings.rows.count == 1)
+    #expect(try #require(tables[.workoutSessions]).header.contains("exercise_notes"))
+    #expect(try #require(tables[.workoutSets]).header.contains("duration_seconds"))
+    #expect(try #require(tables[.routineExercises]).header.contains("set_targets"))
+    let userHeader = try #require(tables[.userExercises]).header
+    #expect(["load_kind", "is_compound", "tracks_duration"].allSatisfy(userHeader.contains))
+    #expect(CSVTables.readme(for: document).contains("exercise_settings.csv : réglages par exercice (incrément, échauffement)"))
+}

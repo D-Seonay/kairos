@@ -68,3 +68,61 @@ import Testing
     let exercise = Sample.userExercise()
     #expect(StoredUserExercise(exercise).toDomain() == exercise)
 }
+
+@Test func m4TrainingFieldsRoundTripThroughStoredModels() {
+    var program = Sample.program()
+    program.days[0].exercises[0].setTargets = [SetTarget(repsMin: 6, repsMax: 8), SetTarget(repsMin: 10, repsMax: 12)]
+    #expect(StoredProgram(program).toDomain() == program)
+
+    var session = Sample.session()
+    session.source = .hevy
+    session.exerciseNotes = [ExerciseNote(exercise: .content(id: "plank"), text: "Gainage solide"),
+                             ExerciseNote(exercise: .user(id: UUID()), text: "Siège cran 4")]
+    session.sets[1].durationSeconds = 45
+    #expect(StoredWorkoutSession(session).toDomain() == session)
+
+    var exercise = Sample.userExercise()
+    exercise.loadKind = .assisted
+    exercise.isCompound = true
+    exercise.tracksDuration = true
+    #expect(StoredUserExercise(exercise).toDomain() == exercise)
+}
+
+@Test func exerciseSettingsRoundTripFilledThenEmpty() {
+    var settings = Sample.exerciseSettings(exercise: .user(id: UUID()))
+    #expect(StoredExerciseSettings(settings).toDomain() == settings)
+    settings.exercise = .content(id: "squat-barbell")
+    settings.incrementKg = nil
+    settings.warmupSetCount = nil
+    #expect(StoredExerciseSettings(settings).toDomain() == settings)
+    let stored = StoredExerciseSettings(Sample.exerciseSettings())
+    stored.apply(settings)
+    #expect(stored.toDomain().exercise == settings.exercise && stored.incrementKg == nil && stored.warmupSetCount == nil)
+}
+
+/// Les dates des jours, exercices de routine et séries n'existent qu'en stockage : elles suivent le `updatedAt` du parent.
+@Test func childDatesFollowTheParentUpdatedAt() throws {
+    var program = Sample.program(days: 1)
+    let storedProgram = StoredProgram(program)
+    let day = try #require(storedProgram.days?.first)
+    #expect(day.createdAt == Fixed.t2 && day.updatedAt == Fixed.t2)
+    #expect(day.exercises?.allSatisfy { $0.createdAt == Fixed.t2 && $0.updatedAt == Fixed.t2 } == true)
+    let later = Fixed.t2.addingTimeInterval(60)
+    program.updatedAt = later
+    program.days[0].exercises.append(Sample.routineExercise(order: 3))
+    storedProgram.apply(program)
+    #expect(day.createdAt == Fixed.t2 && day.updatedAt == later)
+    let exercises = day.exercises ?? []
+    #expect(exercises.count == 4 && exercises.allSatisfy { $0.updatedAt == later })
+    #expect(exercises.filter { $0.createdAt == later }.count == 1)
+
+    var session = Sample.session(sets: 2)
+    let storedSession = StoredWorkoutSession(session)
+    #expect(storedSession.sets?.allSatisfy { $0.createdAt == Fixed.t2 && $0.updatedAt == Fixed.t2 } == true)
+    session.updatedAt = later
+    session.sets.append(Sample.set(order: 3))
+    storedSession.apply(session)
+    let sets = storedSession.sets ?? []
+    #expect(sets.count == 3 && sets.allSatisfy { $0.updatedAt == later })
+    #expect(sets.filter { $0.createdAt == later }.count == 1)
+}

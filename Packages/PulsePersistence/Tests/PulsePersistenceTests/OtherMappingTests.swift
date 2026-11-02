@@ -14,8 +14,8 @@ import Testing
     #expect(try context.fetchCount(FetchDescriptor<StoredCachedHealthSample>()) == 1)
     #expect(try context.fetchCount(FetchDescriptor<StoredHealthQueryAnchor>()) == 1)
     #expect(PersistenceStack.localModels.count == 3)
-    #expect(PersistenceStack.syncedModels.count == 14)
-    #expect(PulseSchemaV1.models.count == 17 && PulseSchemaV2.models.count == 17)
+    #expect(PersistenceStack.syncedModels.count == 15)
+    #expect(PulseSchemaV1.models.count == 17 && PulseSchemaV2.models.count == 17 && PulseSchemaV3.models.count == 18)
 }
 
 @Test func newM3FieldsRoundTripThroughStoredModels() {

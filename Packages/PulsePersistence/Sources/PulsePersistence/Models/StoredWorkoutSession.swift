@@ -23,6 +23,7 @@ public final class StoredWorkoutSession {
     public var averageHeartRate: Double?
     public var estimatedRPE: Double?
     public var healthKitUUID: String?
+    public var exerciseNotes: Data?
     @Relationship(deleteRule: .cascade, inverse: \StoredWorkoutSet.session) public var sets: [StoredWorkoutSet]? = []
     public var createdAt: Date = Date()
     public var updatedAt: Date = Date()
@@ -53,6 +54,7 @@ public final class StoredWorkoutSession {
         averageHeartRate = session.averageHeartRate
         estimatedRPE = session.estimatedRPE
         healthKitUUID = session.healthKitUUID
+        exerciseNotes = CodableColumn.encode(session.exerciseNotes)
         updatedAt = session.updatedAt
         applySets(session.sets)
     }
@@ -62,9 +64,9 @@ public final class StoredWorkoutSession {
         for set in newSets {
             if let existing = remaining.removeValue(forKey: set.id) {
                 existing.deletedAt = nil
-                existing.apply(set)
+                existing.apply(set, updatedAt: updatedAt)
             } else {
-                let stored = StoredWorkoutSet(set)
+                let stored = StoredWorkoutSet(set, updatedAt: updatedAt)
                 stored.session = self
                 sets = (sets ?? []) + [stored]
             }
@@ -83,6 +85,7 @@ public final class StoredWorkoutSession {
                        overallRPE: overallRPE, note: note, tonnageKg: tonnageKg, durationMinutes: durationMinutes,
                        distanceMeters: distanceMeters, averageHeartRate: averageHeartRate, estimatedRPE: estimatedRPE,
                        healthKitUUID: healthKitUUID,
+                       exerciseNotes: CodableColumn.decode([ExerciseNote].self, from: exerciseNotes, default: []),
                        sets: (sets ?? []).filter { $0.deletedAt == nil }.sorted { $0.order < $1.order }.map { $0.toDomain() },
                        createdAt: createdAt, updatedAt: updatedAt)
     }

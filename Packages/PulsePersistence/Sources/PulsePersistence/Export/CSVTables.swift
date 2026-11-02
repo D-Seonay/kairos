@@ -56,7 +56,7 @@ struct CSVFormat: @unchecked Sendable {
     }
 }
 
-/// Les 14 tables de l'export CSV (spec M2 §6.2).
+/// Les 15 tables de l'export CSV (spec M2 §6.2).
 public enum CSVTables {
     public static func tables(from document: ExportDocument, timeZone: TimeZone) -> [StoreTable: CSVTable] {
         let format = CSVFormat(timeZone: timeZone)
@@ -69,6 +69,7 @@ public enum CSVTables {
             .routineDays: table(days, CSVColumns.routineDays, format),
             .routineExercises: table(exercises, CSVColumns.routineExercises, format),
             .userExercises: table(document.userExercises, CSVColumns.userExercises, format),
+            .exerciseSettings: table(document.exerciseSettings, CSVColumns.exerciseSettings, format),
             .workoutSessions: table(document.workoutSessions, CSVColumns.workoutSessions, format),
             .workoutSets: table(sets, CSVColumns.workoutSets, format),
             .scheduledDays: table(document.scheduledDays, CSVColumns.scheduledDays, format),
@@ -101,6 +102,7 @@ public enum CSVTables {
     private static let descriptions: [StoreTable: String] = [
         .profile: "profil et préférences", .programs: "programmes de l'utilisateur", .routineDays: "jours de chaque programme",
         .routineExercises: "exercices de chaque jour", .userExercises: "exercices créés par l'utilisateur",
+        .exerciseSettings: "réglages par exercice (incrément, échauffement)",
         .workoutSessions: "séances (musculation Pulse, courses et vélos importés)", .workoutSets: "séries de chaque séance",
         .scheduledDays: "semaine datée : séances placées, déplacées, validées", .dailyRecoveries: "score de récupération par jour",
         .checkIns: "check-ins du matin", .supplements: "compléments", .supplementIntakes: "prises de compléments",
