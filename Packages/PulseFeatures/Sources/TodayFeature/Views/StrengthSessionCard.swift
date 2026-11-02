@@ -8,8 +8,7 @@ import SwiftUI
 /// « Pourquoi ? » et « Séance d'origine » côte à côte, puis « Démarrer ».
 struct StrengthSessionCard: View {
     let card: StrengthCard
-    /// `nil` tant que l'écran « Pourquoi » n'existe pas : le bouton est alors grisé.
-    let onWhy: (() -> Void)?
+    let onWhy: () -> Void
     let onOrigin: () -> Void
     let onStart: () -> Void
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -32,9 +31,8 @@ struct StrengthSessionCard: View {
             : AnyLayout(HStackLayout(spacing: 8))
         return layout {
             if card.showsWhy {
-                Button(String(localized: "Pourquoi ?", bundle: .module)) { onWhy?() }
+                Button(String(localized: "Pourquoi ?", bundle: .module), action: onWhy)
                     .buttonStyle(SecondaryButtonStyle())
-                    .disabled(onWhy == nil)
                     .accessibilityIdentifier(TodayIdentifiers.sessionWhy)
             }
             if let origin = card.originButton {
@@ -51,9 +49,14 @@ struct SessionCardHeader: View {
     let title: String
     var badge: StrengthCard.Badge?
     var runIcon = false
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
+    /// Le titre et le badge côte à côte, empilés aux tailles d'accessibilité.
     var body: some View {
-        HStack(alignment: .top, spacing: 8) {
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8))
+            : AnyLayout(HStackLayout(alignment: .top, spacing: 8))
+        layout {
             VStack(alignment: .leading, spacing: 4) {
                 Text(String(localized: "Séance du jour", bundle: .module))
                     .font(.caption.weight(.semibold))
@@ -97,7 +100,8 @@ private struct SessionBadge: View {
         .labelStyle(.titleAndIcon)
         .font(.system(.caption, weight: .semibold))
         .foregroundStyle(badge == .adjusted ? Color(palette.accent) : PulsePalette.text2)
-        .lineLimit(1)
+        .fixedSize(horizontal: false, vertical: true)
+        .layoutPriority(1)
         .padding(.horizontal, 10)
         .frame(minHeight: 24)
         .background(badge == .adjusted ? palette.soft : PulsePalette.surface2, in: Capsule())

@@ -175,4 +175,21 @@ struct TodayModelTests {
         await model.refresh()
         #expect(model.dateText == "lundi 2 novembre")
     }
+
+    @Test func whyIsAvailableOnceScored() async throws {
+        let scored = TodayFixture()
+        try await scored.adopt("ppl-3")
+        let model = scored.makeModel()
+        #expect(model.why == nil)
+        await model.refresh()
+        #expect(model.why != nil)
+        model.showWhy()
+        #expect(model.isShowingWhy)
+
+        let empty = TodayFixture(scenario: .noData).makeModel()
+        await empty.refresh()
+        #expect(empty.why == nil)
+        empty.showWhy()
+        #expect(!empty.isShowingWhy)
+    }
 }

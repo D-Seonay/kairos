@@ -38,7 +38,7 @@ enum SessionCardState: Equatable {
     case rest(next: NextSession?, suggestsMobility: Bool)
     case noProgram
 
-    static let mobilityThreshold = 65
+    static let mobilityThreshold = 65.0
 
     /// Sans score du jour (avant 4 h, check-in à faire), la séance reste planifiée : aucun ajustement n'est proposé,
     /// et « Séance d'origine » serait refusée faute de score à modifier.
@@ -49,7 +49,8 @@ enum SessionCardState: Equatable {
         case .noProgram:
             return .noProgram
         case .rest(let next):
-            let suggestsMobility = today.map { Int($0.score.rounded()) < mobilityThreshold } ?? false
+            // Le score brut, pas l'arrondi : 64,6 s'affiche « 65 » mais reste une fatigue modérée.
+            let suggestsMobility = today.map { $0.score < mobilityThreshold } ?? false
             return .rest(next: next, suggestsMobility: suggestsMobility)
         case .run(let day):
             let suggestion = status == .adjusted ? session.adjusted.flatMap(runSuggestion) : nil

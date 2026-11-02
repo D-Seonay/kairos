@@ -127,6 +127,9 @@ struct SessionCardStateTests {
             return SessionCardState.make(session: TodaySession(plannedDay: rest, recovery: scored), score: score, library: library)
         }
         #expect(state(.scored(recovery(58))) == .rest(next: next, suggestsMobility: true))
+        // 64,6 s'affiche « 65 » mais reste une fatigue modérée : la suggestion suit le score brut.
+        #expect(state(.scored(recovery(64.6))) == .rest(next: next, suggestsMobility: true))
+        #expect(state(.scored(recovery(65))) == .rest(next: next, suggestsMobility: false))
         #expect(state(.scored(recovery(70))) == .rest(next: next, suggestsMobility: false))
         #expect(state(.needsCheckIn(missing: Factor.allCases)) == .rest(next: next, suggestsMobility: false))
     }

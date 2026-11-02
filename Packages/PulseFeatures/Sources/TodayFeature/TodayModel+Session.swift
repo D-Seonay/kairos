@@ -16,16 +16,6 @@ public enum TodaySheet: Identifiable, Equatable {
 }
 
 extension TodayModel {
-    /// Garde la séance d'origine (`true`) ou revient à la séance ajustée (`false`). Si le choix est refusé
-    /// (plus de score aujourd'hui, écriture impossible), l'accueil se relit pour montrer la séance réellement enregistrée.
-    public func chooseOriginalSession(_ chosen: Bool) async {
-        do {
-            applyWritten(try await environment.refresher.chooseOriginalSession(chosen))
-        } catch {
-            await refresh()
-        }
-    }
-
     /// Ouvre la séance de musculation affichée : l'ajustée sous le badge « Ajustée », l'originale sinon.
     /// Sans effet hors d'une carte de musculation (mobilité ou repos, course, repos, sans programme).
     public func startSession() {

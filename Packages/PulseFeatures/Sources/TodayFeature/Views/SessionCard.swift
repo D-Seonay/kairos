@@ -8,8 +8,8 @@ import SwiftUI
 /// ou aucun programme.
 struct SessionCard: View {
     let model: TodayModel
-    /// L'écran « Pourquoi », quand il existe.
-    var onWhy: (() -> Void)?
+    /// Ouvre l'écran « Pourquoi ».
+    let onWhy: () -> Void
 
     var body: some View {
         ObsidianCard {

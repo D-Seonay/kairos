@@ -19,7 +19,7 @@ struct SessionPlanLine: Equatable {
         }
     }
 
-    private static func name(of reference: ExerciseReference, library: ContentLibrary) -> String {
+    static func name(of reference: ExerciseReference, library: ContentLibrary) -> String {
         switch reference {
         case .content(let id): library.exercise(id: id)?.name.fr ?? id
         case .user: String(localized: "Exercice personnel", bundle: .module)

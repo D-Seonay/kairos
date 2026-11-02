@@ -87,8 +87,8 @@ struct TodayModelConcurrencyTests {
 
     /// Un check-in envoyé pendant une actualisation attend qu'elle finisse, et l'accueil finit sur le score estimé.
     /// Le rafraîchisseur sérialise ses opérations : l'actualisation rend son « check-in à faire » avant que le check-in
-    /// ne commence. Ce test ne couvre donc pas la garde contre une lecture périmée du modèle (`scoreEpoch`), que
-    /// cette sérialisation rend inatteignable ; elle reste en défense.
+    /// ne commence. Ce test ne couvre donc pas la garde du modèle (`scoreEpoch`) : elle ne peut plus écarter une lecture
+    /// périmée, et reste en défense (elle peut écarter sans dommage un résultat plus récent que le score écrit).
     @Test func checkInSubmittedDuringARefreshEndsOnTheEstimate() async {
         let recovery = Self.recoveries()
         let fixture = TodayFixture(scenario: .threeNights, recovery: recovery)

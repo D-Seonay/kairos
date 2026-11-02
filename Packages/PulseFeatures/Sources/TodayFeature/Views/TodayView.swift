@@ -3,7 +3,8 @@ import PulseDesignSystem
 import PulseServices
 import SwiftUI
 
-/// L'onglet « Aujourd'hui » : en-tête, carte de récupération (ou check-in) et séance du jour, avec ses feuilles.
+/// L'onglet « Aujourd'hui » : en-tête, carte de récupération (ou check-in) et séance du jour, avec ses feuilles et l'écran « Pourquoi »,
+/// poussé dans sa pile de navigation.
 public struct TodayView: View {
     private let model: TodayModel
     private let onOpenProfile: () -> Void
@@ -16,20 +17,24 @@ public struct TodayView: View {
 
     public var body: some View {
         @Bindable var model = model
-        content
-            .background(PulsePalette.background)
-            .sheet(item: $model.sheet) { sheet in
-                switch sheet {
-                case .start(let day): StartSessionSheet(day: day, library: model.environment.library)
-                case .mobility: MobilitySheet()
-                }
+        NavigationStack {
+            content
+                .background(PulsePalette.background)
+                .hidingNavigationBar()
+                .navigationDestination(isPresented: $model.isShowingWhy) { WhyView(model: model) }
+        }
+        .sheet(item: $model.sheet) { sheet in
+            switch sheet {
+            case .start(let day): StartSessionSheet(day: day, library: model.library)
+            case .mobility: MobilitySheet()
             }
-            .task { await model.refresh() }
-            .onChange(of: scenePhase) { _, phase in
-                if phase == .active {
-                    Task { await model.refresh() }
-                }
+        }
+        .task { await model.refresh() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active {
+                Task { await model.refresh() }
             }
+        }
     }
 
     private var content: some View {
@@ -37,7 +42,7 @@ public struct TodayView: View {
             VStack(spacing: PulseMetrics.spacing) {
                 TodayHeader(model: model, onOpenProfile: onOpenProfile)
                 recoveryOrCheckIn
-                SessionCard(model: model)
+                SessionCard(model: model, onWhy: model.showWhy)
             }
             .padding(PulseMetrics.spacing)
         }
@@ -60,7 +65,7 @@ public struct TodayView: View {
                 }
             }
         } else {
-            RecoveryCard(score: model.score, factors: model.factors, marker: model.marker)
+            RecoveryCard(score: model.score, factors: model.factors, marker: model.marker, onWhy: model.showWhy)
         }
     }
 }
@@ -120,5 +125,16 @@ private struct TodayHeader: View {
     private var syncText: String {
         guard let time = model.lastSyncText else { return String(localized: "Pas encore synchronisé", bundle: .module) }
         return String(localized: "Synchro \(time)", bundle: .module)
+    }
+}
+
+private extension View {
+    /// L'accueil a son propre en-tête : la barre de navigation n'apparaît que sur l'écran poussé. Sans effet sur Mac.
+    func hidingNavigationBar() -> some View {
+        #if os(iOS)
+        toolbar(.hidden, for: .navigationBar)
+        #else
+        self
+        #endif
     }
 }
