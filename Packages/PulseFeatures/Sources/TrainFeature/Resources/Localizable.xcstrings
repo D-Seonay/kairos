@@ -111,6 +111,16 @@
         }
       }
     },
+    "%@ à %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ à %@"
+          }
+        }
+      }
+    },
     "%@%@ kg en 30 jours" : {
       "localizations" : {
         "fr" : {
@@ -159,6 +169,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld min"
+          }
+        }
+      }
+    },
+    "%lld records" : {
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld record"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld records"
+                }
+              }
+            }
           }
         }
       }
@@ -244,6 +276,28 @@
                 "stringUnit" : {
                   "state" : "translated",
                   "value" : "%lld séances par semaine"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld séries" : {
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld série"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld séries"
                 }
               }
             }
@@ -351,6 +405,16 @@
         }
       }
     },
+    "Abandonnée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abandonnée"
+          }
+        }
+      }
+    },
     "Adopte ce modèle comme programme actif" : {
       "localizations" : {
         "fr" : {
@@ -387,6 +451,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ajoute l'exercice au choix ou l'en retire"
+          }
+        }
+      }
+    },
+    "Ajoute les exercices de cette séance à ton programme" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajoute les exercices de cette séance à ton programme"
           }
         }
       }
@@ -581,6 +655,16 @@
         }
       }
     },
+    "Aucune séance pour l'instant. Tes séances terminées apparaîtront ici." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune séance pour l'instant. Tes séances terminées apparaîtront ici."
+          }
+        }
+      }
+    },
     "Autres exercices" : {
       "localizations" : {
         "fr" : {
@@ -637,6 +721,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cette routine est introuvable ou ne peut pas être modifiée ici."
+          }
+        }
+      }
+    },
+    "Cette séance est introuvable. Elle a peut-être été supprimée." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette séance est introuvable. Elle a peut-être été supprimée."
           }
         }
       }
@@ -771,6 +865,16 @@
         }
       }
     },
+    "Depuis une séance passée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Depuis une séance passée"
+          }
+        }
+      }
+    },
     "Dernières séances" : {
       "localizations" : {
         "fr" : {
@@ -801,12 +905,32 @@
         }
       }
     },
+    "Dégressive" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dégressive"
+          }
+        }
+      }
+    },
     "Déplie les réglages" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Déplie les réglages"
+          }
+        }
+      }
+    },
+    "Elle disparaît de ton historique et tes records sont recalculés." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elle disparaît de ton historique et tes records sont recalculés."
           }
         }
       }
@@ -827,6 +951,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Enregistrer"
+          }
+        }
+      }
+    },
+    "Enregistrer comme routine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrer comme routine"
           }
         }
       }
@@ -897,6 +1031,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fiches, consignes et tes exercices perso"
+          }
+        }
+      }
+    },
+    "Hevy" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hevy"
           }
         }
       }
@@ -1141,6 +1285,26 @@
         }
       }
     },
+    "Muscles sollicités" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muscles sollicités"
+          }
+        }
+      }
+    },
+    "Muscles sollicités par la séance" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muscles sollicités par la séance"
+          }
+        }
+      }
+    },
     "Muscles sollicités. Principaux : %@." : {
       "localizations" : {
         "fr" : {
@@ -1241,6 +1405,26 @@
         }
       }
     },
+    "Note : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Note : %@"
+          }
+        }
+      }
+    },
+    "Notes" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notes"
+          }
+        }
+      }
+    },
     "Nouveau programme" : {
       "localizations" : {
         "fr" : {
@@ -1297,6 +1481,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ouvre l'accueil, où démarrer la séance du jour"
+          }
+        }
+      }
+    },
+    "Ouvre l'historique : choisis une séance à enregistrer comme routine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvre l'historique : choisis une séance à enregistrer comme routine"
           }
         }
       }
@@ -1361,6 +1555,16 @@
         }
       }
     },
+    "Pour annuler un import raté." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour annuler un import raté."
+          }
+        }
+      }
+    },
     "Principaux : %@" : {
       "localizations" : {
         "fr" : {
@@ -1421,6 +1625,16 @@
         }
       }
     },
+    "Pulse n'a pas pu enregistrer cette routine." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu enregistrer cette routine."
+          }
+        }
+      }
+    },
     "Pulse n'a pas pu enregistrer l'exercice." : {
       "localizations" : {
         "fr" : {
@@ -1471,12 +1685,32 @@
         }
       }
     },
+    "Pulse n'a pas pu lire cette séance." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu lire cette séance."
+          }
+        }
+      }
+    },
     "Pulse n'a pas pu lire tes programmes." : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pulse n'a pas pu lire tes programmes."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu lire ton historique." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu lire ton historique."
           }
         }
       }
@@ -1497,6 +1731,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pulse n'a pas pu lire toute la bibliothèque."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu supprimer cette séance." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu supprimer cette séance."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu supprimer les séances importées." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu supprimer les séances importées."
+          }
+        }
+      }
+    },
+    "RPE %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RPE %@"
           }
         }
       }
@@ -1741,6 +2005,36 @@
         }
       }
     },
+    "Supprimer cette séance ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer cette séance ?"
+          }
+        }
+      }
+    },
+    "Supprimer les séances importées de Hevy ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer les séances importées de Hevy ?"
+          }
+        }
+      }
+    },
+    "Supprimer toutes les séances importées de Hevy" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer toutes les séances importées de Hevy"
+          }
+        }
+      }
+    },
     "Supprimer « %@ » ?" : {
       "localizations" : {
         "fr" : {
@@ -1811,6 +2105,16 @@
         }
       }
     },
+    "Tes séances Pulse restent. Tes records sont recalculés." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tes séances Pulse restent. Tes records sont recalculés."
+          }
+        }
+      }
+    },
     "Tes séances passées et tes records" : {
       "localizations" : {
         "fr" : {
@@ -1861,6 +2165,16 @@
         }
       }
     },
+    "Tout supprimer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tout supprimer"
+          }
+        }
+      }
+    },
     "Tu as signalé : %@. Cet exercice peut les solliciter : ajuste la charge ou prends une alternative." : {
       "localizations" : {
         "fr" : {
@@ -1891,6 +2205,16 @@
         }
       }
     },
+    "abandonnée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "abandonnée"
+          }
+        }
+      }
+    },
     "dimanche" : {
       "localizations" : {
         "fr" : {
@@ -1917,6 +2241,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "hors semaine type"
+          }
+        }
+      }
+    },
+    "importée de Hevy" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "importée de Hevy"
           }
         }
       }
@@ -2041,12 +2375,32 @@
         }
       }
     },
+    "À l'échec" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À l'échec"
+          }
+        }
+      }
+    },
     "À éviter" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "À éviter"
+          }
+        }
+      }
+    },
+    "Échauffement" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Échauffement"
           }
         }
       }

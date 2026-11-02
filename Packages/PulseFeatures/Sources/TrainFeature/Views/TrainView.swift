@@ -9,6 +9,8 @@ enum TrainDestination: Hashable {
     case programEditor
     case library
     case history
+    /// Le détail de la séance passée `id`.
+    case session(UUID)
     case hevyImport
 }
 
@@ -155,8 +157,11 @@ public struct TrainView: View {
         case .library:
             LibraryView(model: model.libraryModel(mode: .browse))
         case .history:
-            // Tâche 16 : l'historique des séances.
-            pending(String(localized: "Historique", bundle: .module))
+            HistoryView(model: model.historyModel())
+        case .session(let id):
+            SessionDetailView(model: model.sessionDetailModel(sessionID: id)) { program, day in
+                path.append(.routine(program: program, day: day))
+            }
         case .hevyImport:
             // Tâche 17 : l'import Hevy.
             pending(String(localized: "Importer depuis Hevy", bundle: .module))

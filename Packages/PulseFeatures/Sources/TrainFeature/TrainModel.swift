@@ -83,6 +83,16 @@ public final class TrainModel {
         RoutineEditorModel(environment: environment, programID: programID, dayID: dayID)
     }
 
+    /// Le modèle de l'historique des séances, sur le même environnement que l'onglet.
+    public func historyModel() -> HistoryModel {
+        HistoryModel(environment: environment)
+    }
+
+    /// Le modèle du détail de la séance `sessionID`.
+    public func sessionDetailModel(sessionID: UUID) -> SessionDetailModel {
+        SessionDetailModel(environment: environment, sessionID: sessionID)
+    }
+
     /// Ajoute une routine vide au programme actif, relit l'onglet et rend l'identifiant de la routine.
     public func addRoutine(named name: String) async throws -> UUID {
         let editor = programEditorModel()

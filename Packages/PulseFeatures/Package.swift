@@ -83,7 +83,7 @@ let package = Package(
         ),
         .testTarget(
             name: "TrainFeatureTests",
-            dependencies: ["TrainFeature", "PulseServices", domain, content],
+            dependencies: ["TrainFeature", "PulseServices", domain, content, designSystem],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(

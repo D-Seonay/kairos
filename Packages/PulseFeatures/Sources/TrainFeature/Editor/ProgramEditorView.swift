@@ -112,6 +112,12 @@ public struct ProgramEditorView: View {
                 Label(String(localized: "Ajouter une routine", bundle: .module), systemImage: "plus")
             }
             .frame(minHeight: 44)
+            NavigationLink(value: TrainDestination.history) {
+                Label(String(localized: "Depuis une séance passée", bundle: .module), systemImage: "clock.arrow.circlepath")
+            }
+            .frame(minHeight: 44)
+            .accessibilityHint(String(localized: "Ouvre l'historique : choisis une séance à enregistrer comme routine", bundle: .module))
+            .accessibilityIdentifier(TrainIdentifiers.routineFromSession)
         } header: {
             Text(String(localized: "Routines", bundle: .module))
         }

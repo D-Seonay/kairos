@@ -84,13 +84,14 @@ struct TrainFixture {
     /// Enregistre une séance terminée de musculation avec ces séries d'un seul exercice, dans l'ordre ; rend la séance.
     @discardableResult
     func log(_ exercise: ExerciseReference = .content(id: "bench-press-barbell"), on date: Date, sets: [LoggedSet],
-             status: SessionStatus = .completed) async throws -> WorkoutSession {
+             status: SessionStatus = .completed, title: String = "Séance",
+             source: SessionSource = .pulse) async throws -> WorkoutSession {
         let workoutSets = sets.enumerated().map { index, set in
             WorkoutSet(order: index, exercise: exercise, exerciseName: "Exercice", setType: set.type,
                        actualWeightKg: set.weightKg, actualReps: set.reps, rpe: set.rpe, completedAt: date)
         }
-        let session = WorkoutSession(startedAt: date, endedAt: date.addingTimeInterval(3_600), kind: .strength, source: .pulse,
-                                     status: status, title: "Séance", sets: workoutSets, createdAt: date, updatedAt: date)
+        let session = WorkoutSession(startedAt: date, endedAt: date.addingTimeInterval(3_600), kind: .strength, source: source,
+                                     status: status, title: title, sets: workoutSets, createdAt: date, updatedAt: date)
         try await environment.workouts.save(session)
         return session
     }

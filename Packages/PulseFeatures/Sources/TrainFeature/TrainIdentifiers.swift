@@ -11,6 +11,11 @@ public enum TrainIdentifiers {
     public static let programLink = "train.program"
     public static let routineCreate = "train.routine.create"
     public static let weekdayPrefix = "program.weekday."
+    public static let historyRowPrefix = "history.session."
+    public static let historyRemoveImported = "history.removeImported"
+    public static let routineFromSession = "program.fromSession"
+    public static let sessionSaveAsRoutine = "session.saveAsRoutine"
+    public static let sessionDelete = "session.delete"
     public static let routineSave = "routine.save"
     public static let routineAddExercises = "routine.add"
 }
