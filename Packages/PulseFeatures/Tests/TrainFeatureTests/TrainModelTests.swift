@@ -16,7 +16,7 @@ private actor UnreadableProfileRepository: ProfileRepository {
 }
 
 /// PPL : Push lundi et jeudi, Pull mardi et vendredi, Legs mercredi ; `run` ajoute un footing le samedi.
-private func pplProgram(withRun run: Bool = false) -> Program {
+func pplProgram(withRun run: Bool = false) -> Program {
     func strength(_ order: Int, _ name: String, _ exerciseID: String) -> RoutineDay {
         RoutineDay(order: order, name: name, kind: .strength, exercises: [
             RoutineExercise(order: 0, exercise: .content(id: exerciseID), sets: 3, repsMin: 8, repsMax: 10,

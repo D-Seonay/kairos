@@ -71,7 +71,8 @@ enum LivePreviewSupport {
         let train = TrainEnvironment(
             profiles: profiles, programs: InMemoryProgramRepository(), recovery: InMemoryRecoveryRepository(calendar: calendar),
             workouts: workouts, userExercises: userExercises, exerciseSettings: settings, personalRecords: personalRecords,
-            records: records, importer: importer, library: library, calendar: calendar, now: clock)
+            records: records, importer: importer, library: library, activeSession: service, calendar: calendar,
+            now: clock)
         await seedBenchHistory(into: workouts)
         return LiveSessionEnvironment(service: service, train: train, notifications: StubNotificationAuthorizer(granted: true),
                                       calendar: calendar, now: clock)

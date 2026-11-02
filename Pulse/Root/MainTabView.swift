@@ -33,7 +33,9 @@ struct MainTabView: View {
                 comingSoon(String(localized: "Planning"), milestone: "M6")
             }
             Tab(String(localized: "Séance"), systemImage: "dumbbell", value: Item.session) {
-                TrainView(model: train) { router.selectedTab = .today }
+                // Le démarrage et la reprise seront branchés sur l'écran en direct à l'étape suivante.
+                TrainView(model: train, onOpenToday: { router.selectedTab = .today },
+                          onStartSession: { _ in }, onResumeSession: {})
             }
             Tab(String(localized: "Stats"), systemImage: "chart.bar", value: Item.stats) {
                 comingSoon(String(localized: "Stats"), milestone: "M7")

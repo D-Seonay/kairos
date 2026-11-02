@@ -1,6 +1,7 @@
 import Foundation
 import Observation
 import PulseDomain
+import PulseRecoveryEngine
 import PulseServices
 
 /// Une routine du programme actif, telle que la liste « Mes routines » la résume.
@@ -34,10 +35,17 @@ public final class TrainModel {
     public private(set) var nextRun: NextSession?
     public private(set) var directory: ExerciseDirectory
     public private(set) var errorMessage: String?
+    /// Le titre de la séance en cours, relu à chaque `refresh()` ; `nil` sans séance en cours.
+    public private(set) var activeSessionTitle: String?
+    /// Le début de la séance en cours, pour dire depuis combien de temps elle dure.
+    public private(set) var activeSessionStartedAt: Date?
     /// Le jour de la semaine de la dernière lecture, pour dire « aujourd'hui » ou « demain » de la prochaine course.
     private(set) var weekday: Weekday?
 
     @ObservationIgnored private let environment: TrainEnvironment
+    /// Le profil et le score du jour de la dernière lecture : ils règlent ce qu'une séance lancée applique.
+    @ObservationIgnored private var profile: UserProfile?
+    @ObservationIgnored private var scoredToday: DailyRecovery?
     @ObservationIgnored private var isRefreshing = false
 
     public init(environment: TrainEnvironment) {
@@ -53,10 +61,16 @@ public final class TrainModel {
         defer { isRefreshing = false }
         let now = environment.now()
         await refreshDirectory()
+        let active = await environment.activeSession.current()
+        activeSessionTitle = active?.title
+        activeSessionStartedAt = active?.startedAt
         do {
-            let program = try await activeProgram()
+            let profile = try await environment.profiles.load()
+            let program = try await activeProgram(of: profile)
             let recovery = try await todaysRecovery(now: now)
             let planned = TodayPlanner.plan(program: program, on: now, calendar: environment.calendar)
+            self.profile = profile
+            scoredToday = recovery
             self.program = program
             weekday = Weekday(date: now, calendar: environment.calendar)
             today = TodaySession(plannedDay: planned, recovery: recovery)
@@ -107,6 +121,27 @@ public final class TrainModel {
         return id
     }
 
+    /// La routine `dayID` du programme actif avec les ajustements du jour (le score du jour et « Séance d'origine » s'il a été
+    /// choisie). `nil` pour un jour inconnu ou une course : les courses ne se démarrent pas avant M6.
+    public func launch(routine dayID: UUID) -> SessionLaunch? {
+        guard let day = program?.days.first(where: { $0.id == dayID }), day.kind == .strength else { return nil }
+        return SessionLaunch.routine(day, programID: program?.id, recovery: scoredToday,
+                                     originalChosen: scoredToday?.originalSessionChosen == true, profile: profile)
+    }
+
+    /// La séance de musculation du jour, ajustée ou d'origine ; `nil` un jour de repos, de course ou sans programme.
+    public func launchToday() -> SessionLaunch? {
+        guard case .strength(let day) = today?.plannedDay else { return nil }
+        return launch(routine: day.id)
+    }
+
+    /// Une séance sans routine, sous la règle de hausse du jour.
+    public func freeLaunch() -> SessionLaunch {
+        let policy = ProgressionPolicy.make(recovery: scoredToday, adaptationEnabled: profile?.adaptationEnabled ?? true,
+                                            startsOriginalAfterOverreach: scoredToday?.category == .overreached)
+        return SessionLaunch.free(policy: policy)
+    }
+
     // MARK: - Interne
 
     /// Les exercices de l'utilisateur, archivés compris : une routine peut encore les nommer. Si la lecture échoue,
@@ -116,8 +151,8 @@ public final class TrainModel {
         directory = ExerciseDirectory(library: environment.library, userExercises: userExercises)
     }
 
-    private func activeProgram() async throws -> Program? {
-        guard let id = try await environment.profiles.load()?.activeProgramID else { return nil }
+    private func activeProgram(of profile: UserProfile?) async throws -> Program? {
+        guard let id = profile?.activeProgramID else { return nil }
         return try await environment.programs.program(id: id)
     }
 

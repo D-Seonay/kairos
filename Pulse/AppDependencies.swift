@@ -255,6 +255,6 @@ extension AppDependencies {
     func trainEnvironment() -> TrainEnvironment {
         TrainEnvironment(profiles: profiles, programs: programs, recovery: recovery, workouts: workouts, userExercises: userExercises,
                          exerciseSettings: exerciseSettings, personalRecords: personalRecords, records: records,
-                         importer: hevyImporter, library: content, calendar: calendar, now: now)
+                         importer: hevyImporter, library: content, activeSession: liveSession, calendar: calendar, now: now)
     }
 }

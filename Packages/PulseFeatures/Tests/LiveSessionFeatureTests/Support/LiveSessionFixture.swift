@@ -91,7 +91,8 @@ struct LiveFixture {
         let train = TrainEnvironment(
             profiles: profiles, programs: InMemoryProgramRepository(), recovery: InMemoryRecoveryRepository(calendar: calendar),
             workouts: workouts, userExercises: userExercises, exerciseSettings: InMemoryExerciseSettingsRepository(),
-            personalRecords: personalRecords, records: records, importer: importer, library: library, calendar: calendar, now: now)
+            personalRecords: personalRecords, records: records, importer: importer, library: library,
+            activeSession: service, calendar: calendar, now: now)
         authorizer = StubNotificationAuthorizer(granted: notificationsGranted)
         environment = LiveSessionEnvironment(service: service, train: train, notifications: authorizer, calendar: calendar,
                                              now: now)
