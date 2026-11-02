@@ -47,3 +47,13 @@ public enum TodayPlanner {
         return program.days.first { $0.id == id }
     }
 }
+
+extension PlannedDay {
+    /// La séance prévue, de musculation ou de course ; `nil` un jour de repos ou sans programme.
+    public var routineDay: RoutineDay? {
+        switch self {
+        case .strength(let day), .run(let day): day
+        case .noProgram, .rest: nil
+        }
+    }
+}

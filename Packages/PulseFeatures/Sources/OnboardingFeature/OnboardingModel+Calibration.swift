@@ -36,7 +36,8 @@ extension OnboardingModel {
         var phase = CalibrationPhase.needsCheckIn(missing: Factor.allCases, baseline: baseline)
         var failure: String?
         do {
-            switch try await environment.scores.update(nights: snapshot.nights, now: now) {
+            let plannedDay = await plannedDay(at: now)
+            switch try await environment.scores.update(nights: snapshot.nights, plannedDay: plannedDay, now: now) {
             case .scored(let recovery):
                 phase = .scored(recovery, baseline)
             case .needsCheckIn(let missing):
@@ -62,13 +63,23 @@ extension OnboardingModel {
         errorMessage = nil
         let generation = calibrationGeneration
         do {
-            let recovery = try await environment.scores.saveCheckIn(answers, now: environment.now())
+            let now = environment.now()
+            let recovery = try await environment.scores.saveCheckIn(answers, plannedDay: await plannedDay(at: now), now: now)
             guard generation == calibrationGeneration else { return }
             calibration = .scored(recovery, baseline)
         } catch {
             guard generation == calibrationGeneration else { return }
             errorMessage = String(localized: "Pulse n'a pas pu enregistrer ton check-in.", bundle: .module)
         }
+    }
+
+    /// Ce que le programme adopté prévoit aujourd'hui, pour que le premier score porte déjà les ajustements de sa séance.
+    private func plannedDay(at now: Date) async -> PlannedDay {
+        var program: Program?
+        if let id = profile.activeProgramID {
+            program = try? await environment.programs.program(id: id)
+        }
+        return TodayPlanner.plan(program: program, on: now, calendar: environment.calendar)
     }
 
     private func baseline(of nights: [NightSample], at now: Date) -> BaselineSummary {

@@ -95,16 +95,18 @@ struct TodayModelConcurrencyTests {
             return
         }
 
-        // La lecture du score du jour est suspendue après avoir vu « pas de score » : sa réponse devient périmée.
+        // La lecture du score du jour est suspendue après avoir vu « pas de score ». Le service étant sérialisé,
+        // le check-in lancé pendant ce temps attend la fin de ce calcul, puis enregistre l'estimation.
         let gate = Gate()
         await recovery.holdNextRead(at: gate)
         let staleRefresh = Task { await model.refresh() }
         await gate.waitForArrival()
 
         model.checkIn.selection = [.sleep: 3, .pain: 3, .motivation: 3]
-        await model.submitCheckIn()
+        let checkIn = Task { await model.submitCheckIn() }
         await gate.open()
         await staleRefresh.value
+        await checkIn.value
 
         guard case .scored(let estimated) = model.score else {
             Issue.record("Le score estimé devait rester affiché, obtenu \(String(describing: model.score))")

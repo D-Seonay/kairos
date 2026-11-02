@@ -12,4 +12,8 @@ public enum TodayScore: Sendable, Equatable {
 public enum DailyScoreError: Error, Equatable {
     /// Le score du jour est figé : il n'accepte plus de check-in.
     case frozen
+    /// Le score du jour est mesuré : un check-in ne le remplace pas.
+    case alreadyMeasured
+    /// Aucun score aujourd'hui : il n'y a pas de séance ajustée à garder ou à quitter.
+    case noScoreToday
 }

@@ -32,6 +32,8 @@ struct AppDependencies: Sendable {
     let workouts: any WorkoutRepository
     let scheduledDays: any ScheduledDayRepository
     let recovery: any RecoveryRepository
+    /// Le seul service du score du jour : l'onboarding et l'accueil le partagent, ses écritures passent par une même file.
+    let scores: DailyScoreService
     let supplements: any SupplementRepository
     let bodyMeasurements: any BodyMeasurementRepository
     let personalRecords: any PersonalRecordRepository
@@ -130,6 +132,7 @@ struct AppDependencies: Sendable {
                                      defaultsDomain: wiring.defaultsSuite ?? Bundle.main.bundleIdentifier ?? "fr.seonay.pulse",
                                      healthEraser: wiring.healthEraser, notifications: nil,
                                      exportsDirectory: SwiftDataExporter.exportsDirectory)
+        let recovery = SwiftDataRecoveryRepository(modelContainer: container, calendar: calendar)
         return AppDependencies(
             health: wiring.health, healthSource: wiring.healthSource, notifications: wiring.notifications,
             onboardingSteps: UserDefaultsOnboardingStepStore(suiteName: wiring.defaultsSuite),
@@ -140,7 +143,7 @@ struct AppDependencies: Sendable {
             userExercises: SwiftDataUserExerciseRepository(modelContainer: container),
             workouts: SwiftDataWorkoutRepository(modelContainer: container),
             scheduledDays: SwiftDataScheduledDayRepository(modelContainer: container),
-            recovery: SwiftDataRecoveryRepository(modelContainer: container, calendar: calendar),
+            recovery: recovery, scores: DailyScoreService(recovery: recovery, calendar: calendar),
             supplements: SwiftDataSupplementRepository(modelContainer: container),
             bodyMeasurements: SwiftDataBodyMeasurementRepository(modelContainer: container),
             personalRecords: SwiftDataPersonalRecordRepository(modelContainer: container),
@@ -167,10 +170,6 @@ extension AppDependencies {
     /// Les nuits lues dans la source Apple Santé, mises en cache dans le magasin.
     var nightHistory: NightHistory {
         NightHistory(source: healthSource, cache: healthCache, calendar: calendar)
-    }
-
-    var scores: DailyScoreService {
-        DailyScoreService(recovery: recovery, calendar: calendar)
     }
 
     func onboardingEnvironment() -> OnboardingEnvironment {

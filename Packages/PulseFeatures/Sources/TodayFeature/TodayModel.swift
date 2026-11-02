@@ -57,7 +57,8 @@ public final class TodayModel {
         if let readAt = snapshot.readAt {
             lastSync = readAt
         }
-        guard let updated = try? await environment.scores.update(nights: snapshot.nights, now: now), epoch == scoreEpoch else { return }
+        guard let updated = try? await environment.scores.update(nights: snapshot.nights, plannedDay: plannedDay, now: now),
+              epoch == scoreEpoch else { return }
         apply(updated)
     }
 
@@ -68,7 +69,7 @@ public final class TodayModel {
         isSubmittingCheckIn = true
         defer { isSubmittingCheckIn = false }
         do {
-            let estimated = try await environment.scores.saveCheckIn(answers, now: environment.now())
+            let estimated = try await environment.scores.saveCheckIn(answers, plannedDay: plannedDay, now: environment.now())
             scoreEpoch += 1
             errorMessage = nil
             checkIn.selection = [:]

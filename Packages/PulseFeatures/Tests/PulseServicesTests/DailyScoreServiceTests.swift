@@ -3,66 +3,7 @@ import PulseDomain
 import PulseServices
 import Testing
 
-/// Un dépôt qui compte les `DailyRecovery` enregistrées, au-dessus d'un vrai dépôt en mémoire.
-private actor CountingRecoveryRepository: RecoveryRepository {
-    private let inner: InMemoryRecoveryRepository
-    private(set) var recoverySaves = 0
-
-    init(calendar: Calendar) {
-        inner = InMemoryRecoveryRepository(calendar: calendar)
-    }
-
-    func dailyRecoveries(from: Date, to: Date) async throws -> [DailyRecovery] {
-        try await inner.dailyRecoveries(from: from, to: to)
-    }
-
-    func save(_ recovery: DailyRecovery) async throws {
-        recoverySaves += 1
-        try await inner.save(recovery)
-    }
-
-    func checkIns(from: Date, to: Date) async throws -> [CheckIn] {
-        try await inner.checkIns(from: from, to: to)
-    }
-
-    func save(_ checkIn: CheckIn) async throws {
-        try await inner.save(checkIn)
-    }
-}
-
-struct DailyScoreServiceTests {
-    private var calendar: Calendar { TestClock.calendar }
-
-    private struct Fixture {
-        let repository: InMemoryRecoveryRepository
-        let service: DailyScoreService
-    }
-
-    private func fixture() -> Fixture {
-        let repository = InMemoryRecoveryRepository(calendar: TestClock.calendar)
-        return Fixture(repository: repository, service: DailyScoreService(recovery: repository, calendar: TestClock.calendar))
-    }
-
-    private func nights(_ scenario: HealthScenario, at now: Date) async -> [NightSample] {
-        let source = ScenarioHealthSource(scenario: scenario, now: now, calendar: calendar)
-        let history = NightHistory(source: source, cache: InMemoryHealthSampleCache(), calendar: calendar)
-        return await history.refresh(now: now).nights
-    }
-
-    private func records(_ fixture: Fixture, on text: String) async throws -> [DailyRecovery] {
-        let day = TestClock.date(text)
-        return try await fixture.repository.dailyRecoveries(from: day, to: calendar.date(byAdding: .day, value: 1, to: day) ?? day)
-    }
-
-    private func scored(_ score: TodayScore) throws -> DailyRecovery {
-        guard case .scored(let recovery) = score else {
-            throw Failure.notScored(score)
-        }
-        return recovery
-    }
-
-    private enum Failure: Error { case notScored(TodayScore) }
-
+struct DailyScoreServiceTests: DailyScoreTesting {
     private func yesterday() -> DailyRecovery {
         DailyRecovery(day: TestClock.date("2026-11-01T00:00"), score: 70, category: .normal, isEstimated: false,
                       calibration: .ready, frozenAt: TestClock.date("2026-11-01T12:00"),
