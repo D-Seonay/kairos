@@ -79,6 +79,45 @@ struct HevyCSVTests {
         #expect(throws: HevyImportError.invalidDate(line: 4)) { try rows([header, good, bad].joined(separator: "\n")) }
     }
 
+    private func setLine(setIndex: String = "0", weight: String = "20", reps: String = "10", extra: String = "") -> String {
+        "\"Pull\",\"27 Oct 2026, 07:17\",\"27 Oct 2026, 07:59\",\"\",\"Curl\",,\"\",\(setIndex),\"normal\",\(weight),\(reps),,,\(extra)"
+    }
+
+    @Test func malformedNumbersFailTheRow() throws {
+        let read = try rows([header, setLine(), setLine(weight: "\"72,5\"")].joined(separator: "\n"))
+        #expect(read[1].weightKg == 72.5)
+        let bad = [setLine(reps: "12.0"), setLine(setIndex: "x"), setLine(weight: "-5"), setLine(weight: "1e3"),
+                   setLine(weight: "nan"), setLine(reps: "-1"), setLine(extra: "x"), setLine(weight: "\"1,234.5\"")]
+        for text in bad {
+            #expect(throws: HevyImportError.invalidRow(line: 3)) { try rows([header, setLine(), text].joined(separator: "\n")) }
+        }
+    }
+
+    @Test func invalidNumbersInSupersetAndDurationFailTheRow() {
+        let superset = line("A", "1 Nov 2026, 10:00", "Curl", superset: "a")
+        #expect(throws: HevyImportError.invalidRow(line: 2)) { try rows([header, superset].joined(separator: "\n")) }
+        let duration = "\"A\",\"1 Nov 2026, 10:00\",\"1 Nov 2026, 10:00\",\"\",\"Run\",,\"\",0,\"normal\",,,,1.5,"
+        #expect(throws: HevyImportError.invalidRow(line: 2)) { try rows([header, duration].joined(separator: "\n")) }
+    }
+
+    @Test func recordsWithTheWrongFieldCountFail() {
+        let short = "\"Pull\",\"27 Oct 2026, 07:17\",\"27 Oct 2026, 07:59\""
+        let long = setLine(extra: ",x")
+        #expect(throws: HevyImportError.invalidRow(line: 3)) { try rows([header, setLine(), short].joined(separator: "\n")) }
+        #expect(throws: HevyImportError.invalidRow(line: 2)) { try rows([header, long, setLine()].joined(separator: "\n")) }
+    }
+
+    @Test func anUnterminatedQuoteFails() {
+        let open = "\"Pull\",\"27 Oct 2026, 07:17\",\"27 Oct 2026, 07:59\",\"never closed\n" + setLine()
+        #expect(throws: HevyImportError.invalidRow(line: 3)) { try rows([header, setLine(), open].joined(separator: "\n")) }
+    }
+
+    @Test func aBlankLineInTheMiddleIsSkippedAndLinesStayAccurate() {
+        let bad = setLine(reps: "x")
+        #expect(throws: HevyImportError.invalidRow(line: 5)) { try rows([header, setLine(), "", "", bad].joined(separator: "\n")) }
+        #expect((try? rows([header, setLine(), "", setLine()].joined(separator: "\n")).count) == 2)
+    }
+
     @Test func textIsKeptAsWrittenAndNumbersTolerateSpaces() throws {
         let rows = try rows(header + "\n\" Pull \",\"27 Oct 2026, 07:17\",\"27 Oct 2026, 07:59\",\" note\n\",Curl,,,0,normal, 20 , 10,,,")
         #expect(rows[0].title == " Pull " && rows[0].description == " note\n" && rows[0].weightKg == 20 && rows[0].reps == 10)

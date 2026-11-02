@@ -7,11 +7,17 @@ enum CSVReader {
         let fields: [String]
     }
 
-    static func records(_ text: String) -> [[String]] {
-        numberedRecords(text).map(\.fields)
+    struct Parsed: Equatable {
+        let records: [Record]
+        /// Ligne où commence l'enregistrement dont un guillemet n'est jamais refermé ; `nil` si le texte est bien formé.
+        let unterminatedQuoteLine: Int?
     }
 
-    static func numberedRecords(_ text: String) -> [Record] {
+    static func records(_ text: String) -> [[String]] {
+        parse(text).records.map(\.fields)
+    }
+
+    static func parse(_ text: String) -> Parsed {
         var parser = Parser()
         let scalars = Array(text.unicodeScalars.drop { $0 == "\u{FEFF}" })
         var index = 0
@@ -50,9 +56,10 @@ enum CSVReader {
             return 1
         }
 
-        mutating func finish() -> [Record] {
+        mutating func finish() -> Parsed {
+            let unterminatedLine = inQuotes ? recordLine : nil
             endRecord()
-            return records
+            return Parsed(records: records, unterminatedQuoteLine: unterminatedLine)
         }
 
         private mutating func consumeQuoted(_ scalar: Unicode.Scalar, next: Unicode.Scalar?) -> Int {
