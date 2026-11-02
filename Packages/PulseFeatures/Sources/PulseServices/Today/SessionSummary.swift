@@ -1,5 +1,4 @@
 import Foundation
-import PulseContent
 import PulseDomain
 
 /// Le résumé d'un jour de musculation : séries de travail, durée estimée, intensité maximale et muscles sollicités.
@@ -21,9 +20,9 @@ public struct SessionSummary: Sendable, Equatable {
     private static let effortSeconds = 45
     private static let topMuscleCount = 3
 
-    public static func make(day: RoutineDay, library: ContentLibrary) -> SessionSummary {
+    public static func make(day: RoutineDay, directory: ExerciseDirectory) -> SessionSummary {
         let exercises = day.exercises.sorted { $0.order < $1.order }
-        let weights = muscleWeights(of: exercises, library: library)
+        let weights = muscleWeights(of: exercises, directory: directory)
         return SessionSummary(
             setCount: exercises.reduce(0) { $0 + $1.sets },
             estimatedMinutes: estimatedMinutes(of: exercises),
@@ -33,11 +32,11 @@ public struct SessionSummary: Sendable, Equatable {
         )
     }
 
-    /// 1 par série pour un muscle principal, 0,5 pour un secondaire ; les exercices de l'utilisateur sont ignorés.
-    private static func muscleWeights(of exercises: [RoutineExercise], library: ContentLibrary) -> [Muscle: Double] {
+    /// 1 par série pour un muscle principal, 0,5 pour un secondaire ; une référence inconnue de l'annuaire est ignorée.
+    private static func muscleWeights(of exercises: [RoutineExercise], directory: ExerciseDirectory) -> [Muscle: Double] {
         var weights: [Muscle: Double] = [:]
         for routineExercise in exercises {
-            guard let id = routineExercise.exercise.contentID, let exercise = library.exercise(id: id) else { continue }
+            guard let exercise = directory.info(routineExercise.exercise) else { continue }
             let sets = Double(routineExercise.sets)
             for muscle in exercise.primaryMuscles { weights[muscle, default: 0] += sets }
             for muscle in exercise.secondaryMuscles where !exercise.primaryMuscles.contains(muscle) {

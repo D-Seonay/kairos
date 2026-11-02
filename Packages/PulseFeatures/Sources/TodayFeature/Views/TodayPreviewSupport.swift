@@ -85,7 +85,8 @@ enum TodayPreviewSupport {
             widgets: StubWidgetPublisher(), notifications: StubNotificationScheduler(), activity: InMemoryDayActivityLog(),
             calendar: calendar, now: { now })
         return TodayModel(environment: TodayEnvironment(
-            refresher: refresher, workouts: workouts, library: library, calendar: calendar, now: { now }))
+            refresher: refresher, workouts: workouts, userExercises: InMemoryUserExerciseRepository(), library: library,
+            calendar: calendar, now: { now }))
     }
 
     /// Un score estimé de surmenage (check-in très bas), lundi 2 novembre.

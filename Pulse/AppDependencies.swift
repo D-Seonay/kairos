@@ -222,6 +222,7 @@ extension AppDependencies {
     }
 
     func todayEnvironment() -> TodayEnvironment {
-        TodayEnvironment(refresher: refresher, workouts: workouts, library: content, calendar: calendar, now: now)
+        TodayEnvironment(refresher: refresher, workouts: workouts, userExercises: userExercises, library: content, calendar: calendar,
+                         now: now)
     }
 }

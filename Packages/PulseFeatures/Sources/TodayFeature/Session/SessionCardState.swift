@@ -42,7 +42,7 @@ enum SessionCardState: Equatable {
 
     /// Sans score du jour (avant 4 h, check-in à faire), la séance reste planifiée : aucun ajustement n'est proposé,
     /// et « Séance d'origine » serait refusée faute de score à modifier.
-    static func make(session: TodaySession, score: TodayScore?, library: ContentLibrary) -> SessionCardState {
+    static func make(session: TodaySession, score: TodayScore?, directory: ExerciseDirectory) -> SessionCardState {
         let today: DailyRecovery? = if case .scored(let recovery)? = score { recovery } else { nil }
         let status = today == nil ? .planned : session.status
         switch session.plannedDay {
@@ -56,29 +56,29 @@ enum SessionCardState: Equatable {
             let suggestion = status == .adjusted ? session.adjusted.flatMap(runSuggestion) : nil
             return .run(RunCard(title: day.runType?.localizedName ?? day.name, target: runTarget(day), suggestion: suggestion))
         case .strength(let day):
-            return strength(day, session: session, status: status, library: library)
+            return strength(day, session: session, status: status, directory: directory)
         }
     }
 
     private static func strength(_ day: RoutineDay, session: TodaySession, status: TodaySession.Status,
-                                 library: ContentLibrary) -> SessionCardState {
+                                 directory: ExerciseDirectory) -> SessionCardState {
         switch status {
         case .adjusted:
             guard let adjusted = session.adjusted, !adjusted.isReplacedByMobility else {
                 return .mobilityOrRest(dayName: day.name)
             }
             return .strength(StrengthCard(
-                title: session.title ?? day.name, badge: .adjusted, summary: SessionSummary.make(day: adjusted.day, library: library),
+                title: session.title ?? day.name, badge: .adjusted, summary: SessionSummary.make(day: adjusted.day, directory: directory),
                 showsWhy: true, originButton: String(localized: "Séance d'origine", bundle: .module),
                 startButton: String(localized: "Démarrer la séance", bundle: .module)))
         case .restored:
             return .strength(StrengthCard(
-                title: day.name, badge: .planned, summary: SessionSummary.make(day: day, library: library),
+                title: day.name, badge: .planned, summary: SessionSummary.make(day: day, directory: directory),
                 showsWhy: true, originButton: String(localized: "Revenir à l'ajustée", bundle: .module),
                 startButton: String(localized: "Démarrer quand même", bundle: .module)))
         case .planned:
             return .strength(StrengthCard(
-                title: day.name, badge: .planned, summary: SessionSummary.make(day: day, library: library),
+                title: day.name, badge: .planned, summary: SessionSummary.make(day: day, directory: directory),
                 showsWhy: false, originButton: nil, startButton: String(localized: "Démarrer la séance", bundle: .module)))
         }
     }
