@@ -2,7 +2,8 @@ import Foundation
 import PulseDomain
 import UserNotifications
 
-/// Le délégué du centre de notifications : une notification touchée ouvre l'onglet de son lien ; l'app ouverte l'affiche quand même.
+/// Le délégué du centre de notifications : une notification touchée ouvre l'onglet de son lien ; l'app ouverte affiche les autres,
+/// mais tait le score du matin, déjà à l'écran (le passage au premier plan le retire du centre de notifications).
 final class NotificationRouter: NSObject, UNUserNotificationCenterDelegate {
     /// La clé du lien dans `userInfo`, posée par `UserNotificationScheduler`.
     static let linkKey = "link"
@@ -25,6 +26,11 @@ final class NotificationRouter: NSObject, UNUserNotificationCenterDelegate {
 
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                                 willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
-        [.banner, .sound]
+        Self.presentationOptions(forIdentifier: notification.request.identifier)
+    }
+
+    /// Rien pour le score du matin, une bannière et un son pour le reste.
+    static func presentationOptions(forIdentifier identifier: String) -> UNNotificationPresentationOptions {
+        identifier == UserNotificationScheduler.morningScoreIdentifier ? [] : [.banner, .sound]
     }
 }
