@@ -6,21 +6,6 @@ import PulseServices
 import Testing
 @testable import TrainFeature
 
-/// Calendrier grégorien Europe/Paris en français ; lundi 2 novembre 2026, 9 h.
-private enum TrainClock {
-    static let calendar: Calendar = {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(identifier: "Europe/Paris")!
-        calendar.locale = Locale(identifier: "fr_FR")
-        return calendar
-    }()
-
-    static func date(day: Int, hour: Int) -> Date {
-        let start = calendar.date(from: DateComponents(year: 2026, month: 11, day: day))!
-        return calendar.date(bySettingHour: hour, minute: 0, second: 0, of: start)!
-    }
-}
-
 /// Un dépôt de profil illisible.
 private actor UnreadableProfileRepository: ProfileRepository {
     enum Failure: Error { case unreadable }
@@ -28,49 +13,6 @@ private actor UnreadableProfileRepository: ProfileRepository {
     func load() async throws -> UserProfile? { throw Failure.unreadable }
     func save(_ profile: UserProfile) async throws {}
     func delete(id: UUID) async throws {}
-}
-
-/// Les doublures de l'onglet Séance et l'environnement construit dessus.
-@MainActor
-private struct TrainFixture {
-    let profiles: any ProfileRepository
-    let programs = InMemoryProgramRepository()
-    let recovery = InMemoryRecoveryRepository(calendar: TrainClock.calendar)
-    let environment: TrainEnvironment
-    let now: Date
-
-    init(profiles: any ProfileRepository = InMemoryProfileRepository(), now: Date = TrainClock.date(day: 2, hour: 9)) {
-        self.profiles = profiles
-        self.now = now
-        let library = ContentLibrary.bundled
-        let calendar = TrainClock.calendar
-        let workouts = InMemoryWorkoutRepository()
-        let userExercises = InMemoryUserExerciseRepository()
-        let personalRecords = InMemoryPersonalRecordRepository()
-        let clock: @Sendable () -> Date = { now }
-        let records = RecordsService(workouts: workouts, records: personalRecords, userExercises: userExercises,
-                                     library: library, now: clock)
-        let importer = HevyImporter(workouts: workouts, userExercises: userExercises, records: records,
-                                    mappings: InMemoryHevyMappingStore(), library: library, calendar: calendar, now: clock)
-        environment = TrainEnvironment(
-            profiles: profiles, programs: programs, recovery: recovery, workouts: workouts, userExercises: userExercises,
-            exerciseSettings: InMemoryExerciseSettingsRepository(), personalRecords: personalRecords, records: records,
-            importer: importer, library: library, calendar: calendar, now: clock)
-    }
-
-    /// Enregistre `program` et le rend actif.
-    func activate(_ program: Program) async throws {
-        try await programs.save(program)
-        try await profiles.save(UserProfile(firstName: "Mathéo", onboardingCompletedAt: now, activeProgramID: program.id,
-                                            createdAt: now, updatedAt: now))
-    }
-
-    /// Un score « normal » enregistré pour aujourd'hui.
-    func scoreToday(_ category: RecoveryCategory) async throws {
-        try await recovery.save(DailyRecovery(
-            day: TrainClock.calendar.startOfDay(for: now), score: 72, category: category, isEstimated: false,
-            calibration: .ready, createdAt: now, updatedAt: now))
-    }
 }
 
 /// PPL : Push lundi et jeudi, Pull mardi et vendredi, Legs mercredi ; `run` ajoute un footing le samedi.

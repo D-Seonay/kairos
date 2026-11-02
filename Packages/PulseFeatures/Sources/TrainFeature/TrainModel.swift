@@ -68,6 +68,11 @@ public final class TrainModel {
         }
     }
 
+    /// Le modèle de la bibliothèque d'exercices, sur le même environnement que l'onglet.
+    public func libraryModel(mode: LibraryMode) -> LibraryModel {
+        LibraryModel(environment: environment, mode: mode)
+    }
+
     // MARK: - Interne
 
     /// Les exercices de l'utilisateur, archivés compris : une routine peut encore les nommer. Si la lecture échoue,

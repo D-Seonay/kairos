@@ -91,8 +91,7 @@ public struct TrainView: View {
             // Tâche 15 : l'éditeur de la routine.
             pending(String(localized: "Routine", bundle: .module))
         case .library:
-            // Tâche 14 : la bibliothèque d'exercices.
-            pending(String(localized: "Bibliothèque d'exercices", bundle: .module))
+            LibraryView(model: model.libraryModel(mode: .browse))
         case .history:
             // Tâche 16 : l'historique des séances.
             pending(String(localized: "Historique", bundle: .module))

@@ -42,8 +42,8 @@ enum TrainPreviewSupport {
         return TrainModel(environment: environment(profiles: profiles, programs: programs, recovery: recovery, now: now))
     }
 
-    private static func environment(profiles: any ProfileRepository, programs: any ProgramRepository,
-                                    recovery: any RecoveryRepository, now: Date) -> TrainEnvironment {
+    static func environment(profiles: any ProfileRepository, programs: any ProgramRepository,
+                            recovery: any RecoveryRepository, now: Date) -> TrainEnvironment {
         let library = ContentLibrary.bundled
         let workouts = InMemoryWorkoutRepository()
         let userExercises = InMemoryUserExerciseRepository()
