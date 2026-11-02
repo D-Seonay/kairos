@@ -2,7 +2,8 @@ import PulseDesignSystem
 import PulseServices
 import SwiftUI
 
-/// Ce que contient le fichier : séances nouvelles, période, exercices, cardio détecté et séances déjà présentes.
+/// Ce que contient le fichier : séances nouvelles, période, exercices, cardio détecté, séances déjà présentes, et ce qui n'est
+/// pas importé.
 struct HevySummaryView: View {
     let model: HevyImportModel
 
@@ -28,7 +29,11 @@ struct HevySummaryView: View {
                                         value: String(preview.duplicateCount))
                         }
                     }
-                    note(for: preview)
+                    ForEach(model.summaryNotes, id: \.self) { note in
+                        Text(note)
+                            .font(.footnote)
+                            .foregroundStyle(PulsePalette.text2)
+                    }
                 }
                 Button(String(localized: "Vérifier les correspondances", bundle: .module)) { model.showMapping() }
                     .buttonStyle(PrimaryButtonStyle())
@@ -39,14 +44,6 @@ struct HevySummaryView: View {
             }
             .padding(PulseMetrics.spacing)
         }
-    }
-
-    private func note(for preview: HevyImportPreview) -> some View {
-        Text(preview.newWorkouts.isEmpty
-             ? String(localized: "Toutes les séances de ce fichier sont déjà dans Pulse : il n'y a rien à ajouter.", bundle: .module)
-             : String(localized: "Le cardio est proposé en « Ignoré » à l'étape suivante, où tu peux le changer.", bundle: .module))
-            .font(.footnote)
-            .foregroundStyle(PulsePalette.text2)
     }
 }
 

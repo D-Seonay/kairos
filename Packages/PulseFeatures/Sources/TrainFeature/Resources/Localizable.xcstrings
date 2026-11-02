@@ -271,6 +271,16 @@
         }
       }
     },
+    "%lld séances de cardio seul non importées" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld séances de cardio seul non importées"
+          }
+        }
+      }
+    },
     "%lld séances par semaine" : {
       "localizations" : {
         "fr" : {
@@ -289,6 +299,16 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "%lld séances sans exercice retenu non importées" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld séances sans exercice retenu non importées"
           }
         }
       }
@@ -363,6 +383,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : ", à vérifier"
+          }
+        }
+      }
+    },
+    "1 séance sans exercice retenu non importée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 séance sans exercice retenu non importée"
+          }
+        }
+      }
+    },
+    "1 séance de cardio seul non importée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 séance de cardio seul non importée"
           }
         }
       }
@@ -753,6 +793,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ce fichier n'est pas un export de séances Hevy."
+          }
+        }
+      }
+    },
+    "Ce fichier ne contient aucune séance de musculation à importer." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce fichier ne contient aucune séance de musculation à importer."
           }
         }
       }
@@ -2129,6 +2179,16 @@
         }
       }
     },
+    "Records établis" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Records établis"
+          }
+        }
+      }
+    },
     "Retirer %@ de la routine ?" : {
       "localizations" : {
         "fr" : {
@@ -2185,16 +2245,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rechercher (ex. developpe)"
-          }
-        }
-      }
-    },
-    "Records" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Records"
           }
         }
       }

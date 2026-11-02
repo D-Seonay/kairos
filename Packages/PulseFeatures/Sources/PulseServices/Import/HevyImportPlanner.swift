@@ -22,6 +22,8 @@ public struct HevyNameSummary: Sendable, Equatable, Identifiable {
 public struct HevyImportPreview: Sendable, Equatable {
     public let newWorkouts: [HevyWorkout]
     public let duplicateCount: Int
+    /// Les séances nouvelles de cardio seul (aucune ligne chargée ni répétée) : elles ne sont pas importées (spec M4 §13.2).
+    public let cardioOnlyWorkoutCount: Int
     /// Les lignes de cardio des séances nouvelles.
     public let cardioSetCount: Int
     /// Du début de la première séance nouvelle au début de la dernière ; `nil` sans séance nouvelle.
@@ -35,13 +37,14 @@ public enum HevyImportPlanner {
         guard !rows.isEmpty else { throw HevyImportError.empty }
         let imported = Set(existing.filter { $0.source == .hevy }.map { SessionKey(title: $0.title, startedAt: $0.startedAt) })
         let workouts = HevyWorkouts.group(rows)
-        let fresh = workouts.filter { !imported.contains(SessionKey(title: $0.title, startedAt: $0.startedAt)) }
+        let unseen = workouts.filter { !imported.contains(SessionKey(title: $0.title, startedAt: $0.startedAt)) }
+        let fresh = unseen.filter { !isCardioOnly($0) }
         let resolver = Resolver(library: library, userExercises: userExercises, remembered: remembered)
         let names = summaries(of: fresh, resolver: resolver)
         let cardioNames = Set(names.filter(\.isCardio).map(\.name))
         let starts = fresh.map(\.startedAt)
         return HevyImportPreview(
-            newWorkouts: fresh, duplicateCount: workouts.count - fresh.count,
+            newWorkouts: fresh, duplicateCount: workouts.count - unseen.count, cardioOnlyWorkoutCount: unseen.count - fresh.count,
             cardioSetCount: fresh.reduce(0) { total, workout in
                 total + workout.exercises.filter { cardioNames.contains($0.name) }.reduce(0) { $0 + $1.sets.count }
             },
@@ -77,6 +80,13 @@ public enum HevyImportPlanner {
     /// Une ligne de cardio : ni charge ni répétitions, mais une durée ou une distance.
     private static func isCardioRow(_ row: HevyRow) -> Bool {
         (row.weightKg ?? 0) <= 0 && (row.reps ?? 0) <= 0 && ((row.durationSeconds ?? 0) > 0 || (row.distanceKm ?? 0) > 0)
+    }
+
+    /// Une séance de cardio seul : aucune ligne chargée ni répétée, et au moins une ligne de cardio. Une séance aux lignes toutes
+    /// vides n'en est pas une : elle reste à importer, et l'import la compte parmi les séances sans exercice retenu.
+    private static func isCardioOnly(_ workout: HevyWorkout) -> Bool {
+        let rows = workout.exercises.flatMap(\.sets)
+        return rows.allSatisfy { (row: HevyRow) in (row.weightKg ?? 0) <= 0 && (row.reps ?? 0) <= 0 } && rows.contains(where: isCardioRow)
     }
 
     private static func summaries(of workouts: [HevyWorkout], resolver: Resolver) -> [HevyNameSummary] {

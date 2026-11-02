@@ -2,7 +2,7 @@ import PulseDesignSystem
 import PulseServices
 import SwiftUI
 
-/// Le bilan de l'import : séances importées, exercices créés, records, et le lien vers l'historique.
+/// Le bilan de l'import : séances importées, exercices créés, records, séances non importées, et le lien vers l'historique.
 struct HevyResultView: View {
     let result: HevyImportResult
     let onShowHistory: () -> Void
@@ -23,8 +23,13 @@ struct HevyResultView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         line(String(localized: "Séances importées", bundle: .module), result.importedSessions)
                         line(String(localized: "Exercices créés", bundle: .module), result.createdExercises)
-                        line(String(localized: "Records", bundle: .module), result.records)
+                        line(String(localized: "Records établis", bundle: .module), result.records)
                     }
+                }
+                ForEach(HevyImportModel.resultNotes(for: result), id: \.self) { note in
+                    Text(note)
+                        .font(.footnote)
+                        .foregroundStyle(PulsePalette.text2)
                 }
                 Button(String(localized: "Voir l'historique", bundle: .module), action: onShowHistory)
                     .buttonStyle(PrimaryButtonStyle())

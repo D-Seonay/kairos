@@ -93,6 +93,29 @@ struct HevyImportPlannerTests {
         #expect(preview.cardioSetCount == 2)
     }
 
+    /// Une séance sans aucune ligne chargée ni répétée, mais avec du cardio, n'est pas importée : elle est comptée à part.
+    @Test func cardioOnlyWorkoutsAreCountedApart() throws {
+        let text = HevyFixtures.csv(
+            HevyFixtures.row("Course", title: "Cardio", start: "4 nov. 2026, 10:00", end: "4 nov. 2026, 11:00", distance: "5",
+                             seconds: "1800"),
+            HevyFixtures.row("Rameur", title: "Cardio", start: "4 nov. 2026, 10:00", end: "4 nov. 2026, 11:00", seconds: "300"),
+            HevyFixtures.row("Développé Couché (Barre)", weight: "60", reps: "8"),
+            HevyFixtures.row("Rameur", seconds: "600"))
+        let preview = try plan(text)
+        #expect(preview.newWorkouts.map(\.title) == ["Test"])
+        #expect(preview.cardioOnlyWorkoutCount == 1)
+        #expect(preview.cardioSetCount == 1)
+        #expect(preview.names.map(\.name).sorted() == ["Développé Couché (Barre)", "Rameur"])
+        #expect(preview.period == TestClock.date("2026-11-03T10:00")...TestClock.date("2026-11-03T10:00"))
+    }
+
+    /// Une séance aux lignes toutes vides n'est pas du cardio : elle reste à importer, et l'import dira qu'elle n'a rien donné.
+    @Test func aWorkoutOfEmptyLinesIsNotCardioOnly() throws {
+        let preview = try plan(HevyFixtures.csv(HevyFixtures.row("Série vide")))
+        #expect(preview.cardioOnlyWorkoutCount == 0)
+        #expect(preview.newWorkouts.count == 1)
+    }
+
     @Test func rememberedAndUserExerciseChoicesWin() throws {
         let shrug = ExerciseDirectoryTests.shrug
         let text = HevyFixtures.csv(

@@ -75,6 +75,38 @@ public final class HevyImportModel {
         return first == last ? first : String(localized: "du \(first) au \(last)", bundle: .module)
     }
 
+    /// Ce que le résumé précise sous les chiffres : les séances de cardio seul laissées de côté, puis pourquoi il n'y a rien à
+    /// importer, ou que le cardio des séances importées est proposé en « Ignoré ».
+    public var summaryNotes: [String] {
+        guard let preview else { return [] }
+        var notes = [Self.cardioOnlyNote(preview.cardioOnlyWorkoutCount)].compactMap(\.self)
+        if preview.newWorkouts.isEmpty {
+            notes.append(preview.duplicateCount > 0
+                ? String(localized: "Toutes les séances de ce fichier sont déjà dans Pulse : il n'y a rien à ajouter.", bundle: .module)
+                : String(localized: "Ce fichier ne contient aucune séance de musculation à importer.", bundle: .module))
+        } else if preview.cardioSetCount > 0 {
+            notes.append(String(localized: "Le cardio est proposé en « Ignoré » à l'étape suivante, où tu peux le changer.",
+                                bundle: .module))
+        }
+        return notes
+    }
+
+    /// Ce que le bilan dit des séances non importées : rien n'est écarté sans un mot (spec M4 §13.2).
+    public static func resultNotes(for result: HevyImportResult) -> [String] {
+        let skipped = result.skippedSessions == 0 ? nil : result.skippedSessions == 1
+            ? String(localized: "1 séance sans exercice retenu non importée", bundle: .module)
+            : String(localized: "\(result.skippedSessions) séances sans exercice retenu non importées", bundle: .module)
+        return [cardioOnlyNote(result.cardioOnlySessions), skipped].compactMap(\.self)
+    }
+
+    private static func cardioOnlyNote(_ count: Int) -> String? {
+        switch count {
+        case 0: nil
+        case 1: String(localized: "1 séance de cardio seul non importée", bundle: .module)
+        default: String(localized: "\(count) séances de cardio seul non importées", bundle: .module)
+        }
+    }
+
     // MARK: - Lecture
 
     /// Analyse l'export `data` : le résumé s'affiche, avec les choix proposés ; sinon, l'échec dit pourquoi.
@@ -199,7 +231,8 @@ public final class HevyImportModel {
             let result = try await environment.importer.run(preview, choices: choices, progress: report)
             step = .done(HevyImportResult(importedSessions: result.importedSessions,
                                           createdExercises: result.createdExercises + createdByFormInUse,
-                                          records: result.records))
+                                          records: result.records, skippedSessions: result.skippedSessions,
+                                          cardioOnlySessions: result.cardioOnlySessions))
         } catch {
             step = .failed(message(for: error))
         }

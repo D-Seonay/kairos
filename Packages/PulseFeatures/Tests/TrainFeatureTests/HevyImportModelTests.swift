@@ -87,6 +87,40 @@ struct HevyImportModelTests {
         #expect(result.records > 0)
     }
 
+    /// Le cardio seul est annoncé au résumé ; le bilan dit aussi les séances restées sans exercice retenu.
+    @Test func sessionsLeftOutAreSaid() async {
+        let model = HevyImportModel(environment: environment)
+        let cardio = "\"Cardio\",\"4 nov. 2026, 10:00\",\"4 nov. 2026, 11:00\",\"\",\"Course\",,\"\",0,\"normal\",,,5,1800,"
+        await model.read(Data((HevyFixtures.csv + "\n" + cardio).utf8))
+        #expect(model.preview?.newWorkouts.count == 2)
+        #expect(model.summaryNotes == ["1 séance de cardio seul non importée",
+                                       "Le cardio est proposé en « Ignoré » à l'étape suivante, où tu peux le changer."])
+        model.choose(.ignore, for: triceps)
+        model.choose(.ignore, for: "Avant Bras Poulie Barre Droite")
+        await model.start()
+        guard case .done(let result) = model.step else { Issue.record("import non terminé"); return }
+        #expect(result.importedSessions == 1)
+        #expect(HevyImportModel.resultNotes(for: result)
+                == ["1 séance de cardio seul non importée", "1 séance sans exercice retenu non importée"])
+        #expect(HevyImportModel.resultNotes(for: HevyImportResult(importedSessions: 4, createdExercises: 0, records: 0,
+                                                                  skippedSessions: 2, cardioOnlySessions: 3))
+                == ["3 séances de cardio seul non importées", "2 séances sans exercice retenu non importées"])
+    }
+
+    @Test func aFileWithNothingToImportSaysWhy() async {
+        let model = HevyImportModel(environment: environment)
+        let cardio = "\"Cardio\",\"4 nov. 2026, 10:00\",\"4 nov. 2026, 11:00\",\"\",\"Course\",,\"\",0,\"normal\",,,5,1800,"
+        let header = HevyFixtures.csv.components(separatedBy: "\n")[0]
+        await model.read(Data((header + "\n" + cardio).utf8))
+        #expect(!model.canImport)
+        #expect(model.summaryNotes == ["1 séance de cardio seul non importée",
+                                       "Ce fichier ne contient aucune séance de musculation à importer."])
+        await model.read(Data(HevyFixtures.csv.utf8))
+        await model.start()
+        await model.read(Data(HevyFixtures.csv.utf8))
+        #expect(model.summaryNotes == ["Toutes les séances de ce fichier sont déjà dans Pulse : il n'y a rien à ajouter."])
+    }
+
     @Test func importingCreatesTheDefaultCustomExercise() async throws {
         let model = await readFixtureWithUnknownName()
         await model.start()

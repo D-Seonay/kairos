@@ -7,11 +7,17 @@ public struct HevyImportResult: Sendable, Equatable {
     public let createdExercises: Int
     /// Le nombre de records après le recalcul qui clôt l'import.
     public let records: Int
+    /// Les séances nouvelles qui ne gardaient aucune série : tous leurs exercices ignorés, ou des lignes toutes vides.
+    public let skippedSessions: Int
+    /// Les séances de cardio seul de l'aperçu, laissées de côté.
+    public let cardioOnlySessions: Int
 
-    public init(importedSessions: Int, createdExercises: Int, records: Int) {
+    public init(importedSessions: Int, createdExercises: Int, records: Int, skippedSessions: Int = 0, cardioOnlySessions: Int = 0) {
         self.importedSessions = importedSessions
         self.createdExercises = createdExercises
         self.records = records
+        self.skippedSessions = skippedSessions
+        self.cardioOnlySessions = cardioOnlySessions
     }
 }
 
@@ -76,17 +82,21 @@ public final class HevyImporter: Sendable {
         let resolution = try await resolve(preview, choices: choices, now: now)
         let directory = ExerciseDirectory(library: library, userExercises: try await userExercises.all(includeArchived: true))
         let references = resolution.choices.compactMapValues(\.reference)
-        var imported = 0
+        var (imported, skipped) = (0, 0)
         for (index, workout) in preview.newWorkouts.enumerated() {
-            if try await !isSaved(workout),
-               let session = HevySessionBuilder.session(from: workout, references: references, directory: directory, now: now) {
-                try await workouts.save(session)
-                imported += 1
+            if try await !isSaved(workout) {
+                if let session = HevySessionBuilder.session(from: workout, references: references, directory: directory, now: now) {
+                    try await workouts.save(session)
+                    imported += 1
+                } else {
+                    skipped += 1
+                }
             }
             progress(Double(index + 1) / Double(preview.newWorkouts.count))
         }
         return HevyImportResult(importedSessions: imported, createdExercises: resolution.created,
-                                records: try await records.recomputeAll())
+                                records: try await records.recomputeAll(), skippedSessions: skipped,
+                                cardioOnlySessions: preview.cardioOnlyWorkoutCount)
     }
 
     /// Crée un exercice perso pour chaque `.create` et rend les choix des noms de l'aperçu, les créations devenues `.user`.

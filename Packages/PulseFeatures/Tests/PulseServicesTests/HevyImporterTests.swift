@@ -104,6 +104,31 @@ struct HevyImporterTests {
         #expect(try await allSessions().count == 2)
     }
 
+    /// Une séance dont tous les exercices sont ignorés n'est pas créée, et le bilan le dit ; le cardio seul de l'aperçu aussi.
+    @Test func workoutsLeftWithoutAnExerciseAreCounted() async throws {
+        let cardio = HevyFixtures.row("Course", title: "Cardio", start: "4 nov. 2026, 10:00", end: "4 nov. 2026, 11:00",
+                                      distance: "5", seconds: "1800")
+        let importer = makeImporter()
+        let preview = try await importer.preview(Data((HevyFixtures.csv + "\n" + cardio).utf8))
+        var choices = proposed(preview)
+        choices[triceps] = .ignore
+        choices["Avant Bras Poulie Barre Droite"] = .ignore
+        let result = try await importer.run(preview, choices: choices, progress: { _ in })
+        #expect(result.importedSessions == 1)
+        #expect(result.skippedSessions == 1)
+        #expect(result.cardioOnlySessions == 1)
+        #expect(try await allSessions().map(\.title) == ["Push 🫷🫸"])
+    }
+
+    /// Une séance déjà en base n'est pas une séance écartée.
+    @Test func aSessionAlreadySavedIsNotCountedAsSkipped() async throws {
+        let importer = makeImporter()
+        let preview = try await importer.preview(data)
+        _ = try await importer.run(preview, choices: proposed(preview), progress: { _ in })
+        let result = try await importer.run(preview, choices: proposed(preview), progress: { _ in })
+        #expect(result.skippedSessions == 0)
+    }
+
     private func tricepsReferences() async throws -> Set<ExerciseReference> {
         Set(try await allSessions().flatMap(\.sets).filter { $0.exerciseName == triceps }.map(\.exercise))
     }
