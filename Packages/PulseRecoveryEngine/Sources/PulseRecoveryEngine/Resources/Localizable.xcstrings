@@ -1,6 +1,21 @@
 {
   "sourceLanguage" : "fr",
   "strings" : {
+    "%@ : %@ %@, %@" : {
+
+    },
+    "%@ : assistance à 0, %@ ; passe au poids du corps pour lester" : {
+
+    },
+    "%lld répétitions atteintes la dernière fois" : {
+
+    },
+    "%lld secondes atteintes la dernière fois" : {
+
+    },
+    "+%@ kg" : {
+
+    },
     "Effort plafonné à RPE 7,5" : {
 
     },
@@ -17,6 +32,15 @@
 
     },
     "Volume réduit de %lld à %lld séries" : {
+
+    },
+    "assistance −%@ kg" : {
+
+    },
+    "sur %lld séries" : {
+
+    },
+    "sur 1 série" : {
 
     }
   },
