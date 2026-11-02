@@ -6,7 +6,8 @@ struct PulseApp: App {
 
     var body: some Scene {
         WindowGroup {
-            AppRootView(dependencies: appDelegate.dependencies, router: appDelegate.router)
+            AppRootView(dependencies: appDelegate.dependencies, router: appDelegate.router,
+                        sessionIntents: appDelegate.sessionIntents)
         }
     }
 }

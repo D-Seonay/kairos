@@ -175,7 +175,7 @@ import Testing
         #expect(NumericKeypad.identifier(for: .next) == "live.key.next")
     }
 
-    @Test func rpePillsGoFromSixToTenByHalves() {
+    @MainActor @Test func rpePillsGoFromSixToTenByHalves() {
         #expect(RPEPicker.values.count == 9)
         #expect(RPEPicker.values.first == 6)
         #expect(RPEPicker.values.last == 10)

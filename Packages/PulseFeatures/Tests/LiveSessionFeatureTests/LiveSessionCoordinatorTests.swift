@@ -172,3 +172,22 @@ import Testing
     #expect(coordinator.notice != nil)
     #expect(await fixture.authorizer.requestCount == 1)
 }
+
+/// Un snapshot qu'on ne peut pas enregistrer : aucune séance ne démarre.
+private actor SaveFailingStore: ActiveSessionStore {
+    struct Failure: Error {}
+
+    func load() async throws -> ActiveSessionSnapshot? { nil }
+    func save(_ snapshot: ActiveSessionSnapshot) async throws { throw Failure() }
+    func clear() async throws {}
+}
+
+@MainActor @Test func aFailedStartShowsAnErrorUntilDismissed() async {
+    let fixture = LiveFixture(store: SaveFailingStore())
+    let coordinator = fixture.coordinator()
+    await coordinator.start(LiveFixture.pushLaunch)
+    #expect(coordinator.errorMessage != nil)
+    #expect(!coordinator.isPresented && coordinator.current == nil)
+    coordinator.dismissError()
+    #expect(coordinator.errorMessage == nil)
+}

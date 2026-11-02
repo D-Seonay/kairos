@@ -3,7 +3,8 @@ import PulseDomain
 import UserNotifications
 
 /// Le délégué du centre de notifications : une notification touchée ouvre l'onglet de son lien ; l'app ouverte affiche les autres,
-/// mais tait le score du matin, déjà à l'écran (le passage au premier plan le retire du centre de notifications).
+/// mais tait le score du matin, déjà à l'écran (le passage au premier plan le retire du centre de notifications), et la fin du
+/// repos, que la vibration longue de l'écran de séance annonce déjà (spec M4 §15.2).
 final class NotificationRouter: NSObject, UNUserNotificationCenterDelegate {
     /// La clé du lien dans `userInfo`, posée par `UserNotificationScheduler`.
     static let linkKey = "link"
@@ -29,8 +30,12 @@ final class NotificationRouter: NSObject, UNUserNotificationCenterDelegate {
         Self.presentationOptions(forIdentifier: notification.request.identifier)
     }
 
-    /// Rien pour le score du matin, une bannière et un son pour le reste.
+    /// Rien pour le score du matin ni pour la fin du repos, une bannière et un son pour le reste.
     static func presentationOptions(forIdentifier identifier: String) -> UNNotificationPresentationOptions {
-        identifier == UserNotificationScheduler.morningScoreIdentifier ? [] : [.banner, .sound]
+        silentInForeground.contains(identifier) ? [] : [.banner, .sound]
     }
+
+    private static let silentInForeground: Set<String> = [
+        UserNotificationScheduler.morningScoreIdentifier, UserNotificationScheduler.restTimerIdentifier
+    ]
 }

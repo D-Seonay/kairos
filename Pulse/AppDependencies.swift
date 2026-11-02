@@ -1,4 +1,5 @@
 import Foundation
+import LiveSessionFeature
 import OnboardingFeature
 import PulseContent
 import PulseDomain
@@ -53,9 +54,10 @@ struct AppDependencies: Sendable {
     /// Les réveils d'Apple Santé ; `nil` sans Apple Santé, avec un scénario de lancement et en mode mémoire.
     let backgroundDelivery: HealthKitBackgroundDelivery?
     let activeSession: any ActiveSessionStore
-    /// Le seul chemin vers la séance en cours (l'accueil le lit ; l'écran en direct l'écrira). Les doublures de la notification de
-    /// repos et de la Live Activity attendent la suite du jalon.
+    /// Le seul chemin vers la séance en cours : l'accueil, l'onglet Séance, l'écran en direct et les boutons de la Live Activity.
     let liveSession: ActiveSessionService
+    /// La Live Activity de la séance ; la racine y ferme, au lancement, celles qui ne correspondent plus à la séance en cours.
+    let sessionActivity: any SessionActivityControlling
     let inspector: any StoreInspector
     let exporter: any DataExporter
     let eraser: any DataEraser
@@ -71,6 +73,10 @@ struct AppDependencies: Sendable {
         var widgets: any WidgetPublishing
         /// La notification du matin ; une doublure en mode mémoire et dans les tests.
         var morningScore: any NotificationScheduling
+        /// La notification de fin de repos ; une doublure en mode mémoire et dans les tests.
+        var restNotifier: any RestTimerNotifying
+        /// La Live Activity de la séance ; une doublure en mode mémoire et dans les tests.
+        var sessionActivity: any SessionActivityControlling
         /// `nil` : la suppression totale n'a aucune notification à retirer.
         var notificationCanceling: (any NotificationCanceling)?
         var backgroundDelivery: HealthKitBackgroundDelivery?
@@ -88,6 +94,8 @@ struct AppDependencies: Sendable {
             notifications = StubNotificationAuthorizer(granted: false)
             widgets = StubWidgetPublisher()
             morningScore = StubNotificationScheduler()
+            restNotifier = StubRestTimerNotifier()
+            sessionActivity = StubSessionActivityController()
             notificationCanceling = nil
             backgroundDelivery = nil
         }
@@ -117,11 +125,12 @@ struct AppDependencies: Sendable {
         } else {
             healthSource = UnavailableHealthSource()
         }
-        let scheduler = UserNotificationScheduler()
+        let scheduler = UserNotificationScheduler(now: now)
         var wiring = Wiring(health: reader ?? StubHealthReader(), healthSource: healthSource,
                             notifications: UserNotificationAuthorizer(), healthEraser: StubHealthEraser(),
                             widgets: AppGroupWidgetPublisher(file: WidgetSnapshotFile.appGroup()),
-                            morningScore: scheduler, notificationCanceling: scheduler,
+                            morningScore: scheduler, restNotifier: scheduler, sessionActivity: SessionActivityController(),
+                            notificationCanceling: scheduler,
                             backgroundDelivery: launch.healthScenario == nil ? reader.map(HealthKitBackgroundDelivery.init) : nil,
                             inspector: nil, defaultsSuite: nil, calendar: calendar, now: now, launch: launch)
         if launch.storeInMemory {
@@ -157,24 +166,18 @@ struct AppDependencies: Sendable {
             health: health,
             healthSource: healthSource ?? ScenarioHealthSource(scenario: .noData, now: now(), calendar: calendar),
             notifications: StubNotificationAuthorizer(granted: false), healthEraser: healthEraser,
-            widgets: StubWidgetPublisher(), morningScore: StubNotificationScheduler(), notificationCanceling: nil,
+            widgets: StubWidgetPublisher(), morningScore: StubNotificationScheduler(), restNotifier: StubRestTimerNotifier(),
+            sessionActivity: StubSessionActivityController(), notificationCanceling: nil,
             backgroundDelivery: nil, inspector: inspector, defaultsSuite: testingDefaultsSuite, calendar: calendar, now: now,
             launch: LaunchOptions())
         guard let dependencies = try? make(wiring, mode: .inMemory, error: nil) else { crash(nil) }
         return dependencies
     }
 
-    // swiftlint:disable:next function_body_length
     private static func make(_ wiring: Wiring, mode: StoreMode, error: String?) throws -> AppDependencies {
         let container = try PersistenceStack.makeContainer(mode: mode)
         let content = ContentLibrary.bundled
         let calendar = wiring.calendar
-        let exporter = SwiftDataExporter(container: container, appVersion: appVersion, contentVersion: content.contentVersion,
-                                         exerciseNames: { content.exercise(id: $0)?.name.fr })
-        let storeEraser = SwiftDataEraser(container: container, defaultsSuite: wiring.defaultsSuite,
-                                          defaultsDomain: wiring.defaultsSuite ?? Bundle.main.bundleIdentifier ?? "fr.seonay.pulse",
-                                          healthEraser: wiring.healthEraser, notifications: wiring.notificationCanceling,
-                                          widgets: wiring.widgets, exportsDirectory: SwiftDataExporter.exportsDirectory)
         let recovery = SwiftDataRecoveryRepository(modelContainer: container, calendar: calendar)
         let profiles = SwiftDataProfileRepository(modelContainer: container)
         let programs = SwiftDataProgramRepository(modelContainer: container)
@@ -186,8 +189,6 @@ struct AppDependencies: Sendable {
             nightHistory: NightHistory(source: wiring.healthSource, cache: healthCache, calendar: calendar), scores: scores,
             widgets: wiring.widgets, notifications: wiring.morningScore, activity: activity,
             calendar: calendar, now: wiring.now)
-        // La suppression totale attend la fin d'un rafraîchissement en cours, qui republierait l'instantané effacé.
-        let eraser = SerializedDataEraser(refresher: refresher, inner: storeEraser)
         let userExercises = SwiftDataUserExerciseRepository(modelContainer: container)
         let workouts = SwiftDataWorkoutRepository(modelContainer: container)
         let personalRecords = SwiftDataPersonalRecordRepository(modelContainer: container)
@@ -198,7 +199,7 @@ struct AppDependencies: Sendable {
         let exerciseSettings = SwiftDataExerciseSettingsRepository(modelContainer: container)
         let liveSession = ActiveSessionService(
             store: activeSession, workouts: workouts, profiles: profiles, settings: exerciseSettings, userExercises: userExercises,
-            records: records, library: content, restNotifier: StubRestTimerNotifier(), activity: StubSessionActivityController(),
+            records: records, library: content, restNotifier: wiring.restNotifier, activity: wiring.sessionActivity,
             calendar: calendar, now: wiring.now)
         return AppDependencies(
             health: wiring.health, healthSource: wiring.healthSource, notifications: wiring.notifications,
@@ -217,9 +218,22 @@ struct AppDependencies: Sendable {
             hevyImporter: HevyImporter(workouts: workouts, userExercises: userExercises, records: records, mappings: hevyMappings,
                                        library: content, calendar: calendar, now: wiring.now),
             healthCache: healthCache, activity: activity, refresher: refresher, backgroundDelivery: wiring.backgroundDelivery,
-            activeSession: activeSession, liveSession: liveSession,
+            activeSession: activeSession, liveSession: liveSession, sessionActivity: wiring.sessionActivity,
             inspector: wiring.inspector ?? SwiftDataStoreInspector(container: container, cloudEnabled: mode == .cloud),
-            exporter: exporter, eraser: eraser, seeder: SampleDataSeeder(container: container, calendar: calendar))
+            exporter: SwiftDataExporter(container: container, appVersion: appVersion, contentVersion: content.contentVersion,
+                                        exerciseNames: { content.exercise(id: $0)?.name.fr }),
+            eraser: makeEraser(wiring, container: container, refresher: refresher),
+            seeder: SampleDataSeeder(container: container, calendar: calendar))
+    }
+
+    /// Efface le magasin, les préférences, les notifications, l'instantané du widget et les exports. Elle attend la fin d'un
+    /// rafraîchissement en cours, qui republierait l'instantané effacé.
+    private static func makeEraser(_ wiring: Wiring, container: ModelContainer, refresher: DayRefresher) -> any DataEraser {
+        let store = SwiftDataEraser(container: container, defaultsSuite: wiring.defaultsSuite,
+                                    defaultsDomain: wiring.defaultsSuite ?? Bundle.main.bundleIdentifier ?? "fr.seonay.pulse",
+                                    healthEraser: wiring.healthEraser, notifications: wiring.notificationCanceling,
+                                    widgets: wiring.widgets, exportsDirectory: SwiftDataExporter.exportsDirectory)
+        return SerializedDataEraser(refresher: refresher, inner: store)
     }
 
     private static var appVersion: String {
@@ -256,5 +270,12 @@ extension AppDependencies {
         TrainEnvironment(profiles: profiles, programs: programs, recovery: recovery, workouts: workouts, userExercises: userExercises,
                          exerciseSettings: exerciseSettings, personalRecords: personalRecords, records: records,
                          importer: hevyImporter, library: content, activeSession: liveSession, calendar: calendar, now: now)
+    }
+
+    /// L'écran en direct passe par le même service que l'accueil et l'onglet Séance ; il demande l'autorisation des notifications
+    /// par l'autorisateur de l'app (une doublure en mode mémoire et dans les tests).
+    func liveSessionEnvironment() -> LiveSessionEnvironment {
+        LiveSessionEnvironment(service: liveSession, train: trainEnvironment(), notifications: notifications, calendar: calendar,
+                               now: now)
     }
 }

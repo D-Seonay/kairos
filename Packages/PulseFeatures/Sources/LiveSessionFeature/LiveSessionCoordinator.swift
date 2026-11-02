@@ -112,6 +112,11 @@ public final class LiveSessionCoordinator {
         notice = nil
     }
 
+    /// L'alerte d'un démarrage ou d'un abandon raté a été fermée.
+    public func dismissError() {
+        errorMessage = nil
+    }
+
     private func requestNotificationsOnce() async {
         guard !hasRequestedAuthorization else { return }
         hasRequestedAuthorization = true

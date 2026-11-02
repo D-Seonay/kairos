@@ -1,6 +1,8 @@
 import Foundation
 @testable import Pulse
 import PulseDomain
+import PulseRecoveryEngine
+import PulseServices
 import Testing
 
 @MainActor
@@ -47,5 +49,40 @@ import Testing
         model.onboardingFinished()
         #expect(model.destination == .main)
         #expect(model.today != nil && model.onboarding == nil)
+    }
+
+    @Test func launchClosesLiveActivitiesWithoutASession() async throws {
+        let dependencies = AppDependencies.testing()
+        try await dependencies.profiles.save(Self.completedProfile())
+        let model = AppRootModel(dependencies: dependencies)
+        await model.load()
+        let activity = try #require(dependencies.sessionActivity as? StubSessionActivityController)
+        #expect(model.liveSession != nil && model.liveSession?.current == nil)
+        #expect(await activity.endAllCalls == [nil])
+    }
+
+    @Test func launchKeepsTheActivityOfTheRunningSession() async throws {
+        let dependencies = AppDependencies.testing()
+        try await dependencies.profiles.save(Self.completedProfile())
+        let session = try await dependencies.liveSession.start(.free(policy: ProgressionPolicy(allowsIncrease: true)))
+        let model = AppRootModel(dependencies: dependencies)
+        await model.load()
+        let activity = try #require(dependencies.sessionActivity as? StubSessionActivityController)
+        #expect(model.liveSession?.current?.id == session.id)
+        #expect(await activity.endAllCalls == [session.id])
+    }
+
+    @Test func erasingDiscardsTheRunningSession() async throws {
+        let dependencies = AppDependencies.testing()
+        try await dependencies.profiles.save(Self.completedProfile())
+        _ = try await dependencies.liveSession.start(.free(policy: ProgressionPolicy(allowsIncrease: true)))
+        let model = AppRootModel(dependencies: dependencies)
+        await model.load()
+        try await dependencies.eraser.eraseEverything(options: EraseOptions(includeAppleHealth: false))
+        await model.dataErased()
+        let activity = try #require(dependencies.sessionActivity as? StubSessionActivityController)
+        #expect(model.liveSession == nil)
+        #expect(await dependencies.liveSession.current() == nil)
+        #expect(await activity.endAllCalls.last == .some(nil))
     }
 }

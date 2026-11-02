@@ -7,11 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		01FFBDBB734149187619F5F5 /* LiveSessionFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 7EBF12B38C337EEB13470D03 /* LiveSessionFeature */; };
 		040A86C6285D90BF16F5B5AA /* PulseRecoveryEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 6B02FCA8EE3E67636F42D06C /* PulseRecoveryEngine */; };
+		0F7B92CF7E5D5E17EF965C4C /* PulseLiveActivity in Frameworks */ = {isa = PBXBuildFile; productRef = FB9888630E9B4F027086794D /* PulseLiveActivity */; };
 		1FBA94A654E8F834B581EDD8 /* PulseDomain in Frameworks */ = {isa = PBXBuildFile; productRef = D496246F4F0D75412E1528B3 /* PulseDomain */; };
 		41A0C7A70FCDB1E786FF3D21 /* OnboardingFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 23A0449ABFD0F90FCF52CB7E /* OnboardingFeature */; };
 		5024563D1C977796CEC6C4D2 /* PulseContent in Frameworks */ = {isa = PBXBuildFile; productRef = CADDF951A0B30D2BE04A2F29 /* PulseContent */; };
 		64068CB54DF03A28FE132C72 /* CheckInFeature in Frameworks */ = {isa = PBXBuildFile; productRef = A9C8BCE68F5B531CBD349FDB /* CheckInFeature */; };
+		667BA47E97E428FE303FD210 /* PulseLiveActivity in Frameworks */ = {isa = PBXBuildFile; productRef = E56E1EFCA871CDFECF552C98 /* PulseLiveActivity */; };
 		69CB165197E173B96333A3CA /* PulsePersistence in Frameworks */ = {isa = PBXBuildFile; productRef = BA7396E5B28E53EE5BB52EFE /* PulsePersistence */; };
 		6BD6F7154BFC6A570DFAD9A4 /* TrainFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 46B53139D9C2719CD05324D4 /* TrainFeature */; };
 		6D0C4ACE8C0C1D8A460ECC91 /* PulseDesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 778E32CCFEBB1FE604B7373D /* PulseDesignSystem */; };
@@ -66,6 +69,7 @@
 /* Begin PBXFileReference section */
 		08C0C5C2A43D096433BA0B8F /* PulseContent */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PulseContent; path = Packages/PulseContent; sourceTree = SOURCE_ROOT; };
 		13FEF2D2118D74C3572DF349 /* Pulse.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Pulse.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2E0436DA77EFA3E3E13C9423 /* PulseLiveActivity */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PulseLiveActivity; path = Packages/PulseLiveActivity; sourceTree = SOURCE_ROOT; };
 		401063C8184B4A8F0651DCAB /* PulseDesignSystem */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PulseDesignSystem; path = Packages/PulseDesignSystem; sourceTree = SOURCE_ROOT; };
 		4FBA30D234A433E58E16508B /* PulseTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = PulseTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9EB175B708FA8903888C60A1 /* PulseWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = PulseWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -147,6 +151,7 @@
 				1FBA94A654E8F834B581EDD8 /* PulseDomain in Frameworks */,
 				B8172B2AEC365494E49651D8 /* PulseDesignSystem in Frameworks */,
 				770C98D2B3BAC63B9D4FEFD6 /* WidgetFeature in Frameworks */,
+				0F7B92CF7E5D5E17EF965C4C /* PulseLiveActivity in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -166,6 +171,8 @@
 				B7C03201C860D0561958042A /* TodayFeature in Frameworks */,
 				6BD6F7154BFC6A570DFAD9A4 /* TrainFeature in Frameworks */,
 				EFF3DE79CAEEE2351E8EB80C /* WidgetFeature in Frameworks */,
+				01FFBDBB734149187619F5F5 /* LiveSessionFeature in Frameworks */,
+				667BA47E97E428FE303FD210 /* PulseLiveActivity in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -191,6 +198,7 @@
 				AB2D664BC108B8D410A545BF /* PulseDomain */,
 				C7C03033530D8BA199B06F1B /* PulseFeatures */,
 				E88E86A74B7F7A81085945C2 /* PulseHealth */,
+				2E0436DA77EFA3E3E13C9423 /* PulseLiveActivity */,
 				C038C8A3EE9A6E3AF29E18F4 /* PulsePersistence */,
 				A70D8B0C52E658248BD5D9C9 /* PulseRecoveryEngine */,
 			);
@@ -287,6 +295,8 @@
 				2CBD7AA3EB8955404F12F8BD /* TodayFeature */,
 				46B53139D9C2719CD05324D4 /* TrainFeature */,
 				7CBDB83896B464F56F24DBCD /* WidgetFeature */,
+				7EBF12B38C337EEB13470D03 /* LiveSessionFeature */,
+				E56E1EFCA871CDFECF552C98 /* PulseLiveActivity */,
 			);
 			productName = Pulse;
 			productReference = 13FEF2D2118D74C3572DF349 /* Pulse.app */;
@@ -312,6 +322,7 @@
 				D496246F4F0D75412E1528B3 /* PulseDomain */,
 				0304F45AA4EED5FE2D4D284C /* PulseDesignSystem */,
 				39C9A66A915380930D00B1BB /* WidgetFeature */,
+				FB9888630E9B4F027086794D /* PulseLiveActivity */,
 			);
 			productName = PulseWidgets;
 			productReference = 9EB175B708FA8903888C60A1 /* PulseWidgets.appex */;
@@ -358,6 +369,7 @@
 				3F03ECA5ED4F94E324D71332 /* XCLocalSwiftPackageReference "Packages/PulseDomain" */,
 				EAC9E566AAF5AEB23A012043 /* XCLocalSwiftPackageReference "Packages/PulseFeatures" */,
 				A81386294F42011B679000AB /* XCLocalSwiftPackageReference "Packages/PulseHealth" */,
+				BC549EFEBB3ADA4D31B3FD5F /* XCLocalSwiftPackageReference "Packages/PulseLiveActivity" */,
 				4EBDC5E5E84F811AC2F3F612 /* XCLocalSwiftPackageReference "Packages/PulsePersistence" */,
 				A8A3B40E44C020828C72886D /* XCLocalSwiftPackageReference "Packages/PulseRecoveryEngine" */,
 			);
@@ -805,6 +817,10 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/PulseRecoveryEngine;
 		};
+		BC549EFEBB3ADA4D31B3FD5F /* XCLocalSwiftPackageReference "Packages/PulseLiveActivity" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/PulseLiveActivity;
+		};
 		EAC9E566AAF5AEB23A012043 /* XCLocalSwiftPackageReference "Packages/PulseFeatures" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/PulseFeatures;
@@ -844,6 +860,10 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = WidgetFeature;
 		};
+		7EBF12B38C337EEB13470D03 /* LiveSessionFeature */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = LiveSessionFeature;
+		};
 		8C27DDA66D90C7A34759B03B /* PulseDomain */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = PulseDomain;
@@ -868,9 +888,17 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = PulseDomain;
 		};
+		E56E1EFCA871CDFECF552C98 /* PulseLiveActivity */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PulseLiveActivity;
+		};
 		F4BAF19749CA79DDDA8F7559 /* PulseHealth */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = PulseHealth;
+		};
+		FB9888630E9B4F027086794D /* PulseLiveActivity */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PulseLiveActivity;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
