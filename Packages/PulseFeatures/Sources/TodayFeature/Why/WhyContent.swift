@@ -37,12 +37,14 @@ struct WhyContent: Equatable, Sendable {
     var primaryAction: Action?
     var restoreTitle: String?
 
-    /// `checkIn` : le check-in du jour, qui sert à lire un score estimé.
-    static func make(recovery: DailyRecovery, session: TodaySession, checkIn: CheckIn?, directory: ExerciseDirectory) -> WhyContent {
+    /// `checkIn` : le check-in du jour, qui sert à lire un score estimé. `loadAdjustments` : les hausses de charge du jour, vides
+    /// si aucune série n'a atteint le haut de sa fourchette, `nil` quand elles ne se calculent pas (voir `LoadPreview`).
+    static func make(recovery: DailyRecovery, session: TodaySession, checkIn: CheckIn?, directory: ExerciseDirectory,
+                     loadAdjustments: [SessionAdjustment]?) -> WhyContent {
         let signals = WhySignals.make(recovery: recovery, checkIn: checkIn)
         return WhyContent(
             reading: WhyReading.make(recovery: recovery, session: session),
-            changes: WhyChanges.make(recovery: recovery, session: session, directory: directory),
+            changes: WhyChanges.make(recovery: recovery, session: session, directory: directory, loadAdjustments: loadAdjustments),
             signals: signals.signals,
             formula: signals.formula,
             rule: rule(for: recovery.category),

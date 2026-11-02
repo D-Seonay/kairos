@@ -21,6 +21,16 @@
         }
       }
     },
+    "%@ kg" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kg"
+          }
+        }
+      }
+    },
     "%@ km" : {
       "localizations" : {
         "fr" : {
@@ -103,6 +113,16 @@
         }
       }
     },
+    "%lld records" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld records"
+          }
+        }
+      }
+    },
     "%lld secondes" : {
       "localizations" : {
         "fr" : {
@@ -143,6 +163,26 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "1 record" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 record"
+          }
+        }
+      }
+    },
+    "1 série" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 série"
           }
         }
       }
@@ -267,6 +307,16 @@
         }
       }
     },
+    "Charges de la dernière fois : aucune série n'a atteint le haut de sa fourchette" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Charges de la dernière fois : aucune série n'a atteint le haut de sa fourchette"
+          }
+        }
+      }
+    },
     "Charges inchangées" : {
       "localizations" : {
         "fr" : {
@@ -343,16 +393,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Démarrer quand même"
-          }
-        }
-      }
-    },
-    "En attendant, voici ta séance à suivre en salle :" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "En attendant, voici ta séance à suivre en salle :"
           }
         }
       }
@@ -505,16 +545,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "La jauge de charge apparaîtra après 28 jours d'entraînement : elle compare ta dernière semaine à ton mois."
-          }
-        }
-      }
-    },
-    "La séance en direct arrive bientôt" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La séance en direct arrive bientôt"
           }
         }
       }
@@ -789,6 +819,16 @@
         }
       }
     },
+    "Reprendre la séance" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprendre la séance"
+          }
+        }
+      }
+    },
     "Respiration : 2 min allongé, inspire 4 s, expire 6 s." : {
       "localizations" : {
         "fr" : {
@@ -985,6 +1025,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Séance du jour"
+          }
+        }
+      }
+    },
+    "Séance en cours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance en cours"
+          }
+        }
+      }
+    },
+    "Séance faite" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance faite"
           }
         }
       }

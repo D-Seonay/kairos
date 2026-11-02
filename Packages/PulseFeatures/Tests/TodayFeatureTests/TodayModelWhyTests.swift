@@ -20,6 +20,38 @@ struct TodayModelWhyTests {
         #expect(model.why?.restoreTitle == "Revenir à l'ajustée")
     }
 
+    /// Un jour mesuré, optimal ou normal : l'écran dit les hausses de charge du jour, lues sans rien écrire.
+    @Test func whyListsTheLoadIncreasesOfTheDay() async throws {
+        let fixture = TodayFixture(scenario: .goodNight)
+        try await fixture.adopt("ppl-3")
+        let bench = ExerciseReference.content(id: "bench-press-barbell")
+        let last = TodayClock.date("2026-10-28T18:00")
+        let sets = (0..<4).map { index in
+            WorkoutSet(order: index, exercise: bench, exerciseName: "Développé couché", setType: .working, actualWeightKg: 60,
+                       actualReps: 10, rpe: 8, completedAt: last)
+        }
+        try await fixture.workouts.save(WorkoutSession(startedAt: last, endedAt: last.addingTimeInterval(3_600), kind: .strength,
+                                                       source: .pulse, status: .completed, title: "Push", sets: sets,
+                                                       createdAt: last, updatedAt: last))
+        let model = fixture.makeModel()
+        await model.refresh()
+        let changes = try #require(model.why).changes
+        let load = try #require(changes.first { $0.pill.hasPrefix("+") && $0.title.contains("kg sur 4 séries") })
+        #expect(load.pill == "+2,5")
+        #expect(!changes.contains { $0.title == "Charges inchangées" })
+        // Rien n'a été écrit : aucune séance en cours.
+        #expect(await fixture.liveSession.current() == nil)
+    }
+
+    @Test func whySaysWhenNoSetReachedTheTopOfItsRange() async throws {
+        let fixture = TodayFixture(scenario: .goodNight)
+        try await fixture.adopt("ppl-3")
+        let model = fixture.makeModel()
+        await model.refresh()
+        let changes = try #require(model.why).changes
+        #expect(changes.last?.title == "Charges de la dernière fois : aucune série n'a atteint le haut de sa fourchette")
+    }
+
     @Test func whyShowsTheAnswersJustSaved() async throws {
         let fixture = TodayFixture(scenario: .threeNights)
         try await fixture.adopt("ppl-3")

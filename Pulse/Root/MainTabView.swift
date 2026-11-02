@@ -25,7 +25,9 @@ struct MainTabView: View {
     var body: some View {
         TabView(selection: $router.selectedTab) {
             Tab(String(localized: "Aujourd'hui"), systemImage: "sun.max", value: Item.today) {
-                TodayView(model: today) { router.selectedTab = .profile }
+                // L'écran en direct n'est pas encore branché : démarrer et reprendre ne font rien jusqu'à son ouverture.
+                TodayView(model: today, onOpenProfile: { router.selectedTab = .profile }, onStartSession: { _ in },
+                          onResumeSession: {})
             }
             Tab(String(localized: "Planning"), systemImage: "calendar", value: Item.planning) {
                 comingSoon(String(localized: "Planning"), milestone: "M6")

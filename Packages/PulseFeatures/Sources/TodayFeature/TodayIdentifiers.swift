@@ -5,4 +5,6 @@ public enum TodayIdentifiers {
     public static let sessionStart = "today.session.start"
     public static let sessionOrigin = "today.session.origin"
     public static let sessionWhy = "today.session.why"
+    public static let sessionDone = "today.session.done"
+    public static let sessionResume = "today.session.resume"
 }

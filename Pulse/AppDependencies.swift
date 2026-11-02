@@ -53,6 +53,9 @@ struct AppDependencies: Sendable {
     /// Les réveils d'Apple Santé ; `nil` sans Apple Santé, avec un scénario de lancement et en mode mémoire.
     let backgroundDelivery: HealthKitBackgroundDelivery?
     let activeSession: any ActiveSessionStore
+    /// Le seul chemin vers la séance en cours (l'accueil le lit ; l'écran en direct l'écrira). Les doublures de la notification de
+    /// repos et de la Live Activity attendent la suite du jalon.
+    let liveSession: ActiveSessionService
     let inspector: any StoreInspector
     let exporter: any DataExporter
     let eraser: any DataEraser
@@ -161,6 +164,7 @@ struct AppDependencies: Sendable {
         return dependencies
     }
 
+    // swiftlint:disable:next function_body_length
     private static func make(_ wiring: Wiring, mode: StoreMode, error: String?) throws -> AppDependencies {
         let container = try PersistenceStack.makeContainer(mode: mode)
         let content = ContentLibrary.bundled
@@ -190,6 +194,12 @@ struct AppDependencies: Sendable {
         let records = RecordsService(workouts: workouts, records: personalRecords, userExercises: userExercises,
                                      library: content, now: wiring.now)
         let hevyMappings = UserDefaultsHevyMappingStore(suiteName: wiring.defaultsSuite)
+        let activeSession = SwiftDataActiveSessionStore(modelContainer: container)
+        let exerciseSettings = SwiftDataExerciseSettingsRepository(modelContainer: container)
+        let liveSession = ActiveSessionService(
+            store: activeSession, workouts: workouts, profiles: profiles, settings: exerciseSettings, userExercises: userExercises,
+            records: records, library: content, restNotifier: StubRestTimerNotifier(), activity: StubSessionActivityController(),
+            calendar: calendar, now: wiring.now)
         return AppDependencies(
             health: wiring.health, healthSource: wiring.healthSource, notifications: wiring.notifications,
             onboardingSteps: UserDefaultsOnboardingStepStore(suiteName: wiring.defaultsSuite),
@@ -202,12 +212,12 @@ struct AppDependencies: Sendable {
             supplements: SwiftDataSupplementRepository(modelContainer: container),
             bodyMeasurements: SwiftDataBodyMeasurementRepository(modelContainer: container),
             personalRecords: personalRecords,
-            exerciseSettings: SwiftDataExerciseSettingsRepository(modelContainer: container),
+            exerciseSettings: exerciseSettings,
             records: records, hevyMappings: hevyMappings,
             hevyImporter: HevyImporter(workouts: workouts, userExercises: userExercises, records: records, mappings: hevyMappings,
                                        library: content, calendar: calendar, now: wiring.now),
             healthCache: healthCache, activity: activity, refresher: refresher, backgroundDelivery: wiring.backgroundDelivery,
-            activeSession: SwiftDataActiveSessionStore(modelContainer: container),
+            activeSession: activeSession, liveSession: liveSession,
             inspector: wiring.inspector ?? SwiftDataStoreInspector(container: container, cloudEnabled: mode == .cloud),
             exporter: exporter, eraser: eraser, seeder: SampleDataSeeder(container: container, calendar: calendar))
     }
@@ -238,8 +248,8 @@ extension AppDependencies {
     }
 
     func todayEnvironment() -> TodayEnvironment {
-        TodayEnvironment(refresher: refresher, workouts: workouts, userExercises: userExercises, library: content, calendar: calendar,
-                         now: now)
+        TodayEnvironment(refresher: refresher, workouts: workouts, userExercises: userExercises, exerciseSettings: exerciseSettings,
+                         activeSession: liveSession, library: content, calendar: calendar, now: now)
     }
 
     func trainEnvironment() -> TrainEnvironment {

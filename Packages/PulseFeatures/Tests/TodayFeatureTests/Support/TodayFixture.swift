@@ -78,7 +78,9 @@ struct TodayFixture {
     let programs = InMemoryProgramRepository()
     let workouts = InMemoryWorkoutRepository()
     let userExercises = InMemoryUserExerciseRepository()
+    let exerciseSettings = InMemoryExerciseSettingsRepository()
     let recovery: any RecoveryRepository
+    let liveSession: ActiveSessionService
     let source: SwitchableHealthSource
     let clock: MutableClock
     let environment: TodayEnvironment
@@ -99,8 +101,15 @@ struct TodayFixture {
             scores: DailyScoreService(recovery: recovery, calendar: calendar),
             widgets: StubWidgetPublisher(), notifications: StubNotificationScheduler(), activity: InMemoryDayActivityLog(),
             calendar: calendar, now: { clock.now })
-        environment = TodayEnvironment(refresher: refresher, workouts: workouts, userExercises: userExercises, library: .bundled,
-                                      calendar: calendar, now: { clock.now })
+        let records = RecordsService(workouts: workouts, records: InMemoryPersonalRecordRepository(), userExercises: userExercises,
+                                     library: .bundled, now: { clock.now })
+        liveSession = ActiveSessionService(
+            store: InMemoryActiveSessionStore(), workouts: workouts, profiles: profiles, settings: exerciseSettings,
+            userExercises: userExercises, records: records, library: .bundled, restNotifier: StubRestTimerNotifier(),
+            activity: StubSessionActivityController(), calendar: calendar, now: { clock.now })
+        environment = TodayEnvironment(
+            refresher: refresher, workouts: workouts, userExercises: userExercises, exerciseSettings: exerciseSettings,
+            activeSession: liveSession, library: .bundled, calendar: calendar, now: { clock.now })
     }
 
     func makeModel() -> TodayModel {

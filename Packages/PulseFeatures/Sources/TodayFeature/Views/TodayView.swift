@@ -4,14 +4,20 @@ import PulseServices
 import SwiftUI
 
 /// L'onglet « Aujourd'hui » : en-tête, carte de récupération (ou check-in), séance du jour, charge d'entraînement et tendances,
-/// avec ses feuilles et l'écran « Pourquoi », poussé dans sa pile de navigation.
+/// avec sa feuille de mobilité et l'écran « Pourquoi », poussé dans sa pile de navigation. « Démarrer » rend la séance à lancer à
+/// l'app, qui ouvre l'écran en direct ; « Reprendre la séance » lui demande de rouvrir celle en cours.
 public struct TodayView: View {
     private let model: TodayModel
     private let onOpenProfile: () -> Void
+    private let onStartSession: (SessionLaunch) -> Void
+    private let onResumeSession: () -> Void
 
-    public init(model: TodayModel, onOpenProfile: @escaping () -> Void) {
+    public init(model: TodayModel, onOpenProfile: @escaping () -> Void, onStartSession: @escaping (SessionLaunch) -> Void,
+                onResumeSession: @escaping () -> Void) {
         self.model = model
         self.onOpenProfile = onOpenProfile
+        self.onStartSession = onStartSession
+        self.onResumeSession = onResumeSession
     }
 
     public var body: some View {
@@ -20,11 +26,10 @@ public struct TodayView: View {
             content
                 .background(PulsePalette.background)
                 .hidingNavigationBar()
-                .navigationDestination(isPresented: $model.isShowingWhy) { WhyView(model: model) }
+                .navigationDestination(isPresented: $model.isShowingWhy) { WhyView(model: model, onStart: startSession) }
         }
         .sheet(item: $model.sheet) { sheet in
             switch sheet {
-            case .start(let day): StartSessionSheet(lines: model.planLines(for: day))
             case .mobility: MobilitySheet()
             }
         }
@@ -37,13 +42,19 @@ public struct TodayView: View {
             VStack(spacing: PulseMetrics.spacing) {
                 TodayHeader(model: model, onOpenProfile: onOpenProfile)
                 recoveryOrCheckIn
-                SessionCard(model: model, onWhy: model.showWhy)
+                SessionCard(model: model, onWhy: model.showWhy, onStart: startSession, onResume: onResumeSession)
                 LoadCard(content: model.load)
                 TrendTilesView(tiles: model.trends)
             }
             .padding(PulseMetrics.spacing)
         }
         .refreshable { await model.refresh() }
+    }
+
+    private func startSession() {
+        if let launch = model.shownSessionLaunch() {
+            onStartSession(launch)
+        }
     }
 
     /// Les données ne suffisent pas : le check-in prend la place de la carte de récupération, la séance reste dessous.

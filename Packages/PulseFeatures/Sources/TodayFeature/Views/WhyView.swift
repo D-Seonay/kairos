@@ -6,6 +6,8 @@ import SwiftUI
 /// puis les boutons. Poussé dans la pile de l'accueil depuis la carte de récupération ou le bouton « Pourquoi ? ».
 struct WhyView: View {
     let model: TodayModel
+    /// Lance la séance affichée.
+    let onStart: () -> Void
 
     var body: some View {
         ScrollView {
@@ -14,7 +16,7 @@ struct WhyView: View {
                     ReadingCard(text: why.reading)
                     ChangesSection(changes: why.changes)
                     SignalsSection(signals: why.signals, formula: why.formula, rule: why.rule)
-                    ActionButtons(model: model, why: why)
+                    ActionButtons(model: model, why: why, onStart: onStart)
                 }
                 .padding(PulseMetrics.spacing)
             }
@@ -212,6 +214,7 @@ private struct SignalBar: View {
 private struct ActionButtons: View {
     let model: TodayModel
     let why: WhyContent
+    let onStart: () -> Void
 
     var body: some View {
         VStack(spacing: 8) {
@@ -236,7 +239,7 @@ private struct ActionButtons: View {
 
     private func start(_ action: WhyContent.Action) {
         switch action {
-        case .startSession: model.startSession()
+        case .startSession: onStart()
         case .startMobility: model.startMobility()
         }
     }
@@ -256,7 +259,7 @@ private struct WhyPreviewHost: View {
     var body: some View {
         NavigationStack {
             if let model {
-                WhyView(model: model)
+                WhyView(model: model, onStart: {})
             } else {
                 ProgressView()
             }

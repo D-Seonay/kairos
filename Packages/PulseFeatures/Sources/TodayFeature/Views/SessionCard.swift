@@ -5,11 +5,15 @@ import PulseServices
 import SwiftUI
 
 /// La carte « Séance du jour » : musculation (ajustée, planifiée ou rétablie), mobilité ou repos au choix, course, repos
-/// ou aucun programme.
+/// ou aucun programme ; ou, une fois la séance lancée, son bilan ou « Reprendre la séance ».
 struct SessionCard: View {
     let model: TodayModel
     /// Ouvre l'écran « Pourquoi ».
     let onWhy: () -> Void
+    /// Lance la séance affichée.
+    let onStart: () -> Void
+    /// Rouvre la séance en cours.
+    let onResume: () -> Void
 
     var body: some View {
         ObsidianCard {
@@ -19,11 +23,13 @@ struct SessionCard: View {
                     StrengthSessionCard(
                         card: card, onWhy: onWhy,
                         onOrigin: { choose(original: card.badge == .adjusted) },
-                        onStart: model.startSession)
+                        onStart: onStart)
                 case .mobilityOrRest(let dayName): mobilityOrRest(dayName)
                 case .run(let card): run(card)
                 case .rest(let next, let suggestsMobility): rest(next, suggestsMobility: suggestsMobility)
                 case .noProgram: noProgram
+                case .done(let card): DoneSessionCard(card: card)
+                case .inProgress(let title): ResumeSessionCard(title: title, onResume: onResume)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
