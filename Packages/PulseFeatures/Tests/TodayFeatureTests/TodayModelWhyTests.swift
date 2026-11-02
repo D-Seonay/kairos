@@ -52,6 +52,38 @@ struct TodayModelWhyTests {
         #expect(changes.last?.title == "Charges de la dernière fois : aucune série n'a atteint le haut de sa fourchette")
     }
 
+    /// Une séance en cours : « Valider et démarrer » devient « Reprendre la séance ».
+    @Test func whyOffersToResumeARunningSession() async throws {
+        let fixture = TodayFixture(scenario: .goodNight)
+        try await fixture.adopt("ppl-3")
+        let model = fixture.makeModel()
+        await model.refresh()
+        #expect(model.why?.primaryAction == .startSession)
+        _ = try await fixture.liveSession.start(try #require(model.shownSessionLaunch()))
+        await model.refresh()
+        #expect(model.why?.primaryAction == .resumeSession)
+        #expect(model.why?.primaryAction?.title == "Reprendre la séance")
+    }
+
+    /// Une séance faite : plus de bouton de départ, plus de charges du jour.
+    @Test func whyDropsTheStartButtonAndTheLoadsOnceTheSessionIsDone() async throws {
+        let fixture = TodayFixture(scenario: .goodNight)
+        try await fixture.adopt("ppl-3")
+        let start = TodayClock.date("2026-11-02T06:30")
+        try await fixture.workouts.save(WorkoutSession(
+            startedAt: start, endedAt: TodayClock.date("2026-11-02T07:25"), kind: .strength, source: .pulse, status: .completed,
+            title: "Push", durationMinutes: 55, createdAt: start, updatedAt: start))
+        let model = fixture.makeModel()
+        await model.refresh()
+        guard case .done = model.card else {
+            Issue.record("Une séance faite était attendue, obtenu \(model.card)")
+            return
+        }
+        let why = try #require(model.why)
+        #expect(why.primaryAction == nil)
+        #expect(!why.changes.contains { $0.title.hasPrefix("Charges") })
+    }
+
     @Test func whyShowsTheAnswersJustSaved() async throws {
         let fixture = TodayFixture(scenario: .threeNights)
         try await fixture.adopt("ppl-3")

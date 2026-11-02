@@ -18,13 +18,19 @@ struct WhyContent: Equatable, Sendable {
         var score: Int
     }
 
+    /// Où en est la séance de la carte : à démarrer, en cours (le bouton la reprend) ou faite (plus de bouton ni de charges du jour).
+    enum Progress: Equatable, Sendable {
+        case toStart, inProgress, done
+    }
+
     enum Action: Equatable, Sendable {
-        case startSession, startMobility
+        case startSession, startMobility, resumeSession
 
         var title: String {
             switch self {
             case .startSession: String(localized: "Valider et démarrer", bundle: .module)
             case .startMobility: String(localized: "Démarrer 20 min de mobilité", bundle: .module)
+            case .resumeSession: String(localized: "Reprendre la séance", bundle: .module)
             }
         }
     }
@@ -39,16 +45,18 @@ struct WhyContent: Equatable, Sendable {
 
     /// `checkIn` : le check-in du jour, qui sert à lire un score estimé. `loadAdjustments` : les hausses de charge du jour, vides
     /// si aucune série n'a atteint le haut de sa fourchette, `nil` quand elles ne se calculent pas (voir `LoadPreview`).
+    /// `progress` : la séance faite n'a plus de bouton de départ ni de charges du jour ; celle en cours se reprend.
     static func make(recovery: DailyRecovery, session: TodaySession, checkIn: CheckIn?, directory: ExerciseDirectory,
-                     loadAdjustments: [SessionAdjustment]?) -> WhyContent {
+                     loadAdjustments: [SessionAdjustment]?, progress: Progress = .toStart) -> WhyContent {
         let signals = WhySignals.make(recovery: recovery, checkIn: checkIn)
         return WhyContent(
             reading: WhyReading.make(recovery: recovery, session: session),
-            changes: WhyChanges.make(recovery: recovery, session: session, directory: directory, loadAdjustments: loadAdjustments),
+            changes: WhyChanges.make(recovery: recovery, session: session, directory: directory,
+                                     loadAdjustments: progress == .done ? nil : loadAdjustments, listsLoads: progress != .done),
             signals: signals.signals,
             formula: signals.formula,
             rule: rule(for: recovery.category),
-            primaryAction: primaryAction(for: session),
+            primaryAction: primaryAction(for: session, progress: progress),
             restoreTitle: restoreTitle(for: session))
     }
 
@@ -74,9 +82,14 @@ struct WhyContent: Equatable, Sendable {
     // MARK: - Boutons
 
     /// La mobilité quand le surmenage a remplacé la séance, « Valider et démarrer » pour toute autre séance de musculation ;
-    /// rien un jour de repos, de course ou sans programme.
-    private static func primaryAction(for session: TodaySession) -> Action? {
+    /// rien un jour de repos, de course ou sans programme. Une séance en cours se reprend ; une séance faite n'a plus de bouton.
+    private static func primaryAction(for session: TodaySession, progress: Progress) -> Action? {
         guard case .strength = session.plannedDay else { return nil }
+        switch progress {
+        case .inProgress: return .resumeSession
+        case .done: return nil
+        case .toStart: break
+        }
         if session.status == .adjusted, session.adjusted?.isReplacedByMobility == true {
             return .startMobility
         }

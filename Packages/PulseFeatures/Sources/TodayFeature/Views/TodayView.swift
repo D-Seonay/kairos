@@ -26,7 +26,9 @@ public struct TodayView: View {
             content
                 .background(PulsePalette.background)
                 .hidingNavigationBar()
-                .navigationDestination(isPresented: $model.isShowingWhy) { WhyView(model: model, onStart: startSession) }
+                .navigationDestination(isPresented: $model.isShowingWhy) {
+                    WhyView(model: model, onStart: startSession, onResume: onResumeSession)
+                }
         }
         .sheet(item: $model.sheet) { sheet in
             switch sheet {

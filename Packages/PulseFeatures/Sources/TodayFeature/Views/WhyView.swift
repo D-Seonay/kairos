@@ -8,6 +8,8 @@ struct WhyView: View {
     let model: TodayModel
     /// Lance la séance affichée.
     let onStart: () -> Void
+    /// Rouvre la séance en cours.
+    let onResume: () -> Void
 
     var body: some View {
         ScrollView {
@@ -16,7 +18,7 @@ struct WhyView: View {
                     ReadingCard(text: why.reading)
                     ChangesSection(changes: why.changes)
                     SignalsSection(signals: why.signals, formula: why.formula, rule: why.rule)
-                    ActionButtons(model: model, why: why, onStart: onStart)
+                    ActionButtons(model: model, why: why, onStart: onStart, onResume: onResume)
                 }
                 .padding(PulseMetrics.spacing)
             }
@@ -215,6 +217,7 @@ private struct ActionButtons: View {
     let model: TodayModel
     let why: WhyContent
     let onStart: () -> Void
+    let onResume: () -> Void
 
     var body: some View {
         VStack(spacing: 8) {
@@ -241,6 +244,7 @@ private struct ActionButtons: View {
         switch action {
         case .startSession: onStart()
         case .startMobility: model.startMobility()
+        case .resumeSession: onResume()
         }
     }
 }
@@ -259,7 +263,7 @@ private struct WhyPreviewHost: View {
     var body: some View {
         NavigationStack {
             if let model {
-                WhyView(model: model, onStart: {})
+                WhyView(model: model, onStart: {}, onResume: {})
             } else {
                 ProgressView()
             }

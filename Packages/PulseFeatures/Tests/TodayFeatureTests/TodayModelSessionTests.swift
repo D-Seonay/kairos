@@ -103,6 +103,25 @@ struct TodayModelSessionTests {
         #expect(launch.refused.map(\.kind) == [.volume, .rpeCap, .rest])
     }
 
+    /// Le chemin de la vue : la séance affichée est l'ajustée, puis l'originale une fois rétablie.
+    @Test func theShownLaunchFollowsTheChosenSession() async throws {
+        let fixture = TodayFixture(scenario: .badNight)
+        try await fixture.adopt("ppl-3")
+        let model = fixture.makeModel()
+        await model.refresh()
+        let adjusted = try #require(model.session?.adjusted?.day)
+        let original = try #require(model.session?.originalDay)
+        let shown = try #require(model.shownSessionLaunch())
+        #expect(shown.day == adjusted)
+        #expect(shown.refused.isEmpty)
+
+        await model.chooseOriginalSession(true)
+        let restored = try #require(model.shownSessionLaunch())
+        #expect(restored.day == original)
+        #expect(restored.applied.isEmpty)
+        #expect(!restored.refused.isEmpty)
+    }
+
     @Test func noLaunchWithoutAStrengthCard() async throws {
         let fixture = TodayFixture(at: "2026-11-03T08:00")
         try await fixture.adopt("ppl-3")

@@ -9,18 +9,21 @@ import PulseServices
 enum WhyChanges {
     typealias Change = WhyContent.Change
 
+    /// `listsLoads` faux : la séance est faite, les charges du jour ne sont plus d'actualité.
     static func make(recovery: DailyRecovery, session: TodaySession, directory: ExerciseDirectory,
-                     loadAdjustments: [SessionAdjustment]?) -> [Change] {
+                     loadAdjustments: [SessionAdjustment]?, listsLoads: Bool = true) -> [Change] {
         guard let original = session.originalDay else {
             return [Change(pill: "✓", title: String(localized: "Pas de séance aujourd'hui : rien à ajuster.", bundle: .module),
                            detail: nil)]
         }
         guard let adjusted = session.adjusted, !adjusted.adjustments.isEmpty else {
             let nothing = Change(pill: "✓", title: String(localized: "Rien à alléger aujourd'hui.", bundle: .module), detail: nil)
-            return [nothing] + loadChanges(recovery.category, plannedDay: session.plannedDay, adjustments: loadAdjustments)
+            return [nothing] + (listsLoads ? loadChanges(recovery.category, plannedDay: session.plannedDay,
+                                                         adjustments: loadAdjustments) : [])
         }
         let changes = adjusted.adjustments.map { change(for: $0, adjusted: adjusted, original: original, directory: directory) }
-        return changes + loadChanges(recovery.category, plannedDay: session.plannedDay, adjustments: loadAdjustments)
+        return changes + (listsLoads ? loadChanges(recovery.category, plannedDay: session.plannedDay,
+                                                   adjustments: loadAdjustments) : [])
     }
 
     private static func change(for adjustment: SessionAdjustment, adjusted: AdjustedSession, original: RoutineDay,
