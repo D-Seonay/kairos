@@ -12,7 +12,7 @@ public struct RecoveryWidgetCircularView: View {
     }
 
     public var body: some View {
-        RecoveryGauge(score: content.score.map(Double.init), category: content.category, style: .compact)
+        RecoveryGauge(score: content.score.map(Double.init), category: content.category, style: .compact, animatesReveal: false)
             .padding(6)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .accessibilityElement(children: .ignore)

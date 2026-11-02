@@ -43,3 +43,17 @@ import Testing
     #expect(RecoveryGauge.accessibilityLabel(score: 71, category: nil) == "Récupération 71 sur 100")
     #expect(RecoveryGauge.accessibilityLabel(score: nil, category: .optimal) == "Récupération pas encore calculée")
 }
+
+@Test func stillGaugeStartsWithTheMarkerOnTheScore() {
+    #expect(RecoveryGauge.initialScore(score: 50, animatesReveal: false) == 50)
+    #expect(RecoveryGauge.initialScore(score: 120, animatesReveal: false) == 100)
+    #expect(RecoveryGauge.initialScore(score: nil, animatesReveal: false) == 0)
+    #expect(RecoveryGauge.initialScore(score: .nan, animatesReveal: false) == 0)
+    let rect = CGRect(x: 0, y: 0, width: 200, height: 200)
+    let point = GaugeGeometry.point(for: RecoveryGauge.initialScore(score: 50, animatesReveal: false), in: rect, lineWidth: 10)
+    #expect(abs(point.x - 100) < 0.001 && abs(point.y - 5) < 0.001)   // le repère est en haut de l'arc, pas au départ
+}
+
+@Test func animatedGaugeStartsWithTheMarkerAtTheStart() {
+    #expect(RecoveryGauge.initialScore(score: 50, animatesReveal: true) == 0)
+}

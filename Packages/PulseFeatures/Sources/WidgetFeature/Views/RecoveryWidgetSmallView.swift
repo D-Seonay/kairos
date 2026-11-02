@@ -22,7 +22,7 @@ public struct RecoveryWidgetSmallView: View {
             .font(.system(.caption2, weight: .semibold))
             .foregroundStyle(.secondary)
             .lineLimit(1)
-            RecoveryGauge(score: content.score.map(Double.init), category: content.category, style: .compact)
+            RecoveryGauge(score: content.score.map(Double.init), category: content.category, style: .compact, animatesReveal: false)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             VStack(alignment: .leading, spacing: 1) {
                 Text(content.categoryText)
