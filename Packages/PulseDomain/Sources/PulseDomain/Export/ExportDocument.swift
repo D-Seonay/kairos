@@ -23,6 +23,7 @@ public struct ExportDocument: Sendable, Equatable, Codable {
     public var profile: UserProfile?
     public var programs: [Program]
     public var userExercises: [UserExercise]
+    public var exerciseSettings: [ExerciseSettings]
     public var workoutSessions: [WorkoutSession]
     public var scheduledDays: [ScheduledDay]
     public var dailyRecoveries: [DailyRecovery]
@@ -35,7 +36,8 @@ public struct ExportDocument: Sendable, Equatable, Codable {
     public var contentExercises: [String: String]
 
     public init(schemaVersion: Int, contentVersion: String, appVersion: String, exportedAt: Date, locale: String,
-                profile: UserProfile?, programs: [Program], userExercises: [UserExercise], workoutSessions: [WorkoutSession],
+                profile: UserProfile?, programs: [Program], userExercises: [UserExercise],
+                exerciseSettings: [ExerciseSettings] = [], workoutSessions: [WorkoutSession],
                 scheduledDays: [ScheduledDay], dailyRecoveries: [DailyRecovery], checkIns: [CheckIn], supplements: [Supplement],
                 supplementIntakes: [SupplementIntake], bodyMeasurements: [BodyMeasurement], personalRecords: [PersonalRecord],
                 contentExercises: [String: String]) {
@@ -47,6 +49,7 @@ public struct ExportDocument: Sendable, Equatable, Codable {
         self.profile = profile
         self.programs = programs
         self.userExercises = userExercises
+        self.exerciseSettings = exerciseSettings
         self.workoutSessions = workoutSessions
         self.scheduledDays = scheduledDays
         self.dailyRecoveries = dailyRecoveries
@@ -62,18 +65,30 @@ public struct ExportDocument: Sendable, Equatable, Codable {
     public static func empty(exportedAt: Date, appVersion: String, schemaVersion: Int, contentVersion: String,
                              locale: String) -> ExportDocument {
         ExportDocument(schemaVersion: schemaVersion, contentVersion: contentVersion, appVersion: appVersion, exportedAt: exportedAt,
-                       locale: locale, profile: nil, programs: [], userExercises: [], workoutSessions: [], scheduledDays: [],
-                       dailyRecoveries: [], checkIns: [], supplements: [], supplementIntakes: [], bodyMeasurements: [],
-                       personalRecords: [], contentExercises: [:])
+                       locale: locale, profile: nil, programs: [], userExercises: [], exerciseSettings: [], workoutSessions: [],
+                       scheduledDays: [], dailyRecoveries: [], checkIns: [], supplements: [], supplementIntakes: [],
+                       bodyMeasurements: [], personalRecords: [], contentExercises: [:])
     }
+}
+
+/// Enveloppe un formateur ISO 8601 que l'init configure puis ne modifie plus, d'où `@unchecked Sendable`.
+private struct ISODateFormatter: @unchecked Sendable {
+    private let formatter: ISO8601DateFormatter
+
+    init(timeZone: TimeZone? = nil) {
+        formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        if let timeZone { formatter.timeZone = timeZone }
+    }
+
+    func string(from date: Date) -> String { formatter.string(from: date) }
+    func date(from text: String) -> Date? { formatter.date(from: text) }
 }
 
 /// Encodage et décodage de l'export : clés triées, indenté, dates ISO 8601 avec décalage horaire.
 public enum ExportCoding {
     public static func encoder(timeZone: TimeZone = .current) -> JSONEncoder {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime]
-        formatter.timeZone = timeZone
+        let formatter = ISODateFormatter(timeZone: timeZone)
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys, .prettyPrinted]
         encoder.dateEncodingStrategy = .custom { date, encoder in
@@ -84,8 +99,7 @@ public enum ExportCoding {
     }
 
     public static func decoder() -> JSONDecoder {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime]
+        let formatter = ISODateFormatter()
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .custom { decoder in
             let container = try decoder.singleValueContainer()

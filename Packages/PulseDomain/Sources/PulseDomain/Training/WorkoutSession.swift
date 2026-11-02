@@ -9,6 +9,7 @@ public enum SessionKind: String, Sendable, Codable, CaseIterable {
 public enum SessionSource: String, Sendable, Codable, CaseIterable {
     case pulse
     case appleHealth
+    case hevy
 }
 
 public enum SessionStatus: String, Sendable, Codable, CaseIterable {
@@ -63,6 +64,7 @@ public struct WorkoutSession: Sendable, Equatable, Codable, Identifiable {
     public var averageHeartRate: Double?
     public var estimatedRPE: Double?
     public var healthKitUUID: String?
+    public var exerciseNotes: [ExerciseNote]
     public var sets: [WorkoutSet]
     public var createdAt: Date
     public var updatedAt: Date
@@ -72,7 +74,8 @@ public struct WorkoutSession: Sendable, Equatable, Codable, Identifiable {
                 appliedAdjustments: [SessionAdjustment] = [], refusedAdjustments: [SessionAdjustment] = [],
                 overallRPE: Double? = nil, note: String? = nil, tonnageKg: Double = 0, durationMinutes: Double? = nil,
                 distanceMeters: Double? = nil, averageHeartRate: Double? = nil, estimatedRPE: Double? = nil,
-                healthKitUUID: String? = nil, sets: [WorkoutSet] = [], createdAt: Date, updatedAt: Date) {
+                healthKitUUID: String? = nil, exerciseNotes: [ExerciseNote] = [], sets: [WorkoutSet] = [], createdAt: Date,
+                updatedAt: Date) {
         self.id = id
         self.startedAt = startedAt
         self.endedAt = endedAt
@@ -92,6 +95,7 @@ public struct WorkoutSession: Sendable, Equatable, Codable, Identifiable {
         self.averageHeartRate = averageHeartRate
         self.estimatedRPE = estimatedRPE
         self.healthKitUUID = healthKitUUID
+        self.exerciseNotes = exerciseNotes
         self.sets = sets
         self.createdAt = createdAt
         self.updatedAt = updatedAt
