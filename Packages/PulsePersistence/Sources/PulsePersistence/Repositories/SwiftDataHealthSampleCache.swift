@@ -29,12 +29,35 @@ public actor SwiftDataHealthSampleCache: HealthSampleCache {
         try modelContext.save()
     }
 
+    public func apply(_ changes: HealthSampleChanges) throws {
+        let raw = changes.kind.rawValue
+        if changes.isFullRead {
+            try modelContext.delete(model: StoredCachedHealthSample.self, where: #Predicate { $0.kind == raw })
+        } else {
+            let removed = Set(changes.deletedHealthKitUUIDs + changes.added.compactMap(\.healthKitUUID))
+            let existing = try modelContext.fetch(FetchDescriptor<StoredCachedHealthSample>(predicate: #Predicate { $0.kind == raw }))
+            for stored in existing where stored.healthKitUUID.map(removed.contains) == true {
+                modelContext.delete(stored)
+            }
+        }
+        for sample in changes.added {
+            modelContext.insert(StoredCachedHealthSample(sample))
+        }
+        try upsertAnchor(changes.anchor, for: changes.kind)
+        try modelContext.save()
+    }
+
     public func anchor(for kind: HealthSampleKind) throws -> Data? {
         let raw = kind.rawValue
         return try modelContext.first(StoredHealthQueryAnchor.self, where: #Predicate { $0.kind == raw })?.anchorData
     }
 
     public func saveAnchor(_ data: Data, for kind: HealthSampleKind) throws {
+        try upsertAnchor(data, for: kind)
+        try modelContext.save()
+    }
+
+    private func upsertAnchor(_ data: Data, for kind: HealthSampleKind) throws {
         let raw = kind.rawValue
         if let existing = try modelContext.first(StoredHealthQueryAnchor.self, where: #Predicate { $0.kind == raw }) {
             existing.anchorData = data
@@ -42,7 +65,6 @@ public actor SwiftDataHealthSampleCache: HealthSampleCache {
         } else {
             modelContext.insert(StoredHealthQueryAnchor(kind: kind, anchorData: data))
         }
-        try modelContext.save()
     }
 
     public func clear() throws {

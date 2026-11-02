@@ -21,6 +21,15 @@ public actor InMemoryHealthSampleCache: HealthSampleCache {
         stored += samples
     }
 
+    public func apply(_ changes: HealthSampleChanges) async throws {
+        let removed = Set(changes.deletedHealthKitUUIDs + changes.added.compactMap(\.healthKitUUID))
+        stored.removeAll { sample in
+            sample.kind == changes.kind && (changes.isFullRead || sample.healthKitUUID.map(removed.contains) == true)
+        }
+        stored += changes.added
+        anchors[changes.kind] = changes.anchor
+    }
+
     public func anchor(for kind: HealthSampleKind) async throws -> Data? {
         anchors[kind]
     }

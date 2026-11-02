@@ -33,3 +33,52 @@ import Testing
     try await SwiftDataHealthSampleCache(modelContainer: container).clear()
     #expect(try await store.load() != nil)
 }
+
+private func anchored(_ kind: HealthSampleKind = .sdnn, uuid: String?, at offset: TimeInterval = 0) -> CachedHealthSample {
+    var sample = Sample.cachedSample(kind: kind, start: Fixed.t0.addingTimeInterval(offset))
+    sample.healthKitUUID = uuid
+    return sample
+}
+
+private func all(_ cache: SwiftDataHealthSampleCache, _ kind: HealthSampleKind) async throws -> [CachedHealthSample] {
+    try await cache.samples(kind: kind, from: .distantPast, to: .distantFuture)
+}
+
+@Test func fullReadReplacesTheKind() async throws {
+    let cache = SwiftDataHealthSampleCache(modelContainer: try TestContainer.make())
+    let sleep = anchored(.sleep, uuid: "S")
+    try await cache.insert([anchored(uuid: nil), anchored(uuid: nil, at: 60), sleep])
+    let added = anchored(uuid: "A", at: 120)
+    try await cache.apply(HealthSampleChanges(kind: .sdnn, added: [added], deletedHealthKitUUIDs: [],
+                                              anchor: Data([7]), isFullRead: true))
+    #expect(try await all(cache, .sdnn) == [added])
+    #expect(try await all(cache, .sleep) == [sleep])
+    #expect(try await cache.anchor(for: .sdnn) == Data([7]))
+}
+
+@Test func incrementalReadRemovesDeleted() async throws {
+    let cache = SwiftDataHealthSampleCache(modelContainer: try TestContainer.make())
+    let first = anchored(uuid: "A")
+    let second = anchored(uuid: "B", at: 60)
+    try await cache.insert([first, second])
+    try await cache.apply(HealthSampleChanges(kind: .sdnn, added: [], deletedHealthKitUUIDs: ["A"],
+                                              anchor: Data([1]), isFullRead: false))
+    #expect(try await all(cache, .sdnn) == [second])
+}
+
+@Test func returningSampleIsNotDuplicated() async throws {
+    let cache = SwiftDataHealthSampleCache(modelContainer: try TestContainer.make())
+    let sample = anchored(uuid: "A")
+    try await cache.insert([sample])
+    try await cache.apply(HealthSampleChanges(kind: .sdnn, added: [sample], deletedHealthKitUUIDs: [],
+                                              anchor: Data([1]), isFullRead: false))
+    #expect(try await all(cache, .sdnn) == [sample])
+}
+
+@Test func anchorIsKeptPerKind() async throws {
+    let cache = SwiftDataHealthSampleCache(modelContainer: try TestContainer.make())
+    try await cache.apply(HealthSampleChanges(kind: .sdnn, added: [anchored(uuid: "A")], deletedHealthKitUUIDs: [],
+                                              anchor: Data([1]), isFullRead: false))
+    #expect(try await cache.anchor(for: .sleep) == nil)
+    #expect(try await cache.anchor(for: .sdnn) == Data([1]))
+}
