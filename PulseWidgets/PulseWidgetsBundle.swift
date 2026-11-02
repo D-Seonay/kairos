@@ -5,5 +5,10 @@ import WidgetKit
 struct PulseWidgetsBundle: WidgetBundle {
     var body: some Widget {
         RecoveryWidget()
+        StreakWidget()
+        TodaySessionWidget()
+        WeekWidget()
+        LoadWidget()
+        NextWorkoutWidget()
     }
 }
