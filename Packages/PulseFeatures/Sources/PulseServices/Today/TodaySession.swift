@@ -22,8 +22,9 @@ public struct TodaySession: Sendable, Equatable {
         originalChosen = recovery?.originalSessionChosen == true
     }
 
+    /// Planifiée tant qu'aucun ajustement ne s'applique (pas de score, repos, ou score optimal) ; rétablie seulement s'il y en avait un.
     public var status: Status {
-        guard adjusted != nil else { return .planned }
+        guard let adjusted, !adjusted.adjustments.isEmpty else { return .planned }
         return originalChosen ? .restored : .adjusted
     }
 

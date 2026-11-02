@@ -30,6 +30,7 @@ struct DayRefresherTests {
         #expect(scored.category == .optimal)
         #expect(scored.isEstimated == false)
         #expect(refresh.plannedDay.routineDay?.name == "Push")
+        #expect(refresh.session.status == .planned)
         #expect(refresh.session.title == "Push")
         #expect(refresh.session.isLightened == false)
         #expect(refresh.profile?.onboardingCompletedAt != nil)

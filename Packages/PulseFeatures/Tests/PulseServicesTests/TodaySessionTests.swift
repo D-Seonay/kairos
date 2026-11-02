@@ -36,6 +36,15 @@ struct TodaySessionTests {
         #expect(!session.isLightened)
     }
 
+    @Test func optimalScoreKeepsThePlannedSession() throws {
+        let optimal = TodaySession(plannedDay: try plan("ppl-3", on: "2026-11-02T08:00"), recovery: recovery(94, .optimal))
+        #expect(optimal.status == .planned)
+        #expect(optimal.activeDay == optimal.originalDay)
+        let restored = TodaySession(plannedDay: try plan("ppl-3", on: "2026-11-02T08:00"),
+                                    recovery: recovery(94, .optimal, originalChosen: true))
+        #expect(restored.status == .planned)
+    }
+
     @Test func fatigueAdjustsAndLightens() throws {
         let session = TodaySession(plannedDay: try plan("ppl-3", on: "2026-11-02T08:00"), recovery: recovery(50, .moderateFatigue))
         #expect(session.status == .adjusted)
