@@ -1,8 +1,9 @@
 import PulseDesignSystem
 import SwiftUI
 import TodayFeature
+import TrainFeature
 
-/// Les cinq onglets de l'app. Seuls « Aujourd'hui » et « Profil » ont du contenu en M3a.
+/// Les cinq onglets de l'app. « Aujourd'hui », « Séance » et « Profil » ont du contenu en M4a.
 struct MainTabView: View {
     enum Item: Hashable {
         case today
@@ -16,6 +17,7 @@ struct MainTabView: View {
     /// L'onglet affiché : un lien du widget ou la notification du matin le change aussi.
     @Bindable var router: AppRouter
     let today: TodayModel
+    let train: TrainModel
     let firstName: String?
     /// Appelé après une suppression totale réussie depuis l'écran « Données ».
     let onErased: () async -> Void
@@ -29,7 +31,7 @@ struct MainTabView: View {
                 comingSoon(String(localized: "Planning"), milestone: "M6")
             }
             Tab(String(localized: "Séance"), systemImage: "dumbbell", value: Item.session) {
-                comingSoon(String(localized: "Séance"), milestone: "M4")
+                TrainView(model: train) { router.selectedTab = .today }
             }
             Tab(String(localized: "Stats"), systemImage: "chart.bar", value: Item.stats) {
                 comingSoon(String(localized: "Stats"), milestone: "M7")

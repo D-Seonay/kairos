@@ -4,6 +4,7 @@ import OnboardingFeature
 import PulseDomain
 import PulseServices
 import TodayFeature
+import TrainFeature
 
 /// Où l'app en est : chargement du profil, onboarding, ou onglets. Chaque entrée dans une destination repart d'un modèle neuf.
 @MainActor
@@ -20,6 +21,7 @@ final class AppRootModel {
     private(set) var profile: UserProfile?
     private(set) var onboarding: OnboardingModel?
     private(set) var today: TodayModel?
+    private(set) var train: TrainModel?
 
     let dependencies: AppDependencies
 
@@ -62,13 +64,16 @@ final class AppRootModel {
         case .loading:
             onboarding = nil
             today = nil
+            train = nil
         case .onboarding:
             today = nil
+            train = nil
             onboarding = OnboardingModel(environment: dependencies.onboardingEnvironment())
         case .main:
             onboarding = nil
             if destination != .main || today == nil {
                 today = TodayModel(environment: dependencies.todayEnvironment())
+                train = TrainModel(environment: dependencies.trainEnvironment())
             }
         }
         destination = next

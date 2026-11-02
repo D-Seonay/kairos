@@ -3,6 +3,7 @@ import PulseDesignSystem
 import PulseDomain
 import SwiftUI
 import TodayFeature
+import TrainFeature
 
 /// La racine : écran de chargement, onboarding tant que le profil n'est pas terminé, puis les onglets. Toujours en sombre.
 struct AppRootView: View {
@@ -23,9 +24,14 @@ struct AppRootView: View {
             .task { await model.load() }
             .onOpenURL { AppLink(url: $0).map(router.open) }
             .onChange(of: scenePhase) { _, phase in
-                // Chaque retour au premier plan rafraîchit « Aujourd'hui », quel que soit l'onglet affiché.
+                // Chaque retour au premier plan rafraîchit « Aujourd'hui », quel que soit l'onglet affiché, puis « Séance »,
+                // qui relit le score du jour qu'« Aujourd'hui » vient d'enregistrer.
                 guard phase == .active, model.destination == .main, let today = model.today else { return }
-                Task { await today.refresh() }
+                let train = model.train
+                Task {
+                    await today.refresh()
+                    await train?.refresh()
+                }
             }
     }
 
@@ -46,8 +52,9 @@ struct AppRootView: View {
                     }
             }
         case .main:
-            if let today = model.today {
-                MainTabView(dependencies: model.dependencies, router: router, today: today, firstName: model.profile?.firstName) {
+            if let today = model.today, let train = model.train {
+                MainTabView(dependencies: model.dependencies, router: router, today: today, train: train,
+                            firstName: model.profile?.firstName) {
                     await model.dataErased()
                 }
                 .id(ObjectIdentifier(today))
