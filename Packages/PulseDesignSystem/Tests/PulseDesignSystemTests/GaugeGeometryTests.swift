@@ -33,12 +33,12 @@ import Testing
     #expect(abs(end.x - (100 + 100 * 0.8660254)) < 0.001 && abs(end.y - 150) < 0.001)
 }
 
-@Test func accessibilityLabelNamesTheCategory() {
+@MainActor @Test func accessibilityLabelNamesTheCategory() {
     #expect(RecoveryGauge.accessibilityLabel(score: 58.4, category: .moderateFatigue) == "Récupération 58 sur 100, fatigue modérée")
     #expect(RecoveryGauge.accessibilityLabel(score: nil, category: nil) == "Récupération pas encore calculée")
 }
 
-@Test func accessibilityLabelRoundsAndSurvivesMissingCategory() {
+@MainActor @Test func accessibilityLabelRoundsAndSurvivesMissingCategory() {
     #expect(RecoveryGauge.accessibilityLabel(score: 58.6, category: .normal) == "Récupération 59 sur 100, forme normale")
     #expect(RecoveryGauge.accessibilityLabel(score: 71, category: nil) == "Récupération 71 sur 100")
     #expect(RecoveryGauge.accessibilityLabel(score: nil, category: .optimal) == "Récupération pas encore calculée")
