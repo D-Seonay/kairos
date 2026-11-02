@@ -137,6 +137,17 @@ import Testing
         #expect(RestBanner.nextSetText(in: live) == nil)
     }
 
+    @Test func nextSetStartsFromTheLastSetChecked() {
+        var live = session()
+        live.exercises[1].sets.append(LiveSet(proposed: ProposedSet(durationSeconds: 60), previous: nil))
+        // Bench 2 sauté, gainage 1 validé : la suite est le gainage 2, puis le bench 2 laissé de côté.
+        live.exercises[0].sets[0].completedAt = LiveClock.date("2026-11-02T08:10")
+        live.exercises[1].sets[0].completedAt = LiveClock.date("2026-11-02T08:15")
+        #expect(RestBanner.nextSetText(in: live) == "Gainage, série 2 : 60 s")
+        live.exercises[1].sets[1].completedAt = LiveClock.date("2026-11-02T08:20")
+        #expect(RestBanner.nextSetText(in: live) == "Développé couché, série 2 : 72,5 kg × 5")
+    }
+
     @Test func restRingEmptiesWithTheTime() {
         let start = LiveClock.date("2026-11-02T08:10")
         let rest = LiveRest(startedAt: start, endsAt: start.addingTimeInterval(120), exerciseID: UUID())

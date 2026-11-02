@@ -110,9 +110,9 @@ extension LiveSession {
         return start..<end
     }
 
-    /// La prochaine série, telle que la notification et la Live Activity la nomment.
+    /// La série qui suit la dernière validée, telle que la notification et la Live Activity la nomment.
     fileprivate var nextSetParts: NextSetParts? {
-        guard let next = nextSet else { return nil }
+        guard let next = nextSet(after: lastCheckedSet) else { return nil }
         let exercise = exercises[next.exerciseIndex]
         return NextSetParts(name: exercise.name, number: next.setIndex + 1,
                             values: LiveSessionText.planned(exercise.sets[next.setIndex], of: exercise))

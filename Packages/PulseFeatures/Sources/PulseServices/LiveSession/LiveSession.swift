@@ -61,21 +61,42 @@ public struct LiveSession: Sendable, Equatable, Codable, Identifiable {
         }
     }
 
-    /// La prochaine série non validée, dans l'ordre de la séance. Les exercices d'un même super set alternent :
-    /// A1, B1, A2, B2…
+    /// La première série non validée, dans l'ordre de la séance : `nil` quand il n'en reste aucune.
     public var nextSet: (exerciseIndex: Int, setIndex: Int)? {
+        nextSet(after: nil)
+    }
+
+    /// La série validée le plus tard, `nil` tant qu'aucune ne l'est.
+    public var lastCheckedSet: (exerciseIndex: Int, setIndex: Int)? {
+        var last: (position: (exerciseIndex: Int, setIndex: Int), completedAt: Date)?
+        for position in orderedSets {
+            guard let completedAt = exercises[position.exerciseIndex].sets[position.setIndex].completedAt else { continue }
+            if completedAt >= last?.completedAt ?? .distantPast { last = (position, completedAt) }
+        }
+        return last?.position
+    }
+
+    /// La première série non validée qui suit `position` dans l'ordre de la séance, en reprenant au début après la dernière
+    /// (spec M4 §15.2) ; sans `position`, la première non validée.
+    public func nextSet(after position: (exerciseIndex: Int, setIndex: Int)?) -> (exerciseIndex: Int, setIndex: Int)? {
+        let order = orderedSets
+        let start = position.flatMap { position in order.firstIndex { $0 == position } }.map { $0 + 1 } ?? 0
+        return (order[start...] + order[..<start]).first { exercises[$0.exerciseIndex].sets[$0.setIndex].completedAt == nil }
+    }
+
+    /// Toutes les séries dans l'ordre de la séance. Les exercices d'un même super set alternent : A1, B1, A2, B2…
+    private var orderedSets: [(exerciseIndex: Int, setIndex: Int)] {
+        var order: [(exerciseIndex: Int, setIndex: Int)] = []
         var start = 0
         while start < exercises.count {
             let end = blockEnd(from: start)
             let rounds = exercises[start..<end].map(\.sets.count).max() ?? 0
             for round in 0..<rounds {
-                for index in start..<end where round < exercises[index].sets.count && exercises[index].sets[round].completedAt == nil {
-                    return (index, round)
-                }
+                for index in start..<end where round < exercises[index].sets.count { order.append((index, round)) }
             }
             start = end
         }
-        return nil
+        return order
     }
 
     /// Fin du bloc qui commence à `start` : l'exercice seul, ou les exercices voisins du même super set.

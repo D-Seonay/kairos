@@ -116,9 +116,10 @@ struct RestBanner: View {
 // MARK: - Textes
 
 extension RestBanner {
-    /// « Développé couché, série 3 : 70 kg × 5 » : la prochaine série non validée ; `nil` quand tout est validé.
+    /// « Développé couché, série 3 : 70 kg × 5 » : la série non validée qui suit la dernière validée ; `nil` quand tout est
+    /// validé.
     nonisolated static func nextSetText(in session: LiveSession) -> String? {
-        guard let next = session.nextSet else { return nil }
+        guard let next = session.nextSet(after: session.lastCheckedSet) else { return nil }
         let exercise = session.exercises[next.exerciseIndex]
         let set = exercise.sets[next.setIndex]
         let title = String(localized: "\(exercise.name), série \(next.setIndex + 1)", bundle: .module)

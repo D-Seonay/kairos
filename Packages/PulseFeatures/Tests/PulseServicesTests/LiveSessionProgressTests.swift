@@ -39,6 +39,32 @@ struct LiveSessionProgressTests {
         #expect(next.exerciseIndex == 1 && next.setIndex == 0)
     }
 
+    /// Spec M4 §15.2 : la série suivante part de la dernière validée, pas de la première restée non validée.
+    @Test func theNextSetFollowsTheLastSetCheckedAndWrapsAround() throws {
+        var session = Fix.session(Fix.launch(Fix.day([Fix.exercise(Fix.bench, order: 0), Fix.exercise(Fix.pecDeck, order: 1)]), nil))
+        #expect(session.lastCheckedSet == nil)
+        let first = try #require(session.nextSet(after: session.lastCheckedSet))
+        #expect(first.exerciseIndex == 0 && first.setIndex == 0)
+        // Bench 1 et 2 validés, bench 3 sauté, pec deck 1 validé : la suite est pec deck 2.
+        session.exercises[0].sets[0].completedAt = TestClock.date("2026-11-02T08:05")
+        session.exercises[0].sets[1].completedAt = TestClock.date("2026-11-02T08:10")
+        session.exercises[1].sets[0].completedAt = TestClock.date("2026-11-02T08:15")
+        let next = try #require(session.nextSet(after: session.lastCheckedSet))
+        #expect(next.exerciseIndex == 1 && next.setIndex == 1)
+        // Le pec deck fini, on revient au bench 3 sauté.
+        session.exercises[1].sets[1].completedAt = TestClock.date("2026-11-02T08:20")
+        session.exercises[1].sets[2].completedAt = TestClock.date("2026-11-02T08:25")
+        let wrapped = try #require(session.nextSet(after: session.lastCheckedSet))
+        #expect(wrapped.exerciseIndex == 0 && wrapped.setIndex == 2)
+    }
+
+    @Test func theNextSetAfterASupersetSetIsItsPartner() throws {
+        var session = supersetSession()
+        validate(&session, 0, 0)
+        let next = try #require(session.nextSet(after: session.lastCheckedSet))
+        #expect(next.exerciseIndex == 1 && next.setIndex == 0)
+    }
+
     @Test func aSessionWithoutExercisesHasNoNextSet() {
         let session = Fix.session(.free(policy: ProgressionPolicy(allowsIncrease: true)))
         #expect(session.nextSet == nil && session.plannedWorkingSets == 0 && session.doneWorkingSets == 0)

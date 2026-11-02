@@ -159,6 +159,19 @@ struct ActiveSessionRestTests {
         #expect(await fixture.activity.states.last?.restEndsAt == nil)
     }
 
+    @Test func aSkippedSetDoesNotHoldTheNextSet() async throws {
+        let (service, session) = try await start([Fix.exercise(Fix.bench, order: 0), Fix.exercise(Fix.pecDeck, order: 1)])
+        let (bench, pecDeck) = (session.exercises[0], session.exercises[1])
+        _ = try await validate(service, bench, 0)
+        fixture.clock.set("2026-11-02T08:05")
+        _ = try await validate(service, bench, 1)
+        // Bench 3 sauté : après le pec deck 1, la suite est le pec deck 2.
+        fixture.clock.set("2026-11-02T08:10")
+        _ = try await validate(service, pecDeck, 0)
+        #expect(await fixture.notifier.scheduled.last?.message.body == "\(pecDeck.name), série 2 : 8 rép.")
+        #expect(await fixture.activity.states.last?.nextSet == "\(pecDeck.name) · série 2 · 8 rép.")
+    }
+
     @Test func nextSetTextsFollowTheLoadKind() async throws {
         let service = fixture.makeService()
         _ = try await service.start(.free(policy: ProgressionPolicy(allowsIncrease: true)))
