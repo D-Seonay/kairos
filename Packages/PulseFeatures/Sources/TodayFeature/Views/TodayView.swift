@@ -8,7 +8,6 @@ import SwiftUI
 public struct TodayView: View {
     private let model: TodayModel
     private let onOpenProfile: () -> Void
-    @Environment(\.scenePhase) private var scenePhase
 
     public init(model: TodayModel, onOpenProfile: @escaping () -> Void) {
         self.model = model
@@ -29,12 +28,8 @@ public struct TodayView: View {
             case .mobility: MobilitySheet()
             }
         }
+        // Le retour au premier plan est rafraîchi par la racine de l'app, quel que soit l'onglet affiché.
         .task { await model.refresh() }
-        .onChange(of: scenePhase) { _, phase in
-            if phase == .active {
-                Task { await model.refresh() }
-            }
-        }
     }
 
     private var content: some View {

@@ -2,11 +2,13 @@ import OnboardingFeature
 import PulseDesignSystem
 import PulseDomain
 import SwiftUI
+import TodayFeature
 
 /// La racine : écran de chargement, onboarding tant que le profil n'est pas terminé, puis les onglets. Toujours en sombre.
 struct AppRootView: View {
     @State private var model: AppRootModel
     let router: AppRouter
+    @Environment(\.scenePhase) private var scenePhase
 
     init(dependencies: AppDependencies, router: AppRouter) {
         _model = State(initialValue: AppRootModel(dependencies: dependencies))
@@ -20,6 +22,11 @@ struct AppRootView: View {
             .environment(\.pulseTheme, model.theme)
             .task { await model.load() }
             .onOpenURL { AppLink(url: $0).map(router.open) }
+            .onChange(of: scenePhase) { _, phase in
+                // Chaque retour au premier plan rafraîchit « Aujourd'hui », quel que soit l'onglet affiché.
+                guard phase == .active, model.destination == .main, let today = model.today else { return }
+                Task { await today.refresh() }
+            }
     }
 
     @ViewBuilder
