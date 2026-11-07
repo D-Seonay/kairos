@@ -1,41 +1,55 @@
 <!DOCTYPE html>
-<html lang="fr" data-theme="dark" data-accent="ambre">
+<html lang="fr" data-theme="dark" data-accent="cobalt">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pulse · Maquette V2 · CdC v1</title>
+<title>Pulse · Maquette V3 · CdC v1</title>
 <style>
-/* ---------- Jetons de design (CdC §7.2) ---------- */
+/* ---------- Jetons de design (CdC §7.2, direction V3) ---------- */
+/* V3 : noir OLED, halo cobalt au bas de l'écran, cartes larges à bord fin, gros chiffres fins
+   suivis d'une unité discrète, pastilles d'icône cerclées, barre d'onglets flottante. */
 :root{
-  --radius:22px; --radius-sm:14px; --radius-xs:10px;
+  --radius:26px; --radius-sm:18px; --radius-xs:12px;
   --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Inter","Segoe UI",Roboto,sans-serif;
-  --ok:#10B981; --ok-soft:rgba(16,185,129,.16);
-  --warn:#F59E0B; --warn-soft:rgba(245,158,11,.16);
-  --bad:#EF4444; --bad-soft:rgba(239,68,68,.16);
-  --run:#06B6D4; --run-soft:rgba(6,182,212,.16);
-  --gold:#F5C518;
+  --ok:#30D158; --ok-soft:rgba(48,209,88,.15);
+  --warn:#FF9F0A; --warn-soft:rgba(255,159,10,.15);
+  --bad:#FF453A; --bad-soft:rgba(255,69,58,.15);
+  --run:#40C8E0; --run-soft:rgba(64,200,224,.15);
+  --gold:#FFD60A;
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
 }
 html{--accent-text:var(--accent)}
+html[data-theme=light][data-accent=cobalt]{--accent-text:#1D5FD6}
 html[data-theme=light][data-accent=ambre]{--accent-text:#B45309}
 html[data-theme=light][data-accent=amethyste]{--accent-text:#7E22CE}
+html[data-accent=cobalt]{--accent:#4C8DFF;--accent-2:#6E5BFF;--accent-ink:#FFFFFF;--accent-soft:rgba(76,141,255,.16);
+  --aura:radial-gradient(70% 40% at 80% 0%,rgba(76,141,255,.28),transparent 75%);
+  --glow:radial-gradient(90% 60% at 50% 100%,rgba(40,96,230,.62),rgba(36,52,140,.28) 45%,transparent 78%)}
 html[data-accent=ambre]{--accent:#F59E0B;--accent-2:#EA580C;--accent-ink:#1A1206;--accent-soft:rgba(245,158,11,.16);
-  --aura:radial-gradient(60% 45% at 70% 0%,rgba(245,158,11,.55),rgba(234,88,12,.28) 45%,transparent 80%)}
+  --aura:radial-gradient(70% 40% at 80% 0%,rgba(245,158,11,.3),transparent 75%);
+  --glow:radial-gradient(90% 60% at 50% 100%,rgba(234,120,12,.5),rgba(120,50,10,.25) 45%,transparent 78%)}
 html[data-accent=amethyste]{--accent:#A855F7;--accent-2:#6366F1;--accent-ink:#FFFFFF;--accent-soft:rgba(168,85,247,.18);
-  --aura:radial-gradient(60% 45% at 70% 0%,rgba(168,85,247,.55),rgba(99,102,241,.3) 45%,transparent 80%)}
+  --aura:radial-gradient(70% 40% at 80% 0%,rgba(168,85,247,.3),transparent 75%);
+  --glow:radial-gradient(90% 60% at 50% 100%,rgba(124,72,240,.58),rgba(70,50,160,.28) 45%,transparent 78%)}
 html[data-theme=dark]{
-  --page:#050608; --bg:#0B0C10; --surface:#13151C; --surface-2:#1B1E27; --line:rgba(255,255,255,.08);
-  --text:#F4F5F7; --text-2:#A3A9B7; --muted:#6C7383;
-  --opal:#FFFFFF; --opal-ink:#0A0B0F; --opal-muted:#6B7280; --opal-line:rgba(10,11,15,.08);
+  --page:#0B0B0D; --bg:#000000; --surface:#151517; --surface-2:#232326; --line:rgba(255,255,255,.07); --ring:rgba(255,255,255,.14);
+  --text:#F5F5F7; --text-2:#9B9BA3; --muted:#5F5F67;
+  --cta:#F2F2F4; --cta-ink:#0A0A0B;
+  --edge:inset 0 0 0 1px rgba(255,255,255,.05),inset 0 1px 0 rgba(255,255,255,.06);
+  --opal:#F2F2F4; --opal-ink:#0A0A0B; --opal-muted:#6B6B73; --opal-line:rgba(10,11,15,.08);
   --oo-ok:#047857; --oo-warn:#B45309; --oo-bad:#DC2626;
-  --glass:rgba(19,21,28,.72); --shadow:0 30px 80px rgba(0,0,0,.65); --frame:#15161b; --frame-2:#34363d;
+  --glass:rgba(30,30,33,.74); --shadow:0 30px 80px rgba(0,0,0,.65); --frame:#141416; --frame-2:#3a3a40;
 }
 html[data-theme=light]{
-  --page:#E9E7E1; --bg:#FAF9F6; --surface:#FFFFFF; --surface-2:#F0EEE8; --line:rgba(10,11,15,.08);
-  --text:#0F1116; --text-2:#505664; --muted:#8A9099;
-  --opal:#0F1116; --opal-ink:#FFFFFF; --opal-muted:#A0A6B2; --opal-line:rgba(255,255,255,.1);
+  --page:#E4E4E7; --bg:#F2F2F4; --surface:#FFFFFF; --surface-2:#EBEBEE; --line:rgba(10,11,15,.07); --ring:rgba(10,11,15,.12);
+  --text:#111113; --text-2:#5D5D66; --muted:#9A9AA2;
+  --cta:#111113; --cta-ink:#FFFFFF;
+  --edge:0 1px 2px rgba(17,17,19,.04),0 10px 30px rgba(17,17,19,.05);
+  --opal:#111113; --opal-ink:#FFFFFF; --opal-muted:#A0A0A8; --opal-line:rgba(255,255,255,.1);
   --oo-ok:#34D399; --oo-warn:#FBBF24; --oo-bad:#F87171;
-  --ok:#047857; --warn:#B45309; --bad:#DC2626; --run:#0E7490; --gold:#A16207;
-  --glass:rgba(255,255,255,.72); --shadow:0 30px 80px rgba(30,30,40,.25); --frame:#2a2b30; --frame-2:#4a4c54;
+  --ok:#1F9D49; --warn:#C26A00; --bad:#D92D20; --run:#0A84A8; --gold:#A16207;
+  --aura:none; --glow:radial-gradient(90% 55% at 50% 100%,color-mix(in srgb,var(--accent) 22%,transparent),transparent 75%);
+  --glass:rgba(255,255,255,.7); --shadow:0 30px 80px rgba(30,30,40,.22); --frame:#2a2b30; --frame-2:#4a4c54;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--font);background:var(--page);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
@@ -62,9 +76,9 @@ b,strong{font-weight:700}
 .topbar .spacer{flex:1}
 .logo{width:30px;height:30px;border-radius:9px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-weight:900;font-size:16px}
 .logo svg{width:18px;height:18px}
-.seg{display:inline-flex;background:var(--surface-2);border-radius:11px;padding:3px}
-.seg button{padding:6px 12px;border-radius:8px;font-size:13px;color:var(--text-2);text-align:center}
-.seg button.on{background:var(--bg);color:var(--text);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.seg{display:inline-flex;background:color-mix(in srgb,var(--surface-2) 70%,transparent);border-radius:16px;padding:3px;box-shadow:inset 0 0 0 1px var(--line)}
+.seg button{padding:6px 12px;border-radius:13px;font-size:13px;color:var(--text-2);text-align:center}
+.seg button.on{background:var(--surface);color:var(--text);font-weight:600;box-shadow:inset 0 0 0 1px var(--ring),0 2px 8px rgba(0,0,0,.18)}
 .layout{display:flex;gap:40px;justify-content:center;padding:32px 24px}
 .sidenav{width:230px;flex-shrink:0;position:sticky;top:24px;align-self:flex-start;max-height:calc(100vh - 48px);overflow-y:auto;scrollbar-width:thin}
 .sidenav h2{font-size:12px;font-weight:600;color:var(--muted);margin:18px 0 6px}
@@ -83,6 +97,7 @@ b,strong{font-weight:700}
 .phone.on-dark{background:#000}
 .phone.on-dark .statusbar{color:#fff}
 .phone.has-banner .screen{padding-bottom:150px}
+.phone::before{content:"";position:absolute;left:-10%;right:-10%;bottom:-40px;height:420px;background:var(--glow);filter:blur(30px);pointer-events:none;z-index:0}
 .island{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:120px;height:34px;background:#000;border-radius:20px;z-index:50}
 .statusbar{height:50px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 30px 6px 36px;font-size:15px;font-weight:600;flex-shrink:0;position:relative;z-index:6}
 .statusbar .icons{display:flex;gap:5px;align-items:center}
@@ -92,16 +107,21 @@ b,strong{font-weight:700}
 .screen.active{display:block}
 .screen.no-tab{padding-bottom:40px}
 .screen[data-screen=live]{padding-bottom:150px}
-/* Aura ambrée derrière le haut de l'écran (CdC §7.1) */
-.aura{position:absolute;z-index:-1;left:0;right:0;top:-60px;height:360px;background:var(--aura);filter:blur(24px);pointer-events:none;opacity:.9}
+/* Halo d'accent : léger en haut à droite, plus dense au bas du téléphone (.phone::before) */
+.aura{position:absolute;z-index:-1;left:0;right:0;top:-60px;height:320px;background:var(--aura);filter:blur(28px);pointer-events:none}
 
 /* ---------- Barre d'onglets + bandeau ---------- */
-.tabbar{position:absolute;left:12px;right:12px;bottom:14px;height:68px;background:var(--glass);backdrop-filter:blur(20px) saturate(160%);
-  border:1px solid var(--line);border-radius:34px;display:flex;justify-content:space-around;align-items:center;padding:0 6px;z-index:20;box-shadow:0 10px 30px rgba(0,0,0,.25)}
-.tabbar button{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;color:var(--muted);width:66px;height:54px;justify-content:center;border-radius:27px;text-align:center}
-.tabbar button.on{color:var(--text);background:var(--surface-2)}
-.tabbar svg{width:24px;height:24px}
-.banner{position:absolute;left:12px;right:12px;bottom:92px;background:var(--accent);color:var(--accent-ink);border-radius:18px;
+/* Barre flottante en verre + bouton rond détaché pour lancer une séance (onglet à rôle distinct d'iOS 26) */
+.tabbar{position:absolute;left:14px;right:92px;bottom:16px;height:64px;background:var(--glass);backdrop-filter:blur(24px) saturate(170%);
+  border:1px solid var(--ring);border-radius:32px;display:flex;justify-content:space-between;align-items:center;padding:0 5px;z-index:20;box-shadow:0 12px 34px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.08)}
+.tabbar button{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:500;color:var(--text-2);flex:1;height:54px;justify-content:center;border-radius:27px;text-align:center}
+.tabbar button.on{color:var(--text);background:color-mix(in srgb,var(--text) 12%,transparent);font-weight:600}
+.tabbar svg{width:23px;height:23px}
+.tabbar .tab-fab{position:absolute;left:auto;right:-78px;top:-1px;width:64px;height:64px;flex:none;border-radius:50%;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(24px) saturate(170%);
+  border:1px solid var(--ring);box-shadow:0 12px 34px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.08);color:var(--text);font-size:0;gap:0}
+.tabbar .tab-fab svg{width:25px;height:25px}
+.tabbar .tab-fab.on{background:var(--cta);color:var(--cta-ink);border-color:transparent}
+.banner{position:absolute;left:14px;right:14px;bottom:92px;background:var(--accent);color:var(--accent-ink);border-radius:22px;
   padding:11px 16px;display:none;align-items:center;gap:10px;z-index:21;font-size:14px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.3)}
 .banner.show{display:flex}
 .banner .go{margin-left:auto;font-weight:800}
@@ -111,62 +131,92 @@ b,strong{font-weight:700}
 /* ---------- Composants communs ---------- */
 .head{display:flex;align-items:center;gap:10px;padding:8px 16px 12px;position:relative}
 .head.solid{position:sticky;top:0;z-index:5;background:var(--bg)}
-.head h2{font-size:24px;font-weight:800;letter-spacing:-.02em}
+/* Feuilles : s'ouvrent par-dessus l'écran courant, se ferment d'un glissement ou d'une touche */
+.screen.as-sheet{top:54px;border-radius:30px 30px 0 0;background:var(--bg);z-index:40;box-shadow:0 -24px 60px rgba(0,0,0,.5),inset 0 1px 0 var(--ring);animation:up .32s cubic-bezier(.16,1,.3,1)}
+.viewport.sheet-open::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.5);z-index:39;backdrop-filter:blur(2px)}
+.board-cell .screen.as-sheet{top:0;border-radius:0;box-shadow:none;animation:none}
+.sheet-head{display:flex;align-items:center;gap:10px;padding:26px 16px 10px;position:sticky;top:0;z-index:5;background:var(--bg);border-radius:30px 30px 0 0}
+.sheet-head::before{content:"";position:absolute;top:9px;left:50%;width:40px;height:5px;margin-left:-20px;border-radius:3px;background:var(--ring)}
+.sheet-head .title-sm{text-align:left;color:var(--text);font-size:19px;font-weight:600;letter-spacing:-.01em}
+.sheet-head .icon-btn{width:36px;height:36px}
+.head h2{font-size:28px;font-weight:700;letter-spacing:-.03em}
 .head .sub{font-size:13px;color:var(--text-2);margin-top:2px}
-.head .title-sm{font-size:17px;font-weight:700;flex:1;text-align:center}
+.head .title-sm{font-size:17px;font-weight:600;flex:1;text-align:center;color:var(--text-2)}
 .head .right{margin-left:auto;display:flex;gap:8px;align-items:center}
-.icon-btn{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:var(--text-2);background:var(--surface)}
+.icon-btn{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:var(--text);background:var(--surface);box-shadow:var(--edge)}
 .icon-btn svg{width:20px;height:20px}
-.btn{height:46px;padding:0 18px;border-radius:14px;font-weight:650;font-size:15px;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-align:center}
-.btn-primary{background:var(--accent);color:var(--accent-ink)}
+.btn{height:48px;padding:0 16px;border-radius:24px;font-weight:600;font-size:15px;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-align:center}
+.btn-primary{background:var(--cta);color:var(--cta-ink)}
+.btn-accent{background:var(--accent);color:var(--accent-ink)}
 .btn-soft{background:var(--surface-2);color:var(--text)}
+.btn-line{background:transparent;color:var(--text);box-shadow:inset 0 0 0 1px var(--ring)}
 .btn-opal{background:var(--opal);color:var(--opal-ink)}
 .btn-ghost{color:var(--accent-text)}
 .btn-danger{color:var(--bad)}
 .btn-block{width:100%}
-.btn-sm{height:34px;padding:0 14px;font-size:14px;border-radius:10px}
-.btn-lg{height:54px;font-size:16px;border-radius:18px}
+.btn-sm{height:34px;padding:0 14px;font-size:14px;border-radius:17px}
+.btn-lg{height:58px;font-size:16px;border-radius:29px}
 .section{padding:0 16px;margin-top:16px}
-.section-title{display:flex;align-items:center;justify-content:space-between;font-size:14px;font-weight:700;color:var(--text);margin-bottom:10px}
+.section-title{display:flex;align-items:center;justify-content:space-between;font-size:15px;font-weight:600;color:var(--text);margin-bottom:10px}
 .section-title .more{font-size:13px;font-weight:600;color:var(--accent-text)}
-.card{background:var(--surface);border-radius:var(--radius);padding:16px}
+.card{background:var(--surface);border-radius:var(--radius);padding:18px;box-shadow:var(--edge)}
 .card+.card{margin-top:10px}
 .card.opal{background:var(--opal);color:var(--opal-ink)}
 .card.opal .muted,.card.opal .t2{color:var(--opal-muted)}
 .card.glass{background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--line)}
-.card h3{font-size:16px;font-weight:700}
+.card h3{font-size:17px;font-weight:600;letter-spacing:-.01em}
+/* Pastille d'icône cerclée et flèche d'ouverture (cartes de synthèse) */
+.ring-ico{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;box-shadow:inset 0 0 0 1px var(--ring);color:var(--text);font-size:18px}
+.ring-ico .i{stroke-width:1.7}
+.arrow-btn{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;background:var(--cta);color:var(--cta-ink);font-size:18px}
+.arrow-btn .i{stroke-width:1.8}
+.unit{font-size:.42em;font-weight:500;color:var(--muted);letter-spacing:0;margin-left:3px}
+.big-num{font-size:44px;font-weight:500;letter-spacing:-.045em;line-height:1;font-variant-numeric:tabular-nums}
 .muted{color:var(--muted)} .t2{color:var(--text-2)}
-.tag{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:12px;background:var(--surface-2);font-size:12px;color:var(--text-2);font-weight:600;white-space:nowrap}
+.tag{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 10px;border-radius:13px;background:var(--surface-2);font-size:12px;color:var(--text-2);font-weight:600;white-space:nowrap}
 .tag.acc{background:var(--accent-soft);color:var(--accent-text)}
 .tag.ok{background:var(--ok-soft);color:var(--ok)} .tag.warn{background:var(--warn-soft);color:var(--warn)} .tag.bad{background:var(--bad-soft);color:var(--bad)} .tag.run{background:var(--run-soft);color:var(--run)}
 .tag.gold{background:rgba(245,197,24,.16);color:var(--gold)}
 .chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:0 16px}
 .chips.wrap{flex-wrap:wrap;padding:0;overflow:visible}
-.chip{flex-shrink:0;height:34px;padding:0 14px;border-radius:17px;background:var(--surface-2);font-size:13px;font-weight:600;color:var(--text-2);display:inline-flex;align-items:center;gap:6px}
-.chip.on{background:var(--text);color:var(--bg)}
-.bento{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chip{flex-shrink:0;height:36px;padding:0 16px;border-radius:18px;background:transparent;box-shadow:inset 0 0 0 1px var(--ring);font-size:13px;font-weight:500;color:var(--text-2);display:inline-flex;align-items:center;gap:6px}
+.chip.on{background:var(--cta);color:var(--cta-ink);box-shadow:none;font-weight:600}
+.bento{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .bento .card+.card{margin-top:0}
 .bento .wide{grid-column:1/-1}
-.kpi .k{font-size:12.5px;color:var(--muted)}
-.kpi .v{font-size:22px;font-weight:800;margin-top:2px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.kpi .k{font-size:13px;color:var(--text-2);font-weight:500}
+.kpi .v{font-size:30px;font-weight:500;margin-top:6px;letter-spacing:-.04em;font-variant-numeric:tabular-nums;line-height:1.05}
+/* Tuile de mesure : icône et libellé en tête, valeur en bas à gauche, mini-graphique en bas à droite */
+.kpi-viz{display:flex;flex-direction:column;gap:14px;min-height:150px}
+.kpi-viz .kt{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600}
+.kpi-viz .kt .i{font-size:18px}
+.kpi-viz .kb{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;margin-top:auto}
+.kpi-viz .v{font-size:30px;margin:0}
+.kpi-viz .v small{display:block;font-size:13px;font-weight:500;color:var(--muted);letter-spacing:0;margin-top:2px}
+.kpi-viz .bars{display:flex;align-items:flex-end;gap:3px;height:44px}
+.kpi-viz .bars i{width:5px;border-radius:3px;background:color-mix(in srgb,var(--text) 22%,transparent)}
+.kpi-viz .bars i.on{background:var(--text)}
+.kpi-viz .wave{width:66px;height:40px;overflow:visible}
 .kpi .d{font-size:12px;font-weight:600;margin-top:2px}
 .kpi .d.up{color:var(--ok)}.kpi .d.down{color:var(--bad)}.kpi .d.eq{color:var(--muted);font-weight:500}
 .stats-row{display:flex;gap:22px;padding:0 16px 12px}
 .stat .k{font-size:12px;color:var(--muted)}
-.stat .v{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:2px}
+.stat .v{font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;margin-top:2px;letter-spacing:-.02em}
 .stat .v.acc{color:var(--accent-text)}
-.row-link{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--surface);font-size:15px;font-weight:550;width:100%}
+.row-link{display:flex;align-items:center;gap:14px;padding:15px 16px;min-height:56px;background:var(--surface);font-size:15px;font-weight:550;width:100%}
 .row-link:first-child{border-radius:var(--radius) var(--radius) 0 0}
 .row-link:last-child{border-radius:0 0 var(--radius) var(--radius)}
 .row-link:only-child{border-radius:var(--radius)}
 .row-link+.row-link{border-top:1px solid var(--line)}
-.row-link .ico{width:34px;height:34px;border-radius:10px;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center;flex-shrink:0;font-size:16px}
-.row-link .ico.run{background:var(--run-soft);color:var(--run)}
-.row-link .ico.neutral{background:var(--surface-2);color:var(--text-2)}
+.row-link .ico{width:38px;height:38px;border-radius:50%;background:transparent;box-shadow:inset 0 0 0 1px var(--ring);color:var(--accent-text);display:grid;place-items:center;flex-shrink:0;font-size:17px}
+.row-link .ico.run{color:var(--run)}
+.row-link .ico.neutral{color:var(--text-2)}
 .row-link .end{margin-left:auto;color:var(--muted);font-size:14px;display:flex;align-items:center;gap:6px;flex-shrink:0}
 .row-link small{display:block;font-size:12.5px;color:var(--muted);font-weight:500;margin-top:2px}
+/* Pastilles d'icône : cercles cerclés plutôt que carrés pleins */
+.routine .ico,.alt .ico,.perm .ico,.ex .ex-av,.ai-line .ico,.rec .ico{border-radius:50%!important;background:transparent!important;box-shadow:inset 0 0 0 1px var(--ring)}
 .avatar{width:42px;height:42px;border-radius:50%;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center;font-weight:800;flex-shrink:0}
-.set-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;background:var(--surface);font-size:15px;min-height:50px}
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;background:var(--surface);font-size:15px;min-height:54px}
 .set-row+.set-row{border-top:1px solid var(--line)}
 .set-row:first-child{border-radius:var(--radius) var(--radius) 0 0}
 .set-row:last-child{border-radius:0 0 var(--radius) var(--radius)}
@@ -178,14 +228,15 @@ b,strong{font-weight:700}
 .switch{width:50px;height:30px;border-radius:15px;background:var(--surface-2);position:relative;transition:background .2s;flex-shrink:0;box-shadow:inset 0 0 0 1px var(--line)}
 .switch::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
 .switch.on{background:var(--ok)}
+.switch{width:52px;height:31px;border-radius:16px}
 .switch.on::after{transform:translateX(20px)}
 .field{display:block;margin-top:12px}
 .field span{font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px}
-.field input,.field textarea{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:13px 14px;font-size:15px;outline:0;resize:none}
+.field input,.field textarea{width:100%;background:var(--surface);border:1px solid var(--ring);border-radius:18px;padding:13px 14px;font-size:15px;outline:0;resize:none}
 .field input:focus,.field textarea:focus{border-color:var(--accent)}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .link-c{display:block;text-align:center;margin-top:14px;font-size:14px;color:var(--accent-text);font-weight:600;width:100%}
-.track{height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden}
+.track{height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden}
 .track span{display:block;height:100%;background:var(--accent);border-radius:4px}
 .card.opal .track{background:var(--opal-line)}
 .spark{width:100%;height:36px;display:block;margin-top:8px}
@@ -226,23 +277,59 @@ b,strong{font-weight:700}
 .days button.on{background:var(--text);color:var(--bg)}
 .days button.rest{box-shadow:inset 0 0 0 2px var(--bad);color:var(--bad)}
 .calib{display:flex;flex-direction:column;align-items:center;text-align:center;padding:30px 16px 0}
-.calib .big{font-size:64px;font-weight:850;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
+.calib .big{font-size:72px;font-weight:500;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
 
 /* ---------- Aujourd'hui ---------- */
 .gauge{position:relative;width:230px;height:150px;margin:6px auto 0}
 .gauge svg{width:100%;height:100%;overflow:visible}
 .gauge .score{position:absolute;left:0;right:0;top:66px;text-align:center}
-.gauge .score b{display:block;font-size:64px;font-weight:850;letter-spacing:-.05em;line-height:1;font-variant-numeric:tabular-nums}
+.gauge .score b{display:block;font-size:72px;font-weight:500;letter-spacing:-.06em;line-height:1;font-variant-numeric:tabular-nums}
 .gauge .score small{display:block;font-size:13px;color:var(--opal-muted);margin-top:6px;font-weight:600}
 .needle{transform-origin:115px 118px;transition:transform .6s cubic-bezier(.16,1,.3,1)}
 .factors{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid var(--opal-line)}
 .factors .k{font-size:12px;color:var(--opal-muted)}
-.factors .v{font-size:16px;font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums}
+.factors .v{font-size:17px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .factors .d{font-size:12px;font-weight:600;margin-top:1px;color:var(--opal-muted)}
 .factors .d.ok{color:var(--oo-ok)}.factors .d.warn{color:var(--oo-warn)}.factors .d.bad{color:var(--oo-bad)}
 .card.opal .tag.ok{background:color-mix(in srgb,var(--oo-ok) 14%,transparent);color:var(--oo-ok)}
 .card.opal .tag.warn{background:color-mix(in srgb,var(--oo-warn) 14%,transparent);color:var(--oo-warn)}
 .card.opal .tag.bad{background:color-mix(in srgb,var(--oo-bad) 14%,transparent);color:var(--oo-bad)}
+/* Carte maillée (récupération) : dégradé flou + grain, teinte selon l'état du score */
+.card.mesh{position:relative;overflow:hidden;isolation:isolate;color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);
+  --m1:#7A4A22;--m2:#D08A3C;--m3:#4F86B0;--m4:#2A2F3A}
+.card.mesh[data-state=ok]{--m1:#0F5C4C;--m2:#3FBF8A;--m3:#3E7CC7;--m4:#13222B}
+.card.mesh[data-state=bad]{--m1:#6B1F2A;--m2:#E0564A;--m3:#7A4FB0;--m4:#221418}
+.card.mesh::before{content:"";position:absolute;inset:-30%;z-index:-2;filter:blur(36px);
+  background:radial-gradient(38% 42% at 18% 70%,var(--m1),transparent 70%),radial-gradient(40% 45% at 52% 42%,var(--m2),transparent 72%),
+    radial-gradient(42% 48% at 88% 28%,var(--m3),transparent 72%),radial-gradient(60% 60% at 80% 95%,var(--m4),transparent 75%),var(--m4)}
+.card.mesh::after{content:"";position:absolute;inset:0;z-index:-1;background:var(--grain);mix-blend-mode:overlay;opacity:.35;pointer-events:none}
+.card.mesh .ring-ico{box-shadow:inset 0 0 0 1px rgba(255,255,255,.45);color:#fff}
+.card.mesh .arrow-btn{background:#fff;color:#0A0A0B}
+.card.mesh .tag{background:rgba(255,255,255,.18);color:#fff;backdrop-filter:blur(8px)}
+.card.mesh .mesh-head{display:flex;justify-content:space-between;align-items:flex-start}
+.card.mesh .mesh-title{display:flex;align-items:center;justify-content:space-between;margin-top:14px;font-size:19px;font-weight:500;letter-spacing:-.01em}
+.card.mesh .gauge .score small{color:rgba(255,255,255,.7)}
+.card.mesh .factors{border-top:0;padding-top:0;gap:6px}
+.card.mesh .factors>div{background:rgba(255,255,255,.12);border-radius:16px;padding:10px 11px;backdrop-filter:blur(10px)}
+.card.mesh .factors .k,.card.mesh .factors .d{color:rgba(255,255,255,.72)}
+.card.mesh .factors .d.ok{color:#9BF0BE}.card.mesh .factors .d.warn{color:#FFD58A}.card.mesh .factors .d.bad{color:#FFB0A8}
+.hero-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px}
+.hero-k{font-size:14px;color:rgba(255,255,255,.75);font-weight:500}
+.hero-v{font-size:64px;font-weight:500;letter-spacing:-.05em;line-height:1;margin:2px 0 10px}
+.hero-v .unit{font-size:16px;color:rgba(255,255,255,.7)}
+.ring{width:104px;height:104px;flex-shrink:0}
+.ring circle{transition:stroke-dasharray .6s cubic-bezier(.16,1,.3,1)}
+.card.mesh .factors{margin-top:16px}
+/* Actions en un geste sous le score */
+.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.qk{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 6px 10px;border-radius:var(--radius-sm);background:var(--surface);box-shadow:var(--edge);font-size:12.5px;font-weight:600;text-align:center;color:var(--text)}
+.qk .ring-ico{width:40px;height:40px}
+.qk.done{color:var(--ok)} .qk.done .ring-ico{background:var(--ok-soft);box-shadow:none;color:var(--ok)}
+/* Bouton principal épinglé au-dessus de la barre d'onglets, dans la zone du pouce */
+.dock{position:absolute;left:14px;right:14px;bottom:92px;z-index:21;display:none;padding-top:22px;background:linear-gradient(transparent,var(--bg) 60%)}
+.dock.show{display:block}
+.dock .btn{box-shadow:0 12px 30px rgba(0,0,0,.35)}
+.screen[data-dock]{padding-bottom:190px}
 .session-card .top{display:flex;align-items:flex-start;gap:10px}
 .session-card .top h3{flex:1;font-size:18px;letter-spacing:-.01em;line-height:1.2}
 .session-card .meta{display:flex;gap:14px;margin-top:10px;font-size:13.5px;color:var(--text-2)}
@@ -281,6 +368,15 @@ b,strong{font-weight:700}
 .cal-legend i{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--text);margin-right:5px;vertical-align:-1px}
 .cal-legend i.o{background:transparent;box-shadow:inset 0 0 0 1.5px var(--muted)}
 .cal-legend i.a{background:var(--accent)}
+/* Bande de la semaine : un jour par touche, aujourd'hui en plein */
+.week-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.ws{display:grid;align-content:start;justify-items:center;gap:3px;padding:10px 0 8px;height:80px;border-radius:18px;background:var(--surface);box-shadow:var(--edge);text-align:center;color:var(--text)}
+.ws small{font-size:11px;color:var(--muted);font-weight:500}
+.ws b{font-size:17px;font-weight:600;font-variant-numeric:tabular-nums}
+.ws i{display:block;width:6px;height:6px;border-radius:50%;margin-top:2px}
+.ws.done i{background:var(--ok)} .ws.run i{background:var(--run)} .ws.next i{box-shadow:inset 0 0 0 1.5px var(--muted)} .ws.rest{opacity:.5}
+.ws.today{background:var(--cta);color:var(--cta-ink)} .ws.today small{color:inherit;opacity:.65} .ws.today i{background:var(--accent)}
+.day-card .top{display:flex;align-items:flex-start;gap:10px} .day-card .top>div{flex:1}
 .week-plan{display:flex;flex-direction:column;gap:6px}
 .wp{display:grid;grid-template-columns:34px 1fr auto;gap:12px;align-items:center;padding:10px 12px;border-radius:14px;background:var(--surface)}
 .wp .d{font-size:12px;font-weight:700;color:var(--muted);text-align:center;line-height:1.2}
@@ -323,22 +419,48 @@ b,strong{font-weight:700}
 .ex .n{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--surface-2);font-size:12.5px;font-weight:800}
 .ex .n.w{color:var(--warn)} .ex .n.d{color:var(--run)} .ex .n.f{color:var(--bad)}
 .ex .prev{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
-.ex input.val{width:60px;height:36px;border-radius:9px;background:var(--surface-2);border:0;text-align:center;font-weight:700;font-size:15px;outline:0;font-variant-numeric:tabular-nums}
+.ex input.val{width:60px;height:40px;border-radius:12px;background:var(--surface-2);border:0;text-align:center;font-weight:700;font-size:15px;outline:0;font-variant-numeric:tabular-nums}
 .ex input.val.tgt{color:var(--accent-text)}
 .ex input.val:focus{box-shadow:0 0 0 2px var(--accent)}
 .ex .rpe{width:44px}
-.chk{width:40px;height:36px;border-radius:9px;background:var(--surface-2);display:inline-grid;place-items:center;color:var(--muted)}
+.chk{width:44px;height:40px;border-radius:12px;background:var(--surface-2);display:inline-grid;place-items:center;color:var(--muted)}
 .chk svg{width:20px;height:20px}
 tr.done .chk{background:var(--ok);color:#fff}
 .ex .add{display:block;width:100%;text-align:center;padding:11px;font-size:14px;font-weight:600;color:var(--accent-text);border-top:1px solid var(--line)}
-.rest-panel{position:absolute;left:12px;right:12px;bottom:14px;background:var(--text);color:var(--bg);border-radius:22px;padding:14px 16px;display:none;align-items:center;gap:10px;z-index:25;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.4)}
+/* Série en cours : la seule chose en grand, valeurs préremplies, un appui pour valider */
+.focus{margin:12px 16px 0;background:var(--surface);border-radius:var(--radius);padding:16px 16px 14px;box-shadow:var(--edge),0 0 0 1.5px var(--accent)}
+.focus .f-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.focus .f-ex{font-size:17px;font-weight:600;letter-spacing:-.01em;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.focus .f-n{font-size:13px;color:var(--accent-text);font-weight:600;white-space:nowrap}
+.focus .f-prev{font-size:13px;color:var(--text-2);margin-top:2px}
+.focus .f-vals{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.focus .f-val{display:flex;align-items:center;justify-content:space-between;background:var(--surface-2);border-radius:20px;padding:6px}
+.focus .f-val button{width:44px;height:44px;border-radius:50%;background:var(--surface);box-shadow:var(--edge);font-size:22px;font-weight:500;text-align:center;line-height:1;display:grid;place-items:center}
+.focus .f-val div{text-align:center}
+.focus .f-val b{display:block;font-size:26px;font-weight:500;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1}
+.focus .f-val small{font-size:11.5px;color:var(--muted);font-weight:500}
+.focus .f-rpe{display:flex;align-items:center;gap:6px;margin-top:12px;font-size:13px;color:var(--text-2)}
+.focus .f-rpe span{margin-right:auto}
+.focus .f-rpe button{width:36px;height:32px;border-radius:16px;background:var(--surface-2);font-size:13px;font-weight:600;text-align:center;color:var(--text-2)}
+.focus .f-rpe button.on{background:var(--cta);color:var(--cta-ink)}
+.focus .btn{margin-top:12px}
+.focus .f-done{text-align:center;padding:10px 0 4px;font-size:15px;color:var(--text-2)}
+.focus .f-done b{display:block;font-size:20px;color:var(--text);margin-bottom:4px;font-weight:600}
+.ex{opacity:.62;transition:opacity .2s}
+.ex.cur{opacity:1}
+.ex tr.cur td{background:var(--accent-soft)}
+.ex tr.cur td:first-child .n{background:var(--accent);color:var(--accent-ink)}
+/* Repos : feuille en bas de l'écran, compte à rebours énorme, série suivante déjà affichée, Passer sous le pouce */
+.rest-panel{position:absolute;left:0;right:0;bottom:0;background:var(--cta);color:var(--cta-ink);border-radius:30px 30px 0 0;padding:14px 20px 30px;display:none;flex-direction:column;align-items:center;text-align:center;z-index:25;box-shadow:0 -20px 60px rgba(0,0,0,.45);animation:up .3s cubic-bezier(.16,1,.3,1)}
 .rest-panel.show{display:flex}
-.rest-panel .fill{position:absolute;left:0;top:0;bottom:0;background:var(--accent);opacity:.35;transition:width .25s linear}
-.rest-panel .txt{position:relative;flex:1}
-.rest-panel .time{font-size:30px;font-weight:850;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1}
-.rest-panel .lbl{font-size:12.5px;opacity:.7;margin-top:3px}
-.rest-panel .step{position:relative;height:38px;padding:0 12px;border-radius:12px;background:rgba(127,127,127,.25);font-weight:700;font-size:14px;text-align:center}
-.rest-panel .btn{position:relative;height:38px}
+.rest-panel .bar{width:100%;height:4px;border-radius:2px;background:rgba(127,127,127,.25);overflow:hidden}
+.rest-panel .fill{display:block;height:100%;background:var(--accent);transition:width .25s linear}
+.rest-panel .lbl{font-size:14px;opacity:.65;margin-top:16px}
+.rest-panel .time{font-size:88px;font-weight:500;letter-spacing:-.06em;line-height:1;margin-top:4px}
+.rest-panel .next{font-size:15px;font-weight:600;margin-top:10px}
+.rest-panel .acts{display:flex;align-items:center;gap:10px;width:100%;margin-top:20px}
+.rest-panel .acts .btn{flex:1;background:var(--bg);color:var(--text)}
+.rest-panel .step{width:56px;height:56px;border-radius:50%;background:rgba(127,127,127,.22);font-weight:600;font-size:15px;text-align:center;flex-shrink:0}
 .alt{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--surface);border-radius:var(--radius-sm);width:100%;margin-top:8px}
 .alt .ico{width:44px;height:44px;border-radius:14px;background:var(--surface-2);display:grid;place-items:center;font-size:20px;flex-shrink:0}
 .alt b{display:block;font-size:15px}
@@ -410,8 +532,18 @@ tr.done .chk{background:var(--ok);color:#fff}
 .stv{display:none}.stv.on{display:block}
 .pane{display:none}.pane.on{display:block}
 .chart{width:100%;height:150px;display:block}
-.heat{display:grid;grid-template-rows:repeat(7,1fr);grid-auto-flow:column;gap:3px}
-.heat i{width:100%;aspect-ratio:1;border-radius:3px;background:var(--surface-2)}
+.kpi-head{display:flex;justify-content:space-between;align-items:baseline}
+.kpi-head .k{font-size:15px;font-weight:600}
+.streak{display:flex;flex-direction:column;gap:10px;min-height:150px}
+.streak .k{font-size:14px;font-weight:600}
+.streak .v{font-size:36px;font-weight:500;letter-spacing:-.045em;line-height:1}
+.streak .v .i{font-size:24px;color:var(--warn);margin-right:4px;vertical-align:-.02em;fill:color-mix(in srgb,var(--warn) 35%,transparent)}
+.streak small{font-size:12.5px;color:var(--text-2)}
+.pips{display:flex;gap:6px}
+.pips i{width:20px;height:20px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--ring)}
+.pips i.on{background:var(--accent);box-shadow:none}
+.heat{display:grid;grid-template-rows:repeat(7,1fr);grid-auto-flow:column;gap:4px}
+.heat i{width:100%;aspect-ratio:1;border-radius:4px;background:var(--surface-2)}
 .heat i.l1{background:color-mix(in srgb,var(--accent) 30%,var(--surface-2))}
 .heat i.l2{background:color-mix(in srgb,var(--accent) 55%,var(--surface-2))}
 .heat i.l3{background:color-mix(in srgb,var(--accent) 80%,var(--surface-2))}
@@ -925,6 +1057,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
 <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
 <symbol id="i-chev-r" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+<symbol id="i-arrow-ur" viewBox="0 0 24 24"><path d="M7 17 17 7M8 7h9v9"/></symbol>
 <symbol id="i-chev-l" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
 <symbol id="i-grip" viewBox="0 0 24 24"><g fill="currentColor" stroke="none"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></g></symbol>
 <symbol id="i-swap" viewBox="0 0 24 24"><path d="M17 3l4 4-4 4M21 7H5M7 21l-4-4 4-4M3 17h16"/></symbol>
@@ -993,9 +1126,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 <header class="topbar">
   <span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3-7 4 14 3-7h6"/></svg></span>
-  <h1>Pulse</h1><span class="sub">Maquette V2 · cahier des charges v1 · 42 écrans</span>
+  <h1>Pulse</h1><span class="sub">Maquette V3 · cahier des charges v1 · 42 écrans</span>
   <span class="spacer"></span>
-  <div class="seg" id="accentSeg"><button class="on" data-accent="ambre">Ambre</button><button data-accent="amethyste">Améthyste</button></div>
+  <div class="seg" id="accentSeg"><button class="on" data-accent="cobalt">Cobalt</button><button data-accent="ambre">Ambre</button><button data-accent="amethyste">Améthyste</button></div>
   <div class="seg" id="modeSeg"><button class="on" data-mode="proto">Prototype</button><button data-mode="board">Planche</button></div>
   <div class="seg" id="themeSeg"><button class="on" data-theme="dark">Sombre</button><button data-theme="light">Clair</button></div>
 </header>
@@ -1197,23 +1330,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       </section>
 
       <!-- ================= TABLEAU DE BORD ================= -->
-      <section class="screen" data-screen="today" data-tab="today" data-title="Tableau de bord">
+      <section class="screen" data-screen="today" data-tab="today" data-dock="Démarrer la séance" data-title="Tableau de bord">
         <div class="aura"></div>
         <div class="head"><div><h2>Bonjour Léa</h2><div class="sub">vendredi 30 octobre</div></div>
           <div class="right"><span class="tag" title="Dernière synchronisation Santé à 7:02"><i class="sdot"></i>Synchro 7:02</span><button class="icon-btn" data-go="social" aria-label="Amis"><svg class="i" aria-hidden="true"><use href="#i-users"/></svg></button></div></div>
 
         <div class="section" style="margin-top:2px">
-          <div class="card opal">
-            <div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:16px">Récupération</b><span class="tag warn" id="scoreTag">Fatigue modérée</span></div>
-            <div class="gauge">
-              <svg viewBox="0 0 230 160" aria-hidden="true">
-                <path d="M24.8 150.8 A96 96 0 1 1 205.2 150.8" fill="none" stroke="currentColor" stroke-opacity=".12" stroke-width="1.5" stroke-linecap="round"/>
-                <path d="M24.8 150.8 A96 96 0 1 1 205.2 150.8" pathLength="100" fill="none" stroke="#EF4444" stroke-width="3" stroke-dasharray="39 61" stroke-linecap="round"/>
-                <path d="M24.8 150.8 A96 96 0 1 1 205.2 150.8" pathLength="100" fill="none" stroke="#F59E0B" stroke-width="3" stroke-dasharray="24 76" stroke-dashoffset="-40.5"/>
-                <path d="M24.8 150.8 A96 96 0 1 1 205.2 150.8" pathLength="100" fill="none" stroke="#10B981" stroke-width="3" stroke-dasharray="34 66" stroke-dashoffset="-66" stroke-linecap="round"/>
-                <g class="needle" id="needle"><line x1="115" y1="44" x2="115" y2="10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="115" cy="22" r="5.5" fill="currentColor" stroke="var(--opal)" stroke-width="2.5"/></g>
-              </svg>
-              <div class="score"><b id="scoreVal">58</b><small>sur 100</small></div>
+          <div class="card mesh hero" id="scoreCard" data-state="warn">
+            <div class="mesh-head"><span class="ring-ico"><svg class="i" aria-hidden="true"><use href="#i-heart"/></svg></span><button class="arrow-btn" data-go="pourquoi" aria-label="Pourquoi ce score"><svg class="i" aria-hidden="true"><use href="#i-arrow-ur"/></svg></button></div>
+            <div class="hero-row">
+              <div><div class="hero-k">Récupération ce matin</div><div class="hero-v num"><span id="scoreVal">58</span><span class="unit">/ 100</span></div><span class="tag warn" id="scoreTag">Fatigue modérée</span></div>
+              <svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="42" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width="7" pathLength="100" stroke-dasharray="75 100" stroke-linecap="round" transform="rotate(135 50 50)"/><circle id="scoreArc" cx="50" cy="50" r="42" fill="none" stroke="#fff" stroke-width="7" pathLength="100" stroke-dasharray="43.5 100" stroke-linecap="round" transform="rotate(135 50 50)"/></svg>
             </div>
             <div class="factors">
               <div><div class="k">Sommeil</div><div class="v num">5 h 10</div><div class="d warn">profond 7 %</div></div>
@@ -1224,22 +1351,25 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         </div>
 
         <div class="section">
-          <div class="card session-card" id="sessAdapted">
-            <div class="top"><div><div class="muted" style="font-size:13px;margin-bottom:4px">Séance du jour</div><h3>Pectoraux et triceps, volume allégé</h3></div><span class="tag acc"><svg class="i" aria-hidden="true"><use href="#i-spark"/></svg>Ajustée</span></div>
-            <div class="split"><div class="bodymap mini" style="--mm-chest:var(--h4);--mm-triceps:var(--h3);--mm-frontDeltoid:var(--h2)" role="img" aria-label="Muscles ciblés : pectoraux, triceps, épaules"><figure><svg viewBox="0 0 650 1450"><use href="#body-front"/></svg></figure><figure><svg viewBox="0 0 650 1450"><use href="#body-back"/></svg></figure></div><div class="meta"><span><b>14</b> séries</span><span><b>~ 55</b> min</span><span>RPE max <b>7,5</b></span><span class="muted">Pectoraux, triceps, épaules</span></div></div>
-            <div class="acts">
-              <button class="btn btn-soft" style="flex:1" data-go="pourquoi">Pourquoi ?</button>
-              <button class="btn btn-soft" style="flex:1" data-action="restore">Séance d'origine</button>
-            </div>
-            <button class="btn btn-primary btn-block btn-lg" style="margin-top:8px" data-action="start-lift">Démarrer la séance</button>
+          <div class="quick">
+            <button class="qk" data-go="checkin"><span class="ring-ico"><svg class="i" aria-hidden="true"><use href="#i-watch"/></svg></span>Check-in</button>
+            <button class="qk" data-supp="cafeine"><span class="ring-ico"><svg class="i" aria-hidden="true"><use href="#i-pill"/></svg></span>Caféine prise</button>
+            <button class="qk" data-go="corps-saisie"><span class="ring-ico"><svg class="i" aria-hidden="true"><use href="#i-scale"/></svg></span>Peser</button>
           </div>
-          <div class="card session-card" id="sessOriginal" style="display:none">
-            <div class="top"><div><div class="muted" style="font-size:13px;margin-bottom:4px">Séance du jour</div><h3>Pectoraux et triceps, hypertrophie</h3></div><span class="tag">Planifiée</span></div>
-            <div class="split"><div class="bodymap mini" style="--mm-chest:var(--h4);--mm-triceps:var(--h4);--mm-frontDeltoid:var(--h3)" role="img" aria-label="Muscles ciblés : pectoraux, triceps, épaules"><figure><svg viewBox="0 0 650 1450"><use href="#body-front"/></svg></figure><figure><svg viewBox="0 0 650 1450"><use href="#body-back"/></svg></figure></div><div class="meta"><span><b>18</b> séries</span><span><b>~ 68</b> min</span><span>RPE max <b>9</b></span><span class="muted">Pectoraux, triceps, épaules</span></div></div>
-            <div class="acts">
-              <button class="btn btn-soft" style="flex:1" data-action="restore">Revenir à l'ajustée</button>
+        </div>
+
+        <div class="section">
+          <div class="card session-card">
+            <div id="sessAdapted">
+              <div class="top"><div><div class="muted" style="font-size:13px;margin-bottom:4px">Séance du jour</div><h3>Pectoraux et triceps, volume allégé</h3></div><span class="tag acc"><svg class="i" aria-hidden="true"><use href="#i-spark"/></svg>Ajustée</span></div>
+              <div class="split"><div class="bodymap mini" style="--mm-chest:var(--h4);--mm-triceps:var(--h3);--mm-frontDeltoid:var(--h2)" role="img" aria-label="Muscles ciblés : pectoraux, triceps, épaules"><figure><svg viewBox="0 0 650 1450"><use href="#body-front"/></svg></figure><figure><svg viewBox="0 0 650 1450"><use href="#body-back"/></svg></figure></div><div class="meta"><span><b>14</b> séries</span><span><b>~ 55</b> min</span><span>RPE max <b>7,5</b></span><span class="t2">Pectoraux, triceps, épaules</span></div></div>
+              <button class="link-c" style="margin-top:6px" data-action="restore">Revenir à la séance d'origine</button>
             </div>
-            <button class="btn btn-primary btn-block btn-lg" style="margin-top:8px" data-action="start-lift">Démarrer quand même</button>
+            <div id="sessOriginal" style="display:none">
+              <div class="top"><div><div class="muted" style="font-size:13px;margin-bottom:4px">Séance du jour</div><h3>Pectoraux et triceps, hypertrophie</h3></div><span class="tag">Planifiée</span></div>
+              <div class="split"><div class="bodymap mini" style="--mm-chest:var(--h4);--mm-triceps:var(--h4);--mm-frontDeltoid:var(--h3)" role="img" aria-label="Muscles ciblés : pectoraux, triceps, épaules"><figure><svg viewBox="0 0 650 1450"><use href="#body-front"/></svg></figure><figure><svg viewBox="0 0 650 1450"><use href="#body-back"/></svg></figure></div><div class="meta"><span><b>18</b> séries</span><span><b>~ 65</b> min</span><span>RPE max <b>9</b></span><span class="t2">Pectoraux, triceps, épaules</span></div></div>
+              <button class="link-c" style="margin-top:6px" data-action="restore">Revenir à la séance ajustée</button>
+            </div>
           </div>
         </div>
 
@@ -1262,18 +1392,20 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
         <div class="section">
           <div class="bento">
-            <div class="card kpi"><div class="k">Variabilité, 14 jours</div><div class="v num">44 <small style="font-size:13px;font-weight:600;color:var(--muted)">ms</small></div>
-              <svg class="spark" viewBox="0 0 120 36" preserveAspectRatio="none"><polyline points="0,14 10,16 20,12 30,15 40,13 50,17 60,14 70,16 80,13 90,15 100,16 110,24 120,30" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/></svg></div>
-            <div class="card kpi"><div class="k">Sommeil, 14 jours</div><div class="v num">7 h 12</div>
-              <svg class="spark" viewBox="0 0 120 36" preserveAspectRatio="none"><polyline points="0,14 10,12 20,16 30,10 40,13 50,15 60,11 70,9 80,13 90,11 100,10 110,22 120,28" fill="none" stroke="var(--run)" stroke-width="2" stroke-linejoin="round"/></svg></div>
+            <div class="card kpi kpi-viz"><div class="kt"><svg class="i" aria-hidden="true"><use href="#i-pulse"/></svg>Variabilité</div>
+              <div class="kb"><div class="v num">44<span class="unit">ms</span><small>moy. 14 j : 52</small></div>
+                <svg class="wave" viewBox="0 0 66 40" aria-hidden="true"><defs><linearGradient id="waveFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--text)" stop-opacity=".22"/><stop offset="1" stop-color="var(--text)" stop-opacity="0"/></linearGradient></defs><path d="M0 22C6 20 9 12 15 14s8 10 14 8 7-16 13-17 8 16 13 22 7-4 11-3V40H0Z" fill="url(#waveFill)"/><path d="M0 22C6 20 9 12 15 14s8 10 14 8 7-16 13-17 8 16 13 22 7-4 11-3" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round"/></svg></div></div>
+            <div class="card kpi kpi-viz"><div class="kt"><svg class="i" aria-hidden="true"><use href="#i-moon"/></svg>Sommeil</div>
+              <div class="kb"><div class="v num">5<span class="unit">h</span>10<small>moy. 14 j : 7 h 12</small></div>
+                <div class="bars" aria-hidden="true"><i style="height:62%"></i><i style="height:74%"></i><i style="height:58%"></i><i style="height:80%"></i><i style="height:70%"></i><i style="height:76%"></i><i class="on" style="height:44%"></i></div></div></div>
             <button class="card wide row-link" style="border-radius:var(--radius)" data-go="planning"><span class="ico run"><svg class="i" aria-hidden="true"><use href="#i-shoe"/></svg></span><span>Demain : sortie endurance 45 min<small>Zone 2, placée 36 h après les jambes de mercredi</small></span><span class="end"><svg class="i" aria-hidden="true"><use href="#i-chev-r"/></svg></span></button>
           </div>
         </div>
       </section>
 
       <!-- ================= POURQUOI ================= -->
-      <section class="screen no-tab" data-screen="pourquoi" data-title="Pourquoi cette adaptation">
-        <div class="head solid"><button class="icon-btn" data-action="back" aria-label="Retour"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button><span class="title-sm">Pourquoi cette adaptation</span><span style="width:38px"></span></div>
+      <section class="screen no-tab as-sheet" data-screen="pourquoi" data-title="Pourquoi cette adaptation">
+        <div class="sheet-head"><span class="title-sm">Pourquoi cette adaptation</span><button class="icon-btn" data-action="back" aria-label="Fermer"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button></div>
         <div class="section" style="margin-top:4px">
           <div class="card opal">
             <div class="muted" style="font-size:13px">Lecture de ce matin</div>
@@ -1307,8 +1439,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       </section>
 
       <!-- ================= CHECK-IN SANS MONTRE ================= -->
-      <section class="screen no-tab" data-screen="checkin" data-title="Check-in sans montre">
-        <div class="head solid"><button class="icon-btn" data-action="back" aria-label="Retour"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button><span class="title-sm">Comment tu te sens ?</span><span style="width:38px"></span></div>
+      <section class="screen no-tab as-sheet" data-screen="checkin" data-title="Check-in sans montre">
+        <div class="sheet-head"><span class="title-sm">Comment tu te sens ?</span><button class="icon-btn" data-action="back" aria-label="Fermer"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button></div>
         <div class="section" style="margin-top:4px">
           <div class="card glass" style="display:flex;gap:12px;align-items:center"><span style="font-size:24px;display:flex;color:var(--warn)"><svg class="i" aria-hidden="true"><use href="#i-watch"/></svg></span><div style="font-size:14px;line-height:1.4"><b>Pas de données de nuit</b><div class="t2">Montre déchargée ou non portée. Trois questions suffisent pour estimer ta récupération.</div></div></div>
           <div class="qa"><b>Ton sommeil cette nuit</b><div class="chips wrap" data-q="sleep"><button class="chip" data-v="30">Mauvais</button><button class="chip" data-v="60">Moyen</button><button class="chip on" data-v="85">Bon</button><button class="chip" data-v="100">Excellent</button></div></div>
@@ -1417,20 +1549,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
       <!-- ================= PLANNING ================= -->
       <section class="screen" data-screen="planning" data-tab="plan" data-title="Calendrier et série">
-        <div class="head"><div><h2>Planning</h2><div class="sub">octobre 2026</div></div>
-          <div class="right"><button class="icon-btn" data-toast="Mois précédent" aria-label="Mois précédent"><svg class="i" aria-hidden="true"><use href="#i-chev-l"/></svg></button><button class="icon-btn" data-toast="Mois suivant" aria-label="Mois suivant"><svg class="i" aria-hidden="true"><use href="#i-chev-r"/></svg></button></div></div>
-        <div class="stats-row" style="padding-top:0">
-          <div class="stat"><div class="k">Série en cours</div><div class="v acc">14 semaines</div></div>
-          <div class="stat"><div class="k">Séances validées</div><div class="v">92</div></div>
-          <div class="stat"><div class="k">Ce mois</div><div class="v">20</div></div>
-        </div>
-        <div class="section" style="margin-top:4px">
-          <div class="card">
-            <div class="cal-wrap">
-              <div class="cal" id="cal"></div>
-              <div class="pillar" id="pillar"></div>
-            </div>
-            <div class="cal-legend"><span><i></i>Séance validée</span><span><i class="o"></i>Planifiée</span><span><i class="a"></i>Deux séances ou record</span></div>
+        <div class="head"><div><h2>Planning</h2><div class="sub">semaine du 26 octobre</div></div>
+          <div class="right"><span class="tag"><svg class="i c-warn" aria-hidden="true"><use href="#i-flame"/></svg>14 sem.</span><button class="icon-btn" data-go="programme" aria-label="Modifier le programme"><svg class="i" aria-hidden="true"><use href="#i-settings"/></svg></button></div></div>
+        <div class="section" style="margin-top:0"><div class="week-strip"><button class="ws done"><small>lun.</small><b>26</b><i></i></button><button class="ws done run"><small>mar.</small><b>27</b><i></i></button><button class="ws done" data-go="seance-passee"><small>mer.</small><b>28</b><i></i></button><button class="ws "><small>jeu.</small><b>29</b><i></i></button><button class="ws today"><small>ven.</small><b>30</b><i></i></button><button class="ws next run"><small>sam.</small><b>31</b><i></i></button><button class="ws rest"><small>dim.</small><b>1</b><i></i></button></div></div>
+        <div class="section">
+          <div class="card day-card">
+            <div class="top"><div><div class="muted" style="font-size:13px;margin-bottom:4px">Aujourd'hui · vendredi 30</div><h3>Pectoraux et triceps</h3><div class="t2" style="font-size:13.5px;margin-top:4px">14 séries · ~ 55 min · ajustée au score du matin</div></div><span class="tag acc"><svg class="i" aria-hidden="true"><use href="#i-spark"/></svg>Ajustée</span></div>
+            <button class="btn btn-primary btn-block" style="margin-top:14px" data-action="start-lift">Lancer la séance</button>
           </div>
         </div>
         <div class="section">
@@ -1440,9 +1565,18 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             <div class="wp"><div class="d">mar.<b>27</b></div><div class="t">Fractionné 6 × 800 m<small>Validée · 8,2 km</small></div><span class="tag ok"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span></div>
             <div class="wp" data-go="seance-passee" style="cursor:pointer"><div class="d">mer.<b>28</b></div><div class="t">Jambes lourdes<small>Validée · squat 85 kg × 5, record</small></div><span style="display:flex;gap:6px"><span class="tag"><svg class="i" aria-hidden="true"><use href="#i-camera"/></svg><span data-ph-count="past">2</span></span><span class="tag gold"><svg class="i" aria-hidden="true"><use href="#i-trophy"/></svg></span></span></div>
             <div class="wp rest"><div class="d">jeu.<b>29</b></div><div class="t">Repos<small>Placé automatiquement</small></div></div>
-            <div class="wp" style="box-shadow:inset 0 0 0 2px var(--accent)"><div class="d">ven.<b>30</b></div><div class="t">Pectoraux et triceps<small>Aujourd'hui · ajustée</small></div><button class="btn btn-primary btn-sm" data-action="start-lift">Lancer</button></div>
             <div class="wp"><div class="d">sam.<b>31</b></div><div class="t">Endurance 45 min<small>Zone 2 · 36 h après les jambes</small></div><span class="tag run"><svg class="i" aria-hidden="true"><use href="#i-shoe"/></svg></span></div>
             <div class="wp rest"><div class="d">dim.<b>1</b></div><div class="t">Repos obligatoire<small>Choisi à l'inscription</small></div></div>
+          </div>
+        </div>
+        <div class="section">
+          <button class="row-link" style="border-radius:var(--radius)" data-toggle="calCard"><span class="ico neutral"><svg class="i" aria-hidden="true"><use href="#i-calendar"/></svg></span><span>Octobre en un coup d'œil<small>20 séances · 92 validées au total</small></span><span class="end"><svg class="i" aria-hidden="true"><use href="#i-chev-r"/></svg></span></button>
+          <div class="card" id="calCard" hidden style="margin-top:10px">
+            <div class="cal-wrap">
+              <div class="cal" id="cal"></div>
+              <div class="pillar" id="pillar"></div>
+            </div>
+            <div class="cal-legend"><span><i></i>Séance validée</span><span><i class="o"></i>Planifiée</span><span><i class="a"></i>Deux séances ou record</span></div>
           </div>
         </div>
       </section>
@@ -1553,6 +1687,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
           </div>
         </div>
 
+        <div class="focus" id="focus"></div>
+
         <div class="ex" data-rest="165" data-warmup="barbell">
           <div class="ex-top"><div class="ex-av"><svg class="i" aria-hidden="true"><use href="#i-lift"/></svg></div><button class="name" data-go="fiche">Développé couché (barre)<small>Dernière fois 52,5 kg × 8 · 8 · 7</small></button><button class="icon-btn" data-action="plates" aria-label="Calculer le chargement de la barre"><svg class="i" aria-hidden="true"><use href="#i-disc"/></svg></button><button class="icon-btn" data-go="remplacer" aria-label="Remplacer"><svg class="i" aria-hidden="true"><use href="#i-swap"/></svg></button></div>
           <div class="hint"><svg class="i" aria-hidden="true"><use href="#i-spark"/></svg><span>Même charge, une série en moins, repos 2:45</span></div>
@@ -1617,8 +1753,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       </section>
 
       <!-- ================= REMPLACER UN EXERCICE ================= -->
-      <section class="screen no-tab" data-screen="remplacer" data-title="Remplacer un exercice">
-        <div class="head solid"><button class="icon-btn" data-go="live" aria-label="Retour"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button><span class="title-sm">Remplacer l'exercice</span><span style="width:38px"></span></div>
+      <section class="screen no-tab as-sheet" data-screen="remplacer" data-title="Remplacer un exercice">
+        <div class="sheet-head"><span class="title-sm">Remplacer l'exercice</span><button class="icon-btn" data-go="live" aria-label="Fermer"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button></div>
         <div class="section" style="margin-top:4px">
           <div class="card routine"><div class="ico"><svg class="i" aria-hidden="true"><use href="#i-lift"/></svg></div><div><h4>Développé couché (barre)</h4><small>Poussée horizontale · pectoraux, triceps, deltoïde antérieur</small></div></div>
         </div>
@@ -1994,18 +2130,19 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
         <div class="stv" data-sv="assid">
           <div class="section">
-            <div class="bento">
-              <div class="card kpi"><div class="k">Série en cours</div><div class="v num" style="color:var(--accent-text)">14 sem.</div><div class="d eq">record 14</div></div>
-              <div class="card kpi"><div class="k">Séances validées</div><div class="v num">92</div><div class="d eq">depuis le 21 juillet</div></div>
-              <div class="card kpi"><div class="k">Durée moyenne</div><div class="v num">54 min</div><div class="d eq">souvent à 18 h</div></div>
-              <div class="card kpi"><div class="k">Objectif de la semaine</div><div class="v num">3 / 5</div><div class="track" style="margin-top:8px"><span style="width:60%"></span></div></div>
+            <div class="card">
+              <div class="kpi-head"><span class="k">Régularité</span><span class="muted" style="font-size:13px">16 dernières semaines</span></div>
+              <div class="big-num" style="margin:10px 0 16px"><svg class="i" aria-hidden="true" style="font-size:26px;color:var(--accent-text);margin-right:6px;vertical-align:-.05em"><use href="#i-rotate"/></svg>71<span class="unit">%</span></div>
+              <div class="heat" id="heat"></div>
+              <div class="heat-foot"><span>juillet</span><span class="lv">Moins <i></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i> Plus</span><span>octobre</span></div>
             </div>
           </div>
           <div class="section">
-            <div class="card">
-              <div class="section-title" style="margin-bottom:10px">16 dernières semaines</div>
-              <div class="heat" id="heat"></div>
-              <div class="heat-foot"><span>juillet</span><span class="lv">Moins <i></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i> Plus</span><span>octobre</span></div>
+            <div class="bento">
+              <div class="card streak"><div class="k">Série en cours</div><div class="v num"><svg class="i" aria-hidden="true"><use href="#i-flame"/></svg>14<span class="unit">sem.</span></div><div class="pips"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div><small>3 séances sur 5 cette semaine</small></div>
+              <div class="card streak"><div class="k">Meilleure série</div><div class="v num"><svg class="i" aria-hidden="true"><use href="#i-flame"/></svg>14<span class="unit">sem.</span></div><small style="margin-top:auto">21 juillet – aujourd'hui</small></div>
+              <div class="card kpi"><div class="k">Séances validées</div><div class="v num">92</div><div class="d eq">depuis le 21 juillet</div></div>
+              <div class="card kpi"><div class="k">Durée moyenne</div><div class="v num">54<span class="unit">min</span></div><div class="d eq">souvent à 18 h</div></div>
             </div>
           </div>
           <div class="section">
@@ -2355,7 +2492,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
           <div class="section-title">Affichage</div>
           <div class="set-row"><span>Unités</span><div class="seg"><button class="on" data-pick>kg · km</button><button data-pick>lb · mi</button></div></div>
           <div class="set-row"><span>Thème</span><div class="seg" id="themeSeg2"><button class="on" data-theme="dark">Sombre</button><button data-theme="light">Clair</button><button data-theme="auto">Auto</button></div></div>
-          <div class="set-row"><span>Ambiance</span><div class="seg" id="accentSeg2"><button class="on" data-accent="ambre">Ambre</button><button data-accent="amethyste">Améthyste</button></div></div>
+          <div class="set-row"><span>Ambiance</span><div class="seg" id="accentSeg2"><button class="on" data-accent="cobalt">Cobalt</button><button data-accent="ambre">Ambre</button><button data-accent="amethyste">Améthyste</button></div></div>
         </div>
         <div class="section">
           <div class="section-title">Compte</div>
@@ -2595,9 +2732,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
       <!-- ================= Calques partagés ================= -->
       <div class="rest-panel" id="restPanel">
-        <div class="fill" id="restBar" style="width:100%"></div>
-        <div class="txt"><div class="time num" id="restTime">2:45</div><div class="lbl" id="restLbl">Développé couché, série 1</div></div>
-        <button class="step" data-rest="-30" aria-label="Retirer 30 secondes">−30</button><button class="step" data-rest="30" aria-label="Ajouter 30 secondes">+30</button><button class="btn btn-primary" data-rest="skip">Passer</button>
+        <div class="bar"><span class="fill" id="restBar" style="width:100%"></span></div>
+        <div class="lbl" id="restLbl">Développé couché, série 1</div>
+        <div class="time num" id="restTime">2:45</div>
+        <div class="next" id="restNext">Ensuite : série 2 · 52,5 kg × 8</div>
+        <div class="acts"><button class="step" data-rest="-30" aria-label="Retirer 30 secondes">−30</button><button class="btn btn-primary btn-lg" data-rest="skip">Passer le repos</button><button class="step" data-rest="30" aria-label="Ajouter 30 secondes">+30</button></div>
       </div>
       <div class="scrim" id="scrim"><div class="sheet"><div class="grab"></div><h3 id="dlgTitle"></h3><div id="dlgBody"></div><div class="acts" id="dlgActs"></div></div></div>
       <div class="viewer" id="viewer" role="dialog" aria-label="Photo de séance">
@@ -2611,13 +2750,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       <div class="toast" id="toast"></div>
     </div>
 
+    <div class="dock" id="dock"><button class="btn btn-primary btn-block btn-lg" data-action="start-lift" id="dockBtn">Démarrer la séance</button></div>
     <div class="banner" id="banner" data-action="resume"><span class="dot-live"></span><span id="bannerTxt">Séance en cours</span> · <b class="num" id="bannerTime">0:00</b><span class="go">Reprendre</span></div>
     <nav class="tabbar" id="tabbar">
       <button data-go="today" data-t="today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 16a8 8 0 1 1 16 0"/><path d="M12 16l4-5"/><circle cx="12" cy="16" r="1.5" fill="currentColor"/></svg>Aujourd'hui</button>
       <button data-go="planning" data-t="plan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Planning</button>
-      <button data-go="seance" data-t="train"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6.5 6.5v11M17.5 6.5v11M3 9.5v5M21 9.5v5M6.5 12h11"/></svg>Séance</button>
       <button data-go="stats" data-t="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Stats</button>
       <button data-go="profil" data-t="profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Profil</button>
+      <button class="tab-fab" data-go="seance" data-t="train" aria-label="Séance"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6.5 6.5v11M17.5 6.5v11M3 9.5v5M21 9.5v5M6.5 12h11"/></svg>Séance</button>
     </nav>
   </div>
 
@@ -2647,19 +2787,24 @@ function go(name) {
   if (name !== state.screen) state.prev = state.screen;
   state.screen = name;
   if (PH.view) closeViewer(true);
-  $$('#viewport .screen').forEach(s => s.classList.toggle('active', s.dataset.screen === name));
   const scr = $(`#viewport .screen[data-screen="${name}"]`);
-  const tab = scr.dataset.tab;
+  const sheet = scr.classList.contains('as-sheet');
+  const under = sheet ? $(`#viewport .screen[data-screen="${state.prev}"]`) : null;
+  $$('#viewport .screen').forEach(s => s.classList.toggle('active', s.dataset.screen === name || (under && s === under && !s.classList.contains('as-sheet'))));
+  $('#viewport').classList.toggle('sheet-open', !!(under && under.classList.contains('active')));
+  const tab = under && under.classList.contains('active') ? under.dataset.tab : scr.dataset.tab;
   const sys = scr.classList.contains('sys');
   $('#phone').classList.toggle('on-dark', sys || scr.classList.contains('run-screen'));
   $('#phone').classList.toggle('landscape', scr.dataset.orient === 'landscape');
   $('#phone').classList.toggle('no-time', scr.dataset.sb === 'no-time');
   setIsland($('#phone .island'), scr.dataset.island || '');
   $('#tabbar').style.display = tab ? 'flex' : 'none';
+  const dock = $('#dock'); dock.classList.toggle('show', !!scr.dataset.dock && !state.session && !sheet); if (scr.dataset.dock) $('#dockBtn').textContent = scr.dataset.dock;
   $$('#tabbar button').forEach(b => b.classList.toggle('on', b.dataset.t === tab));
   $$('#sidenav button').forEach(b => b.classList.toggle('on', b.dataset.go === name));
   updateBanner();
   $('#restPanel').classList.toggle('show', name === 'live' && !!state.rest);
+  if (name === 'live') renderFocus();
   scr.scrollTop = 0;
   renderNotes(name);
 }
@@ -2669,6 +2814,7 @@ function updateBanner() {
   $('#banner').classList.toggle('show', active && !!tab);
   $('#phone').classList.toggle('has-banner', active && !!tab);
   $('#bannerTxt').textContent = state.run ? 'Course en cours' : 'Séance en cours';
+  const scr = $(`#viewport .screen[data-screen="${state.screen}"]`); $('#dock').classList.toggle('show', !!scr.dataset.dock && !active);
 }
 // Cette méthode permet d'afficher un message bref lorsqu'une action n'est pas branchée dans la maquette.
 function toast(msg) {
@@ -2692,8 +2838,9 @@ const cat = s => s >= 90 ? ['Forme optimale', 'ok'] : s >= 65 ? ['Forme normale'
 function setScore(s) {
   state.score = s;
   $('#scoreVal').textContent = s;
-  $('#needle').style.transform = `rotate(${-110 + s * 2.2}deg)`;
+  $('#scoreArc').setAttribute('stroke-dasharray', `${s * .75} 100`);
   const [label, cls] = cat(s); const t = $('#scoreTag'); t.textContent = label; t.className = 'tag ' + cls;
+  $('#scoreCard').dataset.state = cls;
 }
 // Cette méthode permet d'estimer un score lorsqu'aucune donnée de nuit n'est disponible (matrice des risques du plan technique).
 function checkin() {
@@ -2727,11 +2874,41 @@ function toggleSet(tr) {
     const warm = !!tr.querySelector('.n.w');
     startRest(warm ? Math.min(60, +ex.dataset.rest) : +ex.dataset.rest, name + (warm ? ', échauffement' : ', série ' + tr.querySelector('.n').textContent));
   }
-  updateTotals();
+  updateTotals(); renderFocus();
+}
+const SETN = { 'É': 'Échauffement', 'D': 'Dégressive', 'F': 'Échec' };
+// Cette méthode permet de trouver la prochaine série à faire, dans l'ordre de la séance.
+function curRow() { return $$('.screen[data-screen=live] tr.set').find(tr => !tr.classList.contains('done')) || null; }
+// Cette méthode permet de décrire une série (numéro, charge, répétitions) pour la carte en cours et le repos.
+function setDesc(tr) {
+  const v = tr.querySelectorAll('input.val'); const n = tr.querySelector('.n').textContent.trim();
+  const kg = v[0].value.replace('.', ','); const reps = v[1].value || '–';
+  return { n, label: SETN[n] || 'Série ' + n, kg, reps, prev: tr.querySelector('.prev').textContent.trim() };
+}
+// Cette méthode permet d'afficher la série en cours en grand, avec ses valeurs préremplies et les steppers.
+function renderFocus() {
+  const box = $('#focus'); if (!box) return;
+  $$('.screen[data-screen=live] .ex.cur, .screen[data-screen=live] tr.cur').forEach(e => e.classList.remove('cur'));
+  const tr = curRow();
+  if (!tr) { box.innerHTML = '<div class="f-done"><b>Toutes les séries sont faites</b>Belle séance. Termine pour enregistrer.</div><button class="btn btn-primary btn-block btn-lg" data-action="finish">Terminer la séance</button>'; return; }
+  tr.classList.add('cur'); const ex = tr.closest('.ex'); ex.classList.add('cur');
+  const d = setDesc(tr); const total = ex.querySelectorAll('tr.set:not(:has(.n.w))').length; const idx = [...ex.querySelectorAll('tr.set')].indexOf(tr) + 1;
+  const name = ex.querySelector('.name').childNodes[0].textContent.trim();
+  const rpe = tr.querySelector('input.rpe').value;
+  const warm = d.n === 'É';
+  box.innerHTML = `<div class="f-top"><span class="f-ex">${name}</span><span class="f-n">${warm ? 'Échauffement' : 'Série ' + (idx - ex.querySelectorAll('tr.set:has(.n.w)').length) + ' sur ' + total}</span></div>
+    <div class="f-prev">${warm ? d.prev + ' de la charge de travail' : d.prev === '—' ? 'Nouvelle série' : 'Dernière fois ' + d.prev}</div>
+    <div class="f-vals">
+      <div class="f-val"><button data-fstep="0:-2.5" aria-label="Moins 2,5 kg">−</button><div><b>${d.kg || '0'}</b><small>kg</small></div><button data-fstep="0:2.5" aria-label="Plus 2,5 kg">+</button></div>
+      <div class="f-val"><button data-fstep="1:-1" aria-label="Une répétition en moins">−</button><div><b>${d.reps}</b><small>reps</small></div><button data-fstep="1:1" aria-label="Une répétition en plus">+</button></div>
+    </div>
+    ${warm ? '' : '<div class="f-rpe"><span>Effort ressenti</span>' + [6, 7, 8, 9, 10].map(r => `<button data-frpe="${r}" class="${rpe == r ? 'on' : ''}">${r}</button>`).join('') + '</div>'}
+    <button class="btn btn-primary btn-block btn-lg" data-act="fcheck">${warm ? 'Échauffement fait' : 'Valider la série'}</button>`;
 }
 function startRest(secs, label) {
   state.rest = { end: Date.now() + secs * 1000, total: secs };
   $('#restLbl').textContent = label; $('#liveRestLbl').textContent = clock(secs * 1000);
+  const nx = curRow(); const nd = nx && setDesc(nx); $('#restNext').textContent = nx ? 'Ensuite\u00a0: ' + nd.label.toLowerCase() + ' · ' + (nd.kg ? nd.kg + '\u00a0kg × ' : '× ') + nd.reps : 'Ensuite\u00a0: fin de séance';
   $('#restPanel').classList.add('show'); tickRest();
 }
 function tickRest() {
@@ -3144,13 +3321,13 @@ const NOTES = {
   'profil-init': ['Étape 3 : sexe, naissance, taille, poids (§3.1).', 'Expérience muscu et course : fixe les premiers incréments de surcharge et les zones cardiaques.'],
   objectifs: ['Fusion des modules 1 et 11 : curseur force / endurance, jours de repos, matériel, limitations (§3.1, §3.11).', 'Le curseur pilote la répartition hebdomadaire proposée en dessous.', 'Les zones douloureuses masquent les mouvements à risque et proposent l\'alternative (§3.10).'],
   calibration: ['Étape 5 : import de 30 à 60 jours de santé, ligne de base VFC et FC repos immédiate, premier score affiché (§3.1).', 'Z-score sur 14 jours glissants, écart-type échantillon (§4.1).', 'Point ouvert : comportement avec moins de 14 nuits ou un écart-type nul.'],
-  today: ["Carte Compléments : prises du jour et prochaine prise, cochable sans quitter l'accueil.", 'Mini-carte face et dos des muscles ciblés par la séance du jour, recalculée si l\'on rétablit la séance d\'origine.', 'Jauge filaire inspirée des tachymètres, sur carte blanche opale (§7.1). Seuils : 90, 65, 40 (§4.5).', 'Trois facteurs sous la jauge : sommeil, VFC vs 14 j, FC repos (§3.2).', 'Carte séance avec badge « Ajustée », « Pourquoi ? » et « Séance d\'origine » : l\'athlète garde le contrôle (§3.2).', 'Jauge ACWR linéaire : sous-entraînement, optimal 0,8 à 1,3, risque > 1,5 (§2.5 du plan).', 'Bento de sparklines (§7.1).'],
-  pourquoi: ['Modale d\'explicabilité du §3.2, promue en écran pour la planche.', 'Chaque modification est nommée avec sa raison : volume, RPE plafond, repos, charges.', 'Les trois sous-scores et la pondération 50 / 25 / 25 sont montrés (§4.5).'],
-  checkin: ['Fallback de la matrice des risques : montre déchargée ou absente, trois questions (sommeil, douleurs, motivation).', 'Pondération 40 / 35 / 25, recalcul en direct.', 'Un score estimé n\'ouvre jamais la surcharge progressive.'],
-  planning: ["Touche une séance validée pour ouvrir son détail et ses photos.", 'Calendrier mensuel lundi à dimanche, pastilles blanches avec icône monochrome de la discipline (§3.5).', 'Point pour double séance ou record. Cerclage « aujourd\'hui ».', 'Pilier vertical de série à droite : une coche par semaine réussie, anneau pour la semaine en cours, flamme avec le compteur.', 'Semaine courante en liste, avec la sortie déplacée par la règle des 36 h.'],
+  today: ["Tout l'essentiel sans défiler : score et séance en tête, bouton « Démarrer la séance » épinglé dans la zone du pouce (il disparaît quand une séance est en cours, le bandeau prend le relais).", 'Carte Récupération maillée : la teinte suit l\'état, la flèche ouvre « Pourquoi ? » en feuille. Seuils 40, 65, 90 (§4.5).', 'Trois actions en un geste : check-in, complément pris, pesée.', 'Carte séance : badge « Ajustée », muscles ciblés, retour à la séance d\'origine en un lien (§3.2).', 'Compléments et charge d\'entraînement en dessous ; tuiles Variabilité et Sommeil avec mini-graphique.'],
+  pourquoi: ['S\'ouvre en feuille par-dessus le tableau de bord, se ferme d\'un glissement ou d\'une touche : pas de navigation.', 'Lecture du matin en langage clair, puis chaque changement du moteur avec sa raison (§3.2).', 'Les trois signaux et la formule du score, pour une transparence totale (§4.5).', 'Deux sorties : valider et démarrer, ou rétablir la séance d\'origine.'],
+  checkin: ['Feuille par-dessus l\'accueil : trois questions, le score estimé se recalcule à chaque touche.', 'Un score estimé n\'autorise jamais de surcharge progressive (matrice des risques du plan technique).'],
+  planning: ['Bande des 7 jours en tête, aujourd\'hui en plein : un jour par touche, la séance validée s\'ouvre directement.', 'La séance du jour est la carte principale avec son bouton de lancement.', 'Le mois complet et le pilier de série (§3.5) s\'ouvrent d\'une touche en bas de l\'écran.', 'Les règles anti-interférence (§3.8) se modifient depuis le programme.'],
   programme: ['Édition du split hebdomadaire par glisser-déposer (§3.5).', 'Les trois règles d\'or anti-interférence sont affichées et désactivables (§3.8).', 'La séance en conflit est surlignée en ambre avec la raison du déplacement.'],
   seance: ['Deux tuiles : musculation (opale) et course (obsidienne), avec l\'état du jour.', 'Routines, bibliothèque, séance libre et saisie a posteriori (§3.3).'],
-  live: ["Échauffement automatique sur les exercices de base : 2 ou 3 séries progressives (barre seule, 60 %, 80 %) arrondies aux disques disponibles, recalculées si la charge change. Repos de 60 s, hors volume et hors records. Pas d'échauffement quand le muscle est déjà chaud.", "Icône disque sur les exercices à la barre : disques à charger par côté pour la prochaine série, au moins de disques possible. Réglage de la barre, ±2,5 kg, report sur les séries restantes.", "Bouton appareil photo dans l'en-tête : photo de forme ou de séance sans quitter le chrono. La pastille compte les photos.", 'Une seule main, cibles de 56 px minimum (§7.4). En production, l’écran passe en noir OLED pur pendant la séance.', 'Colonnes : série, précédent, kg, reps, RPE facultatif, validation (§3.3). Types É, D, X par touche sur le numéro.', 'Valeurs en couleur d\'accent = proposées par le moteur ; une valeur modifiée repasse en couleur neutre.', 'Cocher lance le repos propre à l\'exercice : −30 s, +30 s, Passer. Haptique longue au terme (§7.4).', 'FC en direct si ceinture BLE connectée (§3.3). Bouton de remplacement : substitution (§3.10).', 'Persistance locale à chaque validation ; bandeau « Reprendre » si l\'app est rouverte (plan, risques).'],
+  live: ['Mode focus : la série en cours est la seule chose en grand. Valeurs préremplies avec la dernière fois, steppers −2,5 / +2,5 kg et −1 / +1 rép, effort en une touche, un seul appui pour valider (§3.3, < 4 s par série).', 'Le plan complet reste dessous, estompé ; l\'exercice en cours est surligné. Les valeurs en couleur d\'accent sont proposées par le moteur.', 'Repos en feuille : compte à rebours énorme, série suivante déjà affichée, « Passer » sous le pouce, ±30 s de chaque côté.', "Échauffement automatique sur les exercices de base : 2 ou 3 séries progressives (barre seule, 60 %, 80 %) arrondies aux disques disponibles, recalculées si la charge change. Repos de 60 s, hors volume et hors séries validées.", 'Chargement de la barre et remplacement d\'exercice depuis la ligne de l\'exercice.'],
   remplacer: ['Substitution « machine occupée / douleur » : 3 alternatives, même plan de mouvement, charge équivalente (§3.10).', 'Le repos et le plafond RPE du jour sont conservés.'],
   fiche: ['Trois onglets : technique, progression, alternatives (§3.10).', 'Carte musculaire face et dos : moteurs en ambre, stabilisateurs en cyan (§3.10). Les sous-zones (deltoïde antérieur, dentelé) se colorent sans repeindre tout le muscle.', 'Silhouettes : MuscleMap de Melih Colpan, licence MIT (notice dans le code source).', 'Trois consignes clés et erreurs à éviter. Rappel des limitations déclarées.', '1RM estimé par Brzycki (§4.6), tendance projetée en pointillés.'],
   biblio: ['250 exercices en gratuit, 650 en Premium (§2.2).', 'Filtres muscle + matériel, récents en tête, recherche insensible aux accents.'],
@@ -3158,7 +3335,7 @@ const NOTES = {
   'run-recap': ["Photos du parcours, privées par défaut.", 'Ruban d\'élévation 3D : ligne de crête blanche, rideau translucide, balises ▲ ▼, pin de départ ambré (§3.4).', 'Grille 2 × 2 distance, allure, durée, calories.', 'Badge « Enregistré dans Apple Santé », médaille collectible, RPE (§3.4, §3.12).'],
   recap: ["Photos de séance : jusqu'à 6, prises pendant la séance ou choisies dans Photos. Touche une vignette pour l'agrandir.", "Rappel de whey après la séance, synchronisé avec l'écran Compléments.", 'Carte des muscles travaillés, intensité selon les séries de la séance.', 'Bilan de séance : durée, tonnage, séries, records (§3.12).', 'RPE global par curseur, impact sur la charge de demain expliqué.', 'Note libre puis Partager ou Enregistrer.'],
   partage: ['Story 9:16, carré, carte 3D (§3.7, §3.12).', 'Score, tracé et QR code d\'invitation activables.', 'Export vers Instagram, Snapchat ou Photos.'],
-  stats: ['Cinq vues : charge, biométrie, muscles, assiduité, records (§3.6). Période commune.', 'Muscles : carte de chaleur face et dos sur la période (principal 1, secondaire 0,5), muscles les plus travaillés, muscles délaissés, équilibre pousser/tirer et haut/bas.', 'Charge : ACWR avec bande optimale et seuil de risque, répartition muscu / course.', 'Biométrie : VFC vs ligne de base, sommeil, journées par état de forme.', 'Assiduité : matrice 7 × 16 à 5 niveaux, piliers de récupération avec check-in (§3.6).', 'Records : 1RM estimés et chronos course.'],
+  stats: ['Cinq vues : charge, biométrie, muscles, assiduité, records (§3.6). Période commune.', 'Muscles : carte de chaleur face et dos sur la période (principal 1, secondaire 0,5), muscles les plus travaillés, muscles délaissés, équilibre pousser/tirer et haut/bas.', 'Charge : ACWR avec bande optimale et seuil de risque, répartition muscu / course.', 'Biométrie : VFC vs ligne de base, sommeil, journées par état de forme.', 'Assiduité : taux de régularité, matrice 7 × 16 à 5 niveaux, série en cours avec pastilles de la semaine, meilleure série, piliers de récupération avec check-in (§3.6).', 'Records : 1RM estimés et chronos course.'],
   social: ["Touche un post pour ouvrir la séance, l'avatar pour le profil de l'ami.", "Photo jointe à une séance partagée par un ami, visible en grand d'une touche.", 'Flux restreint au cercle, séances, records et état de forme du matin (§3.7).', 'Réactions bravo et flamme, encouragements. Invitation par lien.'],
   classement: ["Touche un ami pour ouvrir son profil.", 'Classement mensuel fondé sur la régularité, pas sur le volume brut, pour ne pas inciter au surentraînement (§3.7).', 'Défis bilatéraux : 3 séances cette semaine.'],
   profil: ["Le poids ouvre le suivi du corps ; il se floute avec l'option « Masquer les chiffres ».", 'Carte d\'identité, badges, mur des records avec 1RM estimé, chronos course (§3.9).', 'Vitrine de médailles, dont une verrouillée avec l\'écart restant.', 'Accès statistiques, amis, abonnement, paramètres.'],
@@ -3177,6 +3354,7 @@ function renderNotes(name) {
 function buildBoard() {
   const bv = $('#boardview'); bv.innerHTML = '';
   if (!state.session) { startLift(); state.session = false; }
+  renderFocus();
   $$('#viewport .screen').forEach(s => {
     const cell = document.createElement('div'); cell.className = 'board-cell';
     const ph = document.createElement('div');
@@ -3187,8 +3365,9 @@ function buildBoard() {
     const clone = s.cloneNode(true); clone.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));
     vp.appendChild(clone);
     if (s.dataset.screen === 'live') { const rp = $('#restPanel').cloneNode(true); rp.removeAttribute('id'); rp.classList.add('show');
-      rp.querySelector('.time').textContent = '1:52'; rp.querySelector('.fill').style.width = '68%'; vp.appendChild(rp); }
+      rp.querySelector('.time').textContent = '1:52'; rp.querySelector('.fill').style.width = '68%'; rp.querySelector('.next').textContent = 'Ensuite\u00a0: série 2 · 52,5\u00a0kg × 8'; vp.appendChild(rp); }
     ph.appendChild(vp);
+    if (s.dataset.dock) { const dk = $('#dock').cloneNode(true); dk.removeAttribute('id'); dk.classList.add('show'); dk.querySelector('button').textContent = s.dataset.dock; ph.appendChild(dk); }
     if (s.dataset.tab) { const tb = $('#tabbar').cloneNode(true); tb.removeAttribute('id'); tb.style.display = 'flex';
       tb.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.t === s.dataset.tab)); ph.appendChild(tb); }
     cell.innerHTML = `<div class="cap">${s.dataset.title}</div>`; cell.appendChild(ph); bv.appendChild(cell);
@@ -3254,6 +3433,7 @@ document.addEventListener('click', e => {
   if (ds.action === 'supp-save') { toast('Vitamine D3 enregistrée, rappel à 8:00'); return go('supplements'); }
   if (ds.go) return go(ds.go);
   if (ds.toast) return toast(ds.toast);
+  if (ds.toggle) { const el = $('#' + ds.toggle); el.hidden = !el.hidden; return; }
   if (ds.action === 'back') return go(state.prev === state.screen ? 'today' : state.prev);
   if (ds.action === 'minimize') return go('today');
   if (ds.action === 'resume') return go(state.run ? 'run' : 'live');
@@ -3299,6 +3479,10 @@ document.addEventListener('click', e => {
     if (ds.rest === 'skip') { state.rest = null; $('#restPanel').classList.remove('show'); return; }
     r.end += +ds.rest * 1000; r.total = Math.max(r.total, (r.end - Date.now()) / 1000); return tickRest(); }
   if (ds.act === 'check') return toggleSet(t.closest('tr.set'));
+  if (ds.act === 'fcheck') { const tr = curRow(); return tr && toggleSet(tr); }
+  if (ds.fstep) { const tr = curRow(); if (!tr) return; const [k, d] = ds.fstep.split(':'); const inp = tr.querySelectorAll('input.val')[+k];
+    const v = Math.max(0, (parseFloat((inp.value || '0').replace(',', '.')) || 0) + +d); inp.value = String(v).replace('.', ','); return renderFocus(); }
+  if (ds.frpe) { const tr = curRow(); if (!tr) return; tr.querySelector('input.rpe').value = ds.frpe; return renderFocus(); }
 });
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'cmInput') { e.preventDefault(); sendComment(); } });
 document.addEventListener('keydown', e => { if (e.key === ' ' && e.target.classList.contains('switch')) { e.preventDefault(); e.target.click(); } });
@@ -3335,6 +3519,7 @@ $$('[data-di]').forEach(el => setIsland(el, el.dataset.di, ''));
 const hash = location.hash.slice(1);
 if (location.search.includes('light')) setTheme('light');
 if (location.search.includes('amethyste')) setAccent('amethyste');
+if (location.search.includes('ambre')) setAccent('ambre');
 if (hash === 'board') { $$('#modeSeg button').forEach(b => b.classList.toggle('on', b.dataset.mode === 'board')); document.body.classList.add('board'); go('today'); buildBoard(); }
 else go(hash && $(`#viewport .screen[data-screen="${hash}"]`) ? hash : 'today');
 </script>
