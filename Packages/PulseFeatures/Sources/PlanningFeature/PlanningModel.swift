@@ -60,6 +60,29 @@ public final class PlanningModel {
         await load()
     }
 
+    /// Vrai pour un jour à venir qu'une règle anti-interférence a changé : « Garder le jour prévu » le rend à la semaine type.
+    public func canKeepPlanned(_ day: PlanningDay) -> Bool {
+        day.isMovable && day.scheduled.map(AntiInterference.isRule) == true
+    }
+
+    /// Refuse ce qu'une règle a placé ce jour-là (spec M6 §9), puis relit la semaine.
+    public func keepPlanned(_ day: PlanningDay) async {
+        do {
+            try await environment.service.keepPlanned(day.date)
+            errorMessage = nil
+        } catch {
+            errorMessage = String(localized: "Pulse n'a pas pu garder le jour prévu.", bundle: .module)
+        }
+        await load()
+    }
+
+    /// Le rappel de la règle « même jour » (spec M6 §9), si elle n'est pas désactivée ; `nil` sinon.
+    public func spacingReminder(for day: PlanningDay) -> String? {
+        let disabled = overview?.profile?.antiInterferenceRulesDisabled.contains(.sameDayOrdering) == true
+        guard !disabled, AntiInterference.needsSpacing(day) else { return nil }
+        return String(localized: "Au moins 6 h entre les deux, la plus technique le matin.", bundle: .module)
+    }
+
     /// Remet la semaine type, puis relit la semaine.
     public func restoreWeek() async {
         do {
@@ -118,8 +141,12 @@ public final class PlanningModel {
     }
 
     /// « Validée · 11 240 kg », « Manquée », « Sortie facile · 45 min », « Déplacée de mardi », « Legs déplacée à samedi »,
-    /// « Choisi à l'inscription ».
+    /// « Choisi à l'inscription », ou la raison d'une règle anti-interférence (« Déplacée : 36 h après les jambes »).
     public func detail(of day: PlanningDay) -> String {
+        if day.state == .planned || day.state == .rest, let line = day.scheduled, AntiInterference.isRule(line),
+           let reason = line.moveReasonText {
+            return reason
+        }
         switch day.state {
         case .done:
             let results = day.sessions.map(PlanningText.result(of:)).joined(separator: " + ")

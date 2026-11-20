@@ -21,6 +21,8 @@ public final class TodayModel {
     private(set) var card: SessionCardState = .noProgram
     /// La carte de charge d'entraînement : cachée tant que l'historique ne couvre pas 28 jours.
     private(set) var load: LoadCardContent = .hidden
+    /// La semaine de décharge à proposer : l'ACWR est resté ≥ 1,5 deux jours de suite (spec M6 §10).
+    private(set) var deloadOffer: DeloadOffer?
     /// Les tuiles de tendance sur 14 jours : variabilité, FC repos, sommeil. Vides avant la première lecture.
     private(set) var trends: [TrendTile] = []
     /// La feuille ouverte depuis la carte de la séance : les 20 min de mobilité.
@@ -30,10 +32,10 @@ public final class TodayModel {
     /// Vrai quand l'écran « Pourquoi » est poussé dans la pile de l'accueil.
     var isShowingWhy = false
     public private(set) var isLoading = false
-    public private(set) var errorMessage: String?
+    public internal(set) var errorMessage: String?
     public let checkIn = CheckInForm()
 
-    @ObservationIgnored private let environment: TodayEnvironment
+    @ObservationIgnored let environment: TodayEnvironment
     @ObservationIgnored private var isSubmittingCheckIn = false
     /// Le contenu et les exercices de l'utilisateur, relus à chaque actualisation pour nommer et compter les muscles des séances.
     @ObservationIgnored private var directory: ExerciseDirectory
@@ -136,28 +138,31 @@ public final class TodayModel {
             show(day.session)
         } else {
             // Le calcul a échoué : le score affiché reste, la séance suit le programme relu.
-            show(TodaySession(plannedDay: day.plannedDay, recovery: scoredToday))
+            show(TodaySession(plannedDay: day.plannedDay, recovery: scoredToday, deload: session?.isDeload == true))
         }
     }
 
-    /// Les nuits lues font les tendances ; les séances des 28 derniers jours font le ratio de charge. Si les séances ne se lisent
-    /// pas, la carte garde son dernier contenu.
+    /// Les nuits lues font les tendances ; les séances des 28 derniers jours font le ratio de charge, et celles de la veille la
+    /// proposition de décharge. Si les séances ne se lisent pas, la carte garde son dernier contenu.
     private func updateLoadAndTrends(day: DayRefresh, now: Date) async {
         let calendar = environment.calendar
         let today = calendar.startOfDay(for: now)
         trends = TrendTile.make(nights: day.nights, day: today, calendar: calendar)
-        guard let start = calendar.date(byAdding: .day, value: -(LoadCalculator.requiredHistoryDays - 1), to: today),
+        guard let start = calendar.date(byAdding: .day, value: -LoadCalculator.requiredHistoryDays, to: today),
+              let loadStart = calendar.date(byAdding: .day, value: 1, to: start),
               let end = calendar.date(byAdding: .day, value: 1, to: today),
               let sessions = try? await environment.workouts.sessions(from: start, to: end) else { return }
         load = LoadCardContent.make(TrainingLoad.acwr(
-            sessions: sessions, onboardingCompletedAt: day.profile?.onboardingCompletedAt, now: now, calendar: calendar))
+            sessions: sessions.filter { $0.startedAt >= loadStart }, onboardingCompletedAt: day.profile?.onboardingCompletedAt,
+            now: now, calendar: calendar))
+        deloadOffer = Deload.offer(sessions: sessions, profile: day.profile, now: now, calendar: calendar)
     }
 
     /// Affiche un score que l'accueil vient d'écrire, et la séance qu'il ajuste.
     func applyWritten(_ recovery: DailyRecovery) {
         scoreEpoch += 1
         apply(.scored(recovery))
-        show(TodaySession(plannedDay: session?.plannedDay ?? .noProgram, recovery: recovery))
+        show(TodaySession(plannedDay: session?.plannedDay ?? .noProgram, recovery: recovery, deload: session?.isDeload == true))
     }
 
     var scoredToday: DailyRecovery? {

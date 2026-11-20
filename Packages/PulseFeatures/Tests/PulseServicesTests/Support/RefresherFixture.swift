@@ -97,9 +97,10 @@ struct RefresherFixture {
     let refresher: DayRefresher
 
     /// Sans `adopt`, il n'y a ni profil ni programme. Avec `gate`, chaque notification planifiée attend que la porte s'ouvre ;
-    /// avec `publishGate`, chaque publication de l'instantané.
+    /// avec `publishGate`, chaque publication de l'instantané. Avec `planning`, le passage applique les règles anti-interférence
+    /// et publie la série et la semaine.
     init(scenario: HealthScenario, at start: String = "2026-11-02T08:00", holdingNotificationsAt gate: Gate? = nil,
-         holdingPublishesAt publishGate: Gate? = nil) {
+         holdingPublishesAt publishGate: Gate? = nil, planning: Bool = false) {
         let calendar = TestClock.calendar
         let clock = MutableClock(start)
         let recovery = InMemoryRecoveryRepository(calendar: calendar)
@@ -116,6 +117,11 @@ struct RefresherFixture {
         self.recovery = recovery
         self.source = source
         self.notifications = notifications
+        let rules = planning ? AntiInterferenceService(
+            profiles: profiles, programs: programs, workouts: workouts, scheduledDays: scheduled,
+            userExercises: InMemoryUserExerciseRepository(), library: .bundled, calendar: calendar, now: { clock.now }) : nil
+        let planningService = planning ? PlanningService(profiles: profiles, programs: programs, workouts: workouts,
+                                                         scheduledDays: scheduled, calendar: calendar, now: { clock.now }) : nil
         refresher = DayRefresher(
             profiles: profiles, programs: programs, recovery: recovery,
             nightHistory: NightHistory(source: source, cache: InMemoryHealthSampleCache(), calendar: calendar),
@@ -123,7 +129,7 @@ struct RefresherFixture {
             widgets: publisher, notifications: scheduler, activity: activity, scheduledDays: scheduled,
             workoutHistory: WorkoutHistory(source: scenarioSource, cache: InMemoryHealthSampleCache(), workouts: workouts,
                                            profiles: profiles, calendar: calendar),
-            calendar: calendar, now: { clock.now })
+            antiInterference: rules, planning: planningService, calendar: calendar, now: { clock.now })
     }
 
     /// PPL 3 adopté (lundi Push, mardi repos), et un profil dont l'onboarding est terminé, sauf si `onboarded` est faux.

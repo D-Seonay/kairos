@@ -127,25 +127,61 @@ Une course lue d'Apple Santé ne se supprime pas depuis Pulse : elle reviendrait
 
 ---
 
-# M6b (à faire après M6a)
+# M6b
+
+M6b se fait sur la branche `m6-anti-interference`, en trois lots comme M6a : moteur (testé par `swift test`), écrans, app.
 
 ## 9. Règles anti-interférence
 
-Elles sont calculées sur la semaine datée en cours, à chaque passage du jour, depuis aujourd'hui. Chacune est désactivable (`profile.antiInterferenceRulesDisabled`).
+Elles sont calculées à chaque passage du jour, sur la semaine datée en cours, depuis aujourd'hui. Chacune est désactivable (`profile.antiInterferenceRulesDisabled`), depuis l'éditeur de programme (maquette `programme`).
 
-1. **Jambes lourdes → course intense.** Un fractionné ou une sortie longue prévu moins de 36 h après une séance de jambes lourde, faite ou prévue, est déplacé au premier jour libre qui respecte les 36 h dans la semaine. Sans jour libre, il devient une sortie facile. Une séance est « jambes lourdes » quand plus de la moitié de ses séries de travail visent les quadriceps, les ischios ou les fessiers **(choix du constructeur)**.
-2. **Même jour.** Une course et une séance de musculation le même jour : un rappel « au moins 6 h entre les deux, la plus technique le matin ». Pulse ne connaît pas les heures prévues, donc la règle ne déplace rien **(choix du constructeur)**.
-3. **Repos complet.** Sans jour de repos depuis 7 jours, et avec une moyenne de sommeil sur 7 jours sous le seuil de la catégorie « fatigue modérée » du sous-score sommeil, le prochain jour prévu devient un repos.
+**Semaine de base.** Les règles partent de la semaine type et des lignes `.user` (déplacements et refus de l'utilisateur). Elles ignorent leurs propres lignes et les recalculent à chaque passage : les lignes de règle d'aujourd'hui et après qui ne servent plus sont supprimées, les nouvelles écrites. Une règle désactivée perd ainsi ses lignes au passage suivant. Les lignes passées restent, pour l'historique **(choix du constructeur)**.
 
-Chaque déplacement écrit une ligne `ScheduledDay` avec le `moveReason` de la règle et un `moveReasonText` en clair, que la semaine affiche. Un déplacement refusé est enregistré dans `refusedAdjustments` de la séance du jour et n'est plus proposé pour cette date.
+**Jours que les règles ne touchent pas** : un jour passé, un jour validé au sens du §4 (une séance qui ne valide pas le jour ne le fige pas), un jour qui porte une ligne `.user`. Quand un des deux jours d'un déplacement est figé, l'autre l'est aussi : sinon la course serait perdue ou doublée **(choix du constructeur)**. Un échange de l'utilisateur qui touche un jour déplacé par une règle écrit des lignes `.user` sur les deux jours, même quand l'un retrouve la semaine type.
+
+1. **Jambes lourdes → course intense.** Un fractionné ou une sortie longue prévu le jour même ou le lendemain d'une séance de jambes lourde, faite ou prévue, est déplacé au premier jour libre de la semaine, aujourd'hui ou après, qui n'a pas de séance de jambes lourde la veille ni le jour même. Sans jour libre, il devient une sortie facile.
+   - Pulse ne connaît pas l'heure d'une séance prévue. « Moins de 36 h » se lit donc « le jour même ou le lendemain » **(choix du constructeur)**.
+   - Un jour libre est un jour de repos, pas un repos obligatoire, sans séance faite et sans ligne `.user`.
+   - Une séance est « jambes lourdes » quand plus de la moitié de ses séries de travail visent les quadriceps, les ischios ou les fessiers (un de leurs muscles principaux) **(choix du constructeur)**. Pour une séance prévue on compte les séries de la routine, pour une séance faite les séries enregistrées hors échauffement.
+   - Le déplacement écrit deux lignes : un repos sur le jour d'origine, la course sur le jour libre (`movedFromDate` = le jour d'origine). La sortie facile écrit une ligne sur le jour même, sans `movedFromDate`. La semaine affiche « Déplacée : 36 h après les jambes » ou « Sortie facile : 36 h après les jambes ».
+2. **Même jour.** Une course et une séance de musculation le même jour : un rappel « Au moins 6 h entre les deux, la plus technique le matin. » La semaine type ne place qu'une séance par jour, donc la règle porte sur aujourd'hui : une séance prévue et une séance de l'autre discipline déjà faite. Elle ne déplace rien et n'écrit rien **(choix du constructeur)**.
+3. **Repos complet.** Le prochain jour prévu de la semaine (aujourd'hui compris) devient un repos quand deux conditions sont réunies :
+   - les 7 jours d'avant aujourd'hui ont tous eu une séance (musculation terminée, course ou vélo) ;
+   - la moyenne du sous-score sommeil sur les 7 dernières nuits est sous 65, le seuil de la fatigue modérée. Il faut au moins 4 nuits avec du sommeil **(choix du constructeur)**.
+
+   La semaine affiche « Repos placé : 7 jours sans repos et sommeil court ». Si l'utilisateur a refusé ce repos, la règle ne le reporte pas au jour prévu suivant **(choix du constructeur)**.
+
+Chaque ligne de règle porte le `moveReason` de la règle et un `moveReasonText` en clair.
+
+**Refus.** Sur un jour placé par une règle, « Garder le jour prévu » écrit des lignes `.user` qui rétablissent la semaine type sur les jours concernés. Les règles ne touchent plus ces jours, et le refus vaut pour ces dates. La spec V1 voulait le refus dans `refusedAdjustments` de la séance du jour. Mais la séance n'existe pas encore quand on refuse, et une course n'est jamais une séance Pulse. Le refus est donc une ligne de la semaine datée **(choix du constructeur)**. « Rétablir la semaine type » efface aussi les refus, et les règles reprennent la main.
 
 ## 10. Décharge
 
-Quand l'ACWR est ≥ 1,5 deux jours de suite (avec 28 jours d'historique), l'accueil propose une semaine de décharge : volume −40 %, charges −10 %, jusqu'au dimanche suivant. On peut l'accepter ou la refuser. Elle est enregistrée comme ajustement `.deload` (refusé ou appliqué) **(choix du constructeur pour la durée)**.
+**Quand.** L'ACWR est ≥ 1,5 aujourd'hui et hier, avec 28 jours d'historique. Aucune décharge ni aucun refus n'est en cours.
+
+**Proposition.** L'accueil montre une carte « Semaine de décharge » avec le ratio, et deux boutons : « Commencer la décharge » et « Pas cette fois ».
+
+**Fenêtre.** Une décision vaut du jour où elle est prise jusqu'au dimanche suivant compris. Un dimanche, c'est le dimanche d'après **(choix du constructeur)**. Accepter écrit `profile.deloadWeekStartedAt`, refuser écrit `profile.deloadDeclinedAt`. Pendant la fenêtre, rien n'est reproposé.
+
+**Pendant une décharge acceptée**, chaque séance de routine lancée :
+- perd 40 % de ses séries, avant les ajustements du score du jour ;
+- reçoit des charges proposées 10 % plus basses, arrondies comme d'habitude, calculées sur les séances d'avant la décharge pour que la baisse ne se cumule pas. Après la décharge, la progression repart des charges de la décharge **(choix du constructeur)** ;
+- ne peut pas monter en charge ;
+- porte l'ajustement `.deload` dans `appliedAdjustments`.
+
+La carte de l'accueil porte « Décharge ».
+
+**Pendant une fenêtre refusée**, les séances lancées portent `.deload` dans `refusedAdjustments`.
 
 ## 11. Widgets
 
-Les widgets Série, Semaine, Séance du jour et Prochaine séance existent (travail de Mathéo) avec des données d'exemple. M6b ajoute à `WidgetSnapshot` la série, la semaine en cours et la prochaine séance, publiés par le passage du jour, et les widgets les lisent. Comme pour le score, rien de sensible sur l'écran verrouillé.
+`WidgetSnapshot` gagne quatre champs facultatifs (un ancien fichier se lit toujours) :
+- la série : semaines, séances de la semaine, objectif ;
+- les 7 jours de la semaine : discipline et état ;
+- la prochaine séance : titre, jour, discipline ;
+- le ratio de charge (ACWR), quand il existe, pour les widgets Semaine et Charge.
+
+Le passage du jour les remplit depuis la semaine datée et la série. Les widgets Série, Semaine, Séance du jour et Prochaine séance les lisent, et retombent sur leurs données d'exemple sans instantané du jour. Rien de sensible sur l'écran verrouillé : jamais une valeur de santé brute.
 
 ---
 

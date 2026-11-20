@@ -23,6 +23,10 @@ public final class DayRefresher: Sendable {
     private let scheduledDays: (any ScheduledDayRepository)?
     /// Les courses et les vélos d'Apple Santé, lus après les nuits (spec M6 §3).
     private let workoutHistory: WorkoutHistory?
+    /// Les règles anti-interférence, appliquées après la lecture des entraînements (spec M6 §9).
+    private let antiInterference: AntiInterferenceService?
+    /// La série, la semaine et la charge publiées avec l'instantané du widget (spec M6 §11).
+    private let planning: PlanningService?
     private let calendar: Calendar
     private let now: @Sendable () -> Date
     private let queue = SerialTaskQueue()
@@ -35,12 +39,15 @@ public final class DayRefresher: Sendable {
     private struct DayPlan {
         var display: PlannedDay
         var forScore: PlannedDay?
+        /// Vrai pendant une semaine de décharge acceptée (spec M6 §10).
+        var deload = false
     }
 
     public init(profiles: any ProfileRepository, programs: any ProgramRepository, recovery: any RecoveryRepository,
                 nightHistory: NightHistory, scores: DailyScoreService, widgets: any WidgetPublishing,
                 notifications: any NotificationScheduling, activity: any DayActivityLog,
-                scheduledDays: (any ScheduledDayRepository)? = nil, workoutHistory: WorkoutHistory? = nil, calendar: Calendar,
+                scheduledDays: (any ScheduledDayRepository)? = nil, workoutHistory: WorkoutHistory? = nil,
+                antiInterference: AntiInterferenceService? = nil, planning: PlanningService? = nil, calendar: Calendar,
                 now: @escaping @Sendable () -> Date) {
         self.profiles = profiles
         self.programs = programs
@@ -52,6 +59,8 @@ public final class DayRefresher: Sendable {
         self.activity = activity
         self.scheduledDays = scheduledDays
         self.workoutHistory = workoutHistory
+        self.antiInterference = antiInterference
+        self.planning = planning
         self.calendar = calendar
         self.now = now
     }
@@ -72,7 +81,7 @@ public final class DayRefresher: Sendable {
             let now = self.now()
             let plan = await self.currentPlan(now: now)
             let saved = try await self.scores.saveCheckIn(answers, plannedDay: plan.forScore, now: now)
-            await self.publish(saved, plannedDay: plan.display)
+            await self.publish(saved, plan: plan)
             return saved
         }
     }
@@ -83,8 +92,23 @@ public final class DayRefresher: Sendable {
             let now = self.now()
             let plan = await self.currentPlan(now: now)
             let saved = try await self.scores.chooseOriginalSession(chosen, now: now)
-            await self.publish(saved, plannedDay: plan.display)
+            await self.publish(saved, plan: plan)
             return saved
+        }
+    }
+
+    /// Accepte (`true`) ou refuse la semaine de décharge proposée (spec M6 §10) ; la décision vaut jusqu'au dimanche suivant.
+    public func decideDeload(_ accepted: Bool) async throws {
+        try await queue.run {
+            let now = self.now()
+            guard var profile = try await self.profiles.load() else { return }
+            if accepted {
+                profile.deloadWeekStartedAt = now
+            } else {
+                profile.deloadDeclinedAt = now
+            }
+            profile.updatedAt = now
+            try await self.profiles.save(profile)
         }
     }
 
@@ -113,15 +137,17 @@ public final class DayRefresher: Sendable {
             activity.markOpened(at: now)
             await notifications.cancelMorningScore()
         }
-        let plan = await plan(for: profile, readFailed: profileReadFailed, now: now)
-        let plannedDay = plan.display
         let history = await nightHistory.refresh(now: now)
         await workoutHistory?.refresh(now: now)
+        // Une semaine illisible reste telle quelle : la séance du jour suit les lignes déjà écrites.
+        try? await antiInterference?.apply(nights: history.nights)
+        let plan = await plan(for: profile, readFailed: profileReadFailed, now: now)
+        let plannedDay = plan.display
         let score = try? await scores.update(nights: history.nights, plannedDay: plan.forScore, now: now)
         let scored: DailyRecovery? = if case .scored(let recovery)? = score { recovery } else { nil }
-        let session = TodaySession(plannedDay: plannedDay, recovery: scored)
+        let session = TodaySession(plannedDay: plannedDay, recovery: scored, deload: plan.deload)
         if let scored {
-            await widgets.publish(WidgetSnapshot(recovery: scored, session: session))
+            await widgets.publish(await snapshot(scored, session: session))
             if origin == .background, let profile {
                 await notifyIfDue(scored, session: session, profile: profile, now: now)
             }
@@ -139,9 +165,14 @@ public final class DayRefresher: Sendable {
         activity.markNotified(day: scored.day)
     }
 
-    private func publish(_ scored: DailyRecovery, plannedDay: PlannedDay) async {
-        let session = TodaySession(plannedDay: plannedDay, recovery: scored)
-        await widgets.publish(WidgetSnapshot(recovery: scored, session: session))
+    private func publish(_ scored: DailyRecovery, plan: DayPlan) async {
+        let session = TodaySession(plannedDay: plan.display, recovery: scored, deload: plan.deload)
+        await widgets.publish(await snapshot(scored, session: session))
+    }
+
+    /// L'instantané du jour, avec la série, la semaine et la charge quand elles se lisent.
+    private func snapshot(_ scored: DailyRecovery, session: TodaySession) async -> WidgetSnapshot {
+        WidgetSnapshot(recovery: scored, session: session).adding(try? await planning?.widgetPlanning())
     }
 
     /// Le profil enregistré, et si sa lecture a échoué : un profil absent n'est pas un profil illisible.
@@ -170,7 +201,8 @@ public final class DayRefresher: Sendable {
             }
         }
         let planned = TodayPlanner.plan(program: program, on: now, calendar: calendar, overrides: await overrides(now: now))
-        return DayPlan(display: planned, forScore: planned)
+        let deload = Deload.status(profile: profile, now: now, calendar: calendar).isActive
+        return DayPlan(display: planned, forScore: planned, deload: deload)
     }
 
     /// Les lignes de la semaine datée d'aujourd'hui et des 7 jours suivants ; aucune si leur lecture échoue.

@@ -17,9 +17,18 @@ struct TodaySessionWidgetContentTests {
         #expect(!content.isRest)
         #expect(content.buttonText == "Démarrer")
         #expect(content.accessoryTitle == "Push")
-        #expect(content.accessorySubtitle == "14 séries · allégée")
-        #expect(content.inlineText == "Push · 14 séries")
+        #expect(content.accessorySubtitle == "allégée", "Sans détail dans l'instantané, pas de chiffres inventés")
+        #expect(content.inlineText == "Push")
         #expect(!content.muscleLevels.isEmpty)
+    }
+
+    @Test func theSessionDetailComesFromTheSnapshot() {
+        var snapshot = WidgetSample.snapshot(sessionTitle: "Push", isLightened: false)
+        snapshot.sessionDetail = "5 exercices · 16 séries"
+        let content = TodaySessionWidgetContent.make(snapshot: snapshot, at: now, calendar: calendar)
+        #expect(content.metaText == "5 exercices · 16 séries · comme prévu")
+        #expect(content.inlineText == "Push · 5 exercices · 16 séries")
+        #expect(!content.isAdjusted)
     }
 
     @Test func restDayShowsRestContent() {

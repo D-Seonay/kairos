@@ -9,6 +9,8 @@ import PulseServices
 struct StrengthCard: Equatable {
     enum Badge: Equatable {
         case adjusted, planned
+        /// Une semaine de décharge acceptée allège la séance (spec M6 §10).
+        case deload
     }
 
     var title: String
@@ -90,13 +92,17 @@ enum SessionCardState: Equatable {
                 showsWhy: true, originButton: String(localized: "Séance d'origine", bundle: .module),
                 startButton: String(localized: "Démarrer la séance", bundle: .module)))
         case .restored:
+            let base = session.baseDay ?? day
             return .strength(StrengthCard(
-                title: day.name, badge: .planned, summary: SessionSummary.make(day: day, directory: directory),
+                title: session.isDeload ? session.title ?? day.name : day.name, badge: session.isDeload ? .deload : .planned,
+                summary: SessionSummary.make(day: base, directory: directory),
                 showsWhy: true, originButton: String(localized: "Revenir à l'ajustée", bundle: .module),
                 startButton: String(localized: "Démarrer quand même", bundle: .module)))
         case .planned:
+            let base = session.baseDay ?? day
             return .strength(StrengthCard(
-                title: day.name, badge: .planned, summary: SessionSummary.make(day: day, directory: directory),
+                title: session.isDeload ? session.title ?? day.name : day.name, badge: session.isDeload ? .deload : .planned,
+                summary: SessionSummary.make(day: base, directory: directory),
                 showsWhy: false, originButton: nil, startButton: String(localized: "Démarrer la séance", bundle: .module)))
         }
     }

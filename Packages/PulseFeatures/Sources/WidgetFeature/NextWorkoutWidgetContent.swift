@@ -37,8 +37,23 @@ public struct NextWorkoutWidgetContent: Sendable, Equatable {
         self.accessibilityLabel = accessibilityLabel
     }
 
+    /// La prochaine séance de l'instantané du jour ; l'exemple sans instantané du jour ou sans semaine.
     public static func make(snapshot: WidgetSnapshot?, at date: Date, calendar: Calendar) -> NextWorkoutWidgetContent {
-        sample(at: date, calendar: calendar)
+        guard let planning = WidgetPlanningText.planning(snapshot, at: date, calendar: calendar) else {
+            return sample(at: date, calendar: calendar)
+        }
+        guard let next = planning.snapshot.nextSession else {
+            let title = String(localized: "Rien de prévu", bundle: .module)
+            let detail = String(localized: "Cette semaine", bundle: .module)
+            return NextWorkoutWidgetContent(timingText: detail, title: title, zoneText: "", activeZone: 0, inlineText: title,
+                                            accessibilityLabel: String(localized: "Aucune séance prévue cette semaine", bundle: .module))
+        }
+        let timing = WidgetPlanningText.timing(of: next.date, from: date, calendar: calendar)
+        let detail = next.detail ?? ""
+        let spoken = String(localized: "Prochaine séance : \(timing), \(next.title), \(detail)", bundle: .module)
+        return NextWorkoutWidgetContent(timingText: timing, title: next.title, zoneText: detail,
+                                        activeZone: 0, inlineText: "\(next.title) · \(timing)",
+                                        accessibilityLabel: spoken)
     }
 
     public static func sample(at date: Date, calendar: Calendar) -> NextWorkoutWidgetContent {

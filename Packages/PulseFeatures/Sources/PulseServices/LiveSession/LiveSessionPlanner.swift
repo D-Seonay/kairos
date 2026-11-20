@@ -17,13 +17,15 @@ public enum LiveSessionPlanner {
         var directory: ExerciseDirectory
         var profile: UserProfile?
         var policy: ProgressionPolicy
+        /// Le facteur des charges externes proposées : 0,9 pendant une semaine de décharge.
+        var loadFactor = 1.0
     }
 
     // swiftlint:disable function_parameter_count
     public static func session(for launch: SessionLaunch, directory: ExerciseDirectory,
                                history: [ExerciseReference: [WorkoutSet]], settings: [ExerciseReference: ExerciseSettings],
                                profile: UserProfile?, now: Date) -> LiveSession {
-        let context = Context(directory: directory, profile: profile, policy: launch.policy)
+        let context = Context(directory: directory, profile: profile, policy: launch.policy, loadFactor: launch.loadFactor)
         let planned = Dictionary((launch.plannedDay?.exercises ?? []).map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         var applied = launch.applied
         var exercises: [LiveExercise] = []
@@ -78,7 +80,9 @@ public enum LiveSessionPlanner {
         let proposal = LoadProgression.propose(exercise: routineExercise, name: name, loadKind: loadKind,
                                                tracksDuration: tracksDuration, lastSets: lastSets, incrementKg: incrementKg,
                                                rounding: rounding, policy: context.policy)
-        let working = proposal.sets.enumerated().map { index, proposed in
+        let proposedSets = loadKind == .external ? scaled(proposal.sets, by: context.loadFactor, increment: incrementKg,
+                                                           rounding: rounding) : proposal.sets
+        let working = proposedSets.enumerated().map { index, proposed in
             let before = index < lastSets.count ? lastSets[index] : nil
             return LiveSet(proposed: proposed, previous: LiveSessionText.previous(before, loadKind: loadKind,
                                                                                   tracksDuration: tracksDuration))
@@ -110,6 +114,16 @@ public enum LiveSessionPlanner {
                                   maxCount: plan.maxCount).map { warmup in
             let proposed = ProposedSet(weightKg: warmup.weightKg, reps: warmup.reps)
             return LiveSet(setType: .warmup, proposed: proposed, weightKg: warmup.weightKg, reps: warmup.reps)
+        }
+    }
+
+    /// Les charges de `sets` multipliées par `factor`, arrondies au plus près comme les autres charges ; inchangées à 1.
+    static func scaled(_ sets: [ProposedSet], by factor: Double, increment: Double, rounding: WeightRounding) -> [ProposedSet] {
+        guard factor != 1 else { return sets }
+        return sets.map { set in
+            var lowered = set
+            lowered.weightKg = set.weightKg.map { PlateRounding.nearestLoad($0 * factor, increment: increment, rounding: rounding) }
+            return lowered
         }
     }
 
