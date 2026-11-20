@@ -136,3 +136,18 @@ private func loadedModel(_ fixture: TrainFixture) async throws -> ProgramEditorM
     #expect(model.templates.count == fixture.environment.library.programTemplates.count)
     #expect(model.program == nil)
 }
+
+@MainActor @Test func rulesAreToggledInTheProfile() async throws {
+    let fixture = TrainFixture()
+    let model = try await loadedModel(fixture)
+    #expect(model.disabledRules.isEmpty)
+    try await model.setRule(.fullRestDay, enabled: false)
+    try await model.setRule(.noIntenseRunAfterHeavyLegs, enabled: false)
+    #expect(model.disabledRules == [.noIntenseRunAfterHeavyLegs, .fullRestDay])
+    try await model.setRule(.fullRestDay, enabled: true)
+    #expect(try await fixture.profiles.load()?.antiInterferenceRulesDisabled == [.noIntenseRunAfterHeavyLegs])
+
+    let reloaded = ProgramEditorModel(environment: fixture.environment)
+    await reloaded.load()
+    #expect(reloaded.disabledRules == [.noIntenseRunAfterHeavyLegs])
+}

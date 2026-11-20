@@ -61,8 +61,35 @@ public struct WeekWidgetContent: Sendable, Equatable {
         self.accessibilityLabel = accessibilityLabel
     }
 
+    /// La semaine, la séance du jour, la charge et la prochaine séance de l'instantané du jour ; l'exemple sans instantané du
+    /// jour ou sans semaine.
     public static func make(snapshot: WidgetSnapshot?, at date: Date, calendar: Calendar) -> WeekWidgetContent {
-        sample(at: date, calendar: calendar)
+        guard let planning = WidgetPlanningText.planning(snapshot, at: date, calendar: calendar) else {
+            return sample(at: date, calendar: calendar)
+        }
+        let snapshot = planning.snapshot
+        let days = planning.week.map { day in
+            DayItem(letter: WidgetPlanningText.letter(of: day, calendar: calendar), iconName: WidgetPlanningText.icon(of: day.kind),
+                    isRest: day.kind == .rest, state: WidgetPlanningText.state(of: day))
+        }
+        let title = snapshot.sessionTitle ?? String(localized: "Jour de repos", bundle: .module)
+        let meta = snapshot.sessionTitle == nil ? String(localized: "Récupération", bundle: .module)
+            : snapshot.isLightened ? String(localized: "Allégée selon ta forme", bundle: .module)
+            : String(localized: "Comme prévu", bundle: .module)
+        let load = snapshot.loadRatio.map { ratio in
+            "\(WidgetPlanningText.ratio(ratio)) · \(WidgetPlanningText.zone(of: ratio).text.lowercased())"
+        } ?? String(localized: "après 28 jours", bundle: .module)
+        let next = snapshot.nextSession.map { next in
+            "\(WidgetPlanningText.timing(of: next.date, from: date, calendar: calendar)) : \(next.title)"
+        } ?? String(localized: "Rien de prévu cette semaine", bundle: .module)
+        let completed = planning.streak.completed
+        let target = planning.streak.target
+        let week = String(localized: "Cette semaine : \(completed) séances sur \(target) faites.", bundle: .module)
+        let spoken = String(localized: "\(week) Aujourd'hui : \(title). Charge \(load). \(next)", bundle: .module)
+        return WeekWidgetContent(
+            badgeText: String(localized: "\(completed) sur \(target)", bundle: .module), days: days, todayTitle: title,
+            todayMeta: meta, todayMuscleLevels: snapshot.sessionTitle.map(TodaySessionWidgetContent.defaultMuscleLevels(for:)) ?? [:],
+            acwrRatio: snapshot.loadRatio ?? 1, acwrZoneText: load, tomorrowText: next, accessibilityLabel: spoken)
     }
 
     public static func sample(at date: Date, calendar: Calendar) -> WeekWidgetContent {

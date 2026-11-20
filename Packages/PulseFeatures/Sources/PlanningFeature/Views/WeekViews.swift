@@ -87,6 +87,12 @@ struct TodayPlanCard: View {
                     .font(.subheadline)
                     .foregroundStyle(PulsePalette.opalMuted)
                     .fixedSize(horizontal: false, vertical: true)
+                if let reminder = model.spacingReminder(for: day) {
+                    Label(reminder, systemImage: "clock")
+                        .font(.footnote)
+                        .foregroundStyle(PulsePalette.opalInk)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 action
             }
         }
@@ -94,7 +100,7 @@ struct TodayPlanCard: View {
     }
 
     private var subtitle: String {
-        if day.state == .done { return model.detail(of: day) }
+        if day.state == .done || day.scheduled.map(AntiInterference.isRule) == true { return model.detail(of: day) }
         if let routine = day.routine, routine.kind == .run { return PlanningText.run(routine) }
         return train.strengthSubtitle
     }
@@ -139,10 +145,18 @@ struct WeekDayRow: View {
                     Label(String(localized: "Déplacer à…", bundle: .module), systemImage: "arrow.left.arrow.right")
                 }
             }
+            if model.canKeepPlanned(day) {
+                Button { Task { await model.keepPlanned(day) } } label: {
+                    Label(String(localized: "Garder le jour prévu", bundle: .module), systemImage: "arrow.uturn.backward")
+                }
+            }
         }
         .accessibilityElement(children: .combine)
         .accessibilityAction(named: String(localized: "Déplacer", bundle: .module)) {
             if !model.targets(for: day).isEmpty { model.moving = day }
+        }
+        .accessibilityAction(named: String(localized: "Garder le jour prévu", bundle: .module)) {
+            if model.canKeepPlanned(day) { Task { await model.keepPlanned(day) } }
         }
         .accessibilityIdentifier(PlanningIdentifiers.dayPrefix + model.dayNumber(day))
     }
@@ -189,6 +203,8 @@ struct WeekDayRow: View {
             Image(systemName: "checkmark.circle.fill").foregroundStyle(PulsePalette.ink).accessibilityHidden(true)
         } else if day.movedFrom != nil {
             Image(systemName: "arrow.left.arrow.right").foregroundStyle(PulsePalette.text2).accessibilityHidden(true)
+        } else if day.scheduled.map(AntiInterference.isRule) == true {
+            Image(systemName: "arrow.triangle.2.circlepath").foregroundStyle(PulsePalette.text2).accessibilityHidden(true)
         }
     }
 }

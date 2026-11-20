@@ -69,6 +69,9 @@ public struct TodayView: View {
                 TodayHeader(model: model, onOpenProfile: onOpenProfile)
                 recoveryOrCheckIn
                 SessionCard(model: model, onWhy: model.showWhy, onResume: onResumeSession)
+                if let offer = model.deloadOffer {
+                    DeloadOfferCard(offer: offer) { accepted in Task { await model.decideDeload(accepted) } }
+                }
                 if let supplements {
                     SupplementsCard(model: supplements) { isShowingSupplements.wrappedValue = true }
                 }

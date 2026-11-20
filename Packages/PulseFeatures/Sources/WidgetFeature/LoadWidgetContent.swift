@@ -34,8 +34,20 @@ public struct LoadWidgetContent: Sendable, Equatable {
         self.accessibilityLabel = accessibilityLabel
     }
 
+    /// Le ratio de l'instantané du jour ; l'exemple sans instantané du jour. Sans 28 jours d'historique, le widget le dit.
     public static func make(snapshot: WidgetSnapshot?, at date: Date, calendar: Calendar) -> LoadWidgetContent {
-        sample(at: date, calendar: calendar)
+        guard let snapshot, calendar.isDate(snapshot.day, inSameDayAs: date) else { return sample(at: date, calendar: calendar) }
+        guard let ratio = snapshot.loadRatio else {
+            let text = String(localized: "Après 28 jours", bundle: .module)
+            return LoadWidgetContent(ratio: 1, ratioText: "–", zoneText: text, isOptimal: false,
+                                     accessibilityLabel: String(localized: "Charge d'entraînement disponible après 28 jours",
+                                                                bundle: .module))
+        }
+        let ratioText = WidgetPlanningText.ratio(ratio)
+        let zone = WidgetPlanningText.zone(of: ratio)
+        return LoadWidgetContent(ratio: ratio, ratioText: ratioText, zoneText: zone.text, isOptimal: zone.isOptimal,
+                                 accessibilityLabel: String(localized: "Charge d'entraînement \(ratioText), \(zone.text)",
+                                                            bundle: .module))
     }
 
     public static func sample(at date: Date, calendar: Calendar) -> LoadWidgetContent {

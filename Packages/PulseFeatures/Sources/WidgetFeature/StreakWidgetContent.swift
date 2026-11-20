@@ -47,15 +47,21 @@ public struct StreakWidgetContent: Sendable, Equatable {
         self.accessibilityLabel = accessibilityLabel
     }
 
+    /// La série et la semaine de l'instantané du jour ; l'exemple sans instantané du jour ou sans série.
     public static func make(snapshot: WidgetSnapshot?, at date: Date, calendar: Calendar) -> StreakWidgetContent {
-        sample(at: date, calendar: calendar)
+        guard let planning = WidgetPlanningText.planning(snapshot, at: date, calendar: calendar) else {
+            return sample(at: date, calendar: calendar)
+        }
+        let streak = planning.streak
+        return content(weeks: streak.weeks, completed: streak.completed, target: streak.target,
+                       days: planning.week.map(WidgetPlanningText.state(of:)))
     }
 
     public static func sample(at date: Date, calendar: Calendar) -> StreakWidgetContent {
-        let days: [DayState] = [.completed, .completed, .completed, .rest, .today, .upcoming, .rest]
-        let weeks = 14
-        let completed = 3
-        let target = 5
+        content(weeks: 14, completed: 3, target: 5, days: [.completed, .completed, .completed, .rest, .today, .upcoming, .rest])
+    }
+
+    private static func content(weeks: Int, completed: Int, target: Int, days: [DayState]) -> StreakWidgetContent {
         let subtitleText = String(localized: "\(completed) sur \(target) cette semaine", bundle: .module)
         let inline = String(localized: "\(weeks) sem. · \(completed)/\(target)", bundle: .module)
         let label = String(localized: "Série de \(weeks) semaines, \(completed) séances sur \(target) cette semaine", bundle: .module)

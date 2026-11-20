@@ -79,7 +79,7 @@ struct SessionCardHeader: View {
     }
 }
 
-/// « Ajustée » en couleur d'accent, « Planifiée » en neutre ; le mot est toujours écrit.
+/// « Ajustée » et « Décharge » en couleur d'accent, « Planifiée » en neutre ; le mot est toujours écrit.
 private struct SessionBadge: View {
     let badge: StrengthCard.Badge
     @Environment(\.pulseTheme) private var theme
@@ -89,18 +89,20 @@ private struct SessionBadge: View {
         Label {
             Text(text)
         } icon: {
-            if badge == .adjusted {
-                Image(systemName: "sparkles")
+            switch badge {
+            case .adjusted: Image(systemName: "sparkles")
+            case .deload: Image(systemName: "arrow.down.right")
+            case .planned: EmptyView()
             }
         }
         .labelStyle(.titleAndIcon)
         .font(.system(.caption, weight: .semibold))
-        .foregroundStyle(badge == .adjusted ? Color(palette.accent) : PulsePalette.text2)
+        .foregroundStyle(badge == .planned ? PulsePalette.text2 : Color(palette.accent))
         .fixedSize(horizontal: false, vertical: true)
         .layoutPriority(1)
         .padding(.horizontal, 10)
         .frame(minHeight: 24)
-        .background(badge == .adjusted ? palette.soft : PulsePalette.surface2, in: Capsule())
+        .background(badge == .planned ? PulsePalette.surface2 : palette.soft, in: Capsule())
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(text)
     }
@@ -109,6 +111,7 @@ private struct SessionBadge: View {
         switch badge {
         case .adjusted: String(localized: "Ajustée", bundle: .module)
         case .planned: String(localized: "Planifiée", bundle: .module)
+        case .deload: String(localized: "Décharge", bundle: .module)
         }
     }
 }

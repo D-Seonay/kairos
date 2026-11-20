@@ -96,6 +96,9 @@ public struct ProgramEditorView: View {
         }
         .listRowBackground(PulsePalette.surface)
         routines(of: program)
+        AntiInterferenceSection(disabled: model.disabledRules) { rule, enabled in
+            perform { try await model.setRule(rule, enabled: enabled) }
+        }
         Section {
             Button(String(localized: "Archiver ce programme", bundle: .module), role: .destructive) { isArchiving = true }
                 .frame(minHeight: 44)

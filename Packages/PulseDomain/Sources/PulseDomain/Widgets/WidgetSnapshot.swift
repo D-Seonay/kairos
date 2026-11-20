@@ -8,6 +8,8 @@ public struct WidgetSnapshot: Sendable, Equatable, Codable {
     public var isEstimated: Bool
     public var sessionTitle: String?
     public var isLightened: Bool
+    /// « 5 exercices · 12 séries », « Sortie facile · 45 min » : la séance du jour telle qu'elle est à faire.
+    public var sessionDetail: String?
     /// La série et la semaine en cours (spec M6 §11) ; nulles dans un instantané d'avant M6b.
     public var streak: WidgetStreak?
     /// Les 7 jours de la semaine en cours, du lundi au dimanche.
@@ -17,7 +19,7 @@ public struct WidgetSnapshot: Sendable, Equatable, Codable {
     public var loadRatio: Double?
 
     public init(day: Date, score: Int, category: RecoveryCategory, isEstimated: Bool, sessionTitle: String?, isLightened: Bool,
-                streak: WidgetStreak? = nil, week: [WidgetDay]? = nil, nextSession: WidgetNextSession? = nil,
+                sessionDetail: String? = nil, streak: WidgetStreak? = nil, week: [WidgetDay]? = nil, nextSession: WidgetNextSession? = nil,
                 loadRatio: Double? = nil) {
         self.day = day
         self.score = score
@@ -25,6 +27,7 @@ public struct WidgetSnapshot: Sendable, Equatable, Codable {
         self.isEstimated = isEstimated
         self.sessionTitle = sessionTitle
         self.isLightened = isLightened
+        self.sessionDetail = sessionDetail
         self.streak = streak
         self.week = week
         self.nextSession = nextSession

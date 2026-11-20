@@ -39,8 +39,10 @@ struct DayRefresherTests {
         #expect(refresh.checkIn == nil)
 
         let published = await fixture.widgets.published
+        let push = try #require(refresh.plannedDay.routineDay)
+        let detail = "\(push.exercises.count) exercices · \(push.exercises.reduce(0) { $0 + $1.sets }) séries"
         #expect(published == [WidgetSnapshot(day: day, score: Int(scored.score.rounded()), category: .optimal,
-                                             isEstimated: false, sessionTitle: "Push", isLightened: false)])
+                                             isEstimated: false, sessionTitle: "Push", isLightened: false, sessionDetail: detail)])
         #expect(fixture.activity.lastOpenedAt() == fixture.clock.now)
         #expect(await fixture.notifications.cancelCount == 1)
         #expect(await fixture.notifications.scheduled.isEmpty)

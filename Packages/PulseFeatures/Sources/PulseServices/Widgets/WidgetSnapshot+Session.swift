@@ -2,10 +2,11 @@ import Foundation
 import PulseDomain
 
 extension WidgetSnapshot {
-    /// L'instantané du jour : score arrondi, catégorie, titre de la séance et allègement, rien d'autre.
+    /// L'instantané du jour : score arrondi, catégorie, titre, détail et allègement de la séance, rien d'autre.
     public init(recovery: DailyRecovery, session: TodaySession) {
         self.init(day: recovery.day, score: Int(recovery.score.rounded()), category: recovery.category,
-                  isEstimated: recovery.isEstimated, sessionTitle: session.title, isLightened: session.isLightened)
+                  isEstimated: recovery.isEstimated, sessionTitle: session.title, isLightened: session.isLightened,
+                  sessionDetail: session.activeDay.flatMap(WidgetPlanning.detail(of:)))
     }
 }
 

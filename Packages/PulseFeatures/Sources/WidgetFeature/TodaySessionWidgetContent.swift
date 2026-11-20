@@ -82,17 +82,12 @@ public struct TodaySessionWidgetContent: Sendable, Equatable {
         }
 
         let isAdjusted = snapshot.isLightened
-        let meta = String(localized: "14 séries · 55 min · RPE 7,5", bundle: .module)
+        let detail = snapshot.sessionDetail
+        let state = isAdjusted ? String(localized: "allégée", bundle: .module) : String(localized: "comme prévu", bundle: .module)
+        let meta = [detail, state].compactMap { $0 }.joined(separator: " · ")
         let levels = defaultMuscleLevels(for: sessionTitle)
-        let sub = isAdjusted
-            ? String(localized: "14 séries · allégée", bundle: .module)
-            : String(localized: "14 séries · 55 min", bundle: .module)
-        let detail = String(localized: "RPE max 7,5", bundle: .module)
-        let inline = "\(sessionTitle) · 14 séries"
-        let spoken = String(
-            localized: "Séance du jour : \(sessionTitle), 14 séries, 55 minutes, RPE 7,5",
-            bundle: .module
-        )
+        let inline = detail.map { "\(sessionTitle) · \($0)" } ?? sessionTitle
+        let spoken = String(localized: "Séance du jour : \(sessionTitle), \(meta)", bundle: .module)
 
         return TodaySessionWidgetContent(
             title: sessionTitle,
@@ -103,8 +98,8 @@ public struct TodaySessionWidgetContent: Sendable, Equatable {
             buttonText: String(localized: "Démarrer", bundle: .module),
             muscleLevels: levels,
             accessoryTitle: sessionTitle,
-            accessorySubtitle: sub,
-            accessoryDetail: detail,
+            accessorySubtitle: meta,
+            accessoryDetail: isAdjusted ? String(localized: "Ajustée à ta forme", bundle: .module) : "",
             inlineText: inline,
             accessibilityLabel: spoken
         )
@@ -136,7 +131,7 @@ public struct TodaySessionWidgetContent: Sendable, Equatable {
         )
     }
 
-    private static func defaultMuscleLevels(for sessionTitle: String) -> [MuscleMapRegion: Int] {
+    static func defaultMuscleLevels(for sessionTitle: String) -> [MuscleMapRegion: Int] {
         let lower = sessionTitle.lowercased()
         if lower.contains("push") || lower.contains("pec") || lower.contains("pector") {
             return [.chest: 4, .triceps: 3, .frontDeltoid: 2]

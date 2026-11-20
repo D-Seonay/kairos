@@ -90,4 +90,46 @@ struct PlanningModelTests {
         let saved = try #require(try await fixture.workouts.session(id: run.id))
         #expect(saved.overallRPE == 8 && saved.note == "Vent de face" && !model.hasChanges)
     }
+
+    @Test func ruleMovesShowTheirReasonAndCanBeRefused() async throws {
+        let fixture = PlanningFixture()
+        try await fixture.activate()
+        let created = PlanningClock.date(day: 18)
+        try await fixture.scheduled.save(ScheduledDay(
+            date: PlanningClock.date(day: 19), programID: fixture.program.id, title: "Repos", kind: .rest, status: .planned,
+            moveReason: .antiInterferenceAfterHeavyLegs, moveReasonText: "Course déplacée : 36 h après les jambes",
+            createdAt: created, updatedAt: created))
+        try await fixture.scheduled.save(ScheduledDay(
+            date: PlanningClock.date(day: 21), programID: fixture.program.id, routineDayID: PlanningFixture.run.id, title: "Endurance",
+            kind: .run, status: .planned, movedFromDate: PlanningClock.date(day: 19), moveReason: .antiInterferenceAfterHeavyLegs,
+            moveReasonText: "Déplacée : 36 h après les jambes", createdAt: created, updatedAt: created))
+        let model = PlanningModel(environment: fixture.environment)
+        await model.load()
+
+        #expect(model.detail(of: model.days[3]) == "Course déplacée : 36 h après les jambes")
+        #expect(model.detail(of: model.days[5]) == "Déplacée : 36 h après les jambes")
+        #expect(model.canKeepPlanned(model.days[5]) && !model.canKeepPlanned(model.days[2]))
+        #expect(model.overview?.hasUserMoves == false)
+
+        await model.keepPlanned(model.days[5])
+        #expect(model.days[3].routine?.name == "Endurance" && model.days[5].routine == nil)
+        #expect(!model.canKeepPlanned(model.days[3]) && model.errorMessage == nil)
+    }
+
+    @Test func aRunDoneOnALegsDayAsksForSpacing() async throws {
+        let fixture = PlanningFixture()
+        try await fixture.activate()
+        try await fixture.log(day: 18, hour: 7, kind: .run, meters: 5_000, source: .appleHealth)
+        let model = PlanningModel(environment: fixture.environment)
+        await model.load()
+        let today = try #require(model.today)
+        #expect(model.spacingReminder(for: today) == "Au moins 6 h entre les deux, la plus technique le matin.")
+        #expect(model.spacingReminder(for: model.days[3]) == nil)
+
+        var profile = try #require(try await fixture.profiles.load())
+        profile.antiInterferenceRulesDisabled = [.sameDayOrdering]
+        try await fixture.profiles.save(profile)
+        await model.load()
+        #expect(model.spacingReminder(for: try #require(model.today)) == nil)
+    }
 }

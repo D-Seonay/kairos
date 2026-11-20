@@ -24,7 +24,7 @@ struct WidgetSnapshotTests {
         let fatigue = recovery(58.4)
         let data = try JSONEncoder().encode(WidgetSnapshot(recovery: fatigue, session: try session(fatigue)))
         let object = try #require(try JSONSerialization.jsonObject(with: data) as? [String: Any])
-        #expect(Set(object.keys) == ["day", "score", "category", "isEstimated", "sessionTitle", "isLightened"])
+        #expect(Set(object.keys) == ["day", "score", "category", "isEstimated", "sessionTitle", "isLightened", "sessionDetail"])
     }
 
     @Test func restDaySnapshotHasNoSessionTitle() throws {

@@ -27,6 +27,8 @@ public final class ProgramEditorModel {
     public private(set) var otherPrograms: [Program] = []
     public let templates: [ProgramTemplate]
     public private(set) var errorMessage: String?
+    /// Les règles anti-interférence que le profil a désactivées (spec M6 §9).
+    public private(set) var disabledRules: [AntiInterferenceRule] = []
 
     @ObservationIgnored private let environment: TrainEnvironment
 
@@ -77,6 +79,20 @@ public final class ProgramEditorModel {
     /// Retire la routine du programme et de la semaine type.
     public func remove(_ dayID: UUID) async throws {
         try await update { ProgramEditor.removeDay(id: dayID, from: $0, now: $1) }
+    }
+
+    // MARK: - Règles anti-interférence
+
+    /// Active ou désactive une règle anti-interférence. Elle s'applique, ou ses déplacements à venir disparaissent, au prochain
+    /// passage du jour.
+    public func setRule(_ rule: AntiInterferenceRule, enabled: Bool) async throws {
+        var profile = try await requireProfile()
+        var disabled = profile.antiInterferenceRulesDisabled.filter { $0 != rule }
+        if !enabled { disabled.append(rule) }
+        profile.antiInterferenceRulesDisabled = AntiInterferenceRule.allCases.filter(disabled.contains)
+        profile.updatedAt = environment.now()
+        try await environment.profiles.save(profile)
+        disabledRules = profile.antiInterferenceRulesDisabled
     }
 
     // MARK: - Programmes
@@ -143,7 +159,9 @@ public final class ProgramEditorModel {
     }
 
     private func reload() async throws {
-        let activeID = try await environment.profiles.load()?.activeProgramID
+        let profile = try await environment.profiles.load()
+        let activeID = profile?.activeProgramID
+        disabledRules = profile?.antiInterferenceRulesDisabled ?? []
         let all = try await environment.programs.programs(includeArchived: false)
         if let activeID {
             program = try await environment.programs.program(id: activeID)
