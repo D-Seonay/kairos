@@ -17,25 +17,33 @@ enum TrainDestination: Hashable {
 
 /// L'onglet « Séance » : « Reprendre la séance » pendant une séance, la tuile Musculation (« Démarrer »), la tuile Course,
 /// « Mes routines » (« Lancer », « Mon programme » et « + Nouvelle »), puis la bibliothèque d'exercices, l'historique,
-/// « Séance libre » et l'import Hevy, poussés dans sa pile de navigation. Lancer une séance la rend à l'app, qui ouvre
-/// l'écran en direct ; s'il y en a déjà une en cours, l'onglet propose de la reprendre.
+/// « Séance libre », « Saisir une séance passée » et l'import Hevy. Lancer une séance la rend à l'app, qui ouvre l'écran en
+/// direct ; s'il y en a déjà une en cours, l'onglet propose de la reprendre. Une séance passée se saisit à côté de celle en
+/// cours.
 public struct TrainView: View {
     private let model: TrainModel
     private let onOpenToday: () -> Void
     private let onStartSession: (SessionLaunch) -> Void
     private let onResumeSession: () -> Void
+    private let onEnterPastSession: (SessionLaunch) -> Void
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var path: [TrainDestination] = []
     @State private var creationFailed = false
     @State private var offersResume = false
+    @State private var isEnteringPast = false
+    /// La séance passée rendue par le formulaire : elle s'ouvre une fois la feuille fermée, deux présentations ne se
+    /// chevauchant pas.
+    @State private var pendingPastLaunch: SessionLaunch?
 
-    /// `onOpenToday` affiche l'accueil ; `onStartSession` démarre la séance rendue ; `onResumeSession` rouvre celle en cours.
+    /// `onOpenToday` affiche l'accueil ; `onStartSession` démarre la séance rendue ; `onResumeSession` rouvre celle en cours ;
+    /// `onEnterPastSession` ouvre la saisie de la séance passée rendue.
     public init(model: TrainModel, onOpenToday: @escaping () -> Void, onStartSession: @escaping (SessionLaunch) -> Void,
-                onResumeSession: @escaping () -> Void) {
+                onResumeSession: @escaping () -> Void, onEnterPastSession: @escaping (SessionLaunch) -> Void) {
         self.model = model
         self.onOpenToday = onOpenToday
         self.onStartSession = onStartSession
         self.onResumeSession = onResumeSession
+        self.onEnterPastSession = onEnterPastSession
     }
 
     public var body: some View {
@@ -49,6 +57,11 @@ public struct TrainView: View {
         .task { await model.refresh() }
         // Revenir d'un éditeur relit le programme : la séance du jour et les routines ont pu changer.
         .onChange(of: path) { Task { await model.refresh() } }
+        .sheet(isPresented: $isEnteringPast, onDismiss: openPendingPastSession) {
+            NavigationStack {
+                PastSessionForm(model: model) { pendingPastLaunch = $0 }
+            }
+        }
         .confirmationDialog(String(localized: "Une séance est déjà en cours", bundle: .module), isPresented: $offersResume,
                             titleVisibility: .visible) {
             Button(String(localized: "Reprendre la séance", bundle: .module), action: onResumeSession)
@@ -58,6 +71,12 @@ public struct TrainView: View {
                 Text(String(localized: "« \(title) » est en cours : reprends-la avant d'en lancer une autre.", bundle: .module))
             }
         }
+    }
+
+    private func openPendingPastSession() {
+        guard let launch = pendingPastLaunch else { return }
+        pendingPastLaunch = nil
+        onEnterPastSession(launch)
     }
 
     /// Lance `launch` ; avec une séance déjà en cours, propose de la reprendre à la place.
@@ -165,6 +184,10 @@ public struct TrainView: View {
                         title: String(localized: "Séance libre", bundle: .module),
                         detail: String(localized: "Sans routine : tu ajoutes les exercices au fil de la séance", bundle: .module),
                         identifier: TrainIdentifiers.freeSession) { start(model.freeLaunch()) }
+            EntryButton(systemImage: "calendar.badge.clock",
+                        title: String(localized: "Saisir une séance passée", bundle: .module),
+                        detail: String(localized: "Une séance faite sans Pulse, avec sa date et sa durée", bundle: .module),
+                        identifier: TrainIdentifiers.pastSession) { isEnteringPast = true }
             EntryRow(destination: .hevyImport, systemImage: "square.and.arrow.down",
                      title: String(localized: "Importer depuis Hevy", bundle: .module),
                      detail: String(localized: "Ton historique, depuis un export CSV", bundle: .module),

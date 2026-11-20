@@ -314,3 +314,55 @@ private func savedSessions(_ fixture: LiveFixture) async throws -> [WorkoutSessi
     #expect(finished == 1)
     #expect(await fixture.service.current() == nil)
 }
+
+// MARK: - Apple Santé (spec M4 §19.5)
+
+@MainActor @Test func theFirstSaveExplainsAppleHealthBeforeAskingThenWrites() async throws {
+    let writer = StubWorkoutHealthWriter(access: .notDetermined, grantedOnRequest: .authorized)
+    let fixture = LiveFixture(healthWriter: writer)
+    let live = try await fixture.startedModel()
+    await validateBench(live, rpes: [8])
+    let model = RecapModel(service: fixture.service, endedAt: LiveClock.date("2026-11-02T09:00"))
+    await model.load()
+    #expect(model.healthAccess == .notDetermined)
+
+    #expect(await model.save() == false)
+    #expect(model.isExplainingHealth)
+    #expect(try await savedSessions(fixture).isEmpty)
+    #expect(await writer.requestCount == 0)
+
+    #expect(await model.continueAfterHealthExplanation())
+    #expect(!model.isExplainingHealth && model.healthAccess == .authorized)
+    #expect(await writer.requestCount == 1)
+    let saved = try #require(try await savedSessions(fixture).first)
+    #expect(saved.overallRPE == Double(model.rpe) && saved.healthKitUUID != nil)
+}
+
+@MainActor @Test func closingTheExplanationSavesNothingAndAsksAgain() async throws {
+    let writer = StubWorkoutHealthWriter(access: .notDetermined)
+    let fixture = LiveFixture(healthWriter: writer)
+    let live = try await fixture.startedModel()
+    await validateBench(live, rpes: [nil])
+    let model = RecapModel(service: fixture.service, endedAt: LiveClock.date("2026-11-02T09:00"))
+    await model.load()
+    #expect(await model.later() == false)
+    model.cancelHealthExplanation()
+    #expect(!model.isExplainingHealth)
+    #expect(try await savedSessions(fixture).isEmpty)
+    #expect(await model.save() == false && model.isExplainingHealth)
+}
+
+@MainActor @Test func aRefusedAccessSavesWithoutAskingAndSaysSo() async throws {
+    let writer = StubWorkoutHealthWriter(access: .denied)
+    let fixture = LiveFixture(healthWriter: writer)
+    let live = try await fixture.startedModel()
+    await validateBench(live, rpes: [nil])
+    let model = RecapModel(service: fixture.service, endedAt: LiveClock.date("2026-11-02T09:00"))
+    await model.load()
+    #expect(model.healthAccess == .denied)
+    #expect(await model.save())
+    #expect(!model.isExplainingHealth)
+    #expect(await writer.requestCount == 0)
+    #expect(await writer.saved.isEmpty)
+    #expect(try await savedSessions(fixture).first?.healthKitUUID == nil)
+}

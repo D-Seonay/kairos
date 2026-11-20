@@ -21,7 +21,9 @@ private actor FlakyWorkoutRepository: WorkoutRepository {
     func session(id: UUID) async throws -> WorkoutSession? { try await base.session(id: id) }
     func save(_ session: WorkoutSession) async throws { try await base.save(session) }
     func delete(id: UUID) async throws { try await base.delete(id: id) }
-    func lastSets(for exercise: ExerciseReference) async throws -> [WorkoutSet] { try await base.lastSets(for: exercise) }
+    func lastSets(for exercise: ExerciseReference, startedBefore date: Date) async throws -> [WorkoutSet] {
+        try await base.lastSets(for: exercise, startedBefore: date)
+    }
 }
 
 @MainActor @Test func historyGroupsByMonthNewestFirst() async throws {

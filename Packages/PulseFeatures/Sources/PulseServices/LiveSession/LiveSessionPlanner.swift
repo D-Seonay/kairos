@@ -37,9 +37,10 @@ public enum LiveSessionPlanner {
             worked.formUnion(directory.info(reference)?.primaryMuscles ?? [])
             if let adjustment = built.loadAdjustment { applied.append(adjustment) }
         }
-        return LiveSession(title: launch.title, startedAt: now, lastActionAt: now, programID: launch.programID,
-                           routineDayID: launch.day?.id, appliedAdjustments: applied, refusedAdjustments: launch.refused,
-                           policy: launch.policy, exercises: exercises)
+        return LiveSession(title: launch.title, startedAt: launch.past?.start ?? now, lastActionAt: now,
+                           programID: launch.programID, routineDayID: launch.day?.id, appliedAdjustments: applied,
+                           refusedAdjustments: launch.refused, policy: launch.policy, exercises: exercises,
+                           pastEndedAt: launch.past?.end)
     }
     // swiftlint:enable function_parameter_count
 

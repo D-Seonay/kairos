@@ -37,8 +37,9 @@ extension ActiveSessionService {
     }
 
     /// Replanifie la notification quand le repos ou la série suivante change, l'annule quand le repos s'arrête, et met à jour
-    /// la Live Activity quand ce qu'elle montre change.
+    /// la Live Activity quand ce qu'elle montre change. Une séance passée ne touche à rien.
     func publish(from old: LiveSession, to new: LiveSession) async {
+        guard !new.isPastEntry else { return }
         if let rest = new.rest {
             let message = Self.restEndMessage(for: new)
             if rest != old.rest || message != Self.restEndMessage(for: old), await restNotificationsEnabled() {

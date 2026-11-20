@@ -42,7 +42,7 @@ public final class TrainModel {
     /// Le jour de la semaine de la dernière lecture, pour dire « aujourd'hui » ou « demain » de la prochaine course.
     private(set) var weekday: Weekday?
 
-    @ObservationIgnored private let environment: TrainEnvironment
+    @ObservationIgnored let environment: TrainEnvironment
     /// Le profil et le score du jour de la dernière lecture : ils règlent ce qu'une séance lancée applique.
     @ObservationIgnored private var profile: UserProfile?
     @ObservationIgnored private var scoredToday: DailyRecovery?

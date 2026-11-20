@@ -43,8 +43,10 @@ struct TrainFixture {
     let activeSession: ActiveSessionService
     let now: Date
 
+    /// `healthWriter` branche l'écriture dans Apple Santé sur la séance active ; sans lui, elle est indisponible.
     init(profiles: any ProfileRepository = InMemoryProfileRepository(), now: Date = TrainClock.date(day: 2, hour: 9),
-         exerciseSettings: any ExerciseSettingsRepository = InMemoryExerciseSettingsRepository()) {
+         exerciseSettings: any ExerciseSettingsRepository = InMemoryExerciseSettingsRepository(),
+         healthWriter: StubWorkoutHealthWriter? = nil) {
         self.profiles = profiles
         self.now = now
         let library = ContentLibrary.bundled
@@ -60,7 +62,8 @@ struct TrainFixture {
         activeSession = ActiveSessionService(
             store: InMemoryActiveSessionStore(), workouts: workouts, profiles: profiles, settings: exerciseSettings,
             userExercises: userExercises, records: records, library: library, restNotifier: StubRestTimerNotifier(),
-            activity: StubSessionActivityController(), calendar: calendar, now: clock)
+            activity: StubSessionActivityController(), calendar: calendar, now: clock,
+            health: healthWriter.map { HealthWorkoutExporter(writer: $0, workouts: workouts, profiles: profiles) })
         environment = TrainEnvironment(
             profiles: profiles, programs: programs, recovery: recovery, workouts: workouts, userExercises: userExercises,
             exerciseSettings: exerciseSettings, personalRecords: personalRecords, records: records,

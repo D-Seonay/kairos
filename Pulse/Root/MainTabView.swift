@@ -22,6 +22,8 @@ struct MainTabView: View {
     let today: TodayModel
     let train: TrainModel
     @Bindable var liveSession: LiveSessionCoordinator
+    /// La saisie d'une séance passée, ouverte depuis l'onglet Séance.
+    @Bindable var pastSession: PastSessionCoordinator
     let firstName: String?
     /// Appelé après une suppression totale réussie depuis l'écran « Données ».
     let onErased: () async -> Void
@@ -61,7 +63,7 @@ struct MainTabView: View {
             }
             Tab(String(localized: "Séance"), systemImage: "dumbbell", value: Item.session) {
                 TrainView(model: train, onOpenToday: { router.selectedTab = .today }, onStartSession: start,
-                          onResumeSession: resume)
+                          onResumeSession: resume, onEnterPastSession: enterPastSession)
             }
             Tab(String(localized: "Stats"), systemImage: "chart.bar", value: Item.stats) {
                 comingSoon(String(localized: "Stats"), milestone: "M7")
@@ -72,11 +74,23 @@ struct MainTabView: View {
         }
         // La barre d'onglets se replie quand on descend : le contenu et l'action ancrée de l'accueil gagnent de la place.
         .tabBarMinimizeBehavior(.onScrollDown)
+        // Sur les onglets plutôt qu'à côté de la séance en direct : deux plein écrans sur la même vue se gênent.
+        .fullScreenCover(isPresented: $pastSession.isPresented, onDismiss: refreshTabs) {
+            FinishFlow(model: pastSession.model(), flow: pastSession.finishFlow())
+        }
+        .alert(pastSession.errorMessage ?? "", isPresented: isShowingPastError) {
+            Button(String(localized: "OK")) { pastSession.dismissError() }
+        }
     }
 
     /// Démarre la séance, ou présente celle déjà en cours (le coordinateur ne démarre jamais une seconde séance).
     private func start(_ launch: SessionLaunch) {
         Task { await liveSession.start(launch) }
+    }
+
+    /// Ouvre la saisie de la séance passée rendue par le formulaire de l'onglet Séance.
+    private func enterPastSession(_ launch: SessionLaunch) {
+        Task { await pastSession.start(launch) }
     }
 
     /// Rouvre la séance en cours, sur l'alerte de la séance oubliée si elle est restée ouverte plus de 3 h.
@@ -93,6 +107,10 @@ struct MainTabView: View {
 
     private var isShowingNotice: Binding<Bool> {
         Binding(get: { liveSession.notice != nil }, set: { if !$0 { liveSession.dismissNotice() } })
+    }
+
+    private var isShowingPastError: Binding<Bool> {
+        Binding(get: { pastSession.errorMessage != nil }, set: { if !$0 { pastSession.dismissError() } })
     }
 
     private var isShowingError: Binding<Bool> {

@@ -147,3 +147,16 @@ private func hevyPush(_ fixture: TrainFixture, status: SessionStatus = .complete
     let kept = try #require(try await fixture.environment.workouts.session(id: middle.id))
     #expect(kept.sets.allSatisfy { $0.isPersonalRecord })
 }
+
+@MainActor @Test func deletingASessionDeletesItsAppleHealthWorkout() async throws {
+    let writer = StubWorkoutHealthWriter()
+    let fixture = TrainFixture(healthWriter: writer)
+    var session = try await fixture.log(on: TrainClock.date(day: 1, hour: 18), sets: [LoggedSet(weightKg: 60, reps: 8)])
+    let workoutID = UUID()
+    session.healthKitUUID = workoutID.uuidString
+    try await fixture.environment.workouts.save(session)
+    let model = SessionDetailModel(environment: fixture.environment, sessionID: session.id)
+    await model.load()
+    try await model.delete()
+    #expect(await writer.deleted == [workoutID])
+}

@@ -17,6 +17,7 @@ public enum LiveSessionIdentifiers {
     public static let addExercise = "live.addExercise"
     public static let recapSave = "recap.save"
     public static let recapLater = "recap.later"
+    public static let recapHealthContinue = "recap.health.continue"
     public static let recapRPE = "recap.rpe"
 
     /// « live.exercise.0.set.1.check » : la coche de la deuxième série du premier exercice.

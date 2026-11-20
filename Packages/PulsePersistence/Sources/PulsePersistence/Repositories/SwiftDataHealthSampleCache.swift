@@ -21,21 +21,53 @@ public actor SwiftDataHealthSampleCache: HealthSampleCache {
     }
 
     public func apply(_ changes: HealthSampleChanges) throws {
+        do {
+            try stage(changes)
+            try modelContext.save()
+        } catch {
+            // Un enregistrement raté ne doit pas laisser ses suppressions et insertions en attente pour l'écriture suivante.
+            modelContext.rollback()
+            throw error
+        }
+    }
+
+    private func stage(_ changes: HealthSampleChanges) throws {
         let raw = changes.kind.rawValue
         if changes.isFullRead {
             try modelContext.delete(model: StoredCachedHealthSample.self, where: #Predicate { $0.kind == raw })
         } else {
-            let removed = Set(changes.deletedHealthKitUUIDs + changes.added.compactMap(\.healthKitUUID))
-            let existing = try modelContext.fetch(FetchDescriptor<StoredCachedHealthSample>(predicate: #Predicate { $0.kind == raw }))
-            for stored in existing where stored.healthKitUUID.map(removed.contains) == true {
+            // Seuls les échantillons nommés sont lus, pas tout le type.
+            // Un tableau d'optionnels, que SwiftData traduit en `IN` ; `nil` n'y figure jamais.
+            let removed: [String?] = Set(changes.deletedHealthKitUUIDs + changes.added.compactMap(\.healthKitUUID)).map { $0 }
+            let named = FetchDescriptor<StoredCachedHealthSample>(
+                predicate: #Predicate { $0.kind == raw && removed.contains($0.healthKitUUID) })
+            for stored in try modelContext.fetch(named) {
                 modelContext.delete(stored)
             }
         }
-        for sample in changes.added {
+        let cutoff = try retentionCutoff(kind: changes.kind, added: changes.added, afterFullRead: changes.isFullRead)
+        for sample in changes.added where cutoff.map({ sample.start >= $0 }) ?? true {
             modelContext.insert(StoredCachedHealthSample(sample))
         }
+        if let cutoff, !changes.isFullRead {
+            let old = FetchDescriptor<StoredCachedHealthSample>(predicate: #Predicate { $0.kind == raw && $0.start < cutoff })
+            for stored in try modelContext.fetch(old) {
+                modelContext.delete(stored)
+            }
+        }
         try upsertAnchor(changes.anchor, for: changes.kind)
-        try modelContext.save()
+    }
+
+    /// La date avant laquelle un échantillon du type est élagué : `healthCacheRetention` avant le plus récent, gardé ou ajouté.
+    /// `nil` quand le type est vide.
+    private func retentionCutoff(kind: HealthSampleKind, added: [CachedHealthSample], afterFullRead: Bool) throws -> Date? {
+        let raw = kind.rawValue
+        var latest = FetchDescriptor<StoredCachedHealthSample>(predicate: #Predicate { $0.kind == raw },
+                                                               sortBy: [SortDescriptor(\.start, order: .reverse)])
+        latest.fetchLimit = 1
+        let stored = afterFullRead ? nil : try modelContext.fetch(latest).first?.start
+        let newest = ([stored] + added.map(\.start)).compactMap { $0 }.max()
+        return newest?.addingTimeInterval(-healthCacheRetention)
     }
 
     public func anchor(for kind: HealthSampleKind) throws -> Data? {

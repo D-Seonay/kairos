@@ -1,9 +1,11 @@
 import Foundation
 import Observation
+import PulseDomain
 import PulseServices
 
 /// L'état du récap de fin de séance (spec M4 §17) : le bilan lu du service, le RPE global pré-placé sur la moyenne des RPE de
 /// série, la note, et les deux sorties « Enregistrer » et « Plus tard ». Une erreur laisse le récap ouvert : on peut réessayer.
+/// La première fois, l'enregistrement passe par l'écran d'explication d'Apple Santé, puis la demande système (spec M4 §19.5).
 @MainActor
 @Observable
 public final class RecapModel {
@@ -13,6 +15,10 @@ public final class RecapModel {
     public var note = ""
     public private(set) var errorMessage: String?
     public private(set) var isSaving = false
+    /// Ce que Pulse peut écrire dans Apple Santé, lu avec le bilan.
+    public private(set) var healthAccess: HealthWriteAccess = .unavailable
+    /// L'écran d'explication d'Apple Santé est ouvert : la séance s'enregistre après lui.
+    public private(set) var isExplainingHealth = false
 
     public static let rpeRange = 1...10
     /// Le RPE avant que le bilan, qui le suggère, soit lu.
@@ -21,6 +27,8 @@ public final class RecapModel {
     @ObservationIgnored private let service: ActiveSessionService
     @ObservationIgnored private let endedAt: Date
     @ObservationIgnored private var isSaved = false
+    /// Le RPE à enregistrer une fois l'écran d'explication passé.
+    @ObservationIgnored private var pendingRPE: Int?
 
     public init(service: ActiveSessionService, endedAt: Date) {
         self.service = service
@@ -49,6 +57,7 @@ public final class RecapModel {
             let recap = try await service.recap(endedAt: endedAt)
             self.recap = recap
             rpe = recap.suggestedRPE
+            healthAccess = await service.healthAccess()
             errorMessage = nil
         } catch {
             errorMessage = String(localized: "Pulse n'a pas pu préparer le récap de la séance.", bundle: .module)
@@ -56,14 +65,38 @@ public final class RecapModel {
     }
 
     /// « Enregistrer » : la séance avec le RPE choisi et la note. Vrai quand elle est enregistrée (ou l'était déjà) ; faux sur
-    /// une erreur, que le récap affiche et qu'un nouvel appel retente sans doublon.
+    /// une erreur, que le récap affiche et qu'un nouvel appel retente sans doublon, ou quand l'écran d'explication d'Apple
+    /// Santé s'ouvre d'abord.
     public func save() async -> Bool {
-        await finish(overallRPE: rpe)
+        await finishOrExplain(overallRPE: rpe)
     }
 
     /// « Plus tard » : la séance avec le RPE pré-placé, pas celui du curseur, et la note déjà saisie.
     public func later() async -> Bool {
-        await finish(overallRPE: recap?.suggestedRPE ?? Self.initialRPE)
+        await finishOrExplain(overallRPE: recap?.suggestedRPE ?? Self.initialRPE)
+    }
+
+    /// « Continuer » de l'écran d'explication : la demande système, puis l'enregistrement, écrit dans Apple Santé si c'est
+    /// permis. Vrai quand la séance est enregistrée.
+    public func continueAfterHealthExplanation() async -> Bool {
+        guard let overallRPE = pendingRPE else { return false }
+        isExplainingHealth = false
+        pendingRPE = nil
+        healthAccess = await service.requestHealthAccess()
+        return await finish(overallRPE: overallRPE)
+    }
+
+    /// L'écran d'explication se ferme sans « Continuer » : rien n'est enregistré, le récap reste ouvert.
+    public func cancelHealthExplanation() {
+        isExplainingHealth = false
+        pendingRPE = nil
+    }
+
+    private func finishOrExplain(overallRPE: Int) async -> Bool {
+        guard !isSaved, healthAccess == .notDetermined else { return await finish(overallRPE: overallRPE) }
+        pendingRPE = overallRPE
+        isExplainingHealth = true
+        return false
     }
 
     private func finish(overallRPE: Int) async -> Bool {

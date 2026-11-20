@@ -83,3 +83,21 @@ private func all(_ cache: SwiftDataHealthSampleCache, _ kind: HealthSampleKind) 
     #expect(try await cache.anchor(for: .sleep) == nil)
     #expect(try await cache.anchor(for: .sdnn) == Data([1]))
 }
+
+@Test func applyingPrunesSamplesBeyondTheRetentionOfTheKind() async throws {
+    let cache = SwiftDataHealthSampleCache(modelContainer: try TestContainer.make())
+    let old = anchored(uuid: "OLD", at: -63 * 86_400)
+    let kept = anchored(uuid: "KEPT", at: -61 * 86_400)
+    let oldSleep = anchored(.sleep, uuid: "SLEEP", at: -90 * 86_400)
+    try await cache.insert([old, kept, oldSleep])
+    let newest = anchored(uuid: "NEW")
+    try await cache.apply(HealthSampleChanges(kind: .sdnn, added: [newest], deletedHealthKitUUIDs: [],
+                                              anchor: Data([1]), isFullRead: false))
+    #expect(try await all(cache, .sdnn).map(\.healthKitUUID) == ["KEPT", "NEW"])
+    #expect(try await all(cache, .sleep) == [oldSleep])
+
+    let tooOld = anchored(uuid: "TOO_OLD", at: -70 * 86_400)
+    try await cache.apply(HealthSampleChanges(kind: .sdnn, added: [tooOld, newest], deletedHealthKitUUIDs: [],
+                                              anchor: Data([2]), isFullRead: true))
+    #expect(try await all(cache, .sdnn).map(\.healthKitUUID) == ["NEW"])
+}

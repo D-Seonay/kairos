@@ -30,6 +30,7 @@ public struct RecapView: View {
                     if !recap.setsPerGroup.isEmpty { muscles(recap) }
                     effort()
                     noteField
+                    if model.healthAccess == .denied { healthDeniedNote }
                 } else if model.errorMessage == nil {
                     ProgressView().padding(.top, 80)
                 }
@@ -46,7 +47,30 @@ public struct RecapView: View {
         .scrollDismissesKeyboard(.interactively)
         .pulseScreenBackground()
         .safeAreaInset(edge: .bottom, spacing: 0) { actions }
+        .sheet(isPresented: isExplainingHealth) {
+            HealthWriteExplanation {
+                Task { if await model.continueAfterHealthExplanation() { onSaved() } }
+            }
+        }
         .preferredColorScheme(.dark)
+    }
+
+    private var isExplainingHealth: Binding<Bool> {
+        Binding(get: { model.isExplainingHealth }, set: { if !$0 { model.cancelHealthExplanation() } })
+    }
+
+    /// Le refus d'écrire dans Apple Santé, dit sans bloquer.
+    private var healthDeniedNote: some View {
+        Label {
+            Text(String(localized: """
+                Apple Santé : écriture refusée, la séance reste dans Pulse. Tu peux l'autoriser dans Réglages › Santé › Pulse.
+                """, bundle: .module))
+        } icon: {
+            Image(systemName: "heart.slash")
+        }
+        .font(.footnote)
+        .foregroundStyle(PulsePalette.muted)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     // MARK: Bilan

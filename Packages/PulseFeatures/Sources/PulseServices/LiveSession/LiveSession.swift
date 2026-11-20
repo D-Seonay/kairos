@@ -20,12 +20,15 @@ public struct LiveSession: Sendable, Equatable, Codable, Identifiable {
     public var policy: ProgressionPolicy
     public var exercises: [LiveExercise]
     public var rest: LiveRest?
+    /// La fin d'une séance passée saisie après coup (spec M4 §19.4) : ni repos, ni notification, ni Live Activity, et
+    /// l'historique lu est celui d'avant `startedAt`. `nil` en direct ; optionnel, une séance enregistrée avant M4c se relit sans.
+    public var pastEndedAt: Date?
 
     public init(formatVersion: Int = LiveSession.currentFormat, id: UUID = UUID(), title: String, startedAt: Date,
                 lastActionAt: Date, programID: UUID? = nil, routineDayID: UUID? = nil,
                 appliedAdjustments: [SessionAdjustment] = [], refusedAdjustments: [SessionAdjustment] = [],
                 policy: ProgressionPolicy = ProgressionPolicy(allowsIncrease: true), exercises: [LiveExercise] = [],
-                rest: LiveRest? = nil) {
+                rest: LiveRest? = nil, pastEndedAt: Date? = nil) {
         self.formatVersion = formatVersion
         self.id = id
         self.title = title
@@ -38,7 +41,14 @@ public struct LiveSession: Sendable, Equatable, Codable, Identifiable {
         self.policy = policy
         self.exercises = exercises
         self.rest = rest
+        self.pastEndedAt = pastEndedAt
     }
+
+    /// Vrai pour une séance passée saisie après coup.
+    public var isPastEntry: Bool { pastEndedAt != nil }
+
+    /// L'historique que la séance lit : celui d'avant son début pour une séance passée, tout l'historique en direct.
+    public var historyLimit: Date { isPastEntry ? startedAt : .distantFuture }
 
     /// Les séries de travail prévues, échauffement exclu.
     public var plannedWorkingSets: Int {

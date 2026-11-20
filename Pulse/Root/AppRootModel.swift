@@ -25,6 +25,8 @@ final class AppRootModel {
     private(set) var train: TrainModel?
     /// La séance en direct des onglets : le bandeau « Reprendre la séance » et l'écran en plein écran.
     private(set) var liveSession: LiveSessionCoordinator?
+    /// La saisie d'une séance passée, à côté de la séance en direct.
+    private(set) var pastSession: PastSessionCoordinator?
 
     let dependencies: AppDependencies
     /// Les boutons de la Live Activity relisent la séance des onglets ; `nil` dans les tests.
@@ -50,6 +52,8 @@ final class AppRootModel {
     /// Au retour au premier plan : la séance en cours, puis « Aujourd'hui », puis « Séance », qui relit le score du jour
     /// qu'« Aujourd'hui » vient d'enregistrer.
     func becameActive() async {
+        // L'accès à Apple Santé a pu être accordé dans Réglages pendant que l'app était en arrière-plan.
+        dependencies.backgroundDelivery?.restartIfStopped()
         guard destination == .main, let today else { return }
         let train = train
         await refreshLiveSession()
@@ -104,6 +108,7 @@ final class AppRootModel {
                 train = TrainModel(environment: dependencies.trainEnvironment())
                 let liveSession = LiveSessionCoordinator(environment: dependencies.liveSessionEnvironment())
                 self.liveSession = liveSession
+                pastSession = PastSessionCoordinator(environment: dependencies.pastSessionEnvironment())
                 sessionIntents?.coordinator = liveSession
             }
         }
@@ -114,6 +119,7 @@ final class AppRootModel {
         today = nil
         train = nil
         liveSession = nil
+        pastSession = nil
         sessionIntents?.coordinator = nil
     }
 }

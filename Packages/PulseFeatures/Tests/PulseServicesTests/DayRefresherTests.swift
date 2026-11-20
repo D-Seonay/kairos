@@ -122,6 +122,19 @@ struct DayRefresherTests {
         #expect(try await fixture.score(on: "2026-11-02T00:00") == nil)
     }
 
+    /// Juste après une suppression totale il n'y a plus de profil : une passe au premier plan ne relit pas Apple Santé et ne
+    /// republie pas le widget (spec M4 §20).
+    @Test func foregroundRightAfterAnEraseDoesNothing() async throws {
+        let fixture = RefresherFixture(scenario: .goodNight)
+        try await fixture.refresher.eraseEverything(using: NothingLeftEraser(), options: EraseOptions(includeAppleHealth: false))
+
+        let refresh = await fixture.refresher.refresh(origin: .foreground)
+
+        #expect(refresh.profile == nil && refresh.score == nil)
+        #expect(await fixture.source.changeCalls == 0)
+        #expect(await fixture.widgets.published.isEmpty)
+    }
+
     @Test func backgroundRefreshWithUnreadableHealthKeepsTheScore() async throws {
         let fixture = RefresherFixture(scenario: .goodNight, at: "2026-11-02T07:00")
         try await fixture.adopt()
@@ -226,4 +239,9 @@ struct DayRefresherTests {
         guard case .rest(let next?) = refresh.plannedDay else { throw RefreshTestFailure.notScored(refresh.score) }
         #expect(next.weekday == .wednesday)
     }
+}
+
+/// Une suppression totale sur des dépôts déjà vides.
+private struct NothingLeftEraser: DataEraser {
+    func eraseEverything(options: EraseOptions) async throws {}
 }
