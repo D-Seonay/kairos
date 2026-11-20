@@ -222,10 +222,12 @@ struct AppDependencies: Sendable {
         let activity = UserDefaultsDayActivityLog(suiteName: wiring.defaultsSuite)
         let workouts = SwiftDataWorkoutRepository(modelContainer: container)
         let scheduledDays = SwiftDataScheduledDayRepository(modelContainer: container)
+        let userExercises = SwiftDataUserExerciseRepository(modelContainer: container)
+        let planning = PlanningService(profiles: profiles, programs: programs, workouts: workouts, scheduledDays: scheduledDays,
+                                       calendar: calendar, now: wiring.now)
         let refresher = makeRefresher(wiring, stores: RefresherStores(
             profiles: profiles, programs: programs, recovery: recovery, workouts: workouts, scheduledDays: scheduledDays,
-            healthCache: healthCache, activity: activity), scores: scores)
-        let userExercises = SwiftDataUserExerciseRepository(modelContainer: container)
+            userExercises: userExercises, healthCache: healthCache, activity: activity, planning: planning), scores: scores)
         let personalRecords = SwiftDataPersonalRecordRepository(modelContainer: container)
         let records = RecordsService(workouts: workouts, records: personalRecords, userExercises: userExercises,
                                      library: content, now: wiring.now)
@@ -247,9 +249,7 @@ struct AppDependencies: Sendable {
             now: wiring.now, launch: wiring.launch,
             calendar: calendar, content: content, container: container, storeMode: mode, storeError: error,
             profiles: profiles, programs: programs, userExercises: userExercises, workouts: workouts,
-            scheduledDays: scheduledDays, planning: PlanningService(
-                profiles: profiles, programs: programs, workouts: workouts, scheduledDays: scheduledDays, calendar: calendar,
-                now: wiring.now), recovery: recovery, scores: scores,
+            scheduledDays: scheduledDays, planning: planning, recovery: recovery, scores: scores,
             supplements: supplements, supplementService: supplementService,
             bodyMeasurements: SwiftDataBodyMeasurementRepository(modelContainer: container),
             personalRecords: personalRecords, exerciseSettings: exerciseSettings, records: records, hevyMappings: hevyMappings,
@@ -322,11 +322,14 @@ extension AppDependencies {
         var recovery: any RecoveryRepository
         var workouts: any WorkoutRepository
         var scheduledDays: any ScheduledDayRepository
+        var userExercises: any UserExerciseRepository
         var healthCache: any HealthSampleCache
         var activity: any DayActivityLog
+        var planning: PlanningService
     }
 
-    /// Le passage du jour : les nuits, puis les courses et les vélos quand la source Apple Santé sait les lire (spec M6 §3).
+    /// Le passage du jour : les nuits, puis les courses et les vélos quand la source Apple Santé sait les lire (spec M6 §3),
+    /// les règles anti-interférence (§9), et la série et la semaine publiées avec l'instantané du widget (§11).
     private static func makeRefresher(_ wiring: Wiring, stores: RefresherStores, scores: DailyScoreService) -> DayRefresher {
         let calendar = wiring.calendar
         let workoutHistory = (wiring.healthSource as? any HealthWorkoutSource).map { source in
@@ -337,7 +340,11 @@ extension AppDependencies {
             profiles: stores.profiles, programs: stores.programs, recovery: stores.recovery,
             nightHistory: NightHistory(source: wiring.healthSource, cache: stores.healthCache, calendar: calendar), scores: scores,
             widgets: wiring.widgets, notifications: wiring.morningScore, activity: stores.activity,
-            scheduledDays: stores.scheduledDays, workoutHistory: workoutHistory, calendar: calendar, now: wiring.now)
+            scheduledDays: stores.scheduledDays, workoutHistory: workoutHistory,
+            antiInterference: AntiInterferenceService(
+                profiles: stores.profiles, programs: stores.programs, workouts: stores.workouts, scheduledDays: stores.scheduledDays,
+                userExercises: stores.userExercises, library: .bundled, calendar: calendar, now: wiring.now),
+            planning: stores.planning, calendar: calendar, now: wiring.now)
     }
 }
 
