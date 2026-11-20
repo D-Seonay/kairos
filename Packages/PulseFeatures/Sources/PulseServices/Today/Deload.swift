@@ -5,8 +5,8 @@ import PulseRecoveryEngine
 /// Où en est la semaine de décharge (spec M6 §10).
 public enum DeloadStatus: Sendable, Equatable {
     case none
-    /// Acceptée : les séances lancées sont allégées jusqu'au dimanche.
-    case active(until: Date)
+    /// Acceptée à `since` : les séances lancées sont allégées jusqu'au dimanche.
+    case active(since: Date, until: Date)
     /// Refusée : les séances lancées portent la décharge refusée jusqu'au dimanche.
     case declined(until: Date)
 }
@@ -40,7 +40,7 @@ public enum Deload {
         let declined = profile?.deloadDeclinedAt
         if let accepted, accepted >= (declined ?? .distantPast) {
             let end = windowEnd(from: accepted, calendar: calendar)
-            return now >= accepted && now < end ? .active(until: end) : .none
+            return now >= accepted && now < end ? .active(since: accepted, until: end) : .none
         }
         if let declined {
             let end = windowEnd(from: declined, calendar: calendar)

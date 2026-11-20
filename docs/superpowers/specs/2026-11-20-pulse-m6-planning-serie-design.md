@@ -137,7 +137,7 @@ Elles sont calculées à chaque passage du jour, sur la semaine datée en cours,
 
 **Semaine de base.** Les règles partent de la semaine type et des lignes `.user` (déplacements et refus de l'utilisateur). Elles ignorent leurs propres lignes et les recalculent à chaque passage : les lignes de règle d'aujourd'hui et après qui ne servent plus sont supprimées, les nouvelles écrites. Une règle désactivée perd ainsi ses lignes au passage suivant. Les lignes passées restent, pour l'historique **(choix du constructeur)**.
 
-**Jours que les règles ne touchent pas** : un jour passé, un jour validé, un jour qui porte une ligne `.user`.
+**Jours que les règles ne touchent pas** : un jour passé, un jour validé au sens du §4 (une séance qui ne valide pas le jour ne le fige pas), un jour qui porte une ligne `.user`. Quand un des deux jours d'un déplacement est figé, l'autre l'est aussi : sinon la course serait perdue ou doublée **(choix du constructeur)**. Un échange de l'utilisateur qui touche un jour déplacé par une règle écrit des lignes `.user` sur les deux jours, même quand l'un retrouve la semaine type.
 
 1. **Jambes lourdes → course intense.** Un fractionné ou une sortie longue prévu le jour même ou le lendemain d'une séance de jambes lourde, faite ou prévue, est déplacé au premier jour libre de la semaine, aujourd'hui ou après, qui n'a pas de séance de jambes lourde la veille ni le jour même. Sans jour libre, il devient une sortie facile.
    - Pulse ne connaît pas l'heure d'une séance prévue. « Moins de 36 h » se lit donc « le jour même ou le lendemain » **(choix du constructeur)**.
@@ -165,7 +165,7 @@ Chaque ligne de règle porte le `moveReason` de la règle et un `moveReasonText`
 
 **Pendant une décharge acceptée**, chaque séance de routine lancée :
 - perd 40 % de ses séries, avant les ajustements du score du jour ;
-- reçoit des charges proposées 10 % plus basses, arrondies comme d'habitude ;
+- reçoit des charges proposées 10 % plus basses, arrondies comme d'habitude, calculées sur les séances d'avant la décharge pour que la baisse ne se cumule pas. Après la décharge, la progression repart des charges de la décharge **(choix du constructeur)** ;
 - ne peut pas monter en charge ;
 - porte l'ajustement `.deload` dans `appliedAdjustments`.
 

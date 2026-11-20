@@ -18,8 +18,10 @@ extension PlanningService {
         let day = WeekSchedule.day(on: calendar.startOfDay(for: date), context: context, today: today)
         guard let line = day.scheduled, AntiInterference.isRule(line) else { throw PlanningError.notMovable }
         let partners = ruleMovePartners(of: line, in: overrides)
+        guard day.isMovable else { throw PlanningError.notMovable }
+        // L'autre jour d'un déplacement, s'il est passé ou fait, reste tel quel : on ne garde que les jours qui peuvent encore changer.
         let days = [day] + partners.map { WeekSchedule.day(on: calendar.startOfDay(for: $0.date), context: context, today: today) }
-        guard days.allSatisfy(\.isMovable) else { throw PlanningError.notMovable }
+            .filter(\.isMovable)
         for target in days {
             guard var kept = target.scheduled else { continue }
             let routine = TodayPlanner.routineDay(of: program, on: target.weekday)
@@ -35,8 +37,10 @@ extension PlanningService {
     }
 
     /// Avant un échange, les déplacements de règle qui touchent les jours échangés passent à l'utilisateur, tels quels : sinon
-    /// la règle recalculerait l'autre jour d'un déplacement, et la course apparaîtrait deux fois.
-    func adoptRuleMoves(touching days: [PlanningDay], in overrides: [ScheduledDay], today: Date, now: Date) async throws {
+    /// la règle recalculerait l'autre jour d'un déplacement, et la course apparaîtrait deux fois. Rend vrai si un des jours
+    /// échangés portait une ligne de règle.
+    @discardableResult
+    func adoptRuleMoves(touching days: [PlanningDay], in overrides: [ScheduledDay], today: Date, now: Date) async throws -> Bool {
         let lines = days.compactMap(\.scheduled).filter(AntiInterference.isRule)
         let partners = lines.flatMap { ruleMovePartners(of: $0, in: overrides) }
         for var partner in partners where partner.date >= today && !lines.contains(where: { $0.id == partner.id }) {
@@ -45,6 +49,7 @@ extension PlanningService {
             partner.updatedAt = now
             try await scheduledDays.save(partner)
         }
+        return !lines.isEmpty
     }
 
     /// L'autre jour d'un déplacement de règle : le jour d'origine d'une course déplacée, ou le jour où est allée la course partie

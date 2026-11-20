@@ -121,4 +121,41 @@ struct AntiInterferenceTests {
         kept.moveReasonText = nil
         #expect(!placesRest(Fixture.input(lines: [kept], sessions: sessions, nights: short)))
     }
+
+    @Test func aRefusedRestDayStaysRefusedOnceTrained() {
+        let sessions = (9...16).map { Fixture.session("2026-11-\($0)T\($0 == 16 ? "06" : "18"):00") }
+        let short = (10...16).map { Fixture.night("2026-11-\($0)", asleepMinutes: 300) }
+        var kept = Fixture.scheduled(RuleLine(date: Fixture.day("2026-11-16"), routine: Fixture.push, reason: .user, text: ""))
+        kept.moveReasonText = nil
+        #expect(!placesRest(Fixture.input(lines: [kept], sessions: sessions, nights: short)), "Le repos ne glisse pas à mardi")
+    }
+
+    @Test func aMoveKeepsBothDaysOnceOneIsPast() {
+        let plan = AntiInterference.plan(Fixture.input())
+        let lines = plan.lines.map(Fixture.scheduled)
+        let friday = AntiInterference.plan(Fixture.input(lines: lines, now: "2026-11-20T09:00"))
+        #expect(friday.lines.isEmpty && !friday.managedDates.contains(Fixture.day("2026-11-21")),
+                "Le samedi garde la course partie du jeudi passé")
+    }
+
+    @Test func aMoveKeepsBothDaysOnceTheRunIsDone() {
+        let longRun = RoutineDay(order: 3, name: "Sortie longue", kind: .run, runType: .long, runTargetMinutes: 90)
+        let program = Program(id: Fixture.programID, name: "Hybride", sessionsPerWeek: 2,
+                              weekLayout: [nil, nil, nil, nil, nil, Fixture.legs.id, longRun.id], days: [Fixture.legs, longRun],
+                              createdAt: Fixture.created, updatedAt: Fixture.created)
+        let plan = AntiInterference.plan(Fixture.input(program: program, rest: [], now: "2026-11-18T07:00"))
+        #expect(plan.lines.map(\.date) == [Fixture.day("2026-11-22"), Fixture.day("2026-11-18")])
+        let ran = Fixture.session("2026-11-18T08:00", kind: .run)
+        let after = AntiInterference.plan(Fixture.input(program: program, lines: plan.lines.map(Fixture.scheduled), sessions: [ran],
+                                                        rest: [], now: "2026-11-18T12:00"))
+        #expect(after.lines.isEmpty && !after.managedDates.contains(Fixture.day("2026-11-22")), "Pas de seconde course dimanche")
+    }
+
+    @Test func aSessionThatDoesNotValidateTheDayLeavesItToTheRules() {
+        let legs = Fixture.session("2026-11-19T07:00", exercises: ["back-squat-barbell", "leg-press-machine"])
+        let plan = AntiInterference.plan(Fixture.input(sessions: [legs], now: "2026-11-19T09:00"))
+        #expect(plan.lines.first?.date == Fixture.day("2026-11-19") && plan.lines.first?.routine == nil,
+                "Des jambes faites jeudi matin éloignent le fractionné du jeudi")
+        #expect(plan.lines.last?.date == Fixture.day("2026-11-21"))
+    }
 }

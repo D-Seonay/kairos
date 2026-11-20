@@ -17,6 +17,9 @@ public struct SessionLaunch: Sendable, Equatable {
     public var past: DateInterval?
     /// Le facteur des charges proposées : 0,9 pendant une semaine de décharge (spec M6 §10), 1 sinon.
     public var loadFactor: Double
+    /// Pendant une décharge, le début de la décharge : les charges partent des séances d'avant, pour que la baisse de 10 % ne
+    /// se cumule pas d'une séance à l'autre.
+    public var historyLimit: Date?
 
     public init(title: String, day: RoutineDay?, plannedDay: RoutineDay? = nil, programID: UUID? = nil,
                 applied: [SessionAdjustment] = [], refused: [SessionAdjustment] = [], policy: ProgressionPolicy,
@@ -41,10 +44,11 @@ public struct SessionLaunch: Sendable, Equatable {
         var launch = adapted(day, programID: programID, recovery: recovery, originalChosen: originalChosen, profile: profile,
                              base: deload.isActive ? DeloadAdjuster.apply(day).day : day)
         switch deload {
-        case .active:
+        case .active(let since, _):
             launch.applied.insert(DeloadAdjuster.adjustment, at: 0)
             launch.policy.allowsIncrease = false
             launch.loadFactor = DeloadAdjuster.loadFactor
+            launch.historyLimit = since
         case .declined:
             launch.refused.insert(DeloadAdjuster.adjustment, at: 0)
         case .none:

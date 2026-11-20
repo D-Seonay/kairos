@@ -101,9 +101,9 @@ public struct PlanningService: Sendable {
         let days = [first, second].map { WeekSchedule.day(on: calendar.startOfDay(for: $0), context: context, today: today) }
         guard days[0].date != days[1].date, days.allSatisfy({ $0.isMovable && $0.date >= weekStart && $0.date < weekEnd }),
               days.contains(where: { $0.routine != nil }) else { throw PlanningError.notMovable }
-        try await adoptRuleMoves(touching: days, in: overrides, today: today, now: now)
-        try await place(days[1].routine, from: days[1], on: days[0], program: program, now: now)
-        try await place(days[0].routine, from: days[0], on: days[1], program: program, now: now)
+        let touchesRules = try await adoptRuleMoves(touching: days, in: overrides, today: today, now: now)
+        try await place(days[1].routine, from: days[1], on: days[0], program: program, keepsLine: touchesRules, now: now)
+        try await place(days[0].routine, from: days[0], on: days[1], program: program, keepsLine: touchesRules, now: now)
     }
 
     /// Supprime les déplacements de l'utilisateur dans la semaine en cours.
@@ -124,11 +124,14 @@ public struct PlanningService: Sendable {
         return (profile, try await programs.program(id: id))
     }
 
+    // swiftlint:disable function_parameter_count
     /// Met `routine`, venue du jour `origin`, sur le jour `target` : met à jour sa ligne, en crée une, ou la supprime quand la
-    /// semaine type prévoit déjà `routine` ce jour-là.
-    private func place(_ routine: RoutineDay?, from origin: PlanningDay, on target: PlanningDay, program: Program, now: Date) async throws {
+    /// semaine type prévoit déjà `routine` ce jour-là. `keepsLine` garde une ligne `.user` même dans ce cas : après un échange
+    /// qui défait un déplacement de règle, la règle ne doit pas le refaire au passage suivant.
+    private func place(_ routine: RoutineDay?, from origin: PlanningDay, on target: PlanningDay, program: Program, keepsLine: Bool,
+                       now: Date) async throws {
         let template = TodayPlanner.routineDay(of: program, on: target.weekday)
-        if routine?.id == template?.id {
+        if routine?.id == template?.id, !keepsLine {
             if let existing = target.scheduled { try await scheduledDays.delete(id: existing.id) }
             return
         }
@@ -146,4 +149,5 @@ public struct PlanningService: Sendable {
         line.updatedAt = now
         try await scheduledDays.save(line)
     }
+    // swiftlint:enable function_parameter_count
 }

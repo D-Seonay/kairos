@@ -30,7 +30,7 @@ struct DeloadTests {
     @Test func theLatestDecisionWinsWhileItsWindowRuns() {
         let now = TestClock.date("2026-11-20T09:00")
         #expect(Deload.status(profile: profile(accepted: "2026-11-18T08:00"), now: now, calendar: calendar)
-            == .active(until: TestClock.date("2026-11-23T00:00")))
+            == .active(since: TestClock.date("2026-11-18T08:00"), until: TestClock.date("2026-11-23T00:00")))
         #expect(Deload.status(profile: profile(declined: "2026-11-18T08:00"), now: now, calendar: calendar)
             == .declined(until: TestClock.date("2026-11-23T00:00")))
         #expect(Deload.status(profile: profile(accepted: "2026-11-10T08:00"), now: now, calendar: calendar) == .none)
@@ -60,7 +60,7 @@ struct DeloadTests {
         let day = LiveFixtures.day([LiveFixtures.exercise(LiveFixtures.bench, sets: 5), LiveFixtures.exercise(LiveFixtures.pecDeck,
                                                                                                              order: 1, sets: 5)])
         let launch = SessionLaunch.routine(day, programID: nil, recovery: LiveFixtures.recovery(.optimal), originalChosen: false,
-                                           profile: LiveFixtures.profile(), deload: .active(until: .distantFuture))
+                                           profile: LiveFixtures.profile(), deload: .active(since: .distantPast, until: .distantFuture))
         #expect(launch.day?.exercises.map(\.sets).reduce(0, +) == 6, "40 % de 10 séries en moins")
         #expect(launch.applied.first?.kind == .deload && !launch.policy.allowsIncrease && launch.loadFactor == 0.9)
         #expect(launch.plannedDay == day)
@@ -73,7 +73,7 @@ struct DeloadTests {
     @Test func deloadLowersTheProposedLoadsByTenPercent() throws {
         let day = LiveFixtures.day([LiveFixtures.exercise(LiveFixtures.bench, sets: 3)])
         let launch = SessionLaunch.routine(day, programID: nil, recovery: nil, originalChosen: false, profile: LiveFixtures.profile(),
-                                           deload: .active(until: .distantFuture))
+                                           deload: .active(since: .distantPast, until: .distantFuture))
         let history = [LiveFixtures.done(LiveFixtures.bench, 100, 8), LiveFixtures.done(LiveFixtures.bench, 100, 8)]
         let session = LiveFixtures.session(launch, history: [LiveFixtures.bench: history])
         let weights = try #require(session.exercises.first).sets.map(\.proposed.weightKg)
@@ -87,5 +87,23 @@ struct DeloadTests {
         #expect(session.activeDay?.exercises.first?.sets == 3 && session.originalDay == day)
         let run = TodaySession(plannedDay: .run(RoutineDay(order: 0, name: "Endurance", kind: .run)), recovery: nil, deload: true)
         #expect(!run.isDeload)
+    }
+
+    @Test func deloadLoadsStartFromBeforeTheDeloadSoTheyDoNotCompound() async throws {
+        let fixture = ActiveSessionFixture()
+        let before = TestClock.date("2026-10-26T08:00")
+        let during = TestClock.date("2026-10-30T08:00")
+        for (date, weight) in [(before, 100.0), (during, 90.0)] {
+            try await fixture.workouts.save(WorkoutSession(
+                startedAt: date, kind: .strength, source: .pulse, status: .completed, title: "Push",
+                sets: [LiveFixtures.done(LiveFixtures.bench, weight, 8)], createdAt: date, updatedAt: date))
+        }
+        let day = LiveFixtures.day([LiveFixtures.exercise(LiveFixtures.bench, sets: 3)])
+        let launch = SessionLaunch.routine(day, programID: nil, recovery: nil, originalChosen: false, profile: LiveFixtures.profile(),
+                                           deload: .active(since: TestClock.date("2026-10-29T08:00"), until: .distantFuture))
+        #expect(launch.historyLimit == TestClock.date("2026-10-29T08:00"))
+        let session = try await fixture.makeService().start(launch)
+        #expect(session.exercises.first?.sets.map(\.proposed.weightKg) == [90, 90],
+                "3 séries moins 40 %, à 100 kg d'avant la décharge × 0,9, pas 81")
     }
 }

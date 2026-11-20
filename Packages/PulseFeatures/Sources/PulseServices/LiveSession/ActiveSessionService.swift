@@ -85,7 +85,7 @@ public final class ActiveSessionService: Sendable {
             let profile = try await self.profiles.load()
             var history: [ExerciseReference: [WorkoutSet]] = [:]
             var settingsByExercise: [ExerciseReference: ExerciseSettings] = [:]
-            let historyLimit = launch.past?.start ?? .distantFuture
+            let historyLimit = min(launch.past?.start ?? .distantFuture, launch.historyLimit ?? .distantFuture)
             for reference in launch.day?.exercises.map(\.exercise) ?? [] where history[reference] == nil {
                 history[reference] = try await self.workouts.lastSets(for: reference, startedBefore: historyLimit)
                 settingsByExercise[reference] = try await self.settings.settings(for: reference)

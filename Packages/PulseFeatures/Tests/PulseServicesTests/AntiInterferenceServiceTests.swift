@@ -58,7 +58,7 @@ struct AntiInterferenceServiceTests {
         #expect(try await lines().isEmpty)
     }
 
-    @Test func pastRuleLinesStay() async throws {
+    @Test func aMoveWhoseOriginIsPastSurvivesDisablingTheRule() async throws {
         try await setUp()
         try await service.apply(nights: [])
         clock.set("2026-11-20T09:00")
@@ -66,7 +66,8 @@ struct AntiInterferenceServiceTests {
         profile.antiInterferenceRulesDisabled = [.noIntenseRunAfterHeavyLegs]
         try await profiles.save(profile)
         try await service.apply(nights: [])
-        #expect(try await lines().map(\.date) == [Fixture.day("2026-11-19")], "Le jeudi passé garde sa ligne")
+        #expect(try await lines().map(\.date) == [Fixture.day("2026-11-19"), Fixture.day("2026-11-21")],
+                "Le jeudi est passé : le samedi garde la course qui en est partie, sinon elle disparaîtrait")
     }
 
     @Test func keepingThePlannedDayRestoresBothDaysAndLocksThem() async throws {
@@ -106,5 +107,24 @@ struct AntiInterferenceServiceTests {
         try await profiles.save(UserProfile(onboardingCompletedAt: Fixture.created))
         try await service.apply(nights: [])
         #expect(try await lines().isEmpty)
+    }
+
+    @Test func theMoveSurvivesOnceItsOriginIsPast() async throws {
+        try await setUp()
+        try await service.apply(nights: [])
+        let lines = try await lines()
+        clock.set("2026-11-20T09:00")
+        try await service.apply(nights: [])
+        #expect(try await self.lines() == lines)
+        #expect(try await planning.overview().days[5].routine?.id == Fixture.intervals.id)
+    }
+
+    @Test func swappingAMovedRunBackSticks() async throws {
+        try await setUp()
+        try await service.apply(nights: [])
+        try await planning.swap(Fixture.day("2026-11-19"), Fixture.day("2026-11-21"))
+        try await service.apply(nights: [])
+        let routines = try await planning.overview().days.map(\.routine?.id)
+        #expect(routines[3] == Fixture.intervals.id && routines[5] == nil, "L'échange de l'utilisateur tient")
     }
 }

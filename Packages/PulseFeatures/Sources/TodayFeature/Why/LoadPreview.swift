@@ -15,7 +15,7 @@ enum LoadPreview {
             return nil
         }
         let launch = SessionLaunch.routine(day, programID: nil, recovery: recovery, originalChosen: false, profile: profile,
-                                           deload: session.isDeload ? .active(until: now) : .none)
+                                           deload: session.isDeload ? .active(since: now, until: now) : .none)
         guard launch.policy.allowsIncrease else { return nil }
         let planned = LiveSessionPlanner.session(for: launch, directory: directory, history: reading.history,
                                                  settings: reading.settings, profile: profile, now: now)
