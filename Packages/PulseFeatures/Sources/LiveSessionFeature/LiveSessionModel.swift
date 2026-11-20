@@ -161,6 +161,35 @@ public final class LiveSessionModel {
         await perform(.setRemainingLoad(exercise: exercise, weightKg: weightKg))
     }
 
+    // MARK: Remplacer
+
+    /// Les alternatives à l'exercice, planifiées avec leur charge proposée (spec M4 §19.3) ; aucune si la lecture échoue.
+    public func replacementOptions(for exercise: UUID, reason: ReplacementReason) async -> [ReplacementOption] {
+        do {
+            return try await environment.service.replacementOptions(for: exercise, reason: reason)
+        } catch {
+            errorMessage = Self.saveFailure
+            return []
+        }
+    }
+
+    /// Remplace l'exercice par une alternative déjà planifiée.
+    public func replace(_ exercise: UUID, with replacement: LiveExercise) async {
+        focus(nil)
+        await perform(.replaceExercise(exercise, with: replacement))
+    }
+
+    /// Remplace l'exercice par un exercice choisi dans la bibliothèque.
+    public func replace(_ exercise: UUID, withPicked reference: ExerciseReference, reason: ReplacementReason) async {
+        do {
+            guard let replacement = try await environment.service.replacement(for: exercise, with: reference,
+                                                                              reason: reason) else { return }
+            await replace(exercise, with: replacement)
+        } catch {
+            errorMessage = Self.saveFailure
+        }
+    }
+
     // MARK: Repos
 
     public func restMinus30() async {

@@ -188,7 +188,7 @@ public final class ActiveSessionService: Sendable {
     }
 
     /// Les exercices archivés restent connus : une routine ou un historique peut encore les nommer.
-    private func directory() async throws -> ExerciseDirectory {
+    func directory() async throws -> ExerciseDirectory {
         ExerciseDirectory(library: library, userExercises: try await userExercises.all(includeArchived: true))
     }
 }

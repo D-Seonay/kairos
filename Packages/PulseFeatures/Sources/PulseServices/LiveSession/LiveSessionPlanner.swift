@@ -46,14 +46,16 @@ public enum LiveSessionPlanner {
     // swiftlint:disable function_parameter_count
     /// Un exercice ajouté en séance : 3 séries de 8 à 12 répétitions (30 à 60 s s'il est tenu), au repos par défaut de
     /// l'exercice, sinon à celui du profil. `workedMuscles` : les muscles principaux des exercices déjà dans la séance.
+    /// `routineExercise` remplace ces séries par défaut (le remplacement reprend celles de l'exercice remplacé).
     public static func exercise(_ reference: ExerciseReference, directory: ExerciseDirectory, history: [WorkoutSet],
                                 settings: ExerciseSettings?, profile: UserProfile?, policy: ProgressionPolicy,
-                                workedMuscles: Set<Muscle> = []) -> LiveExercise {
+                                workedMuscles: Set<Muscle> = [], routineExercise: RoutineExercise? = nil) -> LiveExercise {
         let info = directory.info(reference)
         let range = info?.tracksDuration == true ? addedHoldRange : addedRepRange
         let restSeconds = info?.defaultRestSeconds ?? profile?.defaultRestSeconds ?? fallbackRestSeconds
-        let routineExercise = RoutineExercise(order: 0, exercise: reference, sets: addedSetCount, repsMin: range.lowerBound,
-                                              repsMax: range.upperBound, targetRPE: addedTargetRPE, restSeconds: restSeconds)
+        let routineExercise = routineExercise ?? RoutineExercise(
+            order: 0, exercise: reference, sets: addedSetCount, repsMin: range.lowerBound, repsMax: range.upperBound,
+            targetRPE: addedTargetRPE, restSeconds: restSeconds)
         let context = Context(directory: directory, profile: profile, policy: policy)
         return build(routineExercise, planned: nil, lastSets: history, settings: settings, context: context,
                      workedMuscles: workedMuscles).exercise
@@ -111,7 +113,7 @@ public enum LiveSessionPlanner {
     }
 
     /// Aux disques déclarés sur une barre, à l'incrément ailleurs ou sans disques connus.
-    private static func rounding(for info: ExerciseInfo?, profile: UserProfile?) -> WeightRounding {
+    static func rounding(for info: ExerciseInfo?, profile: UserProfile?) -> WeightRounding {
         guard info?.equipment == .barbell, let profile, let smallest = profile.availablePlatesKg.filter({ $0 > 0 }).min() else {
             return .increment
         }

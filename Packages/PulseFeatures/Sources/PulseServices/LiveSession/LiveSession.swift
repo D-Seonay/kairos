@@ -142,11 +142,16 @@ public struct LiveExercise: Sendable, Equatable, Codable, Identifiable {
     /// L'échauffement automatique de l'exercice, pour le recalculer quand la première charge de travail change ; `nil` quand
     /// Pulse ne l'échauffe pas. Optionnel : une séance enregistrée avant M4c se relit sans.
     public var warmupPlan: LiveWarmupPlan?
+    /// L'exercice que celui-ci remplace depuis le menu « Remplacer », et pourquoi (spec M4 §19.3). Optionnels, comme
+    /// `warmupPlan`.
+    public var replacedExercise: ExerciseReference?
+    public var replacementReason: ReplacementReason?
 
     public init(id: UUID = UUID(), exercise: ExerciseReference, name: String, loadKind: LoadKind, tracksDuration: Bool,
                 isBarbell: Bool, incrementKg: Double, supersetGroup: Int? = nil, restSeconds: Int, rpeCap: Double? = nil,
                 dayNote: String? = nil, lastTimeText: String? = nil, note: String? = nil, sets: [LiveSet],
-                warmupPlan: LiveWarmupPlan? = nil) {
+                warmupPlan: LiveWarmupPlan? = nil, replacedExercise: ExerciseReference? = nil,
+                replacementReason: ReplacementReason? = nil) {
         self.id = id
         self.exercise = exercise
         self.name = name
@@ -162,6 +167,8 @@ public struct LiveExercise: Sendable, Equatable, Codable, Identifiable {
         self.note = note
         self.sets = sets
         self.warmupPlan = warmupPlan
+        self.replacedExercise = replacedExercise
+        self.replacementReason = replacementReason
     }
 }
 

@@ -31,6 +31,9 @@ public enum LiveSessionChange: Sendable, Equatable {
     /// La charge de toutes les séries de travail pas encore validées de l'exercice, marquées modifiées (le ±2,5 kg du
     /// calculateur de disques, spec M4 §19.2). Une charge négative est ignorée.
     case setRemainingLoad(exercise: UUID, weightKg: Double)
+    /// Remplace l'exercice (spec M4 §19.3) : ses séries validées restent, les autres disparaissent, et `replacement` se place
+    /// juste après lui. Un exercice sans série validée laisse toute sa place au remplaçant.
+    case replaceExercise(UUID, with: LiveExercise)
     case restMinus30
     case restPlus30
     case skipRest
@@ -42,8 +45,10 @@ extension LiveSession {
         switch change {
         case .validate, .unvalidate, .edit, .setType, .addSet, .deleteSet:
             applySetChange(change, now: now)
-        case .addExercises, .removeExercise, .moveExercise, .setNote, .setIncrement, .setWarmupCount, .setRemainingLoad:
+        case .addExercises, .removeExercise, .moveExercise, .replaceExercise:
             applyExerciseChange(change)
+        case .setNote, .setIncrement, .setWarmupCount, .setRemainingLoad:
+            applyExerciseSetting(change)
         case .restMinus30, .restPlus30, .skipRest:
             return
         }
@@ -77,6 +82,16 @@ extension LiveSession {
             exercises.removeAll { $0.id == exercise }
         case let .moveExercise(exercise, offset):
             move(exercise, by: offset)
+        case let .replaceExercise(exercise, replacement):
+            replace(exercise, with: replacement)
+        default:
+            return
+        }
+    }
+
+    /// La note, l'incrément, l'échauffement ou la charge restante d'un exercice.
+    private mutating func applyExerciseSetting(_ change: LiveSessionChange) {
+        switch change {
         case let .setNote(exercise, note):
             let trimmed = note?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
             updateExercise(exercise) { $0.note = trimmed.isEmpty ? nil : trimmed }
@@ -134,6 +149,16 @@ extension LiveSession {
         var set = LiveSet(proposed: proposal, previous: nil)
         set.setType = last.setType
         return set
+    }
+
+    private mutating func replace(_ exercise: UUID, with replacement: LiveExercise) {
+        guard let index = exercises.firstIndex(where: { $0.id == exercise }) else { return }
+        exercises[index].sets.removeAll { $0.completedAt == nil }
+        if exercises[index].sets.isEmpty {
+            exercises[index] = replacement
+        } else {
+            exercises.insert(replacement, at: index + 1)
+        }
     }
 
     private mutating func move(_ exercise: UUID, by offset: Int) {

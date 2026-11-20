@@ -39,6 +39,8 @@ struct PlateCalculatorSheet: View {
             }
         }
         .task { await load() }
+        // Comme l'écran en direct et sa bibliothèque : la séance reste noire (spec M4 §14.2).
+        .preferredColorScheme(.dark)
     }
 
     // MARK: Charge

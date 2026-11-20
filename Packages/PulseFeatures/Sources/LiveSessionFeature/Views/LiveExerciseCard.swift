@@ -16,6 +16,7 @@ struct LiveExerciseCard: View {
     @Binding var rpeSet: UUID?
     @State private var isShowingSheet = false
     @State private var isShowingPlates = false
+    @State private var isReplacing = false
     @State private var isRemoving = false
     @State private var isEditingNote = false
     @State private var noteDraft = ""
@@ -75,6 +76,9 @@ struct LiveExerciseCard: View {
         .padding(.horizontal, 12)
         .padding(.top, 4)
         .sheet(isPresented: $isShowingSheet) { exerciseSheet }
+        .sheet(isPresented: $isReplacing) {
+            ReplaceExerciseSheet(model: model, exercise: exercise)
+        }
         .sheet(isPresented: $isShowingPlates) {
             PlateCalculatorSheet(model: model, exerciseID: exercise.id)
                 .presentationDetents([.medium, .large])
@@ -156,6 +160,12 @@ struct LiveExerciseCard: View {
                 }
                 .pickerStyle(.menu)
             }
+            Button {
+                isReplacing = true
+            } label: {
+                Label(String(localized: "Remplacer", bundle: .module), systemImage: "arrow.triangle.swap")
+            }
+            .disabled(!exercise.sets.contains { $0.setType != .warmup && $0.completedAt == nil })
             Button {
                 Task { await model.moveExercise(exercise.id, by: -1) }
             } label: {
