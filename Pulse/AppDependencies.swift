@@ -77,6 +77,9 @@ struct AppDependencies: Sendable {
         var notifications: any NotificationAuthorizing
         var liveSessionNotifications: any NotificationAuthorizing
         var healthEraser: any HealthErasing
+        /// L'écriture des séances dans Apple Santé ; `nil` sans Apple Santé, avec un scénario de lancement, en mode mémoire et
+        /// dans les tests.
+        var healthWriter: (any WorkoutHealthWriting)?
         /// Le groupe d'apps de l'app réelle ; une doublure en mode mémoire et dans les tests.
         var widgets: any WidgetPublishing
         /// La notification du matin ; une doublure en mode mémoire et dans les tests.
@@ -107,6 +110,8 @@ struct AppDependencies: Sendable {
             morningScore = StubNotificationScheduler()
             restNotifier = StubRestTimerNotifier()
             sessionActivity = StubSessionActivityController()
+            healthWriter = nil
+            healthEraser = StubHealthEraser()
             notificationCanceling = nil
             backgroundDelivery = nil
         }
@@ -139,8 +144,10 @@ struct AppDependencies: Sendable {
         }
         let scheduler = UserNotificationScheduler(now: now)
         let authorizer = UserNotificationAuthorizer()
+        let writer = reader != nil && launch.healthScenario == nil ? HealthKitWorkoutWriter() : nil
         var wiring = Wiring(health: reader ?? StubHealthReader(), healthSource: healthSource,
-                            notifications: authorizer, liveSessionNotifications: authorizer, healthEraser: StubHealthEraser(),
+                            notifications: authorizer, liveSessionNotifications: authorizer,
+                            healthEraser: writer ?? StubHealthEraser(), healthWriter: writer,
                             widgets: AppGroupWidgetPublisher(file: WidgetSnapshotFile.appGroup()),
                             morningScore: scheduler, restNotifier: scheduler, sessionActivity: SessionActivityController(),
                             notificationCanceling: scheduler,
@@ -176,7 +183,7 @@ struct AppDependencies: Sendable {
             health: health,
             healthSource: healthSource ?? ScenarioHealthSource(scenario: .noData, now: now(), calendar: calendar),
             notifications: StubNotificationAuthorizer(granted: false),
-            liveSessionNotifications: StubNotificationAuthorizer(granted: false), healthEraser: healthEraser,
+            liveSessionNotifications: StubNotificationAuthorizer(granted: false), healthEraser: healthEraser, healthWriter: nil,
             widgets: StubWidgetPublisher(), morningScore: StubNotificationScheduler(), restNotifier: StubRestTimerNotifier(),
             sessionActivity: StubSessionActivityController(), notificationCanceling: nil,
             backgroundDelivery: nil, inspector: inspector, defaultsSuite: testingDefaultsSuite, calendar: calendar, now: now,
@@ -212,10 +219,11 @@ struct AppDependencies: Sendable {
         let hevyMappings = UserDefaultsHevyMappingStore(suiteName: wiring.defaultsSuite)
         let activeSession = SwiftDataActiveSessionStore(modelContainer: container)
         let exerciseSettings = SwiftDataExerciseSettingsRepository(modelContainer: container)
+        let health = wiring.healthWriter.map { HealthWorkoutExporter(writer: $0, workouts: workouts, profiles: profiles) }
         let liveSession = ActiveSessionService(
             store: activeSession, workouts: workouts, profiles: profiles, settings: exerciseSettings, userExercises: userExercises,
             records: records, library: content, restNotifier: wiring.restNotifier, activity: wiring.sessionActivity,
-            calendar: calendar, now: wiring.now)
+            calendar: calendar, now: wiring.now, health: health)
         return AppDependencies(
             health: wiring.health, healthSource: wiring.healthSource, notifications: wiring.notifications,
             liveSessionNotifications: wiring.liveSessionNotifications,
@@ -327,7 +335,7 @@ extension AppDependencies {
     func pastSessionEnvironment() -> LiveSessionEnvironment {
         let service = ActiveSessionService.pastSessions(
             workouts: workouts, profiles: profiles, settings: exerciseSettings, userExercises: userExercises, records: records,
-            library: content, calendar: calendar, now: now)
+            library: content, calendar: calendar, now: now, health: liveSession.health)
         return LiveSessionEnvironment(service: service, train: trainEnvironment(), notifications: liveSessionNotifications,
                                       calendar: calendar, now: now)
     }

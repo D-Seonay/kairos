@@ -20,7 +20,8 @@ struct EraseConfirmationView: View {
                 }
                 Section {
                     Toggle(String(localized: "Supprimer aussi ce que Pulse a écrit dans Apple Santé"), isOn: $includeAppleHealth)
-                    Text(String(localized: "Disponible quand Pulse écrit dans Apple Santé.")).font(.footnote).foregroundStyle(.secondary)
+                    Text(String(localized: "Les entraînements de musculation que Pulse y a enregistrés, et leur énergie."))
+                        .font(.footnote).foregroundStyle(.secondary)
                 }
                 Section {
                     TextField(String(localized: "Tapez \(Self.confirmationWord) pour confirmer"), text: $typed)

@@ -72,6 +72,16 @@ private func allSamples(_ cache: InMemoryHealthSampleCache, _ kind: HealthSample
     #expect(try await cache.anchor(for: .sdnn) == Data([7]))
 }
 
+@Test func applyingPrunesSamplesBeyondTheRetentionOfTheKind() async throws {
+    let cache = InMemoryHealthSampleCache()
+    let oldSleep = anchoredSample(.sleep, uuid: "SLEEP", at: -90 * 86_400)
+    try await cache.insert([anchoredSample(uuid: "OLD", at: -63 * 86_400), anchoredSample(uuid: "KEPT", at: -61 * 86_400), oldSleep])
+    try await cache.apply(HealthSampleChanges(kind: .sdnn, added: [anchoredSample(uuid: "NEW")], deletedHealthKitUUIDs: [],
+                                              anchor: Data([1]), isFullRead: false))
+    #expect(try await allSamples(cache, .sdnn).map(\.healthKitUUID) == ["KEPT", "NEW"])
+    #expect(try await allSamples(cache, .sleep) == [oldSleep])
+}
+
 @Test func incrementalReadRemovesDeleted() async throws {
     let cache = InMemoryHealthSampleCache()
     let first = anchoredSample(uuid: "A")

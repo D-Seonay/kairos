@@ -42,16 +42,27 @@ extension ActiveSessionService {
     }
 
     /// Enregistre la séance terminée avec ses seules séries validées, recalcule les records, efface le snapshot, termine la
-    /// Live Activity et annule la notification de repos. La `WorkoutSession` garde l'identifiant de la séance en cours : si
-    /// l'écriture échoue, l'erreur remonte, le snapshot reste, et un nouvel appel réécrit la même séance sans doublon.
+    /// Live Activity et annule la notification de repos, puis écrit l'entraînement dans Apple Santé si c'est permis. La
+    /// `WorkoutSession` garde l'identifiant de la séance en cours : si l'écriture échoue, l'erreur remonte, le snapshot reste,
+    /// et un nouvel appel réécrit la même séance sans doublon. Apple Santé ne retient jamais la séance.
     public func finish(overallRPE: Int, note: String?, endedAt: Date) async throws -> WorkoutSession {
         try await queue.run {
             guard let session = try await self.loadSession() else { throw ActiveSessionError.noSession }
             let saved = try await self.write(session.workoutSession(status: .completed, endedAt: endedAt,
                                                                      overallRPE: overallRPE, note: note, savedAt: self.now()))
             try await self.clearSession()
-            return saved
+            return await self.health?.export(saved) ?? saved
         }
+    }
+
+    /// Ce que Pulse peut écrire dans Apple Santé ; `unavailable` sans Apple Santé.
+    public func healthAccess() async -> HealthWriteAccess {
+        await health?.access() ?? .unavailable
+    }
+
+    /// La demande d'écriture système, après l'écran d'explication du récap.
+    public func requestHealthAccess() async -> HealthWriteAccess {
+        await health?.requestAccess() ?? .unavailable
     }
 
     /// Enregistre la séance abandonnée avec ses séries validées, sans RPE, puis fait le même ménage que `finish`. Sans série

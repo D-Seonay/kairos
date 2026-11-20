@@ -1,5 +1,6 @@
 import Foundation
 import PulseDomain
+import Synchronization
 
 /// Le seul passage qui lit Apple Santé, met le score du jour à jour, décrit la séance, publie l'instantané du widget et,
 /// en arrière-plan, envoie la notification du matin. L'écran d'accueil (premier plan) et la livraison Apple Santé
@@ -21,6 +22,9 @@ public final class DayRefresher: Sendable {
     private let calendar: Calendar
     private let now: @Sendable () -> Date
     private let queue = SerialTaskQueue()
+    /// Vrai après une suppression totale, tant qu'aucun profil n'a terminé l'onboarding : une passe ne relit alors ni Apple
+    /// Santé ni ne republie le widget (spec M4 §20).
+    private let erased = Mutex(false)
 
     /// Ce que le programme prévoit : `display` sert à l'écran, `forScore` au score du jour, `nil` quand le profil ou le programme
     /// n'a pas pu être lu, pour que le score garde les ajustements déjà enregistrés.
@@ -46,8 +50,9 @@ public final class DayRefresher: Sendable {
     }
 
     /// Lit Apple Santé, met le score à jour et publie l'instantané. Au premier plan, note l'ouverture de l'app et retire la
-    /// notification du matin ; en arrière-plan, annonce le score une seule fois par jour, et ne fait rien tant que
-    /// l'onboarding n'est pas terminé.
+    /// notification du matin ; en arrière-plan, annonce le score une seule fois par jour. Ne fait rien tant que l'onboarding
+    /// n'est pas terminé ; au premier plan, il en va de même juste après une suppression totale, jusqu'à la fin du nouvel
+    /// onboarding.
     public func refresh(origin: Origin) async -> DayRefresh {
         // La file ne lève que ce que lève l'opération, et celle-ci ne lève pas.
         let result = try? await queue.run { await self.pass(origin) }
@@ -78,7 +83,10 @@ public final class DayRefresher: Sendable {
 
     /// Efface tout avec `eraser`, dans la file : après le passage en cours, et avant le suivant.
     public func eraseEverything(using eraser: any DataEraser, options: EraseOptions) async throws {
-        try await queue.run { try await eraser.eraseEverything(options: options) }
+        try await queue.run {
+            try await eraser.eraseEverything(options: options)
+            self.erased.withLock { $0 = true }
+        }
     }
 
     // MARK: - Interne
@@ -86,7 +94,12 @@ public final class DayRefresher: Sendable {
     private func pass(_ origin: Origin) async -> DayRefresh {
         let now = now()
         let (profile, profileReadFailed) = await loadProfile()
-        if origin == .background, profile?.onboardingCompletedAt == nil {
+        let onboarded = profile?.onboardingCompletedAt != nil
+        let erasedSinceOnboarding = erased.withLock { flag in
+            if onboarded { flag = false }
+            return flag
+        }
+        if !onboarded, origin == .background || (erasedSinceOnboarding && !profileReadFailed) {
             return .empty(profile: profile)
         }
         if origin == .foreground {

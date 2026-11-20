@@ -111,9 +111,12 @@ public final class SessionDetailModel {
         return (program.id, dayID)
     }
 
-    /// Supprime la séance puis recalcule les records, qu'elle a pu établir.
+    /// Supprime la séance puis recalcule les records, qu'elle a pu établir, et supprime son entraînement Apple Santé
+    /// (spec M4 §19.5).
     public func delete() async throws {
+        let deleted = try await environment.workouts.session(id: sessionID)
         try await environment.workouts.delete(id: sessionID)
+        if let deleted { await environment.activeSession.health?.removeWorkout(of: deleted) }
         _ = try await environment.records.recomputeAll()
         session = nil
         isMissing = true

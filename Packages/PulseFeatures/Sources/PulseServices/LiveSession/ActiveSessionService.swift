@@ -27,12 +27,15 @@ public final class ActiveSessionService: Sendable {
     let activity: any SessionActivityControlling
     let calendar: Calendar
     let now: @Sendable () -> Date
+    /// L'écriture des séances terminées dans Apple Santé (spec M4 §19.5) ; `nil` sans Apple Santé. L'historique s'en sert
+    /// aussi pour supprimer l'entraînement d'une séance supprimée.
+    public let health: HealthWorkoutExporter?
     let queue = SerialTaskQueue()
 
     public init(store: any ActiveSessionStore, workouts: any WorkoutRepository, profiles: any ProfileRepository,
                 settings: any ExerciseSettingsRepository, userExercises: any UserExerciseRepository, records: RecordsService,
                 library: ContentLibrary, restNotifier: any RestTimerNotifying, activity: any SessionActivityControlling,
-                calendar: Calendar, now: @escaping @Sendable () -> Date) {
+                calendar: Calendar, now: @escaping @Sendable () -> Date, health: HealthWorkoutExporter? = nil) {
         self.store = store
         self.workouts = workouts
         self.profiles = profiles
@@ -44,6 +47,7 @@ public final class ActiveSessionService: Sendable {
         self.activity = activity
         self.calendar = calendar
         self.now = now
+        self.health = health
     }
 
     /// La séance en cours, ou `nil` sans snapshot lisible. Un repos fini est effacé, enregistré, et sa notification annulée ;

@@ -72,7 +72,9 @@ struct LiveFixture {
     let environment: LiveSessionEnvironment
     let haptics = HapticLog()
 
-    init(notificationsGranted: Bool = true, store: any ActiveSessionStore = InMemoryActiveSessionStore()) {
+    /// `healthWriter` branche l'écriture dans Apple Santé ; sans lui, elle est indisponible.
+    init(notificationsGranted: Bool = true, store: any ActiveSessionStore = InMemoryActiveSessionStore(),
+         healthWriter: StubWorkoutHealthWriter? = nil) {
         let clock = clock
         let now: @Sendable () -> Date = { clock.now }
         let library = ContentLibrary.bundled
@@ -82,10 +84,12 @@ struct LiveFixture {
         let personalRecords = InMemoryPersonalRecordRepository()
         let records = RecordsService(workouts: workouts, records: personalRecords, userExercises: userExercises,
                                      library: library, now: now)
+        let workouts = workouts
+        let health = healthWriter.map { HealthWorkoutExporter(writer: $0, workouts: workouts, profiles: profiles) }
         service = ActiveSessionService(store: store, workouts: workouts, profiles: profiles,
                                        settings: InMemoryExerciseSettingsRepository(), userExercises: userExercises,
                                        records: records, library: library, restNotifier: notifier, activity: activity,
-                                       calendar: calendar, now: now)
+                                       calendar: calendar, now: now, health: health)
         let importer = HevyImporter(workouts: workouts, userExercises: userExercises, records: records,
                                     mappings: InMemoryHevyMappingStore(), library: library, calendar: calendar, now: now)
         let train = TrainEnvironment(

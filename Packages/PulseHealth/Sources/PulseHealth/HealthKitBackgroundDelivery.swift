@@ -9,6 +9,8 @@ public final class HealthKitBackgroundDelivery: @unchecked Sendable {
     private let lock = NSLock()
     private var queries: [HKObserverQuery] = []
     private var onChange: (@Sendable () async -> Void)?
+    /// Une requête a reçu une erreur (accès pas encore accordé) : HealthKit l'a arrêtée.
+    private var hasFailed = false
 
     public init(reader: HealthKitReader) {
         store = reader.store
@@ -29,15 +31,26 @@ public final class HealthKitBackgroundDelivery: @unchecked Sendable {
         lock.withLock { register() }
     }
 
+    /// Au retour au premier plan : relance les requêtes si HealthKit en a arrêté une, par exemple parce que l'accès à Apple
+    /// Santé a été accordé plus tard dans Réglages (spec M4 §20). Sans effet sinon : chaque relance provoque une lecture.
+    public func restartIfStopped() {
+        lock.withLock {
+            guard hasFailed else { return }
+            register()
+        }
+    }
+
     /// Remplace les requêtes en cours. Appelé sous le verrou.
     private func register() {
         guard let onChange else { return }
+        hasFailed = false
         queries.forEach(store.stop)
         queries = HealthKitTypes.observed.map { type in
-            let query = HKObserverQuery(sampleType: type, predicate: nil) { _, completion, error in
+            let query = HKObserverQuery(sampleType: type, predicate: nil) { [weak self] _, completion, error in
                 let done = CompletionBox(completion)
                 // Une erreur (autorisation pas encore donnée, données protégées) ne porte aucune nouveauté à lire.
                 guard error == nil else {
+                    self?.markFailed()
                     done.call()
                     return
                 }
@@ -51,6 +64,12 @@ public final class HealthKitBackgroundDelivery: @unchecked Sendable {
             store.enableBackgroundDelivery(for: type, frequency: .immediate) { _, _ in }
             return query
         }
+    }
+}
+
+extension HealthKitBackgroundDelivery {
+    fileprivate func markFailed() {
+        lock.withLock { hasFailed = true }
     }
 }
 

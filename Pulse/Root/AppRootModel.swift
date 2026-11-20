@@ -52,6 +52,8 @@ final class AppRootModel {
     /// Au retour au premier plan : la séance en cours, puis « Aujourd'hui », puis « Séance », qui relit le score du jour
     /// qu'« Aujourd'hui » vient d'enregistrer.
     func becameActive() async {
+        // L'accès à Apple Santé a pu être accordé dans Réglages pendant que l'app était en arrière-plan.
+        dependencies.backgroundDelivery?.restartIfStopped()
         guard destination == .main, let today else { return }
         let train = train
         await refreshLiveSession()

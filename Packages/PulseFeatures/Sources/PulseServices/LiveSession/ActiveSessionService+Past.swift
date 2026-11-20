@@ -11,10 +11,11 @@ extension ActiveSessionService {
     public static func pastSessions(workouts: any WorkoutRepository, profiles: any ProfileRepository,
                                     settings: any ExerciseSettingsRepository, userExercises: any UserExerciseRepository,
                                     records: RecordsService, library: ContentLibrary, calendar: Calendar,
-                                    now: @escaping @Sendable () -> Date) -> ActiveSessionService {
+                                    now: @escaping @Sendable () -> Date,
+                                    health: HealthWorkoutExporter? = nil) -> ActiveSessionService {
         ActiveSessionService(store: InMemoryActiveSessionStore(), workouts: workouts, profiles: profiles, settings: settings,
                              userExercises: userExercises, records: records, library: library, restNotifier: SilentRestNotifier(),
-                             activity: SilentSessionActivity(), calendar: calendar, now: now)
+                             activity: SilentSessionActivity(), calendar: calendar, now: now, health: health)
     }
     // swiftlint:enable function_parameter_count
 }
