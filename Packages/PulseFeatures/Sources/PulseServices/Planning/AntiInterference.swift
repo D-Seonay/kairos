@@ -122,6 +122,8 @@ private struct Draft {
     let completed: [WorkoutSession]
     /// Passé, validé par une séance faite, ou fixé par l'utilisateur.
     let locked: [Bool]
+    /// Une séance a été faite ce jour-là.
+    let done: [Bool]
     var routines: [RoutineDay?]
     /// Déjà décidé par une règle : une autre règle n'y revient pas.
     var ruled: [Bool]
@@ -139,10 +141,11 @@ private struct Draft {
         let program = input.program
         let lines = input.lines.filter { $0.programID == nil || $0.programID == program.id }
         let today = today
-        let locked = dates.map { date in
-            date < today
-                || lines.contains { !AntiInterference.isRule($0) && calendar.isDate($0.date, inSameDayAs: date) }
-                || completed.contains { calendar.isDate($0.startedAt, inSameDayAs: date) }
+        let done = dates.map { date in completed.contains { calendar.isDate($0.startedAt, inSameDayAs: date) } }
+        self.done = done
+        let locked = dates.indices.map { index in
+            dates[index] < today || done[index]
+                || lines.contains { !AntiInterference.isRule($0) && calendar.isDate($0.date, inSameDayAs: dates[index]) }
         }
         self.locked = locked
         // Les lignes de règle des jours fixés restent : elles disent ce qui était prévu ce jour-là.
@@ -161,9 +164,11 @@ private struct Draft {
         !locked[index] && !ruled[index]
     }
 
-    /// Règle 3 : le premier jour prévu de la semaine, aujourd'hui compris, devient un repos.
+    /// Règle 3 : le prochain jour prévu de la semaine, aujourd'hui compris, devient un repos. Si l'utilisateur a fixé ce jour
+    /// (un refus), la règle ne cherche pas plus loin : le repos ne glisse pas de jour en jour.
     mutating func placeRestDay() {
-        guard let index = dates.indices.first(where: { isFree($0) && routines[$0] != nil }) else { return }
+        guard let index = dates.indices.first(where: { dates[$0] >= today && !done[$0] && routines[$0] != nil }),
+              isFree(index) else { return }
         routines[index] = nil
         ruled[index] = true
         lines.append(RuleLine(date: dates[index], routine: nil, reason: .antiInterferenceRestDay,

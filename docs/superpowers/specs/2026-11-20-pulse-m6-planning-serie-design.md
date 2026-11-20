@@ -149,7 +149,7 @@ Elles sont calculées à chaque passage du jour, sur la semaine datée en cours,
    - les 7 jours d'avant aujourd'hui ont tous eu une séance (musculation terminée, course ou vélo) ;
    - la moyenne du sous-score sommeil sur les 7 dernières nuits est sous 65, le seuil de la fatigue modérée. Il faut au moins 4 nuits avec du sommeil **(choix du constructeur)**.
 
-   La semaine affiche « Repos placé : 7 jours sans repos et sommeil court ».
+   La semaine affiche « Repos placé : 7 jours sans repos et sommeil court ». Si l'utilisateur a refusé ce repos, la règle ne le reporte pas au jour prévu suivant **(choix du constructeur)**.
 
 Chaque ligne de règle porte le `moveReason` de la règle et un `moveReasonText` en clair.
 

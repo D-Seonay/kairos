@@ -113,4 +113,12 @@ struct AntiInterferenceTests {
         let tomorrow = WeekSchedule.day(on: Fixture.day("2026-11-17"), context: context, today: Fixture.day("2026-11-16"))
         #expect(!AntiInterference.needsSpacing(tomorrow))
     }
+
+    @Test func aRefusedRestDayDoesNotSlideToTheNextDay() {
+        let sessions = (9...15).map { Fixture.session("2026-11-\($0)T18:00") }
+        let short = (10...16).map { Fixture.night("2026-11-\($0)", asleepMinutes: 300) }
+        var kept = Fixture.scheduled(RuleLine(date: Fixture.day("2026-11-16"), routine: Fixture.push, reason: .user, text: ""))
+        kept.moveReasonText = nil
+        #expect(!placesRest(Fixture.input(lines: [kept], sessions: sessions, nights: short)))
+    }
 }
