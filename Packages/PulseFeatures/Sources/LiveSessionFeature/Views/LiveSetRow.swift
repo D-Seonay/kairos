@@ -20,6 +20,7 @@ struct LiveSetRow: View {
     let index: Int
     @Binding var rpeSet: UUID?
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         Group {
@@ -69,7 +70,7 @@ struct LiveSetRow: View {
             }
         } label: {
             Text(Self.badge(for: set.setType, index: index))
-                .font(.headline.monospacedDigit())
+                .font(PulseFont.value(.headline))
                 .foregroundStyle(badgeColor)
                 .frame(width: Self.badgeWidth, height: Self.targetHeight)
         }
@@ -159,10 +160,14 @@ struct LiveSetRow: View {
             Task { await model.tap(set: set.id) }
         } label: {
             Image(systemName: "checkmark")
-                .font(.title3.weight(.bold))
+                .font(.title3.weight(.black))
                 .foregroundStyle(isDone ? PulsePalette.liveBackground : PulsePalette.muted)
                 .frame(width: Self.targetHeight, height: Self.targetHeight)
                 .background(isDone ? PulsePalette.ok : PulsePalette.surface2, in: Circle())
+                // Une série validée s'allume : la lueur menthe dit « fait » d'un coup d'œil, entre deux séries.
+                .shadow(color: isDone ? PulsePalette.ok.opacity(0.55) : .clear, radius: 10)
+                .scaleEffect(isDone ? 1 : 0.92)
+                .animation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.55), value: isDone)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(Self.accessibilityText(for: set, index: index, loadKind: exercise.loadKind,
@@ -189,7 +194,7 @@ private struct ValueCell: View {
         let accent = Color(PulsePalette.accent(for: theme).accent)
         Button(action: action) {
             Text(text)
-                .font(.title3.weight(.semibold).monospacedDigit())
+                .font(PulseFont.value(.title2, weight: .bold))
                 .foregroundStyle(isEmpty ? PulsePalette.muted : (isProposed ? accent : PulsePalette.text))
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)

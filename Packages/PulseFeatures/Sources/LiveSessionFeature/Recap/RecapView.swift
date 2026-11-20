@@ -44,7 +44,7 @@ public struct RecapView: View {
             .padding(16)
         }
         .scrollDismissesKeyboard(.interactively)
-        .background(PulsePalette.background.ignoresSafeArea())
+        .pulseScreenBackground()
         .safeAreaInset(edge: .bottom, spacing: 0) { actions }
         .preferredColorScheme(.dark)
     }
@@ -55,10 +55,10 @@ public struct RecapView: View {
         VStack(spacing: 4) {
             Image(systemName: "sparkles")
                 .font(.largeTitle)
-                .foregroundStyle(Color(PulsePalette.accent(for: theme).accent))
+                .foregroundStyle(PulsePalette.accent(for: theme).gradient(startPoint: .topLeading, endPoint: .bottomTrailing))
                 .accessibilityHidden(true)
             Text(String(localized: "Séance terminée", bundle: .module))
-                .font(.title2.weight(.heavy))
+                .font(PulseFont.title(.title2))
                 .foregroundStyle(PulsePalette.text)
                 .accessibilityAddTraits(.isHeader)
             Text(Self.subtitle(title: recap.title, endedAt: recap.endedAt, calendar: calendar))
@@ -84,13 +84,12 @@ public struct RecapView: View {
     private func stat(_ value: String, _ name: String, color: Color = PulsePalette.text) -> some View {
         VStack(spacing: 2) {
             Text(value)
-                .font(.title2.weight(.heavy).monospacedDigit())
+                .font(PulseFont.value(.largeTitle))
                 .foregroundStyle(color)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
             Text(name)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(PulsePalette.muted)
+                .pulseEyebrow()
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)

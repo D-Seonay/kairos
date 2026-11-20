@@ -1,8 +1,8 @@
 import PulseDomain
 import SwiftUI
 
-/// Rangée L M M J V S D, lundi en premier : un jour sélectionné est un jour de repos imposé,
-/// contour rouge comme l'écran `objectifs` de la maquette.
+/// Rangée L M M J V S D, lundi en premier : un jour sélectionné est un jour de repos imposé, une pastille éteinte barrée
+/// d'une diagonale, comme une case rayée au calendrier.
 public struct WeekdayToggleRow: View {
     @Binding private var selection: Set<Weekday>
 
@@ -19,10 +19,11 @@ public struct WeekdayToggleRow: View {
                 } label: {
                     Text(day.initial)
                         .font(.system(.subheadline, weight: .bold))
-                        .foregroundStyle(isRest ? PulsePalette.bad : PulsePalette.text2)
+                        .foregroundStyle(isRest ? PulsePalette.muted : PulsePalette.text)
                         .frame(maxWidth: .infinity, minHeight: 44)
-                        .background(PulsePalette.surface2, in: shape)
-                        .overlay { if isRest { shape.strokeBorder(PulsePalette.bad, lineWidth: 2) } }
+                        .background(isRest ? Color.clear : PulsePalette.surface2, in: shape)
+                        .overlay { shape.strokeBorder(PulsePalette.ink.opacity(isRest ? 0.3 : 0.08), lineWidth: 1) }
+                        .overlay { if isRest { RestStrike().stroke(PulsePalette.muted, lineWidth: 1).clipShape(shape) } }
                         .contentShape(shape)
                 }
                 .buttonStyle(.plain)
@@ -44,6 +45,16 @@ public struct WeekdayToggleRow: View {
             selection.insert(day)
         }
         PulseHaptics.selection()
+    }
+}
+
+/// La diagonale d'un jour de repos, du coin bas gauche au coin haut droit.
+private struct RestStrike: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.minX, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
+        return path
     }
 }
 

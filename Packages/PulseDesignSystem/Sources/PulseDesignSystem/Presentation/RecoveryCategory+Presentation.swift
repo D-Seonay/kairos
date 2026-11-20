@@ -7,18 +7,13 @@ public enum CategoryTone: Sendable {
     case caution
     case critical
 
-    /// Sur fond opale (blanc), les teintes plus sombres de la maquette (`--oo-*`) gardent le contraste.
+    /// Sur la dalle tramée, les teintes `opalOK`… restent lisibles par-dessus la trame.
     public func color(onOpal: Bool) -> Color {
         switch self {
         case .positive: onOpal ? PulsePalette.opalOK : PulsePalette.ok
         case .caution: onOpal ? PulsePalette.opalWarn : PulsePalette.warn
         case .critical: onOpal ? PulsePalette.opalBad : PulsePalette.bad
         }
-    }
-
-    /// Le fond doux de la pastille (`.tag.ok`, `.tag.warn`, `.tag.bad`) : la teinte du ton à faible opacité.
-    func softColor(onOpal: Bool) -> Color {
-        color(onOpal: onOpal).opacity(onOpal ? 0.12 : 0.16)
     }
 }
 

@@ -30,11 +30,11 @@ private struct TrendTileView: View {
         ObsidianCard {
             VStack(alignment: .leading, spacing: 4) {
                 Text(tile.title)
-                    .font(.caption)
-                    .foregroundStyle(PulsePalette.muted)
+                    .pulseEyebrow()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
                 Text(tile.valueText)
-                    .font(.title2.weight(.heavy))
-                    .monospacedDigit()
+                    .font(PulseFont.value(.title, weight: .regular))
                     .foregroundStyle(PulsePalette.text)
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
@@ -50,7 +50,7 @@ private struct TrendTileView: View {
     private var color: Color {
         switch tile.factor {
         case .hrv: Color(PulsePalette.accent(for: theme).accent)
-        case .restingHeartRate: PulsePalette.warn
+        case .restingHeartRate: PulsePalette.text2
         case .sleep: PulsePalette.run
         }
     }

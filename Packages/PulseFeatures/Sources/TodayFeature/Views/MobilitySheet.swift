@@ -19,7 +19,7 @@ public struct MobilitySheet: View {
             ScrollView {
                 VStack(spacing: PulseMetrics.spacing) {
                     Text(String(localized: "20 min de mobilité", bundle: .module))
-                        .font(.title.weight(.heavy))
+                        .font(PulseFont.title(.title))
                         .foregroundStyle(PulsePalette.text)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .accessibilityAddTraits(.isHeader)
@@ -50,7 +50,7 @@ public struct MobilitySheet: View {
             ObsidianCard {
                 VStack(spacing: 14) {
                     Text(MobilityTimer.clockText(remaining))
-                        .font(.system(size: digitSize, weight: .bold, design: .rounded).monospacedDigit())
+                        .font(PulseFont.score(size: digitSize * 1.3))
                         .foregroundStyle(PulsePalette.text)
                         .lineLimit(1)
                         .minimumScaleFactor(0.5)

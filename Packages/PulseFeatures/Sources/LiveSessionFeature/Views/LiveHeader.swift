@@ -16,7 +16,7 @@ struct LiveHeader: View {
         VStack(spacing: 4) {
             HStack(spacing: 8) {
                 Text(Self.titleText(session.title))
-                    .font(.title3.weight(.bold))
+                    .font(PulseFont.title(.title3))
                     .foregroundStyle(PulsePalette.text)
                     .lineLimit(2)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -24,7 +24,7 @@ struct LiveHeader: View {
                 menu
                 Button(action: onFinish) {
                     Text(String(localized: "Terminer", bundle: .module))
-                        .font(.headline)
+                        .font(PulseFont.title(.subheadline))
                         .foregroundStyle(Color(palette.accentInk))
                         .padding(.horizontal, 18)
                         .frame(minHeight: LiveSetRow.targetHeight)
@@ -73,9 +73,9 @@ struct LiveHeader: View {
     @ViewBuilder
     private func stat(_ name: String, spoken: String? = nil, @ViewBuilder value: () -> some View) -> some View {
         let content = VStack(spacing: 0) {
-            Text(name).font(.caption2.weight(.semibold)).foregroundStyle(PulsePalette.muted)
+            Text(name).pulseEyebrow()
             value()
-                .font(.headline.monospacedDigit())
+                .font(PulseFont.value(.title2))
                 .foregroundStyle(PulsePalette.text)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)

@@ -3,7 +3,8 @@ import PulseDomain
 import PulseServices
 import SwiftUI
 
-/// La carte opale de récupération : catégorie, jauge, marqueur et les trois facteurs de la nuit ; la toucher ouvre l'écran « Pourquoi ».
+/// La dalle tramée de récupération, dont la lumière suit le score : catégorie, jauge, marqueur et les trois facteurs de la
+/// nuit ; la toucher ouvre l'écran « Pourquoi ».
 /// Avant 4 h, elle montre le score de la veille. `.needsCheckIn` n'est pas une carte : l'accueil affiche alors le check-in.
 struct RecoveryCard: View {
     let score: TodayScore?
@@ -27,7 +28,7 @@ struct RecoveryCard: View {
     /// Toucher la carte ouvre « Pourquoi ». La jauge reste un texte à part (les tests d'interface la lisent) : VoiceOver y trouve
     /// l'action « Pourquoi ce score ? ».
     private func scoredCard(_ recovery: DailyRecovery) -> some View {
-        OpalCard {
+        OpalCard(heat: recovery.score) {
             VStack(spacing: 16) {
                 CardHeader(title: String(localized: "Récupération", bundle: .module), category: recovery.category, marker: marker)
                 RecoveryGauge(score: recovery.score, category: recovery.category, style: .large)
@@ -38,14 +39,14 @@ struct RecoveryCard: View {
                 FactorColumns(factors: factors)
             }
         }
-        .contentShape(RoundedRectangle(cornerRadius: PulseMetrics.radius, style: .continuous))
+        .contentShape(RoundedRectangle(cornerRadius: PulseMetrics.radiusHero, style: .continuous))
         .onTapGesture(perform: onWhy)
     }
 
     // MARK: - Veille
 
     private func yesterdayCard(_ yesterday: DailyRecovery?) -> some View {
-        OpalCard {
+        OpalCard(heat: yesterday?.score) {
             VStack(spacing: 16) {
                 CardHeader(title: String(localized: "Score d'hier", bundle: .module), category: yesterday?.category, marker: nil)
                 RecoveryGauge(score: yesterday?.score, category: yesterday?.category, style: .large)
@@ -103,8 +104,7 @@ private struct CardHeader: View {
 
     private var titleText: some View {
         Text(title)
-            .font(.subheadline.weight(.semibold))
-            .foregroundStyle(PulsePalette.opalMuted)
+            .pulseEyebrow(PulsePalette.opalMuted)
             .accessibilityAddTraits(.isHeader)
     }
 
@@ -135,10 +135,11 @@ private struct FactorColumns: View {
     private func column(_ factor: FactorDisplay) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(factor.title)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(PulsePalette.opalMuted)
+                .pulseEyebrow(PulsePalette.opalMuted)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
             Text(factor.value)
-                .font(.title3.weight(.bold).monospacedDigit())
+                .font(PulseFont.value(.title2, weight: .regular))
                 .foregroundStyle(factor.isMissing ? PulsePalette.opalMuted : PulsePalette.opalInk)
             Text(factor.detail)
                 .font(.caption)

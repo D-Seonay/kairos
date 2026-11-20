@@ -4,7 +4,7 @@ import PulseLiveActivity
 import SwiftUI
 import WidgetFeature
 
-/// Les couleurs de la Live Activity. L'extension ne lit pas le thème du profil : elle prend l'accent par défaut (ambre).
+/// Les couleurs de la Live Activity. L'extension ne lit pas le thème du profil : elle prend l'accent par défaut (Ivoire).
 enum SessionActivityStyle {
     static let accent = Color(PulsePalette.accent(for: .amber).accent)
     static let accentInk = Color(PulsePalette.accent(for: .amber).accentInk)
@@ -170,7 +170,7 @@ struct SessionLockScreenView: View {
             SessionTitleAndNextSet(state: state, spacing: 4)
             Spacer(minLength: 8)
             SessionClockText(state: state)
-                .font(.system(.title, design: .rounded, weight: .heavy))
+                .font(PulseFont.value(.largeTitle))
                 .foregroundStyle(SessionActivityStyle.accent)
         }
     }
@@ -199,7 +199,7 @@ struct SessionIslandTrailing: View {
 
     var body: some View {
         SessionClockText(state: state)
-            .font(.system(.title2, design: .rounded, weight: .heavy))
+            .font(PulseFont.value(.title))
             .foregroundStyle(SessionActivityStyle.accent)
     }
 }

@@ -23,7 +23,7 @@ struct WhyView: View {
                 .padding(PulseMetrics.spacing)
             }
         }
-        .background(PulsePalette.background)
+        .pulseScreenBackground(aura: 0.6)
         .navigationTitle(String(localized: "Pourquoi cette adaptation", bundle: .module))
         .pulseInlineTitle()
     }
@@ -277,7 +277,7 @@ private struct WhyPreviewHost: View {
             }
             model = prepared
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(.light)
     }
 }
 

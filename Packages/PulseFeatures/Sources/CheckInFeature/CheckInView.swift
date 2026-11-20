@@ -92,7 +92,7 @@ public struct CheckInView: View {
                     .font(.footnote)
                     .foregroundStyle(PulsePalette.opalMuted)
                 Text(scoreText)
-                    .font(.system(size: 48, weight: .heavy).monospacedDigit())
+                    .font(PulseFont.score(size: 64))
                     .contentTransition(.numericText())
                 categoryLine
             }

@@ -1,12 +1,35 @@
 {
   "sourceLanguage" : "fr",
   "strings" : {
+    "," : {
+
+    },
     "%@ : %@" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ : %@"
+          }
+        }
+      }
+    },
+    "%@ · Série %lld · %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · Série %lld · %@"
+          }
+        }
+      }
+    },
+    "%@ · Série %lld · RPE" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · Série %lld · RPE"
           }
         }
       }
@@ -41,26 +64,6 @@
         }
       }
     },
-    "%@ · Série %lld · %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ · Série %lld · %@"
-          }
-        }
-      }
-    },
-    "%@ · Série %lld · RPE" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ · Série %lld · RPE"
-          }
-        }
-      }
-    },
     "%@, série %lld" : {
       "localizations" : {
         "fr" : {
@@ -70,6 +73,9 @@
           }
         }
       }
+    },
+    "%lld" : {
+
     },
     "%lld répétitions" : {
       "localizations" : {
@@ -161,6 +167,26 @@
         }
       }
     },
+    "−30 s" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "−30 s"
+          }
+        }
+      }
+    },
+    "−kg" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "−kg"
+          }
+        }
+      }
+    },
     "1 répétition" : {
       "localizations" : {
         "fr" : {
@@ -221,12 +247,22 @@
         }
       }
     },
-    "−30 s" : {
+    "à l'échec" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "−30 s"
+            "value" : "à l'échec"
+          }
+        }
+      }
+    },
+    "À l'échec" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À l'échec"
           }
         }
       }
@@ -241,132 +277,22 @@
         }
       }
     },
-    "Abandonner la séance ?" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abandonner la séance ?"
-          }
-        }
-      }
-    },
-    "Clore à %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clore à %@"
-          }
-        }
-      }
-    },
-    "Comment s'est passée la séance ?" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Comment s'est passée la séance ?"
-          }
-        }
-      }
-    },
-    "Continuer la séance" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Continuer la séance"
-          }
-        }
-      }
-    },
-    "dur" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "dur"
-          }
-        }
-      }
-    },
-    "Effort global ressenti" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Effort global ressenti"
-          }
-        }
-      }
-    },
-    "Enregistre la séance avec l'effort proposé" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enregistre la séance avec l'effort proposé"
-          }
-        }
-      }
-    },
-    "facile" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "facile"
-          }
-        }
-      }
-    },
-    "Garder l'heure actuelle" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Garder l'heure actuelle"
-          }
-        }
-      }
-    },
-    "Il reste %lld séries prévues" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Il reste %lld séries prévues"
-          }
-        }
-      }
-    },
-    "Il reste 1 série prévue" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Il reste 1 série prévue"
-          }
-        }
-      }
-    },
-    "−kg" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "−kg"
-          }
-        }
-      }
-    },
     "Abandonner" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Abandonner"
+          }
+        }
+      }
+    },
+    "Abandonner la séance ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abandonner la séance ?"
           }
         }
       }
@@ -431,32 +357,32 @@
         }
       }
     },
-    "Descendre" : {
+    "Clore à %@" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Descendre"
+            "value" : "Clore à %@"
           }
         }
       }
     },
-    "Durée" : {
+    "Comment s'est passée la séance ?" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Durée"
+            "value" : "Comment s'est passée la séance ?"
           }
         }
       }
     },
-    "durée à saisir" : {
+    "Continuer la séance" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "durée à saisir"
+            "value" : "Continuer la séance"
           }
         }
       }
@@ -481,6 +407,66 @@
         }
       }
     },
+    "Descendre" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descendre"
+          }
+        }
+      }
+    },
+    "dur" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "dur"
+          }
+        }
+      }
+    },
+    "Durée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Durée"
+          }
+        }
+      }
+    },
+    "durée à saisir" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "durée à saisir"
+          }
+        }
+      }
+    },
+    "échauffement" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "échauffement"
+          }
+        }
+      }
+    },
+    "Échauffement" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Échauffement"
+          }
+        }
+      }
+    },
     "Effacer" : {
       "localizations" : {
         "fr" : {
@@ -501,12 +487,42 @@
         }
       }
     },
+    "Effort global ressenti" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effort global ressenti"
+          }
+        }
+      }
+    },
+    "Enregistre la séance avec l'effort proposé" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistre la séance avec l'effort proposé"
+          }
+        }
+      }
+    },
     "Enregistrer" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Enregistrer"
+          }
+        }
+      }
+    },
+    "facile" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "facile"
           }
         }
       }
@@ -537,6 +553,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fermer le clavier"
+          }
+        }
+      }
+    },
+    "Garder l'heure actuelle" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Garder l'heure actuelle"
+          }
+        }
+      }
+    },
+    "Il reste %lld séries prévues" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il reste %lld séries prévues"
+          }
+        }
+      }
+    },
+    "Il reste 1 série prévue" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il reste 1 série prévue"
           }
         }
       }
@@ -781,26 +827,6 @@
         }
       }
     },
-    "presque maximal" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "presque maximal"
-          }
-        }
-      }
-    },
-    "proposé %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "proposé %@"
-          }
-        }
-      }
-    },
     "Précédent" : {
       "localizations" : {
         "fr" : {
@@ -817,6 +843,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Précédent %@"
+          }
+        }
+      }
+    },
+    "presque maximal" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "presque maximal"
+          }
+        }
+      }
+    },
+    "proposé %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "proposé %@"
           }
         }
       }
@@ -897,6 +943,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Réessayer"
+          }
+        }
+      }
+    },
+    "Répétitions" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Répétitions"
+          }
+        }
+      }
+    },
+    "répétitions à saisir" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "répétitions à saisir"
           }
         }
       }
@@ -991,22 +1057,12 @@
         }
       }
     },
-    "Répétitions" : {
+    "Séance" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Répétitions"
-          }
-        }
-      }
-    },
-    "répétitions à saisir" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "répétitions à saisir"
+            "value" : "Séance"
           }
         }
       }
@@ -1051,12 +1107,52 @@
         }
       }
     },
+    "Série" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Série"
+          }
+        }
+      }
+    },
+    "Série %lld" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Série %lld"
+          }
+        }
+      }
+    },
+    "Série suivante : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Série suivante : %@"
+          }
+        }
+      }
+    },
     "séries" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "séries"
+          }
+        }
+      }
+    },
+    "Séries" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séries"
           }
         }
       }
@@ -1107,56 +1203,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Supprimer la série"
-          }
-        }
-      }
-    },
-    "Séance" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Séance"
-          }
-        }
-      }
-    },
-    "Série" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Série"
-          }
-        }
-      }
-    },
-    "Série %lld" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Série %lld"
-          }
-        }
-      }
-    },
-    "Série suivante : %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Série suivante : %@"
-          }
-        }
-      }
-    },
-    "Séries" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Séries"
           }
         }
       }
@@ -1267,46 +1313,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Virgule"
-          }
-        }
-      }
-    },
-    "à l'échec" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "à l'échec"
-          }
-        }
-      }
-    },
-    "À l'échec" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "À l'échec"
-          }
-        }
-      }
-    },
-    "Échauffement" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Échauffement"
-          }
-        }
-      }
-    },
-    "échauffement" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "échauffement"
           }
         }
       }

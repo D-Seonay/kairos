@@ -59,8 +59,7 @@ struct SessionCardHeader: View {
         layout {
             VStack(alignment: .leading, spacing: 4) {
                 Text(String(localized: "Séance du jour", bundle: .module))
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(PulsePalette.muted)
+                    .pulseEyebrow()
                 HStack(spacing: 10) {
                     if runIcon {
                         Image(systemName: "figure.run")
@@ -69,7 +68,7 @@ struct SessionCardHeader: View {
                             .accessibilityHidden(true)
                     }
                     Text(title)
-                        .font(.title3.weight(.bold))
+                        .font(.title2.weight(.semibold))
                         .foregroundStyle(PulsePalette.text)
                         .accessibilityAddTraits(.isHeader)
                         .accessibilityIdentifier(TodayIdentifiers.sessionTitle)

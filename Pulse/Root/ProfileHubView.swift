@@ -12,7 +12,7 @@ struct ProfileHubView: View {
             List {
                 Section {
                     Text(displayName)
-                        .font(.system(.title2, weight: .heavy))
+                        .font(PulseFont.title(.title2))
                         .foregroundStyle(PulsePalette.text)
                 }
                 Section(String(localized: "Debug")) {
@@ -25,7 +25,7 @@ struct ProfileHubView: View {
                 }
             }
             .scrollContentBackground(.hidden)
-            .background(PulsePalette.background)
+            .pulseScreenBackground(aura: 0.5)
             .navigationTitle(String(localized: "Profil"))
         }
     }

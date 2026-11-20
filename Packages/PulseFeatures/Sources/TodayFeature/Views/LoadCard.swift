@@ -44,8 +44,7 @@ struct LoadCard: View {
 
     private var title: some View {
         Text(String(localized: "Charge d'entraînement", bundle: .module))
-            .font(.subheadline.weight(.semibold))
-            .foregroundStyle(PulsePalette.text)
+            .pulseEyebrow(PulsePalette.text2)
             .accessibilityAddTraits(.isHeader)
     }
 
@@ -54,12 +53,11 @@ struct LoadCard: View {
         if case .ratio(let value, _, let zoneTitle, _) = content {
             let tint = Self.tint(for: ACWRZone(ratio: value))
             Text(zoneTitle)
-                .font(.system(.caption, weight: .semibold))
-                .foregroundStyle(tint)
+                .pulseEyebrow(tint)
                 .lineLimit(1)
                 .padding(.horizontal, 10)
                 .frame(minHeight: 24)
-                .background(tint.opacity(0.16), in: Capsule())
+                .overlay(Capsule().strokeBorder(tint.opacity(0.4), lineWidth: 1))
         }
     }
 

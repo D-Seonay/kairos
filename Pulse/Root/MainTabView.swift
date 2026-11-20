@@ -99,6 +99,6 @@ struct MainTabView: View {
 
     private func comingSoon(_ title: String, milestone: String) -> some View {
         ComingSoonView(title: title, milestone: milestone)
-            .background(PulsePalette.background)
+            .pulseScreenBackground(aura: 0.4)
     }
 }

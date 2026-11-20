@@ -58,17 +58,19 @@ struct RestBanner: View {
     }
 
     private func ring(fraction: Double) -> some View {
-        let accent = Color(PulsePalette.accent(for: theme).accent)
+        let palette = PulsePalette.accent(for: theme)
         return ZStack {
             Circle().stroke(PulsePalette.line, lineWidth: 4).accessibilityHidden(true)
             Circle()
                 .trim(from: 0, to: fraction)
-                .stroke(accent, style: StrokeStyle(lineWidth: 4, lineCap: .round))
+                .stroke(AngularGradient(colors: [Color(palette.accent), Color(palette.accent2)], center: .center),
+                        style: StrokeStyle(lineWidth: 4, lineCap: .round))
+                .shadow(color: Color(palette.accent2).opacity(0.6), radius: 4)
                 .rotationEffect(.degrees(-90))
                 .animation(reduceMotion ? nil : .linear(duration: 1), value: fraction)
                 .accessibilityHidden(true)
             Text(timerInterval: rest.startedAt...rest.endsAt, pauseTime: nil, countsDown: true, showsHours: false)
-                .font(.subheadline.weight(.bold).monospacedDigit())
+                .font(PulseFont.value(.headline))
                 .foregroundStyle(PulsePalette.text)
                 .minimumScaleFactor(0.5)
                 .lineLimit(1)
@@ -103,8 +105,7 @@ struct RestBanner: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 .frame(maxWidth: .infinity, minHeight: LiveSetRow.targetHeight)
-                .background(isProminent ? Color(palette.accent) : PulsePalette.surface,
-                            in: RoundedRectangle(cornerRadius: PulseMetrics.radiusTiny, style: .continuous))
+                .background(isProminent ? AnyShapeStyle(Color(palette.accent)) : AnyShapeStyle(PulsePalette.surface), in: Capsule())
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

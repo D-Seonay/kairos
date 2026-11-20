@@ -1,9 +1,10 @@
 import SwiftUI
 
-/// La barre de charge d'entraînement (ratio 7 j / 28 j) de la maquette : quatre zones de couleur
-/// et un repère rond à la position du ratio. Les libellés nomment les zones, la couleur ne porte pas seule le sens.
+/// La barre de charge d'entraînement (ratio 7 j / 28 j), en rangée de points : creux en sous-charge, pleins et blancs dans la
+/// zone optimale, gris en vigilance, du signal dans le risque. Un anneau marque le ratio et les points déjà parcourus
+/// s'allument. Les libellés nomment les zones, la couleur ne porte pas seule le sens.
 public struct LoadGauge: View {
-    private static let barHeight: CGFloat = 10
+    private static let dotCount = 34
     private static let markerDiameter: CGFloat = 20
     private static let markerBorder: CGFloat = 3
 
@@ -28,35 +29,43 @@ public struct LoadGauge: View {
     // MARK: Barre
 
     private var bar: some View {
-        GeometryReader { proxy in
-            let radius = Self.markerDiameter / 2
-            let center = min(max(proxy.size.width * LoadGaugeGeometry.fraction(ratio: ratio), radius), proxy.size.width - radius)
-            ZStack(alignment: .leading) {
-                Capsule()
-                    .fill(zones)
-                    .frame(height: Self.barHeight)
-                Circle()
-                    .fill(PulsePalette.text)
-                    .overlay(Circle().strokeBorder(PulsePalette.background, lineWidth: Self.markerBorder))
-                    .frame(width: Self.markerDiameter, height: Self.markerDiameter)
-                    .offset(x: center - radius)
+        Canvas { context, size in
+            let count = Self.dotCount
+            let step = size.width / CGFloat(count)
+            let radius = min(step * 0.32, 3.2)
+            let midY = size.height / 2
+            let position = LoadGaugeGeometry.fraction(ratio: ratio)
+            for index in 0..<count {
+                let fraction = (Double(index) + 0.5) / Double(count)
+                let center = CGPoint(x: step * (CGFloat(index) + 0.5), y: midY)
+                let dot = Path(ellipseIn: CGRect(x: center.x - radius, y: center.y - radius, width: 2 * radius,
+                                                 height: 2 * radius))
+                let zone = Self.zone(for: fraction)
+                let lit = fraction <= position
+                if zone == 0 {
+                    context.stroke(dot, with: .color(PulsePalette.text2.opacity(lit ? 0.9 : 0.45)), lineWidth: 1)
+                } else {
+                    context.fill(dot, with: .color(Self.zoneColors[zone].opacity(lit ? 1 : 0.4)))
+                }
             }
-            .frame(maxHeight: .infinity)
+            let markerRadius = Self.markerDiameter / 2
+            let markerX = min(max(size.width * position, markerRadius), size.width - markerRadius)
+            let marker = CGRect(x: markerX - markerRadius, y: midY - markerRadius, width: Self.markerDiameter,
+                                height: Self.markerDiameter)
+            context.fill(Path(ellipseIn: marker), with: .color(PulsePalette.background))
+            context.stroke(Path(ellipseIn: marker.insetBy(dx: 1, dy: 1)), with: .color(PulsePalette.text), lineWidth: 2)
+            context.fill(Path(ellipseIn: marker.insetBy(dx: Self.markerBorder + 3, dy: Self.markerBorder + 3)),
+                         with: .color(PulsePalette.text))
         }
         .frame(height: Self.markerDiameter)
     }
 
-    /// `linear-gradient(90deg, run 0 20%, ok 20% 60%, warn 60% 78%, bad 78%)` : des changements de couleur nets.
-    private var zones: LinearGradient {
-        let colors = [PulsePalette.run, PulsePalette.ok, PulsePalette.warn, PulsePalette.bad]
+    /// Sous-charge, optimal, vigilance, risque : les zones de `LoadGaugeGeometry.zoneBounds`.
+    private static let zoneColors = [PulsePalette.text2, PulsePalette.text, PulsePalette.warn, PulsePalette.bad]
+
+    private static func zone(for fraction: Double) -> Int {
         let bounds = LoadGaugeGeometry.zoneBounds
-        let stops = colors.indices.flatMap { index in
-            [
-                Gradient.Stop(color: colors[index], location: bounds[index]),
-                Gradient.Stop(color: colors[index], location: bounds[index + 1])
-            ]
-        }
-        return LinearGradient(stops: stops, startPoint: .leading, endPoint: .trailing)
+        return (1..<bounds.count).first { fraction < bounds[$0] }.map { $0 - 1 } ?? zoneColors.count - 1
     }
 
     // MARK: Libellés

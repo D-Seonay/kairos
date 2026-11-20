@@ -25,7 +25,7 @@ struct ProgramEditorPreviewHost: View {
             await model.refresh()
             train = model
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(.light)
     }
 }
 
@@ -49,7 +49,7 @@ struct RoutineEditorPreviewHost: View {
                 editor = train.routineEditorModel(programID: programID, dayID: dayID)
             }
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(.light)
     }
 }
 

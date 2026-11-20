@@ -124,10 +124,10 @@ private struct TechniquePane: View {
             VStack(alignment: .leading, spacing: 12) {
                 MuscleMapView(levels: model.muscleLevels, label: muscleLabel(primary: primary, secondary: secondary), height: 280)
                     .frame(maxWidth: .infinity)
-                legend(color: Color(MuscleIntensity.color(level: 4, accent: accent)),
+                legend(color: MuscleIntensity.color(level: 4, accent: accent),
                        text: String(localized: "Principaux : \(primary)", bundle: .module))
                 if !info.secondaryMuscles.isEmpty {
-                    legend(color: Color(MuscleIntensity.color(level: 2, accent: accent)),
+                    legend(color: MuscleIntensity.color(level: 2, accent: accent),
                            text: String(localized: "Secondaires : \(secondary)", bundle: .module))
                 }
             }

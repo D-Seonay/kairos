@@ -24,7 +24,7 @@ public struct TodayView: View {
         @Bindable var model = model
         NavigationStack {
             content
-                .background(PulsePalette.background)
+                .pulseScreenBackground()
                 .hidingNavigationBar()
                 .navigationDestination(isPresented: $model.isShowingWhy) {
                     WhyView(model: model, onStart: startSession, onResume: onResumeSession)
@@ -88,14 +88,14 @@ private struct TodayHeader: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top, spacing: 8) {
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(model.dateText)
+                        .pulseEyebrow(PulsePalette.text2)
                     Text(model.greeting)
-                        .font(.title.weight(.heavy))
+                        .font(PulseFont.title(.largeTitle, weight: .semibold))
+                        .tracking(-0.6)
                         .foregroundStyle(PulsePalette.text)
                         .accessibilityAddTraits(.isHeader)
-                    Text(model.dateText)
-                        .font(.subheadline)
-                        .foregroundStyle(PulsePalette.text2)
                 }
                 Spacer(minLength: 8)
                 profileButton
@@ -107,10 +107,11 @@ private struct TodayHeader: View {
 
     private var profileButton: some View {
         Button(action: onOpenProfile) {
-            Image(systemName: "person.crop.circle")
-                .font(.title)
-                .foregroundStyle(PulsePalette.text2)
-                .frame(minWidth: 44, minHeight: 44)
+            Image(systemName: "person")
+                .font(.system(size: 17, weight: .medium))
+                .foregroundStyle(PulsePalette.text)
+                .frame(width: 44, height: 44)
+                .overlay(Circle().strokeBorder(PulsePalette.ink.opacity(0.2), lineWidth: 1))
         }
         .buttonStyle(.plain)
         .accessibilityLabel(String(localized: "Profil", bundle: .module))
@@ -120,12 +121,17 @@ private struct TodayHeader: View {
         Button {
             Task { await model.refresh() }
         } label: {
-            Label(syncText, systemImage: "arrow.triangle.2.circlepath")
-                .font(.system(.caption, weight: .semibold))
-                .foregroundStyle(PulsePalette.text2)
-                .padding(.horizontal, 12)
-                .frame(minHeight: 32)
-                .background(PulsePalette.surface2, in: Capsule())
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(model.lastSyncText == nil ? PulsePalette.muted : PulsePalette.text)
+                    .frame(width: 6, height: 6)
+                Text(syncText)
+                    .pulseEyebrow(PulsePalette.text2)
+            }
+            .padding(.horizontal, 12)
+            .frame(minHeight: 32)
+            .background(PulsePalette.surface.opacity(0.6), in: Capsule())
+            .overlay(Capsule().strokeBorder(PulsePalette.ink.opacity(0.2), lineWidth: 1))
         }
         .buttonStyle(.plain)
         .disabled(model.isLoading)

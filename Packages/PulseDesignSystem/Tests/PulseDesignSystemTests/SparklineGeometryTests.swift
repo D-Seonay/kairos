@@ -37,3 +37,12 @@ import Testing
     #expect(points[1] == nil && points[3] == nil)
     #expect(points[0]?.y == 40 && points[2]?.y == 0)
 }
+
+@Test func sparklineAreaClosesOneShapePerRunOfTwoOrMore() {
+    let points: [CGPoint?] = [
+        CGPoint(x: 0, y: 5), CGPoint(x: 10, y: 2), nil, CGPoint(x: 30, y: 4), nil, CGPoint(x: 50, y: 1), CGPoint(x: 60, y: 3)
+    ]
+    let area = Sparkline.area(through: points, bottom: 20)
+    #expect(area.boundingRect == CGRect(x: 0, y: 1, width: 60, height: 19))
+    #expect(Sparkline.area(through: [CGPoint(x: 4, y: 4)], bottom: 20).isEmpty)
+}

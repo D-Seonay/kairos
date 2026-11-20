@@ -41,7 +41,7 @@ public struct TrainView: View {
     public var body: some View {
         NavigationStack(path: $path) {
             content
-                .background(PulsePalette.background)
+                .pulseScreenBackground(aura: 0.6)
                 .hidingNavigationBar()
                 .navigationDestination(for: TrainDestination.self, destination: destination)
         }
@@ -201,7 +201,7 @@ private struct TrainHeader: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(String(localized: "Séance", bundle: .module))
-                .font(.title.weight(.heavy))
+                .font(PulseFont.title(.title))
                 .foregroundStyle(PulsePalette.text)
                 .accessibilityAddTraits(.isHeader)
             Text(String(localized: "Ce que ton corps peut encaisser aujourd'hui", bundle: .module))
@@ -217,7 +217,7 @@ private struct SectionTitle: View {
 
     var body: some View {
         Text(text)
-            .font(.title3.weight(.bold))
+            .font(PulseFont.title(.title3))
             .foregroundStyle(PulsePalette.text)
             .accessibilityAddTraits(.isHeader)
     }

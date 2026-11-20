@@ -25,7 +25,7 @@ struct CalibrationView: View {
         VStack(alignment: .leading, spacing: 0) {
             VStack(alignment: .leading, spacing: 8) {
                 Text(String(localized: "Pas encore de score mesuré", bundle: .module))
-                    .font(.system(.title2, weight: .heavy))
+                    .font(PulseFont.title(.title2))
                     .foregroundStyle(PulsePalette.text)
                     .accessibilityAddTraits(.isHeader)
                 Text(explanation)

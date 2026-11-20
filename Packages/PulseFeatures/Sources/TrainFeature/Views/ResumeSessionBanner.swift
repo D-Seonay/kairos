@@ -12,8 +12,7 @@ struct ResumeSessionBanner: View {
             VStack(alignment: .leading, spacing: 12) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(String(localized: "Séance en cours", bundle: .module))
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(PulsePalette.text2)
+                        .pulseEyebrow(PulsePalette.text2)
                     Text(title)
                         .font(.headline)
                         .foregroundStyle(PulsePalette.text)

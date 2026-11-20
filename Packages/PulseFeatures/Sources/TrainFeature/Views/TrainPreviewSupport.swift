@@ -91,7 +91,7 @@ struct TrainPreviewHost: View {
             model = await TrainPreviewSupport.model(now: now, templateID: templateID, category: category,
                                                     sessionRunning: sessionRunning)
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(.light)
     }
 }
 

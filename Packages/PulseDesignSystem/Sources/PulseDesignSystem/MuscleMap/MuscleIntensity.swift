@@ -1,5 +1,5 @@
-import Foundation
 import PulseDomain
+import SwiftUI
 
 /// Passe des poids par muscle aux niveaux 1 à 4 de la carte, et des niveaux aux couleurs.
 public enum MuscleIntensity {
@@ -20,13 +20,20 @@ public enum MuscleIntensity {
     }
 
     /// Le mélange sRGB de l'accent et de `muscleOff` pour ce niveau (`color-mix(in srgb, accent n%, off)`).
-    public static func color(level: Int, accent: PulseRGBA) -> PulseRGBA {
+    public static func color(level: Int, accent: PulseRGBA, off: PulseRGBA = PulsePalette.muscleOffRGBA) -> PulseRGBA {
         let share = accentShares[min(max(level, 1), accentShares.count) - 1]
-        let off = PulsePalette.muscleOffRGBA
         func mix(_ lit: Double, _ unlit: Double) -> Double { lit * share + unlit * (1 - share) }
         return PulseRGBA(
             red: mix(accent.red, off.red), green: mix(accent.green, off.green), blue: mix(accent.blue, off.blue)
         )
+    }
+}
+
+public extension MuscleIntensity {
+    /// La couleur de ce niveau dans les deux apparences : l'accent du thème mêlé au `muscleOff` clair ou sombre.
+    static func color(level: Int, accent: PulseTone) -> Color {
+        Color(light: color(level: level, accent: accent.light, off: PulsePalette.muscleOffLightRGBA),
+              dark: color(level: level, accent: accent.dark))
     }
 }
 
