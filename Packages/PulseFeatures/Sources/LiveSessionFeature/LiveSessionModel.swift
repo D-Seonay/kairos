@@ -156,6 +156,11 @@ public final class LiveSessionModel {
         }
     }
 
+    /// La charge des séries de travail restantes de l'exercice (calculateur de disques).
+    public func setRemainingLoad(_ weightKg: Double, exercise: UUID) async {
+        await perform(.setRemainingLoad(exercise: exercise, weightKg: weightKg))
+    }
+
     // MARK: Repos
 
     public func restMinus30() async {

@@ -4,8 +4,8 @@ import PulseServices
 import SwiftUI
 import TrainFeature
 
-/// Un exercice : son en-tête (nom qui ouvre la fiche, « Dernière fois », ce que le jour a changé, RPE plafond, menu), ses séries
-/// et « + Ajouter une série ». Une section de la liste, pour que le balayage supprime une série.
+/// Un exercice : son en-tête (nom qui ouvre la fiche, « Dernière fois », ce que le jour a changé, RPE plafond, disques sur une
+/// barre, menu), ses séries et « + Ajouter une série ». Une section de la liste, pour que le balayage supprime une série.
 struct LiveExerciseCard: View {
     static let incrementChoices: [Double] = [1, 1.25, 2, 2.5, 5, 10]
 
@@ -15,6 +15,7 @@ struct LiveExerciseCard: View {
     let isLast: Bool
     @Binding var rpeSet: UUID?
     @State private var isShowingSheet = false
+    @State private var isShowingPlates = false
     @State private var isRemoving = false
     @State private var isEditingNote = false
     @State private var noteDraft = ""
@@ -66,11 +67,18 @@ struct LiveExerciseCard: View {
                 .accessibilityHint(String(localized: "Ouvre la fiche de l'exercice", bundle: .module))
                 details
             }
+            if exercise.isBarbell && exercise.loadKind == .external {
+                platesButton
+            }
             menu
         }
         .padding(.horizontal, 12)
         .padding(.top, 4)
         .sheet(isPresented: $isShowingSheet) { exerciseSheet }
+        .sheet(isPresented: $isShowingPlates) {
+            PlateCalculatorSheet(model: model, exerciseID: exercise.id)
+                .presentationDetents([.medium, .large])
+        }
         .confirmationDialog(String(localized: "Retirer cet exercice ?", bundle: .module), isPresented: $isRemoving,
                             titleVisibility: .visible) {
             Button(String(localized: "Retirer", bundle: .module), role: .destructive) {
@@ -109,6 +117,21 @@ struct LiveExerciseCard: View {
         if let note = exercise.note {
             Text(note).font(.footnote.italic()).foregroundStyle(PulsePalette.text2)
         }
+    }
+
+    /// Le calculateur de disques, sur les exercices à la barre (spec M4 §19.2).
+    private var platesButton: some View {
+        Button {
+            isShowingPlates = true
+        } label: {
+            Image(systemName: "circle.circle")
+                .font(.title3)
+                .foregroundStyle(PulsePalette.text2)
+                .frame(width: LiveSetRow.targetHeight, height: LiveSetRow.targetHeight)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(String(localized: "Disques à charger", bundle: .module))
     }
 
     private var menu: some View {

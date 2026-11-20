@@ -126,6 +126,24 @@ public final class ActiveSessionService: Sendable {
         }
     }
 
+    /// La barre et les disques du profil, ou ceux d'une salle courante sans profil (barre de 20 kg, disques de 25 à 1,25 kg).
+    public func barAndPlates() async throws -> (barKg: Double, platesKg: [Double]) {
+        let profile = try await profiles.load() ?? UserProfile(createdAt: now(), updatedAt: now())
+        return (profile.barWeightKg, profile.availablePlatesKg)
+    }
+
+    /// Enregistre la barre et les disques disponibles dans le profil (spec M4 §8.3 : le calculateur les règle, l'écran
+    /// Paramètres arrive en M7). Sans profil, rien n'est enregistré.
+    public func saveBarAndPlates(barKg: Double, platesKg: [Double]) async throws {
+        try await queue.run {
+            guard var profile = try await self.profiles.load() else { return }
+            profile.barWeightKg = barKg
+            profile.availablePlatesKg = platesKg.filter { $0 > 0 }.sorted(by: >)
+            profile.updatedAt = self.now()
+            try await self.profiles.save(profile)
+        }
+    }
+
     /// Applique le geste, pose `lastActionAt`, enregistre la séance, puis règle la notification et la Live Activity.
     public func apply(_ change: LiveSessionChange) async throws -> LiveSession {
         try await queue.run {

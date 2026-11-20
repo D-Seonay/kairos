@@ -28,6 +28,9 @@ public enum LiveSessionChange: Sendable, Equatable {
     case setIncrement(exercise: UUID, Double)
     /// Le nombre de séries d'échauffement de l'exercice ; `nil` revient à l'automatique (spec M4 §19.1).
     case setWarmupCount(exercise: UUID, Int?)
+    /// La charge de toutes les séries de travail pas encore validées de l'exercice, marquées modifiées (le ±2,5 kg du
+    /// calculateur de disques, spec M4 §19.2). Une charge négative est ignorée.
+    case setRemainingLoad(exercise: UUID, weightKg: Double)
     case restMinus30
     case restPlus30
     case skipRest
@@ -39,7 +42,7 @@ extension LiveSession {
         switch change {
         case .validate, .unvalidate, .edit, .setType, .addSet, .deleteSet:
             applySetChange(change, now: now)
-        case .addExercises, .removeExercise, .moveExercise, .setNote, .setIncrement, .setWarmupCount:
+        case .addExercises, .removeExercise, .moveExercise, .setNote, .setIncrement, .setWarmupCount, .setRemainingLoad:
             applyExerciseChange(change)
         case .restMinus30, .restPlus30, .skipRest:
             return
@@ -82,6 +85,9 @@ extension LiveSession {
             updateExercise(exercise) { $0.incrementKg = incrementKg }
         case let .setWarmupCount(exercise, count):
             updateExercise(exercise) { $0.setWarmupCount(count) }
+        case let .setRemainingLoad(exercise, weightKg):
+            guard weightKg >= 0 else { return }
+            updateExercise(exercise) { $0.setRemainingLoad(weightKg) }
         default:
             return
         }
@@ -154,6 +160,17 @@ private extension LiveExercise {
     /// Change le nombre de séries d'échauffement et les recalcule, tant qu'aucune n'est validée et que la première série de
     /// travail ne l'est pas non plus. Sans plan d'échauffement (exercice que Pulse n'échauffe pas aujourd'hui), le réglage
     /// vaudra pour les prochaines séances.
+    /// Pose la charge sur les séries de travail restantes, puis recalcule l'échauffement s'il suit encore la première.
+    mutating func setRemainingLoad(_ weightKg: Double) {
+        let remaining = sets.indices.filter { sets[$0].setType != .warmup && sets[$0].completedAt == nil }
+        guard let first = remaining.first else { return }
+        for index in remaining {
+            sets[index].weightKg = weightKg
+            sets[index].isEdited = true
+        }
+        refreshWarmups(afterEditing: sets[first].id)
+    }
+
     mutating func setWarmupCount(_ count: Int?) {
         guard var plan = warmupPlan else { return }
         plan.maxCount = count
