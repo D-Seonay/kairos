@@ -12,12 +12,17 @@ public struct TodaySession: Sendable, Equatable {
     public var plannedDay: PlannedDay
     public var adjusted: AdjustedSession?
     public var originalChosen: Bool
+    /// Vrai pendant une semaine de décharge acceptée : le jour de musculation perd 40 % de ses séries (spec M6 §10).
+    public var isDeload: Bool
 
-    /// `recovery` est le score du jour : nul avant 4 h ou tant qu'aucun score n'existe.
-    public init(plannedDay: PlannedDay, recovery: DailyRecovery?) {
+    /// `recovery` est le score du jour : nul avant 4 h ou tant qu'aucun score n'existe. Pendant une décharge, le score ajuste
+    /// le jour déjà allégé.
+    public init(plannedDay: PlannedDay, recovery: DailyRecovery?, deload: Bool = false) {
         self.plannedDay = plannedDay
+        isDeload = deload && plannedDay.routineDay?.kind == .strength
+        let base = plannedDay.routineDay.map { deload ? DeloadAdjuster.apply($0).day : $0 }
         adjusted = recovery.flatMap { recovery in
-            plannedDay.routineDay.map { SessionAdjuster.adjust($0, category: recovery.category) }
+            base.map { SessionAdjuster.adjust($0, category: recovery.category) }
         }
         originalChosen = recovery?.originalSessionChosen == true
     }
@@ -30,13 +35,20 @@ public struct TodaySession: Sendable, Equatable {
 
     public var originalDay: RoutineDay? { plannedDay.routineDay }
 
-    /// Le jour à faire : l'ajusté tant que l'ajustement tient, l'original sinon.
-    public var activeDay: RoutineDay? {
-        status == .adjusted ? adjusted?.day : originalDay
+    /// Le jour prévu, allégé pendant une décharge : ce que « Séance d'origine » démarre.
+    public var baseDay: RoutineDay? {
+        guard isDeload, let day = originalDay else { return originalDay }
+        return DeloadAdjuster.apply(day).day
     }
 
-    /// Vrai si la séance est allégée : ajustée avec au moins un ajustement autre que le repos conseillé.
+    /// Le jour à faire : l'ajusté tant que l'ajustement tient, le jour prévu (allégé pendant une décharge) sinon.
+    public var activeDay: RoutineDay? {
+        status == .adjusted ? adjusted?.day : baseDay
+    }
+
+    /// Vrai si la séance est allégée : en décharge, ou ajustée avec au moins un ajustement autre que le repos conseillé.
     public var isLightened: Bool {
+        if isDeload { return true }
         guard status == .adjusted, let adjusted else { return false }
         return adjusted.adjustments.contains { $0.kind != .rest }
     }
@@ -47,6 +59,7 @@ public struct TodaySession: Sendable, Equatable {
         case .run:
             return day.runType?.localizedName ?? day.name
         case .strength:
+            if isDeload { return String(localized: "\(day.name), décharge", bundle: .module) }
             guard status == .adjusted, adjusted?.isVolumeReduced == true else { return day.name }
             return String(localized: "\(day.name), volume allégé", bundle: .module)
         }

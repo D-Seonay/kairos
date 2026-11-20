@@ -34,12 +34,12 @@ public struct PlanningOverview: Sendable, Equatable {
 /// Le seul chemin vers la semaine datée (spec M6 §4 à §6) : la lire, y échanger deux jours, la rétablir, et en tirer la série
 /// et le mois.
 public struct PlanningService: Sendable {
-    private let profiles: any ProfileRepository
-    private let programs: any ProgramRepository
-    private let workouts: any WorkoutRepository
-    private let scheduledDays: any ScheduledDayRepository
-    private let calendar: Calendar
-    private let now: @Sendable () -> Date
+    let profiles: any ProfileRepository
+    let programs: any ProgramRepository
+    let workouts: any WorkoutRepository
+    let scheduledDays: any ScheduledDayRepository
+    let calendar: Calendar
+    let now: @Sendable () -> Date
 
     public init(profiles: any ProfileRepository, programs: any ProgramRepository, workouts: any WorkoutRepository,
                 scheduledDays: any ScheduledDayRepository, calendar: Calendar, now: @escaping @Sendable () -> Date) {
@@ -101,6 +101,7 @@ public struct PlanningService: Sendable {
         let days = [first, second].map { WeekSchedule.day(on: calendar.startOfDay(for: $0), context: context, today: today) }
         guard days[0].date != days[1].date, days.allSatisfy({ $0.isMovable && $0.date >= weekStart && $0.date < weekEnd }),
               days.contains(where: { $0.routine != nil }) else { throw PlanningError.notMovable }
+        try await adoptRuleMoves(touching: days, in: overrides, today: today, now: now)
         try await place(days[1].routine, from: days[1], on: days[0], program: program, now: now)
         try await place(days[0].routine, from: days[0], on: days[1], program: program, now: now)
     }
@@ -117,7 +118,7 @@ public struct PlanningService: Sendable {
 
     // MARK: - Interne
 
-    private func profileAndProgram() async throws -> (UserProfile?, Program?) {
+    func profileAndProgram() async throws -> (UserProfile?, Program?) {
         let profile = try await profiles.load()
         guard let id = profile?.activeProgramID else { return (profile, nil) }
         return (profile, try await programs.program(id: id))
@@ -131,11 +132,7 @@ public struct PlanningService: Sendable {
             if let existing = target.scheduled { try await scheduledDays.delete(id: existing.id) }
             return
         }
-        let kind: ScheduledDayKind = switch routine?.kind {
-        case .strength: .strength
-        case .run: .run
-        case nil: .rest
-        }
+        let kind = Self.kind(of: routine)
         var line = target.scheduled ?? ScheduledDay(date: target.date, programID: program.id, title: "", kind: kind, status: .planned,
                                                     createdAt: now, updatedAt: now)
         line.programID = program.id

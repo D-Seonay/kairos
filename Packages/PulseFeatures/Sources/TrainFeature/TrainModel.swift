@@ -74,7 +74,8 @@ public final class TrainModel {
             scoredToday = recovery
             self.program = program
             weekday = Weekday(date: now, calendar: environment.calendar)
-            today = TodaySession(plannedDay: planned, recovery: recovery)
+            today = TodaySession(plannedDay: planned, recovery: recovery,
+                                 deload: Deload.status(profile: profile, now: now, calendar: environment.calendar).isActive)
             routines = program.map(summaries(of:)) ?? []
             nextRun = program.flatMap { nextRun(in: $0, now: now) }
             errorMessage = nil
@@ -127,7 +128,8 @@ public final class TrainModel {
     public func launch(routine dayID: UUID) -> SessionLaunch? {
         guard let day = program?.days.first(where: { $0.id == dayID }), day.kind == .strength else { return nil }
         return SessionLaunch.routine(day, programID: program?.id, recovery: scoredToday,
-                                     originalChosen: scoredToday?.originalSessionChosen == true, profile: profile)
+                                     originalChosen: scoredToday?.originalSessionChosen == true, profile: profile,
+                                     deload: Deload.status(profile: profile, now: environment.now(), calendar: environment.calendar))
     }
 
     /// La séance de musculation du jour, ajustée ou d'origine ; `nil` un jour de repos, de course ou sans programme.

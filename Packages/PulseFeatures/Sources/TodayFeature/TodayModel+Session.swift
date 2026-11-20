@@ -20,7 +20,7 @@ extension TodayModel {
     public func sessionLaunch(startsOriginal: Bool) -> SessionLaunch? {
         guard case .strength = card, let day = session?.originalDay else { return nil }
         return SessionLaunch.routine(day, programID: profile?.activeProgramID, recovery: scoredToday,
-                                     originalChosen: startsOriginal, profile: profile)
+                                     originalChosen: startsOriginal, profile: profile, deload: deloadStatus)
     }
 
     /// La séance telle que la carte la montre : l'originale si elle a été rétablie, l'ajustée sinon.

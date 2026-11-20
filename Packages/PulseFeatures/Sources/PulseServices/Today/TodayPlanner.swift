@@ -32,11 +32,16 @@ public enum TodayPlanner {
     }
 
     /// Le jour de routine prévu à `date` : celui de la ligne du jour si elle existe (aucun pour un repos), sinon celui de la
-    /// semaine type. Une ligne d'un autre programme est ignorée.
+    /// semaine type. Une ligne d'un autre programme est ignorée. Une course que la règle des jambes lourdes a rendue facile
+    /// revient en sortie facile (spec M6 §9).
     public static func routineDay(of program: Program, on date: Date, calendar: Calendar, overrides: [ScheduledDay]) -> RoutineDay? {
         if let override = override(on: date, for: program, calendar: calendar, in: overrides) {
-            guard override.kind != .rest, let id = override.routineDayID else { return nil }
-            return program.days.first { $0.id == id }
+            guard override.kind != .rest, let id = override.routineDayID,
+                  var day = program.days.first(where: { $0.id == id }) else { return nil }
+            if AntiInterference.isEasedRun(override), day.kind == .run {
+                day.runType = .easy
+            }
+            return day
         }
         return routineDay(of: program, on: Weekday(date: date, calendar: calendar))
     }
