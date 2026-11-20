@@ -2,6 +2,7 @@ import PulseContent
 import PulseDesignSystem
 import PulseDomain
 import PulseServices
+import SupplementsFeature
 import SwiftUI
 
 /// Le récap de fin de séance (spec M4 §17, maquette `recap`) : le bilan, les records battus, les muscles travaillés, l'effort
@@ -28,6 +29,12 @@ public struct RecapView: View {
                     stats(recap)
                     if !recap.beatenRecords.isEmpty { records(recap.beatenRecords) }
                     if !recap.setsPerGroup.isEmpty { muscles(recap) }
+                    if let supplements = model.supplements, !supplements.overview.workoutItems.isEmpty {
+                        card(title: String(localized: "Compléments de la séance", bundle: .module),
+                             detail: Self.supplementsDetail(supplements.overview)) {
+                            SupplementsWorkoutChecklist(model: supplements)
+                        }
+                    }
                     effort()
                     noteField
                     if model.healthAccess == .denied { healthDeniedNote }
@@ -277,6 +284,12 @@ public struct RecapView: View {
 // MARK: - Textes
 
 extension RecapView {
+    /// « 1 sur 2 », les compléments de la séance déjà pris.
+    static func supplementsDetail(_ overview: SupplementOverview) -> String {
+        let items = overview.workoutItems
+        return String(localized: "\(items.filter(\.isTaken).count) sur \(items.count)", bundle: .module)
+    }
+
     /// « Pectoraux et triceps · lundi 2 novembre ».
     nonisolated static func subtitle(title: String, endedAt: Date, calendar: Calendar) -> String {
         let style = Date.FormatStyle(locale: Locale(identifier: "fr_FR"), calendar: calendar, timeZone: calendar.timeZone)

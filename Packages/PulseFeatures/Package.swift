@@ -15,6 +15,7 @@ let package = Package(
         .library(name: "CheckInFeature", targets: ["CheckInFeature"]),
         .library(name: "LiveSessionFeature", targets: ["LiveSessionFeature"]),
         .library(name: "OnboardingFeature", targets: ["OnboardingFeature"]),
+        .library(name: "SupplementsFeature", targets: ["SupplementsFeature"]),
         .library(name: "TodayFeature", targets: ["TodayFeature"]),
         .library(name: "TrainFeature", targets: ["TrainFeature"]),
         .library(name: "WidgetFeature", targets: ["WidgetFeature"])
@@ -40,7 +41,7 @@ let package = Package(
         ),
         .target(
             name: "LiveSessionFeature",
-            dependencies: ["PulseServices", "TrainFeature", domain, recoveryEngine, content, designSystem],
+            dependencies: ["PulseServices", "TrainFeature", "SupplementsFeature", domain, recoveryEngine, content, designSystem],
             resources: [.process("Resources")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
@@ -51,8 +52,14 @@ let package = Package(
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .target(
+            name: "SupplementsFeature",
+            dependencies: ["PulseServices", designSystem, domain],
+            resources: [.process("Resources")],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .target(
             name: "TodayFeature",
-            dependencies: ["PulseServices", "CheckInFeature", designSystem, domain, recoveryEngine, content],
+            dependencies: ["PulseServices", "CheckInFeature", "SupplementsFeature", designSystem, domain, recoveryEngine, content],
             resources: [.process("Resources")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
@@ -86,6 +93,11 @@ let package = Package(
         .testTarget(
             name: "OnboardingFeatureTests",
             dependencies: ["OnboardingFeature", "PulseServices", "CheckInFeature", domain, content],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .testTarget(
+            name: "SupplementsFeatureTests",
+            dependencies: ["SupplementsFeature", "PulseServices", domain],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(
