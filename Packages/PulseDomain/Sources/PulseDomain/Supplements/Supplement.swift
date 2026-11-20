@@ -10,6 +10,8 @@ public enum SupplementForm: String, Sendable, Codable, CaseIterable {
 public enum DoseUnit: String, Sendable, Codable, CaseIterable {
     case gram = "g"
     case mg
+    /// Microgramme, pour la vitamine D (M5). Valeur brute en ASCII : le magasin et l'export la gardent telle quelle.
+    case microgram = "mcg"
     case iu
     case ml
     case serving

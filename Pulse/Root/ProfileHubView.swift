@@ -1,9 +1,11 @@
 import PulseDesignSystem
+import SupplementsFeature
 import SwiftUI
 
-/// L'onglet « Profil » de M3a : le prénom, puis les deux écrans de debug (diagnostic Apple Santé et données).
+/// L'onglet « Profil » de M3a : le prénom, les compléments (M5), puis les deux écrans de debug (diagnostic Apple Santé et données).
 struct ProfileHubView: View {
     let dependencies: AppDependencies
+    let supplements: SupplementsModel
     let firstName: String?
     let onErased: () async -> Void
 
@@ -14,6 +16,13 @@ struct ProfileHubView: View {
                     Text(displayName)
                         .font(PulseFont.title(.title2))
                         .foregroundStyle(PulsePalette.text)
+                }
+                Section {
+                    NavigationLink {
+                        SupplementsView(model: supplements)
+                    } label: {
+                        Label(String(localized: "Compléments"), systemImage: "pills")
+                    }
                 }
                 Section(String(localized: "Debug")) {
                     NavigationLink(String(localized: "Santé (diagnostic)")) {
@@ -39,5 +48,7 @@ struct ProfileHubView: View {
 }
 
 #Preview {
-    ProfileHubView(dependencies: .preview(), firstName: "Mathéo") {}
+    let dependencies = AppDependencies.preview()
+    ProfileHubView(dependencies: dependencies, supplements: SupplementsModel(environment: dependencies.supplementsEnvironment()),
+                   firstName: "Mathéo") {}
 }

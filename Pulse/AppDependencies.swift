@@ -6,6 +6,7 @@ import PulseDomain
 import PulseHealth
 import PulsePersistence
 import PulseServices
+import SupplementsFeature
 import SwiftData
 import TodayFeature
 import TrainFeature
@@ -45,6 +46,8 @@ struct AppDependencies: Sendable {
     /// Le seul service du score du jour : l'onboarding et l'accueil le partagent, ses écritures passent par une même file.
     let scores: DailyScoreService
     let supplements: any SupplementRepository
+    /// Le seul chemin vers les compléments : l'écran, les cartes de l'accueil et du récap, et l'action « Pris » des rappels.
+    let supplementService: SupplementService
     let bodyMeasurements: any BodyMeasurementRepository
     let personalRecords: any PersonalRecordRepository
     let exerciseSettings: any ExerciseSettingsRepository
@@ -86,6 +89,10 @@ struct AppDependencies: Sendable {
         var morningScore: any NotificationScheduling
         /// La notification de fin de repos ; une doublure en mode mémoire et dans les tests.
         var restNotifier: any RestTimerNotifying
+        /// Les rappels de compléments ; une doublure en mode mémoire et dans les tests.
+        var supplementReminders: any SupplementReminderScheduling
+        /// L'écriture des prises dans Apple Santé ; `nil` dans les mêmes cas que `healthWriter`.
+        var supplementHealth: (any SupplementHealthWriting)?
         /// La Live Activity de la séance ; une doublure en mode mémoire et dans les tests.
         var sessionActivity: any SessionActivityControlling
         /// `nil` : la suppression totale n'a aucune notification à retirer.
@@ -109,8 +116,10 @@ struct AppDependencies: Sendable {
             widgets = StubWidgetPublisher()
             morningScore = StubNotificationScheduler()
             restNotifier = StubRestTimerNotifier()
+            supplementReminders = StubSupplementReminderScheduler()
             sessionActivity = StubSessionActivityController()
             healthWriter = nil
+            supplementHealth = nil
             healthEraser = StubHealthEraser()
             notificationCanceling = nil
             backgroundDelivery = nil
@@ -149,7 +158,8 @@ struct AppDependencies: Sendable {
                             notifications: authorizer, liveSessionNotifications: authorizer,
                             healthEraser: writer ?? StubHealthEraser(), healthWriter: writer,
                             widgets: AppGroupWidgetPublisher(file: WidgetSnapshotFile.appGroup()),
-                            morningScore: scheduler, restNotifier: scheduler, sessionActivity: SessionActivityController(),
+                            morningScore: scheduler, restNotifier: scheduler, supplementReminders: scheduler,
+                            supplementHealth: writer, sessionActivity: SessionActivityController(),
                             notificationCanceling: scheduler,
                             backgroundDelivery: launch.healthScenario == nil ? reader.map(HealthKitBackgroundDelivery.init) : nil,
                             inspector: nil, defaultsSuite: nil, calendar: calendar, now: now, launch: launch)
@@ -185,6 +195,7 @@ struct AppDependencies: Sendable {
             notifications: StubNotificationAuthorizer(granted: false),
             liveSessionNotifications: StubNotificationAuthorizer(granted: false), healthEraser: healthEraser, healthWriter: nil,
             widgets: StubWidgetPublisher(), morningScore: StubNotificationScheduler(), restNotifier: StubRestTimerNotifier(),
+            supplementReminders: StubSupplementReminderScheduler(), supplementHealth: nil,
             sessionActivity: StubSessionActivityController(), notificationCanceling: nil,
             backgroundDelivery: nil, inspector: inspector, defaultsSuite: testingDefaultsSuite, calendar: calendar, now: now,
             launch: LaunchOptions())
@@ -219,6 +230,9 @@ struct AppDependencies: Sendable {
         let hevyMappings = UserDefaultsHevyMappingStore(suiteName: wiring.defaultsSuite)
         let activeSession = SwiftDataActiveSessionStore(modelContainer: container)
         let exerciseSettings = SwiftDataExerciseSettingsRepository(modelContainer: container)
+        let supplements = SwiftDataSupplementRepository(modelContainer: container)
+        let supplementService = makeSupplementService(wiring, supplements: supplements, programs: programs, profiles: profiles,
+                                                      workouts: workouts)
         let health = wiring.healthWriter.map { HealthWorkoutExporter(writer: $0, workouts: workouts, profiles: profiles) }
         let liveSession = ActiveSessionService(
             store: activeSession, workouts: workouts, profiles: profiles, settings: exerciseSettings, userExercises: userExercises,
@@ -230,15 +244,12 @@ struct AppDependencies: Sendable {
             onboardingSteps: UserDefaultsOnboardingStepStore(suiteName: wiring.defaultsSuite),
             now: wiring.now, launch: wiring.launch,
             calendar: calendar, content: content, container: container, storeMode: mode, storeError: error,
-            profiles: profiles, programs: programs,
-            userExercises: userExercises, workouts: workouts,
+            profiles: profiles, programs: programs, userExercises: userExercises, workouts: workouts,
             scheduledDays: SwiftDataScheduledDayRepository(modelContainer: container),
             recovery: recovery, scores: scores,
-            supplements: SwiftDataSupplementRepository(modelContainer: container),
+            supplements: supplements, supplementService: supplementService,
             bodyMeasurements: SwiftDataBodyMeasurementRepository(modelContainer: container),
-            personalRecords: personalRecords,
-            exerciseSettings: exerciseSettings,
-            records: records, hevyMappings: hevyMappings,
+            personalRecords: personalRecords, exerciseSettings: exerciseSettings, records: records, hevyMappings: hevyMappings,
             hevyImporter: HevyImporter(workouts: workouts, userExercises: userExercises, records: records, mappings: hevyMappings,
                                        library: content, calendar: calendar, now: wiring.now),
             healthCache: healthCache, activity: activity, refresher: refresher, backgroundDelivery: wiring.backgroundDelivery,
@@ -327,7 +338,13 @@ extension AppDependencies {
     /// par l'autorisateur de l'app (une doublure accordée dans les modes des tests d'interface, refusée dans les tests).
     func liveSessionEnvironment() -> LiveSessionEnvironment {
         LiveSessionEnvironment(service: liveSession, train: trainEnvironment(), notifications: liveSessionNotifications,
-                               calendar: calendar, now: now)
+                               supplements: supplementsEnvironment(), calendar: calendar, now: now)
+    }
+
+    /// Les compléments demandent l'autorisation des notifications comme l'écran en direct : par l'autorisateur de l'app (une
+    /// doublure dans les modes des tests d'interface et dans les tests).
+    func supplementsEnvironment() -> SupplementsEnvironment {
+        SupplementsEnvironment(service: supplementService, notifications: liveSessionNotifications, calendar: calendar, now: now)
     }
 
     /// La saisie d'une séance passée (spec M4 §19.4) : un service à part, en mémoire, sans notification ni Live Activity, pour
@@ -338,5 +355,18 @@ extension AppDependencies {
             library: content, calendar: calendar, now: now, health: liveSession.health)
         return LiveSessionEnvironment(service: service, train: trainEnvironment(), notifications: liveSessionNotifications,
                                       calendar: calendar, now: now)
+    }
+}
+
+// MARK: - Compléments
+
+extension AppDependencies {
+    /// Le service des compléments, avec les rappels et l'écriture Apple Santé du câblage.
+    private static func makeSupplementService(_ wiring: Wiring, supplements: any SupplementRepository,
+                                              programs: any ProgramRepository, profiles: any ProfileRepository,
+                                              workouts: any WorkoutRepository) -> SupplementService {
+        SupplementService(supplements: supplements, programs: programs, profiles: profiles, workouts: workouts,
+                          reminders: wiring.supplementReminders, health: wiring.supplementHealth, calendar: wiring.calendar,
+                          now: wiring.now)
     }
 }

@@ -1,6 +1,7 @@
 import Foundation
 import Observation
 import PulseServices
+import SupplementsFeature
 
 /// La suite de « Terminer » et d'« Abandonner » (spec M4 §14.6, §16) : la confirmation, l'heure de fin d'une séance oubliée, puis
 /// le récap (terminer) ou l'abandon. Chaque étape est une propriété que la vue lit ; `onFinished` ferme la séance une fois
@@ -149,7 +150,9 @@ public final class FinishFlowModel {
     private func complete(_ intent: Intent, endedAt: Date) async {
         switch intent {
         case .finish:
-            let model = RecapModel(service: live.environment.service, endedAt: endedAt)
+            // Les compléments de la séance ne concernent qu'une séance faite aujourd'hui, pas une saisie après coup.
+            let supplements = live.session.isPastEntry ? nil : live.environment.supplements.map(SupplementsModel.init)
+            let model = RecapModel(service: live.environment.service, endedAt: endedAt, supplements: supplements)
             recap = model
             await model.load()
         case .abandon:

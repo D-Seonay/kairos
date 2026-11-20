@@ -1,22 +1,30 @@
 import CheckInFeature
 import PulseDesignSystem
 import PulseServices
+import SupplementsFeature
 import SwiftUI
 
 /// L'onglet « Aujourd'hui » : en-tête, carte de récupération (ou check-in), séance du jour, charge d'entraînement et tendances,
 /// avec sa feuille de mobilité et l'écran « Pourquoi », poussé dans sa pile de navigation. Un jour de musculation, « Démarrer »
 /// est ancré en bas de l'écran : l'action du jour reste sous le pouce, quelle que soit la position du défilement.
 /// « Démarrer » rend la séance à lancer à l'app, qui ouvre l'écran en direct ; « Reprendre la séance » lui demande de rouvrir
-/// celle en cours.
+/// celle en cours. La carte Compléments, sous la séance, ouvre l'écran Compléments dans la même pile.
 public struct TodayView: View {
     private let model: TodayModel
+    private let supplements: SupplementsModel?
     private let onOpenProfile: () -> Void
     private let onStartSession: (SessionLaunch) -> Void
     private let onResumeSession: () -> Void
+    /// L'écran Compléments poussé ; l'app le tient pour qu'un rappel touché l'ouvre. Sans lui, l'accueil garde le sien.
+    private let showsSupplements: Binding<Bool>?
+    @State private var localShowsSupplements = false
 
-    public init(model: TodayModel, onOpenProfile: @escaping () -> Void, onStartSession: @escaping (SessionLaunch) -> Void,
+    public init(model: TodayModel, supplements: SupplementsModel? = nil, showsSupplements: Binding<Bool>? = nil,
+                onOpenProfile: @escaping () -> Void, onStartSession: @escaping (SessionLaunch) -> Void,
                 onResumeSession: @escaping () -> Void) {
         self.model = model
+        self.supplements = supplements
+        self.showsSupplements = showsSupplements
         self.onOpenProfile = onOpenProfile
         self.onStartSession = onStartSession
         self.onResumeSession = onResumeSession
@@ -39,6 +47,9 @@ public struct TodayView: View {
                 .navigationDestination(isPresented: $model.isShowingWhy) {
                     WhyView(model: model, onStart: startSession, onResume: onResumeSession)
                 }
+                .navigationDestination(isPresented: isShowingSupplements) {
+                    if let supplements { SupplementsView(model: supplements) }
+                }
         }
         .sheet(item: $model.sheet) { sheet in
             switch sheet {
@@ -46,7 +57,10 @@ public struct TodayView: View {
             }
         }
         // Le retour au premier plan est rafraîchi par la racine de l'app, quel que soit l'onglet affiché.
-        .task { await model.refresh() }
+        .task {
+            await model.refresh()
+            await supplements?.load()
+        }
     }
 
     private var content: some View {
@@ -55,13 +69,23 @@ public struct TodayView: View {
                 TodayHeader(model: model, onOpenProfile: onOpenProfile)
                 recoveryOrCheckIn
                 SessionCard(model: model, onWhy: model.showWhy, onResume: onResumeSession)
+                if let supplements {
+                    SupplementsCard(model: supplements) { isShowingSupplements.wrappedValue = true }
+                }
                 PulseSectionHeader(String(localized: "Tendances", bundle: .module))
                 LoadCard(content: model.load)
                 TrendTilesView(tiles: model.trends)
             }
             .padding(PulseMetrics.spacing)
         }
-        .refreshable { await model.refresh() }
+        .refreshable {
+            await model.refresh()
+            await supplements?.load()
+        }
+    }
+
+    private var isShowingSupplements: Binding<Bool> {
+        showsSupplements ?? $localShowsSupplements
     }
 
     /// Le libellé du bouton ancré, `nil` quand la séance du jour n'est pas une musculation à lancer.

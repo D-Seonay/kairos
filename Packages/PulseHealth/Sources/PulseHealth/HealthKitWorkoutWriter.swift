@@ -3,10 +3,10 @@ import HealthKit
 import PulseDomain
 
 /// L'écriture réelle des séances dans Apple Santé (spec M4 §19.5) : un entraînement `traditionalStrengthTraining` avec son
-/// énergie estimée, et l'effacement de tout ce que Pulse y a écrit (spec M2 §7.2). `HKHealthStore` est thread-safe, d'où
-/// `@unchecked Sendable`.
+/// énergie estimée, et l'effacement de tout ce que Pulse y a écrit (spec M2 §7.2). Les prises de compléments sont dans
+/// l'extension `+Supplements` (spec M5 §6). `HKHealthStore` est thread-safe, d'où `@unchecked Sendable`.
 public final class HealthKitWorkoutWriter: WorkoutHealthWriting, HealthErasing, @unchecked Sendable {
-    private let store: HKHealthStore
+    let store: HKHealthStore
 
     public init(store: HKHealthStore = HKHealthStore()) {
         self.store = store
@@ -67,8 +67,10 @@ public final class HealthKitWorkoutWriter: WorkoutHealthWriting, HealthErasing, 
 
     // MARK: - HealthErasing
 
-    /// Supprime les entraînements et l'énergie écrits par Pulse. Sans accès en écriture, Pulse n'a rien pu écrire.
+    /// Supprime les entraînements, l'énergie et les prises de compléments écrits par Pulse. Sans accès en écriture à un type,
+    /// Pulse n'a rien pu y écrire.
     public func deleteAllSamplesWrittenByPulse() async throws {
+        try await deleteAllSupplementSamples()
         guard await writeAccess() == .authorized else { return }
         let fromPulse = HKQuery.predicateForObjects(from: HKSource.default())
         for type in [HKQuantityType(.activeEnergyBurned), HKWorkoutType.workoutType()] as [HKObjectType] {
@@ -82,7 +84,7 @@ public final class HealthKitWorkoutWriter: WorkoutHealthWriting, HealthErasing, 
         case notSaved
     }
 
-    private func deleteObjects(of type: HKObjectType, matching predicate: NSPredicate) async throws {
+    func deleteObjects(of type: HKObjectType, matching predicate: NSPredicate) async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, any Error>) in
             store.deleteObjects(of: type, predicate: predicate) { _, _, error in
                 // Rien à supprimer n'est pas un échec.
