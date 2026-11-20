@@ -49,6 +49,9 @@ struct LiveHeader: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 4)
+        // Une série validée fait rouler le tonnage et le compte des séries.
+        .animation(.snappy, value: session.tonnageKg)
+        .animation(.snappy, value: session.doneWorkingSets)
     }
 
     private var menu: some View {
@@ -76,6 +79,7 @@ struct LiveHeader: View {
             Text(name).pulseEyebrow()
             value()
                 .font(PulseFont.value(.title2))
+                .contentTransition(.numericText())
                 .foregroundStyle(PulsePalette.text)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)

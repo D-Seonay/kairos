@@ -178,7 +178,8 @@ struct LiveSetRow: View {
     }
 }
 
-/// Une valeur touchable : accent tant qu'elle est proposée, neutre une fois modifiée, estompée sans valeur.
+/// Une valeur touchable. Proposée par Pulse : grise dans un cadre pointillé, comme une suggestion ; saisie : à l'encre pleine
+/// dans un cadre net ; vide : estompée. En noir et blanc, c'est le cadre et le gris qui font la différence, pas la couleur.
 private struct ValueCell: View {
     let text: String
     let isEmpty: Bool
@@ -195,13 +196,15 @@ private struct ValueCell: View {
         Button(action: action) {
             Text(text)
                 .font(PulseFont.value(.title2, weight: .bold))
-                .foregroundStyle(isEmpty ? PulsePalette.muted : (isProposed ? accent : PulsePalette.text))
+                .foregroundStyle(isEmpty ? PulsePalette.muted : (isProposed ? PulsePalette.text2 : PulsePalette.text))
+                .contentTransition(.numericText())
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
                 .frame(width: width)
                 .frame(maxWidth: width == nil ? .infinity : nil, minHeight: LiveSetRow.targetHeight)
                 .background(isFocused ? PulsePalette.surface2 : PulsePalette.surface, in: shape)
-                .overlay(shape.strokeBorder(isFocused ? accent : PulsePalette.line, lineWidth: isFocused ? 2 : 1))
+                .overlay(shape.strokeBorder(isFocused ? accent : PulsePalette.ink.opacity(isProposed ? 0.3 : 0.12),
+                                            style: StrokeStyle(lineWidth: isFocused ? 2 : 1, dash: isProposed && !isFocused ? [3, 3] : [])))
                 .contentShape(shape)
         }
         .buttonStyle(.plain)

@@ -82,7 +82,7 @@ struct ProgressionPane: View {
     @ViewBuilder
     private var sessions: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SheetSectionTitle(text: String(localized: "Dernières séances", bundle: .module))
+            PulseSectionHeader(String(localized: "Dernières séances", bundle: .module))
             if model.recentSessions.isEmpty {
                 Text(String(localized: "Aucune séance enregistrée avec cet exercice.", bundle: .module))
                     .font(.subheadline)

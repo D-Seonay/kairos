@@ -53,6 +53,10 @@ private struct PulseButtonBody: View {
             .scaleEffect(pressed && kind != .link ? 0.97 : 1)
             .opacity(isEnabled ? (pressed && kind == .link ? 0.6 : 1) : 0.35)
             .animation(reduceMotion ? nil : .spring(response: 0.25, dampingFraction: 0.6), value: pressed)
+            // Un tic sous le doigt dès l'appui : le bouton répond avant même que l'action ne s'affiche.
+            .sensoryFeedback(.impact(weight: kind == .primary ? .medium : .light), trigger: pressed) { _, isDown in
+                isDown && kind != .link
+            }
     }
 
     private func foreground(_ palette: AccentPalette) -> Color {

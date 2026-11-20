@@ -171,7 +171,7 @@ private struct ExerciseRow: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 12) {
-                TileIcon(systemName: icon, foreground: PulsePalette.text2, background: PulsePalette.surface2)
+                IconChip(systemName: icon)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(info.name)
                         .font(.headline)

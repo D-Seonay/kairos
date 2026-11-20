@@ -111,27 +111,23 @@ public struct TrainView: View {
         }
     }
 
-    /// « Mes routines », puis « Mon programme » et « + Nouvelle » ; à côté, ou dessous aux tailles d'accessibilité.
+    /// « Mes routines », puis « Mon programme » et « + Nouvelle » en pastilles ; dessous aux tailles d'accessibilité.
     private var routinesHeader: some View {
-        let layout = dynamicTypeSize.isAccessibilitySize
-            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
-            : AnyLayout(HStackLayout(spacing: 16))
-        return layout {
-            SectionTitle(text: String(localized: "Mes routines", bundle: .module))
-            if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 0) }
+        PulseSectionHeader(String(localized: "Mes routines", bundle: .module)) {
             NavigationLink(value: TrainDestination.programEditor) {
-                HeaderAction(text: String(localized: "Mon programme", bundle: .module))
+                Text(String(localized: "Mon programme", bundle: .module))
             }
+            .buttonStyle(PillButtonStyle())
             .accessibilityIdentifier(TrainIdentifiers.programLink)
             if model.program != nil {
                 Button(action: createRoutine) {
-                    HeaderAction(text: String(localized: "+ Nouvelle", bundle: .module))
+                    Label(String(localized: "Nouvelle", bundle: .module), systemImage: "plus")
                 }
+                .buttonStyle(PillButtonStyle(prominent: true))
                 .accessibilityLabel(String(localized: "Nouvelle routine", bundle: .module))
                 .accessibilityIdentifier(TrainIdentifiers.routineCreate)
             }
         }
-        .buttonStyle(.plain)
     }
 
     private func routineRow(_ routine: RoutineSummary) -> some View {
@@ -156,6 +152,7 @@ public struct TrainView: View {
 
     private var entries: some View {
         VStack(spacing: 10) {
+            PulseSectionHeader(String(localized: "Aller plus loin", bundle: .module))
             EntryRow(destination: .library, systemImage: "book.closed",
                      title: String(localized: "Bibliothèque d'exercices", bundle: .module),
                      detail: String(localized: "Fiches, consignes et tes exercices perso", bundle: .module),
@@ -199,41 +196,16 @@ public struct TrainView: View {
 /// « Séance » et sa ligne d'accroche.
 private struct TrainHeader: View {
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(String(localized: "Ce que ton corps peut encaisser aujourd'hui", bundle: .module))
+                .pulseEyebrow(PulsePalette.text2)
             Text(String(localized: "Séance", bundle: .module))
-                .font(PulseFont.title(.title))
+                .font(PulseFont.title(.largeTitle, weight: .semibold))
+                .tracking(-0.6)
                 .foregroundStyle(PulsePalette.text)
                 .accessibilityAddTraits(.isHeader)
-            Text(String(localized: "Ce que ton corps peut encaisser aujourd'hui", bundle: .module))
-                .font(.subheadline)
-                .foregroundStyle(PulsePalette.text2)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-    }
-}
-
-private struct SectionTitle: View {
-    let text: String
-
-    var body: some View {
-        Text(text)
-            .font(PulseFont.title(.title3))
-            .foregroundStyle(PulsePalette.text)
-            .accessibilityAddTraits(.isHeader)
-    }
-}
-
-/// Le texte d'un lien d'en-tête de section, accentué, avec une cible d'au moins 44 pt.
-private struct HeaderAction: View {
-    let text: String
-    @Environment(\.pulseTheme) private var theme
-
-    var body: some View {
-        Text(text)
-            .font(.subheadline.weight(.semibold))
-            .foregroundStyle(Color(PulsePalette.accent(for: theme).accent))
-            .frame(minHeight: 44)
-            .contentShape(Rectangle())
     }
 }
 
@@ -247,9 +219,9 @@ private struct EntryRow: View {
 
     var body: some View {
         NavigationLink(value: destination) {
-            EntryCard(systemImage: systemImage, title: title, detail: detail)
+            PulseRow(systemImage: systemImage, title: title, detail: detail)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PressableButtonStyle())
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(title)
         .accessibilityHint(detail)
@@ -268,42 +240,14 @@ private struct EntryButton: View {
 
     var body: some View {
         Button(action: action) {
-            EntryCard(systemImage: systemImage, title: title, detail: detail)
+            PulseRow(systemImage: systemImage, title: title, detail: detail)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PressableButtonStyle())
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(title)
         .accessibilityHint(detail)
         .accessibilityAddTraits(.isButton)
         .accessibilityIdentifier(identifier)
-    }
-}
-
-private struct EntryCard: View {
-    let systemImage: String
-    let title: String
-    let detail: String
-
-    var body: some View {
-        ObsidianCard {
-            HStack(spacing: 12) {
-                TileIcon(systemName: systemImage, foreground: PulsePalette.text2, background: PulsePalette.surface2)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(title)
-                        .font(.headline)
-                        .foregroundStyle(PulsePalette.text)
-                    Text(detail)
-                        .font(.footnote)
-                        .foregroundStyle(PulsePalette.text2)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                Image(systemName: "chevron.right")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(PulsePalette.muted)
-                    .accessibilityHidden(true)
-            }
-            .frame(minHeight: 44)
-        }
     }
 }
 

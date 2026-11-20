@@ -70,6 +70,8 @@ struct MainTabView: View {
                 ProfileHubView(dependencies: dependencies, firstName: firstName, onErased: onErased)
             }
         }
+        // La barre d'onglets se replie quand on descend : le contenu et l'action ancrée de l'accueil gagnent de la place.
+        .tabBarMinimizeBehavior(.onScrollDown)
     }
 
     /// Démarre la séance, ou présente celle déjà en cours (le coordinateur ne démarre jamais une seconde séance).

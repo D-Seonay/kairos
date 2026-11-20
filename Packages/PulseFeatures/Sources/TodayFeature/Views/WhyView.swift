@@ -49,21 +49,6 @@ private struct ReadingCard: View {
     }
 }
 
-private struct SectionTitle: View {
-    let text: String
-
-    init(_ text: String) {
-        self.text = text
-    }
-
-    var body: some View {
-        Text(text)
-            .font(.headline)
-            .foregroundStyle(PulsePalette.text)
-            .accessibilityAddTraits(.isHeader)
-    }
-}
-
 // MARK: - Ce que le moteur a changé
 
 private struct ChangesSection: View {
@@ -71,7 +56,7 @@ private struct ChangesSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionTitle(String(localized: "Ce que le moteur a changé", bundle: .module))
+            PulseSectionHeader(String(localized: "Ce que le moteur a changé", bundle: .module))
             ObsidianCard {
                 VStack(spacing: 0) {
                     ForEach(changes.indices, id: \.self) { index in
@@ -138,7 +123,7 @@ private struct SignalsSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionTitle(sectionTitle)
+            PulseSectionHeader(sectionTitle)
             ObsidianCard {
                 VStack(alignment: .leading, spacing: 14) {
                     ForEach(signals.indices, id: \.self) { index in

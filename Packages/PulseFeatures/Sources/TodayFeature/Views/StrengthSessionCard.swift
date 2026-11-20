@@ -5,12 +5,12 @@ import PulseServices
 import SwiftUI
 
 /// La carte d'une séance de musculation : titre, badge « Ajustée » ou « Planifiée », mini-carte musculaire et résumé,
-/// « Pourquoi ? » et « Séance d'origine » côte à côte, puis « Démarrer ».
+/// « Pourquoi ? » et « Séance d'origine » côte à côte. « Démarrer » n'est pas dans la carte : l'accueil l'ancre en bas de
+/// l'écran, sous le pouce (`TodayView`).
 struct StrengthSessionCard: View {
     let card: StrengthCard
     let onWhy: () -> Void
     let onOrigin: () -> Void
-    let onStart: () -> Void
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
@@ -19,9 +19,6 @@ struct StrengthSessionCard: View {
         if card.showsWhy || card.originButton != nil {
             secondaryButtons
         }
-        Button(card.startButton, action: onStart)
-            .buttonStyle(PrimaryButtonStyle())
-            .accessibilityIdentifier(TodayIdentifiers.sessionStart)
     }
 
     /// Côte à côte, empilés aux tailles d'accessibilité.

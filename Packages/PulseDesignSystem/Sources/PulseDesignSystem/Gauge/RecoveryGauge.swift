@@ -150,6 +150,9 @@ public struct RecoveryGauge: View {
         VStack(spacing: side * 0.026) {
             Text(verbatim: Self.roundedScore(score).map(String.init) ?? "—")
                 .font(PulseFont.score(size: side * style.scoreScale))
+                // Un nouveau score fait rouler les chiffres au lieu de les remplacer d'un coup.
+                .contentTransition(.numericText(value: Double(Self.roundedScore(score) ?? 0)))
+                .animation(reduceMotion ? nil : .snappy, value: Self.roundedScore(score))
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
             if style.showsCaption {
