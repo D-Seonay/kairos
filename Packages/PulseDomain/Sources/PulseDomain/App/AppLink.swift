@@ -1,8 +1,10 @@
 import Foundation
 
-/// Les liens que l'app sait ouvrir : `fr.seonay.pulse://today` mène à l'accueil.
+/// Les liens que l'app sait ouvrir : `fr.seonay.pulse://today` mène à l'accueil, `fr.seonay.pulse://supplements` à l'écran
+/// Compléments.
 public enum AppLink: String, Sendable {
     case today
+    case supplements
 
     public static let scheme = "fr.seonay.pulse"
 

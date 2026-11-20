@@ -4,6 +4,7 @@ import Observation
 import OnboardingFeature
 import PulseDomain
 import PulseServices
+import SupplementsFeature
 import TodayFeature
 import TrainFeature
 
@@ -27,6 +28,8 @@ final class AppRootModel {
     private(set) var liveSession: LiveSessionCoordinator?
     /// La saisie d'une séance passée, à côté de la séance en direct.
     private(set) var pastSession: PastSessionCoordinator?
+    /// Les compléments du jour, partagés par la carte de l'accueil et l'écran Compléments (accueil et profil).
+    private(set) var supplements: SupplementsModel?
 
     let dependencies: AppDependencies
     /// Les boutons de la Live Activity relisent la séance des onglets ; `nil` dans les tests.
@@ -47,6 +50,7 @@ final class AppRootModel {
         #endif
         await resolve()
         await refreshLiveSession()
+        await refreshSupplementReminders()
     }
 
     /// Au retour au premier plan : la séance en cours, puis « Aujourd'hui », puis « Séance », qui relit le score du jour
@@ -59,6 +63,16 @@ final class AppRootModel {
         await refreshLiveSession()
         await today.refresh()
         await train?.refresh()
+        await supplements?.load()
+        await refreshSupplementReminders()
+    }
+
+    /// Les rappels de compléments couvrent 14 jours : chaque lancement et chaque retour au premier plan les recalculent, et
+    /// réécrivent dans Apple Santé les prises faites iPhone verrouillé (spec M5 §5, §7).
+    func refreshSupplementReminders() async {
+        guard destination == .main else { return }
+        await dependencies.supplementService.retryHealthWrites()
+        await dependencies.supplementService.rescheduleReminders()
     }
 
     /// Relit la séance en cours (les boutons de la Live Activity ont pu la changer) et ferme les Live Activities qui ne
@@ -109,6 +123,7 @@ final class AppRootModel {
                 let liveSession = LiveSessionCoordinator(environment: dependencies.liveSessionEnvironment())
                 self.liveSession = liveSession
                 pastSession = PastSessionCoordinator(environment: dependencies.pastSessionEnvironment())
+                supplements = SupplementsModel(environment: dependencies.supplementsEnvironment())
                 sessionIntents?.coordinator = liveSession
             }
         }
@@ -120,6 +135,7 @@ final class AppRootModel {
         train = nil
         liveSession = nil
         pastSession = nil
+        supplements = nil
         sessionIntents?.coordinator = nil
     }
 }

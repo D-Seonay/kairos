@@ -1,6 +1,7 @@
 import LiveSessionFeature
 import PulseDesignSystem
 import PulseServices
+import SupplementsFeature
 import SwiftUI
 import TodayFeature
 import TrainFeature
@@ -24,6 +25,7 @@ struct MainTabView: View {
     @Bindable var liveSession: LiveSessionCoordinator
     /// La saisie d'une séance passée, ouverte depuis l'onglet Séance.
     @Bindable var pastSession: PastSessionCoordinator
+    let supplements: SupplementsModel
     let firstName: String?
     /// Appelé après une suppression totale réussie depuis l'écran « Données ».
     let onErased: () async -> Void
@@ -47,6 +49,8 @@ struct MainTabView: View {
         }
         // Une séance démarrée, terminée ou abandonnée change la carte de l'accueil et le haut de l'onglet Séance.
         .onChange(of: liveSession.current?.id) { refreshTabs() }
+        // L'action « Pris » d'un rappel a enregistré une prise pendant que l'app tournait.
+        .onChange(of: router.supplementsVersion) { Task { await supplements.load() } }
         .alert(liveSession.errorMessage ?? "", isPresented: isShowingError) {
             Button(String(localized: "OK")) { liveSession.dismissError() }
         }
@@ -55,8 +59,8 @@ struct MainTabView: View {
     private var tabs: some View {
         TabView(selection: $router.selectedTab) {
             Tab(String(localized: "Aujourd'hui"), systemImage: "sun.max", value: Item.today) {
-                TodayView(model: today, onOpenProfile: { router.selectedTab = .profile }, onStartSession: start,
-                          onResumeSession: resume)
+                TodayView(model: today, supplements: supplements, showsSupplements: $router.isShowingSupplements,
+                          onOpenProfile: { router.selectedTab = .profile }, onStartSession: start, onResumeSession: resume)
             }
             Tab(String(localized: "Planning"), systemImage: "calendar", value: Item.planning) {
                 comingSoon(String(localized: "Planning"), milestone: "M6")
@@ -69,7 +73,7 @@ struct MainTabView: View {
                 comingSoon(String(localized: "Stats"), milestone: "M7")
             }
             Tab(String(localized: "Profil"), systemImage: "person.crop.circle", value: Item.profile) {
-                ProfileHubView(dependencies: dependencies, firstName: firstName, onErased: onErased)
+                ProfileHubView(dependencies: dependencies, supplements: supplements, firstName: firstName, onErased: onErased)
             }
         }
         // La barre d'onglets se replie quand on descend : le contenu et l'action ancrée de l'accueil gagnent de la place.
@@ -102,6 +106,9 @@ struct MainTabView: View {
         Task {
             await today.refresh()
             await train.refresh()
+            // Une séance finie place le rappel « après la séance » et peut changer les jours d'entraînement.
+            await supplements.load()
+            await dependencies.supplementService.rescheduleReminders()
         }
     }
 

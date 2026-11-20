@@ -119,11 +119,11 @@ Le pied de l'écran et du formulaire rappelle : « Pulse ne propose pas de dose.
 
 ## 10. Écrans
 
-**Écran Compléments** (poussé depuis la carte de l'accueil et depuis le Profil) : en-tête avec la date et « + » ; carte de synthèse « 2 sur 5 pris », segments, prochaine prise avec « Pris » ; les moments et leurs lignes (nom, heure prévue et moment, dose, coche) ; les conseils ; le stock (barres, alerte sous le seuil) ; la régularité 30 jours ; l'avertissement. Toucher une ligne ouvre le formulaire en modification ; glisser propose « Archiver ». Sans complément : un état vide avec « Ajouter un complément ».
+**Écran Compléments** (poussé depuis la carte de l'accueil et depuis le Profil) : en-tête avec la date et « + » ; carte de synthèse « 2 sur 5 pris », segments, prochaine prise avec « Pris » ; les moments et leurs lignes (nom, heure prévue et moment, dose, coche) ; les conseils ; le stock (barres, alerte sous le seuil) ; la régularité 30 jours ; l'avertissement. Toucher une ligne ouvre le formulaire en modification ; un appui long propose « Archiver » (l'écran est un défilement, pas une liste système) **(choix du constructeur)**. Les compléments non dus aujourd'hui sont listés à part, pour rester modifiables. Sans complément : un état vide avec « Ajouter un complément ».
 
 **Formulaire** (feuille) : suggestions en pastilles (Créatine, Whey, Vitamine D3, Magnésium, Caféine, Oméga-3, Fer, Zinc, Électrolytes) qui préremplissent sans dose ; nom, forme, dose et unité, moment (avec heure pour heure fixe et coucher), jours (avec les sept jours en personnalisé), rappel, type Apple Santé et écriture, stock et seuil. « Enregistrer » est actif quand le nom et une dose positive sont remplis. En modification : « Archiver ».
 
-**Carte de l'accueil** : sous la carte séance, « Compléments », « 2 sur 5 », la prochaine prise avec « Pris », une pastille d'alerte de stock. Masquée quand aucun complément n'est dû aujourd'hui et qu'aucun n'existe ; sinon « Ajouter un complément » quand la liste est vide.
+**Carte de l'accueil** : sous la carte séance, « Compléments », « 2 sur 5 », la prochaine prise avec « Pris », une pastille d'alerte de stock. Toujours affichée : sans complément, elle invite à en ajouter ; sans prise due aujourd'hui, elle le dit **(choix du constructeur)**.
 
 **Carte du récap** : pour une séance en direct (pas pour une séance saisie après coup), les compléments « avant » et « après la séance » dus aujourd'hui, cochables. Masquée s'il n'y en a pas.
 

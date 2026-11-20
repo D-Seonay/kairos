@@ -14,8 +14,9 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
 
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
-        let notificationRouter = NotificationRouter(router: router)
+        let notificationRouter = NotificationRouter(router: router, supplements: dependencies.supplementService)
         UNUserNotificationCenter.current().delegate = notificationRouter
+        UNUserNotificationCenter.current().setNotificationCategories(UserNotificationScheduler.supplementCategories)
         self.notificationRouter = notificationRouter
         sessionIntents.install()
         let refresher = dependencies.refresher
