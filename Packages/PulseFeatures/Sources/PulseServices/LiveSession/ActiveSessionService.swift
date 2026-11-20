@@ -100,12 +100,29 @@ public final class ActiveSessionService: Sendable {
             let directory = try await self.directory()
             let profile = try await self.profiles.load()
             var added: [LiveExercise] = []
+            // Un muscle déjà travaillé dans la séance n'est pas échauffé une seconde fois (spec M4 §8.3).
+            var worked = Set(session.exercises.flatMap { directory.info($0.exercise)?.primaryMuscles ?? [] })
             for reference in references {
                 added.append(LiveSessionPlanner.exercise(
                     reference, directory: directory, history: try await self.workouts.lastSets(for: reference),
-                    settings: try await self.settings.settings(for: reference), profile: profile, policy: session.policy))
+                    settings: try await self.settings.settings(for: reference), profile: profile, policy: session.policy,
+                    workedMuscles: worked))
+                worked.formUnion(directory.info(reference)?.primaryMuscles ?? [])
             }
             return added
+        }
+    }
+
+    /// Enregistre le nombre de séries d'échauffement de l'exercice dans ses réglages, pour toutes les routines ; `nil` revient
+    /// à l'automatique. La séance en cours change par `apply(.setWarmupCount(…))`.
+    public func saveWarmupCount(_ count: Int?, for reference: ExerciseReference) async throws {
+        try await queue.run {
+            let now = self.now()
+            var settings = try await self.settings.settings(for: reference)
+                ?? ExerciseSettings(exercise: reference, createdAt: now, updatedAt: now)
+            settings.warmupSetCount = count
+            settings.updatedAt = now
+            try await self.settings.save(settings)
         }
     }
 

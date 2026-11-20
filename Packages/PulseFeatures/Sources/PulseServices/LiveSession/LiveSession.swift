@@ -139,10 +139,14 @@ public struct LiveExercise: Sendable, Equatable, Codable, Identifiable {
     public var lastTimeText: String?
     public var note: String?
     public var sets: [LiveSet]
+    /// L'échauffement automatique de l'exercice, pour le recalculer quand la première charge de travail change ; `nil` quand
+    /// Pulse ne l'échauffe pas. Optionnel : une séance enregistrée avant M4c se relit sans.
+    public var warmupPlan: LiveWarmupPlan?
 
     public init(id: UUID = UUID(), exercise: ExerciseReference, name: String, loadKind: LoadKind, tracksDuration: Bool,
                 isBarbell: Bool, incrementKg: Double, supersetGroup: Int? = nil, restSeconds: Int, rpeCap: Double? = nil,
-                dayNote: String? = nil, lastTimeText: String? = nil, note: String? = nil, sets: [LiveSet]) {
+                dayNote: String? = nil, lastTimeText: String? = nil, note: String? = nil, sets: [LiveSet],
+                warmupPlan: LiveWarmupPlan? = nil) {
         self.id = id
         self.exercise = exercise
         self.name = name
@@ -157,6 +161,19 @@ public struct LiveExercise: Sendable, Equatable, Codable, Identifiable {
         self.lastTimeText = lastTimeText
         self.note = note
         self.sets = sets
+        self.warmupPlan = warmupPlan
+    }
+}
+
+/// Comment l'échauffement d'un exercice se calcule (spec M4 §8.3) : l'arrondi de ses charges et le nombre maximal de séries.
+public struct LiveWarmupPlan: Sendable, Equatable, Codable {
+    public var rounding: WeightRounding
+    /// `warmupSetCount` des réglages de l'exercice ; `nil` garde toutes les séries.
+    public var maxCount: Int?
+
+    public init(rounding: WeightRounding, maxCount: Int?) {
+        self.rounding = rounding
+        self.maxCount = maxCount
     }
 }
 

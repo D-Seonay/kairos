@@ -26,6 +26,8 @@ public enum LiveSessionChange: Sendable, Equatable {
     case setNote(exercise: UUID, String?)
     /// Un incrément nul ou négatif est ignoré.
     case setIncrement(exercise: UUID, Double)
+    /// Le nombre de séries d'échauffement de l'exercice ; `nil` revient à l'automatique (spec M4 §19.1).
+    case setWarmupCount(exercise: UUID, Int?)
     case restMinus30
     case restPlus30
     case skipRest
@@ -37,7 +39,7 @@ extension LiveSession {
         switch change {
         case .validate, .unvalidate, .edit, .setType, .addSet, .deleteSet:
             applySetChange(change, now: now)
-        case .addExercises, .removeExercise, .moveExercise, .setNote, .setIncrement:
+        case .addExercises, .removeExercise, .moveExercise, .setNote, .setIncrement, .setWarmupCount:
             applyExerciseChange(change)
         case .restMinus30, .restPlus30, .skipRest:
             return
@@ -52,6 +54,7 @@ extension LiveSession {
             updateSet(set, of: exercise) { $0.completedAt = nil }
         case let .edit(exercise, set, weightKg, reps, durationSeconds, rpe):
             updateSet(set, of: exercise) { $0.edit(weightKg: weightKg, reps: reps, durationSeconds: durationSeconds, rpe: rpe) }
+            if weightKg != nil { updateExercise(exercise) { $0.refreshWarmups(afterEditing: set) } }
         case let .setType(exercise, set, type):
             updateSet(set, of: exercise) { $0.setType = type }
         case let .addSet(exercise):
@@ -77,6 +80,8 @@ extension LiveSession {
         case let .setIncrement(exercise, incrementKg):
             guard incrementKg > 0 else { return }
             updateExercise(exercise) { $0.incrementKg = incrementKg }
+        case let .setWarmupCount(exercise, count):
+            updateExercise(exercise) { $0.setWarmupCount(count) }
         default:
             return
         }
@@ -142,6 +147,42 @@ extension LiveSession {
             guard let index = exercise.sets.firstIndex(where: { $0.id == set }) else { return }
             update(&exercise.sets[index])
         }
+    }
+}
+
+private extension LiveExercise {
+    /// Change le nombre de séries d'échauffement et les recalcule, tant qu'aucune n'est validée et que la première série de
+    /// travail ne l'est pas non plus. Sans plan d'échauffement (exercice que Pulse n'échauffe pas aujourd'hui), le réglage
+    /// vaudra pour les prochaines séances.
+    mutating func setWarmupCount(_ count: Int?) {
+        guard var plan = warmupPlan else { return }
+        plan.maxCount = count
+        warmupPlan = plan
+        guard let first = sets.firstIndex(where: { $0.setType != .warmup }), sets[first].completedAt == nil,
+              sets[..<first].allSatisfy({ $0.setType == .warmup && $0.completedAt == nil }) else { return }
+        let working = sets[first].weightKg ?? sets[first].proposed.weightKg
+        sets.replaceSubrange(..<first, with: LiveSessionPlanner.warmupSets(firstWorkingKg: working, plan: plan,
+                                                                           incrementKg: incrementKg))
+    }
+
+    /// Recalcule l'échauffement quand la charge de la première série de travail change (spec M4 §8.3), tant que cette série
+    /// n'est pas validée et que les séries d'échauffement n'ont été ni validées ni modifiées. Le nombre de séries ne grandit
+    /// jamais : une série d'échauffement supprimée à la main ne revient pas.
+    mutating func refreshWarmups(afterEditing setID: UUID) {
+        guard let plan = warmupPlan,
+              let first = sets.firstIndex(where: { $0.setType != .warmup }), sets[first].id == setID,
+              sets[first].completedAt == nil else { return }
+        let warmups = sets[..<first].filter { $0.setType == .warmup }
+        guard first == warmups.count, !warmups.isEmpty,
+              warmups.allSatisfy({ !$0.isEdited && $0.completedAt == nil }) else { return }
+        let fresh = LiveSessionPlanner.warmupSets(firstWorkingKg: sets[first].weightKg, plan: plan, incrementKg: incrementKg)
+            .suffix(warmups.count)
+        let kept = zip(warmups.suffix(fresh.count), fresh).map { old, new in
+            var set = new
+            set.id = old.id
+            return set
+        }
+        sets.replaceSubrange(..<first, with: kept)
     }
 }
 

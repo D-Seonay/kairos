@@ -122,6 +122,17 @@ struct LiveExerciseCard: View {
             Picker(String(localized: "Incrément", bundle: .module), selection: incrementBinding) {
                 ForEach(Self.incrementChoices, id: \.self) { Text(Self.incrementText($0)).tag($0) }
             }
+            if exercise.warmupPlan != nil {
+                Picker(String(localized: "Échauffement", bundle: .module), selection: warmupBinding) {
+                    Text(String(localized: "Automatique", bundle: .module)).tag(Int?.none)
+                    Text(String(localized: "Aucun", bundle: .module)).tag(Int?.some(0))
+                    Text(String(localized: "1 série", bundle: .module)).tag(Int?.some(1))
+                    ForEach(2...3, id: \.self) { count in
+                        Text(String(localized: "\(count) séries", bundle: .module)).tag(Int?.some(count))
+                    }
+                }
+                .pickerStyle(.menu)
+            }
             Button {
                 Task { await model.moveExercise(exercise.id, by: -1) }
             } label: {
@@ -147,6 +158,11 @@ struct LiveExerciseCard: View {
                 .contentShape(Rectangle())
         }
         .accessibilityLabel(String(localized: "Options de \(exercise.name)", bundle: .module))
+    }
+
+    private var warmupBinding: Binding<Int?> {
+        Binding(get: { exercise.warmupPlan?.maxCount },
+                set: { count in Task { await model.setWarmupCount(count, exercise: exercise.id) } })
     }
 
     private var incrementBinding: Binding<Double> {

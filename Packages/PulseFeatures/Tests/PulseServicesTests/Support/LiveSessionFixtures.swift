@@ -46,8 +46,17 @@ enum LiveFixtures {
                               profile: UserProfile(createdAt: .t0, updatedAt: .t0))
     }
 
-    static func session(_ launch: SessionLaunch, history: [ExerciseReference: [WorkoutSet]] = [:]) -> LiveSession {
-        LiveSessionPlanner.session(for: launch, directory: directory, history: history, settings: [:],
-                                   profile: UserProfile(createdAt: .t0, updatedAt: .t0), now: .t0)
+    /// Une séance planifiée. Sans `warmups`, l'échauffement automatique est éteint : ces tests regardent la progression, les
+    /// séries d'échauffement ont leurs propres tests.
+    static func session(_ launch: SessionLaunch, history: [ExerciseReference: [WorkoutSet]] = [:], warmups: Bool = false,
+                        settings: [ExerciseReference: ExerciseSettings] = [:]) -> LiveSession {
+        LiveSessionPlanner.session(for: launch, directory: directory, history: history, settings: settings,
+                                   profile: profile(warmups: warmups), now: .t0)
+    }
+
+    static func profile(warmups: Bool = false) -> UserProfile {
+        var profile = UserProfile(createdAt: .t0, updatedAt: .t0)
+        profile.autoWarmupEnabled = warmups
+        return profile
     }
 }

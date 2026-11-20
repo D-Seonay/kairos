@@ -145,6 +145,17 @@ public final class LiveSessionModel {
         if let focus, focus.exercise == exercise { self.focus(focus) }
     }
 
+    /// Le nombre de séries d'échauffement de l'exercice : la séance le prend tout de suite, ses réglages pour la suite.
+    public func setWarmupCount(_ count: Int?, exercise: UUID) async {
+        guard let reference = session.exercises.first(where: { $0.id == exercise })?.exercise,
+              await perform(.setWarmupCount(exercise: exercise, count)) else { return }
+        do {
+            try await environment.service.saveWarmupCount(count, for: reference)
+        } catch {
+            errorMessage = Self.saveFailure
+        }
+    }
+
     // MARK: Repos
 
     public func restMinus30() async {
