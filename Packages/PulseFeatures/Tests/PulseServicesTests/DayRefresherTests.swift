@@ -46,6 +46,21 @@ struct DayRefresherTests {
         #expect(await fixture.notifications.scheduled.isEmpty)
     }
 
+    @Test func refreshImportsRunsAndFollowsTheDatedWeek() async throws {
+        let fixture = RefresherFixture(scenario: .goodNight)
+        try await fixture.adopt()
+        let profile = try #require(try await fixture.profiles.load())
+        try await fixture.scheduled.save(ScheduledDay(
+            date: day, programID: profile.activeProgramID, title: "Repos", kind: .rest, status: .planned, moveReason: .user,
+            createdAt: day, updatedAt: day))
+
+        let refresh = await fixture.refresher.refresh(origin: .foreground)
+
+        #expect(refresh.plannedDay.routineDay == nil, "Push a été déplacée : lundi devient un repos")
+        let runs = try await fixture.workouts.sessions(from: .distantPast, to: .distantFuture)
+        #expect(runs.count == 9 && runs.allSatisfy { $0.source == .appleHealth && $0.kind == .run })
+    }
+
     @Test func backgroundRefreshNotifiesOnce() async throws {
         let fixture = RefresherFixture(scenario: .badNight, at: "2026-11-02T07:30")
         try await fixture.adopt()

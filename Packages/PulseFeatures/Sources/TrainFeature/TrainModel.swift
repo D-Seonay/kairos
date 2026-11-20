@@ -68,7 +68,8 @@ public final class TrainModel {
             let profile = try await environment.profiles.load()
             let program = try await activeProgram(of: profile)
             let recovery = try await todaysRecovery(now: now)
-            let planned = TodayPlanner.plan(program: program, on: now, calendar: environment.calendar)
+            let planned = TodayPlanner.plan(program: program, on: now, calendar: environment.calendar,
+                                            overrides: try await overrides(now: now))
             self.profile = profile
             scoredToday = recovery
             self.program = program
@@ -154,6 +155,15 @@ public final class TrainModel {
     private func activeProgram(of profile: UserProfile?) async throws -> Program? {
         guard let id = profile?.activeProgramID else { return nil }
         return try await environment.programs.program(id: id)
+    }
+
+    /// Les lignes de la semaine datée d'aujourd'hui et des 7 jours suivants.
+    private func overrides(now: Date) async throws -> [ScheduledDay] {
+        let calendar = environment.calendar
+        let today = calendar.startOfDay(for: now)
+        guard let scheduledDays = environment.scheduledDays,
+              let end = calendar.date(byAdding: .day, value: 8, to: today) else { return [] }
+        return try await scheduledDays.days(from: today, to: end)
     }
 
     /// Le score enregistré pour le jour de `now` ; aucun avant 4 h, l'accueil ne l'ayant pas encore calculé.

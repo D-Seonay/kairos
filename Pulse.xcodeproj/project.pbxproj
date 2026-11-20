@@ -22,6 +22,7 @@
 		926156F0D2A1BA89FCB63479 /* PulseHealth in Frameworks */ = {isa = PBXBuildFile; productRef = F4BAF19749CA79DDDA8F7559 /* PulseHealth */; };
 		B7C03201C860D0561958042A /* TodayFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 2CBD7AA3EB8955404F12F8BD /* TodayFeature */; };
 		5A0F1C2D3E4B5A6978C1D2E3 /* SupplementsFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 5A0F1C2D3E4B5A6978C1D2E4 /* SupplementsFeature */; };
+		7C1E2D3F4A5B6C7D8E9F0A11 /* PlanningFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 7C1E2D3F4A5B6C7D8E9F0A12 /* PlanningFeature */; };
 		B8172B2AEC365494E49651D8 /* PulseDesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 0304F45AA4EED5FE2D4D284C /* PulseDesignSystem */; };
 		EACE9CBEB97038B976FC39A3 /* PulseWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 9EB175B708FA8903888C60A1 /* PulseWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		EFF3DE79CAEEE2351E8EB80C /* WidgetFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 7CBDB83896B464F56F24DBCD /* WidgetFeature */; };
@@ -155,6 +156,7 @@
 				41A0C7A70FCDB1E786FF3D21 /* OnboardingFeature in Frameworks */,
 				B7C03201C860D0561958042A /* TodayFeature in Frameworks */,
 				5A0F1C2D3E4B5A6978C1D2E3 /* SupplementsFeature in Frameworks */,
+				7C1E2D3F4A5B6C7D8E9F0A11 /* PlanningFeature in Frameworks */,
 				6BD6F7154BFC6A570DFAD9A4 /* TrainFeature in Frameworks */,
 				EFF3DE79CAEEE2351E8EB80C /* WidgetFeature in Frameworks */,
 				01FFBDBB734149187619F5F5 /* LiveSessionFeature in Frameworks */,
@@ -280,6 +282,7 @@
 				23A0449ABFD0F90FCF52CB7E /* OnboardingFeature */,
 				2CBD7AA3EB8955404F12F8BD /* TodayFeature */,
 				5A0F1C2D3E4B5A6978C1D2E4 /* SupplementsFeature */,
+				7C1E2D3F4A5B6C7D8E9F0A12 /* PlanningFeature */,
 				46B53139D9C2719CD05324D4 /* TrainFeature */,
 				7CBDB83896B464F56F24DBCD /* WidgetFeature */,
 				7EBF12B38C337EEB13470D03 /* LiveSessionFeature */,
@@ -830,6 +833,10 @@
 		5A0F1C2D3E4B5A6978C1D2E4 /* SupplementsFeature */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = SupplementsFeature;
+		};
+		7C1E2D3F4A5B6C7D8E9F0A12 /* PlanningFeature */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PlanningFeature;
 		};
 		39C9A66A915380930D00B1BB /* WidgetFeature */ = {
 			isa = XCSwiftPackageProductDependency;

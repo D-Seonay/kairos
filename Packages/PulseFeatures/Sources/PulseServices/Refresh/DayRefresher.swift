@@ -19,6 +19,10 @@ public final class DayRefresher: Sendable {
     private let widgets: any WidgetPublishing
     private let notifications: any NotificationScheduling
     private let activity: any DayActivityLog
+    /// La semaine datée : ses déplacements changent la séance du jour (spec M6 §4).
+    private let scheduledDays: (any ScheduledDayRepository)?
+    /// Les courses et les vélos d'Apple Santé, lus après les nuits (spec M6 §3).
+    private let workoutHistory: WorkoutHistory?
     private let calendar: Calendar
     private let now: @Sendable () -> Date
     private let queue = SerialTaskQueue()
@@ -35,7 +39,8 @@ public final class DayRefresher: Sendable {
 
     public init(profiles: any ProfileRepository, programs: any ProgramRepository, recovery: any RecoveryRepository,
                 nightHistory: NightHistory, scores: DailyScoreService, widgets: any WidgetPublishing,
-                notifications: any NotificationScheduling, activity: any DayActivityLog, calendar: Calendar,
+                notifications: any NotificationScheduling, activity: any DayActivityLog,
+                scheduledDays: (any ScheduledDayRepository)? = nil, workoutHistory: WorkoutHistory? = nil, calendar: Calendar,
                 now: @escaping @Sendable () -> Date) {
         self.profiles = profiles
         self.programs = programs
@@ -45,6 +50,8 @@ public final class DayRefresher: Sendable {
         self.widgets = widgets
         self.notifications = notifications
         self.activity = activity
+        self.scheduledDays = scheduledDays
+        self.workoutHistory = workoutHistory
         self.calendar = calendar
         self.now = now
     }
@@ -109,6 +116,7 @@ public final class DayRefresher: Sendable {
         let plan = await plan(for: profile, readFailed: profileReadFailed, now: now)
         let plannedDay = plan.display
         let history = await nightHistory.refresh(now: now)
+        await workoutHistory?.refresh(now: now)
         let score = try? await scores.update(nights: history.nights, plannedDay: plan.forScore, now: now)
         let scored: DailyRecovery? = if case .scored(let recovery)? = score { recovery } else { nil }
         let session = TodaySession(plannedDay: plannedDay, recovery: scored)
@@ -161,8 +169,15 @@ public final class DayRefresher: Sendable {
                 return DayPlan(display: .noProgram, forScore: nil)
             }
         }
-        let planned = TodayPlanner.plan(program: program, on: now, calendar: calendar)
+        let planned = TodayPlanner.plan(program: program, on: now, calendar: calendar, overrides: await overrides(now: now))
         return DayPlan(display: planned, forScore: planned)
+    }
+
+    /// Les lignes de la semaine datée d'aujourd'hui et des 7 jours suivants ; aucune si leur lecture échoue.
+    private func overrides(now: Date) async -> [ScheduledDay] {
+        let today = calendar.startOfDay(for: now)
+        guard let scheduledDays, let end = calendar.date(byAdding: .day, value: 8, to: today) else { return [] }
+        return (try? await scheduledDays.days(from: today, to: end)) ?? []
     }
 
     /// Le check-in du jour, quand le score en est estimé.
