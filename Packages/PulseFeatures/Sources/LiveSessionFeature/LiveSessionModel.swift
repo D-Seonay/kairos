@@ -145,6 +145,51 @@ public final class LiveSessionModel {
         if let focus, focus.exercise == exercise { self.focus(focus) }
     }
 
+    /// Le nombre de séries d'échauffement de l'exercice : la séance le prend tout de suite, ses réglages pour la suite.
+    public func setWarmupCount(_ count: Int?, exercise: UUID) async {
+        guard let reference = session.exercises.first(where: { $0.id == exercise })?.exercise,
+              await perform(.setWarmupCount(exercise: exercise, count)) else { return }
+        do {
+            try await environment.service.saveWarmupCount(count, for: reference)
+        } catch {
+            errorMessage = Self.saveFailure
+        }
+    }
+
+    /// La charge des séries de travail restantes de l'exercice (calculateur de disques).
+    public func setRemainingLoad(_ weightKg: Double, exercise: UUID) async {
+        await perform(.setRemainingLoad(exercise: exercise, weightKg: weightKg))
+    }
+
+    // MARK: Remplacer
+
+    /// Les alternatives à l'exercice, planifiées avec leur charge proposée (spec M4 §19.3) ; aucune si la lecture échoue.
+    public func replacementOptions(for exercise: UUID, reason: ReplacementReason) async -> [ReplacementOption] {
+        do {
+            return try await environment.service.replacementOptions(for: exercise, reason: reason)
+        } catch {
+            errorMessage = Self.saveFailure
+            return []
+        }
+    }
+
+    /// Remplace l'exercice par une alternative déjà planifiée.
+    public func replace(_ exercise: UUID, with replacement: LiveExercise) async {
+        focus(nil)
+        await perform(.replaceExercise(exercise, with: replacement))
+    }
+
+    /// Remplace l'exercice par un exercice choisi dans la bibliothèque.
+    public func replace(_ exercise: UUID, withPicked reference: ExerciseReference, reason: ReplacementReason) async {
+        do {
+            guard let replacement = try await environment.service.replacement(for: exercise, with: reference,
+                                                                              reason: reason) else { return }
+            await replace(exercise, with: replacement)
+        } catch {
+            errorMessage = Self.saveFailure
+        }
+    }
+
     // MARK: Repos
 
     public func restMinus30() async {

@@ -100,12 +100,47 @@ public final class ActiveSessionService: Sendable {
             let directory = try await self.directory()
             let profile = try await self.profiles.load()
             var added: [LiveExercise] = []
+            // Un muscle déjà travaillé dans la séance n'est pas échauffé une seconde fois (spec M4 §8.3).
+            var worked = Set(session.exercises.flatMap { directory.info($0.exercise)?.primaryMuscles ?? [] })
             for reference in references {
                 added.append(LiveSessionPlanner.exercise(
                     reference, directory: directory, history: try await self.workouts.lastSets(for: reference),
-                    settings: try await self.settings.settings(for: reference), profile: profile, policy: session.policy))
+                    settings: try await self.settings.settings(for: reference), profile: profile, policy: session.policy,
+                    workedMuscles: worked))
+                worked.formUnion(directory.info(reference)?.primaryMuscles ?? [])
             }
             return added
+        }
+    }
+
+    /// Enregistre le nombre de séries d'échauffement de l'exercice dans ses réglages, pour toutes les routines ; `nil` revient
+    /// à l'automatique. La séance en cours change par `apply(.setWarmupCount(…))`.
+    public func saveWarmupCount(_ count: Int?, for reference: ExerciseReference) async throws {
+        try await queue.run {
+            let now = self.now()
+            var settings = try await self.settings.settings(for: reference)
+                ?? ExerciseSettings(exercise: reference, createdAt: now, updatedAt: now)
+            settings.warmupSetCount = count
+            settings.updatedAt = now
+            try await self.settings.save(settings)
+        }
+    }
+
+    /// La barre et les disques du profil, ou ceux d'une salle courante sans profil (barre de 20 kg, disques de 25 à 1,25 kg).
+    public func barAndPlates() async throws -> (barKg: Double, platesKg: [Double]) {
+        let profile = try await profiles.load() ?? UserProfile(createdAt: now(), updatedAt: now())
+        return (profile.barWeightKg, profile.availablePlatesKg)
+    }
+
+    /// Enregistre la barre et les disques disponibles dans le profil (spec M4 §8.3 : le calculateur les règle, l'écran
+    /// Paramètres arrive en M7). Sans profil, rien n'est enregistré.
+    public func saveBarAndPlates(barKg: Double, platesKg: [Double]) async throws {
+        try await queue.run {
+            guard var profile = try await self.profiles.load() else { return }
+            profile.barWeightKg = barKg
+            profile.availablePlatesKg = platesKg.filter { $0 > 0 }.sorted(by: >)
+            profile.updatedAt = self.now()
+            try await self.profiles.save(profile)
         }
     }
 
@@ -153,7 +188,7 @@ public final class ActiveSessionService: Sendable {
     }
 
     /// Les exercices archivés restent connus : une routine ou un historique peut encore les nommer.
-    private func directory() async throws -> ExerciseDirectory {
+    func directory() async throws -> ExerciseDirectory {
         ExerciseDirectory(library: library, userExercises: try await userExercises.all(includeArchived: true))
     }
 }

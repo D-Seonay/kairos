@@ -26,6 +26,14 @@ public enum LiveSessionChange: Sendable, Equatable {
     case setNote(exercise: UUID, String?)
     /// Un incrément nul ou négatif est ignoré.
     case setIncrement(exercise: UUID, Double)
+    /// Le nombre de séries d'échauffement de l'exercice ; `nil` revient à l'automatique (spec M4 §19.1).
+    case setWarmupCount(exercise: UUID, Int?)
+    /// La charge de toutes les séries de travail pas encore validées de l'exercice, marquées modifiées (le ±2,5 kg du
+    /// calculateur de disques, spec M4 §19.2). Une charge négative est ignorée.
+    case setRemainingLoad(exercise: UUID, weightKg: Double)
+    /// Remplace l'exercice (spec M4 §19.3) : ses séries validées restent, les autres disparaissent, et `replacement` se place
+    /// juste après lui. Un exercice sans série validée laisse toute sa place au remplaçant.
+    case replaceExercise(UUID, with: LiveExercise)
     case restMinus30
     case restPlus30
     case skipRest
@@ -37,8 +45,10 @@ extension LiveSession {
         switch change {
         case .validate, .unvalidate, .edit, .setType, .addSet, .deleteSet:
             applySetChange(change, now: now)
-        case .addExercises, .removeExercise, .moveExercise, .setNote, .setIncrement:
+        case .addExercises, .removeExercise, .moveExercise, .replaceExercise:
             applyExerciseChange(change)
+        case .setNote, .setIncrement, .setWarmupCount, .setRemainingLoad:
+            applyExerciseSetting(change)
         case .restMinus30, .restPlus30, .skipRest:
             return
         }
@@ -52,6 +62,7 @@ extension LiveSession {
             updateSet(set, of: exercise) { $0.completedAt = nil }
         case let .edit(exercise, set, weightKg, reps, durationSeconds, rpe):
             updateSet(set, of: exercise) { $0.edit(weightKg: weightKg, reps: reps, durationSeconds: durationSeconds, rpe: rpe) }
+            if weightKg != nil { updateExercise(exercise) { $0.refreshWarmups(afterEditing: set) } }
         case let .setType(exercise, set, type):
             updateSet(set, of: exercise) { $0.setType = type }
         case let .addSet(exercise):
@@ -71,12 +82,27 @@ extension LiveSession {
             exercises.removeAll { $0.id == exercise }
         case let .moveExercise(exercise, offset):
             move(exercise, by: offset)
+        case let .replaceExercise(exercise, replacement):
+            replace(exercise, with: replacement)
+        default:
+            return
+        }
+    }
+
+    /// La note, l'incrément, l'échauffement ou la charge restante d'un exercice.
+    private mutating func applyExerciseSetting(_ change: LiveSessionChange) {
+        switch change {
         case let .setNote(exercise, note):
             let trimmed = note?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
             updateExercise(exercise) { $0.note = trimmed.isEmpty ? nil : trimmed }
         case let .setIncrement(exercise, incrementKg):
             guard incrementKg > 0 else { return }
             updateExercise(exercise) { $0.incrementKg = incrementKg }
+        case let .setWarmupCount(exercise, count):
+            updateExercise(exercise) { $0.setWarmupCount(count) }
+        case let .setRemainingLoad(exercise, weightKg):
+            guard weightKg >= 0 else { return }
+            updateExercise(exercise) { $0.setRemainingLoad(weightKg) }
         default:
             return
         }
@@ -125,6 +151,16 @@ extension LiveSession {
         return set
     }
 
+    private mutating func replace(_ exercise: UUID, with replacement: LiveExercise) {
+        guard let index = exercises.firstIndex(where: { $0.id == exercise }) else { return }
+        exercises[index].sets.removeAll { $0.completedAt == nil }
+        if exercises[index].sets.isEmpty {
+            exercises[index] = replacement
+        } else {
+            exercises.insert(replacement, at: index + 1)
+        }
+    }
+
     private mutating func move(_ exercise: UUID, by offset: Int) {
         guard let from = exercises.firstIndex(where: { $0.id == exercise }) else { return }
         let to = min(max(from + offset, 0), exercises.count - 1)
@@ -142,6 +178,53 @@ extension LiveSession {
             guard let index = exercise.sets.firstIndex(where: { $0.id == set }) else { return }
             update(&exercise.sets[index])
         }
+    }
+}
+
+private extension LiveExercise {
+    /// Change le nombre de séries d'échauffement et les recalcule, tant qu'aucune n'est validée et que la première série de
+    /// travail ne l'est pas non plus. Sans plan d'échauffement (exercice que Pulse n'échauffe pas aujourd'hui), le réglage
+    /// vaudra pour les prochaines séances.
+    /// Pose la charge sur les séries de travail restantes, puis recalcule l'échauffement s'il suit encore la première.
+    mutating func setRemainingLoad(_ weightKg: Double) {
+        let remaining = sets.indices.filter { sets[$0].setType != .warmup && sets[$0].completedAt == nil }
+        guard let first = remaining.first else { return }
+        for index in remaining {
+            sets[index].weightKg = weightKg
+            sets[index].isEdited = true
+        }
+        refreshWarmups(afterEditing: sets[first].id)
+    }
+
+    mutating func setWarmupCount(_ count: Int?) {
+        guard var plan = warmupPlan else { return }
+        plan.maxCount = count
+        warmupPlan = plan
+        guard let first = sets.firstIndex(where: { $0.setType != .warmup }), sets[first].completedAt == nil,
+              sets[..<first].allSatisfy({ $0.setType == .warmup && $0.completedAt == nil }) else { return }
+        let working = sets[first].weightKg ?? sets[first].proposed.weightKg
+        sets.replaceSubrange(..<first, with: LiveSessionPlanner.warmupSets(firstWorkingKg: working, plan: plan,
+                                                                           incrementKg: incrementKg))
+    }
+
+    /// Recalcule l'échauffement quand la charge de la première série de travail change (spec M4 §8.3), tant que cette série
+    /// n'est pas validée et que les séries d'échauffement n'ont été ni validées ni modifiées. Le nombre de séries ne grandit
+    /// jamais : une série d'échauffement supprimée à la main ne revient pas.
+    mutating func refreshWarmups(afterEditing setID: UUID) {
+        guard let plan = warmupPlan,
+              let first = sets.firstIndex(where: { $0.setType != .warmup }), sets[first].id == setID,
+              sets[first].completedAt == nil else { return }
+        let warmups = sets[..<first].filter { $0.setType == .warmup }
+        guard first == warmups.count, !warmups.isEmpty,
+              warmups.allSatisfy({ !$0.isEdited && $0.completedAt == nil }) else { return }
+        let fresh = LiveSessionPlanner.warmupSets(firstWorkingKg: sets[first].weightKg, plan: plan, incrementKg: incrementKg)
+            .suffix(warmups.count)
+        let kept = zip(warmups.suffix(fresh.count), fresh).map { old, new in
+            var set = new
+            set.id = old.id
+            return set
+        }
+        sets.replaceSubrange(..<first, with: kept)
     }
 }
 

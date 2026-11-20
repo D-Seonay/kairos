@@ -6,7 +6,7 @@ import Testing
 
 struct LiveSessionPlannerTests {
     private typealias Fix = LiveFixtures
-    private let profile = UserProfile(createdAt: .t0, updatedAt: .t0)
+    private let profile = LiveFixtures.profile()
 
     @Test func aFatigueDayPlanKeepsLoadsAndSaysWhatChanged() {
         let day = Fix.day([Fix.exercise(Fix.bench, order: 0, rpe: 8, rest: 120), Fix.exercise(Fix.pecDeck, order: 1, rpe: 7, rest: 60)])

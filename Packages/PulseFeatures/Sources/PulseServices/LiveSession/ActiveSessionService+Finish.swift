@@ -118,7 +118,8 @@ extension LiveSession {
                     id: set.id, order: sets.count, exercise: exercise.exercise, exerciseName: exercise.name, setType: set.setType,
                     supersetGroup: exercise.supersetGroup, plannedWeightKg: set.proposed.weightKg, plannedReps: set.proposed.reps,
                     actualWeightKg: set.weightKg, actualReps: set.reps, durationSeconds: set.durationSeconds, rpe: set.rpe,
-                    restSeconds: exercise.restSeconds, completedAt: set.completedAt))
+                    restSeconds: exercise.restSeconds, completedAt: set.completedAt, replacedExercise: exercise.replacedExercise,
+                    replacementReason: exercise.replacementReason))
             }
         }
         let notes = exercises.compactMap { exercise in
