@@ -1,13 +1,15 @@
 import PulseDesignSystem
 import PulseDomain
+import PulseServices
 import SwiftUI
 
-/// Le détail d'une séance passée (spec M4 §12), en lecture seule : le résumé, la carte musculaire, la note, puis les exercices et
-/// leurs séries. « Enregistrer comme routine » ajoute la séance au programme et rend la main avec la routine à ouvrir ;
-/// « Supprimer » demande confirmation. À présenter dans la pile de l'onglet « Séance ».
+/// Le détail d'une séance passée (spec M4 §12) : le résumé, la carte musculaire, la note, puis les exercices et leurs séries.
+/// « Modifier » corrige la note, le RPE et les séries (spec M6 §8). « Enregistrer comme routine » ajoute la séance au programme
+/// et rend la main avec la routine à ouvrir ; « Supprimer » demande confirmation. À présenter dans une pile de navigation.
 public struct SessionDetailView: View {
     @State private var model: SessionDetailModel
     @State private var confirmsDeletion = false
+    @State private var correction: CorrectionDraft?
     @State private var isWorking = false
     @State private var errorMessage: String?
     private let onRoutineSaved: (UUID, UUID) -> Void
@@ -42,6 +44,20 @@ public struct SessionDetailView: View {
             Button(String(localized: "Annuler", bundle: .module), role: .cancel) {}
         } message: {
             Text(String(localized: "Elle disparaît de ton historique et tes records sont recalculés.", bundle: .module))
+        }
+        .toolbar {
+            if model.session != nil {
+                ToolbarItem(placement: .primaryAction) {
+                    Button(String(localized: "Modifier", bundle: .module)) { correction = model.correction().map(CorrectionDraft.init) }
+                        .disabled(isWorking)
+                        .accessibilityIdentifier(TrainIdentifiers.sessionEdit)
+                }
+            }
+        }
+        .sheet(item: $correction) { draft in
+            NavigationStack {
+                SessionCorrectionView(correction: draft.correction, blocks: model.correctableBlocks, onSave: save)
+            }
         }
         .task { await model.load() }
     }
@@ -157,6 +173,17 @@ public struct SessionDetailView: View {
         }
     }
 
+    private func save(_ correction: SessionCorrection) async -> Bool {
+        do {
+            try await model.save(correction)
+            errorMessage = nil
+            return true
+        } catch {
+            errorMessage = String(localized: "Pulse n'a pas pu enregistrer tes corrections.", bundle: .module)
+            return false
+        }
+    }
+
     private func delete() async {
         isWorking = true
         defer { isWorking = false }
@@ -167,4 +194,10 @@ public struct SessionDetailView: View {
             errorMessage = String(localized: "Pulse n'a pas pu supprimer cette séance.", bundle: .module)
         }
     }
+}
+
+/// La correction ouverte dans la feuille « Modifier ».
+private struct CorrectionDraft: Identifiable {
+    let id = UUID()
+    let correction: SessionCorrection
 }

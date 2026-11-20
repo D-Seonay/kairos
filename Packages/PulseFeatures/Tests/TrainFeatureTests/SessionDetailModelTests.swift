@@ -160,3 +160,26 @@ private func hevyPush(_ fixture: TrainFixture, status: SessionStatus = .complete
     try await model.delete()
     #expect(await writer.deleted == [workoutID])
 }
+
+@MainActor @Test func correctionSavesSetsNoteAndRecomputesRecords() async throws {
+    let fixture = TrainFixture()
+    try await fixture.log(on: TrainClock.date(month: 10, day: 5, hour: 18), sets: [LoggedSet(weightKg: 60, reps: 5)])
+    let session = try await hevyPush(fixture)
+    _ = try await fixture.environment.records.recomputeAll()
+    let model = SessionDetailModel(environment: fixture.environment, sessionID: session.id)
+    await model.load()
+    #expect(model.correctableBlocks.map(\.setIDs.count) == [2, 1])
+
+    var correction = try #require(model.correction())
+    correction.sets[1].weightKg = 90
+    correction.removedSetIDs = [correction.sets[2].id]
+    correction.note = "Corrigée"
+    try await model.save(correction)
+
+    let saved = try #require(try await fixture.environment.workouts.session(id: session.id))
+    #expect(saved.sets.count == 3 && saved.note == "Corrigée")
+    #expect(saved.sets.first { $0.order == 2 }?.actualWeightKg == 90)
+    #expect(saved.sets.first { $0.order == 2 }?.isPersonalRecord == true)
+    #expect(saved.tonnageKg == 80 * 5 + 90 * 4)
+    #expect(model.session?.note == "Corrigée")
+}

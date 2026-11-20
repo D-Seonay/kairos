@@ -48,7 +48,7 @@ public struct SessionExerciseBlock: Identifiable, Equatable, Sendable {
     public var id: ExerciseReference { exercise }
 }
 
-/// Le détail, en lecture seule, d'une séance passée (spec M4 §12), avec « Enregistrer comme routine » et la suppression.
+/// Le détail d'une séance passée (spec M4 §12), avec « Enregistrer comme routine », la suppression et la correction (spec M6 §8).
 @MainActor
 @Observable
 public final class SessionDetailModel {
@@ -109,6 +109,29 @@ public final class SessionDetailModel {
             try await environment.profiles.save(profile)
         }
         return (program.id, dayID)
+    }
+
+    /// La correction à ouvrir, depuis la séance telle qu'enregistrée.
+    public func correction() -> SessionCorrection? {
+        session.map(SessionCorrection.init(session:))
+    }
+
+    /// Les exercices de la séance et leurs séries corrigeables, dans l'ordre, pour la feuille de correction.
+    public var correctableBlocks: [(name: String, setIDs: [UUID])] {
+        blocks.compactMap { block in
+            let ids = block.sets.filter { $0.type != .warmup }.map(\.id)
+            return ids.isEmpty ? nil : (block.name, ids)
+        }
+    }
+
+    /// Enregistre la séance corrigée, relue à l'instant, puis recalcule les records et relit le détail (spec M6 §8).
+    public func save(_ correction: SessionCorrection) async throws {
+        guard let fresh = try await environment.workouts.session(id: sessionID) else { throw SessionDetailError.missing }
+        let corrected = correction.applied(to: fresh, loadKind: directory.loadKind(of:), now: environment.now())
+        guard corrected != fresh else { return }
+        try await environment.workouts.save(corrected)
+        _ = try await environment.records.recomputeAll()
+        await load()
     }
 
     /// Supprime la séance puis recalcule les records, qu'elle a pu établir, et supprime son entraînement Apple Santé
