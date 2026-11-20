@@ -4,7 +4,8 @@ import PulseDomain
 /// Source Apple Santé factice et déterministe : 60 nuits finissant au jour de `now`, selon un `HealthScenario`.
 ///
 /// L'ancre est le jour des données générées, en texte (`"2026-11-02"`) : la même ancre ne ramène rien, une autre ramène tout.
-public struct ScenarioHealthSource: HealthSampleSource {
+/// Les scénarios à historique complet ont aussi une course de 45 minutes par semaine, jamais le jour même.
+public struct ScenarioHealthSource: HealthSampleSource, HealthWorkoutSource {
     static let nightCount = 60
 
     private let samples: [HealthSampleKind: [CachedHealthSample]]
@@ -18,6 +19,9 @@ public struct ScenarioHealthSource: HealthSampleSource {
             let day = calendar.date(byAdding: .day, value: index - (Self.nightCount - 1), to: today) ?? today
             let night = index == Self.nightCount - 1 ? Self.todayNight(for: scenario) : Self.historyNight(index)
             builder.add(night, on: day)
+            if Self.includesRun(index, in: scenario) {
+                builder.addRun(on: day)
+            }
         }
         samples = builder.samples
         dayAnchor = Data(Self.dayText(today, calendar: calendar).utf8)
@@ -28,6 +32,14 @@ public struct ScenarioHealthSource: HealthSampleSource {
 
     /// Sans ancre, ou avec l'ancre d'un autre jour : tous les échantillons commençant à `start` ou après. Avec l'ancre du jour : rien.
     public func changes(of signal: NightSignal, since anchor: Data?, from start: Date) async throws -> HealthSampleChanges {
+        guard anchor != dayAnchor else {
+            return HealthSampleChanges(kind: signal.kind, added: [], deletedHealthKitUUIDs: [], anchor: dayAnchor, isFullRead: false)
+        }
+        let added = (samples[signal.kind] ?? []).filter { $0.start >= start }
+        return HealthSampleChanges(kind: signal.kind, added: added, deletedHealthKitUUIDs: [], anchor: dayAnchor, isFullRead: true)
+    }
+
+    public func workoutChanges(of signal: WorkoutSignal, since anchor: Data?, from start: Date) async throws -> HealthSampleChanges {
         guard anchor != dayAnchor else {
             return HealthSampleChanges(kind: signal.kind, added: [], deletedHealthKitUUIDs: [], anchor: dayAnchor, isFullRead: false)
         }
@@ -63,6 +75,14 @@ public struct ScenarioHealthSource: HealthSampleSource {
         case .noData: false
         case .threeNights: index >= nightCount - 3
         case .goodNight, .badNight, .missingHRV: true
+        }
+    }
+
+    /// Une course tous les 7 jours, la dernière il y a 3 jours.
+    private static func includesRun(_ index: Int, in scenario: HealthScenario) -> Bool {
+        switch scenario {
+        case .goodNight, .badNight, .missingHRV: index % 7 == 0
+        case .noData, .threeNights: false
         }
     }
 
@@ -110,6 +130,15 @@ public struct ScenarioHealthSource: HealthSampleSource {
                 append(.sleep, start: moment(day, minute), end: moment(day, minute + minutes), stage: stage)
                 minute += minutes
             }
+        }
+
+        /// 7:30 → 8:15, 8 km à 145 bpm de moyenne.
+        mutating func addRun(on day: Date) {
+            let start = moment(day, 450)
+            let uuid = "scenario.run.\(samples[.run, default: []].count)"
+            samples[.run, default: []].append(CachedHealthSample(
+                kind: .run, start: start, end: moment(day, 495), distanceMeters: 8_000, averageHeartRate: 145, durationMinutes: 45,
+                healthKitUUID: uuid, fetchedAt: start))
         }
 
         /// Les UUID suivent l'ordre de génération de chaque type : `scenario.sdnn.0`, `scenario.sdnn.1`…
