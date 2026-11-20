@@ -144,3 +144,40 @@ public actor InMemoryWorkoutRepository: WorkoutRepository {
         return []
     }
 }
+
+/// Les compléments et leurs prises en mémoire, triés comme le dépôt SwiftData ; `delete` les retire.
+public actor InMemorySupplementRepository: SupplementRepository {
+    private var stored: [UUID: Supplement] = [:]
+    private var storedIntakes: [UUID: SupplementIntake] = [:]
+
+    public init(supplements: [Supplement] = [], intakes: [SupplementIntake] = []) {
+        for supplement in supplements { stored[supplement.id] = supplement }
+        for intake in intakes { storedIntakes[intake.id] = intake }
+    }
+
+    public func supplements(includeArchived: Bool) async throws -> [Supplement] {
+        stored.values.filter { includeArchived || !$0.isArchived }
+            .sorted { lhs, rhs in lhs.order != rhs.order ? lhs.order < rhs.order : lhs.createdAt < rhs.createdAt }
+    }
+
+    public func save(_ supplement: Supplement) async throws {
+        stored[supplement.id] = supplement
+    }
+
+    public func delete(id: UUID) async throws {
+        stored[id] = nil
+    }
+
+    public func intakes(from: Date, to: Date) async throws -> [SupplementIntake] {
+        storedIntakes.values.filter { $0.takenAt >= from && $0.takenAt < to }
+            .sorted { lhs, rhs in lhs.takenAt != rhs.takenAt ? lhs.takenAt < rhs.takenAt : lhs.createdAt < rhs.createdAt }
+    }
+
+    public func save(_ intake: SupplementIntake) async throws {
+        storedIntakes[intake.id] = intake
+    }
+
+    public func delete(intakeID: UUID) async throws {
+        storedIntakes[intakeID] = nil
+    }
+}
