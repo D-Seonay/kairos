@@ -23,7 +23,7 @@ public struct LiveSessionView: View {
 
     public var body: some View {
         VStack(spacing: 0) {
-            LiveHeader(session: model.session, onFinish: onFinish, onAbandon: onAbandon)
+            LiveHeader(session: model.session, onFinish: onFinish, onAbandon: onAbandon, calendar: model.environment.calendar)
             if let message = model.errorMessage {
                 Text(message)
                     .font(.footnote)

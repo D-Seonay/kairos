@@ -135,13 +135,14 @@ public final class FinishFlowModel {
         }
     }
 
-    /// L'heure de fin : celle que propose le service pour une séance oubliée, sinon maintenant.
+    /// L'heure de fin : celle que propose le service pour une séance oubliée, celle saisie pour une séance passée, sinon
+    /// maintenant.
     private func start(_ intent: Intent) async {
         errorMessage = nil
         if let suggested = await live.environment.service.suggestedEnd() {
             forgotten = ForgottenPrompt(intent: intent, suggestedEnd: suggested)
         } else {
-            await complete(intent, endedAt: live.environment.now())
+            await complete(intent, endedAt: live.session.pastEndedAt ?? live.environment.now())
         }
     }
 

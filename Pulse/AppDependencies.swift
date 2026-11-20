@@ -321,4 +321,14 @@ extension AppDependencies {
         LiveSessionEnvironment(service: liveSession, train: trainEnvironment(), notifications: liveSessionNotifications,
                                calendar: calendar, now: now)
     }
+
+    /// La saisie d'une séance passée (spec M4 §19.4) : un service à part, en mémoire, sans notification ni Live Activity, pour
+    /// ne jamais toucher à la séance en direct. Un appel, un service : le coordinateur garde le sien.
+    func pastSessionEnvironment() -> LiveSessionEnvironment {
+        let service = ActiveSessionService.pastSessions(
+            workouts: workouts, profiles: profiles, settings: exerciseSettings, userExercises: userExercises, records: records,
+            library: content, calendar: calendar, now: now)
+        return LiveSessionEnvironment(service: service, train: trainEnvironment(), notifications: liveSessionNotifications,
+                                      calendar: calendar, now: now)
+    }
 }

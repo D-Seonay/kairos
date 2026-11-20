@@ -9,10 +9,11 @@ extension ActiveSessionService {
     static let forgottenAfter: TimeInterval = 3 * 3_600
 
     /// Pour une séance laissée ouverte plus de 3 h sans action, l'heure de fin proposée : la dernière série validée plus son
-    /// repos, ou la dernière action sans série validée. `nil` sinon, ou sans séance lisible.
+    /// repos, ou la dernière action sans série validée. `nil` sinon, sans séance lisible, ou pour une séance passée, qui a sa
+    /// fin.
     public func suggestedEnd() async -> Date? {
         let suggested = try? await queue.run { () async throws -> Date? in
-            guard let session = try await self.loadSession(),
+            guard let session = try await self.loadSession(), !session.isPastEntry,
                   self.now().timeIntervalSince(session.lastActionAt) > Self.forgottenAfter else { return nil }
             return session.lastValidatedSetEnd ?? session.lastActionAt
         }
@@ -25,8 +26,10 @@ extension ActiveSessionService {
             guard let session = try await self.loadSession() else { throw ActiveSessionError.noSession }
             let draft = session.workoutSession(status: .completed, endedAt: endedAt, overallRPE: nil, note: nil,
                                                savedAt: self.now())
-            // Une séance déjà écrite par un `finish` dont la suite a échoué ne compte pas deux fois.
-            let history = try await self.workouts.sessions(from: .distantPast, to: .distantFuture).filter { $0.id != session.id }
+            // Une séance déjà écrite par un `finish` dont la suite a échoué ne compte pas deux fois. Une séance passée se compare
+            // à ce qui la précède : records battus et ratio aigu / chronique de ce jour-là.
+            let history = try await self.workouts.sessions(from: .distantPast, to: session.historyLimit)
+                .filter { $0.id != session.id }
             let directory = ExerciseDirectory(library: self.library,
                                               userExercises: try await self.userExercises.all(includeArchived: true))
             // Le genre de charge de la séance en cours prime : il a été lu à l'ajout de l'exercice.
@@ -53,6 +56,7 @@ extension ActiveSessionService {
 
     /// Enregistre la séance abandonnée avec ses séries validées, sans RPE, puis fait le même ménage que `finish`. Sans série
     /// validée, rien n'est enregistré. Un snapshot illisible est effacé de même : la séance rendue n'a alors aucune série.
+    /// Abandonner une séance passée annule la saisie : rien n'est enregistré **(choix du constructeur)**.
     public func abandon(endedAt: Date) async throws -> WorkoutSession {
         try await queue.run {
             guard let snapshot = try await self.store.load() else { throw ActiveSessionError.noSession }
@@ -65,7 +69,7 @@ extension ActiveSessionService {
             }
             var abandoned = session.workoutSession(status: .abandoned, endedAt: endedAt, overallRPE: nil, note: nil,
                                                    savedAt: self.now())
-            if !abandoned.sets.isEmpty { abandoned = try await self.write(abandoned) }
+            if !abandoned.sets.isEmpty, !session.isPastEntry { abandoned = try await self.write(abandoned) }
             try await self.clearSession()
             return abandoned
         }
@@ -89,7 +93,8 @@ extension ActiveSessionService {
         return (try? await workouts.session(id: session.id)) ?? session
     }
 
-    /// Efface le snapshot, termine la Live Activity et annule la notification de repos.
+    /// Efface le snapshot, termine la Live Activity et annule la notification de repos. Le service des séances passées n'en
+    /// a pas : ses doublures muettes ignorent ces appels.
     private func clearSession() async throws {
         try await store.clear()
         await activity.end()
@@ -109,8 +114,10 @@ extension LiveSession {
     }
 
     /// La séance telle qu'elle s'enregistre : séries validées seulement, numérotées de 0 à n − 1 dans l'ordre de la séance,
-    /// avec la proposition pour prévu et la saisie pour réalisé ; durée arrondie à la minute.
+    /// avec la proposition pour prévu et la saisie pour réalisé ; durée arrondie à la minute. Les séries d'une séance passée,
+    /// validées au moment de la saisie, prennent des heures réparties sur la séance, dans l'ordre de leur validation.
     func workoutSession(status: SessionStatus, endedAt: Date, overallRPE: Int?, note: String?, savedAt: Date) -> WorkoutSession {
+        let completedAt = isPastEntry ? spreadCompletions(until: endedAt) : [:]
         var sets: [WorkoutSet] = []
         for exercise in exercises {
             for set in exercise.sets where set.completedAt != nil {
@@ -118,7 +125,8 @@ extension LiveSession {
                     id: set.id, order: sets.count, exercise: exercise.exercise, exerciseName: exercise.name, setType: set.setType,
                     supersetGroup: exercise.supersetGroup, plannedWeightKg: set.proposed.weightKg, plannedReps: set.proposed.reps,
                     actualWeightKg: set.weightKg, actualReps: set.reps, durationSeconds: set.durationSeconds, rpe: set.rpe,
-                    restSeconds: exercise.restSeconds, completedAt: set.completedAt, replacedExercise: exercise.replacedExercise,
+                    restSeconds: exercise.restSeconds, completedAt: completedAt[set.id] ?? set.completedAt,
+                    replacedExercise: exercise.replacedExercise,
                     replacementReason: exercise.replacementReason))
             }
         }
@@ -134,5 +142,15 @@ extension LiveSession {
             refusedAdjustments: refusedAdjustments, overallRPE: overallRPE.map(Double.init),
             note: trimmedNote?.isEmpty == false ? trimmedNote : nil, tonnageKg: tonnageKg, durationMinutes: minutes,
             exerciseNotes: notes, sets: sets, createdAt: savedAt, updatedAt: savedAt)
+    }
+
+    /// Les heures des séries validées, réparties à intervalles égaux entre le début et `endedAt` : la dernière finit la séance.
+    private func spreadCompletions(until endedAt: Date) -> [UUID: Date] {
+        let validated = exercises.flatMap(\.sets).compactMap { set in set.completedAt.map { (id: set.id, at: $0) } }
+            .sorted { $0.at < $1.at }
+        let step = max(0, endedAt.timeIntervalSince(startedAt)) / Double(max(1, validated.count))
+        return Dictionary(validated.enumerated().map { index, set in
+            (set.id, startedAt.addingTimeInterval(step * Double(index + 1)))
+        }, uniquingKeysWith: { first, _ in first })
     }
 }

@@ -6,6 +6,8 @@ public enum TrainIdentifiers {
     public static let routineLaunchPrefix = "train.routine.launch."
     public static let strengthStart = "train.tile.strength.start"
     public static let freeSession = "train.free"
+    public static let pastSession = "train.past"
+    public static let pastSessionStart = "train.past.start"
     public static let resumeSession = "train.resume"
     public static let library = "train.library"
     public static let libraryCreate = "train.library.create"

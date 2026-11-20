@@ -24,7 +24,9 @@ public struct FinishFlow: View {
                 confirmationActions
             } message: {
                 if flow.confirmation == .abandon {
-                    Text(String(localized: "Les séries validées sont gardées, les autres ne sont pas enregistrées.", bundle: .module))
+                    Text(model.session.isPastEntry
+                        ? String(localized: "Rien n'est enregistré.", bundle: .module)
+                        : String(localized: "Les séries validées sont gardées, les autres ne sont pas enregistrées.", bundle: .module))
                 }
             }
             .alert(forgottenTitle, isPresented: isShowingForgotten) {
@@ -46,18 +48,25 @@ public struct FinishFlow: View {
     private var confirmationTitle: String {
         switch flow.confirmation {
         case .unfinished(let remaining): FinishFlowModel.remainingText(remaining)
-        case .abandon, nil: String(localized: "Abandonner la séance ?", bundle: .module)
+        case .abandon, nil:
+            if model.session.isPastEntry {
+                String(localized: "Annuler la saisie ?", bundle: .module)
+            } else {
+                String(localized: "Abandonner la séance ?", bundle: .module)
+            }
         }
     }
 
     @ViewBuilder
     private var confirmationActions: some View {
         if flow.confirmation == .abandon {
-            Button(String(localized: "Abandonner", bundle: .module), role: .destructive) { flow.confirm() }
+            Button(model.session.isPastEntry ? String(localized: "Annuler la saisie", bundle: .module)
+                    : String(localized: "Abandonner", bundle: .module), role: .destructive) { flow.confirm() }
         } else {
             Button(String(localized: "Terminer quand même", bundle: .module)) { flow.confirm() }
         }
-        Button(String(localized: "Continuer la séance", bundle: .module), role: .cancel) { flow.cancelConfirmation() }
+        Button(model.session.isPastEntry ? String(localized: "Continuer la saisie", bundle: .module)
+                : String(localized: "Continuer la séance", bundle: .module), role: .cancel) { flow.cancelConfirmation() }
     }
 
     // MARK: Séance oubliée

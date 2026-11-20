@@ -78,6 +78,18 @@ private func benchSession(day offset: Int, status: SessionStatus, sets: [Workout
     #expect(try await repo.lastSets(for: bench).map(\.actualReps) == [12, 5])
 }
 
+@Test func lastSetsStartedBeforeADateIgnoreLaterSessions() async throws {
+    let repo = SwiftDataWorkoutRepository(modelContainer: try TestContainer.make())
+    let older = benchSession(day: 1, status: .completed, sets: [benchSet(order: 1, reps: 9), benchSet(order: 2, reps: 7)])
+    let newer = benchSession(day: 9, status: .completed, sets: [benchSet(order: 1, reps: 11)])
+    for session in [older, newer] { try await repo.save(session) }
+
+    let bench = ExerciseReference.content(id: "bench-press-barbell")
+    #expect(try await repo.lastSets(for: bench, startedBefore: newer.startedAt).map(\.actualReps) == [9, 7])
+    #expect(try await repo.lastSets(for: bench, startedBefore: older.startedAt).isEmpty)
+    #expect(try await repo.lastSets(for: bench).map(\.actualReps) == [11])
+}
+
 @Test func failureAndDropSetsCountAsLastTime() async throws {
     let repo = SwiftDataWorkoutRepository(modelContainer: try TestContainer.make())
     let session = benchSession(day: 1, status: .completed, sets: [

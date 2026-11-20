@@ -4,11 +4,13 @@ import PulseServices
 import SwiftUI
 
 /// L'en-tête de la séance (spec M4 §14.2) : le titre, « Terminer », le menu « Abandonner », puis la durée écoulée, le tonnage et
-/// les séries de travail faites sur prévues. Les confirmations sont celles de l'appelant.
+/// les séries de travail faites sur prévues. Une séance passée (§19.4) montre sa date, sa durée saisie, et « Annuler la
+/// saisie » à la place d'« Abandonner ». Les confirmations sont celles de l'appelant.
 struct LiveHeader: View {
     let session: LiveSession
     let onFinish: () -> Void
     let onAbandon: () -> Void
+    var calendar: Calendar = .current
     @Environment(\.pulseTheme) private var theme
 
     var body: some View {
@@ -34,9 +36,23 @@ struct LiveHeader: View {
                 .buttonStyle(.plain)
                 .accessibilityIdentifier(LiveSessionIdentifiers.finishButton)
             }
+            if let pastEndedAt = session.pastEndedAt {
+                Text(Self.pastDateText(start: session.startedAt, end: pastEndedAt, calendar: calendar))
+                    .font(.footnote)
+                    .foregroundStyle(PulsePalette.text2)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
             HStack {
-                stat(String(localized: "Durée", bundle: .module)) {
-                    Text(timerInterval: session.startedAt...Date.distantFuture, pauseTime: nil, countsDown: false, showsHours: false)
+                if let pastEndedAt = session.pastEndedAt {
+                    let minutes = Self.minutes(from: session.startedAt, to: pastEndedAt)
+                    stat(String(localized: "Durée", bundle: .module), spoken: PulseFormat.duration(minutes: minutes)) {
+                        Text(PulseFormat.duration(minutes: minutes))
+                    }
+                } else {
+                    stat(String(localized: "Durée", bundle: .module)) {
+                        Text(timerInterval: session.startedAt...Date.distantFuture, pauseTime: nil, countsDown: false,
+                             showsHours: false)
+                    }
                 }
                 stat(String(localized: "Tonnage", bundle: .module), spoken: Self.tonnageText(kg: session.tonnageKg)) {
                     Text(Self.tonnageText(kg: session.tonnageKg))
@@ -57,7 +73,8 @@ struct LiveHeader: View {
     private var menu: some View {
         Menu {
             Button(role: .destructive, action: onAbandon) {
-                Label(String(localized: "Abandonner", bundle: .module), systemImage: "xmark.circle")
+                Label(session.isPastEntry ? String(localized: "Annuler la saisie", bundle: .module)
+                        : String(localized: "Abandonner", bundle: .module), systemImage: "xmark.circle")
             }
             .accessibilityIdentifier(LiveSessionIdentifiers.abandonButton)
         } label: {
@@ -113,6 +130,20 @@ extension LiveHeader {
     nonisolated static func progressAccessibilityText(done: Int, planned: Int) -> String {
         done == 1 ? String(localized: "1 série faite sur \(planned)", bundle: .module)
             : String(localized: "\(done) séries faites sur \(planned)", bundle: .module)
+    }
+
+    /// « Mercredi 28 octobre · 18:00 – 19:05 », en heure du calendrier de l'app.
+    nonisolated static func pastDateText(start: Date, end: Date, calendar: Calendar) -> String {
+        let locale = Locale(identifier: "fr_FR")
+        let day = start.formatted(Date.FormatStyle(locale: locale, calendar: calendar, timeZone: calendar.timeZone)
+            .weekday(.wide).day().month(.wide))
+        let time = { (date: Date) in FinishFlowModel.timeText(date, calendar: calendar) }
+        return "\(day.prefix(1).uppercased())\(day.dropFirst()) · \(time(start)) – \(time(end))"
+    }
+
+    /// La durée saisie, en minutes arrondies.
+    nonisolated static func minutes(from start: Date, to end: Date) -> Int {
+        Int((max(0, end.timeIntervalSince(start)) / 60).rounded())
     }
 
     /// « 1240 kg », « 62,5 kg ».

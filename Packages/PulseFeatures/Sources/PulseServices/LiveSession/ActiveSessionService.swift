@@ -71,8 +71,9 @@ public final class ActiveSessionService: Sendable {
         }
     }
 
-    /// Planifie la séance, l'enregistre, puis démarre la Live Activity. Une séance lisible déjà en cours bloque le départ ; un
-    /// snapshot illisible, qui ne pourra jamais être repris, est effacé avec sa Live Activity et sa notification.
+    /// Planifie la séance, l'enregistre, puis démarre la Live Activity, sauf pour une séance passée. Une séance lisible déjà
+    /// en cours bloque le départ ; un snapshot illisible, qui ne pourra jamais être repris, est effacé avec sa Live Activity
+    /// et sa notification.
     public func start(_ launch: SessionLaunch) async throws -> LiveSession {
         try await queue.run {
             try await self.discardUnreadableSnapshot()
@@ -80,14 +81,15 @@ public final class ActiveSessionService: Sendable {
             let profile = try await self.profiles.load()
             var history: [ExerciseReference: [WorkoutSet]] = [:]
             var settingsByExercise: [ExerciseReference: ExerciseSettings] = [:]
+            let historyLimit = launch.past?.start ?? .distantFuture
             for reference in launch.day?.exercises.map(\.exercise) ?? [] where history[reference] == nil {
-                history[reference] = try await self.workouts.lastSets(for: reference)
+                history[reference] = try await self.workouts.lastSets(for: reference, startedBefore: historyLimit)
                 settingsByExercise[reference] = try await self.settings.settings(for: reference)
             }
             let session = LiveSessionPlanner.session(for: launch, directory: directory, history: history,
                                                      settings: settingsByExercise, profile: profile, now: self.now())
-            try await self.save(session, at: session.startedAt)
-            await self.activity.start(Self.activityState(for: session))
+            try await self.save(session, at: session.lastActionAt)
+            if !session.isPastEntry { await self.activity.start(Self.activityState(for: session)) }
             return session
         }
     }
@@ -104,7 +106,8 @@ public final class ActiveSessionService: Sendable {
             var worked = Set(session.exercises.flatMap { directory.info($0.exercise)?.primaryMuscles ?? [] })
             for reference in references {
                 added.append(LiveSessionPlanner.exercise(
-                    reference, directory: directory, history: try await self.workouts.lastSets(for: reference),
+                    reference, directory: directory,
+                    history: try await self.workouts.lastSets(for: reference, startedBefore: session.historyLimit),
                     settings: try await self.settings.settings(for: reference), profile: profile, policy: session.policy,
                     workedMuscles: worked))
                 worked.formUnion(directory.info(reference)?.primaryMuscles ?? [])
@@ -144,7 +147,8 @@ public final class ActiveSessionService: Sendable {
         }
     }
 
-    /// Applique le geste, pose `lastActionAt`, enregistre la séance, puis règle la notification et la Live Activity.
+    /// Applique le geste, pose `lastActionAt`, enregistre la séance, puis règle la notification et la Live Activity. Une séance
+    /// passée n'a pas de repos.
     public func apply(_ change: LiveSessionChange) async throws -> LiveSession {
         try await queue.run {
             guard let loaded = try await self.loadSession() else { throw ActiveSessionError.noSession }
@@ -153,7 +157,7 @@ public final class ActiveSessionService: Sendable {
             session.clearRest(endedBy: now)
             let before = session
             session.applyStructure(change, now: now)
-            session.rest = Self.rest(after: change, before: before, session: session, now: now)
+            session.rest = session.isPastEntry ? nil : Self.rest(after: change, before: before, session: session, now: now)
             session.lastActionAt = now
             try await self.save(session, at: now)
             await self.publish(from: loaded, to: session)

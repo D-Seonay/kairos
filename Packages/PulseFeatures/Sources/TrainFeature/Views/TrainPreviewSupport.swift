@@ -82,7 +82,8 @@ struct TrainPreviewHost: View {
     var body: some View {
         Group {
             if let model {
-                TrainView(model: model, onOpenToday: {}, onStartSession: { _ in }, onResumeSession: {})
+                TrainView(model: model, onOpenToday: {}, onStartSession: { _ in }, onResumeSession: {},
+                          onEnterPastSession: { _ in })
             } else {
                 ProgressView()
             }

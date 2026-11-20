@@ -104,7 +104,7 @@ private struct EditedNoteWorkoutRepository: WorkoutRepository {
         try await inner.delete(id: id)
     }
 
-    func lastSets(for exercise: ExerciseReference) async throws -> [WorkoutSet] {
-        try await inner.lastSets(for: exercise)
+    func lastSets(for exercise: ExerciseReference, startedBefore date: Date) async throws -> [WorkoutSet] {
+        try await inner.lastSets(for: exercise, startedBefore: date)
     }
 }

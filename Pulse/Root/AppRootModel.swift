@@ -25,6 +25,8 @@ final class AppRootModel {
     private(set) var train: TrainModel?
     /// La séance en direct des onglets : le bandeau « Reprendre la séance » et l'écran en plein écran.
     private(set) var liveSession: LiveSessionCoordinator?
+    /// La saisie d'une séance passée, à côté de la séance en direct.
+    private(set) var pastSession: PastSessionCoordinator?
 
     let dependencies: AppDependencies
     /// Les boutons de la Live Activity relisent la séance des onglets ; `nil` dans les tests.
@@ -104,6 +106,7 @@ final class AppRootModel {
                 train = TrainModel(environment: dependencies.trainEnvironment())
                 let liveSession = LiveSessionCoordinator(environment: dependencies.liveSessionEnvironment())
                 self.liveSession = liveSession
+                pastSession = PastSessionCoordinator(environment: dependencies.pastSessionEnvironment())
                 sessionIntents?.coordinator = liveSession
             }
         }
@@ -114,6 +117,7 @@ final class AppRootModel {
         today = nil
         train = nil
         liveSession = nil
+        pastSession = nil
         sessionIntents?.coordinator = nil
     }
 }

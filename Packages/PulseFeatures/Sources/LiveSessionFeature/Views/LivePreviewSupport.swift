@@ -18,6 +18,8 @@ enum LivePreviewSupport {
         case resting
         /// Le clavier sur la charge de la deuxième série.
         case keypad
+        /// Une séance d'hier saisie après coup, première série cochée : la date et la durée saisie, sans repos.
+        case past
     }
 
     static let calendar: Calendar = {
@@ -45,7 +47,12 @@ enum LivePreviewSupport {
     /// Le modèle d'une séance démarrée. L'horloge est celle du mur : le repos de l'aperçu doit courir pour de bon.
     static func model(_ scenario: Scenario) async -> LiveSessionModel? {
         let environment = await environment()
-        guard let session = try? await environment.service.start(launch) else { return nil }
+        var started = launch
+        if scenario == .past {
+            let start = Date(timeIntervalSinceNow: -26 * 3_600)
+            started.past = DateInterval(start: start, duration: 65 * 60)
+        }
+        guard let session = try? await environment.service.start(started) else { return nil }
         let model = LiveSessionModel(session: session, environment: environment)
         await apply(scenario, to: model)
         return model
@@ -82,6 +89,8 @@ enum LivePreviewSupport {
         switch scenario {
         case .fresh:
             break
+        case .past:
+            await model.tap(set: model.session.exercises[0].sets[0].id)
         case .resting:
             for set in model.session.exercises[0].sets.prefix(2) { await model.tap(set: set.id) }
         case .keypad:
@@ -131,6 +140,10 @@ private struct LivePreviewHost: View {
 
 #Preview("Clavier sur la charge") {
     LivePreviewHost(scenario: .keypad)
+}
+
+#Preview("Séance passée") {
+    LivePreviewHost(scenario: .past)
 }
 
 #Preview("Accessibilité XL") {

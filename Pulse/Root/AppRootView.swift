@@ -48,9 +48,10 @@ struct AppRootView: View {
                     }
             }
         case .main:
-            if let today = model.today, let train = model.train, let liveSession = model.liveSession {
+            if let today = model.today, let train = model.train, let liveSession = model.liveSession,
+               let pastSession = model.pastSession {
                 MainTabView(dependencies: model.dependencies, router: router, today: today, train: train,
-                            liveSession: liveSession, firstName: model.profile?.firstName) {
+                            liveSession: liveSession, pastSession: pastSession, firstName: model.profile?.firstName) {
                     await model.dataErased()
                 }
                 .id(ObjectIdentifier(today))
