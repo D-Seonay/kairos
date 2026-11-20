@@ -152,3 +152,12 @@ struct SupplementCatalogTests {
         #expect(advice.map(\.kind) == [.vitaminDWithMeal, .creatineRegularity, .ironAndCoffee])
     }
 }
+
+extension SupplementScheduleTests {
+    @Test func aRunFromAppleHealthIsNotATrainingSession() {
+        let whey = SupplementFixtures.supplement("Whey", timing: .afterWorkout, minutes: nil, days: .trainingDays)
+        let run = SupplementFixtures.session(start: "2026-11-21T07:30", end: "2026-11-21T08:15", kind: .run)
+        let schedule = SupplementFixtures.schedule([whey], sessions: [run])
+        #expect(schedule.isDue(whey, on: TestClock.date("2026-11-21T12:00")) == false, "Samedi n'est pas un jour d'entraînement")
+    }
+}

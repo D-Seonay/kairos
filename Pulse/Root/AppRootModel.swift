@@ -2,6 +2,7 @@ import Foundation
 import LiveSessionFeature
 import Observation
 import OnboardingFeature
+import PlanningFeature
 import PulseDomain
 import PulseServices
 import SupplementsFeature
@@ -24,6 +25,8 @@ final class AppRootModel {
     private(set) var onboarding: OnboardingModel?
     private(set) var today: TodayModel?
     private(set) var train: TrainModel?
+    /// L'onglet Planning : la semaine datée, la série et le mois.
+    private(set) var planning: PlanningModel?
     /// La séance en direct des onglets : le bandeau « Reprendre la séance » et l'écran en plein écran.
     private(set) var liveSession: LiveSessionCoordinator?
     /// La saisie d'une séance passée, à côté de la séance en direct.
@@ -54,15 +57,18 @@ final class AppRootModel {
     }
 
     /// Au retour au premier plan : la séance en cours, puis « Aujourd'hui », puis « Séance », qui relit le score du jour
-    /// qu'« Aujourd'hui » vient d'enregistrer.
+    /// qu'« Aujourd'hui » vient d'enregistrer, puis « Planning ».
     func becameActive() async {
         // L'accès à Apple Santé a pu être accordé dans Réglages pendant que l'app était en arrière-plan.
         dependencies.backgroundDelivery?.restartIfStopped()
         guard destination == .main, let today else { return }
         let train = train
+        let planning = planning
         await refreshLiveSession()
         await today.refresh()
         await train?.refresh()
+        // « Aujourd'hui » vient de lire les courses d'Apple Santé : la semaine et la série en tiennent compte.
+        await planning?.load()
         await supplements?.load()
         await refreshSupplementReminders()
     }
@@ -120,6 +126,7 @@ final class AppRootModel {
             if destination != .main || today == nil {
                 today = TodayModel(environment: dependencies.todayEnvironment())
                 train = TrainModel(environment: dependencies.trainEnvironment())
+                planning = PlanningModel(environment: dependencies.planningEnvironment())
                 let liveSession = LiveSessionCoordinator(environment: dependencies.liveSessionEnvironment())
                 self.liveSession = liveSession
                 pastSession = PastSessionCoordinator(environment: dependencies.pastSessionEnvironment())
@@ -133,6 +140,7 @@ final class AppRootModel {
     private func dropMainModels() {
         today = nil
         train = nil
+        planning = nil
         liveSession = nil
         pastSession = nil
         supplements = nil

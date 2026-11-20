@@ -3,7 +3,7 @@ import HealthKit
 import PulseDomain
 
 /// La lecture Apple Santé vue par le moteur et les fonctionnalités. Aucune valeur lue n'est journalisée.
-extension HealthKitReader: HealthSampleSource {
+extension HealthKitReader: HealthSampleSource, HealthWorkoutSource {
     public func requestAuthorization() async throws {
         try await store.requestAuthorization(toShare: [], read: HealthKitTypes.read)
     }
@@ -88,15 +88,47 @@ extension HealthKitReader: HealthSampleSource {
                 healthKitUUID: sample.uuid.uuidString, sourceBundleID: sample.sourceRevision.source.bundleIdentifier,
                 fetchedAt: sample.endDate)
         }
-        return try Self.changes(of: .sleep, added: added, deleted: result.deletedObjects, newAnchor: result.newAnchor,
+        return try Self.changes(of: HealthSampleKind.sleep, added: added, deleted: result.deletedObjects, newAnchor: result.newAnchor,
                                 isFullRead: anchor == nil)
     }
 
-    private static func changes(of signal: NightSignal, added: [CachedHealthSample], deleted: [HKDeletedObject], newAnchor: HKQueryAnchor,
-                                isFullRead: Bool) throws -> HealthSampleChanges {
+    private static func changes(of signal: NightSignal, added: [CachedHealthSample], deleted: [HKDeletedObject],
+                                newAnchor: HKQueryAnchor, isFullRead: Bool) throws -> HealthSampleChanges {
+        try changes(of: signal.kind, added: added, deleted: deleted, newAnchor: newAnchor, isFullRead: isFullRead)
+    }
+
+    private static func changes(of kind: HealthSampleKind, added: [CachedHealthSample], deleted: [HKDeletedObject],
+                                newAnchor: HKQueryAnchor, isFullRead: Bool) throws -> HealthSampleChanges {
         HealthSampleChanges(
-            kind: signal.kind, added: added, deletedHealthKitUUIDs: deleted.map { $0.uuid.uuidString },
+            kind: kind, added: added, deletedHealthKitUUIDs: deleted.map { $0.uuid.uuidString },
             anchor: try NSKeyedArchiver.archivedData(withRootObject: newAnchor, requiringSecureCoding: true), isFullRead: isFullRead)
+    }
+
+    // MARK: - Entraînements
+
+    /// Les courses et les vélos commencés après `start` (spec M6 §3). La distance est celle de la discipline, la fréquence
+    /// cardiaque moyenne celle qu'Apple Santé a associée à l'entraînement : une montre tierce peut n'en fournir aucune.
+    public func workoutChanges(of signal: WorkoutSignal, since anchor: Data?, from start: Date) async throws -> HealthSampleChanges {
+        let queryAnchor = anchor.flatMap(Self.decodedAnchor)
+        let activity: HKWorkoutActivityType = signal == .run ? .running : .cycling
+        let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
+            HKQuery.predicateForWorkouts(with: activity),
+            HKQuery.predicateForSamples(withStart: start, end: nil, options: [])
+        ])
+        let descriptor = HKAnchoredObjectQueryDescriptor(predicates: [.workout(predicate)], anchor: queryAnchor)
+        let result = try await descriptor.result(for: store)
+        let distanceType = HKQuantityType(signal == .run ? .distanceWalkingRunning : .distanceCycling)
+        let added = result.addedSamples.map { workout in
+            CachedHealthSample(
+                kind: signal.kind, start: workout.startDate, end: workout.endDate,
+                distanceMeters: workout.statistics(for: distanceType)?.sumQuantity()?.doubleValue(for: .meter()),
+                averageHeartRate: workout.statistics(for: HKQuantityType(.heartRate))?.averageQuantity()?
+                    .doubleValue(for: Self.beatsPerMinute),
+                durationMinutes: workout.duration / 60, healthKitUUID: workout.uuid.uuidString,
+                sourceBundleID: workout.sourceRevision.source.bundleIdentifier, fetchedAt: workout.endDate)
+        }
+        return try Self.changes(of: signal.kind, added: added, deleted: result.deletedObjects, newAnchor: result.newAnchor,
+                                isFullRead: queryAnchor == nil)
     }
 
     /// Une ancre illisible vaut une ancre absente : la lecture repart de zéro.

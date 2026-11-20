@@ -1,6 +1,7 @@
 import Foundation
 import LiveSessionFeature
 import OnboardingFeature
+import PlanningFeature
 import PulseContent
 import PulseDomain
 import PulseHealth
@@ -42,6 +43,8 @@ struct AppDependencies: Sendable {
     let userExercises: any UserExerciseRepository
     let workouts: any WorkoutRepository
     let scheduledDays: any ScheduledDayRepository
+    /// Le seul chemin vers la semaine datée : l'onglet Planning, ses déplacements, la série et le mois.
+    let planning: PlanningService
     let recovery: any RecoveryRepository
     /// Le seul service du score du jour : l'onboarding et l'accueil le partagent, ses écritures passent par une même file.
     let scores: DailyScoreService
@@ -217,13 +220,12 @@ struct AppDependencies: Sendable {
         let scores = DailyScoreService(recovery: recovery, calendar: calendar)
         let healthCache = SwiftDataHealthSampleCache(modelContainer: container)
         let activity = UserDefaultsDayActivityLog(suiteName: wiring.defaultsSuite)
-        let refresher = DayRefresher(
-            profiles: profiles, programs: programs, recovery: recovery,
-            nightHistory: NightHistory(source: wiring.healthSource, cache: healthCache, calendar: calendar), scores: scores,
-            widgets: wiring.widgets, notifications: wiring.morningScore, activity: activity,
-            calendar: calendar, now: wiring.now)
-        let userExercises = SwiftDataUserExerciseRepository(modelContainer: container)
         let workouts = SwiftDataWorkoutRepository(modelContainer: container)
+        let scheduledDays = SwiftDataScheduledDayRepository(modelContainer: container)
+        let refresher = makeRefresher(wiring, stores: RefresherStores(
+            profiles: profiles, programs: programs, recovery: recovery, workouts: workouts, scheduledDays: scheduledDays,
+            healthCache: healthCache, activity: activity), scores: scores)
+        let userExercises = SwiftDataUserExerciseRepository(modelContainer: container)
         let personalRecords = SwiftDataPersonalRecordRepository(modelContainer: container)
         let records = RecordsService(workouts: workouts, records: personalRecords, userExercises: userExercises,
                                      library: content, now: wiring.now)
@@ -245,8 +247,9 @@ struct AppDependencies: Sendable {
             now: wiring.now, launch: wiring.launch,
             calendar: calendar, content: content, container: container, storeMode: mode, storeError: error,
             profiles: profiles, programs: programs, userExercises: userExercises, workouts: workouts,
-            scheduledDays: SwiftDataScheduledDayRepository(modelContainer: container),
-            recovery: recovery, scores: scores,
+            scheduledDays: scheduledDays, planning: PlanningService(
+                profiles: profiles, programs: programs, workouts: workouts, scheduledDays: scheduledDays, calendar: calendar,
+                now: wiring.now), recovery: recovery, scores: scores,
             supplements: supplements, supplementService: supplementService,
             bodyMeasurements: SwiftDataBodyMeasurementRepository(modelContainer: container),
             personalRecords: personalRecords, exerciseSettings: exerciseSettings, records: records, hevyMappings: hevyMappings,
@@ -309,52 +312,32 @@ struct AppDependencies: Sendable {
     }
 }
 
-// MARK: - Environnements des fonctionnalités
+// MARK: - Passage du jour
 
 extension AppDependencies {
-    /// Les nuits lues dans la source Apple Santé, mises en cache dans le magasin.
-    var nightHistory: NightHistory {
-        NightHistory(source: healthSource, cache: healthCache, calendar: calendar)
+    /// Les dépôts que lit le passage du jour.
+    private struct RefresherStores {
+        var profiles: any ProfileRepository
+        var programs: any ProgramRepository
+        var recovery: any RecoveryRepository
+        var workouts: any WorkoutRepository
+        var scheduledDays: any ScheduledDayRepository
+        var healthCache: any HealthSampleCache
+        var activity: any DayActivityLog
     }
 
-    func onboardingEnvironment() -> OnboardingEnvironment {
-        OnboardingEnvironment(profiles: profiles, programs: programs, health: healthSource, nightHistory: nightHistory,
-                              scores: scores, notifications: notifications, library: content, stepStore: onboardingSteps,
-                              calendar: calendar, now: now)
-    }
-
-    func todayEnvironment() -> TodayEnvironment {
-        TodayEnvironment(refresher: refresher, workouts: workouts, userExercises: userExercises, exerciseSettings: exerciseSettings,
-                         activeSession: liveSession, library: content, calendar: calendar, now: now)
-    }
-
-    func trainEnvironment() -> TrainEnvironment {
-        TrainEnvironment(profiles: profiles, programs: programs, recovery: recovery, workouts: workouts, userExercises: userExercises,
-                         exerciseSettings: exerciseSettings, personalRecords: personalRecords, records: records,
-                         importer: hevyImporter, library: content, activeSession: liveSession, calendar: calendar, now: now)
-    }
-
-    /// L'écran en direct passe par le même service que l'accueil et l'onglet Séance ; il demande l'autorisation des notifications
-    /// par l'autorisateur de l'app (une doublure accordée dans les modes des tests d'interface, refusée dans les tests).
-    func liveSessionEnvironment() -> LiveSessionEnvironment {
-        LiveSessionEnvironment(service: liveSession, train: trainEnvironment(), notifications: liveSessionNotifications,
-                               supplements: supplementsEnvironment(), calendar: calendar, now: now)
-    }
-
-    /// Les compléments demandent l'autorisation des notifications comme l'écran en direct : par l'autorisateur de l'app (une
-    /// doublure dans les modes des tests d'interface et dans les tests).
-    func supplementsEnvironment() -> SupplementsEnvironment {
-        SupplementsEnvironment(service: supplementService, notifications: liveSessionNotifications, calendar: calendar, now: now)
-    }
-
-    /// La saisie d'une séance passée (spec M4 §19.4) : un service à part, en mémoire, sans notification ni Live Activity, pour
-    /// ne jamais toucher à la séance en direct. Un appel, un service : le coordinateur garde le sien.
-    func pastSessionEnvironment() -> LiveSessionEnvironment {
-        let service = ActiveSessionService.pastSessions(
-            workouts: workouts, profiles: profiles, settings: exerciseSettings, userExercises: userExercises, records: records,
-            library: content, calendar: calendar, now: now, health: liveSession.health)
-        return LiveSessionEnvironment(service: service, train: trainEnvironment(), notifications: liveSessionNotifications,
-                                      calendar: calendar, now: now)
+    /// Le passage du jour : les nuits, puis les courses et les vélos quand la source Apple Santé sait les lire (spec M6 §3).
+    private static func makeRefresher(_ wiring: Wiring, stores: RefresherStores, scores: DailyScoreService) -> DayRefresher {
+        let calendar = wiring.calendar
+        let workoutHistory = (wiring.healthSource as? any HealthWorkoutSource).map { source in
+            WorkoutHistory(source: source, cache: stores.healthCache, workouts: stores.workouts, profiles: stores.profiles,
+                           calendar: calendar)
+        }
+        return DayRefresher(
+            profiles: stores.profiles, programs: stores.programs, recovery: stores.recovery,
+            nightHistory: NightHistory(source: wiring.healthSource, cache: stores.healthCache, calendar: calendar), scores: scores,
+            widgets: wiring.widgets, notifications: wiring.morningScore, activity: stores.activity,
+            scheduledDays: stores.scheduledDays, workoutHistory: workoutHistory, calendar: calendar, now: wiring.now)
     }
 }
 

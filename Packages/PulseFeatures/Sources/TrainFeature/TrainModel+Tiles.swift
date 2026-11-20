@@ -10,7 +10,7 @@ extension TrainModel {
 
     /// La tuile Musculation : « Push · ajustée · ~ 55 min », « Repos · prochaine : Pull, mardi », « Course aujourd'hui »,
     /// « Aucun programme actif ».
-    var strengthSubtitle: String {
+    public var strengthSubtitle: String {
         guard let today else { return String(localized: "Séance du jour", bundle: .module) }
         switch today.plannedDay {
         case .noProgram:

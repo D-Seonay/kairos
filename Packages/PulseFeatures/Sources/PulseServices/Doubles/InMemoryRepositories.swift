@@ -181,3 +181,26 @@ public actor InMemorySupplementRepository: SupplementRepository {
         storedIntakes[intakeID] = nil
     }
 }
+
+/// La semaine datée en mémoire : `days(from:to:)` renvoie les lignes dont la date est dans `[from, to)`, par date puis création.
+public actor InMemoryScheduledDayRepository: ScheduledDayRepository {
+    private var stored: [UUID: ScheduledDay] = [:]
+
+    public init(_ days: [ScheduledDay] = []) {
+        for day in days { stored[day.id] = day }
+    }
+
+    public func days(from: Date, to: Date) async throws -> [ScheduledDay] {
+        stored.values
+            .filter { $0.date >= from && $0.date < to }
+            .sorted { lhs, rhs in lhs.date != rhs.date ? lhs.date < rhs.date : lhs.createdAt < rhs.createdAt }
+    }
+
+    public func save(_ day: ScheduledDay) async throws {
+        stored[day.id] = day
+    }
+
+    public func delete(id: UUID) async throws {
+        stored[id] = nil
+    }
+}

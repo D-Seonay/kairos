@@ -91,6 +91,8 @@ struct RefresherFixture {
     let widgets = StubWidgetPublisher()
     let notifications: StubNotificationScheduler
     let activity = InMemoryDayActivityLog()
+    let scheduled = InMemoryScheduledDayRepository()
+    let workouts = InMemoryWorkoutRepository()
     let clock: MutableClock
     let refresher: DayRefresher
 
@@ -101,7 +103,8 @@ struct RefresherFixture {
         let calendar = TestClock.calendar
         let clock = MutableClock(start)
         let recovery = InMemoryRecoveryRepository(calendar: calendar)
-        let source = SwitchableHealthSource(ScenarioHealthSource(scenario: scenario, now: clock.now, calendar: calendar))
+        let scenarioSource = ScenarioHealthSource(scenario: scenario, now: clock.now, calendar: calendar)
+        let source = SwitchableHealthSource(scenarioSource)
         let notifications = StubNotificationScheduler()
         let scheduler: any NotificationScheduling = gate.map { HoldingNotificationScheduler(inner: notifications, gate: $0) }
             ?? notifications
@@ -117,7 +120,9 @@ struct RefresherFixture {
             profiles: profiles, programs: programs, recovery: recovery,
             nightHistory: NightHistory(source: source, cache: InMemoryHealthSampleCache(), calendar: calendar),
             scores: DailyScoreService(recovery: recovery, calendar: calendar),
-            widgets: publisher, notifications: scheduler, activity: activity,
+            widgets: publisher, notifications: scheduler, activity: activity, scheduledDays: scheduled,
+            workoutHistory: WorkoutHistory(source: scenarioSource, cache: InMemoryHealthSampleCache(), workouts: workouts,
+                                           profiles: profiles, calendar: calendar),
             calendar: calendar, now: { clock.now })
     }
 

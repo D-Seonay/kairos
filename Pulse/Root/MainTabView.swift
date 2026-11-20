@@ -1,4 +1,5 @@
 import LiveSessionFeature
+import PlanningFeature
 import PulseDesignSystem
 import PulseServices
 import SupplementsFeature
@@ -6,7 +7,7 @@ import SwiftUI
 import TodayFeature
 import TrainFeature
 
-/// Les cinq onglets de l'app. « Aujourd'hui », « Séance » et « Profil » ont du contenu en M4a. La séance en direct s'ouvre
+/// Les cinq onglets de l'app. « Stats » arrive en M7. La séance en direct s'ouvre
 /// en plein écran par-dessus ; une séance en cours qui n'est pas à l'écran garde le bandeau « Reprendre la séance » en haut.
 struct MainTabView: View {
     enum Item: Hashable {
@@ -22,6 +23,7 @@ struct MainTabView: View {
     @Bindable var router: AppRouter
     let today: TodayModel
     let train: TrainModel
+    let planning: PlanningModel
     @Bindable var liveSession: LiveSessionCoordinator
     /// La saisie d'une séance passée, ouverte depuis l'onglet Séance.
     @Bindable var pastSession: PastSessionCoordinator
@@ -63,7 +65,7 @@ struct MainTabView: View {
                           onOpenProfile: { router.selectedTab = .profile }, onStartSession: start, onResumeSession: resume)
             }
             Tab(String(localized: "Planning"), systemImage: "calendar", value: Item.planning) {
-                comingSoon(String(localized: "Planning"), milestone: "M6")
+                PlanningView(model: planning, train: train, onStartSession: start, onResumeSession: resume)
             }
             Tab(String(localized: "Séance"), systemImage: "dumbbell", value: Item.session) {
                 TrainView(model: train, onOpenToday: { router.selectedTab = .today }, onStartSession: start,
@@ -106,6 +108,7 @@ struct MainTabView: View {
         Task {
             await today.refresh()
             await train.refresh()
+            await planning.load()
             // Une séance finie place le rappel « après la séance » et peut changer les jours d'entraînement.
             await supplements.load()
             await dependencies.supplementService.rescheduleReminders()

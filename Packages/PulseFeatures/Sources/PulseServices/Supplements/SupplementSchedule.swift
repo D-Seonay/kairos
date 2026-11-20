@@ -169,10 +169,12 @@ public struct SupplementSchedule: Sendable {
         return Int((Double(median) / 15).rounded()) * 15
     }
 
-    /// Les séances terminées ou en cours commencées ce jour-là.
+    /// Les séances de musculation terminées ou en cours commencées ce jour-là. Une course lue d'Apple Santé (spec M6 §3) n'est
+    /// pas une séance Pulse : elle ne rend pas un jour « d'entraînement » et ne déplace pas les rappels autour de la séance.
     private func trainingSessions(on day: Date) -> [WorkoutSession] {
         sessions.filter {
-            ($0.status == .completed || $0.status == .inProgress) && calendar.isDate($0.startedAt, inSameDayAs: day)
+            $0.kind == .strength && ($0.status == .completed || $0.status == .inProgress)
+                && calendar.isDate($0.startedAt, inSameDayAs: day)
         }
     }
 

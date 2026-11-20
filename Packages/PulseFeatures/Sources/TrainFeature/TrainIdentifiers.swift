@@ -1,6 +1,8 @@
 /// Les identifiants d'accessibilité des éléments que les tests d'interface lisent.
 public enum TrainIdentifiers {
     public static let strengthTile = "train.tile.strength"
+    public static let sessionEdit = "train.session.edit"
+    public static let sessionCorrectionSave = "train.session.correction.save"
     public static let runTile = "train.tile.run"
     public static let routinePrefix = "train.routine."
     public static let routineLaunchPrefix = "train.routine.launch."

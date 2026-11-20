@@ -1,0 +1,93 @@
+import Foundation
+import PlanningFeature
+import PulseDomain
+import PulseServices
+import Testing
+
+@MainActor
+struct PlanningModelTests {
+    @Test func weekTextsFollowTheDatedWeek() async throws {
+        let fixture = PlanningFixture()
+        try await fixture.activate()
+        try await fixture.log(day: 16, tonnage: 11_240)
+        try await fixture.log(day: 21, hour: 9, kind: .run, meters: 8_200, source: .appleHealth)
+        let model = PlanningModel(environment: fixture.environment)
+        await model.load()
+
+        #expect(model.weekTitle == "Semaine du 16 novembre")
+        #expect(model.days.map { model.title(of: $0) } == ["Push", "Pull", "Legs", "Endurance", "Push", "Course", "Repos obligatoire"])
+        #expect(model.detail(of: model.days[0]) == "Validée · 11\u{202F}240 kg")
+        #expect(model.detail(of: model.days[1]) == "Manquée")
+        #expect(model.detail(of: model.days[2]) == "Prévue")
+        #expect(model.detail(of: model.days[3]) == "Sortie facile · 45 min")
+        #expect(model.detail(of: model.days[5]) == "En plus · 8,2 km")
+        #expect(model.detail(of: model.days[6]) == "Choisi à l'inscription")
+        #expect(model.today?.routine?.name == "Legs")
+        #expect(model.weekdayText(model.days[0]) == "lun." && model.dayNumber(model.days[0]) == "16")
+    }
+
+    @Test func destinationsOpenTheRightDetail() async throws {
+        let fixture = PlanningFixture()
+        try await fixture.activate()
+        let strength = try await fixture.log(day: 16)
+        let run = try await fixture.log(day: 17, hour: 7, kind: .run, meters: 5_000, source: .appleHealth)
+        let model = PlanningModel(environment: fixture.environment)
+        await model.load()
+        #expect(model.destination(for: model.days[0]) == .session(strength.id))
+        #expect(model.destination(for: model.days[1]) == .activity(run.id))
+        #expect(model.destination(for: model.days[2]) == nil)
+    }
+
+    @Test func movingSwapsDaysAndTellsWhy() async throws {
+        let fixture = PlanningFixture()
+        try await fixture.activate()
+        let model = PlanningModel(environment: fixture.environment)
+        await model.load()
+
+        let legs = model.days[2]
+        #expect(model.targets(for: legs).map { model.dayNumber($0) } == ["19", "20", "21", "22"])
+        #expect(model.targets(for: model.days[1]).isEmpty, "Un jour passé ne bouge pas")
+        await model.swap(legs, with: model.days[5])
+
+        #expect(model.days[5].routine?.name == "Legs")
+        #expect(model.detail(of: model.days[5]) == "Déplacée de mercredi")
+        #expect(model.detail(of: model.days[2]) == "Legs déplacée à samedi")
+        #expect(model.overview?.hasUserMoves == true && model.moving == nil)
+
+        await model.restoreWeek()
+        #expect(model.days[2].routine?.name == "Legs" && model.overview?.hasUserMoves == false)
+    }
+
+    @Test func monthBoundsGoFromTheFirstActivityToNextMonth() async throws {
+        let fixture = PlanningFixture()
+        try await fixture.activate()
+        let model = PlanningModel(environment: fixture.environment)
+        await model.load()
+        let month = model.monthModel()
+        await month.load()
+        #expect(month.title == "novembre 2026" && month.canGoBack == false && month.canGoForward)
+        await month.show(offset: 1)
+        #expect(month.title == "décembre 2026" && !month.canGoForward)
+        await month.show(offset: 1)
+        #expect(month.title == "décembre 2026")
+        #expect(month.currentWeekText == "0 sur 5 cette semaine")
+    }
+
+    @Test func activityDetailShowsMetricsAndSavesRPE() async throws {
+        let fixture = PlanningFixture()
+        try await fixture.activate()
+        let run = try await fixture.log(day: 17, hour: 7, kind: .run, meters: 8_200, source: .appleHealth)
+        let model = PlanningModel(environment: fixture.environment).activityDetailModel(sessionID: run.id)
+        await model.load()
+        #expect(model.metrics.map(\.value) == ["8,2 km", "45 min", "5:29 /km", "150 bpm", "7"])
+        #expect(model.dateText == "mardi 17 novembre à 07:00")
+        #expect(!model.hasChanges)
+
+        model.rpe = 8
+        model.note = " Vent de face "
+        #expect(model.hasChanges)
+        await model.save()
+        let saved = try #require(try await fixture.workouts.session(id: run.id))
+        #expect(saved.overallRPE == 8 && saved.note == "Vent de face" && !model.hasChanges)
+    }
+}
