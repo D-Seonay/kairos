@@ -51,7 +51,7 @@ private struct HevyImportPreviewHost: View {
             case .failed: await model.read(Data("a,b\n1,2\n".utf8))
             }
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(.light)
     }
 }
 

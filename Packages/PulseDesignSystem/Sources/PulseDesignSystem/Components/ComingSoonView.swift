@@ -11,13 +11,19 @@ public struct ComingSoonView: View {
     }
 
     public var body: some View {
-        VStack(spacing: 8) {
-            Image(systemName: "hourglass")
-                .font(.largeTitle)
-                .foregroundStyle(PulsePalette.muted)
-                .accessibilityHidden(true)
+        VStack(spacing: 10) {
+            // Une sphère en trame, éclairée en haut à gauche.
+            HalftoneField(spacing: 5.5, color: PulsePalette.text) { point in
+                let distance = hypot(Double(point.x) - 0.5, Double(point.y) - 0.5)
+                guard distance < 0.5 else { return 0 }
+                return 0.08 + 0.92 * Halftone.glow(at: point, center: CGPoint(x: 0.36, y: 0.32), spread: 0.3)
+            }
+            .frame(width: 104, height: 104)
+            .padding(.bottom, 6)
+            Text(milestone)
+                .pulseEyebrow()
             Text(title)
-                .font(.system(.title2, weight: .heavy))
+                .font(PulseFont.title(.title2))
                 .foregroundStyle(PulsePalette.text)
             Text(String(localized: "Bientôt disponible, prévu au jalon \(milestone).", bundle: .module))
                 .font(.subheadline)

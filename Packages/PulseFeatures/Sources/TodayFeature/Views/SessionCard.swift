@@ -10,8 +10,6 @@ struct SessionCard: View {
     let model: TodayModel
     /// Ouvre l'écran « Pourquoi ».
     let onWhy: () -> Void
-    /// Lance la séance affichée.
-    let onStart: () -> Void
     /// Rouvre la séance en cours.
     let onResume: () -> Void
 
@@ -22,8 +20,7 @@ struct SessionCard: View {
                 case .strength(let card):
                     StrengthSessionCard(
                         card: card, onWhy: onWhy,
-                        onOrigin: { choose(original: card.badge == .adjusted) },
-                        onStart: onStart)
+                        onOrigin: { choose(original: card.badge == .adjusted) })
                 case .mobilityOrRest(let dayName): mobilityOrRest(dayName)
                 case .run(let card): run(card)
                 case .rest(let next, let suggestsMobility): rest(next, suggestsMobility: suggestsMobility)

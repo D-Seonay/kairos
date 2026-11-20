@@ -34,7 +34,7 @@ private struct StrengthTile: View {
             VStack(alignment: .leading, spacing: 10) {
                 Button(action: onOpenToday) {
                     VStack(alignment: .leading, spacing: 10) {
-                        TileIcon(systemName: "dumbbell.fill", foreground: PulsePalette.opal, background: PulsePalette.opalInk)
+                        IconChip(systemName: "dumbbell.fill", tone: .inverted)
                         Text(String(localized: "Musculation", bundle: .module))
                             .font(.headline)
                         Text(subtitle)
@@ -45,7 +45,7 @@ private struct StrengthTile: View {
                     .frame(maxWidth: .infinity, minHeight: 110, alignment: .topLeading)
                     .contentShape(Rectangle())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PressableButtonStyle())
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(String(localized: "Musculation : \(subtitle)", bundle: .module))
                 .accessibilityHint(String(localized: "Ouvre l'accueil, où démarrer la séance du jour", bundle: .module))
@@ -71,7 +71,7 @@ private struct RunTile: View {
     var body: some View {
         ObsidianCard {
             VStack(alignment: .leading, spacing: 10) {
-                TileIcon(systemName: "figure.run", foreground: PulsePalette.run, background: PulsePalette.runSoft)
+                IconChip(systemName: "figure.run")
                 Text(String(localized: "Course", bundle: .module))
                     .font(.headline)
                 Text(subtitle)
@@ -95,22 +95,6 @@ private struct RunTile: View {
         case 1: return String(localized: "\(title) · prévue demain", bundle: .module)
         default: return String(localized: "\(title) · prévue \(nextRun.weekday.trainName)", bundle: .module)
         }
-    }
-}
-
-/// L'icône d'une tuile ou d'une ligne, dans un carré arrondi.
-struct TileIcon: View {
-    let systemName: String
-    let foreground: Color
-    let background: Color
-
-    var body: some View {
-        Image(systemName: systemName)
-            .font(.body.weight(.semibold))
-            .foregroundStyle(foreground)
-            .frame(width: 38, height: 38)
-            .background(background, in: RoundedRectangle(cornerRadius: PulseMetrics.radiusTiny, style: .continuous))
-            .accessibilityHidden(true)
     }
 }
 

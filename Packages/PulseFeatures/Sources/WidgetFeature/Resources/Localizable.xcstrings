@@ -11,6 +11,19 @@
         }
       }
     },
+    "%lld" : {
+
+    },
+    "%lld · %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld · %@"
+          }
+        }
+      }
+    },
     "%lld sem. · %lld/%lld" : {
       "localizations" : {
         "fr" : {
@@ -31,16 +44,6 @@
         }
       }
     },
-    "%lld · %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld · %@"
-          }
-        }
-      }
-    },
     "+30 s" : {
       "localizations" : {
         "fr" : {
@@ -51,12 +54,38 @@
         }
       }
     },
+    "−30 s" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "−30 s"
+          }
+        }
+      }
+    },
+    "0,8" : {
+
+    },
+    "1,3" : {
+
+    },
     "1,12 · zone optimale" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "1,12 · zone optimale"
+          }
+        }
+      }
+    },
+    "3 sur 5" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 sur 5"
           }
         }
       }
@@ -97,16 +126,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "14 séries · allégée"
-          }
-        }
-      }
-    },
-    "3 sur 5" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "3 sur 5"
           }
         }
       }
@@ -251,6 +270,16 @@
         }
       }
     },
+    "estimé" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "estimé"
+          }
+        }
+      }
+    },
     "Jour de repos" : {
       "localizations" : {
         "fr" : {
@@ -321,22 +350,53 @@
         }
       }
     },
-    "RPE max 7,5" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "RPE max 7,5"
-          }
-        }
-      }
-    },
     "Recovery" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Récupération"
+          }
+        }
+      }
+    },
+    "Récupération" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Récupération"
+          }
+        }
+      }
+    },
+    "Récupération : score pas encore prêt" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Récupération : score pas encore prêt"
+          }
+        }
+      }
+    },
+    "Récupération %lld sur 100" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Récupération %lld sur 100"
+          }
+        }
+      }
+    },
+    "Récupération active" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Récupération active"
           }
         }
       }
@@ -361,42 +421,12 @@
         }
       }
     },
-    "Récupération" : {
+    "RPE max 7,5" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Récupération"
-          }
-        }
-      }
-    },
-    "Récupération %lld sur 100" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Récupération %lld sur 100"
-          }
-        }
-      }
-    },
-    "Récupération : score pas encore prêt" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Récupération : score pas encore prêt"
-          }
-        }
-      }
-    },
-    "Récupération active" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Récupération active"
+            "value" : "RPE max 7,5"
           }
         }
       }
@@ -407,26 +437,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Score pas encore prêt"
-          }
-        }
-      }
-    },
-    "Sous-entraînement" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sous-entraînement"
-          }
-        }
-      }
-    },
-    "Surmenage" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Surmenage"
           }
         }
       }
@@ -491,6 +501,16 @@
         }
       }
     },
+    "semaines" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "semaines"
+          }
+        }
+      }
+    },
     "Série" : {
       "localizations" : {
         "fr" : {
@@ -517,6 +537,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Série suivante"
+          }
+        }
+      }
+    },
+    "série suivante : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "série suivante : %@"
+          }
+        }
+      }
+    },
+    "Sous-entraînement" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sous-entraînement"
+          }
+        }
+      }
+    },
+    "Surmenage" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Surmenage"
           }
         }
       }
@@ -607,46 +659,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Zone optimale"
-          }
-        }
-      }
-    },
-    "estimé" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "estimé"
-          }
-        }
-      }
-    },
-    "semaines" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "semaines"
-          }
-        }
-      }
-    },
-    "série suivante : %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "série suivante : %@"
-          }
-        }
-      }
-    },
-    "−30 s" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "−30 s"
           }
         }
       }

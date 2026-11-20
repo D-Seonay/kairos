@@ -41,7 +41,7 @@ public struct StreakWidgetSmallView: View {
     private var streakNumber: some View {
         HStack(alignment: .firstTextBaseline, spacing: 4) {
             Text("\(content.streakWeeks)")
-                .font(.system(size: 44, weight: .black))
+                .font(.system(size: 44, weight: .light).monospacedDigit())
                 .monospacedDigit()
                 .lineLimit(1)
             Text(String(localized: "semaines", bundle: .module))

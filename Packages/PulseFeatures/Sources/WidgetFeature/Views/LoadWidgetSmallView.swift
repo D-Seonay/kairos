@@ -41,7 +41,7 @@ public struct LoadWidgetSmallView: View {
 
     private var bigRatio: some View {
         Text(content.ratioText)
-            .font(.system(size: 38, weight: .heavy))
+            .font(.system(size: 38, weight: .light).monospacedDigit())
             .foregroundStyle(PulsePalette.text)
             .monospacedDigit()
             .lineLimit(1)

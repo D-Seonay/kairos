@@ -124,10 +124,10 @@ private struct TechniquePane: View {
             VStack(alignment: .leading, spacing: 12) {
                 MuscleMapView(levels: model.muscleLevels, label: muscleLabel(primary: primary, secondary: secondary), height: 280)
                     .frame(maxWidth: .infinity)
-                legend(color: Color(MuscleIntensity.color(level: 4, accent: accent)),
+                legend(color: MuscleIntensity.color(level: 4, accent: accent),
                        text: String(localized: "Principaux : \(primary)", bundle: .module))
                 if !info.secondaryMuscles.isEmpty {
-                    legend(color: Color(MuscleIntensity.color(level: 2, accent: accent)),
+                    legend(color: MuscleIntensity.color(level: 2, accent: accent),
                            text: String(localized: "Secondaires : \(secondary)", bundle: .module))
                 }
             }
@@ -185,7 +185,7 @@ private struct TechniquePane: View {
     private func cues(_ cues: [String]) -> some View {
         if !cues.isEmpty {
             VStack(alignment: .leading, spacing: 10) {
-                SheetSectionTitle(text: String(localized: "Consignes qui comptent", bundle: .module))
+                PulseSectionHeader(String(localized: "Consignes qui comptent", bundle: .module))
                 ObsidianCard {
                     VStack(alignment: .leading, spacing: 12) {
                         ForEach(cues.indices, id: \.self) { index in
@@ -214,7 +214,7 @@ private struct TechniquePane: View {
     private func mistakes(_ mistakes: [String]) -> some View {
         if !mistakes.isEmpty {
             VStack(alignment: .leading, spacing: 10) {
-                SheetSectionTitle(text: String(localized: "À éviter", bundle: .module))
+                PulseSectionHeader(String(localized: "À éviter", bundle: .module))
                 ObsidianCard {
                     VStack(alignment: .leading, spacing: 8) {
                         ForEach(mistakes.indices, id: \.self) { index in
@@ -302,17 +302,5 @@ private struct AlternativesPane: View {
 
     private func subtitle(_ alternative: ExerciseInfo) -> String {
         "\(alternative.pattern.localizedName) · \(alternative.equipment.localizedName.lowercased())"
-    }
-}
-
-/// Le titre d'une section de la fiche.
-struct SheetSectionTitle: View {
-    let text: String
-
-    var body: some View {
-        Text(text)
-            .font(.title3.weight(.bold))
-            .foregroundStyle(PulsePalette.text)
-            .accessibilityAddTraits(.isHeader)
     }
 }

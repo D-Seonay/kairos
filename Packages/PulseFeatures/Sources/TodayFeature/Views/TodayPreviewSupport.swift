@@ -125,7 +125,7 @@ struct TodayPreviewHost: View {
         .task {
             model = await TodayPreviewSupport.model(scenario: scenario, now: now, templateID: templateID, seeded: seeded, load: load)
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(.light)
     }
 }
 

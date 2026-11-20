@@ -18,7 +18,8 @@ struct AppRootView: View {
 
     var body: some View {
         content
-            .preferredColorScheme(.dark)
+            // L'app est sur papier ; seule la séance en direct et son récap restent noirs (spec M4 §14.2).
+            .preferredColorScheme(.light)
             .tint(Color(PulsePalette.accent(for: model.theme).accent))
             .environment(\.pulseTheme, model.theme)
             .task { await model.load() }

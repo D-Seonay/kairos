@@ -36,7 +36,7 @@ public struct MuscleMapView: View {
         .frame(height: height)
     }
 
-    private func draw(_ side: MuscleMapSide, accent: PulseRGBA, in context: inout GraphicsContext, size: CGSize) {
+    private func draw(_ side: MuscleMapSide, accent: PulseTone, in context: inout GraphicsContext, size: CGSize) {
         let box = artwork.viewBox(side)
         guard box.width > 0, box.height > 0 else { return }
         let scale = min(size.width / box.width, size.height / box.height)
@@ -52,10 +52,10 @@ public struct MuscleMapView: View {
 
     /// Le corps en `muscleBody`, une région allumée à son niveau, une région de base éteinte en `muscleOff`,
     /// une région en surimpression éteinte : rien.
-    private func fill(for region: MuscleMapRegion?, accent: PulseRGBA) -> Color? {
+    private func fill(for region: MuscleMapRegion?, accent: PulseTone) -> Color? {
         guard let region else { return PulsePalette.muscleBody }
         let level = levels[region] ?? 0
-        if level > 0 { return Color(MuscleIntensity.color(level: level, accent: accent)) }
+        if level > 0 { return MuscleIntensity.color(level: level, accent: accent) }
         return region.isOverlay ? nil : PulsePalette.muscleOff
     }
 }

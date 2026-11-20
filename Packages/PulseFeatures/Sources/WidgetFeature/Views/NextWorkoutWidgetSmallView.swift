@@ -40,7 +40,7 @@ public struct NextWorkoutWidgetSmallView: View {
 
     private var sessionTitle: some View {
         Text(content.title)
-            .font(.system(size: 19, weight: .heavy))
+            .font(.system(size: 19, weight: .semibold))
             .foregroundStyle(PulsePalette.text)
             .lineLimit(2)
             .minimumScaleFactor(0.85)

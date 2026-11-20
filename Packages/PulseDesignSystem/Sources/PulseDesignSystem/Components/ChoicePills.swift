@@ -1,6 +1,7 @@
+import PulseDomain
 import SwiftUI
 
-/// Pilules à choix unique (`.chip` de la maquette) : la sélectionnée est pleine, en blanc.
+/// Pilules à choix unique (`.chip` de la maquette) : la sélectionnée se remplit de l'accent du thème.
 public struct ChoicePills<Value: Hashable>: View {
     private let options: [(value: Value, label: String)]
     @Binding private var selection: Value?
@@ -55,15 +56,23 @@ struct PillButton: View {
     let label: String
     let isSelected: Bool
     let action: () -> Void
+    @Environment(\.pulseTheme) private var theme
 
     var body: some View {
+        let palette = PulsePalette.accent(for: theme)
         Button(action: action) {
             Text(label)
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(isSelected ? PulsePalette.background : PulsePalette.text2)
-                .padding(.horizontal, 14)
-                .frame(minHeight: 40)
-                .background(isSelected ? PulsePalette.text : PulsePalette.surface2, in: Capsule())
+                .font(.footnote.weight(isSelected ? .heavy : .semibold))
+                .foregroundStyle(isSelected ? Color(palette.accentInk) : PulsePalette.text2)
+                .padding(.horizontal, 16)
+                .frame(minHeight: 42)
+                .background {
+                    if isSelected {
+                        Capsule().fill(Color(palette.accent))
+                    } else {
+                        Capsule().strokeBorder(PulsePalette.ink.opacity(0.18), lineWidth: 1)
+                    }
+                }
                 .contentShape(Capsule())
         }
         .buttonStyle(.plain)

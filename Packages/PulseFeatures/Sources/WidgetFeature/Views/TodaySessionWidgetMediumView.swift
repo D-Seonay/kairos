@@ -44,7 +44,7 @@ public struct TodaySessionWidgetMediumView: View {
         VStack(alignment: .leading, spacing: 3) {
             headerRow
             Text(content.title)
-                .font(.system(size: 16, weight: .heavy))
+                .font(.system(size: 16, weight: .semibold))
                 .foregroundStyle(PulsePalette.text)
                 .lineLimit(1)
             Text(content.metaText)

@@ -85,7 +85,7 @@ struct HistoryPreviewHost: View {
             }
         }
         .task { environment = await HistoryPreviewSupport.environment(withSessions: withSessions) }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(.light)
     }
 }
 
@@ -105,7 +105,7 @@ struct SessionDetailPreviewHost: View {
             let environment = await HistoryPreviewSupport.environment()
             model = SessionDetailModel(environment: environment, sessionID: HistoryPreviewSupport.pushID ?? UUID())
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(.light)
     }
 }
 

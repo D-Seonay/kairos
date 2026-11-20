@@ -10,7 +10,7 @@ struct OnboardingTitle: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
-                .font(.system(.title, weight: .heavy))
+                .font(PulseFont.title(.title))
                 .foregroundStyle(PulsePalette.text)
                 .accessibilityAddTraits(.isHeader)
             if let subtitle {
@@ -78,8 +78,7 @@ struct OnboardingField<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(title)
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(PulsePalette.muted)
+                .pulseEyebrow()
             content
         }
         .frame(maxWidth: .infinity, alignment: .leading)

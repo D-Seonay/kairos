@@ -4,8 +4,10 @@ import PulseServices
 import SwiftUI
 
 /// L'onglet « Aujourd'hui » : en-tête, carte de récupération (ou check-in), séance du jour, charge d'entraînement et tendances,
-/// avec sa feuille de mobilité et l'écran « Pourquoi », poussé dans sa pile de navigation. « Démarrer » rend la séance à lancer à
-/// l'app, qui ouvre l'écran en direct ; « Reprendre la séance » lui demande de rouvrir celle en cours.
+/// avec sa feuille de mobilité et l'écran « Pourquoi », poussé dans sa pile de navigation. Un jour de musculation, « Démarrer »
+/// est ancré en bas de l'écran : l'action du jour reste sous le pouce, quelle que soit la position du défilement.
+/// « Démarrer » rend la séance à lancer à l'app, qui ouvre l'écran en direct ; « Reprendre la séance » lui demande de rouvrir
+/// celle en cours.
 public struct TodayView: View {
     private let model: TodayModel
     private let onOpenProfile: () -> Void
@@ -24,7 +26,15 @@ public struct TodayView: View {
         @Bindable var model = model
         NavigationStack {
             content
-                .background(PulsePalette.background)
+                .pulseScreenBackground()
+                .pulseDockedAction(isPresented: startTitle != nil) {
+                    Button(action: startSession) {
+                        Label(startTitle ?? "", systemImage: "play.fill")
+                    }
+                    .buttonStyle(PrimaryButtonStyle())
+                    .accessibilityIdentifier(TodayIdentifiers.sessionStart)
+                }
+                .animation(.snappy, value: startTitle)
                 .hidingNavigationBar()
                 .navigationDestination(isPresented: $model.isShowingWhy) {
                     WhyView(model: model, onStart: startSession, onResume: onResumeSession)
@@ -44,13 +54,20 @@ public struct TodayView: View {
             VStack(spacing: PulseMetrics.spacing) {
                 TodayHeader(model: model, onOpenProfile: onOpenProfile)
                 recoveryOrCheckIn
-                SessionCard(model: model, onWhy: model.showWhy, onStart: startSession, onResume: onResumeSession)
+                SessionCard(model: model, onWhy: model.showWhy, onResume: onResumeSession)
+                PulseSectionHeader(String(localized: "Tendances", bundle: .module))
                 LoadCard(content: model.load)
                 TrendTilesView(tiles: model.trends)
             }
             .padding(PulseMetrics.spacing)
         }
         .refreshable { await model.refresh() }
+    }
+
+    /// Le libellé du bouton ancré, `nil` quand la séance du jour n'est pas une musculation à lancer.
+    private var startTitle: String? {
+        guard case .strength(let card) = model.card else { return nil }
+        return card.startButton
     }
 
     private func startSession() {
@@ -88,14 +105,14 @@ private struct TodayHeader: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top, spacing: 8) {
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(model.dateText)
+                        .pulseEyebrow(PulsePalette.text2)
                     Text(model.greeting)
-                        .font(.title.weight(.heavy))
+                        .font(PulseFont.title(.largeTitle, weight: .semibold))
+                        .tracking(-0.6)
                         .foregroundStyle(PulsePalette.text)
                         .accessibilityAddTraits(.isHeader)
-                    Text(model.dateText)
-                        .font(.subheadline)
-                        .foregroundStyle(PulsePalette.text2)
                 }
                 Spacer(minLength: 8)
                 profileButton
@@ -107,12 +124,9 @@ private struct TodayHeader: View {
 
     private var profileButton: some View {
         Button(action: onOpenProfile) {
-            Image(systemName: "person.crop.circle")
-                .font(.title)
-                .foregroundStyle(PulsePalette.text2)
-                .frame(minWidth: 44, minHeight: 44)
+            IconChip(systemName: "person", size: 44)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PressableButtonStyle())
         .accessibilityLabel(String(localized: "Profil", bundle: .module))
     }
 
@@ -120,14 +134,19 @@ private struct TodayHeader: View {
         Button {
             Task { await model.refresh() }
         } label: {
-            Label(syncText, systemImage: "arrow.triangle.2.circlepath")
-                .font(.system(.caption, weight: .semibold))
-                .foregroundStyle(PulsePalette.text2)
-                .padding(.horizontal, 12)
-                .frame(minHeight: 32)
-                .background(PulsePalette.surface2, in: Capsule())
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(model.lastSyncText == nil ? PulsePalette.muted : PulsePalette.text)
+                    .frame(width: 6, height: 6)
+                Text(syncText)
+                    .pulseEyebrow(PulsePalette.text2)
+            }
+            .padding(.horizontal, 12)
+            .frame(minHeight: 32)
+            .background(PulsePalette.surface.opacity(0.6), in: Capsule())
+            .overlay(Capsule().strokeBorder(PulsePalette.ink.opacity(0.2), lineWidth: 1))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PressableButtonStyle())
         .disabled(model.isLoading)
         .accessibilityHint(String(localized: "Relit tes données Apple Santé", bundle: .module))
     }

@@ -1,9 +1,11 @@
 import PulseDomain
 import SwiftUI
 
-/// La jauge de récupération : un arc filaire rouge → ambre → vert, un repère au score, le score au centre. Pas d'aiguille.
-/// La couleur du texte et de l'arc de fond suit le `foregroundStyle` de l'environnement (encre sur carte opale, blanc sur widget).
-/// `cardColor` détoure le repère : le fond sur lequel la jauge est posée.
+/// La jauge de récupération : la lunette d'un chronomètre. Des graduations sur 240° s'allument jusqu'au score, de plus en plus
+/// claires, comme une traînée de lumière ; elles prennent le gris de la fatigue ou le signal du surmenage. Une aiguille courte
+/// marque le score, le score s'affiche au centre en grands chiffres fins.
+/// La couleur du texte et des graduations éteintes suit le `foregroundStyle` de l'environnement.
+/// `cardColor` détoure l'aiguille : le fond sur lequel la jauge est posée.
 /// `animatesReveal` à `false` pose le repère d'emblée sur le score : WidgetKit rend une image fixe, sans `onAppear` ni animation.
 public struct RecoveryGauge: View {
     public enum Style: Sendable {
@@ -13,29 +15,38 @@ public struct RecoveryGauge: View {
         var lineWidth: CGFloat {
             switch self {
             case .large: 3
-            case .compact: 2.5
+            case .compact: 2.2
             }
         }
 
-        var markerDiameter: CGFloat {
+        /// Le nombre de graduations sur l'arc : une tous les 2,5 points en grand, tous les 5 points en compact.
+        var tickCount: Int {
             switch self {
-            case .large: 14
-            case .compact: 9
+            case .large: 41
+            case .compact: 21
+            }
+        }
+
+        /// La longueur d'une graduation, en part du côté du cadran.
+        var tickLength: CGFloat {
+            switch self {
+            case .large: 0.075
+            case .compact: 0.085
             }
         }
 
         var idealWidth: CGFloat {
             switch self {
-            case .large: 230
+            case .large: 240
             case .compact: 116
             }
         }
 
-        /// Le score (maquette : 64 pt sur 230 pt, 34 pt sur 116 pt) et « sur 100 » (13 pt sur 230 pt), en part de la largeur.
+        /// La taille du score en part du côté du cadran : les chiffres fins sont larges, ils restent un peu plus bas.
         var scoreScale: CGFloat {
             switch self {
-            case .large: 0.28
-            case .compact: 0.29
+            case .large: 0.32
+            case .compact: 0.32
             }
         }
 
@@ -50,6 +61,7 @@ public struct RecoveryGauge: View {
 
     @State private var shownScore: Double
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorScheme) private var colorScheme
 
     public init(
         score: Double?,
@@ -88,40 +100,43 @@ public struct RecoveryGauge: View {
     // MARK: Cadran
 
     private func dial(side: CGFloat) -> some View {
-        ZStack {
-            arc.stroke(.foreground, style: strokeStyle).opacity(0.12)
-            arc.stroke(gradient, style: strokeStyle).opacity(score == nil ? 0.35 : 1)
+        let length = side * style.tickLength
+        let fraction = GaugeGeometry.fraction(for: shownScore)
+        return ZStack {
+            TickRing(from: 0, to: 1, count: style.tickCount, length: length, inset: style.lineWidth / 2)
+                .stroke(.foreground, style: strokeStyle)
+                .opacity(0.16)
             if score != nil {
-                marker(side: side)
+                TickRing(from: 0, to: fraction, count: style.tickCount, length: length, inset: style.lineWidth / 2)
+                    .stroke(trail(to: fraction), style: strokeStyle)
+                    // Une lueur sur le noir ; sur le papier, l'encre n'en a pas besoin.
+                    .shadow(color: toneColor.opacity(colorScheme == .dark ? 0.55 : 0), radius: side * 0.025)
+                Needle(fraction: fraction, length: length * 2.1, inset: style.lineWidth / 2)
+                    .stroke(cardColor.opacity(0.7), style: StrokeStyle(lineWidth: style.lineWidth * 3.2, lineCap: .round))
+                Needle(fraction: fraction, length: length * 2.1, inset: style.lineWidth / 2)
+                    .stroke(.foreground, style: StrokeStyle(lineWidth: style.lineWidth * 1.6, lineCap: .round))
             }
         }
-    }
-
-    /// 240° de cercle à partir de 8 h : on tourne un tracé qui commence à 3 h, ce qui évite le sens de `addArc`.
-    private var arc: some Shape {
-        Circle()
-            .inset(by: style.lineWidth / 2)
-            .trim(from: 0, to: GaugeGeometry.sweepDegrees / 360)
-            .rotation(.degrees(GaugeGeometry.startDegrees))
     }
 
     private var strokeStyle: StrokeStyle {
         StrokeStyle(lineWidth: style.lineWidth, lineCap: .round)
     }
 
-    /// Rouge jusqu'au seuil de 40, ambre jusqu'à 65, vert au-delà, avec un court fondu autour des seuils.
-    private var gradient: AngularGradient {
-        let first = GaugeGeometry.thresholdFractions[0]
-        let second = GaugeGeometry.thresholdFractions[1]
-        let blend = 0.03
+    /// La teinte de la catégorie : blanc en forme, gris en fatigue, signal en surmenage.
+    private var toneColor: Color {
+        category?.tone.color(onOpal: false) ?? PulsePalette.ok
+    }
+
+    /// La traînée : les graduations s'éclairent du début de l'arc jusqu'au score, où elles prennent toute la teinte.
+    private func trail(to fraction: Double) -> AngularGradient {
+        let end = max(fraction, 0.001)
         return AngularGradient(
             stops: [
-                .init(color: PulsePalette.bad, location: 0),
-                .init(color: PulsePalette.bad, location: first - blend),
-                .init(color: PulsePalette.warn, location: first + blend),
-                .init(color: PulsePalette.warn, location: second - blend),
-                .init(color: PulsePalette.ok, location: second + blend),
-                .init(color: PulsePalette.ok, location: 1)
+                .init(color: toneColor.opacity(0.18), location: 0),
+                .init(color: toneColor.opacity(0.55), location: end * 0.6),
+                .init(color: toneColor, location: end),
+                .init(color: toneColor, location: 1)
             ],
             center: .center,
             startAngle: .degrees(GaugeGeometry.startDegrees),
@@ -129,36 +144,26 @@ public struct RecoveryGauge: View {
         )
     }
 
-    /// Le repère part du bas gauche et tourne autour du centre : l'animation suit l'arc au lieu de couper en ligne droite.
-    private func marker(side: CGFloat) -> some View {
-        let rect = CGRect(x: 0, y: 0, width: side, height: side)
-        let origin = GaugeGeometry.point(for: 0, in: rect, lineWidth: style.lineWidth)
-        return Circle()
-            .fill(.foreground)
-            .overlay(Circle().strokeBorder(cardColor, lineWidth: 2.5))
-            .frame(width: style.markerDiameter, height: style.markerDiameter)
-            .position(origin)
-            .frame(width: side, height: side)
-            .rotationEffect(.degrees(GaugeGeometry.sweepDegrees * GaugeGeometry.fraction(for: shownScore)))
-    }
-
     // MARK: Score
 
     private func scoreLabel(side: CGFloat) -> some View {
         VStack(spacing: side * 0.026) {
             Text(verbatim: Self.roundedScore(score).map(String.init) ?? "—")
-                .font(.system(size: side * style.scoreScale, weight: .heavy))
-                .monospacedDigit()
-                .tracking(-side * style.scoreScale * 0.05)
+                .font(PulseFont.score(size: side * style.scoreScale))
+                // Un nouveau score fait rouler les chiffres au lieu de les remplacer d'un coup.
+                .contentTransition(.numericText(value: Double(Self.roundedScore(score) ?? 0)))
+                .animation(reduceMotion ? nil : .snappy, value: Self.roundedScore(score))
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
             if style.showsCaption {
                 Text(String(localized: "sur 100", bundle: .module))
-                    .font(.system(size: max(11, side * 0.057), weight: .semibold))
+                    .font(.system(size: max(10, side * 0.045), weight: .medium, design: .monospaced))
+                    .textCase(.uppercase)
+                    .tracking(1.6)
                     .foregroundStyle(.secondary)
             }
         }
-        .padding(.top, side * 0.18)
+        .padding(.top, side * 0.15)
     }
 
     // MARK: Animation
@@ -168,7 +173,7 @@ public struct RecoveryGauge: View {
         if reduceMotion || !animatesReveal {
             shownScore = target
         } else {
-            withAnimation(.easeOut(duration: 0.9)) { shownScore = target }
+            withAnimation(.spring(response: 1.1, dampingFraction: 0.82)) { shownScore = target }
         }
     }
 
@@ -198,6 +203,61 @@ public struct RecoveryGauge: View {
     }
 }
 
+/// Les graduations de `from` à `to` (parts de l'arc, 0…1), tracées vers le centre depuis le bord du cadran.
+/// Animable : la lunette s'allume graduation par graduation quand `to` change.
+private struct TickRing: Shape {
+    var from: Double
+    var to: Double
+    let count: Int
+    let length: CGFloat
+    let inset: CGFloat
+
+    var animatableData: AnimatablePair<Double, Double> {
+        get { AnimatablePair(from, to) }
+        set { from = newValue.first; to = newValue.second }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        guard count > 1 else { return path }
+        let outer = max(0, min(rect.width, rect.height) / 2 - inset)
+        let inner = max(0, outer - length)
+        let center = CGPoint(x: rect.midX, y: rect.midY)
+        for index in 0..<count {
+            let fraction = Double(index) / Double(count - 1)
+            guard fraction >= from - 1e-6, fraction <= to + 1e-6 else { continue }
+            let radians = GaugeGeometry.angle(for: fraction * 100).radians
+            let direction = CGPoint(x: cos(radians), y: sin(radians))
+            path.move(to: CGPoint(x: center.x + outer * direction.x, y: center.y + outer * direction.y))
+            path.addLine(to: CGPoint(x: center.x + inner * direction.x, y: center.y + inner * direction.y))
+        }
+        return path
+    }
+}
+
+/// L'aiguille : une graduation plus longue, au score. Animable, elle suit l'arc.
+private struct Needle: Shape {
+    var fraction: Double
+    let length: CGFloat
+    let inset: CGFloat
+
+    var animatableData: Double {
+        get { fraction }
+        set { fraction = newValue }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        let outer = max(0, min(rect.width, rect.height) / 2 - inset)
+        let inner = max(0, outer - length)
+        let center = CGPoint(x: rect.midX, y: rect.midY)
+        let radians = GaugeGeometry.angle(for: fraction * 100).radians
+        var path = Path()
+        path.move(to: CGPoint(x: center.x + outer * cos(radians), y: center.y + outer * sin(radians)))
+        path.addLine(to: CGPoint(x: center.x + inner * cos(radians), y: center.y + inner * sin(radians)))
+        return path
+    }
+}
+
 private struct GaugePreviewRow: View {
     let style: RecoveryGauge.Style
     let cardColor: Color
@@ -212,9 +272,9 @@ private struct GaugePreviewRow: View {
     }
 }
 
-#Preview("Large, sur carte opale") {
+#Preview("Large, sur la dalle tramée") {
     ScrollView {
-        OpalCard { GaugePreviewRow(style: .large, cardColor: PulsePalette.opal).frame(maxWidth: .infinity) }
+        OpalCard(heat: 70) { GaugePreviewRow(style: .large, cardColor: PulsePalette.opal).frame(maxWidth: .infinity) }
             .padding()
     }
     .background(PulsePalette.background)

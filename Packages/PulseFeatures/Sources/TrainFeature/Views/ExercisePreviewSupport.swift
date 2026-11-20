@@ -59,7 +59,7 @@ struct ExercisePreviewHost<Content: View>: View {
             }
         }
         .task { environment = await ExercisePreviewSupport.environment(painAreas: painAreas) }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(.light)
     }
 }
 

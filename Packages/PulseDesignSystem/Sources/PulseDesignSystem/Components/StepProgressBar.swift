@@ -1,7 +1,7 @@
 import PulseDomain
 import SwiftUI
 
-/// Barre d'étapes de l'onboarding : `current` segments accent sur `total` (`.steps` de la maquette).
+/// Barre d'étapes de l'onboarding : `current` segments blancs sur `total`, l'étape en cours plus longue (`.steps` de la maquette).
 public struct StepProgressBar: View {
     private let current: Int
     private let total: Int
@@ -13,11 +13,12 @@ public struct StepProgressBar: View {
     }
 
     public var body: some View {
-        let accent = Color(PulsePalette.accent(for: theme).accent)
+        let palette = PulsePalette.accent(for: theme)
         HStack(spacing: 6) {
             ForEach(0..<max(total, 0), id: \.self) { index in
                 Capsule()
-                    .fill(index < current ? accent : PulsePalette.surface2)
+                    .fill(index < current ? Color(palette.accent) : PulsePalette.ink.opacity(0.12))
+                    .frame(maxWidth: index == current - 1 ? .infinity : 36)
                     .frame(height: 4)
             }
         }
