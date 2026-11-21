@@ -118,9 +118,7 @@ struct MainTabView: View {
                 AnyView(HealthDiagnosticsView(model: HealthDiagnosticsModel(dependencies: dependencies, today: dependencies.now())))
             },
             dataDebug: dataDebugScreen,
-            eraseConfirmation: { onErased in
-                AnyView(EraseConfirmationView(model: DataDebugModel(dependencies: dependencies), onErased: onErased))
-            })
+            eraseConfirmation: { onErased in AnyView(EraseSheet(dependencies: dependencies, onErased: onErased)) })
     }
 
     /// L'écran de debug « Données » (données d'exemple, inspection des tables) n'existe pas en Release (spec M7 §16).

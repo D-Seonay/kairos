@@ -1,3 +1,4 @@
+#if DEBUG
 import PulseDomain
 import SwiftUI
 
@@ -68,3 +69,4 @@ struct DataDebugView: View {
         DataDebugView(model: DataDebugModel(dependencies: .preview())) {}
     }
 }
+#endif
