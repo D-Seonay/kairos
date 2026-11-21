@@ -136,11 +136,15 @@ struct ProfileModelTests {
         let model = model()
         await model.load()
         await workouts.setFailing(true)
+        // Le poids, lui, se lirait : la page ne le prend pas sans le résumé.
+        let weighed = ProfileTestClock.date(2026, 11, 19, hour: 7)
+        try await measurements.save(BodyMeasurement(date: weighed, weightKg: 77.0, source: .manual, createdAt: weighed,
+                                                    updatedAt: weighed))
 
         await model.load()
 
         #expect(model.summary?.sessionsTotal == 3, "L'écran garde son dernier état")
-        #expect(model.body?.trend.current == 78.4)
+        #expect(model.body?.trend.current == 78.4, "Le poids et le résumé viennent de la même lecture")
         #expect(model.errorMessage == "Pulse n'a pas pu lire ton profil.")
 
         await workouts.setFailing(false)
@@ -149,6 +153,7 @@ struct ProfileModelTests {
                                                title: "Séance", createdAt: start, updatedAt: start))
         await model.load()
         #expect(model.summary?.sessionsTotal == 4 && model.errorMessage == nil)
+        #expect(model.body?.trend.current != 78.4)
     }
 
     @Test func loadDuringALoadIsIgnored() async throws {
@@ -211,7 +216,13 @@ struct ProfileTextTests {
         #expect(ProfileText.badgeProgress(Badge(kind: .firstFullMonth, earnedAt: nil, current: 1, goal: 4))
             == "1 / 4 semaines")
         let earned = ProfileTestClock.date(2026, 11, 12, hour: 18)
-        #expect(ProfileText.earnedDate(earned, calendar: calendar) == "12 nov. 2026")
+        #expect(ProfileText.shortDate(earned, calendar: calendar, today: ProfileTestClock.now) == "12 nov.")
+        let lastYear = ProfileTestClock.date(2025, 11, 12, hour: 18)
+        #expect(ProfileText.shortDate(lastYear, calendar: calendar, today: ProfileTestClock.now) == "12 nov. 2025")
+        #expect(ProfileText.weeksUnit(0) == "semaine" && ProfileText.weeksUnit(1) == "semaine")
+        #expect(ProfileText.weeksUnit(9) == "semaines")
+        #expect(RecordStats.mainLifts.map(ProfileText.mainLiftName)
+            == ["Squat", "Développé couché", "Soulevé de terre", "Développé militaire"])
     }
 
     @Test func impossibleValuesShowADash() {

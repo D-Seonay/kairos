@@ -61,7 +61,7 @@ public struct ProfileScreen: View {
                     WeightCard(trend: model.body?.trend, calendar: calendar, today: today)
                     RecordsWall(lifts: summary.mainLifts, runs: summary.runs, calendar: calendar, today: today,
                                 onOpenRecords: onOpenRecords)
-                    BadgeShelfSection(shelf: summary.badges, calendar: calendar)
+                    BadgeShelfSection(shelf: summary.badges, calendar: calendar, today: today)
                 } else if !model.hasLoaded {
                     ProgressView()
                         .frame(maxWidth: .infinity, minHeight: 200)

@@ -38,7 +38,7 @@ struct ProfileTiles: View {
         return ProfileTileContent(
             title: String(localized: "Série en cours", bundle: .module),
             value: summary.sessionsTotal > 0 ? "\(weeks)" : nil,
-            unit: weeks < 2 ? String(localized: "semaine", bundle: .module) : String(localized: "semaines", bundle: .module),
+            unit: ProfileText.weeksUnit(weeks),
             spoken: ProfileText.weeks(weeks),
             emptyText: String(localized: "Pas encore de séance", bundle: .module))
     }
@@ -179,7 +179,7 @@ struct WeightCard: View {
 
 // MARK: - Mur des records
 
-/// Les levés de base et les trois chronos de course ; « Tout voir » ouvre Stats → Records.
+/// Les quatre levés de base et les trois chronos de course, toujours affichés ; « Tout voir » ouvre Stats → Records.
 struct RecordsWall: View {
     let lifts: [StrengthRecordLine]
     let runs: [RunBest]
@@ -195,31 +195,32 @@ struct RecordsWall: View {
             }
             ObsidianCard {
                 VStack(alignment: .leading, spacing: 0) {
-                    if lifts.isEmpty {
-                        ProfileEmptyNote(
-                            heading: String(localized: "Pas encore de record de force", bundle: .module),
-                            reason: String(localized: "squat, développé couché, soulevé de terre et développé militaire",
-                                           bundle: .module))
-                            .padding(.bottom, 10)
-                    } else {
-                        ForEach(lifts) { line in
-                            row(title: line.name, detail: ProfileText.shortDate(line.date, calendar: calendar, today: today),
-                                value: ProfileText.recordValue(line))
-                        }
+                    ForEach(RecordStats.mainLifts, id: \.self) { id in
+                        liftRow(id)
                     }
                     Divider().overlay(PulsePalette.line)
                     ForEach(runs) { run in
                         row(title: ProfileText.runTitle(run.distance),
                             detail: run.date.map { ProfileText.shortDate($0, calendar: calendar, today: today) },
-                            value: run.seconds.map { ProfileText.raceTime(seconds: $0) })
+                            value: run.seconds.map { ProfileText.raceTime(seconds: $0) },
+                            missing: String(localized: "Pas encore couru", bundle: .module))
                     }
                 }
             }
         }
     }
 
-    /// Sans valeur (une distance jamais couverte) : « Pas encore couru ».
-    private func row(title: String, detail: String?, value: String?) -> some View {
+    /// Le record d'un levé de base, nommé par le répertoire d'exercices ; sans record, son nom français et « Pas encore de record ».
+    private func liftRow(_ id: String) -> some View {
+        let line = lifts.first { $0.exercise == .content(id: id) }
+        return row(title: line?.name ?? ProfileText.mainLiftName(id),
+                   detail: line.map { ProfileText.shortDate($0.date, calendar: calendar, today: today) },
+                   value: line.map(ProfileText.recordValue),
+                   missing: String(localized: "Pas encore de record", bundle: .module))
+    }
+
+    /// Sans valeur (un levé sans record, une distance jamais couverte) : `missing`.
+    private func row(title: String, detail: String?, value: String?, missing: String) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
@@ -237,7 +238,7 @@ struct RecordsWall: View {
                     .font(PulseFont.value(.headline))
                     .foregroundStyle(PulsePalette.text)
             } else {
-                Text(String(localized: "Pas encore couru", bundle: .module))
+                Text(missing)
                     .font(.subheadline)
                     .foregroundStyle(PulsePalette.text2)
             }
@@ -253,6 +254,7 @@ struct RecordsWall: View {
 struct BadgeShelfSection: View {
     let shelf: BadgeShelf
     let calendar: Calendar
+    let today: Date
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -261,9 +263,11 @@ struct BadgeShelfSection: View {
                 VStack(alignment: .leading, spacing: 14) {
                     ForEach(shelf.earned) { badge in
                         row(badge) {
-                            Text(badge.earnedAt.map { ProfileText.earnedDate($0, calendar: calendar) } ?? "")
-                                .font(.caption)
-                                .foregroundStyle(PulsePalette.text2)
+                            if let earnedAt = badge.earnedAt {
+                                Text(ProfileText.shortDate(earnedAt, calendar: calendar, today: today))
+                                    .font(.caption)
+                                    .foregroundStyle(PulsePalette.text2)
+                            }
                         }
                     }
                     if !shelf.earned.isEmpty && !shelf.next.isEmpty {

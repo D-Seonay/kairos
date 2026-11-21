@@ -27,6 +27,11 @@ enum ProfileText {
             : String(localized: "\(weeks) semaines", bundle: .module)
     }
 
+    /// « semaine » jusqu'à 1, « semaines » au-delà : l'unité sous le chiffre de la série.
+    static func weeksUnit(_ weeks: Int) -> String {
+        weeks < 2 ? String(localized: "semaine", bundle: .module) : String(localized: "semaines", bundle: .module)
+    }
+
     /// « 78,4 kg ».
     static func weight(_ kilograms: Double) -> String {
         guard kilograms.isFinite else { return dash }
@@ -54,11 +59,11 @@ enum ProfileText {
         guard calendar.component(.year, from: date) != calendar.component(.year, from: today) else {
             return date.formatted(style(Date.FormatStyle.dateTime.day().month(.abbreviated), calendar: calendar))
         }
-        return earnedDate(date, calendar: calendar)
+        return fullDate(date, calendar: calendar)
     }
 
-    /// « 12 nov. 2026 » : la date d'un badge obtenu, toujours avec l'année.
-    static func earnedDate(_ date: Date, calendar: Calendar) -> String {
+    /// « 12 nov. 2026 ».
+    static func fullDate(_ date: Date, calendar: Calendar) -> String {
         date.formatted(style(Date.FormatStyle.dateTime.day().month(.abbreviated).year(), calendar: calendar))
     }
 
@@ -79,6 +84,17 @@ enum ProfileText {
         case .fiveK: String(localized: "5 km", bundle: .module)
         case .tenK: String(localized: "10 km", bundle: .module)
         case .half: String(localized: "Semi-marathon", bundle: .module)
+        }
+    }
+
+    /// Le nom d'un levé de base (`RecordStats.mainLifts`) qui n'a pas encore de record, donc pas de ligne nommée par le répertoire.
+    static func mainLiftName(_ id: String) -> String {
+        switch id {
+        case "back-squat-barbell": String(localized: "Squat", bundle: .module)
+        case "bench-press-barbell": String(localized: "Développé couché", bundle: .module)
+        case "deadlift-barbell": String(localized: "Soulevé de terre", bundle: .module)
+        case "overhead-press-barbell": String(localized: "Développé militaire", bundle: .module)
+        default: id
         }
     }
 
