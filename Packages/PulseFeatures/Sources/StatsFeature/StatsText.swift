@@ -45,6 +45,18 @@ enum StatsText {
         return date.formatted(style)
     }
 
+    /// « 28 oct. », ou « 28 oct. 2025 » hors de l'année de `today` : la date d'un record ou d'une première séance.
+    static func shortDate(_ date: Date, calendar: Calendar, today: Date) -> String {
+        guard calendar.component(.year, from: date) != calendar.component(.year, from: today) else {
+            return dayMonth(date, calendar: calendar, month: .abbreviated)
+        }
+        var style = Date.FormatStyle.dateTime.day().month(.abbreviated).year()
+        style.locale = Locale(identifier: "fr_FR")
+        style.calendar = calendar
+        style.timeZone = calendar.timeZone
+        return date.formatted(style)
+    }
+
     /// « 64,3 km ».
     static func kilometers(meters: Double) -> String {
         guard meters.isFinite, meters >= 0 else { return dash }

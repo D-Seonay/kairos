@@ -1,13 +1,16 @@
 import PulseDesignSystem
+import PulseDomain
 import PulseServices
 import SwiftUI
+import TrainFeature
 
 /// L'onglet Stats (spec M7 §5 et §12, maquette `stats`) : l'en-tête, le segment des cinq vues, les puces de période, puis la
-/// vue choisie. La période est gardée d'un lancement à l'autre.
+/// vue choisie. La période est gardée d'un lancement à l'autre ; toucher un record de force pousse la fiche de l'exercice.
 public struct StatsScreen: View {
     private let model: StatsModel
     /// La période choisie, gardée par sa valeur brute ; poussée dans le modèle à l'apparition et à chaque choix.
     @AppStorage("stats.period") private var storedPeriod = StatsPeriod.month.rawValue
+    @State private var openedExercise: ExerciseReference?
 
     public init(model: StatsModel) {
         self.model = model
@@ -18,12 +21,22 @@ public struct StatsScreen: View {
             content
                 .pulseScreenBackground(aura: 0.5)
                 .hidingNavigationBar()
+                .navigationDestination(item: $openedExercise) { reference in
+                    ExerciseSheetView(model: progressionSheet(for: reference))
+                }
         }
         .onAppear(perform: applyStoredPeriod)
         .onChange(of: storedPeriod) { applyStoredPeriod() }
         .task {
             if !model.hasLoaded { await model.load() }
         }
+    }
+
+    /// La fiche d'un exercice, ouverte sur l'onglet Progression (spec M7 §10).
+    private func progressionSheet(for reference: ExerciseReference) -> ExerciseSheetModel {
+        let sheet = ExerciseSheetModel(environment: model.environment.train, reference: reference)
+        sheet.tab = .progression
+        return sheet
     }
 
     private func applyStoredPeriod() {
@@ -90,10 +103,12 @@ public struct StatsScreen: View {
             LoadSection(load: snapshot.load, window: window)
         case .biometry:
             BiometrySection(biometry: snapshot.biometry, window: window)
-        case .muscles, .attendance, .records:
-            // Provisoire : les trois dernières vues arrivent avec la tâche suivante.
-            ComingSoonView(title: model.view.title, milestone: "M7")
-                .frame(minHeight: 280)
+        case .muscles:
+            MusclesSection(muscles: snapshot.muscles, window: window)
+        case .attendance:
+            AttendanceSection(attendance: snapshot.attendance, window: window)
+        case .records:
+            RecordsSection(records: snapshot.records, window: window) { openedExercise = $0 }
         }
     }
 }

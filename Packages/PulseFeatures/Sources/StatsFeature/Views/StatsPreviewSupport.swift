@@ -8,8 +8,9 @@ import SwiftUI
 import TrainFeature
 
 /// Les doublures des aperçus : un onglet Stats en mémoire, sur une horloge fixe (vendredi 20 novembre, midi) et huit semaines
-/// d'historique de synthèse (musculation lundi, mercredi et vendredi, course le samedi, vélo un dimanche sur deux, nuits
-/// mesurées avec quelques trous et quelques matins estimés par check-in). Sans historique : un nouvel utilisateur du jour.
+/// d'historique de synthèse (musculation poussée lundi, tirage mercredi et jambes vendredi avec des charges qui montent, course
+/// le samedi, vélo un dimanche sur deux, nuits mesurées avec quelques trous et quelques matins estimés par check-in) et les
+/// records qui en découlent. Sans historique : un nouvel utilisateur du jour.
 @MainActor
 enum StatsPreviewSupport {
     nonisolated static let calendar: Calendar = {
@@ -44,6 +45,7 @@ enum StatsPreviewSupport {
         if withHistory {
             for session in sessions() { try? await workouts.save(session) }
             for night in nights() { try? await recoveries.save(night) }
+            _ = try? await records.recomputeAll()
         }
         let importer = HevyImporter(workouts: workouts, userExercises: userExercises, records: records,
                                     mappings: InMemoryHevyMappingStore(), library: library, calendar: calendar, now: clock)
@@ -73,13 +75,17 @@ enum StatsPreviewSupport {
             let start = day(-back, hour: 18)
             let lastWeek = back <= 7
             switch calendar.component(.weekday, from: start) {
-            case 2, 4, 6:
+            case let weekday where [2, 4, 6].contains(weekday):
                 return WorkoutSession(startedAt: start, kind: .strength, source: .pulse, status: .completed, title: "Séance",
                                       overallRPE: 7, tonnageKg: 7_500 + Double(back % 5) * 400,
-                                      durationMinutes: lastWeek ? 70 : 60, createdAt: start, updatedAt: start)
+                                      durationMinutes: lastWeek ? 70 : 60, sets: sets(weekday: weekday, back: back, at: start),
+                                      createdAt: start, updatedAt: start)
             case 7:
+                // Une sortie longue, trois semaines avant, pour un temps sur 10 km.
+                let isLong = back / 7 == 3
                 return WorkoutSession(startedAt: start, kind: .run, source: .appleHealth, status: .completed, title: "Course",
-                                      overallRPE: 6, durationMinutes: 45, distanceMeters: 8_200, createdAt: start, updatedAt: start)
+                                      overallRPE: 6, durationMinutes: isLong ? 58 : 45, distanceMeters: isLong ? 10_600 : 8_200,
+                                      createdAt: start, updatedAt: start)
             case 1 where (back / 7).isMultiple(of: 2):
                 return WorkoutSession(startedAt: start, kind: .ride, source: .appleHealth, status: .completed, title: "Vélo",
                                       overallRPE: 4, durationMinutes: 90, distanceMeters: 36_000, createdAt: start,
@@ -88,6 +94,34 @@ enum StatsPreviewSupport {
                 return nil
             }
         }
+    }
+
+    /// Poussée le lundi, tirage le mercredi, jambes le vendredi : la charge monte de 2,5 kg par semaine, le tronc n'a pas de
+    /// série à lui (il ressort comme peu sollicité) et le haut du corps l'emporte sur le bas.
+    private static func sets(weekday: Int, back: Int, at start: Date) -> [WorkoutSet] {
+        let progress = Double((historyDays - back) / 7) * 2.5
+        var sets: [WorkoutSet] = []
+        func lift(_ id: String, _ name: String, sets count: Int, reps: Int, kg: Double) {
+            for _ in 0..<count {
+                sets.append(WorkoutSet(order: sets.count + 1, exercise: .content(id: id), exerciseName: name, setType: .working,
+                                       actualWeightKg: kg, actualReps: reps,
+                                       completedAt: start.addingTimeInterval(Double(sets.count + 1) * 180)))
+            }
+        }
+        switch weekday {
+        case 2:
+            lift("bench-press-barbell", "Développé couché à la barre", sets: 3, reps: 5, kg: 70 + progress)
+            lift("overhead-press-barbell", "Développé militaire à la barre", sets: 3, reps: 6, kg: 40 + progress / 2)
+            lift("triceps-pushdown-cable", "Extension triceps poulie haute", sets: 3, reps: 12, kg: 25)
+        case 4:
+            lift("barbell-row", "Rowing à la barre", sets: 3, reps: 8, kg: 60 + progress)
+            lift("lat-pulldown-machine", "Tirage vertical machine convergente", sets: 3, reps: 10, kg: 55)
+            lift("barbell-curl", "Curl à la barre", sets: 3, reps: 10, kg: 30)
+        default:
+            lift("back-squat-barbell", "Squat barre", sets: 3, reps: 5, kg: 90 + progress)
+            lift("deadlift-barbell", "Soulevé de terre", sets: 1, reps: 5, kg: 110 + progress)
+        }
+        return sets
     }
 
     /// Des nuits ondulées autour de leur ligne de base ; une nuit sur neuf manque, un matin sur treize est estimé.
@@ -170,6 +204,10 @@ struct StatsSectionPreview<Content: View>: View {
 
 #Preview("Stats, Biométrie") {
     StatsPreviewHost(view: .biometry)
+}
+
+#Preview("Stats, Records") {
+    StatsPreviewHost(view: .records)
 }
 
 #Preview("Stats, nouvel utilisateur") {

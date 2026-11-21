@@ -19,6 +19,9 @@ struct StatsWindow {
     /// Le domaine des courbes : l'intervalle de la période, pour qu'un point de semaine daté du lundi d'avant n'étire pas l'axe.
     var domain: ClosedRange<Date> { interval.start...interval.end }
 
+    /// Le dernier jour de la période : aujourd'hui.
+    var today: Date { calendar.date(byAdding: .day, value: -1, to: interval.end) ?? interval.end }
+
     /// L'unité d'un grain de courbe ou de barre.
     func unit(of bucket: StatsBucket) -> Calendar.Component {
         bucket == .day ? .day : .weekOfYear
