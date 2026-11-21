@@ -51,6 +51,8 @@ struct AppDependencies: Sendable {
     let supplements: any SupplementRepository
     /// Le seul chemin vers les compléments : l'écran, les cartes de l'accueil et du récap, et l'action « Pris » des rappels.
     let supplementService: SupplementService
+    /// Le seul point d'écriture des réglages du profil (spec M7 §15) : il replanifie les rappels de compléments quand ils changent.
+    let settings: SettingsService
     let bodyMeasurements: any BodyMeasurementRepository
     let personalRecords: any PersonalRecordRepository
     let exerciseSettings: any ExerciseSettingsRepository
@@ -75,6 +77,8 @@ struct AppDependencies: Sendable {
     let exporter: any DataExporter
     let eraser: any DataEraser
     let seeder: SampleDataSeeder
+    /// Vrai quand les notifications sont refusées dans les réglages d'iOS ; toujours faux en mode mémoire et dans les tests.
+    let notificationsDenied: @Sendable () async -> Bool
 
     /// Ce qui change entre l'app réelle, le mode mémoire des tests d'interface et les tests de la cible app.
     private struct Wiring {
@@ -103,6 +107,8 @@ struct AppDependencies: Sendable {
         var backgroundDelivery: HealthKitBackgroundDelivery?
         /// `nil` : l'inspecteur du magasin SwiftData.
         var inspector: (any StoreInspector)?
+        /// L'état des notifications dans les réglages d'iOS ; « autorisées » en mode mémoire et dans les tests.
+        var notificationsDenied: @Sendable () async -> Bool
         /// `nil` : `UserDefaults.standard`.
         var defaultsSuite: String?
         var calendar: Calendar
@@ -125,6 +131,7 @@ struct AppDependencies: Sendable {
             supplementHealth = nil
             healthEraser = StubHealthEraser()
             notificationCanceling = nil
+            notificationsDenied = { false }
             backgroundDelivery = nil
         }
         #endif
@@ -165,7 +172,8 @@ struct AppDependencies: Sendable {
                             supplementHealth: writer, sessionActivity: SessionActivityController(),
                             notificationCanceling: scheduler,
                             backgroundDelivery: launch.healthScenario == nil ? reader.map(HealthKitBackgroundDelivery.init) : nil,
-                            inspector: nil, defaultsSuite: nil, calendar: calendar, now: now, launch: launch)
+                            inspector: nil, notificationsDenied: { await UserNotificationAuthorizer.isDenied() },
+                            defaultsSuite: nil, calendar: calendar, now: now, launch: launch)
         #if DEBUG
         if let tested = launchStore(&wiring) { return tested }
         #endif
@@ -200,8 +208,8 @@ struct AppDependencies: Sendable {
             widgets: StubWidgetPublisher(), morningScore: StubNotificationScheduler(), restNotifier: StubRestTimerNotifier(),
             supplementReminders: StubSupplementReminderScheduler(), supplementHealth: nil,
             sessionActivity: StubSessionActivityController(), notificationCanceling: nil,
-            backgroundDelivery: nil, inspector: inspector, defaultsSuite: testingDefaultsSuite, calendar: calendar, now: now,
-            launch: LaunchOptions())
+            backgroundDelivery: nil, inspector: inspector, notificationsDenied: { false }, defaultsSuite: testingDefaultsSuite,
+            calendar: calendar, now: now, launch: LaunchOptions())
         guard let dependencies = try? make(wiring, mode: .inMemory, error: nil) else { crash(nil) }
         return dependencies
     }
@@ -223,11 +231,13 @@ struct AppDependencies: Sendable {
         let workouts = SwiftDataWorkoutRepository(modelContainer: container)
         let scheduledDays = SwiftDataScheduledDayRepository(modelContainer: container)
         let userExercises = SwiftDataUserExerciseRepository(modelContainer: container)
+        let bodyMeasurements = SwiftDataBodyMeasurementRepository(modelContainer: container)
         let planning = PlanningService(profiles: profiles, programs: programs, workouts: workouts, scheduledDays: scheduledDays,
                                        calendar: calendar, now: wiring.now)
         let refresher = makeRefresher(wiring, stores: RefresherStores(
             profiles: profiles, programs: programs, recovery: recovery, workouts: workouts, scheduledDays: scheduledDays,
-            userExercises: userExercises, healthCache: healthCache, activity: activity, planning: planning), scores: scores)
+            userExercises: userExercises, bodyMeasurements: bodyMeasurements, healthCache: healthCache, activity: activity,
+            planning: planning), scores: scores)
         let personalRecords = SwiftDataPersonalRecordRepository(modelContainer: container)
         let records = RecordsService(workouts: workouts, records: personalRecords, userExercises: userExercises,
                                      library: content, now: wiring.now)
@@ -245,39 +255,21 @@ struct AppDependencies: Sendable {
         return AppDependencies(
             health: wiring.health, healthSource: wiring.healthSource, notifications: wiring.notifications,
             liveSessionNotifications: wiring.liveSessionNotifications,
-            onboardingSteps: UserDefaultsOnboardingStepStore(suiteName: wiring.defaultsSuite),
-            now: wiring.now, launch: wiring.launch,
+            onboardingSteps: UserDefaultsOnboardingStepStore(suiteName: wiring.defaultsSuite), now: wiring.now, launch: wiring.launch,
             calendar: calendar, content: content, container: container, storeMode: mode, storeError: error,
             profiles: profiles, programs: programs, userExercises: userExercises, workouts: workouts,
             scheduledDays: scheduledDays, planning: planning, recovery: recovery, scores: scores,
             supplements: supplements, supplementService: supplementService,
-            bodyMeasurements: SwiftDataBodyMeasurementRepository(modelContainer: container),
+            settings: makeSettings(wiring, profiles: profiles, supplementService: supplementService), bodyMeasurements: bodyMeasurements,
             personalRecords: personalRecords, exerciseSettings: exerciseSettings, records: records, hevyMappings: hevyMappings,
             hevyImporter: HevyImporter(workouts: workouts, userExercises: userExercises, records: records, mappings: hevyMappings,
                                        library: content, calendar: calendar, now: wiring.now),
             healthCache: healthCache, activity: activity, refresher: refresher, backgroundDelivery: wiring.backgroundDelivery,
             activeSession: activeSession, liveSession: liveSession, sessionActivity: wiring.sessionActivity,
             inspector: wiring.inspector ?? SwiftDataStoreInspector(container: container, cloudEnabled: mode == .cloud),
-            exporter: SwiftDataExporter(container: container, appVersion: appVersion, contentVersion: content.contentVersion,
-                                        exerciseNames: { content.exercise(id: $0)?.name.fr }),
+            exporter: makeExporter(container: container, content: content),
             eraser: makeEraser(wiring, container: container, refresher: refresher),
-            seeder: SampleDataSeeder(container: container, calendar: calendar))
-    }
-
-    /// Efface le magasin, les préférences, les notifications, l'instantané du widget et les exports. Elle attend la fin d'un
-    /// rafraîchissement en cours, qui republierait l'instantané effacé.
-    private static func makeEraser(_ wiring: Wiring, container: ModelContainer, refresher: DayRefresher) -> any DataEraser {
-        let store = SwiftDataEraser(container: container, defaultsSuite: wiring.defaultsSuite,
-                                    defaultsDomain: wiring.defaultsSuite ?? Bundle.main.bundleIdentifier ?? "fr.seonay.pulse",
-                                    healthEraser: wiring.healthEraser, notifications: wiring.notificationCanceling,
-                                    widgets: wiring.widgets, exportsDirectory: SwiftDataExporter.exportsDirectory)
-        return SerializedDataEraser(refresher: refresher, inner: store)
-    }
-
-    private static var appVersion: String {
-        let short = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0"
-        let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "0"
-        return "\(short) (\(build))"
+            seeder: SampleDataSeeder(container: container, calendar: calendar), notificationsDenied: wiring.notificationsDenied)
     }
 
     #if DEBUG
@@ -323,28 +315,62 @@ extension AppDependencies {
         var workouts: any WorkoutRepository
         var scheduledDays: any ScheduledDayRepository
         var userExercises: any UserExerciseRepository
+        var bodyMeasurements: any BodyMeasurementRepository
         var healthCache: any HealthSampleCache
         var activity: any DayActivityLog
         var planning: PlanningService
     }
 
-    /// Le passage du jour : les nuits, puis les courses et les vélos quand la source Apple Santé sait les lire (spec M6 §3),
-    /// les règles anti-interférence (§9), et la série et la semaine publiées avec l'instantané du widget (§11).
+    /// Le passage du jour : les nuits, puis les courses et les vélos quand la source Apple Santé sait les lire (spec M6 §3), le
+    /// poids et la masse grasse (spec M7 §14), les règles anti-interférence (§9), et la série et la semaine publiées avec
+    /// l'instantané du widget (§11).
     private static func makeRefresher(_ wiring: Wiring, stores: RefresherStores, scores: DailyScoreService) -> DayRefresher {
         let calendar = wiring.calendar
         let workoutHistory = (wiring.healthSource as? any HealthWorkoutSource).map { source in
             WorkoutHistory(source: source, cache: stores.healthCache, workouts: stores.workouts, profiles: stores.profiles,
                            windows: UserDefaultsHealthReadWindowStore(suiteName: wiring.defaultsSuite), calendar: calendar)
         }
+        let bodyHistory = (wiring.healthSource as? any HealthBodySource).map { source in
+            BodyHistory(source: source, cache: stores.healthCache, measurements: stores.bodyMeasurements,
+                        profiles: stores.profiles, windows: UserDefaultsHealthReadWindowStore(suiteName: wiring.defaultsSuite),
+                        calendar: calendar)
+        }
         return DayRefresher(
             profiles: stores.profiles, programs: stores.programs, recovery: stores.recovery,
             nightHistory: NightHistory(source: wiring.healthSource, cache: stores.healthCache, calendar: calendar), scores: scores,
             widgets: wiring.widgets, notifications: wiring.morningScore, activity: stores.activity,
-            scheduledDays: stores.scheduledDays, workoutHistory: workoutHistory,
+            scheduledDays: stores.scheduledDays, workoutHistory: workoutHistory, bodyHistory: bodyHistory,
             antiInterference: AntiInterferenceService(
                 profiles: stores.profiles, programs: stores.programs, workouts: stores.workouts, scheduledDays: stores.scheduledDays,
                 userExercises: stores.userExercises, library: .bundled, calendar: calendar, now: wiring.now),
             planning: stores.planning, calendar: calendar, now: wiring.now)
+    }
+}
+
+// MARK: - Données
+
+extension AppDependencies {
+    /// « 1.0.2 (14) » : l'export et l'écran « À propos ».
+    static var appVersion: String {
+        let short = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0"
+        let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "0"
+        return "\(short) (\(build))"
+    }
+
+    /// Les exports JSON et CSV, avec la version de l'app et celle du contenu.
+    private static func makeExporter(container: ModelContainer, content: ContentLibrary) -> any DataExporter {
+        SwiftDataExporter(container: container, appVersion: appVersion, contentVersion: content.contentVersion,
+                          exerciseNames: { content.exercise(id: $0)?.name.fr })
+    }
+
+    /// Efface le magasin, les préférences, les notifications, l'instantané du widget et les exports. Elle attend la fin d'un
+    /// rafraîchissement en cours, qui republierait l'instantané effacé.
+    private static func makeEraser(_ wiring: Wiring, container: ModelContainer, refresher: DayRefresher) -> any DataEraser {
+        let store = SwiftDataEraser(container: container, defaultsSuite: wiring.defaultsSuite,
+                                    defaultsDomain: wiring.defaultsSuite ?? Bundle.main.bundleIdentifier ?? "fr.seonay.pulse",
+                                    healthEraser: wiring.healthEraser, notifications: wiring.notificationCanceling,
+                                    widgets: wiring.widgets, exportsDirectory: SwiftDataExporter.exportsDirectory)
+        return SerializedDataEraser(refresher: refresher, inner: store)
     }
 }
 
@@ -358,5 +384,15 @@ extension AppDependencies {
         SupplementService(supplements: supplements, programs: programs, profiles: profiles, workouts: workouts,
                           reminders: wiring.supplementReminders, health: wiring.supplementHealth, calendar: wiring.calendar,
                           now: wiring.now)
+    }
+
+    /// Les réglages du profil. Seuls les rappels de compléments dépendent d'un réglage enregistré : le score du matin, la fin du
+    /// repos et le moteur relisent le profil à chaque fois, les widgets ne lisent aucun réglage.
+    private static func makeSettings(_ wiring: Wiring, profiles: any ProfileRepository,
+                                     supplementService: SupplementService) -> SettingsService {
+        SettingsService(profiles: profiles, now: wiring.now) { old, new in
+            guard old.supplementRemindersEnabled != new.supplementRemindersEnabled else { return }
+            await supplementService.rescheduleReminders()
+        }
     }
 }

@@ -3,6 +3,7 @@ import LiveSessionFeature
 import Observation
 import OnboardingFeature
 import PlanningFeature
+import ProfileFeature
 import PulseDomain
 import PulseServices
 import StatsFeature
@@ -21,7 +22,7 @@ final class AppRootModel {
     }
 
     private(set) var destination: Destination = .loading
-    /// Le profil enregistré, lu au chargement ; il donne l'ambiance de l'app.
+    /// Le profil enregistré, lu au chargement et réécrit par les réglages ; il donne l'ambiance de l'app.
     private(set) var profile: UserProfile?
     private(set) var onboarding: OnboardingModel?
     private(set) var today: TodayModel?
@@ -30,6 +31,8 @@ final class AppRootModel {
     private(set) var planning: PlanningModel?
     /// L'onglet Stats : la charge, la biométrie, les muscles, l'assiduité et les records de la période.
     private(set) var stats: StatsModel?
+    /// L'onglet Profil : le résumé, le poids, les réglages et les données stockées.
+    private(set) var profileModel: ProfileModel?
     /// La séance en direct des onglets : le bandeau « Reprendre la séance » et l'écran en plein écran.
     private(set) var liveSession: LiveSessionCoordinator?
     /// La saisie d'une séance passée, à côté de la séance en direct.
@@ -68,6 +71,7 @@ final class AppRootModel {
         let train = train
         let planning = planning
         let stats = stats
+        let profileModel = profileModel
         await refreshLiveSession()
         await today.refresh()
         await train?.refresh()
@@ -77,6 +81,9 @@ final class AppRootModel {
         await refreshSupplementReminders()
         // Les statistiques relisent tout l'historique : seulement une fois l'onglet ouvert (son `.task` charge la première fois).
         if let stats, stats.hasLoaded { await stats.load() }
+        // Le profil lit la série, le score et le poids que le passage du jour vient de mettre à jour : en dernier, et seulement
+        // une fois l'onglet ouvert, comme les statistiques.
+        if let profileModel, profileModel.hasLoaded { await profileModel.load() }
     }
 
     /// Les rappels de compléments couvrent 14 jours : chaque lancement et chaque retour au premier plan les recalculent, et
@@ -134,6 +141,8 @@ final class AppRootModel {
                 train = TrainModel(environment: dependencies.trainEnvironment())
                 planning = PlanningModel(environment: dependencies.planningEnvironment())
                 stats = StatsModel(environment: dependencies.statsEnvironment())
+                // Un réglage enregistré (ambiance, prénom) s'applique tout de suite à la racine.
+                profileModel = ProfileModel(environment: dependencies.profileEnvironment()) { [weak self] in self?.profile = $0 }
                 let liveSession = LiveSessionCoordinator(environment: dependencies.liveSessionEnvironment())
                 self.liveSession = liveSession
                 pastSession = PastSessionCoordinator(environment: dependencies.pastSessionEnvironment())
@@ -149,6 +158,7 @@ final class AppRootModel {
         train = nil
         planning = nil
         stats = nil
+        profileModel = nil
         liveSession = nil
         pastSession = nil
         supplements = nil

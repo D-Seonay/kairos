@@ -10,4 +10,9 @@ struct UserNotificationAuthorizer: NotificationAuthorizing {
             return false
         }
     }
+
+    /// Vrai quand les notifications de Pulse sont refusées dans les réglages d'iOS (Paramètres → Notifications).
+    static func isDenied() async -> Bool {
+        await UNUserNotificationCenter.current().notificationSettings().authorizationStatus == .denied
+    }
 }
