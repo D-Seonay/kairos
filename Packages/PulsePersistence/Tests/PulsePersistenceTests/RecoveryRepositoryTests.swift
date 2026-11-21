@@ -62,4 +62,75 @@ import Testing
     let found = try await repo.dailyRecoveries(from: .distantPast, to: .distantFuture)
     #expect(found.map(\.originalSessionChosen) == [true])
 }
+@Test func savedRecoveryKeepsRawValuesOffTheSyncedStore() async throws {
+    let box = try ModelContainerBox()
+    let repository = SwiftDataRecoveryRepository(modelContainer: box.container, calendar: Fixed.calendar)
+    try await repository.save(Sample.recovery())
+    let context = ModelContext(box.container)
+    let synced = try #require(try context.fetch(FetchDescriptor<StoredDailyRecovery>()).first)
+    #expect(synced.sdnnMs == nil && synced.sdnnBaselineMs == nil && synced.restingHeartRate == nil)
+    #expect(synced.restingHeartRateBaseline == nil && synced.asleepMinutes == nil && synced.deepMinutes == nil)
+    #expect(synced.score == 72 && synced.hrvScore == 80)
+    let reading = try #require(try context.fetch(FetchDescriptor<StoredRecoveryReading>()).first)
+    #expect(reading.sdnnMs == 50 && reading.deepMinutes == 80)
+    let read = try await repository.dailyRecoveries(from: .distantPast, to: .distantFuture)
+    #expect(read.first?.sdnnMs == 50 && read.first?.restingHeartRateBaseline == 50 && read.first?.asleepMinutes == 420)
+}
+
+@Test func rewritingTheDayUpdatesItsReadingInPlace() async throws {
+    let box = try ModelContainerBox()
+    let repository = SwiftDataRecoveryRepository(modelContainer: box.container, calendar: Fixed.calendar)
+    var recovery = Sample.recovery()
+    try await repository.save(recovery)
+    recovery.sdnnMs = 55
+    try await repository.save(recovery)
+    let readings = try ModelContext(box.container).fetch(FetchDescriptor<StoredRecoveryReading>())
+    #expect(readings.count == 1 && readings.first?.sdnnMs == 55)
+}
+
+@Test func recoveryWithoutRawValuesDropsTheReading() async throws {
+    let box = try ModelContainerBox()
+    let repository = SwiftDataRecoveryRepository(modelContainer: box.container, calendar: Fixed.calendar)
+    var recovery = Sample.recovery()
+    try await repository.save(recovery)
+    recovery.sdnnMs = nil
+    recovery.sdnnBaselineMs = nil
+    recovery.restingHeartRate = nil
+    recovery.restingHeartRateBaseline = nil
+    recovery.asleepMinutes = nil
+    recovery.deepMinutes = nil
+    try await repository.save(recovery)
+    #expect(try ModelContext(box.container).fetchCount(FetchDescriptor<StoredRecoveryReading>()) == 0)
+    let read = try await repository.dailyRecoveries(from: .distantPast, to: .distantFuture)
+    #expect(read.count == 1 && read[0].sdnnMs == nil && read[0].asleepMinutes == nil && read[0].deepMinutes == nil)
+}
+
+@Test func readingsJoinTheirOwnDay() async throws {
+    let box = try ModelContainerBox()
+    let repository = SwiftDataRecoveryRepository(modelContainer: box.container, calendar: Fixed.calendar)
+    let today = Fixed.calendar.startOfDay(for: Date())
+    let yesterday = try #require(Fixed.calendar.date(byAdding: .day, value: -1, to: today))
+    var older = Sample.recovery(day: yesterday)
+    older.sdnnMs = 41
+    older.asleepMinutes = 390
+    try await repository.save(older)
+    try await repository.save(Sample.recovery(day: today))
+    let read = try await repository.dailyRecoveries(from: .distantPast, to: .distantFuture)
+    #expect(read.count == 2)
+    #expect(read[0].sdnnMs == 41 && read[0].asleepMinutes == 390)
+    #expect(read[1].sdnnMs == 50 && read[1].asleepMinutes == 420)
+}
+
+@Test func recoveryWithoutReadingKeepsLegacyRawValues() async throws {
+    let box = try ModelContainerBox()
+    let repository = SwiftDataRecoveryRepository(modelContainer: box.container, calendar: Fixed.calendar)
+    let legacy = Sample.recovery(day: Fixed.calendar.startOfDay(for: Fixed.t0))
+    let context = ModelContext(box.container)
+    let row = StoredDailyRecovery(legacy)
+    row.sdnnMs = 61   // ancienne ligne : valeurs brutes encore dans le magasin synchronisé
+    context.insert(row)
+    try context.save()
+    let read = try await repository.dailyRecoveries(from: .distantPast, to: .distantFuture)
+    #expect(read.first?.sdnnMs == 61)
+}
 // swiftlint:enable force_unwrapping

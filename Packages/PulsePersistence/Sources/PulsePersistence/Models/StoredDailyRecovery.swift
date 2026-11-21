@@ -43,12 +43,6 @@ public final class StoredDailyRecovery {
         hrvScore = recovery.hrvScore
         restingHeartRateScore = recovery.restingHeartRateScore
         sleepScore = recovery.sleepScore
-        sdnnMs = recovery.sdnnMs
-        sdnnBaselineMs = recovery.sdnnBaselineMs
-        restingHeartRate = recovery.restingHeartRate
-        restingHeartRateBaseline = recovery.restingHeartRateBaseline
-        asleepMinutes = recovery.asleepMinutes
-        deepMinutes = recovery.deepMinutes
         missingFactors = CodableColumn.encode(recovery.missingFactors)
         calibration = CodableColumn.encode(recovery.calibration)
         adjustments = CodableColumn.encode(recovery.adjustments)
@@ -57,6 +51,17 @@ public final class StoredDailyRecovery {
         updatedAt = recovery.updatedAt
     }
 
+    /// Efface les six valeurs brutes : à appeler une fois qu'elles sont écrites dans le magasin local.
+    public func clearHealthValues() {
+        sdnnMs = nil
+        sdnnBaselineMs = nil
+        restingHeartRate = nil
+        restingHeartRateBaseline = nil
+        asleepMinutes = nil
+        deepMinutes = nil
+    }
+
+    /// Relit les six champs bruts des anciennes lignes, pas encore déplacées vers le magasin local.
     public func toDomain() -> DailyRecovery {
         DailyRecovery(id: id, day: day, score: score, category: .stored(category, default: .normal), isEstimated: isEstimated,
                       hrvScore: hrvScore, restingHeartRateScore: restingHeartRateScore, sleepScore: sleepScore, sdnnMs: sdnnMs,

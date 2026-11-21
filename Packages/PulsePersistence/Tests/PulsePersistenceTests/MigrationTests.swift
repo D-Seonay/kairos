@@ -160,8 +160,9 @@ private func writeV3Store(in directory: URL) throws {
     let container = try makeFrozenContainer(PulseSchemaV3.self, synced: PersistenceStack.syncedModels, in: directory)
     let context = ModelContext(container)
     let recovery = StoredDailyRecovery(DailyRecovery(day: Fixed.calendar.startOfDay(for: Fixed.t0), score: 60, category: .normal,
-                                                     isEstimated: false, sdnnMs: 50, calibration: .ready,
+                                                     isEstimated: false, calibration: .ready,
                                                      createdAt: Fixed.t0, updatedAt: Fixed.t0))
+    recovery.sdnnMs = 50   // `init` n'écrit plus les valeurs brutes : on reproduit l'ancienne ligne V3
     context.insert(recovery)
     let session = StoredWorkoutSession(WorkoutSession(startedAt: Fixed.t0, kind: .run, source: .appleHealth, status: .completed,
                                                       title: "Course", createdAt: Fixed.t0, updatedAt: Fixed.t0))

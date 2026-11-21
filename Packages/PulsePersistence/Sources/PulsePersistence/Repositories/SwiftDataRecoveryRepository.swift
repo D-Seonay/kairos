@@ -18,9 +18,13 @@ public actor SwiftDataRecoveryRepository: ModelActor, RecoveryRepository {
         let descriptor = FetchDescriptor<StoredDailyRecovery>(
             predicate: #Predicate { $0.deletedAt == nil && $0.day >= from && $0.day < to },
             sortBy: [SortDescriptor(\.day)])
-        return try modelContext.fetch(descriptor).map { $0.toDomain() }
+        let recoveries = try modelContext.fetch(descriptor).map { $0.toDomain() }
+        let readings = try modelContext.fetch(FetchDescriptor<StoredRecoveryReading>(
+            predicate: #Predicate { $0.day >= from && $0.day < to }, sortBy: [SortDescriptor(\.day)]))
+        return RecoveryReadingJoin.fill(recoveries, with: readings)
     }
 
+    /// Le score va dans le magasin synchronisé, les valeurs brutes d'Apple Health dans le magasin local, en un seul `save()`.
     public func save(_ recovery: DailyRecovery) throws {
         var stamped = recovery
         stamped.day = calendar.startOfDay(for: recovery.day)
@@ -33,7 +37,21 @@ public actor SwiftDataRecoveryRepository: ModelActor, RecoveryRepository {
         } else {
             modelContext.insert(StoredDailyRecovery(stamped))
         }
+        try writeReading(of: stamped, day: day)
         try modelContext.save()
+    }
+
+    /// Crée, met à jour ou supprime la lecture locale du jour, selon qu'il reste des valeurs brutes.
+    private func writeReading(of recovery: DailyRecovery, day: Date) throws {
+        let now = recovery.updatedAt
+        let existing = try modelContext.first(StoredRecoveryReading.self, where: #Predicate { $0.day == day })
+        if let existing {
+            existing.apply(recovery, at: now)
+            if existing.isEmpty { modelContext.delete(existing) }
+        } else {
+            let reading = StoredRecoveryReading(day: day, from: recovery, at: now)
+            if !reading.isEmpty { modelContext.insert(reading) }
+        }
     }
 
     public func checkIns(from: Date, to: Date) throws -> [CheckIn] {
