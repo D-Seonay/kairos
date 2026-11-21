@@ -1,3 +1,4 @@
+#if DEBUG
 import PulseDomain
 import SwiftUI
 
@@ -47,3 +48,4 @@ struct ContentTemplatesView: View {
         return type
     }
 }
+#endif

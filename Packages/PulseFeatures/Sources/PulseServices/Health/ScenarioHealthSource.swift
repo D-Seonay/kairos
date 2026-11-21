@@ -5,8 +5,11 @@ import PulseDomain
 ///
 /// L'ancre est le jour des données générées, en texte (`"2026-11-02"`) : la même ancre ne ramène rien, une autre ramène tout.
 /// Les scénarios à historique complet ont aussi une course de 45 minutes par semaine, jamais le jour même.
-public struct ScenarioHealthSource: HealthSampleSource, HealthWorkoutSource {
+public struct ScenarioHealthSource: HealthSampleSource, HealthWorkoutSource, HealthBodySource {
     static let nightCount = 60
+
+    /// Le poids et la masse grasse rendus en lecture complète : vide par défaut, un test ou un scénario les remplit.
+    public var bodySamples: [BodySignal: [CachedHealthSample]] = [:]
 
     private let samples: [HealthSampleKind: [CachedHealthSample]]
     private let dayAnchor: Data
@@ -44,6 +47,14 @@ public struct ScenarioHealthSource: HealthSampleSource, HealthWorkoutSource {
             return HealthSampleChanges(kind: signal.kind, added: [], deletedHealthKitUUIDs: [], anchor: dayAnchor, isFullRead: false)
         }
         let added = (samples[signal.kind] ?? []).filter { $0.start >= start }
+        return HealthSampleChanges(kind: signal.kind, added: added, deletedHealthKitUUIDs: [], anchor: dayAnchor, isFullRead: true)
+    }
+
+    public func bodyChanges(of signal: BodySignal, since anchor: Data?, from start: Date) async throws -> HealthSampleChanges {
+        guard anchor != dayAnchor else {
+            return HealthSampleChanges(kind: signal.kind, added: [], deletedHealthKitUUIDs: [], anchor: dayAnchor, isFullRead: false)
+        }
+        let added = (bodySamples[signal] ?? []).filter { $0.start >= start }
         return HealthSampleChanges(kind: signal.kind, added: added, deletedHealthKitUUIDs: [], anchor: dayAnchor, isFullRead: true)
     }
 

@@ -2,6 +2,7 @@ import Foundation
 import LiveSessionFeature
 import OnboardingFeature
 import PlanningFeature
+import ProfileFeature
 import PulseServices
 import StatsFeature
 import SupplementsFeature
@@ -44,6 +45,33 @@ extension AppDependencies {
                                    records: personalRecords, userExercises: userExercises, library: content, calendar: calendar,
                                    now: now)
         return StatsEnvironment(service: service, train: trainEnvironment(), calendar: calendar, now: now)
+    }
+
+    /// L'onglet Profil : le résumé et les pesées relisent les dépôts à chaque lecture, les réglages passent par le service partagé,
+    /// et « Relire maintenant » lance le passage du jour comme un retour au premier plan.
+    func profileEnvironment() -> ProfileEnvironment {
+        let profile = ProfileService(profiles: profiles, programs: programs, workouts: workouts, recoveries: recovery,
+                                     records: personalRecords, userExercises: userExercises, library: content, calendar: calendar,
+                                     now: now)
+        let refresher = refresher
+        let notifications = notifications
+        return ProfileEnvironment(
+            profile: profile, body: BodyService(measurements: bodyMeasurements, profiles: profiles, calendar: calendar, now: now),
+            settings: settings, healthCache: healthCache, inspector: inspector, exporter: exporter, eraser: eraser,
+            notificationStatus: notificationStatus,
+            requestNotificationAuthorization: { await notifications.requestAuthorization() },
+            refreshHealth: { _ = await refresher.refresh(origin: .foreground) },
+            appVersion: Self.appVersion, privacyPolicyURL: Self.privacyPolicyURL, calendar: calendar, now: now)
+    }
+
+    /// La politique de confidentialité, lue dans l'Info.plist (`PulsePrivacyPolicyURL`) ; `nil` tant que la clé est vide ou
+    /// n'est pas une adresse web (M8 la remplit).
+    static var privacyPolicyURL: URL? {
+        guard let text = Bundle.main.object(forInfoDictionaryKey: "PulsePrivacyPolicyURL") as? String else { return nil }
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let url = URL(string: trimmed), let scheme = url.scheme?.lowercased(), ["http", "https"].contains(scheme),
+              url.host() != nil else { return nil }
+        return url
     }
 
     /// L'écran en direct passe par le même service que l'accueil et l'onglet Séance ; il demande l'autorisation des notifications

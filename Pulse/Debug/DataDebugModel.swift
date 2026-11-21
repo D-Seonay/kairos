@@ -23,7 +23,9 @@ final class DataDebugModel {
 
     private let dependencies: AppDependencies
 
-    init(dependencies: AppDependencies) {
+    /// `showsStoreError` faux : `lastError` ne montre que les échecs des opérations, pas celui de l'ouverture du magasin (la
+    /// feuille de suppression le prendrait pour un échec de la suppression).
+    init(dependencies: AppDependencies, showsStoreError: Bool = true) {
         self.dependencies = dependencies
         let content = dependencies.content
         contentVersion = content.contentVersion
@@ -34,7 +36,7 @@ final class DataDebugModel {
         }
         templates = content.programTemplates
         storeModeText = Self.text(for: dependencies.storeMode)
-        lastError = dependencies.storeError
+        lastError = showsStoreError ? dependencies.storeError : nil
     }
 
     func exerciseName(for id: String) -> String? {

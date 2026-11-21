@@ -23,6 +23,8 @@ public final class DayRefresher: Sendable {
     private let scheduledDays: (any ScheduledDayRepository)?
     /// Les courses et les vélos d'Apple Santé, lus après les nuits (spec M6 §3).
     private let workoutHistory: WorkoutHistory?
+    /// Le poids et la masse grasse d'Apple Santé, lus juste après les entraînements (spec M7 §14).
+    private let bodyHistory: BodyHistory?
     /// Les règles anti-interférence, appliquées après la lecture des entraînements (spec M6 §9).
     private let antiInterference: AntiInterferenceService?
     /// La série, la semaine et la charge publiées avec l'instantané du widget (spec M6 §11).
@@ -47,7 +49,8 @@ public final class DayRefresher: Sendable {
                 nightHistory: NightHistory, scores: DailyScoreService, widgets: any WidgetPublishing,
                 notifications: any NotificationScheduling, activity: any DayActivityLog,
                 scheduledDays: (any ScheduledDayRepository)? = nil, workoutHistory: WorkoutHistory? = nil,
-                antiInterference: AntiInterferenceService? = nil, planning: PlanningService? = nil, calendar: Calendar,
+                bodyHistory: BodyHistory? = nil, antiInterference: AntiInterferenceService? = nil,
+                planning: PlanningService? = nil, calendar: Calendar,
                 now: @escaping @Sendable () -> Date) {
         self.profiles = profiles
         self.programs = programs
@@ -59,6 +62,7 @@ public final class DayRefresher: Sendable {
         self.activity = activity
         self.scheduledDays = scheduledDays
         self.workoutHistory = workoutHistory
+        self.bodyHistory = bodyHistory
         self.antiInterference = antiInterference
         self.planning = planning
         self.calendar = calendar
@@ -139,6 +143,7 @@ public final class DayRefresher: Sendable {
         }
         let history = await nightHistory.refresh(now: now)
         await workoutHistory?.refresh(now: now)
+        await bodyHistory?.refresh(now: now)
         // Une semaine illisible reste telle quelle : la séance du jour suit les lignes déjà écrites.
         try? await antiInterference?.apply(nights: history.nights)
         let plan = await plan(for: profile, readFailed: profileReadFailed, now: now)

@@ -10,4 +10,15 @@ struct UserNotificationAuthorizer: NotificationAuthorizing {
             return false
         }
     }
+
+    /// L'autorisation des notifications de Pulse dans les réglages d'iOS (Paramètres → Notifications) ; provisoire et
+    /// éphémère valent une autorisation.
+    static func status() async -> NotificationAuthorizationStatus {
+        switch await UNUserNotificationCenter.current().notificationSettings().authorizationStatus {
+        case .notDetermined: .notDetermined
+        case .denied: .denied
+        case .authorized, .provisional, .ephemeral: .authorized
+        @unknown default: .denied
+        }
+    }
 }

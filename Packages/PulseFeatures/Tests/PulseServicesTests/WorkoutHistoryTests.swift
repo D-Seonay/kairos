@@ -10,6 +10,8 @@ private actor ScriptedWorkoutSource: HealthWorkoutSource {
     var runs: [CachedHealthSample]? = []
     var rides: [CachedHealthSample]? = []
     var deleted: [String] = []
+    /// Vrai : la source rend toujours une lecture complète, comme quand l'ancre stockée est illisible.
+    var alwaysFullRead = false
     private var anchors: [WorkoutSignal: [Data?]] = [:]
 
     /// Les ancres reçues pour le type, dans l'ordre des lectures.
@@ -22,11 +24,15 @@ private actor ScriptedWorkoutSource: HealthWorkoutSource {
         self.deleted = deleted
     }
 
+    func set(alwaysFullRead: Bool) {
+        self.alwaysFullRead = alwaysFullRead
+    }
+
     func workoutChanges(of signal: WorkoutSignal, since anchor: Data?, from start: Date) async throws -> HealthSampleChanges {
         anchors[signal, default: []].append(anchor)
         guard let added = signal == .run ? runs : rides else { throw Failure() }
         return HealthSampleChanges(kind: signal.kind, added: added, deletedHealthKitUUIDs: signal == .run ? deleted : [],
-                                   anchor: Data("a".utf8), isFullRead: anchor == nil)
+                                   anchor: Data("a".utf8), isFullRead: anchor == nil || alwaysFullRead)
     }
 }
 
@@ -180,6 +186,67 @@ struct WorkoutHistoryTests {
         await history.refresh(now: now)
         #expect(await source.anchorsSeen(for: .run).suffix(2) == [nil, nil])
         #expect(try await imported().count == 1)
+    }
+
+    @Test func emptyFullReadWithCurrentWindowKeepsSessions() async throws {
+        // Fenêtre à jour, mais l'ancre est illisible : la source relit tout et ne rend rien (accès révoqué).
+        await source.set(runs: [run("r1", at: "2026-11-17T07:30")])
+        await history.refresh(now: now)
+        #expect(windows.days(for: .run) == WorkoutHistory.historyDays)
+        await source.set(runs: [])
+        await source.set(alwaysFullRead: true)
+
+        #expect(await !history.refresh(now: now))
+        #expect(try await imported().map(\.healthKitUUID) == ["r1"])
+        #expect(try await cache.samples(kind: .run, from: .distantPast, to: .distantFuture).count == 1)
+    }
+
+    @Test func syncedSessionsSurviveAnEmptyFullReadWithAnEmptyCache() async throws {
+        // Second appareil ou réinstallation : les séances importées arrivent par iCloud, le cache local est vide.
+        var synced = PlanningFixtures.session("2026-11-17T07:30", kind: .run, source: .appleHealth)
+        synced.healthKitUUID = "r1"
+        synced.overallRPE = 8
+        try await workouts.save(synced)
+        await source.set(runs: [])
+
+        #expect(await !history.refresh(now: now))
+        #expect(try await imported().map(\.id) == [synced.id])
+        #expect(windows.days(for: .run) == nil)
+    }
+
+    @Test func sessionsSharingAHealthKitUUIDKeepTheOneWithUserData() async throws {
+        var oldest = PlanningFixtures.session("2026-11-17T07:30", kind: .run, source: .appleHealth)
+        oldest.healthKitUUID = "r1"
+        oldest.createdAt = TestClock.date("2026-11-17T09:00")
+        var rated = oldest
+        rated.id = UUID()
+        rated.createdAt = TestClock.date("2026-11-18T09:00")
+        rated.note = "Jambes lourdes"
+        var newest = oldest
+        newest.id = UUID()
+        newest.createdAt = TestClock.date("2026-11-19T09:00")
+        for session in [newest, oldest, rated] { try await workouts.save(session) }
+        await source.set(runs: [run("r1", at: "2026-11-17T07:30")])
+
+        #expect(await history.refresh(now: now))
+        let sessions = try await imported()
+        #expect(sessions.map(\.id) == [rated.id])
+        #expect(sessions.first?.note == "Jambes lourdes")
+    }
+
+    @Test func sessionsSharingAHealthKitUUIDWithoutUserDataKeepTheOldest() async throws {
+        var oldest = PlanningFixtures.session("2026-11-17T07:30", kind: .run, source: .appleHealth)
+        oldest.healthKitUUID = "r1"
+        oldest.createdAt = TestClock.date("2026-11-17T09:00")
+        var copy = oldest
+        copy.id = UUID()
+        copy.createdAt = TestClock.date("2026-11-18T09:00")
+        try await workouts.save(copy)
+        try await workouts.save(oldest)
+        await source.set(runs: [run("r1", at: "2026-11-17T07:30")])
+
+        #expect(await history.refresh(now: now))
+        #expect(try await imported().map(\.id) == [oldest.id])
     }
 
     @Test func emptyFirstReadWithEmptyCacheIsRetained() async throws {

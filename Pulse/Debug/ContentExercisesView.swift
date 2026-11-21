@@ -1,3 +1,4 @@
+#if DEBUG
 import PulseContent
 import PulseDomain
 import SwiftUI
@@ -25,3 +26,4 @@ struct ContentExercisesView: View {
         .navigationTitle(String(localized: "Exercices"))
     }
 }
+#endif

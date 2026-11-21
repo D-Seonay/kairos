@@ -93,6 +93,7 @@ struct RefresherFixture {
     let activity = InMemoryDayActivityLog()
     let scheduled = InMemoryScheduledDayRepository()
     let workouts = InMemoryWorkoutRepository()
+    let measurements = InMemoryBodyMeasurementRepository()
     let clock: MutableClock
     let refresher: DayRefresher
 
@@ -100,11 +101,13 @@ struct RefresherFixture {
     /// avec `publishGate`, chaque publication de l'instantané. Avec `planning`, le passage applique les règles anti-interférence
     /// et publie la série et la semaine.
     init(scenario: HealthScenario, at start: String = "2026-11-02T08:00", holdingNotificationsAt gate: Gate? = nil,
-         holdingPublishesAt publishGate: Gate? = nil, planning: Bool = false) {
+         holdingPublishesAt publishGate: Gate? = nil, planning: Bool = false,
+         bodySamples: [BodySignal: [CachedHealthSample]] = [:]) {
         let calendar = TestClock.calendar
         let clock = MutableClock(start)
         let recovery = InMemoryRecoveryRepository(calendar: calendar)
-        let scenarioSource = ScenarioHealthSource(scenario: scenario, now: clock.now, calendar: calendar)
+        var scenarioSource = ScenarioHealthSource(scenario: scenario, now: clock.now, calendar: calendar)
+        scenarioSource.bodySamples = bodySamples
         let source = SwitchableHealthSource(scenarioSource)
         let notifications = StubNotificationScheduler()
         let scheduler: any NotificationScheduling = gate.map { HoldingNotificationScheduler(inner: notifications, gate: $0) }
@@ -130,6 +133,8 @@ struct RefresherFixture {
             workoutHistory: WorkoutHistory(source: scenarioSource, cache: InMemoryHealthSampleCache(), workouts: workouts,
                                            profiles: profiles, windows: InMemoryHealthReadWindowStore(),
                                            calendar: calendar),
+            bodyHistory: BodyHistory(source: scenarioSource, cache: InMemoryHealthSampleCache(), measurements: measurements,
+                                     profiles: profiles, windows: InMemoryHealthReadWindowStore(), calendar: calendar),
             antiInterference: rules, planning: planningService, calendar: calendar, now: { clock.now })
     }
 

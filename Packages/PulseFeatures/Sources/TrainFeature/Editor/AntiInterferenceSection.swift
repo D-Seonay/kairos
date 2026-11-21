@@ -2,12 +2,19 @@ import PulseDesignSystem
 import PulseDomain
 import SwiftUI
 
-/// Les trois règles anti-interférence de l'éditeur de programme (maquette `programme`), chacune désactivable (spec M6 §9).
-struct AntiInterferenceSection: View {
+/// Les trois règles anti-interférence (maquette `programme`), chacune désactivable (spec M6 §9) : une `Section` de liste, dans
+/// l'éditeur de programme et dans les Paramètres (spec M7 §15).
+public struct AntiInterferenceSection: View {
     let disabled: [AntiInterferenceRule]
     let onChange: (AntiInterferenceRule, Bool) -> Void
 
-    var body: some View {
+    /// `onChange(règle, activée)` part à chaque bascule.
+    public init(disabled: [AntiInterferenceRule], onChange: @escaping (AntiInterferenceRule, Bool) -> Void) {
+        self.disabled = disabled
+        self.onChange = onChange
+    }
+
+    public var body: some View {
         Section {
             ForEach(AntiInterferenceRule.allCases, id: \.self) { rule in
                 Toggle(isOn: binding(for: rule)) {
@@ -37,7 +44,7 @@ struct AntiInterferenceSection: View {
         Binding(get: { !disabled.contains(rule) }, set: { onChange(rule, $0) })
     }
 
-    static func title(of rule: AntiInterferenceRule) -> String {
+    public static func title(of rule: AntiInterferenceRule) -> String {
         switch rule {
         case .noIntenseRunAfterHeavyLegs: String(localized: "Jambes lourdes, puis course intense", bundle: .module)
         case .sameDayOrdering: String(localized: "Deux séances le même jour", bundle: .module)
@@ -45,7 +52,7 @@ struct AntiInterferenceSection: View {
         }
     }
 
-    static func detail(of rule: AntiInterferenceRule) -> String {
+    public static func detail(of rule: AntiInterferenceRule) -> String {
         switch rule {
         case .noIntenseRunAfterHeavyLegs:
             String(localized: "Pas de fractionné ni de sortie longue dans les 36 h qui suivent une séance de jambes lourde.",

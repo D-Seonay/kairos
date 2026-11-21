@@ -1,6 +1,8 @@
+import PulseDesignSystem
 import SwiftUI
 
-/// Confirmation de la suppression totale (spec M2 §7.1).
+/// Confirmation de la suppression totale (spec M2 §7.1). Un échec garde la feuille ouverte avec son message ; elle ne se ferme
+/// (et `onErased` ne part) qu'une fois tout supprimé.
 struct EraseConfirmationView: View {
     static let confirmationWord = "SUPPRIMER"
 
@@ -33,11 +35,17 @@ struct EraseConfirmationView: View {
                         Button(String(localized: "Supprimer définitivement"), role: .destructive) {
                             Task {
                                 await model.erase(includeAppleHealth: includeAppleHealth)
+                                guard model.didErase else { return }
                                 dismiss()
-                                if model.didErase { await onErased() }
+                                await onErased()
                             }
                         }
                         .disabled(typed != Self.confirmationWord)
+                    }
+                    if let error = model.lastError, !model.isBusy {
+                        Label(error, systemImage: "exclamationmark.triangle")
+                            .font(.footnote)
+                            .foregroundStyle(PulsePalette.bad)
                     }
                 }
             }

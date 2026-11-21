@@ -34,6 +34,23 @@ struct InMemoryRepositoriesTests {
         #expect(try await repository.load()?.id == newer.id)
     }
 
+    @Test func bodyMeasurementsAreSoftDeleted() async throws {
+        func measurement(_ text: String, _ weight: Double) -> BodyMeasurement {
+            BodyMeasurement(date: TestClock.date(text), weightKg: weight, source: .manual, createdAt: day, updatedAt: day)
+        }
+        let early = measurement("2026-11-02T08:00", 78)
+        let middle = measurement("2026-11-03T08:00", 77.5)
+        let late = measurement("2026-11-04T08:00", 77)
+        let repository = InMemoryBodyMeasurementRepository([late, early])
+        try await repository.save(middle)
+
+        // `from` inclus, `to` exclu, trié par date.
+        let all = try await repository.measurements(from: early.date, to: late.date)
+        #expect(all.map(\.id) == [early.id, middle.id])
+        try await repository.delete(id: early.id)
+        #expect(try await repository.measurements(from: .distantPast, to: .distantFuture).map(\.id) == [middle.id, late.id])
+    }
+
     @Test func programListingsExcludeDeletedAndArchived() async throws {
         let repository = InMemoryProgramRepository()
         let active = Program(name: "A", sessionsPerWeek: 3, weekLayout: [], days: [], createdAt: day, updatedAt: day)

@@ -19,6 +19,13 @@ struct StatsRepositories: Sendable {
     }
 }
 
+extension StatsRepositories {
+    func profileService(now: Date = StatsFixtures.now) -> ProfileService {
+        ProfileService(profiles: profiles, programs: programs, workouts: workouts, recoveries: recoveries, records: records,
+                       userExercises: userExercises, library: .bundled, calendar: TestClock.calendar, now: { now })
+    }
+}
+
 /// Un exercice d'une séance type : la charge de départ et son gain par semaine.
 struct StatsLift {
     var id: String

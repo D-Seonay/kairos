@@ -1,5 +1,6 @@
 import LiveSessionFeature
 import PlanningFeature
+import ProfileFeature
 import PulseDesignSystem
 import PulseServices
 import StatsFeature
@@ -26,12 +27,12 @@ struct MainTabView: View {
     let train: TrainModel
     let planning: PlanningModel
     let stats: StatsModel
+    let profile: ProfileModel
     @Bindable var liveSession: LiveSessionCoordinator
     /// La saisie d'une séance passée, ouverte depuis l'onglet Séance.
     @Bindable var pastSession: PastSessionCoordinator
     let supplements: SupplementsModel
-    let firstName: String?
-    /// Appelé après une suppression totale réussie depuis l'écran « Données ».
+    /// Appelé après une suppression totale réussie depuis « Mes données » (ou l'écran de debug « Données »).
     let onErased: () async -> Void
 
     var body: some View {
@@ -77,7 +78,8 @@ struct MainTabView: View {
                 StatsScreen(model: stats)
             }
             Tab(String(localized: "Profil"), systemImage: "person.crop.circle", value: Item.profile) {
-                ProfileHubView(dependencies: dependencies, supplements: supplements, firstName: firstName, onErased: onErased)
+                ProfileScreen(model: profile, supplements: supplements, screens: profileScreens,
+                              onOpenStats: { router.selectedTab = .stats }, onOpenRecords: openRecords, onErased: onErased)
             }
         }
         // La barre d'onglets se replie quand on descend : le contenu et l'action ancrée de l'accueil gagnent de la place.
@@ -101,6 +103,35 @@ struct MainTabView: View {
         Task { await pastSession.start(launch) }
     }
 
+    /// « Tout voir » du mur des records : l'onglet Stats, sur la vue Records.
+    private func openRecords() {
+        stats.view = .records
+        router.selectedTab = .stats
+    }
+
+    /// Les écrans de la cible app que l'onglet Profil pousse : le diagnostic Apple Santé (Paramètres), la confirmation de
+    /// suppression et, en Debug seulement, l'écran « Données » (Mes données).
+    private var profileScreens: ProfileAppScreens {
+        let dependencies = dependencies
+        return ProfileAppScreens(
+            healthDiagnostics: {
+                AnyView(HealthDiagnosticsView(model: HealthDiagnosticsModel(dependencies: dependencies, today: dependencies.now())))
+            },
+            dataDebug: dataDebugScreen,
+            eraseConfirmation: { onErased in AnyView(EraseSheet(dependencies: dependencies, onErased: onErased)) })
+    }
+
+    /// L'écran de debug « Données » (données d'exemple, inspection des tables) n'existe pas en Release (spec M7 §16).
+    private var dataDebugScreen: (() -> AnyView)? {
+        #if DEBUG
+        let dependencies = dependencies
+        let onErased = onErased
+        return { AnyView(DataDebugView(model: DataDebugModel(dependencies: dependencies), onErased: onErased)) }
+        #else
+        return nil
+        #endif
+    }
+
     /// Rouvre la séance en cours, sur l'alerte de la séance oubliée si elle est restée ouverte plus de 3 h.
     private func resume() {
         Task { await liveSession.resume() }
@@ -116,6 +147,8 @@ struct MainTabView: View {
             await dependencies.supplementService.rescheduleReminders()
             // Les statistiques relisent tout l'historique : seulement une fois l'onglet ouvert (son `.task` charge la première fois).
             if stats.hasLoaded { await stats.load() }
+            // Une séance finie change la série, le nombre de séances, les records et les badges du profil.
+            if profile.hasLoaded { await profile.load() }
         }
     }
 

@@ -20,6 +20,18 @@ struct DayRefresherTests {
         guard case .needsCheckIn? = refresh.score else { throw RefreshTestFailure.notNeedingCheckIn(refresh.score) }
     }
 
+    @Test func passReadsBodyAfterWorkouts() async throws {
+        let start = TestClock.date("2026-11-01T07:30")
+        let weight = CachedHealthSample(kind: .bodyMass, start: start, end: start, value: 78.2, healthKitUUID: "w1", fetchedAt: start)
+        let fixture = RefresherFixture(scenario: .goodNight, bodySamples: [.bodyMass: [weight]])
+        try await fixture.adopt()
+
+        await fixture.refresher.refresh(origin: .foreground)
+
+        let stored = try await fixture.measurements.measurements(from: .distantPast, to: .distantFuture)
+        #expect(stored.map(\.weightKg) == [78.2] && stored.first?.source == .appleHealth)
+    }
+
     @Test func foregroundRefreshScoresPlansAndPublishes() async throws {
         let fixture = RefresherFixture(scenario: .goodNight)
         try await fixture.adopt()

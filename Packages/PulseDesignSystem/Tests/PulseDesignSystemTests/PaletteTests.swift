@@ -28,6 +28,11 @@ import Testing
     #expect(steel.softOpacity == 0.1)
 }
 
+@Test func themeTitlesAreIvoryAndSteel() {
+    #expect(Theme.amber.title == "Ivoire")
+    #expect(Theme.amethyst.title == "Acier")
+}
+
 @Test func darkTokensFollowTheSilverDirection() {
     #expect(PulsePalette.backgroundRGBA == PulseRGBA(hex: 0x000000))
     #expect(PulsePalette.surfaceRGBA == PulseRGBA(hex: 0x0E0E0F))
