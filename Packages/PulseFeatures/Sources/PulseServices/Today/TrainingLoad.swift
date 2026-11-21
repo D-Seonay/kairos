@@ -18,7 +18,7 @@ public enum TrainingLoad {
         return LoadCalculator(calendar: calendar).acwr(sessions: counted, asOf: now, historyStart: historyStart)
     }
 
-    private static func loadSession(_ session: WorkoutSession) -> LoadSession? {
+    static func loadSession(_ session: WorkoutSession) -> LoadSession? {
         guard let minutes = minutes(of: session), minutes > 0 else { return nil }
         let rpe = session.overallRPE ?? session.estimatedRPE ?? defaultRPE
         return LoadSession(date: session.startedAt, minutes: minutes, rpe: session.kind == .ride ? min(rpe, rideRPECap) : rpe)
