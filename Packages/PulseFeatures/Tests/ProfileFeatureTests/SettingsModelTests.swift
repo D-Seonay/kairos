@@ -115,6 +115,20 @@ struct SettingsModelTests {
         }
     }
 
+    @Test func quickPlateTapsBothLand() async throws {
+        _ = try await storeProfile()
+        let model = SettingsModel(environment: environment()) { _ in }
+        await model.load()
+
+        let first = Task { await model.update { $0.setPlate(25, available: false) } }
+        let second = Task { await model.update { $0.setPlate(0.5, available: true) } }
+        await first.value
+        await second.value
+
+        #expect(try await profiles.load()?.availablePlatesKg == [20, 15, 10, 5, 2.5, 1.25, 0.5])
+        #expect(model.profile?.availablePlatesKg == [20, 15, 10, 5, 2.5, 1.25, 0.5])
+    }
+
     @Test func heightTextIsParsedBeforeSaving() async throws {
         _ = try await storeProfile()
         let model = SettingsModel(environment: environment()) { _ in }

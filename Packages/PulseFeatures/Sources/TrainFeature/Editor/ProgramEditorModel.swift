@@ -87,9 +87,7 @@ public final class ProgramEditorModel {
     /// passage du jour.
     public func setRule(_ rule: AntiInterferenceRule, enabled: Bool) async throws {
         var profile = try await requireProfile()
-        var disabled = profile.antiInterferenceRulesDisabled.filter { $0 != rule }
-        if !enabled { disabled.append(rule) }
-        profile.antiInterferenceRulesDisabled = AntiInterferenceRule.allCases.filter(disabled.contains)
+        profile.setRule(rule, enabled: enabled)
         profile.updatedAt = environment.now()
         try await environment.profiles.save(profile)
         disabledRules = profile.antiInterferenceRulesDisabled

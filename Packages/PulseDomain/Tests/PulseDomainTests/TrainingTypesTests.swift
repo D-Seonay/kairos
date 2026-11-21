@@ -21,6 +21,20 @@ private func roundTrip<T: Codable & Equatable>(_ value: T) throws -> Bool {
     #expect(profile.onboardingCompletedAt == nil && profile.activeProgramID == nil)
 }
 
+@Test func setRuleKeepsDisabledRulesInCatalogueOrder() {
+    var profile = UserProfile()
+    profile.setRule(.fullRestDay, enabled: false)
+    profile.setRule(.noIntenseRunAfterHeavyLegs, enabled: false)
+    #expect(profile.antiInterferenceRulesDisabled == [.noIntenseRunAfterHeavyLegs, .fullRestDay])
+
+    profile.setRule(.fullRestDay, enabled: false)
+    #expect(profile.antiInterferenceRulesDisabled == [.noIntenseRunAfterHeavyLegs, .fullRestDay], "Pas de doublon")
+
+    profile.setRule(.noIntenseRunAfterHeavyLegs, enabled: true)
+    profile.setRule(.sameDayOrdering, enabled: true)
+    #expect(profile.antiInterferenceRulesDisabled == [.fullRestDay])
+}
+
 @Test func programFromTemplateCopiesDaysAndWeek() throws {
     let template = ProgramTemplate(
         id: "ppl-3", name: LocalizedText(fr: "PPL 3 jours"), summary: LocalizedText(fr: "Résumé"),

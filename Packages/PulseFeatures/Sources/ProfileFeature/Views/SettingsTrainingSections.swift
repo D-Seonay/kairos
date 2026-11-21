@@ -64,6 +64,13 @@ struct SessionSettingsSection: View {
             pills(String(localized: "Repos par défaut", bundle: .module)) {
                 ChoicePills(options: SettingsService.restChoices.map { ($0, String(localized: "\($0) s", bundle: .module)) },
                             selection: model.selection(profile.defaultRestSeconds) { $0.defaultRestSeconds = $1 })
+                // Le moteur ne prend ce repos que pour un exercice sans repos au catalogue ; les lignes de routine gardent le leur.
+                Text(String(
+                    localized: "S'applique aux exercices sans repos conseillé. Les exercices de ton programme gardent leur propre repos.",
+                    bundle: .module))
+                    .font(.footnote)
+                    .foregroundStyle(PulsePalette.text2)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             pills(String(localized: "Barre (kg)", bundle: .module)) {
                 ChoicePills(options: Self.barChoices.map { ($0, Self.kilos($0)) },
@@ -87,9 +94,18 @@ struct SessionSettingsSection: View {
         .padding(.vertical, 6)
     }
 
-    /// Un disque absent des puces (2 kg, 1 kg réglés depuis la séance) reste dans l'ensemble.
+    /// Chaque toucher écrit un changement, pas l'ensemble affiché : le disque basculé est ajouté ou retiré des disques stockés,
+    /// donc deux touchers rapprochés ne s'effacent pas. Un disque absent des puces (2 kg, 1 kg réglés depuis la séance) reste.
     private var plates: Binding<Set<Double>> {
-        model.binding(Set(profile.availablePlatesKg)) { $0.availablePlatesKg = Array($1) }
+        let shown = Set(profile.availablePlatesKg)
+        return Binding(get: { shown }, set: { [model] newValue in
+            for plate in newValue.subtracting(shown) {
+                Task { await model.update { $0.setPlate(plate, available: true) } }
+            }
+            for plate in shown.subtracting(newValue) {
+                Task { await model.update { $0.setPlate(plate, available: false) } }
+            }
+        })
     }
 
     /// « 2,5 », « 1,25 » : l'unité est dans le titre.
@@ -198,5 +214,13 @@ extension SettingsModel {
             guard let newValue else { return }
             Task { await self.update { apply(&$0, newValue) } }
         })
+    }
+}
+
+extension UserProfile {
+    /// Ajoute ou retire un disque des disques disponibles ; `SettingsService` trie et filtre ensuite.
+    mutating func setPlate(_ plate: Double, available: Bool) {
+        availablePlatesKg.removeAll { $0 == plate }
+        if available { availablePlatesKg.append(plate) }
     }
 }

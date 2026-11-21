@@ -58,14 +58,6 @@ struct SettingsScreen: View {
     }
 }
 
-extension UserProfile {
-    /// Active ou coupe une règle anti-interférence, sans doublon dans la liste des règles coupées.
-    mutating func setRule(_ rule: AntiInterferenceRule, enabled: Bool) {
-        antiInterferenceRulesDisabled.removeAll { $0 == rule }
-        if !enabled { antiInterferenceRulesDisabled.append(rule) }
-    }
-}
-
 // MARK: - Affichage
 
 /// L'ambiance Ivoire ou Acier. Le thème clair reste forcé : pas de choix Sombre / Clair / Auto (spec M7 §15).
@@ -80,8 +72,6 @@ struct DisplaySettingsSection: View {
                 .padding(.vertical, 6)
         } header: {
             Text(String(localized: "Affichage", bundle: .module))
-        } footer: {
-            Text(String(localized: "Ivoire est chaud, Acier est froid. Pulse reste sur papier clair.", bundle: .module))
         }
         .listRowBackground(PulsePalette.surface)
     }

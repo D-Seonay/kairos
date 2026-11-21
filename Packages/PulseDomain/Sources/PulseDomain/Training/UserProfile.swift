@@ -159,3 +159,13 @@ public struct UserProfile: Sendable, Equatable, Codable, Identifiable {
         self.updatedAt = updatedAt
     }
 }
+
+extension UserProfile {
+    /// Active ou coupe une règle anti-interférence. Les règles coupées restent dans l'ordre de `AntiInterferenceRule.allCases`,
+    /// sans doublon : l'éditeur de programme et les Paramètres écrivent la même liste.
+    public mutating func setRule(_ rule: AntiInterferenceRule, enabled: Bool) {
+        var disabled = antiInterferenceRulesDisabled.filter { $0 != rule }
+        if !enabled { disabled.append(rule) }
+        antiInterferenceRulesDisabled = AntiInterferenceRule.allCases.filter(disabled.contains)
+    }
+}
