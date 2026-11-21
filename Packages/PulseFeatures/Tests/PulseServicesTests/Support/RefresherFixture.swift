@@ -134,7 +134,7 @@ struct RefresherFixture {
                                            profiles: profiles, windows: InMemoryHealthReadWindowStore(),
                                            calendar: calendar),
             bodyHistory: BodyHistory(source: scenarioSource, cache: InMemoryHealthSampleCache(), measurements: measurements,
-                                     windows: InMemoryHealthReadWindowStore(), calendar: calendar),
+                                     profiles: profiles, windows: InMemoryHealthReadWindowStore(), calendar: calendar),
             antiInterference: rules, planning: planningService, calendar: calendar, now: { clock.now })
     }
 

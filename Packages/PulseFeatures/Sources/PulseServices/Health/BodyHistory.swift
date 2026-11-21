@@ -11,14 +11,16 @@ public struct BodyHistory: Sendable {
     private let source: any HealthBodySource
     private let cache: any HealthSampleCache
     private let measurements: any BodyMeasurementRepository
+    private let profiles: any ProfileRepository
     private let windows: any HealthReadWindowStore
     private let calendar: Calendar
 
     public init(source: any HealthBodySource, cache: any HealthSampleCache, measurements: any BodyMeasurementRepository,
-                windows: any HealthReadWindowStore, calendar: Calendar) {
+                profiles: any ProfileRepository, windows: any HealthReadWindowStore, calendar: Calendar) {
         self.source = source
         self.cache = cache
         self.measurements = measurements
+        self.profiles = profiles
         self.windows = windows
         self.calendar = calendar
     }
@@ -32,6 +34,10 @@ public struct BodyHistory: Sendable {
         for signal in BodySignal.allCases {
             guard await sync(signal, from: start, fetchedAt: now) else { continue }
             changed = await align(signal, from: start, now: now) || changed
+        }
+        // `UserProfile.weightKg` suit la tendance : un échec ici ne change pas ce que le passage rend.
+        if changed {
+            try? await ProfileWeightSync.apply(measurements: measurements, profiles: profiles, now: now, calendar: calendar)
         }
         return changed
     }

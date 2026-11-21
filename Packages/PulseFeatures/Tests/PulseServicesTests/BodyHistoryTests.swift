@@ -29,11 +29,13 @@ struct BodyHistoryTests {
     private let source = ScriptedBodySource()
     private let cache = InMemoryHealthSampleCache()
     private let measurements = InMemoryBodyMeasurementRepository()
+    private let profiles = InMemoryProfileRepository()
     private let windows = InMemoryHealthReadWindowStore()
     private let now = TestClock.date("2026-11-20T12:00")
 
     private var history: BodyHistory {
-        BodyHistory(source: source, cache: cache, measurements: measurements, windows: windows, calendar: TestClock.calendar)
+        BodyHistory(source: source, cache: cache, measurements: measurements, profiles: profiles, windows: windows,
+                    calendar: TestClock.calendar)
     }
 
     private func sample(_ signal: BodySignal, _ uuid: String, _ value: Double, at text: String) -> CachedHealthSample {
@@ -128,5 +130,20 @@ struct BodyHistoryTests {
         await source.set([:])
         await history.refresh(now: now)
         #expect(windows.days(for: .bodyMass) == BodyHistory.historyDays)
+    }
+
+    @Test func alignmentSyncsProfileWeight() async throws {
+        try await profiles.save(UserProfile(weightKg: 80, createdAt: now, updatedAt: now))
+        await source.set([.bodyMass: [sample(.bodyMass, "w1", 77.9, at: "2026-11-19T07:30")]])
+
+        #expect(await history.refresh(now: now))
+        #expect(try await profiles.load()?.weightKg == 77.9)
+    }
+
+    @Test func missingProfileDoesNotMakeRefreshFail() async throws {
+        await source.set([.bodyMass: [sample(.bodyMass, "w1", 77.9, at: "2026-11-19T07:30")]])
+
+        #expect(await history.refresh(now: now))
+        #expect(try await profiles.load() == nil)
     }
 }
