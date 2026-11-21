@@ -59,9 +59,6 @@ public struct LoadStats: Sendable, Equatable {
     public var bars: [LoadBar]
     public var totals: LoadTotals
 
-    /// Les bornes de la zone optimale (`ACWRZone`).
-    private static let optimalRange = 0.8...1.3
-
     // swiftlint:disable:next function_parameter_count
     public static func make(sessions: [WorkoutSession], onboardingCompletedAt: Date?, deloadUntil: Date?, period: StatsPeriod,
                             now: Date, calendar: Calendar) -> LoadStats {
@@ -69,13 +66,15 @@ public struct LoadStats: Sendable, Equatable {
         let historyStart = ([onboardingCompletedAt] + sessions.map(\.startedAt)).compactMap { $0 }.min() ?? now
         let counted = sessions
             .filter { $0.status == .completed || $0.status == .abandoned }
-            .compactMap { session in TrainingLoad.loadSession(session).map { (session: session, load: $0) } }
-        let ratios = DailyRatios(loads: counted.map(\.load), historyStart: historyStart, calendar: calendar)
+            .map { CountedSession(session: $0, load: TrainingLoad.loadSession($0)) }
+        let ratios = DailyRatios(loads: counted.compactMap(\.load), historyStart: historyStart, calendar: calendar)
 
         let today = TrainingLoad.acwr(sessions: sessions, onboardingCompletedAt: onboardingCompletedAt, now: now, calendar: calendar)
         let weekBefore = calendar.date(byAdding: .day, value: -7, to: now) ?? now
         let interval = period.interval(now: now, calendar: calendar)
         let inPeriod = counted.filter { interval.start <= $0.session.startedAt && $0.session.startedAt < interval.end }
+        let barStart = bucketStart(of: interval.start, bucket: period.loadBucket, calendar: calendar)
+        let inBars = counted.filter { barStart <= $0.session.startedAt && $0.session.startedAt < interval.end }
 
         return LoadStats(
             today: today,
@@ -83,7 +82,7 @@ public struct LoadStats: Sendable, Equatable {
             ratioPoints: ratioPoints(ratios: ratios, interval: interval, bucket: period.chartBucket, calendar: calendar),
             daysUntilRatio: daysUntilRatio(historyStart: historyStart, now: now, calendar: calendar),
             verdict: verdict(ratios: ratios, deloadUntil: deloadUntil, now: now, calendar: calendar),
-            bars: bars(of: inPeriod, interval: interval, bucket: period.loadBucket, calendar: calendar),
+            bars: bars(of: inBars, interval: interval, bucket: period.loadBucket, calendar: calendar),
             totals: totals(of: inPeriod))
     }
 
@@ -110,20 +109,24 @@ public struct LoadStats: Sendable, Equatable {
     private static func verdict(ratios: DailyRatios, deloadUntil: Date?, now: Date, calendar: Calendar) -> LoadVerdict? {
         if let deloadUntil, deloadUntil >= calendar.startOfDay(for: now) { return .deload(until: deloadUntil) }
         guard let ratio = ratios.result(on: now)?.ratio else { return nil }
-        if ratio < optimalRange.lowerBound { return .low }
-        if ratio > optimalRange.upperBound {
-            return .elevated(days: streak(of: ratios, endingOn: now, calendar: calendar) { $0 > optimalRange.upperBound })
+        switch ACWRZone(ratio: ratio) {
+        case .undertraining:
+            return .low
+        case .elevated, .risk:
+            return .elevated(days: streak(of: ratios, endingOn: now, calendar: calendar) { $0 != .optimal && $0 != .undertraining })
+        case .optimal:
+            break
         }
-        let weeks = streak(of: ratios, endingOn: now, calendar: calendar) { optimalRange.contains($0) } / 7
+        let weeks = streak(of: ratios, endingOn: now, calendar: calendar) { $0 == .optimal } / 7
         return weeks >= 1 ? .optimal(weeks: weeks) : .steady
     }
 
     /// Le nombre de jours d'affilée, jusqu'à aujourd'hui, dont le ratio vérifie `matches` ; la série s'arrête au premier jour
     /// sans ratio.
-    private static func streak(of ratios: DailyRatios, endingOn now: Date, calendar: Calendar, matches: (Double) -> Bool) -> Int {
+    private static func streak(of ratios: DailyRatios, endingOn now: Date, calendar: Calendar, matches: (ACWRZone) -> Bool) -> Int {
         var count = 0
         var day = calendar.startOfDay(for: now)
-        while let ratio = ratios.result(on: day)?.ratio, matches(ratio) {
+        while let ratio = ratios.result(on: day)?.ratio, matches(ACWRZone(ratio: ratio)) {
             count += 1
             guard let previous = calendar.date(byAdding: .day, value: -1, to: day) else { break }
             day = previous
@@ -133,13 +136,16 @@ public struct LoadStats: Sendable, Equatable {
 
     // MARK: - Barres et totaux
 
-    /// Une barre par grain sur toute la période, les grains vides compris. Seules les séances de la période comptent : la
-    /// première semaine d'une période qui commence en milieu de semaine est donc partielle.
-    private static func bars(of sessions: [(session: WorkoutSession, load: LoadSession)], interval: DateInterval, bucket: StatsBucket,
-                             calendar: Calendar) -> [LoadBar] {
-        func start(of date: Date) -> Date {
-            bucket == .day ? calendar.startOfDay(for: date) : WeekSchedule.weekStart(of: date, calendar: calendar)
-        }
+    /// Le début du jour, ou du lundi de la semaine, qui contient `date`.
+    private static func bucketStart(of date: Date, bucket: StatsBucket, calendar: Calendar) -> Date {
+        bucket == .day ? calendar.startOfDay(for: date) : WeekSchedule.weekStart(of: date, calendar: calendar)
+    }
+
+    /// Une barre par grain sur toute la période, les grains vides compris. Chaque barre couvre son grain entier, du lundi au
+    /// dimanche pour une semaine : la première, quand la période commence en milieu de semaine, compte donc aussi les séances
+    /// d'avant la période, pour ne pas afficher un creux qui n'existe pas. Les totaux, eux, restent sur la période seule.
+    private static func bars(of sessions: [CountedSession], interval: DateInterval, bucket: StatsBucket, calendar: Calendar) -> [LoadBar] {
+        func start(of date: Date) -> Date { bucketStart(of: date, bucket: bucket, calendar: calendar) }
         var bars: [Date: LoadBar] = [:]
         var cursor = start(of: interval.start)
         let step = bucket == .day ? 1 : 7
@@ -148,25 +154,32 @@ public struct LoadStats: Sendable, Equatable {
             guard let next = calendar.date(byAdding: .day, value: step, to: cursor) else { break }
             cursor = next
         }
-        for (session, load) in sessions {
-            let key = start(of: session.startedAt)
-            switch session.kind {
-            case .strength: bars[key]?.strength += load.load
-            case .run: bars[key]?.run += load.load
-            case .ride: bars[key]?.ride += load.load
+        for counted in sessions {
+            guard let load = counted.load?.load else { continue }
+            let key = start(of: counted.session.startedAt)
+            switch counted.session.kind {
+            case .strength: bars[key]?.strength += load
+            case .run: bars[key]?.run += load
+            case .ride: bars[key]?.ride += load
             }
         }
         return bars.values.sorted { $0.start < $1.start }
     }
 
-    private static func totals(of sessions: [(session: WorkoutSession, load: LoadSession)]) -> LoadTotals {
-        let totalLoad = sessions.reduce(0) { $0 + $1.load.load }
-        let strengthLoad = sessions.filter { $0.session.kind == .strength }.reduce(0) { $0 + $1.load.load }
+    /// Le nombre de séances, le tonnage et les distances viennent de toutes les séances comptées, même sans durée ; les minutes,
+    /// et la part de musculation de la charge, des seules séances dont la durée est connue.
+    private static func totals(of sessions: [CountedSession]) -> LoadTotals {
+        let loads = sessions.compactMap { counted in counted.load.map { (kind: counted.session.kind, load: $0) } }
+        let totalLoad = loads.reduce(0) { $0 + $1.load.load }
+        let strengthLoad = loads.filter { $0.kind == .strength }.reduce(0) { $0 + $1.load.load }
+        func distance(_ kind: SessionKind) -> Double {
+            sessions.filter { $0.session.kind == kind }.reduce(0) { $0 + ($1.session.distanceMeters ?? 0) }
+        }
         return LoadTotals(
             tonnageKg: sessions.filter { $0.session.kind == .strength }.reduce(0) { $0 + $1.session.tonnageKg },
-            runMeters: sessions.filter { $0.session.kind == .run }.reduce(0) { $0 + ($1.session.distanceMeters ?? 0) },
-            rideMeters: sessions.filter { $0.session.kind == .ride }.reduce(0) { $0 + ($1.session.distanceMeters ?? 0) },
-            minutes: sessions.reduce(0) { $0 + $1.load.minutes },
+            runMeters: distance(.run),
+            rideMeters: distance(.ride),
+            minutes: loads.reduce(0) { $0 + $1.load.minutes },
             sessions: sessions.count,
             strengthShare: totalLoad > 0 ? strengthLoad / totalLoad : nil)
     }
@@ -181,6 +194,12 @@ public struct LoadStats: Sendable, Equatable {
         }
         return days
     }
+}
+
+/// Une séance comptée (terminée ou abandonnée) et sa charge, `nil` quand sa durée est inconnue.
+private struct CountedSession {
+    let session: WorkoutSession
+    let load: LoadSession?
 }
 
 /// Le ratio aigu / chronique d'un jour donné, calculé par `LoadCalculator` sur les seules séances de ses 28 jours : un

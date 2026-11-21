@@ -120,6 +120,42 @@ struct LoadStatsTests {
         #expect(result.totals.strengthShare == strengthLoad / total)
     }
 
+    /// Une séance comptée sans durée calculable garde son tonnage, sa distance et sa place dans le nombre de séances ; seuls les
+    /// minutes et la charge l'ignorent.
+    @Test func sessionsWithoutDurationStillCount() {
+        func noDuration(daysAgo: Int, kind: SessionKind, status: SessionStatus, tonnage: Double, distance: Double?) -> WorkoutSession {
+            let start = day(daysAgo).addingTimeInterval(7 * 3_600)
+            return WorkoutSession(startedAt: start, endedAt: nil, kind: kind, source: .pulse, status: status, title: "Séance",
+                                  tonnageKg: tonnage, distanceMeters: distance, createdAt: start, updatedAt: start)
+        }
+        let sessions = [
+            session(daysAgo: 5, tonnage: 500),
+            noDuration(daysAgo: 4, kind: .strength, status: .completed, tonnage: 700, distance: nil),
+            noDuration(daysAgo: 2, kind: .strength, status: .abandoned, tonnage: 300, distance: nil),
+            noDuration(daysAgo: 1, kind: .run, status: .completed, tonnage: 0, distance: 5_000)
+        ]
+        let result = stats(sessions, historyDays: 40, period: .month)
+        #expect(result.totals.sessions == 4)
+        #expect(result.totals.tonnageKg == 1_500)
+        #expect(result.totals.runMeters == 5_000)
+        #expect(result.totals.minutes == 60)
+        #expect(result.totals.strengthShare == 1)
+    }
+
+    /// La première semaine d'une période qui commence en milieu de semaine compte ses séances d'avant la période.
+    @Test func firstWeeklyBarCoversItsWholeWeek() throws {
+        // Le mois commence le jeudi 22 octobre : la barre du lundi 19 octobre reprend la séance du 20, hors période.
+        let monday = TestClock.date("2026-10-19T00:00")
+        let before = session(daysAgo: 31)
+        #expect(before.startedAt == day(31).addingTimeInterval(7 * 3_600))
+        #expect(calendar.component(.weekday, from: before.startedAt) == 3)
+        let result = stats([before], historyDays: 40, period: .month)
+        let first = try #require(result.bars.first)
+        #expect(first.start == monday)
+        #expect(first.strength == 60 * 7)
+        #expect(result.totals.sessions == 0)
+    }
+
     @Test func totalsWithoutAnySessionAreEmpty() {
         let result = stats([], historyDays: nil)
         #expect(result.totals == LoadTotals(tonnageKg: 0, runMeters: 0, rideMeters: 0, minutes: 0, sessions: 0, strengthShare: nil))
