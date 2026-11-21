@@ -4,21 +4,23 @@ import PulseDomain
 /// Lit les courses et les vélos d'Apple Santé dans le cache local, puis les aligne sur les séances (spec M6 §3) : un
 /// entraînement nouveau devient une séance `appleHealth`, un entraînement effacé dans Apple Santé emporte sa séance.
 public struct WorkoutHistory: Sendable {
-    /// La fenêtre lue, comme pour les nuits.
-    public static let historyDays = 60
+    /// La fenêtre lue : un an, pour que les statistiques et les records de course voient les sorties anciennes (spec M7 §6).
+    public static let historyDays = 365
 
     private let source: any HealthWorkoutSource
     private let cache: any HealthSampleCache
     private let workouts: any WorkoutRepository
     private let profiles: any ProfileRepository
+    private let windows: any HealthReadWindowStore
     private let calendar: Calendar
 
     public init(source: any HealthWorkoutSource, cache: any HealthSampleCache, workouts: any WorkoutRepository,
-                profiles: any ProfileRepository, calendar: Calendar) {
+                profiles: any ProfileRepository, windows: any HealthReadWindowStore, calendar: Calendar) {
         self.source = source
         self.cache = cache
         self.workouts = workouts
         self.profiles = profiles
+        self.windows = windows
         self.calendar = calendar
     }
 
@@ -37,15 +39,26 @@ public struct WorkoutHistory: Sendable {
     }
 
     private func sync(_ signal: WorkoutSignal, from start: Date, fetchedAt: Date) async -> Bool {
-        let anchor = try? await cache.anchor(for: signal.kind)
+        // Une fenêtre lue plus étroite que celle d'aujourd'hui (60 jours avant M7, ou rien) : l'ancre est ignorée, la lecture est
+        // complète et le cache remplace le type. La fenêtre n'est retenue qu'une fois le cache écrit, donc un échec est retenté.
+        let windowIsCurrent = (windows.days(for: signal.kind) ?? 0) >= Self.historyDays
+        let anchor = windowIsCurrent ? try? await cache.anchor(for: signal.kind) : nil
         do {
             var changes = try await source.workoutChanges(of: signal, since: anchor, from: start)
+            // Apple Santé ne distingue pas un accès révoqué d'entraînements effacés : une lecture d'élargissement qui ne rend rien
+            // alors que le cache en gardait ne doit pas emporter les séances importées (et leur RPE, leurs notes). Rien n'est
+            // appliqué ni retenu, la lecture est retentée à la passe suivante.
+            if !windowIsCurrent, changes.added.isEmpty {
+                let cached = try await cache.samples(kind: signal.kind, from: .distantPast, to: .distantFuture)
+                if !cached.isEmpty { return false }
+            }
             changes.added = changes.added.map { sample in
                 var stamped = sample
                 stamped.fetchedAt = fetchedAt
                 return stamped
             }
             try await cache.apply(changes)
+            windows.save(days: Self.historyDays, for: signal.kind)
             return true
         } catch {
             return false

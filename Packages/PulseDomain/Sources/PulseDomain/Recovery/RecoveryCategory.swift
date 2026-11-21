@@ -1,5 +1,5 @@
 /// Catégorie du score de récupération (spec §6.5) : optimal ≥ 90, normal ≥ 65, fatigue modérée ≥ 40, surmenage sinon.
-public enum RecoveryCategory: String, Sendable, Codable {
+public enum RecoveryCategory: String, Sendable, Codable, CaseIterable {
     case optimal
     case normal
     case moderateFatigue

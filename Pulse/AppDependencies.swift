@@ -334,7 +334,7 @@ extension AppDependencies {
         let calendar = wiring.calendar
         let workoutHistory = (wiring.healthSource as? any HealthWorkoutSource).map { source in
             WorkoutHistory(source: source, cache: stores.healthCache, workouts: stores.workouts, profiles: stores.profiles,
-                           calendar: calendar)
+                           windows: UserDefaultsHealthReadWindowStore(suiteName: wiring.defaultsSuite), calendar: calendar)
         }
         return DayRefresher(
             profiles: stores.profiles, programs: stores.programs, recovery: stores.recovery,

@@ -68,4 +68,45 @@ struct WeekStreakTests {
         let week = StreakWeek(weekStart: now, count: 7, target: 5, isCurrent: true)
         #expect(week.progress == 1 && week.isSuccess)
     }
+
+    private func best(_ sessions: [WorkoutSession], target: Int = 3, historyStart: String? = "2026-08-01T08:00") -> BestStreak? {
+        WeekStreak.best(sessions: sessions, target: target, historyStart: historyStart.map(TestClock.date), now: now,
+                        calendar: calendar)
+    }
+
+    @Test func bestFindsLongestRunAnywhere() {
+        // Cinq semaines réussies depuis le 17 août, une manquée (21 septembre), puis deux.
+        let mondays = ["2026-08-17", "2026-08-24", "2026-08-31", "2026-09-07", "2026-09-14", "2026-09-28", "2026-10-05"]
+        let sessions = mondays.flatMap { week($0, count: 3) }
+        let result = best(sessions)
+        #expect(result?.weeks == 5)
+        #expect(result?.firstWeek == TestClock.date("2026-08-17T00:00"))
+        #expect(result?.lastWeek == TestClock.date("2026-09-14T00:00"))
+    }
+
+    @Test func bestTieKeepsTheMostRecentRun() {
+        let sessions = ["2026-09-07", "2026-09-14", "2026-10-12", "2026-10-19"].flatMap { week($0, count: 3) }
+        let result = best(sessions)
+        #expect(result?.weeks == 2)
+        #expect(result?.firstWeek == TestClock.date("2026-10-12T00:00"))
+    }
+
+    @Test func bestCountsTheCurrentWeekOnlyOnceReached() {
+        let past = week("2026-11-02", count: 3) + week("2026-11-09", count: 3)
+        #expect(best(past + week("2026-11-16", count: 2))?.weeks == 2)
+        let reached = best(past + week("2026-11-16", count: 3))
+        #expect(reached?.weeks == 3)
+        #expect(reached?.lastWeek == TestClock.date("2026-11-16T00:00"))
+    }
+
+    @Test func bestIgnoresWeeksBeforeTheHistoryStart() {
+        let sessions = week("2026-10-26", count: 3) + week("2026-11-02", count: 3)
+        #expect(best(sessions, historyStart: "2026-11-04T08:00")?.weeks == 1)
+    }
+
+    @Test func bestIsNilWithoutSuccess() {
+        #expect(best(week("2026-11-09", count: 2)) == nil)
+        #expect(best([]) == nil)
+        #expect(best(week("2026-11-09", count: 3), historyStart: nil) == nil)
+    }
 }

@@ -3,6 +3,7 @@ import LiveSessionFeature
 import OnboardingFeature
 import PlanningFeature
 import PulseServices
+import StatsFeature
 import SupplementsFeature
 import TodayFeature
 import TrainFeature
@@ -35,6 +36,14 @@ extension AppDependencies {
 
     func planningEnvironment() -> PlanningEnvironment {
         PlanningEnvironment(service: planning, train: trainEnvironment(), calendar: calendar, now: now)
+    }
+
+    /// Le service des statistiques ne garde rien (il relit les dépôts à chaque lecture) : on le construit ici, avec les dépôts de l'app.
+    func statsEnvironment() -> StatsEnvironment {
+        let service = StatsService(profiles: profiles, programs: programs, workouts: workouts, recoveries: recovery,
+                                   records: personalRecords, userExercises: userExercises, library: content, calendar: calendar,
+                                   now: now)
+        return StatsEnvironment(service: service, train: trainEnvironment(), calendar: calendar, now: now)
     }
 
     /// L'écran en direct passe par le même service que l'accueil et l'onglet Séance ; il demande l'autorisation des notifications

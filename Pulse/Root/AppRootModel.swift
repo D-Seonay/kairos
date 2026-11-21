@@ -5,6 +5,7 @@ import OnboardingFeature
 import PlanningFeature
 import PulseDomain
 import PulseServices
+import StatsFeature
 import SupplementsFeature
 import TodayFeature
 import TrainFeature
@@ -27,6 +28,8 @@ final class AppRootModel {
     private(set) var train: TrainModel?
     /// L'onglet Planning : la semaine datée, la série et le mois.
     private(set) var planning: PlanningModel?
+    /// L'onglet Stats : la charge, la biométrie, les muscles, l'assiduité et les records de la période.
+    private(set) var stats: StatsModel?
     /// La séance en direct des onglets : le bandeau « Reprendre la séance » et l'écran en plein écran.
     private(set) var liveSession: LiveSessionCoordinator?
     /// La saisie d'une séance passée, à côté de la séance en direct.
@@ -64,6 +67,7 @@ final class AppRootModel {
         guard destination == .main, let today else { return }
         let train = train
         let planning = planning
+        let stats = stats
         await refreshLiveSession()
         await today.refresh()
         await train?.refresh()
@@ -71,6 +75,8 @@ final class AppRootModel {
         await planning?.load()
         await supplements?.load()
         await refreshSupplementReminders()
+        // Les statistiques relisent tout l'historique : seulement une fois l'onglet ouvert (son `.task` charge la première fois).
+        if let stats, stats.hasLoaded { await stats.load() }
     }
 
     /// Les rappels de compléments couvrent 14 jours : chaque lancement et chaque retour au premier plan les recalculent, et
@@ -127,6 +133,7 @@ final class AppRootModel {
                 today = TodayModel(environment: dependencies.todayEnvironment())
                 train = TrainModel(environment: dependencies.trainEnvironment())
                 planning = PlanningModel(environment: dependencies.planningEnvironment())
+                stats = StatsModel(environment: dependencies.statsEnvironment())
                 let liveSession = LiveSessionCoordinator(environment: dependencies.liveSessionEnvironment())
                 self.liveSession = liveSession
                 pastSession = PastSessionCoordinator(environment: dependencies.pastSessionEnvironment())
@@ -141,6 +148,7 @@ final class AppRootModel {
         today = nil
         train = nil
         planning = nil
+        stats = nil
         liveSession = nil
         pastSession = nil
         supplements = nil
