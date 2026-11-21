@@ -93,7 +93,8 @@ struct ProfileModelTests {
         let settings = SettingsService(profiles: profiles, now: clock) { _, _ in }
         environment = ProfileEnvironment(
             profile: service, body: body, settings: settings, healthCache: InMemoryHealthSampleCache(),
-            inspector: SilentInspector(), exporter: SilentExporter(), eraser: SilentEraser(), notificationsDenied: { false },
+            inspector: SilentInspector(), exporter: SilentExporter(), eraser: SilentEraser(), notificationStatus: { .authorized },
+            requestNotificationAuthorization: { true },
             refreshHealth: {}, appVersion: "1.0.2 (14)", privacyPolicyURL: nil, calendar: calendar, now: clock)
     }
 
@@ -156,7 +157,26 @@ struct ProfileModelTests {
         #expect(model.body?.trend.current != 78.4)
     }
 
-    @Test func loadDuringALoadIsIgnored() async throws {
+    @Test func aSavedSettingRereadsThePageOnlyWhenTheFirstNameChanged() async throws {
+        try await seed()
+        let saved = SavedProfiles()
+        let model = ProfileModel(environment: environment) { saved.profiles.append($0) }
+        await model.load()
+        var profile = try #require(try await profiles.load())
+
+        profile.theme = .amethyst
+        await model.settingsSaved(profile)
+        #expect(await workouts.reads == 1, "Le thème n'est pas dans le résumé")
+
+        profile.firstName = "Théo"
+        try await profiles.save(profile)
+        await model.settingsSaved(profile)
+        #expect(await workouts.reads == 2)
+        #expect(model.summary?.firstName == "Théo")
+        #expect(saved.profiles.map(\.firstName) == ["Mathéo", "Théo"], "L'app reçoit chaque profil enregistré")
+    }
+
+    @Test func loadDuringALoadRereadsOnceAfterIt() async throws {
         try await seed()
         let model = model()
         await workouts.armGate()
@@ -174,12 +194,15 @@ struct ProfileModelTests {
             await Task.yield()
         }
 
+        // Deux demandes pendant la lecture (une pesée, un réglage) : elles rendent la main tout de suite et valent une relecture.
         await model.load()
-        #expect(!model.hasLoaded, "Le second appel rend la main sans lire")
+        await model.load()
+        #expect(!model.hasLoaded, "Les appels suivants rendent la main sans lire")
+        #expect(await workouts.reads == 1)
         await workouts.releaseGate()
         await first.value
 
-        #expect(await workouts.reads == 1)
+        #expect(await workouts.reads == 2, "Une seule relecture, après la première")
         #expect(model.summary?.sessionsTotal == 3 && model.hasLoaded)
     }
 }

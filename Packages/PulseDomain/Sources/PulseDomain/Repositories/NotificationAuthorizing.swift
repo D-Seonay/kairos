@@ -20,3 +20,11 @@ public actor StubNotificationAuthorizer: NotificationAuthorizing {
         return granted
     }
 }
+
+/// L'autorisation des notifications de Pulse dans les réglages d'iOS : pas encore demandée, refusée ou accordée (provisoire
+/// comprise).
+public enum NotificationAuthorizationStatus: Sendable, Equatable {
+    case notDetermined
+    case denied
+    case authorized
+}

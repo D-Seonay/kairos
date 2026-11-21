@@ -82,10 +82,9 @@ public struct ProfileScreen: View {
             // Chaque pesée enregistrée ou supprimée relit la page : tuile et carte Poids suivent.
             WeightScreen(environment: model.environment) { [model] in await model.load() }
         case .settings:
-            // Un réglage enregistré part vers l'app (thème, prénom) et relit la page.
+            // Un réglage enregistré part vers l'app (thème, prénom) ; la page ne se relit que pour un prénom changé.
             SettingsScreen(environment: model.environment, screens: screens) { [model] profile in
-                model.onProfileSaved(profile)
-                Task { await model.load() }
+                Task { await model.settingsSaved(profile) }
             }
         case .myData:
             MyDataScreen(environment: model.environment, screens: screens, onErased: onErased)

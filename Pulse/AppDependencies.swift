@@ -77,8 +77,8 @@ struct AppDependencies: Sendable {
     let exporter: any DataExporter
     let eraser: any DataEraser
     let seeder: SampleDataSeeder
-    /// Vrai quand les notifications sont refusées dans les réglages d'iOS ; toujours faux en mode mémoire et dans les tests.
-    let notificationsDenied: @Sendable () async -> Bool
+    /// L'autorisation des notifications dans les réglages d'iOS ; toujours accordée en mode mémoire et dans les tests.
+    let notificationStatus: @Sendable () async -> NotificationAuthorizationStatus
 
     /// Ce qui change entre l'app réelle, le mode mémoire des tests d'interface et les tests de la cible app.
     private struct Wiring {
@@ -108,7 +108,7 @@ struct AppDependencies: Sendable {
         /// `nil` : l'inspecteur du magasin SwiftData.
         var inspector: (any StoreInspector)?
         /// L'état des notifications dans les réglages d'iOS ; « autorisées » en mode mémoire et dans les tests.
-        var notificationsDenied: @Sendable () async -> Bool
+        var notificationStatus: @Sendable () async -> NotificationAuthorizationStatus
         /// `nil` : `UserDefaults.standard`.
         var defaultsSuite: String?
         var calendar: Calendar
@@ -131,7 +131,7 @@ struct AppDependencies: Sendable {
             supplementHealth = nil
             healthEraser = StubHealthEraser()
             notificationCanceling = nil
-            notificationsDenied = { false }
+            notificationStatus = { .authorized }
             backgroundDelivery = nil
         }
         #endif
@@ -172,7 +172,7 @@ struct AppDependencies: Sendable {
                             supplementHealth: writer, sessionActivity: SessionActivityController(),
                             notificationCanceling: scheduler,
                             backgroundDelivery: launch.healthScenario == nil ? reader.map(HealthKitBackgroundDelivery.init) : nil,
-                            inspector: nil, notificationsDenied: { await UserNotificationAuthorizer.isDenied() },
+                            inspector: nil, notificationStatus: { await UserNotificationAuthorizer.status() },
                             defaultsSuite: nil, calendar: calendar, now: now, launch: launch)
         #if DEBUG
         if let tested = launchStore(&wiring) { return tested }
@@ -208,7 +208,7 @@ struct AppDependencies: Sendable {
             widgets: StubWidgetPublisher(), morningScore: StubNotificationScheduler(), restNotifier: StubRestTimerNotifier(),
             supplementReminders: StubSupplementReminderScheduler(), supplementHealth: nil,
             sessionActivity: StubSessionActivityController(), notificationCanceling: nil,
-            backgroundDelivery: nil, inspector: inspector, notificationsDenied: { false }, defaultsSuite: testingDefaultsSuite,
+            backgroundDelivery: nil, inspector: inspector, notificationStatus: { .authorized }, defaultsSuite: testingDefaultsSuite,
             calendar: calendar, now: now, launch: LaunchOptions())
         guard let dependencies = try? make(wiring, mode: .inMemory, error: nil) else { crash(nil) }
         return dependencies
@@ -269,7 +269,7 @@ struct AppDependencies: Sendable {
             inspector: wiring.inspector ?? SwiftDataStoreInspector(container: container, cloudEnabled: mode == .cloud),
             exporter: makeExporter(container: container, content: content),
             eraser: makeEraser(wiring, container: container, refresher: refresher),
-            seeder: SampleDataSeeder(container: container, calendar: calendar), notificationsDenied: wiring.notificationsDenied)
+            seeder: SampleDataSeeder(container: container, calendar: calendar), notificationStatus: wiring.notificationStatus)
     }
 
     #if DEBUG

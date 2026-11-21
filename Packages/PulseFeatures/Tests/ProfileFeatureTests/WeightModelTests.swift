@@ -21,7 +21,8 @@ struct WeightModelTests {
         let settings = SettingsService(profiles: profiles, now: clock) { _, _ in }
         environment = ProfileEnvironment(
             profile: service, body: body, settings: settings, healthCache: InMemoryHealthSampleCache(),
-            inspector: SilentInspector(), exporter: SilentExporter(), eraser: SilentEraser(), notificationsDenied: { false },
+            inspector: SilentInspector(), exporter: SilentExporter(), eraser: SilentEraser(), notificationStatus: { .authorized },
+            requestNotificationAuthorization: { true },
             refreshHealth: {}, appVersion: "1.0.2 (14)", privacyPolicyURL: nil, calendar: calendar, now: clock)
     }
 

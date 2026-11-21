@@ -55,8 +55,9 @@ enum ProfilePreviewSupport {
         return ProfileEnvironment(
             profile: service, body: BodyService(measurements: measurements, profiles: profiles, calendar: calendar, now: clock),
             settings: SettingsService(profiles: profiles, now: clock) { _, _ in }, healthCache: InMemoryHealthSampleCache(),
-            inspector: PreviewInspector(), exporter: PreviewExporter(), eraser: PreviewEraser(), notificationsDenied: { false },
-            refreshHealth: {}, appVersion: "1.0.2 (14)", privacyPolicyURL: nil, calendar: calendar, now: clock)
+            inspector: PreviewInspector(), exporter: PreviewExporter(), eraser: PreviewEraser(),
+            notificationStatus: { .authorized }, requestNotificationAuthorization: { true }, refreshHealth: {},
+            appVersion: "1.0.2 (14)", privacyPolicyURL: nil, calendar: calendar, now: clock)
     }
 
     /// Le jour `offset` (0 = aujourd'hui, négatif = passé) à l'heure donnée.

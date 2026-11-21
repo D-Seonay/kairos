@@ -52,7 +52,8 @@ struct MyDataModelTests {
             profile: service, body: BodyService(measurements: InMemoryBodyMeasurementRepository(), profiles: profiles,
                                                 calendar: calendar, now: clock),
             settings: SettingsService(profiles: profiles, now: clock) { _, _ in }, healthCache: InMemoryHealthSampleCache(),
-            inspector: inspector, exporter: exporter, eraser: SilentEraser(), notificationsDenied: { false }, refreshHealth: {},
+            inspector: inspector, exporter: exporter, eraser: SilentEraser(), notificationStatus: { .authorized },
+            requestNotificationAuthorization: { true }, refreshHealth: {},
             appVersion: "1.0.2 (14)", privacyPolicyURL: nil, calendar: calendar, now: clock)
         return MyDataModel(environment: environment)
     }

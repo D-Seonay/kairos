@@ -4,8 +4,8 @@ import PulseServices
 import SwiftUI
 
 /// Tout ce dont l'onglet Profil a besoin du dehors : le résumé, les pesées, les réglages, l'état d'Apple Santé, les données
-/// stockées (inspection, export, suppression), ce que seule l'app sait (notifications refusées, passage du jour, version,
-/// politique de confidentialité) et l'horloge.
+/// stockées (inspection, export, suppression), ce que seule l'app sait (autorisation des notifications, passage du jour,
+/// version, politique de confidentialité) et l'horloge.
 public struct ProfileEnvironment: Sendable {
     public var profile: ProfileService
     public var body: BodyService
@@ -14,8 +14,10 @@ public struct ProfileEnvironment: Sendable {
     public var inspector: any StoreInspector
     public var exporter: any DataExporter
     public var eraser: any DataEraser
-    /// Vrai quand les notifications de Pulse sont refusées dans les réglages d'iOS.
-    public var notificationsDenied: @Sendable () async -> Bool
+    /// L'autorisation des notifications de Pulse dans les réglages d'iOS.
+    public var notificationStatus: @Sendable () async -> NotificationAuthorizationStatus
+    /// Demande l'autorisation des notifications à iOS ; vrai si elle est accordée.
+    public var requestNotificationAuthorization: @Sendable () async -> Bool
     /// « Relire maintenant » : lance le passage du jour.
     public var refreshHealth: @Sendable () async -> Void
     /// « 1.0.2 (14) ».
@@ -27,7 +29,9 @@ public struct ProfileEnvironment: Sendable {
 
     public init(profile: ProfileService, body: BodyService, settings: SettingsService, healthCache: any HealthSampleCache,
                 inspector: any StoreInspector, exporter: any DataExporter, eraser: any DataEraser,
-                notificationsDenied: @escaping @Sendable () async -> Bool, refreshHealth: @escaping @Sendable () async -> Void,
+                notificationStatus: @escaping @Sendable () async -> NotificationAuthorizationStatus,
+                requestNotificationAuthorization: @escaping @Sendable () async -> Bool,
+                refreshHealth: @escaping @Sendable () async -> Void,
                 appVersion: String, privacyPolicyURL: URL?, calendar: Calendar, now: @escaping @Sendable () -> Date) {
         self.profile = profile
         self.body = body
@@ -36,7 +40,8 @@ public struct ProfileEnvironment: Sendable {
         self.inspector = inspector
         self.exporter = exporter
         self.eraser = eraser
-        self.notificationsDenied = notificationsDenied
+        self.notificationStatus = notificationStatus
+        self.requestNotificationAuthorization = requestNotificationAuthorization
         self.refreshHealth = refreshHealth
         self.appVersion = appVersion
         self.privacyPolicyURL = privacyPolicyURL

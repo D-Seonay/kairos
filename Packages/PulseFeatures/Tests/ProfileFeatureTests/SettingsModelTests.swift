@@ -9,8 +9,9 @@ struct SettingsModelTests {
     let profiles = InMemoryProfileRepository()
     let cache = InMemoryHealthSampleCache()
 
-    /// L'environnement de l'écran ; `refreshHealth` et `notificationsDenied` au choix du test.
-    private func environment(notificationsDenied: Bool = false,
+    /// L'environnement de l'écran ; `refreshHealth`, l'autorisation des notifications et la réponse d'iOS au choix du test.
+    private func environment(notifications: NotificationAuthorizationStatus = .authorized,
+                             permission: StubNotificationAuthorizer = StubNotificationAuthorizer(granted: true),
                              refreshHealth: @escaping @Sendable () async -> Void = {}) -> ProfileEnvironment {
         let calendar = ProfileTestClock.calendar
         let clock: @Sendable () -> Date = { ProfileTestClock.now }
@@ -23,7 +24,8 @@ struct SettingsModelTests {
                                                 calendar: calendar, now: clock),
             settings: SettingsService(profiles: profiles, now: clock) { _, _ in }, healthCache: cache,
             inspector: SilentInspector(), exporter: SilentExporter(), eraser: SilentEraser(),
-            notificationsDenied: { notificationsDenied }, refreshHealth: refreshHealth, appVersion: "1.0.2 (14)",
+            notificationStatus: { notifications }, requestNotificationAuthorization: { await permission.requestAuthorization() },
+            refreshHealth: refreshHealth, appVersion: "1.0.2 (14)",
             privacyPolicyURL: nil, calendar: calendar, now: clock)
     }
 
@@ -46,7 +48,7 @@ struct SettingsModelTests {
         let wakeUp = ProfileTestClock.date(2026, 11, 20, hour: 7)
         try await cache.insert([sample(.bodyMass, start: weighed, end: weighed, fetchedAt: fetched),
                                 sample(.sleep, start: bedtime, end: wakeUp, fetchedAt: fetched)])
-        let model = SettingsModel(environment: environment(notificationsDenied: true)) { _ in }
+        let model = SettingsModel(environment: environment(notifications: .denied)) { _ in }
 
         await model.load()
 
@@ -146,6 +148,75 @@ struct SettingsModelTests {
         #expect(model.errorMessage == nil)
     }
 
+    /// Un profil dont les trois notifications sont coupées.
+    private func storeProfileWithNotificationsOff() async throws {
+        var profile = try await storeProfile()
+        profile.morningScoreNotification = false
+        profile.supplementRemindersEnabled = false
+        profile.restTimerNotificationEnabled = false
+        try await profiles.save(profile)
+    }
+
+    @Test func turningANotificationOnAsksIOSAndKeepsItWhenGranted() async throws {
+        try await storeProfileWithNotificationsOff()
+        let permission = StubNotificationAuthorizer(granted: true)
+        let saved = SavedProfiles()
+        let model = SettingsModel(environment: environment(notifications: .notDetermined, permission: permission)) {
+            saved.profiles.append($0)
+        }
+        await model.load()
+        #expect(!model.notificationsDenied, "Pas encore demandée : pas de lien vers les réglages d'iOS")
+
+        await model.setNotification(true) { $0.morningScoreNotification = $1 }
+
+        #expect(await permission.requestCount == 1)
+        #expect(try await profiles.load()?.morningScoreNotification == true)
+        #expect(model.profile?.morningScoreNotification == true)
+        #expect(!model.notificationsDenied)
+        #expect(saved.profiles.map(\.morningScoreNotification) == [true])
+    }
+
+    @Test func refusedPermissionTurnsTheNotificationBackOff() async throws {
+        try await storeProfileWithNotificationsOff()
+        let permission = StubNotificationAuthorizer(granted: false)
+        let model = SettingsModel(environment: environment(notifications: .notDetermined, permission: permission)) { _ in }
+        await model.load()
+
+        await model.setNotification(true) { $0.supplementRemindersEnabled = $1 }
+
+        #expect(await permission.requestCount == 1)
+        #expect(try await profiles.load()?.supplementRemindersEnabled == false)
+        #expect(model.profile?.supplementRemindersEnabled == false)
+        #expect(model.notificationsDenied)
+    }
+
+    @Test func deniedNotificationsRevertWithoutAskingAgain() async throws {
+        try await storeProfileWithNotificationsOff()
+        let permission = StubNotificationAuthorizer(granted: true)
+        let model = SettingsModel(environment: environment(notifications: .denied, permission: permission)) { _ in }
+        await model.load()
+
+        await model.setNotification(true) { $0.restTimerNotificationEnabled = $1 }
+
+        #expect(await permission.requestCount == 0, "Refusées dans iOS : seule l'app Réglages peut les rendre")
+        #expect(try await profiles.load()?.restTimerNotificationEnabled == false)
+        #expect(model.notificationsDenied)
+    }
+
+    @Test func authorizedOrTurningOffNeverAsks() async throws {
+        try await storeProfileWithNotificationsOff()
+        let permission = StubNotificationAuthorizer(granted: false)
+        let model = SettingsModel(environment: environment(notifications: .authorized, permission: permission)) { _ in }
+        await model.load()
+
+        await model.setNotification(true) { $0.morningScoreNotification = $1 }
+        await model.setNotification(false) { $0.morningScoreNotification = $1 }
+
+        #expect(await permission.requestCount == 0)
+        #expect(try await profiles.load()?.morningScoreNotification == false)
+        #expect(!model.notificationsDenied)
+    }
+
     @Test func refreshHealthCallsThePassThenRereadsStatus() async throws {
         _ = try await storeProfile()
         let ran = ProfileTestClock.date(2026, 11, 20, hour: 11)
@@ -180,6 +251,10 @@ struct SettingsTextTests {
     @Test func lastReadShowsDayAndTime() {
         let read = ProfileTestClock.date(2026, 11, 20, hour: 7).addingTimeInterval(30 * 60)
         #expect(ProfileText.dateTime(read, calendar: ProfileTestClock.calendar) == "20 nov. 2026 à 07:30")
+    }
+
+    @Test func plateChoicesMatchThePlateCalculator() {
+        #expect(SessionSettingsSection.plateChoices == [25, 20, 15, 10, 5, 2.5, 2, 1.25, 1, 0.5])
     }
 
     @Test func deadlinesRunFromSixToNoonByHalfHour() {

@@ -85,9 +85,25 @@ public final class SettingsModel {
         await readHealth()
     }
 
-    /// Relit l'autorisation des notifications : au retour des réglages d'iOS, le message suit.
+    /// Relit l'autorisation des notifications : au retour des réglages d'iOS, le message suit. Pas encore demandée, elle n'affiche
+    /// pas le lien : Pulse la demande quand une notification est allumée.
     public func refreshNotificationStatus() async {
-        notificationsDenied = await environment.notificationsDenied()
+        notificationsDenied = await environment.notificationStatus() == .denied
+    }
+
+    /// Un interrupteur de notification (score du matin, rappels de compléments, fin de repos). Allumé, il s'écrit puis demande
+    /// l'autorisation à iOS si elle n'a pas encore été donnée ; refusée (maintenant ou avant), il se rééteint et le lien vers les
+    /// réglages d'iOS s'affiche.
+    public func setNotification(_ isOn: Bool, apply: @escaping @Sendable (inout UserProfile, Bool) -> Void) async {
+        await update { apply(&$0, isOn) }
+        guard isOn else { return }
+        let granted = switch await environment.notificationStatus() {
+        case .authorized: true
+        case .denied: false
+        case .notDetermined: await environment.requestNotificationAuthorization()
+        }
+        notificationsDenied = !granted
+        if !granted { await update { apply(&$0, false) } }
     }
 
     /// Une lecture du cache qui échoue garde l'état précédent.

@@ -119,8 +119,8 @@ private struct SettingsPreviewHost: View {
         }
         .task {
             var environment = await ProfilePreviewSupport.environment()
-            let denied = notificationsDenied
-            environment.notificationsDenied = { denied }
+            let status: NotificationAuthorizationStatus = notificationsDenied ? .denied : .authorized
+            environment.notificationStatus = { status }
             // Une nuit, une VFC, une FC au repos et une pesée lues ce matin ; ni course, ni vélo, ni masse grasse.
             let night = ProfilePreviewSupport.day(-1, hour: 23)
             let morning = ProfilePreviewSupport.day(0, hour: 7)

@@ -54,10 +54,13 @@ extension AppDependencies {
                                      records: personalRecords, userExercises: userExercises, library: content, calendar: calendar,
                                      now: now)
         let refresher = refresher
+        let notifications = notifications
         return ProfileEnvironment(
             profile: profile, body: BodyService(measurements: bodyMeasurements, profiles: profiles, calendar: calendar, now: now),
             settings: settings, healthCache: healthCache, inspector: inspector, exporter: exporter, eraser: eraser,
-            notificationsDenied: notificationsDenied, refreshHealth: { _ = await refresher.refresh(origin: .foreground) },
+            notificationStatus: notificationStatus,
+            requestNotificationAuthorization: { await notifications.requestAuthorization() },
+            refreshHealth: { _ = await refresher.refresh(origin: .foreground) },
             appVersion: Self.appVersion, privacyPolicyURL: Self.privacyPolicyURL, calendar: calendar, now: now)
     }
 

@@ -50,9 +50,9 @@ struct AdaptationSettingsSection: View {
 
 /// L'échauffement automatique, le repos par défaut, la barre et les disques disponibles.
 struct SessionSettingsSection: View {
-    /// Les barres du calculateur de disques de la séance.
+    /// Les barres et les disques du calculateur de disques de la séance (`PlateCalculatorSheet`), du plus lourd au plus léger.
     static let barChoices: [Double] = [10, 15, 20]
-    static let plateChoices: [Double] = [25, 20, 15, 10, 5, 2.5, 1.25, 0.5]
+    static let plateChoices: [Double] = [25, 20, 15, 10, 5, 2.5, 2, 1.25, 1, 0.5]
 
     let model: SettingsModel
     let profile: UserProfile
@@ -95,7 +95,7 @@ struct SessionSettingsSection: View {
     }
 
     /// Chaque toucher écrit un changement, pas l'ensemble affiché : le disque basculé est ajouté ou retiré des disques stockés,
-    /// donc deux touchers rapprochés ne s'effacent pas. Un disque absent des puces (2 kg, 1 kg réglés depuis la séance) reste.
+    /// donc deux touchers rapprochés ne s'effacent pas. Un disque stocké absent des puces reste.
     private var plates: Binding<Set<Double>> {
         let shown = Set(profile.availablePlatesKg)
         return Binding(get: { shown }, set: { [model] newValue in
@@ -131,7 +131,7 @@ struct NotificationSettingsSection: View {
         Section {
             if model.notificationsDenied { denied }
             SettingsToggle(title: String(localized: "Score du matin", bundle: .module),
-                           isOn: model.binding(profile.morningScoreNotification) { $0.morningScoreNotification = $1 })
+                           isOn: model.notificationBinding(profile.morningScoreNotification) { $0.morningScoreNotification = $1 })
             if profile.morningScoreNotification {
                 Picker(selection: deadline) {
                     ForEach(Self.deadlines, id: \.self) { Text(PulseFormat.duration(minutes: $0)).tag($0) }
@@ -144,9 +144,13 @@ struct NotificationSettingsSection: View {
                 .frame(minHeight: 44)
             }
             SettingsToggle(title: String(localized: "Rappels de compléments", bundle: .module),
-                           isOn: model.binding(profile.supplementRemindersEnabled) { $0.supplementRemindersEnabled = $1 })
+                           isOn: model.notificationBinding(profile.supplementRemindersEnabled) {
+                               $0.supplementRemindersEnabled = $1
+                           })
             SettingsToggle(title: String(localized: "Fin de repos", bundle: .module),
-                           isOn: model.binding(profile.restTimerNotificationEnabled) { $0.restTimerNotificationEnabled = $1 })
+                           isOn: model.notificationBinding(profile.restTimerNotificationEnabled) {
+                               $0.restTimerNotificationEnabled = $1
+                           })
         } header: {
             Text(String(localized: "Notifications", bundle: .module))
         } footer: {
@@ -204,6 +208,13 @@ extension SettingsModel {
                                   apply: @escaping @Sendable (inout UserProfile, Value) -> Void) -> Binding<Value> {
         Binding(get: { value }, set: { newValue in
             Task { await self.update { apply(&$0, newValue) } }
+        })
+    }
+
+    /// Le lien d'un interrupteur de notification : allumé, il demande l'autorisation d'iOS si besoin (`setNotification`).
+    func notificationBinding(_ value: Bool, apply: @escaping @Sendable (inout UserProfile, Bool) -> Void) -> Binding<Bool> {
+        Binding(get: { value }, set: { newValue in
+            Task { await self.setNotification(newValue, apply: apply) }
         })
     }
 
