@@ -151,3 +151,13 @@ public extension AccentPalette {
         LinearGradient(colors: [Color(accent), Color(accent2)], startPoint: startPoint, endPoint: endPoint)
     }
 }
+
+public extension Theme {
+    /// Le nom de l'ambiance dans les réglages : « Ivoire » (`.amber`) ou « Acier » (`.amethyst`).
+    var title: String {
+        switch self {
+        case .amber: String(localized: "Ivoire", bundle: .module)
+        case .amethyst: String(localized: "Acier", bundle: .module)
+        }
+    }
+}

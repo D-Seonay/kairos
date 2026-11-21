@@ -152,6 +152,34 @@ enum ProfileText {
         }
     }
 
+    // MARK: Paramètres
+
+    /// Le nom d'un type lu dans Apple Santé.
+    static func healthKind(_ kind: HealthSampleKind) -> String {
+        switch kind {
+        case .sdnn: String(localized: "VFC", bundle: .module)
+        case .restingHeartRate: String(localized: "FC au repos", bundle: .module)
+        case .sleep: String(localized: "Sommeil", bundle: .module)
+        case .run: String(localized: "Courses", bundle: .module)
+        case .ride: String(localized: "Vélo", bundle: .module)
+        case .bodyMass: String(localized: "Poids", bundle: .module)
+        case .bodyFat: String(localized: "Masse grasse", bundle: .module)
+        }
+    }
+
+    static func sex(_ sex: Sex) -> String {
+        switch sex {
+        case .female: String(localized: "Femme", bundle: .module)
+        case .male: String(localized: "Homme", bundle: .module)
+        case .unspecified: String(localized: "Non précisé", bundle: .module)
+        }
+    }
+
+    /// « 12 nov. 2026 à 07:30 » : la dernière lecture d'Apple Santé.
+    static func dateTime(_ date: Date, calendar: Calendar) -> String {
+        date.formatted(style(Date.FormatStyle.dateTime.day().month(.abbreviated).year().hour().minute(), calendar: calendar))
+    }
+
     /// Le format en français, dans le calendrier et le fuseau donnés.
     private static func style(_ base: Date.FormatStyle, calendar: Calendar) -> Date.FormatStyle {
         var style = base

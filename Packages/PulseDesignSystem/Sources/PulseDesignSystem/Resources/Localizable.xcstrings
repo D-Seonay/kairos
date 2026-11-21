@@ -81,6 +81,16 @@
         }
       }
     },
+    "Acier" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acier"
+          }
+        }
+      }
+    },
     "D" : {
       "comment" : "Initiale de dimanche",
       "localizations" : {
@@ -178,6 +188,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hybride"
+          }
+        }
+      }
+    },
+    "Ivoire" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ivoire"
           }
         }
       }

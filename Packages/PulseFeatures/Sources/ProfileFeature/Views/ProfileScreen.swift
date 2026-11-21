@@ -73,7 +73,7 @@ public struct ProfileScreen: View {
         .refreshable { await model.load() }
     }
 
-    /// Paramètres et Mes données arrivent avec leurs tâches : un texte en attendant.
+    /// Mes données arrive avec sa tâche : un texte en attendant.
     @ViewBuilder
     private func destination(_ destination: ProfileDestination) -> some View {
         switch destination {
@@ -83,7 +83,11 @@ public struct ProfileScreen: View {
             // Chaque pesée enregistrée ou supprimée relit la page : tuile et carte Poids suivent.
             WeightScreen(environment: model.environment) { [model] in await model.load() }
         case .settings:
-            ProfilePlaceholder(title: String(localized: "Paramètres", bundle: .module))
+            // Un réglage enregistré part vers l'app (thème, prénom) et relit la page.
+            SettingsScreen(environment: model.environment, screens: screens) { [model] profile in
+                model.onProfileSaved(profile)
+                Task { await model.load() }
+            }
         case .myData:
             ProfilePlaceholder(title: String(localized: "Mes données", bundle: .module))
         }
