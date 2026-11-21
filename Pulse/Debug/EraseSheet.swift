@@ -6,9 +6,9 @@ struct EraseSheet: View {
     @State private var model: DataDebugModel
     private let onErased: () async -> Void
 
-    /// `onErased` part une fois tout supprimé et la feuille fermée.
+    /// `onErased` part une fois tout supprimé et la feuille fermée. Seuls les échecs de la suppression s'y affichent.
     init(dependencies: AppDependencies, onErased: @escaping () async -> Void) {
-        _model = State(initialValue: DataDebugModel(dependencies: dependencies))
+        _model = State(initialValue: DataDebugModel(dependencies: dependencies, showsStoreError: false))
         self.onErased = onErased
     }
 
