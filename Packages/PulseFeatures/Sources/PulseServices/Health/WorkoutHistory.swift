@@ -41,10 +41,17 @@ public struct WorkoutHistory: Sendable {
     private func sync(_ signal: WorkoutSignal, from start: Date, fetchedAt: Date) async -> Bool {
         // Une fenêtre lue plus étroite que celle d'aujourd'hui (60 jours avant M7, ou rien) : l'ancre est ignorée, la lecture est
         // complète et le cache remplace le type. La fenêtre n'est retenue qu'une fois le cache écrit, donc un échec est retenté.
-        let widened = (windows.days(for: signal.kind) ?? 0) >= Self.historyDays
-        let anchor = widened ? try? await cache.anchor(for: signal.kind) : nil
+        let windowIsCurrent = (windows.days(for: signal.kind) ?? 0) >= Self.historyDays
+        let anchor = windowIsCurrent ? try? await cache.anchor(for: signal.kind) : nil
         do {
             var changes = try await source.workoutChanges(of: signal, since: anchor, from: start)
+            // Apple Santé ne distingue pas un accès révoqué d'entraînements effacés : une lecture d'élargissement qui ne rend rien
+            // alors que le cache en gardait ne doit pas emporter les séances importées (et leur RPE, leurs notes). Rien n'est
+            // appliqué ni retenu, la lecture est retentée à la passe suivante.
+            if !windowIsCurrent, changes.added.isEmpty {
+                let cached = try await cache.samples(kind: signal.kind, from: .distantPast, to: .distantFuture)
+                if !cached.isEmpty { return false }
+            }
             changes.added = changes.added.map { sample in
                 var stamped = sample
                 stamped.fetchedAt = fetchedAt

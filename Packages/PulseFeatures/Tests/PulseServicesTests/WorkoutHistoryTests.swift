@@ -132,6 +132,7 @@ struct WorkoutHistoryTests {
     }
 
     @Test func failedWideningIsRetried() async throws {
+        try await cache.saveAnchor(Data("old".utf8), for: .run)
         windows.save(days: 60, for: .run)
         await source.set(runs: nil)
         await history.refresh(now: now)
@@ -140,6 +141,51 @@ struct WorkoutHistoryTests {
         await history.refresh(now: now)
         #expect(await source.anchorsSeen(for: .run).last == .some(nil))
         #expect(windows.days(for: .run) == 365)
+    }
+
+    @Test func fullReReadKeepsWhatWasTypedOnAnImportedRun() async throws {
+        await source.set(runs: [run("r1", at: "2026-11-17T07:30")])
+        await history.refresh(now: now)
+        var session = try #require(try await imported().first)
+        session.overallRPE = 9
+        session.note = "Course difficile"
+        try await workouts.save(session)
+
+        // La fenêtre revient à 60 jours (mise à jour depuis une version d'avant M7) : lecture complète, même entraînement.
+        windows.save(days: 60, for: .run)
+        await history.refresh(now: now)
+        let sessions = try await imported()
+        #expect(sessions.count == 1)
+        let kept = try #require(sessions.first)
+        #expect(kept.id == session.id && kept.healthKitUUID == "r1")
+        #expect(kept.overallRPE == 9 && kept.note == "Course difficile")
+        #expect(windows.days(for: .run) == WorkoutHistory.historyDays)
+    }
+
+    @Test func emptyWideningReadKeepsSessionsAndIsRetried() async throws {
+        // Accès aux entraînements révoqué : la lecture d'élargissement ne rend rien, mais le cache en gardait.
+        await source.set(runs: [run("r1", at: "2026-11-17T07:30")])
+        await history.refresh(now: now)
+        var session = try #require(try await imported().first)
+        session.overallRPE = 8
+        try await workouts.save(session)
+        windows.save(days: 60, for: .run)
+        await source.set(runs: [])
+
+        #expect(await !history.refresh(now: now))
+        #expect(try await imported().map(\.healthKitUUID) == ["r1"])
+        #expect(try await imported().first?.overallRPE == 8)
+        #expect(windows.days(for: .run) == 60)
+        // Retentée à la passe suivante : toujours en lecture complète, sans ancre.
+        await history.refresh(now: now)
+        #expect(await source.anchorsSeen(for: .run).suffix(2) == [nil, nil])
+        #expect(try await imported().count == 1)
+    }
+
+    @Test func emptyFirstReadWithEmptyCacheIsRetained() async throws {
+        await source.set(runs: [])
+        await history.refresh(now: now)
+        #expect(windows.days(for: .run) == WorkoutHistory.historyDays)
     }
 
     @Test func failedWideningKeepsImportedSessions() async throws {
