@@ -128,7 +128,8 @@ struct RefresherFixture {
             scores: DailyScoreService(recovery: recovery, calendar: calendar),
             widgets: publisher, notifications: scheduler, activity: activity, scheduledDays: scheduled,
             workoutHistory: WorkoutHistory(source: scenarioSource, cache: InMemoryHealthSampleCache(), workouts: workouts,
-                                           profiles: profiles, calendar: calendar),
+                                           profiles: profiles, windows: InMemoryHealthReadWindowStore(),
+                                           calendar: calendar),
             antiInterference: rules, planning: planningService, calendar: calendar, now: { clock.now })
     }
 

@@ -58,7 +58,7 @@ public actor SwiftDataHealthSampleCache: HealthSampleCache {
         try upsertAnchor(changes.anchor, for: changes.kind)
     }
 
-    /// La date avant laquelle un échantillon du type est élagué : `healthCacheRetention` avant le plus récent, gardé ou ajouté.
+    /// La date avant laquelle un échantillon du type est élagué : `healthCacheRetention(for:)` avant le plus récent, gardé ou ajouté.
     /// `nil` quand le type est vide.
     private func retentionCutoff(kind: HealthSampleKind, added: [CachedHealthSample], afterFullRead: Bool) throws -> Date? {
         let raw = kind.rawValue
@@ -67,7 +67,7 @@ public actor SwiftDataHealthSampleCache: HealthSampleCache {
         latest.fetchLimit = 1
         let stored = afterFullRead ? nil : try modelContext.fetch(latest).first?.start
         let newest = ([stored] + added.map(\.start)).compactMap { $0 }.max()
-        return newest?.addingTimeInterval(-healthCacheRetention)
+        return newest?.addingTimeInterval(-healthCacheRetention(for: kind))
     }
 
     public func anchor(for kind: HealthSampleKind) throws -> Data? {

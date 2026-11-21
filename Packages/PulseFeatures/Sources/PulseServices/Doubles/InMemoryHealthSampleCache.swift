@@ -23,7 +23,7 @@ public actor InMemoryHealthSampleCache: HealthSampleCache {
         }
         stored += changes.added
         if let newest = stored.filter({ $0.kind == changes.kind }).map(\.start).max() {
-            let cutoff = newest.addingTimeInterval(-healthCacheRetention)
+            let cutoff = newest.addingTimeInterval(-healthCacheRetention(for: changes.kind))
             stored.removeAll { $0.kind == changes.kind && $0.start < cutoff }
         }
         anchors[changes.kind] = changes.anchor

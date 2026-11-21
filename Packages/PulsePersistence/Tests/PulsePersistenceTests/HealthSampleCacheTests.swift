@@ -84,6 +84,17 @@ private func all(_ cache: SwiftDataHealthSampleCache, _ kind: HealthSampleKind) 
     #expect(try await cache.anchor(for: .sdnn) == Data([1]))
 }
 
+@Test func runSamplesAreKeptForAYear() async throws {
+    let cache = SwiftDataHealthSampleCache(modelContainer: try TestContainer.make())
+    try await cache.insert([anchored(.run, uuid: "RUN", at: -300 * 86_400), anchored(uuid: "OLD", at: -70 * 86_400)])
+    try await cache.apply(HealthSampleChanges(kind: .run, added: [anchored(.run, uuid: "NEW")], deletedHealthKitUUIDs: [],
+                                              anchor: Data([1]), isFullRead: false))
+    try await cache.apply(HealthSampleChanges(kind: .sdnn, added: [anchored(uuid: "NEW")], deletedHealthKitUUIDs: [],
+                                              anchor: Data([1]), isFullRead: false))
+    #expect(try await all(cache, .run).map(\.healthKitUUID) == ["RUN", "NEW"])
+    #expect(try await all(cache, .sdnn).map(\.healthKitUUID) == ["NEW"])
+}
+
 @Test func applyingPrunesSamplesBeyondTheRetentionOfTheKind() async throws {
     let cache = SwiftDataHealthSampleCache(modelContainer: try TestContainer.make())
     let old = anchored(uuid: "OLD", at: -63 * 86_400)

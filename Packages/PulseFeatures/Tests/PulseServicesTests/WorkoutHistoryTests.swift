@@ -10,6 +10,12 @@ private actor ScriptedWorkoutSource: HealthWorkoutSource {
     var runs: [CachedHealthSample]? = []
     var rides: [CachedHealthSample]? = []
     var deleted: [String] = []
+    private var anchors: [WorkoutSignal: [Data?]] = [:]
+
+    /// Les ancres reçues pour le type, dans l'ordre des lectures.
+    func anchorsSeen(for signal: WorkoutSignal) -> [Data?] {
+        anchors[signal] ?? []
+    }
 
     func set(runs: [CachedHealthSample]?, deleted: [String] = []) {
         self.runs = runs
@@ -17,6 +23,7 @@ private actor ScriptedWorkoutSource: HealthWorkoutSource {
     }
 
     func workoutChanges(of signal: WorkoutSignal, since anchor: Data?, from start: Date) async throws -> HealthSampleChanges {
+        anchors[signal, default: []].append(anchor)
         guard let added = signal == .run ? runs : rides else { throw Failure() }
         return HealthSampleChanges(kind: signal.kind, added: added, deletedHealthKitUUIDs: signal == .run ? deleted : [],
                                    anchor: Data("a".utf8), isFullRead: anchor == nil)
@@ -28,10 +35,12 @@ struct WorkoutHistoryTests {
     private let cache = InMemoryHealthSampleCache()
     private let workouts = InMemoryWorkoutRepository()
     private let profiles = InMemoryProfileRepository()
+    private let windows = InMemoryHealthReadWindowStore()
     private let now = TestClock.date("2026-11-20T12:00")
 
     private var history: WorkoutHistory {
-        WorkoutHistory(source: source, cache: cache, workouts: workouts, profiles: profiles, calendar: TestClock.calendar)
+        WorkoutHistory(source: source, cache: cache, workouts: workouts, profiles: profiles, windows: windows,
+                       calendar: TestClock.calendar)
     }
 
     private func run(_ uuid: String, at text: String, heartRate: Double? = 150) -> CachedHealthSample {
@@ -93,7 +102,7 @@ struct WorkoutHistoryTests {
 
     @Test func pulseSessionsAndOldImportsAreNeverTouched() async throws {
         let strength = PlanningFixtures.session("2026-11-17T18:00")
-        var old = PlanningFixtures.session("2026-08-01T07:00", kind: .run, source: .appleHealth)
+        var old = PlanningFixtures.session("2025-08-01T07:00", kind: .run, source: .appleHealth)
         old.healthKitUUID = "old"
         try await workouts.save(strength)
         try await workouts.save(old)
@@ -107,5 +116,51 @@ struct WorkoutHistoryTests {
         let session = WorkoutHistory.session(from: run("r1", at: "2026-11-17T07:30", heartRate: nil), signal: .run, existing: nil,
                                              maxHeartRate: 190, now: now)
         #expect(session.estimatedRPE == nil)
+    }
+
+    @Test func storedNarrowWindowForcesOneFullRead() async throws {
+        try await cache.saveAnchor(Data("old".utf8), for: .run)
+        windows.save(days: 60, for: .run)
+        await source.set(runs: [run("r1", at: "2026-03-01T08:00")])
+        await history.refresh(now: now)
+        // L'ancre est ignorée une fois, puis la fenêtre élargie est retenue.
+        #expect(await source.anchorsSeen(for: .run) == [nil])
+        #expect(windows.days(for: .run) == WorkoutHistory.historyDays)
+        #expect(try await imported().map(\.healthKitUUID) == ["r1"])
+        await history.refresh(now: now)
+        #expect(await source.anchorsSeen(for: .run).last == .some(Data("a".utf8)))
+    }
+
+    @Test func failedWideningIsRetried() async throws {
+        windows.save(days: 60, for: .run)
+        await source.set(runs: nil)
+        await history.refresh(now: now)
+        #expect(windows.days(for: .run) == 60)
+        await source.set(runs: [run("r1", at: "2026-03-01T08:00")])
+        await history.refresh(now: now)
+        #expect(await source.anchorsSeen(for: .run).last == .some(nil))
+        #expect(windows.days(for: .run) == 365)
+    }
+
+    @Test func failedWideningKeepsImportedSessions() async throws {
+        await source.set(runs: [run("r1", at: "2026-11-17T07:30")])
+        await history.refresh(now: now)
+        windows.save(days: 60, for: .run)
+        await source.set(runs: nil)
+        await history.refresh(now: now)
+        #expect(try await imported().map(\.healthKitUUID) == ["r1"])
+    }
+
+    @Test func runsOlderThanTwoMonthsSurviveAlignment() async throws {
+        await source.set(runs: [run("old", at: "2026-02-10T08:00"), run("new", at: "2026-11-10T08:00")])
+        await history.refresh(now: now)
+        await history.refresh(now: now)
+        #expect(try await imported().compactMap(\.healthKitUUID).sorted() == ["new", "old"])
+    }
+
+    @Test func windowStoreIsKeptPerKind() {
+        windows.save(days: 365, for: .run)
+        #expect(windows.days(for: .run) == 365)
+        #expect(windows.days(for: .ride) == nil)
     }
 }
