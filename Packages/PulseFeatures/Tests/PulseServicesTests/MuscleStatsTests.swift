@@ -47,8 +47,9 @@ struct MuscleStatsTests {
                               title: "Séance", sets: sets, createdAt: start, updatedAt: start)
     }
 
-    private func stats(_ sessions: [WorkoutSession], period: StatsPeriod = .month) -> MuscleStats {
-        MuscleStats.make(sessions: sessions, directory: directory, period: period, now: now, calendar: calendar)
+    private func stats(_ sessions: [WorkoutSession], historyStart: Date? = nil, period: StatsPeriod = .month) -> MuscleStats {
+        MuscleStats.make(sessions: sessions, directory: directory, historyStart: historyStart, period: period, now: now,
+                         calendar: calendar)
     }
 
     @Test func weightsCountPrimaryOneSecondaryHalf() {
@@ -142,5 +143,28 @@ struct MuscleStatsTests {
         let result = stats(sessions, period: .month)
         #expect(!result.neglected.map(\.group).contains(.legs))
         #expect(result.neglected.map(\.group).contains(.core))
+    }
+
+    @Test func shortHistoryDoesNotMakeGroupsNeglected() {
+        // 13 semaines d'historique, 5 séances par semaine, 12 séries de pectoraux par semaine : sur l'année entière (52 semaines)
+        // la moyenne tomberait à 3, mais seules les 13 semaines d'historique comptent.
+        let sessions = (0..<91).filter { $0 % 7 < 5 }.map { daysAgo in
+            session(daysAgo: daysAgo, sets: daysAgo % 7 == 0 ? sets(reference(Self.press), count: 12) : [])
+        }
+        let result = stats(sessions, historyStart: day(90), period: .year)
+        #expect(!result.neglected.map(\.group).contains(.chest))
+        // Les autres groupes, sans série, restent délaissés.
+        #expect(result.neglected.map(\.group).contains(.legs))
+        // Sans l'historique, la période entière sert de diviseur et les pectoraux passent sous le seuil.
+        #expect(stats(sessions, period: .year).neglected.map(\.group).contains(.chest))
+    }
+
+    @Test func historyShorterThanTwoWeeksHasNoNeglectedGroups() {
+        let daily = (0..<14).map { session(daysAgo: $0, sets: $0 == 0 ? sets(reference(Self.plank), count: 2) : []) }
+        // 14 jours d'historique : la règle s'applique.
+        #expect(!stats(daily, historyStart: day(13)).neglected.isEmpty)
+        // 13 jours : trop court.
+        #expect(stats(daily, historyStart: day(12)).neglected.isEmpty)
+        #expect(stats(daily, historyStart: day(0)).neglected.isEmpty)
     }
 }

@@ -41,6 +41,8 @@ public struct MuscleStats: Sendable, Equatable {
     public static let balanceRange = 0.67...1.5
     /// La règle « délaissé » ne s'applique qu'à partir de cette période, en jours.
     static let neglectedMinimumDays = 30
+    /// Sous cette durée d'historique dans la période (jours de calendrier), la moyenne hebdomadaire ne veut encore rien dire.
+    static let neglectedMinimumHistoryDays = 14
     static let topCount = 8
 
     /// 1 par série de travail pour un muscle principal, 0,5 pour un secondaire (comme `SessionRecap`).
@@ -62,8 +64,11 @@ public struct MuscleStats: Sendable, Equatable {
     private static let pushPatterns: Set<MovementPattern> = [.horizontalPush, .chestFly, .verticalPush, .elbowExtension]
     private static let pullPatterns: Set<MovementPattern> = [.verticalPull, .horizontalPull, .elbowFlexion]
 
-    public static func make(sessions: [WorkoutSession], directory: ExerciseDirectory, period: StatsPeriod, now: Date,
-                            calendar: Calendar) -> MuscleStats {
+    // swiftlint:disable function_parameter_count
+    /// `historyStart` : la fin de l'onboarding ou la première séance ; la moyenne hebdomadaire ne remonte pas avant
+    /// (`nil` : la période entière).
+    public static func make(sessions: [WorkoutSession], directory: ExerciseDirectory, historyStart: Date?, period: StatsPeriod,
+                            now: Date, calendar: Calendar) -> MuscleStats {
         let interval = period.interval(now: now, calendar: calendar)
         let completed = sessions.filter {
             $0.kind == .strength && $0.status == .completed && interval.start <= $0.startedAt && $0.startedAt < interval.end
@@ -82,11 +87,13 @@ public struct MuscleStats: Sendable, Equatable {
 
         return MuscleStats(
             weights: weights, top: Array(ranked(weights).prefix(topCount)),
-            neglected: neglected(weights: weights, strengthSessions: completed.count, period: period),
+            neglected: neglected(weights: weights, strengthSessions: completed.count, period: period,
+                                 days: clampedDays(of: interval, since: historyStart, calendar: calendar)),
             push: push, pull: pull, upper: upper, lower: lower,
             isPushPullUnbalanced: isUnbalanced(push, pull), isUpperLowerUnbalanced: isUnbalanced(upper, lower),
             strengthSessions: completed.count)
     }
+    // swiftlint:enable function_parameter_count
 
     /// Les muscles qui ont des séries, du plus au moins travaillé ; à égalité, l'ordre de `Muscle.allCases`.
     private static func ranked(_ weights: [Muscle: Double]) -> [MuscleLoad] {
@@ -97,11 +104,20 @@ public struct MuscleStats: Sendable, Equatable {
             .map(\.element)
     }
 
-    /// Un groupe sous `neglectedWeeklySets`, quand la période compte au moins 30 jours et une séance par semaine en moyenne.
-    /// Un groupe sans série compte (il est délaissé), d'où le parcours de tous les groupes.
-    private static func neglected(weights: [Muscle: Double], strengthSessions: Int, period: StatsPeriod) -> [NeglectedGroup] {
-        let weeks = Double(period.days) / 7
-        guard period.days >= neglectedMinimumDays, Double(strengthSessions) / weeks >= 1 else { return [] }
+    /// Les jours de calendrier de la période depuis le début de l'historique : les semaines d'avant la première séance ne comptent
+    /// pas (sans `historyStart`, la période entière).
+    private static func clampedDays(of interval: DateInterval, since historyStart: Date?, calendar: Calendar) -> Int {
+        let start = historyStart.map { max(interval.start, calendar.startOfDay(for: $0)) } ?? interval.start
+        return calendar.dateComponents([.day], from: start, to: interval.end).day ?? 0
+    }
+
+    /// Un groupe sous `neglectedWeeklySets`, quand la période compte au moins 30 jours, que l'historique couvre au moins 14 jours
+    /// de la période (`days`) et qu'il y a une séance par semaine en moyenne. Un groupe sans série compte (il est délaissé),
+    /// d'où le parcours de tous les groupes.
+    private static func neglected(weights: [Muscle: Double], strengthSessions: Int, period: StatsPeriod, days: Int) -> [NeglectedGroup] {
+        let weeks = Double(days) / 7
+        guard period.days >= neglectedMinimumDays, days >= neglectedMinimumHistoryDays,
+              Double(strengthSessions) / weeks >= 1 else { return [] }
         let groups = MuscleGroup.allCases.map { group -> NeglectedGroup in
             let muscles = ranked(weights).filter { MuscleGroup($0.muscle) == group }
             return NeglectedGroup(group: group, weeklySets: muscles.reduce(0) { $0 + $1.sets } / weeks, muscles: muscles)
