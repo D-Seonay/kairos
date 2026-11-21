@@ -41,6 +41,21 @@ public struct StreakSummary: Sendable, Equatable {
     public var currentWeek: StreakWeek? { weeks.last }
 }
 
+/// La plus longue suite de semaines réussies de l'historique.
+public struct BestStreak: Sendable, Equatable {
+    public var weeks: Int
+    /// Le lundi de la première semaine de la suite.
+    public var firstWeek: Date
+    /// Le lundi de sa dernière semaine.
+    public var lastWeek: Date
+
+    public init(weeks: Int, firstWeek: Date, lastWeek: Date) {
+        self.weeks = weeks
+        self.firstWeek = firstWeek
+        self.lastWeek = lastWeek
+    }
+}
+
 public enum WeekStreak {
     /// La hauteur du pilier.
     public static let pillarWeeks = 12
@@ -61,10 +76,7 @@ public enum WeekStreak {
     public static func summary(sessions: [WorkoutSession], target: Int, historyStart: Date?, now: Date,
                                calendar: Calendar) -> StreakSummary {
         let current = WeekSchedule.weekStart(of: now, calendar: calendar)
-        var perWeek = [Date: Int]()
-        for session in sessions where Self.counts(session) {
-            perWeek[WeekSchedule.weekStart(of: session.startedAt, calendar: calendar), default: 0] += 1
-        }
+        let perWeek = weeklyCounts(sessions: sessions, calendar: calendar)
         func week(_ offset: Int) -> StreakWeek? {
             guard let start = calendar.date(byAdding: .weekOfYear, value: -offset, to: current) else { return nil }
             return StreakWeek(weekStart: start, count: perWeek[start] ?? 0, target: target, isCurrent: offset == 0)
@@ -79,5 +91,37 @@ public enum WeekStreak {
             offset += 1
         }
         return StreakSummary(streak: streak, weeks: weeks)
+    }
+
+    /// Les séances comptées de chaque semaine, par lundi.
+    static func weeklyCounts(sessions: [WorkoutSession], calendar: Calendar) -> [Date: Int] {
+        var perWeek = [Date: Int]()
+        for session in sessions where counts(session) {
+            perWeek[WeekSchedule.weekStart(of: session.startedAt, calendar: calendar), default: 0] += 1
+        }
+        return perWeek
+    }
+
+    /// La plus longue suite de semaines réussies depuis la semaine de `historyStart` ; la semaine en cours compte si elle est
+    /// déjà réussie. À égalité, la suite la plus récente l'emporte ; `nil` sans début d'historique ou sans semaine réussie.
+    public static func best(sessions: [WorkoutSession], target: Int, historyStart: Date?, now: Date,
+                            calendar: Calendar) -> BestStreak? {
+        guard let historyStart else { return nil }
+        let current = WeekSchedule.weekStart(of: now, calendar: calendar)
+        let perWeek = weeklyCounts(sessions: sessions, calendar: calendar)
+        var week = WeekSchedule.weekStart(of: historyStart, calendar: calendar)
+        var best: BestStreak?
+        var run: BestStreak?
+        while week <= current {
+            if (perWeek[week] ?? 0) >= target {
+                run = BestStreak(weeks: (run?.weeks ?? 0) + 1, firstWeek: run?.firstWeek ?? week, lastWeek: week)
+                if let candidate = run, candidate.weeks >= (best?.weeks ?? 0) { best = candidate }
+            } else {
+                run = nil
+            }
+            guard let next = calendar.date(byAdding: .weekOfYear, value: 1, to: week), next > week else { break }
+            week = next
+        }
+        return best
     }
 }
