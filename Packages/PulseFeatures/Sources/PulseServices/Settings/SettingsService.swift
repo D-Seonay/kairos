@@ -21,6 +21,8 @@ public struct SettingsService: Sendable {
     private let profiles: any ProfileRepository
     private let now: @Sendable () -> Date
     private let onChange: @Sendable (UserProfile, UserProfile) async -> Void
+    /// Les mises à jour rapides de l'écran Réglages ne s'entrelacent pas entre la lecture du profil et son écriture.
+    private let queue = SerialTaskQueue()
 
     /// `onChange(ancien, nouveau)` part après chaque écriture réussie ; c'est là que l'app replanifie.
     public init(profiles: any ProfileRepository, now: @escaping @Sendable () -> Date,
@@ -36,19 +38,23 @@ public struct SettingsService: Sendable {
     }
 
     /// Applique `change` à une copie du profil, normalise, valide, et n'enregistre (avec `updatedAt = now()`) que si quelque chose a
-    /// changé. Une erreur de validation n'écrit rien et n'appelle rien ; un profil inchangé est rendu tel quel.
+    /// changé. Une erreur de validation n'écrit rien et n'appelle rien ; un profil inchangé est rendu tel quel. Seuls les champs
+    /// modifiés sont validés : une valeur déjà stockée hors limites (une taille lue dans Santé) ne bloque pas un autre réglage.
+    /// Chaque appel s'exécute en entier (lecture, écriture, `onChange`) avant le suivant.
     @discardableResult
-    public func update(_ change: @Sendable (inout UserProfile) -> Void) async throws -> UserProfile {
-        let old = try await load()
-        var updated = old
-        change(&updated)
-        Self.normalize(&updated)
-        try Self.validate(updated)
-        guard updated != old else { return old }
-        updated.updatedAt = now()
-        try await profiles.save(updated)
-        await onChange(old, updated)
-        return updated
+    public func update(_ change: @escaping @Sendable (inout UserProfile) -> Void) async throws -> UserProfile {
+        try await queue.run {
+            let old = try await load()
+            var updated = old
+            change(&updated)
+            Self.normalize(&updated)
+            try Self.validate(updated, against: old)
+            guard updated != old else { return old }
+            updated.updatedAt = now()
+            try await profiles.save(updated)
+            await onChange(old, updated)
+            return updated
+        }
     }
 
     /// Prénom rogné (vide : absent), disques positifs triés du plus lourd au plus léger, comme `ActiveSessionService.saveBarAndPlates`.
@@ -59,11 +65,22 @@ public struct SettingsService: Sendable {
         profile.availablePlatesKg = profile.availablePlatesKg.filter { $0 > 0 }.sorted(by: >)
     }
 
-    private static func validate(_ profile: UserProfile) throws {
-        if let height = profile.heightCm, !heightRange.contains(height) { throw SettingsError.invalidHeight }
-        guard profile.upperIncrementKg > 0, profile.lowerIncrementKg > 0 else { throw SettingsError.invalidIncrement }
-        guard restChoices.contains(profile.defaultRestSeconds) else { throw SettingsError.invalidRest }
-        if let deadline = profile.morningScoreDeadlineMinutes, !deadlineRange.contains(deadline) { throw SettingsError.invalidDeadline }
-        guard profile.barWeightKg > 0, !profile.availablePlatesKg.isEmpty else { throw SettingsError.invalidPlates }
+    private static func validate(_ profile: UserProfile, against old: UserProfile) throws {
+        if profile.heightCm != old.heightCm, let height = profile.heightCm, !heightRange.contains(height) {
+            throw SettingsError.invalidHeight
+        }
+        if profile.upperIncrementKg != old.upperIncrementKg || profile.lowerIncrementKg != old.lowerIncrementKg {
+            guard profile.upperIncrementKg > 0, profile.lowerIncrementKg > 0 else { throw SettingsError.invalidIncrement }
+        }
+        if profile.defaultRestSeconds != old.defaultRestSeconds, !restChoices.contains(profile.defaultRestSeconds) {
+            throw SettingsError.invalidRest
+        }
+        if profile.morningScoreDeadlineMinutes != old.morningScoreDeadlineMinutes,
+           let deadline = profile.morningScoreDeadlineMinutes, !deadlineRange.contains(deadline) {
+            throw SettingsError.invalidDeadline
+        }
+        if profile.barWeightKg != old.barWeightKg || profile.availablePlatesKg != old.availablePlatesKg {
+            guard profile.barWeightKg > 0, !profile.availablePlatesKg.isEmpty else { throw SettingsError.invalidPlates }
+        }
     }
 }

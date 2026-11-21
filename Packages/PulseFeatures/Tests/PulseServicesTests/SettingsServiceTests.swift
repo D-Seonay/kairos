@@ -21,6 +21,7 @@ struct SettingsServiceTests {
         return SettingsService(profiles: profiles, now: { now }, onChange: { old, new in await log.record(old, new) })
     }
 
+    @discardableResult
     private func seed(_ profile: UserProfile? = nil) async throws -> UserProfile {
         let value = profile ?? UserProfile(createdAt: earlier, updatedAt: earlier)
         try await profiles.save(value)
@@ -105,5 +106,29 @@ struct SettingsServiceTests {
         let result = try await service.update { $0.availablePlatesKg = [2.5, 0, 20, 1.25, 10] }
 
         #expect(result.availablePlatesKg == [20, 10, 2.5, 1.25])
+    }
+
+    @Test func concurrentUpdatesDoNotInterleave() async throws {
+        try await seed()
+        let service = service
+
+        async let first = service.update { $0.firstName = "Mathéo" }
+        async let second = service.update { $0.theme = .amethyst }
+        _ = try await (first, second)
+
+        let stored = try #require(try await profiles.load())
+        #expect(stored.firstName == "Mathéo" && stored.theme == .amethyst)
+        let calls = await log.calls
+        #expect(calls.count == 2 && calls[1].old == calls[0].new)
+    }
+
+    @Test func onlyChangedFieldsAreValidated() async throws {
+        try await seed(UserProfile(heightCm: 95, createdAt: earlier, updatedAt: earlier))
+
+        let renamed = try await service.update { $0.firstName = "Mathéo" }
+        #expect(renamed.firstName == "Mathéo" && renamed.heightCm == 95)
+
+        await #expect(throws: SettingsError.invalidHeight) { try await service.update { $0.heightCm = 96 } }
+        #expect(try await profiles.load()?.heightCm == 95)
     }
 }
