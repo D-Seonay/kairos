@@ -34,6 +34,8 @@ public struct WeightTrend: Sendable, Equatable {
     public static let window = 7
     /// Sans pesée depuis autant de jours, la tendance s'affiche avec sa date.
     public static let staleDays = 14
+    /// Le plus vieux jour de référence de `change30Days`, en jours avant `lastMeasured`.
+    public static let changeReferenceMaxDays = 37
 
     /// Une valeur par jour mesuré, chronologique.
     public var days: [WeightDay]
@@ -45,7 +47,8 @@ public struct WeightTrend: Sendable, Equatable {
     public var lastMeasured: Date?
     /// Aucune pesée depuis 14 jours.
     public var isStale: Bool
-    /// `current` moins la tendance du dernier jour mesuré au plus tard 30 jours avant `lastMeasured` ; nul sans un tel jour.
+    /// `current` moins la tendance du dernier jour mesuré entre 37 et 30 jours avant `lastMeasured` ; nul sans un tel jour, pour
+    /// qu'« en 30 j » ne compare jamais à une pesée vieille de plusieurs mois.
     public var change30Days: Double?
     public var latestBodyFat: BodyFatReading?
 
@@ -89,7 +92,8 @@ public struct WeightTrend: Sendable, Equatable {
     private static func change(points: [StatsPoint], lastMeasured: Date?, calendar: Calendar) -> Double? {
         guard let last = points.last, let lastMeasured,
               let limit = calendar.date(byAdding: .day, value: -30, to: lastMeasured),
-              let reference = points.last(where: { $0.date <= limit }) else { return nil }
+              let oldest = calendar.date(byAdding: .day, value: -changeReferenceMaxDays, to: lastMeasured),
+              let reference = points.last(where: { $0.date <= limit }), reference.date >= oldest else { return nil }
         return last.value - reference.value
     }
 }

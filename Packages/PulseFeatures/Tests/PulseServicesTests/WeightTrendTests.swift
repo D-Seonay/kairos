@@ -80,6 +80,18 @@ struct WeightTrendTests {
         #expect(abs(change + 2.0) < 0.001)
     }
 
+    @Test func changeIgnoresAReferenceOlderThanThirtySevenDays() throws {
+        // Une pesée vieille de 300 jours ne dit rien d'un écart « en 30 j ».
+        let old = trend([measurement(85, daysAgo: 300), measurement(79, daysAgo: 3), measurement(78.6, daysAgo: 0)])
+        #expect(old.change30Days == nil)
+        // La borne : 37 jours avant le dernier jour mesuré compte encore, 38 non.
+        #expect(trend([measurement(81, daysAgo: 37), measurement(79, daysAgo: 0)]).change30Days != nil)
+        #expect(trend([measurement(81, daysAgo: 38), measurement(79, daysAgo: 0)]).change30Days == nil)
+        // 33 jours avant : l'écart est calculé.
+        let change = try #require(trend([measurement(81, daysAgo: 33), measurement(79, daysAgo: 0)]).change30Days)
+        #expect(abs(change + 2.0) < 0.001)
+    }
+
     @Test func bodyFatComesFromTheLatestReading() throws {
         let result = trend([measurement(nil, daysAgo: 5, fat: 18), measurement(80, daysAgo: 3, fat: 17.2),
                             measurement(nil, daysAgo: 9, fat: 19)])
