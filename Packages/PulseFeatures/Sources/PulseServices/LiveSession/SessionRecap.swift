@@ -133,7 +133,7 @@ extension SessionRecap {
     }
 
     /// 1 par série pour un muscle principal, 0,5 pour un secondaire ; un exercice inconnu de l'annuaire est ignoré.
-    private static func muscleWeights(of sets: [WorkoutSet], directory: ExerciseDirectory) -> [Muscle: Double] {
+    static func muscleWeights(of sets: [WorkoutSet], directory: ExerciseDirectory) -> [Muscle: Double] {
         var weights: [Muscle: Double] = [:]
         for set in sets {
             guard let exercise = directory.info(set.exercise) else { continue }
