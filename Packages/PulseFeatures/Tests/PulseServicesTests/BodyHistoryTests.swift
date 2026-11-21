@@ -7,6 +7,8 @@ import Testing
 private actor ScriptedBodySource: HealthBodySource {
     var samples: [BodySignal: [CachedHealthSample]] = [:]
     var deleted: [String] = []
+    /// Vrai : la source rend toujours une lecture complète, comme quand l'ancre stockée est illisible.
+    var alwaysFullRead = false
     private var anchors: [BodySignal: [Data?]] = [:]
 
     func anchorsSeen(for signal: BodySignal) -> [Data?] {
@@ -18,10 +20,14 @@ private actor ScriptedBodySource: HealthBodySource {
         self.deleted = deleted
     }
 
+    func set(alwaysFullRead: Bool) {
+        self.alwaysFullRead = alwaysFullRead
+    }
+
     func bodyChanges(of signal: BodySignal, since anchor: Data?, from start: Date) async throws -> HealthSampleChanges {
         anchors[signal, default: []].append(anchor)
         return HealthSampleChanges(kind: signal.kind, added: samples[signal] ?? [], deletedHealthKitUUIDs: deleted,
-                                   anchor: Data("a".utf8), isFullRead: anchor == nil)
+                                   anchor: Data("a".utf8), isFullRead: anchor == nil || alwaysFullRead)
     }
 }
 
@@ -111,6 +117,53 @@ struct BodyHistoryTests {
         await history.refresh(now: now)
         #expect(await source.anchorsSeen(for: .bodyMass).suffix(2) == [nil, nil])
         #expect(try await stored().count == 3)
+    }
+
+    @Test func emptyFullReadWithCurrentWindowKeepsMeasurements() async throws {
+        // Fenêtre à jour, mais l'ancre est illisible : la source relit tout et ne rend rien (accès révoqué).
+        await source.set(threeSamples)
+        await history.refresh(now: now)
+        #expect(windows.days(for: .bodyMass) == BodyHistory.historyDays)
+        await source.set([:])
+        await source.set(alwaysFullRead: true)
+
+        #expect(await !history.refresh(now: now))
+        #expect(try await stored().count == 3)
+        #expect(try await cache.samples(kind: .bodyMass, from: .distantPast, to: .distantFuture).count == 2)
+    }
+
+    @Test func syncedMeasurementsSurviveAnEmptyFullReadWithAnEmptyCache() async throws {
+        // Second appareil ou réinstallation : les mesures importées arrivent par iCloud, le cache local est vide.
+        var weight = BodyMeasurement(date: TestClock.date("2026-11-18T07:30"), weightKg: 78.4, source: .appleHealth,
+                                     createdAt: now, updatedAt: now)
+        weight.healthKitUUID = "w1"
+        var fat = BodyMeasurement(date: TestClock.date("2026-11-19T07:30"), bodyFatPercent: 17.5, source: .appleHealth,
+                                  createdAt: now, updatedAt: now)
+        fat.healthKitUUID = "f1"
+        try await measurements.save(weight)
+        try await measurements.save(fat)
+        await source.set([:])
+
+        #expect(await !history.refresh(now: now))
+        #expect(try await stored().count == 2)
+        #expect(windows.days(for: .bodyMass) == nil && windows.days(for: .bodyFat) == nil)
+    }
+
+    @Test func measurementsSharingAHealthKitUUIDKeepTheOldest() async throws {
+        var oldest = BodyMeasurement(date: TestClock.date("2026-11-18T07:30"), weightKg: 78.4, source: .appleHealth,
+                                     createdAt: TestClock.date("2026-11-18T08:00"), updatedAt: now)
+        oldest.healthKitUUID = "w1"
+        var copy = oldest
+        copy.id = UUID()
+        copy.createdAt = TestClock.date("2026-11-19T08:00")
+        try await measurements.save(copy)
+        try await measurements.save(oldest)
+        await source.set([.bodyMass: [sample(.bodyMass, "w1", 78.4, at: "2026-11-18T07:30")]])
+
+        #expect(await history.refresh(now: now))
+        let all = try await stored()
+        #expect(all.count == 1)
+        #expect(all.first?.id == oldest.id)
     }
 
     @Test func changedSampleUpdatesItsMeasurementAndKeepsItsID() async throws {

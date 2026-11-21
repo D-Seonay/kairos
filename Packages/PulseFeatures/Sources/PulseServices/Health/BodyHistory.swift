@@ -30,10 +30,11 @@ public struct BodyHistory: Sendable {
     @discardableResult
     public func refresh(now: Date) async -> Bool {
         let start = calendar.date(byAdding: .day, value: -Self.historyDays, to: calendar.startOfDay(for: now)) ?? now
+        let end = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: now)) ?? now
         var changed = false
         for signal in BodySignal.allCases {
-            guard await sync(signal, from: start, fetchedAt: now) else { continue }
-            changed = await align(signal, from: start, now: now) || changed
+            guard await sync(signal, from: start, to: end, fetchedAt: now) else { continue }
+            changed = await align(signal, from: start, to: end, now: now) || changed
         }
         // `UserProfile.weightKg` suit la tendance : un échec ici ne change pas ce que le passage rend.
         if changed {
@@ -42,7 +43,7 @@ public struct BodyHistory: Sendable {
         return changed
     }
 
-    private func sync(_ signal: BodySignal, from start: Date, fetchedAt: Date) async -> Bool {
+    private func sync(_ signal: BodySignal, from start: Date, to end: Date, fetchedAt: Date) async -> Bool {
         // Une fenêtre lue plus étroite que celle d'aujourd'hui (ou rien) : l'ancre est ignorée et la lecture est complète. La
         // fenêtre n'est retenue qu'une fois le cache écrit, donc un échec est retenté.
         let windowIsCurrent = (windows.days(for: signal.kind) ?? 0) >= Self.historyDays
@@ -50,10 +51,14 @@ public struct BodyHistory: Sendable {
         do {
             var changes = try await source.bodyChanges(of: signal, since: anchor, from: start)
             // Apple Santé ne distingue pas un accès révoqué de pesées effacées : une lecture complète qui ne rend rien alors que le
-            // cache en gardait ne doit pas emporter les mesures importées. Rien n'est appliqué ni retenu, elle est retentée.
+            // cache en gardait ne doit pas emporter les mesures importées. Le cache est local mais les mesures passent par iCloud :
+            // sur un second appareil ou après une réinstallation, le cache est vide et les mesures importées sont là. Dans les deux
+            // cas rien n'est appliqué ni retenu, la lecture est retentée.
             if changes.isFullRead, changes.added.isEmpty {
                 let cached = try await cache.samples(kind: signal.kind, from: .distantPast, to: .distantFuture)
                 if !cached.isEmpty { return false }
+                let stored = try await measurements.measurements(from: start, to: end)
+                if stored.contains(where: { Self.isImported($0, signal: signal) }) { return false }
             }
             changes.added = changes.added.map { sample in
                 var stamped = sample
@@ -69,16 +74,13 @@ public struct BodyHistory: Sendable {
     }
 
     /// Ajoute, met à jour ou supprime les mesures `appleHealth` du signal datées dans la fenêtre pour qu'elles suivent le cache.
-    private func align(_ signal: BodySignal, from start: Date, now: Date) async -> Bool {
-        let end = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: now)) ?? now
+    private func align(_ signal: BodySignal, from start: Date, to end: Date, now: Date) async -> Bool {
         guard let samples = try? await cache.samples(kind: signal.kind, from: start, to: end),
               let stored = try? await measurements.measurements(from: start, to: end) else { return false }
-        let imported = stored.filter { $0.source == .appleHealth && Self.value(of: $0, signal: signal) != nil }
-        var byUUID = [String: BodyMeasurement]()
-        for measurement in imported {
-            if let uuid = measurement.healthKitUUID { byUUID[uuid] = measurement }
-        }
-        var changed = false
+        let imported = stored.filter { Self.isImported($0, signal: signal) }
+        // Deux appareils qui importent la même pesée avant de se synchroniser en font deux mesures : la plus ancienne est gardée.
+        let (byUUID, duplicates) = HealthImportDuplicates.split(imported, uuid: \.healthKitUUID) { $0.createdAt < $1.createdAt }
+        var changed = await delete(duplicates.map(\.id))
         var seen = Set<String>()
         for sample in samples {
             guard let uuid = sample.healthKitUUID, sample.value != nil, seen.insert(uuid).inserted else { continue }
@@ -86,10 +88,18 @@ public struct BodyHistory: Sendable {
             guard measurement != byUUID[uuid] else { continue }
             if (try? await measurements.save(measurement)) != nil { changed = true }
         }
-        for measurement in imported where measurement.healthKitUUID.map({ !seen.contains($0) }) ?? true {
-            if (try? await measurements.delete(id: measurement.id)) != nil { changed = true }
+        // Les mesures gardées dont l'échantillon n'est plus dans le cache (effacé dans Apple Santé), et celles sans identifiant.
+        let gone = byUUID.filter { !seen.contains($0.key) }.values.map(\.id) + imported.filter { $0.healthKitUUID == nil }.map(\.id)
+        return await delete(gone) || changed
+    }
+
+    /// Rend vrai si au moins une mesure a été supprimée.
+    private func delete(_ ids: [UUID]) async -> Bool {
+        var deleted = false
+        for id in ids.sorted(by: { $0.uuidString < $1.uuidString }) {
+            deleted = (try? await measurements.delete(id: id)) != nil || deleted
         }
-        return changed
+        return deleted
     }
 
     /// La mesure d'un échantillon lu. Une mesure existante garde son identifiant et sa création ; seuls la date et la valeur
@@ -105,6 +115,11 @@ public struct BodyHistory: Sendable {
         measurement.healthKitUUID = sample.healthKitUUID
         if existing != nil, measurement != previous { measurement.updatedAt = now }
         return measurement
+    }
+
+    /// Une mesure importée d'Apple Santé qui porte une valeur du signal.
+    private static func isImported(_ measurement: BodyMeasurement, signal: BodySignal) -> Bool {
+        measurement.source == .appleHealth && value(of: measurement, signal: signal) != nil
     }
 
     private static func value(of measurement: BodyMeasurement, signal: BodySignal) -> Double? {
