@@ -146,3 +146,69 @@ private func syncedHealthRuns(_ context: ModelContext) throws -> Int {
     try await SwiftDataWorkoutRepository(modelContainer: box.container).save(Sample.session())
     #expect(try await SwiftDataHealthDataRelocation(modelContainer: box.container).relocate() == false)
 }
+
+@Test func softDeletedNightIsClearedWithoutReading() async throws {
+    let box = try ModelContainerBox()
+    let context = ModelContext(box.container)
+    let row = legacyRecovery()
+    row.deletedAt = Fixed.t2
+    context.insert(row)
+    try context.save()
+    #expect(try await SwiftDataHealthDataRelocation(modelContainer: box.container).relocate())
+    let check = ModelContext(box.container)
+    #expect(try check.fetchCount(FetchDescriptor<StoredRecoveryReading>()) == 0)
+    let synced = try #require(try check.fetch(FetchDescriptor<StoredDailyRecovery>()).first)
+    #expect(hasNoRawValue(synced))
+}
+
+@Test func softDeletedHealthWeighInIsDroppedWithoutCopy() async throws {
+    let box = try ModelContainerBox()
+    let context = ModelContext(box.container)
+    let row = StoredBodyMeasurement(Sample.measurement())
+    row.deletedAt = Fixed.t2
+    context.insert(row)
+    try context.save()
+    #expect(try await SwiftDataHealthDataRelocation(modelContainer: box.container).relocate())
+    let check = ModelContext(box.container)
+    #expect(try check.fetchCount(FetchDescriptor<StoredBodyMeasurement>()) == 0)
+    #expect(try check.fetchCount(FetchDescriptor<StoredImportedBodyMeasurement>()) == 0)
+}
+
+@Test func healthSessionLeavesWithItsSets() async throws {
+    let box = try ModelContainerBox()
+    let context = ModelContext(box.container)
+    var session = Sample.session()
+    session.source = .appleHealth
+    let row = StoredWorkoutSession(session)
+    context.insert(row)
+    try context.save()
+    #expect(try context.fetchCount(FetchDescriptor<StoredWorkoutSet>()) == 9)
+    #expect(try await SwiftDataHealthDataRelocation(modelContainer: box.container).relocate())
+    let check = ModelContext(box.container)
+    #expect(try syncedHealthRuns(check) == 0)
+    #expect(try check.fetchCount(FetchDescriptor<StoredWorkoutSet>()) == 0)
+    #expect(try check.fetch(FetchDescriptor<StoredImportedWorkout>()).map(\.id) == [row.id])
+}
+
+@Test(arguments: [false, true]) func latestSyncedRowOfADayWins(newerFirst: Bool) async throws {
+    let box = try ModelContainerBox()
+    let context = ModelContext(box.container)
+    let older = legacyRecovery(sdnnMs: 40)
+    older.updatedAt = Fixed.t1
+    let newer = legacyRecovery(sdnnMs: 60)
+    newer.updatedAt = Fixed.t2
+    // Dans un des deux cas, la ligne la plus ancienne vient d'abord par l'identifiant comme par l'ordre d'insertion :
+    // l'ordre de lecture du magasin ne doit pas décider.
+    let first = newerFirst ? newer : older
+    let second = newerFirst ? older : newer
+    first.id = try #require(UUID(uuidString: "00000000-0000-0000-0000-000000000001"))
+    second.id = try #require(UUID(uuidString: "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"))
+    context.insert(first)
+    context.insert(second)
+    try context.save()
+    _ = try await SwiftDataHealthDataRelocation(modelContainer: box.container).relocate()
+    let check = ModelContext(box.container)
+    let readings = try check.fetch(FetchDescriptor<StoredRecoveryReading>())
+    #expect(readings.count == 1 && readings.first?.sdnnMs == 60)
+    #expect(try check.fetch(FetchDescriptor<StoredDailyRecovery>()).allSatisfy(hasNoRawValue))
+}

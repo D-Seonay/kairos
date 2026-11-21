@@ -8,11 +8,14 @@ import SwiftData
 /// elle sera rejouée au passage suivant. Aucun drapeau « déjà fait ».
 @ModelActor
 public actor SwiftDataHealthDataRelocation: HealthDataRelocating {
+    /// Les trois étapes sont indépendantes : chacune est tentée même si une précédente a échoué, puis la première erreur est
+    /// relancée. Sans erreur, rend vrai si une étape a déplacé quelque chose.
     public func relocate() throws -> Bool {
-        let nights = try relocateNights()
-        let workouts = try relocateWorkouts()
-        let measurements = try relocateMeasurements()
-        return nights || workouts || measurements
+        let results = [Result { try relocateNights() }, Result { try relocateWorkouts() }, Result { try relocateMeasurements() }]
+        for case .failure(let error) in results {
+            throw error
+        }
+        return results.contains { (try? $0.get()) == true }
     }
 
     /// Les valeurs brutes passent dans la lecture locale du jour ; une lecture déjà présente l'emporte, elle est plus récente.
@@ -28,8 +31,14 @@ public actor SwiftDataHealthDataRelocation: HealthDataRelocating {
         try commit {
             let readings = try modelContext.fetch(FetchDescriptor<StoredRecoveryReading>())
             var readingDays = Set(readings.map(\.day))
-            // Les lignes vivantes d'abord : si un jour a aussi une ligne supprimée, ce sont leurs valeurs qui comptent.
-            for row in rows.sorted(by: { $0.deletedAt == nil && $1.deletedAt != nil }) {
+            // Deux appareils peuvent avoir créé chacun une ligne pour le même jour : seule la première vue d'un jour est recopiée,
+            // donc les lignes vivantes passent d'abord, de la plus récente à la plus ancienne, pour que la dernière écriture gagne.
+            // Les lignes supprimées logiquement viennent après : elles ne sont que vidées.
+            let ordered = rows.sorted { lhs, rhs in
+                if (lhs.deletedAt == nil) != (rhs.deletedAt == nil) { return lhs.deletedAt == nil }
+                return lhs.updatedAt > rhs.updatedAt
+            }
+            for row in ordered {
                 if row.deletedAt == nil, !readingDays.contains(row.day) {
                     modelContext.insert(StoredRecoveryReading(day: row.day, from: row.toDomain(), at: row.updatedAt))
                     readingDays.insert(row.day)
