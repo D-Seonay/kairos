@@ -10,8 +10,10 @@ struct StatsServiceTests {
 
         #expect(snapshot.period == .month)
         #expect(snapshot.load.today != nil)
-        // La 12e semaine est manquée : la meilleure série court de la 13e à la semaine en cours, déjà réussie.
-        #expect(snapshot.attendance.best?.weeks == 8)
+        // La 12e semaine est manquée : la meilleure série (semaines 1 à 11) précède la série en cours (13e à 20e semaine).
+        #expect(snapshot.attendance.best?.weeks == 11)
+        #expect(snapshot.attendance.best?.firstWeek == StatsFixtures.monday(ofWeek: 1))
+        #expect(snapshot.attendance.best?.lastWeek == StatsFixtures.monday(ofWeek: 11))
         #expect(snapshot.attendance.streak.streak == 8)
         #expect(snapshot.records.strength.first?.exercise == .content(id: "back-squat-barbell"))
         #expect(snapshot.records.runs[0].seconds != nil)

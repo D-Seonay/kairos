@@ -29,19 +29,19 @@ struct StatsLift {
 }
 
 /// Vingt semaines d'entraînement qui finissent le vendredi 20 novembre 2026 : PPL lundi, mardi, mercredi, Push jeudi, course
-/// le samedi avec fréquence cardiaque, un vélo par mois, une semaine manquée (la 12e), 8 séances importées de Hevy au début
-/// (deux par semaine, sous l'objectif de 4 : la série ne démarre qu'après), un score par nuit avec des trous.
+/// le samedi avec fréquence cardiaque, un vélo par mois, une semaine manquée (la 12e), 8 séances de musculation importées de
+/// Hevy au début (les semaines 1 et 2), un score par nuit avec des trous.
 ///
-/// L'objectif hebdomadaire du programme est de 4 : les semaines 5 à 11 réussissent, la 12e est manquée, les semaines 13 à 20
-/// réussissent (la semaine en cours dès le jeudi), donc la meilleure série vaut 8.
+/// L'objectif hebdomadaire du programme est de 4 : les semaines 1 à 11 réussissent, la 12e est manquée, les semaines 13 à 20
+/// réussissent (la semaine en cours dès le jeudi). La meilleure série (11 semaines, 1 à 11) diffère donc de la série en cours (8).
 enum StatsFixtures {
     static let now = TestClock.date("2026-11-20T12:00")
     static let weeks = 20
     /// Le programme : 4 séances de musculation par semaine, la course du samedi en plus.
     static let weeklyTarget = 4
     static let missedWeek = 12
-    /// Les semaines 1 à 4 viennent de Hevy : deux séances chacune.
-    static let hevyWeeks = 4
+    /// Les musculations des semaines 1 et 2 viennent de Hevy : 8 séances.
+    static let hevyWeeks = 2
 
     private static var calendar: Calendar { TestClock.calendar }
 
@@ -120,7 +120,6 @@ enum StatsFixtures {
             let hevy = week <= hevyWeeks
             let source: SessionSource = hevy ? .hevy : .pulse
             func strength(_ lifts: [StatsLift], _ title: String, offset: Int) {
-                guard !hevy || offset < 3 && offset != 1 else { return }
                 let start = day(offset, ofWeek: week)
                 guard start < now else { return }
                 sessions.append(strengthSession(lifts, title: title, start: start, week: week, source: source,
@@ -130,7 +129,7 @@ enum StatsFixtures {
             strength(pull, "Pull", offset: 1)
             strength(legs, "Legs", offset: 2)
             strength(push, "Push", offset: 3)
-            if !hevy { sessions.append(run(start: day(5, ofWeek: week, hour: 10))) }
+            sessions.append(run(start: day(5, ofWeek: week, hour: 10)))
             if week % 4 == 2 { sessions.append(ride(start: day(6, ofWeek: week, hour: 10))) }
         }
         return sessions
@@ -176,8 +175,8 @@ enum StatsFixtures {
         let repositories = StatsRepositories()
         let program = program()
         try await repositories.programs.save(program)
-        // L'onboarding (adoption du programme) vient après l'import Hevy : l'historique démarre à la première séance.
-        let onboarded = monday(ofWeek: hevyWeeks + 1)
+        // L'onboarding vient après la première séance importée : l'historique démarre à la première séance, la semaine 1.
+        let onboarded = monday(ofWeek: 3)
         try await repositories.profiles.save(UserProfile(restWeekdays: [.friday, .sunday], onboardingCompletedAt: onboarded,
                                                          activeProgramID: program.id))
         let sessions = sessions(programID: program.id)
