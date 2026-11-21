@@ -239,9 +239,11 @@ struct HealthSettingsSection: View {
         return String(localized: "dernière donnée le \(day)", bundle: .module)
     }
 
+    /// `HealthReadStatus.lastRead` date la dernière donnée arrivée dans le cache, pas la dernière lecture d'Apple Santé : une
+    /// lecture qui ne rapporte rien ne la change pas.
     private func lastRead(_ date: Date?) -> String {
-        guard let date else { return String(localized: "Dernière lecture : jamais", bundle: .module) }
-        return String(localized: "Dernière lecture : \(ProfileText.dateTime(date, calendar: model.environment.calendar))",
+        guard let date else { return String(localized: "Dernière donnée reçue : jamais", bundle: .module) }
+        return String(localized: "Dernière donnée reçue : \(ProfileText.dateTime(date, calendar: model.environment.calendar))",
                       bundle: .module)
     }
 }
