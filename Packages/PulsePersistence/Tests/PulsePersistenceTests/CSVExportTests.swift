@@ -66,3 +66,24 @@ import Testing
     #expect(["load_kind", "is_compound", "tracks_duration"].allSatisfy(userHeader.contains))
     #expect(CSVTables.readme(for: document).contains("exercise_settings.csv : réglages par exercice (incrément, échauffement)"))
 }
+
+@Test func csvIncludesLocalHealthValues() async throws {
+    let box = try ModelContainerBox()
+    try await SwiftDataRecoveryRepository(modelContainer: box.container, calendar: Fixed.calendar).save(Sample.recovery())
+    try await SwiftDataWorkoutRepository(modelContainer: box.container).save(Sample.importedRun())
+    try await SwiftDataBodyMeasurementRepository(modelContainer: box.container).save(Sample.measurement())
+    let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    let exporter = SwiftDataExporter(container: box.container, appVersion: "1.0 (1)", contentVersion: "1.0.0",
+                                     exerciseNames: { _ in nil }, directory: directory)
+    _ = try await exporter.exportCSVArchive()
+    let folder = try #require(exporter.lastCSVDirectory(in: directory))
+    func lines(_ name: String) throws -> [Substring] {
+        try String(contentsOf: folder.appendingPathComponent(name + ".csv"), encoding: .utf8).split(separator: "\n")
+    }
+    let recoveries = try lines("daily_recoveries")
+    #expect(recoveries.count == 2 && recoveries[1].contains(",50,"))
+    let sessions = try lines("workout_sessions")
+    #expect(sessions.count == 2 && sessions[1].contains("RUN"))
+    let measurements = try lines("body_measurements")
+    #expect(measurements.count == 2 && measurements[1].contains("ABC"))
+}

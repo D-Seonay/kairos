@@ -34,7 +34,7 @@ public struct SwiftDataStoreInspector: StoreInspector {
 actor StoreCounter {
     private typealias Counter = @Sendable (ModelContext) throws -> Int
 
-    /// Enregistrements non supprimés des tables synchronisées ; les tables locales n'ont pas de `deletedAt`.
+    /// Enregistrements non supprimés ; les séances et les mesures additionnent le magasin synchronisé et les imports locaux.
     private static let counters: [StoreTable: Counter] = [
         .profile: { try live(StoredProfile.self, #Predicate { $0.deletedAt == nil }, in: $0) },
         .programs: { try live(StoredProgram.self, #Predicate { $0.deletedAt == nil }, in: $0) },
@@ -42,14 +42,20 @@ actor StoreCounter {
         .routineExercises: { try live(StoredRoutineExercise.self, #Predicate { $0.deletedAt == nil }, in: $0) },
         .userExercises: { try live(StoredUserExercise.self, #Predicate { $0.deletedAt == nil }, in: $0) },
         .exerciseSettings: { try live(StoredExerciseSettings.self, #Predicate { $0.deletedAt == nil }, in: $0) },
-        .workoutSessions: { try live(StoredWorkoutSession.self, #Predicate { $0.deletedAt == nil }, in: $0) },
+        .workoutSessions: {
+            try live(StoredWorkoutSession.self, #Predicate { $0.deletedAt == nil }, in: $0)
+                + live(StoredImportedWorkout.self, #Predicate { $0.deletedAt == nil }, in: $0)
+        },
         .workoutSets: { try live(StoredWorkoutSet.self, #Predicate { $0.deletedAt == nil }, in: $0) },
         .scheduledDays: { try live(StoredScheduledDay.self, #Predicate { $0.deletedAt == nil }, in: $0) },
         .dailyRecoveries: { try live(StoredDailyRecovery.self, #Predicate { $0.deletedAt == nil }, in: $0) },
         .checkIns: { try live(StoredCheckIn.self, #Predicate { $0.deletedAt == nil }, in: $0) },
         .supplements: { try live(StoredSupplement.self, #Predicate { $0.deletedAt == nil }, in: $0) },
         .supplementIntakes: { try live(StoredSupplementIntake.self, #Predicate { $0.deletedAt == nil }, in: $0) },
-        .bodyMeasurements: { try live(StoredBodyMeasurement.self, #Predicate { $0.deletedAt == nil }, in: $0) },
+        .bodyMeasurements: {
+            try live(StoredBodyMeasurement.self, #Predicate { $0.deletedAt == nil }, in: $0)
+                + live(StoredImportedBodyMeasurement.self, #Predicate { $0.deletedAt == nil }, in: $0)
+        },
         .personalRecords: { try live(StoredPersonalRecord.self, #Predicate { $0.deletedAt == nil }, in: $0) },
         .cachedHealthSamples: { try $0.fetchCount(FetchDescriptor<StoredCachedHealthSample>()) },
         .healthQueryAnchors: { try $0.fetchCount(FetchDescriptor<StoredHealthQueryAnchor>()) },

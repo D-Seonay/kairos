@@ -19,3 +19,18 @@ import Testing
     #expect(counts[.profile] == 1 && counts[.workoutSessions] == 1 && counts[.workoutSets] == 3)
     #expect(counts[.exerciseSettings] == 1 && counts[.programs] == 0 && counts[.cachedHealthSamples] == 0)
 }
+
+@Test func countsIncludeLocalImports() async throws {
+    let container = try TestContainer.make()
+    let workouts = SwiftDataWorkoutRepository(modelContainer: container)
+    try await workouts.save(Sample.session(sets: 1))
+    try await workouts.save(Sample.importedRun())
+    let measurements = SwiftDataBodyMeasurementRepository(modelContainer: container)
+    var manual = Sample.measurement()
+    manual.source = .manual
+    manual.healthKitUUID = nil
+    try await measurements.save(manual)
+    try await measurements.save(Sample.measurement())
+    let counts = try await SwiftDataStoreInspector(container: container, cloudEnabled: false).counts()
+    #expect(counts[.workoutSessions] == 2 && counts[.bodyMeasurements] == 2)
+}

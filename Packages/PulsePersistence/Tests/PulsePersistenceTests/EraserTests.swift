@@ -122,3 +122,20 @@ private struct EraseFixture {
     #expect(syncedCount == 32, "jeu d'exemple : 32 enregistrements synchronisés sur les 15 tables")
     #expect(deletes.filter { syncedEntities.contains($0) }.count == syncedCount)
 }
+
+@Test func eraseWipesLocalHealthModels() async throws {
+    let fixture = try EraseFixture()
+    let container = fixture.box.container
+    try await SwiftDataRecoveryRepository(modelContainer: container, calendar: Fixed.calendar).save(Sample.recovery())
+    try await SwiftDataWorkoutRepository(modelContainer: container).save(Sample.importedRun())
+    try await SwiftDataBodyMeasurementRepository(modelContainer: container).save(Sample.measurement())
+    let before = ModelContext(container)
+    #expect(try before.fetchCount(FetchDescriptor<StoredRecoveryReading>()) == 1)
+    #expect(try before.fetchCount(FetchDescriptor<StoredImportedWorkout>()) == 1)
+    #expect(try before.fetchCount(FetchDescriptor<StoredImportedBodyMeasurement>()) == 1)
+    try await fixture.eraser().eraseEverything(options: EraseOptions(includeAppleHealth: false))
+    let context = ModelContext(container)
+    #expect(try context.fetchCount(FetchDescriptor<StoredRecoveryReading>()) == 0)
+    #expect(try context.fetchCount(FetchDescriptor<StoredImportedWorkout>()) == 0)
+    #expect(try context.fetchCount(FetchDescriptor<StoredImportedBodyMeasurement>()) == 0)
+}
