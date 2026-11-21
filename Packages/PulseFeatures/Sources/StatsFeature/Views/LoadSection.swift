@@ -15,7 +15,7 @@ struct LoadSection: View {
         VStack(alignment: .leading, spacing: PulseMetrics.spacing) {
             StatsTileGrid(tiles: tiles)
             LoadRatioCard(load: load, window: window)
-            LoadBarsCard(bars: load.bars, window: window)
+            LoadBarsCard(bars: load.bars, totals: load.totals, window: window)
             LoadTotalsCard(totals: load.totals)
         }
     }
@@ -170,6 +170,8 @@ private struct LoadRatioCard: View {
 /// L'axe n'est pas borné à la période : la première barre de semaine couvre sa semaine entière (voir `LoadStats.bars`).
 private struct LoadBarsCard: View {
     let bars: [LoadBar]
+    /// Les totaux de la période seule : la première barre peut couvrir des jours d'avant la période.
+    let totals: LoadTotals
     let window: StatsWindow
 
     private struct Entry: Identifiable {
@@ -187,7 +189,7 @@ private struct LoadBarsCard: View {
         StatsChartCard(title: window.period.loadBucket == .day
                        ? String(localized: "Charge par jour", bundle: .module)
                        : String(localized: "Charge par semaine", bundle: .module)) {
-            if total(\.strength) + total(\.run) + total(\.ride) > 0 {
+            if totals.totalLoad > 0 {
                 chart
                 StatsLegend(items: [(Self.strength, StatsInk.full), (Self.run, StatsInk.medium), (Self.ride, StatsInk.light)])
             } else {
@@ -220,16 +222,12 @@ private struct LoadBarsCard: View {
         .accessibilityLabel(summary)
     }
 
-    private func total(_ value: KeyPath<LoadBar, Double>) -> Double {
-        bars.reduce(0) { $0 + $1[keyPath: value] }
-    }
-
     /// « Charge par semaine, 30 jours : 8 450 en tout, dont musculation 5 200, course 2 650, vélo 600. »
     private var summary: String {
         let period = window.period.title
-        let all = StatsText.number(total(\.strength) + total(\.run) + total(\.ride))
-        let (strength, run, ride) = (StatsText.number(total(\.strength)), StatsText.number(total(\.run)),
-                                     StatsText.number(total(\.ride)))
+        let all = StatsText.number(totals.totalLoad)
+        let (strength, run, ride) = (StatsText.number(totals.strengthLoad), StatsText.number(totals.runLoad),
+                                     StatsText.number(totals.rideLoad))
         return String(localized: """
             Charge, \(period) : \(all) en tout, dont musculation \(strength), course \(run), vélo \(ride).
             """, bundle: .module)

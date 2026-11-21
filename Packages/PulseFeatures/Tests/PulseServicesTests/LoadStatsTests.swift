@@ -118,6 +118,10 @@ struct LoadStatsTests {
         #expect(result.totals.minutes == Double(strengthCount) * 60 + 45 + 60)
         #expect(result.totals.sessions == strengthCount + 2)
         #expect(result.totals.strengthShare == strengthLoad / total)
+        #expect(result.totals.strengthLoad == strengthLoad)
+        #expect(result.totals.runLoad == 45 * 6)
+        #expect(result.totals.rideLoad == 60 * 5)
+        #expect(result.totals.totalLoad == total)
     }
 
     /// Une séance comptée sans durée calculable garde son tonnage, sa distance et sa place dans le nombre de séances ; seuls les
@@ -154,6 +158,8 @@ struct LoadStatsTests {
         #expect(first.start == monday)
         #expect(first.strength == 60 * 7)
         #expect(result.totals.sessions == 0)
+        // Les totaux de charge, eux, ignorent la séance d'avant la période.
+        #expect(result.totals.totalLoad == 0)
     }
 
     @Test func totalsWithoutAnySessionAreEmpty() {

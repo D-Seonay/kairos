@@ -73,9 +73,10 @@ final class AppRootModel {
         await train?.refresh()
         // « Aujourd'hui » vient de lire les courses d'Apple Santé : la semaine et la série en tiennent compte.
         await planning?.load()
-        await stats?.load()
         await supplements?.load()
         await refreshSupplementReminders()
+        // Les statistiques relisent tout l'historique : seulement une fois l'onglet ouvert (son `.task` charge la première fois).
+        if let stats, stats.hasLoaded { await stats.load() }
     }
 
     /// Les rappels de compléments couvrent 14 jours : chaque lancement et chaque retour au premier plan les recalculent, et

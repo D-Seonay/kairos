@@ -111,10 +111,11 @@ struct MainTabView: View {
             await today.refresh()
             await train.refresh()
             await planning.load()
-            await stats.load()
             // Une séance finie place le rappel « après la séance » et peut changer les jours d'entraînement.
             await supplements.load()
             await dependencies.supplementService.rescheduleReminders()
+            // Les statistiques relisent tout l'historique : seulement une fois l'onglet ouvert (son `.task` charge la première fois).
+            if stats.hasLoaded { await stats.load() }
         }
     }
 

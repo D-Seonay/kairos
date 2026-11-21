@@ -63,11 +63,4 @@ enum StatsText {
         let km = (meters / 1000).formatted(.number.precision(.fractionLength(1)).locale(Locale(identifier: "fr_FR")))
         return String(localized: "\(km) km", bundle: .module)
     }
-
-    /// « 4:54 /km ».
-    static func pace(secondsPerKm: Double) -> String {
-        guard secondsPerKm.isFinite, secondsPerKm >= 0, secondsPerKm < 1e12 else { return dash }
-        let total = Int(secondsPerKm.rounded())
-        return String(format: "%d:%02d /km", total / 60, total % 60)
-    }
 }

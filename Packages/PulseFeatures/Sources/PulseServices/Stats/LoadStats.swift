@@ -27,14 +27,24 @@ public struct LoadTotals: Sendable, Equatable {
     public var sessions: Int
     /// La part de la musculation dans la charge, de 0 à 1 ; `nil` sans charge.
     public var strengthShare: Double?
+    /// La charge (minutes × RPE) de la période seule, par discipline : les barres, elles, couvrent des semaines entières.
+    public var strengthLoad: Double
+    public var runLoad: Double
+    public var rideLoad: Double
 
-    public init(tonnageKg: Double, runMeters: Double, rideMeters: Double, minutes: Double, sessions: Int, strengthShare: Double?) {
+    public var totalLoad: Double { strengthLoad + runLoad + rideLoad }
+
+    public init(tonnageKg: Double, runMeters: Double, rideMeters: Double, minutes: Double, sessions: Int, strengthShare: Double?,
+                strengthLoad: Double = 0, runLoad: Double = 0, rideLoad: Double = 0) {
         self.tonnageKg = tonnageKg
         self.runMeters = runMeters
         self.rideMeters = rideMeters
         self.minutes = minutes
         self.sessions = sessions
         self.strengthShare = strengthShare
+        self.strengthLoad = strengthLoad
+        self.runLoad = runLoad
+        self.rideLoad = rideLoad
     }
 }
 
@@ -171,7 +181,8 @@ public struct LoadStats: Sendable, Equatable {
     private static func totals(of sessions: [CountedSession]) -> LoadTotals {
         let loads = sessions.compactMap { counted in counted.load.map { (kind: counted.session.kind, load: $0) } }
         let totalLoad = loads.reduce(0) { $0 + $1.load.load }
-        let strengthLoad = loads.filter { $0.kind == .strength }.reduce(0) { $0 + $1.load.load }
+        func load(_ kind: SessionKind) -> Double { loads.filter { $0.kind == kind }.reduce(0) { $0 + $1.load.load } }
+        let strengthLoad = load(.strength)
         func distance(_ kind: SessionKind) -> Double {
             sessions.filter { $0.session.kind == kind }.reduce(0) { $0 + ($1.session.distanceMeters ?? 0) }
         }
@@ -181,7 +192,8 @@ public struct LoadStats: Sendable, Equatable {
             rideMeters: distance(.ride),
             minutes: loads.reduce(0) { $0 + $1.load.minutes },
             sessions: sessions.count,
-            strengthShare: totalLoad > 0 ? strengthLoad / totalLoad : nil)
+            strengthShare: totalLoad > 0 ? strengthLoad / totalLoad : nil,
+            strengthLoad: strengthLoad, runLoad: load(.run), rideLoad: load(.ride))
     }
 
     private static func days(in interval: DateInterval, calendar: Calendar) -> [Date] {

@@ -113,7 +113,18 @@ struct StatsModelTests {
         let model = StatsModel(environment: environment)
         await workouts.armGate()
         let first = Task { await model.load() }
-        while !(await workouts.isSuspended) { await Task.yield() }
+        // Borné : une régression qui ne suspend jamais la lecture doit échouer, pas bloquer la suite.
+        var polls = 0
+        while !(await workouts.isSuspended) {
+            polls += 1
+            guard polls < 10_000 else {
+                Issue.record("La lecture ne s'est jamais suspendue")
+                await workouts.releaseGate()
+                await first.value
+                return
+            }
+            await Task.yield()
+        }
 
         // La relecture lancée par ce changement est ignorée par la garde : la lecture en cours doit la reprendre.
         model.period = .year
@@ -158,7 +169,6 @@ struct StatsTextTests {
         #expect(StatsText.duration(minutes: 45.4) == "45 min")
         #expect(StatsText.raceTime(seconds: 1_471) == "24:31")
         #expect(StatsText.raceTime(seconds: 6_307) == "1:45:07")
-        #expect(StatsText.pace(secondsPerKm: 294) == "4:54 /km")
         #expect(StatsText.number(91_200) == "91\u{202F}200")
         #expect(StatsText.number(2_140.4) == "2\u{202F}140")
         #expect(StatsText.number(850) == "850")
@@ -168,7 +178,6 @@ struct StatsTextTests {
         #expect(StatsText.number(.nan) == "\u{2014}")
         #expect(StatsText.duration(minutes: -1) == "\u{2014}")
         #expect(StatsText.raceTime(seconds: .infinity) == "\u{2014}")
-        #expect(StatsText.pace(secondsPerKm: .nan) == "\u{2014}")
     }
 }
 // swiftlint:enable force_unwrapping
