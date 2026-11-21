@@ -117,3 +117,74 @@ private func benchSession(day offset: Int, status: SessionStatus, sets: [Workout
     for session in [older, warmupOnly] { try await repo.save(session) }
     #expect(try await repo.lastSets(for: .content(id: "bench-press-barbell")).map(\.actualReps) == [9, 7])
 }
+
+// MARK: - Séances importées d'Apple Health : magasin local
+
+private func counts(_ container: ModelContainer) throws -> (synced: Int, local: Int) {
+    let context = ModelContext(container)
+    return (try context.fetchCount(FetchDescriptor<StoredWorkoutSession>()),
+            try context.fetchCount(FetchDescriptor<StoredImportedWorkout>()))
+}
+
+@Test func importedRunLivesOnlyInTheLocalStore() async throws {
+    let repo = SwiftDataWorkoutRepository(modelContainer: try TestContainer.make())
+    try await repo.save(Sample.importedRun())
+    let stored = try counts(repo.modelContainer)
+    #expect(stored.synced == 0 && stored.local == 1)
+}
+
+@Test func pulseSessionLivesOnlyInTheSyncedStore() async throws {
+    let repo = SwiftDataWorkoutRepository(modelContainer: try TestContainer.make())
+    try await repo.save(Sample.session(sets: 1))
+    let stored = try counts(repo.modelContainer)
+    #expect(stored.synced == 1 && stored.local == 0)
+}
+
+@Test func sessionsMergeBothStoresInOrder() async throws {
+    let repo = SwiftDataWorkoutRepository(modelContainer: try TestContainer.make())
+    let pulse = Sample.session(startedAt: Fixed.t0, sets: 1)
+    let run = Sample.importedRun(startedAt: Fixed.t0.addingTimeInterval(-3_600))
+    for session in [pulse, run] { try await repo.save(session) }
+    #expect(try await repo.sessions(from: .distantPast, to: .distantFuture).map(\.id) == [run.id, pulse.id])
+    #expect(try await repo.session(id: run.id)?.id == run.id)
+    #expect(try await repo.session(id: pulse.id)?.id == pulse.id)
+    #expect(try await repo.session(id: UUID()) == nil)
+}
+
+@Test func correctedRunStaysLocal() async throws {
+    let repo = SwiftDataWorkoutRepository(modelContainer: try TestContainer.make())
+    let run = Sample.importedRun()
+    try await repo.save(run)
+    var loaded = try #require(try await repo.session(id: run.id))
+    loaded.overallRPE = 8
+    loaded.note = "Jambes lourdes"
+    try await repo.save(loaded)
+    let stored = try counts(repo.modelContainer)
+    #expect(stored.synced == 0 && stored.local == 1)
+    let reread = try #require(try await repo.session(id: run.id))
+    #expect(reread.overallRPE == 8 && reread.note == "Jambes lourdes")
+}
+
+@Test func deletingAnImportedRunMarksItDeleted() async throws {
+    let repo = SwiftDataWorkoutRepository(modelContainer: try TestContainer.make())
+    let run = Sample.importedRun()
+    let pulse = Sample.session(startedAt: Fixed.t0.addingTimeInterval(day), sets: 1)
+    for session in [run, pulse] { try await repo.save(session) }
+    try await repo.delete(id: run.id)
+    #expect(try await repo.sessions(from: .distantPast, to: .distantFuture).map(\.id) == [pulse.id])
+    #expect(try await repo.session(id: run.id) == nil)
+    let local = try ModelContext(repo.modelContainer).fetch(FetchDescriptor<StoredImportedWorkout>())
+    #expect(local.count == 1 && local[0].deletedAt != nil)
+}
+
+@Test func changingSourceMovesTheRowBetweenStores() async throws {
+    let repo = SwiftDataWorkoutRepository(modelContainer: try TestContainer.make())
+    var session = Sample.session(sets: 2)
+    try await repo.save(session)
+    session.source = .appleHealth
+    session.sets = []
+    try await repo.save(session)
+    let stored = try counts(repo.modelContainer)
+    #expect(stored.synced == 0 && stored.local == 1)
+    #expect(try await repo.sessions(from: .distantPast, to: .distantFuture).map(\.id) == [session.id])
+}

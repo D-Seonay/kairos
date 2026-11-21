@@ -65,6 +65,13 @@ enum Sample {
                               sets: all, createdAt: Fixed.t1, updatedAt: Fixed.t2)
     }
 
+    /// Course importée d'Apple Health : source `.appleHealth`, jamais de séries.
+    static func importedRun(startedAt: Date = Fixed.t0) -> WorkoutSession {
+        WorkoutSession(startedAt: startedAt, endedAt: startedAt.addingTimeInterval(2_520), kind: .run, source: .appleHealth,
+                       status: .completed, title: "Course", durationMinutes: 42, distanceMeters: 8_000,
+                       averageHeartRate: 151, estimatedRPE: 6, healthKitUUID: "RUN", sets: [], createdAt: Fixed.t1, updatedAt: Fixed.t2)
+    }
+
     static func scheduledDay(date: Date = Fixed.t0) -> ScheduledDay {
         ScheduledDay(date: date, programID: UUID(), routineDayID: UUID(), title: "Legs", kind: .strength, status: .planned,
                      movedFromDate: date.addingTimeInterval(-86_400), moveReason: .antiInterferenceAfterHeavyLegs,

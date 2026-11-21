@@ -4,37 +4,64 @@ import SwiftData
 
 @ModelActor
 public actor SwiftDataWorkoutRepository: WorkoutRepository {
+    /// Fusionne les séances Pulse (magasin synchronisé) et les séances importées d'Apple Health (magasin local).
     public func sessions(from: Date, to: Date) throws -> [WorkoutSession] {
-        let descriptor = FetchDescriptor<StoredWorkoutSession>(
-            predicate: #Predicate { $0.deletedAt == nil && $0.startedAt >= from && $0.startedAt < to },
-            sortBy: [SortDescriptor(\.startedAt), SortDescriptor(\.createdAt)])
-        return try modelContext.fetch(descriptor).map { $0.toDomain() }
+        let synced = try modelContext.fetch(FetchDescriptor<StoredWorkoutSession>(
+            predicate: #Predicate { $0.deletedAt == nil && $0.startedAt >= from && $0.startedAt < to })).map { $0.toDomain() }
+        let imported = try modelContext.fetch(FetchDescriptor<StoredImportedWorkout>(
+            predicate: #Predicate { $0.deletedAt == nil && $0.startedAt >= from && $0.startedAt < to })).map { $0.toDomain() }
+        return (synced + imported).sorted { ($0.startedAt, $0.createdAt) < ($1.startedAt, $1.createdAt) }
     }
 
     public func session(id: UUID) throws -> WorkoutSession? {
-        try modelContext.first(StoredWorkoutSession.self, where: #Predicate { $0.id == id && $0.deletedAt == nil })?.toDomain()
+        if let synced = try modelContext.first(StoredWorkoutSession.self, where: #Predicate { $0.id == id && $0.deletedAt == nil }) {
+            return synced.toDomain()
+        }
+        return try modelContext.first(StoredImportedWorkout.self, where: #Predicate { $0.id == id && $0.deletedAt == nil })?.toDomain()
     }
 
+    /// Une séance importée d'Apple Health (`source == .appleHealth`) va dans le magasin local, les autres dans le magasin synchronisé.
+    /// Si la même séance existe dans l'autre magasin (changement de source), elle y est supprimée dans le même `save()`.
     public func save(_ session: WorkoutSession) throws {
         var stamped = session
         stamped.updatedAt = Date()
         let id = session.id
-        if let existing = try modelContext.first(StoredWorkoutSession.self, where: #Predicate { $0.id == id && $0.deletedAt == nil }) {
-            existing.apply(stamped)
+        if session.source == .appleHealth {
+            if let other = try modelContext.first(StoredWorkoutSession.self, where: #Predicate { $0.id == id }) {
+                modelContext.delete(other)
+            }
+            if let existing = try modelContext.first(StoredImportedWorkout.self, where: #Predicate { $0.id == id && $0.deletedAt == nil }) {
+                existing.apply(stamped)
+            } else {
+                modelContext.insert(StoredImportedWorkout(stamped))
+            }
         } else {
-            modelContext.insert(StoredWorkoutSession(stamped))
+            if let other = try modelContext.first(StoredImportedWorkout.self, where: #Predicate { $0.id == id }) {
+                modelContext.delete(other)
+            }
+            if let existing = try modelContext.first(StoredWorkoutSession.self, where: #Predicate { $0.id == id && $0.deletedAt == nil }) {
+                existing.apply(stamped)
+            } else {
+                modelContext.insert(StoredWorkoutSession(stamped))
+            }
         }
         try modelContext.save()
     }
 
     public func delete(id: UUID) throws {
-        let predicate: Predicate<StoredWorkoutSession> = #Predicate { $0.id == id && $0.deletedAt == nil }
-        guard let stored = try modelContext.first(StoredWorkoutSession.self, where: predicate) else { return }
         let now = Date()
-        stored.deletedAt = now
-        stored.updatedAt = now
-        for set in stored.sets ?? [] where set.deletedAt == nil {
-            set.deletedAt = now
+        if let stored = try modelContext.first(StoredWorkoutSession.self, where: #Predicate { $0.id == id && $0.deletedAt == nil }) {
+            stored.deletedAt = now
+            stored.updatedAt = now
+            for set in stored.sets ?? [] where set.deletedAt == nil {
+                set.deletedAt = now
+            }
+        } else if let imported = try modelContext.first(StoredImportedWorkout.self,
+                                                        where: #Predicate { $0.id == id && $0.deletedAt == nil }) {
+            imported.deletedAt = now
+            imported.updatedAt = now
+        } else {
+            return
         }
         try modelContext.save()
     }
