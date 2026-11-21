@@ -7,18 +7,32 @@ import PulseServices
 import Testing
 import TrainFeature
 
-/// Un dépôt de séances en mémoire qui compte les lectures et qui échoue sur demande.
+/// Un dépôt de séances en mémoire qui compte les lectures, échoue sur demande et peut suspendre la prochaine lecture.
 actor ScriptedWorkouts: WorkoutRepository {
     struct Failure: Error {}
 
     private let base = InMemoryWorkoutRepository()
     private(set) var reads = 0
     private var failing = false
+    private var gateArmed = false
+    private var gate: CheckedContinuation<Void, Never>?
 
     func setFailing(_ failing: Bool) { self.failing = failing }
 
+    /// La prochaine lecture attend `releaseGate()`.
+    func armGate() { gateArmed = true }
+    var isSuspended: Bool { gate != nil }
+    func releaseGate() {
+        gate?.resume()
+        gate = nil
+    }
+
     func sessions(from: Date, to: Date) async throws -> [WorkoutSession] {
         reads += 1
+        if gateArmed {
+            gateArmed = false
+            await withCheckedContinuation { gate = $0 }
+        }
         if failing { throw Failure() }
         return try await base.sessions(from: from, to: to)
     }
@@ -89,8 +103,27 @@ struct StatsModelTests {
 
         #expect(model.snapshot?.period == .year)
         #expect(await workouts.reads == 2)
+        let reload = model.reloadTask
         model.period = .year
-        #expect(await workouts.reads == 2, "Rechoisir la même période ne relit rien")
+        #expect(model.reloadTask == reload, "Rechoisir la même période ne lance aucune relecture")
+        #expect(await workouts.reads == 2)
+    }
+
+    @Test func changingPeriodDuringALoadReloadsAfterIt() async {
+        let model = StatsModel(environment: environment)
+        await workouts.armGate()
+        let first = Task { await model.load() }
+        while !(await workouts.isSuspended) { await Task.yield() }
+
+        // La relecture lancée par ce changement est ignorée par la garde : la lecture en cours doit la reprendre.
+        model.period = .year
+        await workouts.releaseGate()
+        await first.value
+        await model.reloadTask?.value
+
+        #expect(model.snapshot?.period == .year)
+        #expect(await workouts.reads == 2)
+        #expect(model.errorMessage == nil && model.hasLoaded)
     }
 
     @Test func failureKeepsLastSnapshotAndShowsError() async {
