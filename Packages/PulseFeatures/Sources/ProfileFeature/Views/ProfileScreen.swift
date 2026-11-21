@@ -73,7 +73,6 @@ public struct ProfileScreen: View {
         .refreshable { await model.load() }
     }
 
-    /// Mes données arrive avec sa tâche : un texte en attendant.
     @ViewBuilder
     private func destination(_ destination: ProfileDestination) -> some View {
         switch destination {
@@ -89,7 +88,7 @@ public struct ProfileScreen: View {
                 Task { await model.load() }
             }
         case .myData:
-            ProfilePlaceholder(title: String(localized: "Mes données", bundle: .module))
+            MyDataScreen(environment: model.environment, screens: screens, onErased: onErased)
         }
     }
 }
@@ -151,20 +150,6 @@ private struct ProfileHeader: View {
         .frame(width: badgeSize, height: badgeSize)
         .background(Circle().fill(PulsePalette.ink))
         .accessibilityHidden(true)
-    }
-}
-
-/// L'écran d'une tâche à venir.
-private struct ProfilePlaceholder: View {
-    let title: String
-
-    var body: some View {
-        Text(title)
-            .foregroundStyle(PulsePalette.text2)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .pulseScreenBackground(aura: 0.5)
-            .navigationTitle(title)
-            .pulseInlineTitle()
     }
 }
 
