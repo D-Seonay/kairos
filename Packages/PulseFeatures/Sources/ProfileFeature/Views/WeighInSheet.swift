@@ -37,7 +37,7 @@ struct WeighInSheet: View {
                     .frame(minHeight: 44)
             }
             .listRowBackground(PulsePalette.surface)
-            if let message = model.errorMessage {
+            if let message = model.editorError {
                 Section {
                     Text(message)
                         .font(.footnote)

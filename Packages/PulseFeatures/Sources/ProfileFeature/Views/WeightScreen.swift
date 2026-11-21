@@ -18,7 +18,7 @@ struct WeightScreen: View {
     var body: some View {
         @Bindable var model = model
         List {
-            if let message = model.errorMessage, model.editor == nil {
+            if let message = model.errorMessage {
                 Section {
                     Text(message)
                         .font(.footnote)
@@ -45,7 +45,7 @@ struct WeightScreen: View {
         .pulseScreenBackground(aura: 0.5)
         .navigationTitle(String(localized: "Poids", bundle: .module))
         .pulseInlineTitle()
-        .sheet(item: $model.editor, onDismiss: model.closeEditor) { _ in
+        .sheet(item: $model.editor, onDismiss: model.editorDismissed) { _ in
             NavigationStack {
                 WeighInSheet(model: model)
             }
@@ -87,7 +87,10 @@ struct WeightScreen: View {
                         .font(.subheadline)
                         .foregroundStyle(PulsePalette.text)
                 }
-                WeightChart(trend: trend, calendar: calendar, today: today)
+                // Sans aucun jour pesé, la note du dessus suffit : pas de seconde note à la place de la courbe.
+                if !trend.days.isEmpty {
+                    WeightChart(trend: trend, calendar: calendar, today: today)
+                }
             }
             .padding(.vertical, 8)
         }

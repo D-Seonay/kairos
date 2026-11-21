@@ -34,7 +34,10 @@ public struct WeighInDraft: Identifiable, Equatable {
 @Observable
 public final class WeightModel {
     public private(set) var overview: BodyOverview?
+    /// Les erreurs de l'écran : lecture, suppression.
     public private(set) var errorMessage: String?
+    /// Les erreurs de la feuille (poids refusé, date à venir, écriture ratée), affichées dans la feuille.
+    public private(set) var editorError: String?
     public private(set) var hasLoaded = false
     public private(set) var isSaving = false
     public var editor: WeighInDraft?
@@ -65,14 +68,14 @@ public final class WeightModel {
 
     /// Ouvre la feuille sur une pesée vide, datée de maintenant.
     public func startNew() {
-        errorMessage = nil
+        editorError = nil
         editor = WeighInDraft(date: environment.now())
     }
 
     /// Ouvre la feuille sur une saisie manuelle ; une mesure Apple Santé ne se modifie pas.
     public func edit(_ measurement: BodyMeasurement) {
         guard measurement.source == .manual, let weight = measurement.weightKg else { return }
-        errorMessage = nil
+        editorError = nil
         editor = WeighInDraft(measurementID: measurement.id, weightText: PulseFormat.decimal(weight, maxFractionDigits: 2),
                               date: measurement.date)
     }
@@ -80,14 +83,25 @@ public final class WeightModel {
     /// Ferme la feuille sans enregistrer ; son message part avec elle.
     public func closeEditor() {
         editor = nil
-        errorMessage = nil
+        editorError = nil
     }
 
-    /// Enregistre la feuille. Un poids hors de 20 à 400 kg (ou illisible) garde la feuille ouverte avec son message.
+    /// La feuille a fini de disparaître (« Annuler », balayage, enregistrement) : son message part, sauf si une nouvelle pesée
+    /// s'est ouverte pendant l'animation.
+    public func editorDismissed() {
+        if editor == nil { editorError = nil }
+    }
+
+    /// Enregistre la feuille. Un poids hors de 20 à 400 kg (ou illisible), une date à venir ou une écriture ratée gardent la
+    /// feuille ouverte avec son message.
     public func save() async {
         guard let draft = editor, !isSaving else { return }
         guard let weight = draft.weightKg, BodyService.weightRange.contains(weight) else {
-            errorMessage = Self.invalidWeightMessage
+            editorError = Self.invalidWeightMessage
+            return
+        }
+        guard draft.date <= environment.now() else {
+            editorError = String(localized: "Choisis une date passée.", bundle: .module)
             return
         }
         isSaving = true
@@ -104,12 +118,13 @@ public final class WeightModel {
                 try await environment.body.addManual(weightKg: weight, date: draft.date)
             }
         } catch BodyServiceError.invalidWeight {
-            errorMessage = Self.invalidWeightMessage
+            editorError = Self.invalidWeightMessage
             return
         } catch {
-            errorMessage = String(localized: "Pulse n'a pas pu enregistrer ta pesée.", bundle: .module)
+            editorError = String(localized: "Pulse n'a pas pu enregistrer ta pesée.", bundle: .module)
             return
         }
+        editorError = nil
         editor = nil
         await load()
         await onChanged()

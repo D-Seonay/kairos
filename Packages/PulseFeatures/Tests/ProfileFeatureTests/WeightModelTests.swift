@@ -51,7 +51,7 @@ struct WeightModelTests {
         #expect(model.overview?.measurements.count == 1)
         #expect(saved.weightKg == 78.4 && saved.source == .manual && saved.date == ProfileTestClock.now)
         #expect(model.overview?.trend.current == 78.4)
-        #expect(model.editor == nil && model.errorMessage == nil)
+        #expect(model.editor == nil && model.editorError == nil && model.errorMessage == nil)
         #expect(changes.value == 1, "La page Profil se recharge après l'écriture")
 
         model.startNew()
@@ -69,14 +69,65 @@ struct WeightModelTests {
             model.editor?.weightText = text
             await model.save()
 
-            #expect(model.errorMessage == message, "« \(text) »")
+            #expect(model.editorError == message, "« \(text) »")
+            #expect(model.errorMessage == nil, "L'erreur de la feuille reste dans la feuille")
             #expect(model.editor?.weightText == text, "La feuille reste ouverte")
         }
         #expect(try await measurements.measurements(from: .distantPast, to: .distantFuture).isEmpty)
         #expect(changes.value == 0)
 
         model.closeEditor()
-        #expect(model.editor == nil && model.errorMessage == nil)
+        #expect(model.editor == nil && model.editorError == nil)
+    }
+
+    @Test func futureDateShowsMessageAndKeepsSheet() async throws {
+        let (model, changes) = model()
+        await model.load()
+        model.startNew()
+        model.editor?.weightText = "78,4"
+        model.editor?.date = ProfileTestClock.now.addingTimeInterval(60)
+        await model.save()
+
+        #expect(model.editorError == "Choisis une date passée.")
+        #expect(model.editor != nil && changes.value == 0)
+        #expect(try await measurements.measurements(from: .distantPast, to: .distantFuture).isEmpty)
+
+        model.editor?.date = ProfileTestClock.now
+        await model.save()
+        #expect(model.editor == nil && model.editorError == nil && changes.value == 1, "Maintenant est accepté")
+    }
+
+    @Test func failedSaveKeepsSheetAndSkipsReload() async throws {
+        let failing = FailingSaveMeasurements()
+        let calendar = ProfileTestClock.calendar
+        var environment = environment
+        environment.body = BodyService(measurements: failing, profiles: profiles, calendar: calendar,
+                                       now: { ProfileTestClock.now })
+        let changes = ChangeCounter()
+        let model = WeightModel(environment: environment) { changes.value += 1 }
+        await model.load()
+        model.startNew()
+        model.editor?.weightText = "78,4"
+        await model.save()
+
+        #expect(model.editorError == "Pulse n'a pas pu enregistrer ta pesée.")
+        #expect(model.errorMessage == nil)
+        #expect(model.editor?.weightText == "78,4", "La feuille reste ouverte")
+        #expect(changes.value == 0)
+    }
+
+    @Test func dismissingClearsTheSheetErrorOnlyOnceClosed() async throws {
+        let (model, _) = model()
+        await model.load()
+        model.startNew()
+        model.editor?.weightText = "12"
+        await model.save()
+        model.editorDismissed()
+        #expect(model.editorError != nil, "Une feuille encore ouverte garde son message")
+
+        model.editor = nil
+        model.editorDismissed()
+        #expect(model.editorError == nil)
     }
 
     @Test func editingKeepsTheMeasurementID() async throws {
@@ -153,6 +204,15 @@ struct WeightTextTests {
         #expect(ProfileText.trendCaption(fresh, calendar: calendar, today: ProfileTestClock.now) == "tendance sur 7 jours")
         #expect(ProfileText.trendCaption(stale, calendar: calendar, today: ProfileTestClock.now) == "dernière mesure le 28 oct.")
     }
+}
+
+/// Un dépôt de mesures dont chaque écriture échoue.
+actor FailingSaveMeasurements: BodyMeasurementRepository {
+    struct Failure: Error {}
+
+    func measurements(from: Date, to: Date) async throws -> [BodyMeasurement] { [] }
+    func save(_ measurement: BodyMeasurement) async throws { throw Failure() }
+    func delete(id: UUID) async throws { throw Failure() }
 }
 
 /// Compte les appels à `onChanged`.
