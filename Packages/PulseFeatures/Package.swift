@@ -61,7 +61,7 @@ let package = Package(
         ),
         .target(
             name: "StatsFeature",
-            dependencies: ["PulseServices", "TrainFeature", designSystem, domain, content],
+            dependencies: ["PulseServices", "TrainFeature", designSystem, domain, recoveryEngine, content],
             resources: [.process("Resources")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),

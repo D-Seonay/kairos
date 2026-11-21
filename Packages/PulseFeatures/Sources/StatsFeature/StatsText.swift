@@ -36,6 +36,22 @@ enum StatsText {
             : String(format: "%d:%02d", minutes, rest)
     }
 
+    /// « 24 novembre » (`month: .wide`) ou « 24 nov. » (`.abbreviated`), dans le fuseau du calendrier.
+    static func dayMonth(_ date: Date, calendar: Calendar, month: Date.FormatStyle.Symbol.Month = .wide) -> String {
+        var style = Date.FormatStyle.dateTime.day().month(month)
+        style.locale = Locale(identifier: "fr_FR")
+        style.calendar = calendar
+        style.timeZone = calendar.timeZone
+        return date.formatted(style)
+    }
+
+    /// « 64,3 km ».
+    static func kilometers(meters: Double) -> String {
+        guard meters.isFinite, meters >= 0 else { return dash }
+        let km = (meters / 1000).formatted(.number.precision(.fractionLength(1)).locale(Locale(identifier: "fr_FR")))
+        return String(localized: "\(km) km", bundle: .module)
+    }
+
     /// « 4:54 /km ».
     static func pace(secondsPerKm: Double) -> String {
         guard secondsPerKm.isFinite, secondsPerKm >= 0, secondsPerKm < 1e12 else { return dash }
