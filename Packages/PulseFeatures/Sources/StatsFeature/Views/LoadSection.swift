@@ -98,7 +98,8 @@ private struct LoadRatioCard: View {
                     .foregroundStyle(PulsePalette.text2)
                     .fixedSize(horizontal: false, vertical: true)
             } else if load.ratioPoints.isEmpty {
-                StatsEmptyNote(reason: String(localized: "aucune séance chronométrée sur les 28 jours d'avant la période",
+                // Un jour n'a pas de point quand les 28 jours qui finissent ce jour-là n'ont aucune charge.
+                StatsEmptyNote(reason: String(localized: "aucune séance chronométrée sur la période ni sur les 28 jours d'avant",
                                               bundle: .module))
             } else {
                 chart
@@ -137,7 +138,7 @@ private struct LoadRatioCard: View {
                     .symbolSize(36)
             }
         }
-        .chartXScale(domain: window.domain)
+        .statsPinnedDomain(window)
         .chartYScale(domain: 0...top)
         .statsAxes(calendar: window.calendar)
         .frame(height: 170)
@@ -244,7 +245,7 @@ private struct LoadTotalsCard: View {
     var body: some View {
         StatsChartCard(title: String(localized: "Totaux de la période", bundle: .module)) {
             if totals.sessions == 0 {
-                StatsEmptyNote(reason: String(localized: "aucune séance terminée sur la période", bundle: .module))
+                StatsEmptyNote(reason: String(localized: "aucune séance sur la période", bundle: .module))
             } else {
                 Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 10) {
                     ForEach(rows, id: \.label) { row in

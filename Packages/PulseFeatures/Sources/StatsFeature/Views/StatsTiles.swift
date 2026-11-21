@@ -187,6 +187,15 @@ extension View {
     }
 }
 
+extension View {
+    /// Borne l'axe des dates à la période et rogne la zone du graphique : un point ou une barre de semaine daté du lundi
+    /// d'avant la période ne déborde pas sur les étiquettes de l'axe.
+    func statsPinnedDomain(_ window: StatsWindow) -> some View {
+        chartXScale(domain: window.domain)
+            .chartPlotStyle { $0.clipped() }
+    }
+}
+
 /// Les niveaux d'encre des séries : la plus importante en encre pleine, les autres de plus en plus claires.
 enum StatsInk {
     static let full = PulsePalette.ink

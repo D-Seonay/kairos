@@ -38,7 +38,7 @@ struct BiometrySection: View {
                              details: details(biometry.restingHeartRate), emptyReason: noNight),
             StatsTileContent(title: String(localized: "Sommeil moyen", bundle: .module),
                              value: biometry.sleepMinutes.map { StatsText.duration(minutes: $0.value) },
-                             details: sleepDetails, emptyReason: noNight),
+                             details: sleepDetails, emptyReason: SleepChartCard.emptyReason),
             StatsTileContent(title: String(localized: "Récupération moyenne", bundle: .module),
                              value: biometry.score.map { PulseFormat.integer($0.value, unit: nil) },
                              details: details(biometry.score),
@@ -102,7 +102,7 @@ private struct BaselineChartCard: View {
                 }
             }
         }
-        .chartXScale(domain: window.domain)
+        .statsPinnedDomain(window)
         .chartYScale(domain: .automatic(includesZero: false))
         .statsAxes(calendar: window.calendar)
         .frame(height: 160)
@@ -135,10 +135,12 @@ private struct SleepChartCard: View {
     let deepShare: Double?
     let window: StatsWindow
 
+    static var emptyReason: String { String(localized: "aucune nuit de sommeil mesurée sur la période", bundle: .module) }
+
     var body: some View {
         StatsChartCard(title: String(localized: "Sommeil", bundle: .module)) {
             if points.isEmpty {
-                StatsEmptyNote(reason: String(localized: "aucune nuit de sommeil mesurée sur la période", bundle: .module))
+                StatsEmptyNote(reason: Self.emptyReason)
             } else {
                 chart
                 StatsLegend(items: [(String(localized: "Profond", bundle: .module), StatsInk.full),
@@ -162,7 +164,7 @@ private struct SleepChartCard: View {
                     .foregroundStyle(StatsInk.full)
             }
         }
-        .chartXScale(domain: window.domain)
+        .statsPinnedDomain(window)
         .statsAxes(calendar: window.calendar)
         .frame(height: 160)
         .accessibilityElement(children: .ignore)
