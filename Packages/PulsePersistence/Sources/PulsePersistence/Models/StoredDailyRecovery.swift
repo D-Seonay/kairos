@@ -12,6 +12,8 @@ public final class StoredDailyRecovery {
     public var hrvScore: Double?
     public var restingHeartRateScore: Double?
     public var sleepScore: Double?
+    // Les six valeurs brutes d'Apple Health (sdnnMs jusqu'à deepMinutes) ne sont plus jamais écrites depuis M8a : elles vivent
+    // dans `StoredRecoveryReading`, en local. Les champs restent pour CloudKit, qui n'accepte que des ajouts.
     public var sdnnMs: Double?
     public var sdnnBaselineMs: Double?
     public var restingHeartRate: Double?

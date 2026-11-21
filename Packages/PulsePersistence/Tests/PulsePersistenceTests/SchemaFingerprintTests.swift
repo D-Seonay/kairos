@@ -42,6 +42,18 @@ private let drift = "Un modèle partagé a changé : figer sa copie dans la vers
     ])
 }
 
+@Test func v4SchemaMatchesItsFingerprint() throws {
+    try checkFingerprint(of: Schema(versionedSchema: PulseSchemaV4.self), against: "schema-v4")
+}
+
+@Test func v4OnlyAddsTheThreeLocalModels() {
+    let v3 = Set(SchemaFingerprint.lines(Schema(versionedSchema: PulseSchemaV3.self)))
+    let v4 = Set(SchemaFingerprint.lines(Schema(versionedSchema: PulseSchemaV4.self)))
+    #expect(v3.subtracting(v4).isEmpty)
+    let added = v4.subtracting(v3).compactMap { $0.split(separator: ".").first.map(String.init) }
+    #expect(Set(added) == ["StoredImportedBodyMeasurement", "StoredImportedWorkout", "StoredRecoveryReading"])
+}
+
 @Test func fingerprintNamesTheInverseOfEachRelationship() {
     let lines = SchemaFingerprint.lines(Schema(versionedSchema: PulseSchemaV2.self))
     #expect(lines.contains { $0.hasPrefix("StoredProgram.days -> StoredRoutineDay") && $0.contains("inverse: program") })

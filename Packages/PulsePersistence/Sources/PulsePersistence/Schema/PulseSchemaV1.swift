@@ -8,6 +8,11 @@ import SwiftData
 public enum PulseSchemaV1: VersionedSchema {
     public static let versionIdentifier = Schema.Version(1, 0, 0)
 
+    /// Liste locale figée en M8a : les trois modèles locaux ajoutés en V4 n'en font pas partie.
+    private static var frozenLocalModels: [any PersistentModel.Type] {
+        [StoredCachedHealthSample.self, StoredHealthQueryAnchor.self, StoredActiveSessionSnapshot.self]
+    }
+
     /// Les modèles actuels, sauf ceux qui ont changé depuis la V1, remplacés par leur copie figée : les six modèles
     /// d'entraînement modifiés en V3 n'avaient pas changé entre V1 et V2, d'où leurs copies figées V2.
     public static var models: [any PersistentModel.Type] {
@@ -16,7 +21,7 @@ public enum PulseSchemaV1: VersionedSchema {
          PulseSchemaV2.StoredWorkoutSession.self, PulseSchemaV2.StoredWorkoutSet.self, PulsePersistence.StoredScheduledDay.self,
          StoredDailyRecovery.self, PulsePersistence.StoredCheckIn.self, PulsePersistence.StoredSupplement.self,
          PulsePersistence.StoredSupplementIntake.self, PulsePersistence.StoredBodyMeasurement.self,
-         PulsePersistence.StoredPersonalRecord.self] + PersistenceStack.localModels
+         PulsePersistence.StoredPersonalRecord.self] + frozenLocalModels
     }
 }
 
