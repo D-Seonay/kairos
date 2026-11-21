@@ -237,7 +237,7 @@ struct AppDependencies: Sendable {
         let refresher = makeRefresher(wiring, stores: RefresherStores(
             profiles: profiles, programs: programs, recovery: recovery, workouts: workouts, scheduledDays: scheduledDays,
             userExercises: userExercises, bodyMeasurements: bodyMeasurements, healthCache: healthCache, activity: activity,
-            planning: planning), scores: scores)
+            planning: planning, relocation: SwiftDataHealthDataRelocation(modelContainer: container)), scores: scores)
         let personalRecords = SwiftDataPersonalRecordRepository(modelContainer: container)
         let records = RecordsService(workouts: workouts, records: personalRecords, userExercises: userExercises,
                                      library: content, now: wiring.now)
@@ -247,7 +247,7 @@ struct AppDependencies: Sendable {
         let supplements = SwiftDataSupplementRepository(modelContainer: container)
         let supplementService = makeSupplementService(wiring, supplements: supplements, programs: programs, profiles: profiles,
                                                       workouts: workouts)
-        let health = wiring.healthWriter.map { HealthWorkoutExporter(writer: $0, workouts: workouts, profiles: profiles) }
+        let health = healthExporter(wiring.healthWriter, workouts, profiles, bodyMeasurements, calendar)
         let liveSession = ActiveSessionService(
             store: activeSession, workouts: workouts, profiles: profiles, settings: exerciseSettings, userExercises: userExercises,
             records: records, library: content, restNotifier: wiring.restNotifier, activity: wiring.sessionActivity,
@@ -319,6 +319,7 @@ extension AppDependencies {
         var healthCache: any HealthSampleCache
         var activity: any DayActivityLog
         var planning: PlanningService
+        var relocation: any HealthDataRelocating
     }
 
     /// Le passage du jour : les nuits, puis les courses et les vélos quand la source Apple Santé sait les lire (spec M6 §3), le
@@ -343,7 +344,7 @@ extension AppDependencies {
             antiInterference: AntiInterferenceService(
                 profiles: stores.profiles, programs: stores.programs, workouts: stores.workouts, scheduledDays: stores.scheduledDays,
                 userExercises: stores.userExercises, library: .bundled, calendar: calendar, now: wiring.now),
-            planning: stores.planning, calendar: calendar, now: wiring.now)
+            planning: stores.planning, relocation: stores.relocation, calendar: calendar, now: wiring.now)
     }
 }
 

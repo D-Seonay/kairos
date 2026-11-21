@@ -106,10 +106,15 @@ struct MyDataModelTests {
     }
 
     @Test func cloudTextCoversEveryStatus() {
-        #expect(MyDataModel.cloudText(.available) == "Tes données se synchronisent avec ton compte iCloud.")
         #expect(MyDataModel.cloudText(.noAccount) == "Aucun compte iCloud : tes données restent sur ce téléphone.")
         #expect(MyDataModel.cloudText(.restricted) == "Le compte iCloud est restreint : la synchronisation est coupée.")
         #expect(MyDataModel.cloudText(.unknown) == "État iCloud inconnu.")
         #expect(MyDataModel.cloudText(nil) == "Pas encore lu")
+    }
+
+    @Test func availableCloudSaysHealthStaysOnThePhone() {
+        #expect(MyDataModel.cloudText(.available)
+            == "Tes séances, compléments et scores se synchronisent avec ton compte iCloud. "
+            + "Les données d'Apple Santé restent sur ce téléphone.")
     }
 }

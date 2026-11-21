@@ -96,6 +96,12 @@ struct AboutSettingsSection: View {
                     .foregroundStyle(PulsePalette.text)
             }
             .frame(minHeight: 44)
+            Text(String(localized: """
+                Pulse n'est pas un dispositif médical. \
+                Le score et les ajustements sont des repères d'entraînement, pas un avis médical.
+                """, bundle: .module))
+                .font(.footnote)
+                .foregroundStyle(PulsePalette.text2)
         } header: {
             Text(String(localized: "À propos", bundle: .module))
         }

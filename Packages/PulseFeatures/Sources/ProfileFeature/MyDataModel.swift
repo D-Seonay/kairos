@@ -62,7 +62,10 @@ public final class MyDataModel {
     /// La phrase qui accompagne l'état du compte iCloud ; « Pas encore lu » avant la première lecture.
     public static func cloudText(_ status: CloudAccountStatus?) -> String {
         switch status {
-        case .available?: String(localized: "Tes données se synchronisent avec ton compte iCloud.", bundle: .module)
+        case .available?: String(localized: """
+            Tes séances, compléments et scores se synchronisent avec ton compte iCloud. \
+            Les données d'Apple Santé restent sur ce téléphone.
+            """, bundle: .module)
         case .noAccount?: String(localized: "Aucun compte iCloud : tes données restent sur ce téléphone.", bundle: .module)
         case .restricted?: String(localized: "Le compte iCloud est restreint : la synchronisation est coupée.", bundle: .module)
         case .unknown?: String(localized: "État iCloud inconnu.", bundle: .module)
