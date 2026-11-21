@@ -33,13 +33,17 @@ struct StatsWindow {
     }
 }
 
-/// Une tuile chiffrée : l'étiquette, le gros chiffre fin et ses précisions ; sans valeur, « Pas assez de données » et la raison.
+/// Une tuile chiffrée : l'étiquette, le gros chiffre fin et ses précisions ; sans valeur, « Pas assez de données » (ou un titre
+/// plus juste) et la raison.
 struct StatsTileContent: Identifiable {
     let title: String
     let value: String?
     var details: [String] = []
-    /// Pourquoi la valeur manque, affiché sous « Pas assez de données ».
+    /// Pourquoi la valeur manque, affiché sous le titre vide.
     let emptyReason: String
+    /// Le titre affiché sans valeur : « Pas assez de données », sauf quand l'absence est un fait (« Pas encore de semaine
+    /// réussie »).
+    var emptyTitle: String = StatsEmptyNote.title
 
     var id: String { title }
 }
@@ -86,7 +90,7 @@ struct StatsTile: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 } else {
-                    StatsEmptyNote(reason: content.emptyReason)
+                    StatsEmptyNote(reason: content.emptyReason, heading: content.emptyTitle)
                         .padding(.top, 4)
                 }
             }
@@ -98,7 +102,7 @@ struct StatsTile: View {
 
     private var accessibilityText: String {
         let parts = [content.title] + (content.value.map { [$0] + content.details }
-            ?? [StatsEmptyNote.title, content.emptyReason])
+            ?? [content.emptyTitle, content.emptyReason])
         return parts.joined(separator: ", ")
     }
 }
@@ -106,12 +110,13 @@ struct StatsTile: View {
 /// « Pas assez de données » et sa raison, à la place d'un chiffre ou d'un graphique : jamais un zéro (spec M7 §2).
 struct StatsEmptyNote: View {
     let reason: String
+    var heading: String = StatsEmptyNote.title
 
-    static var title: String { String(localized: "Pas assez de données", bundle: .module) }
+    nonisolated static var title: String { String(localized: "Pas assez de données", bundle: .module) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(Self.title)
+            Text(heading)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(PulsePalette.text2)
             Text(reason)

@@ -46,9 +46,14 @@ struct AttendanceSection: View {
             let end = StatsText.shortDate(min(sunday, window.today), calendar: calendar, today: window.today)
             details.append(String(localized: "du \(start) au \(end)", bundle: .module))
         }
+        let target = attendance.streak.currentWeek?.target ?? 1
+        let reason = target == 1
+            ? String(localized: "aucune semaine n'a encore atteint l'objectif de 1 séance", bundle: .module)
+            : String(localized: "aucune semaine n'a encore atteint l'objectif de \(target) séances", bundle: .module)
         return StatsTileContent(title: String(localized: "Meilleure série", bundle: .module),
                                 value: attendance.best.map { Self.weeksText($0.weeks) }, details: details,
-                                emptyReason: String(localized: "pas encore de semaine réussie", bundle: .module))
+                                emptyReason: reason,
+                                emptyTitle: String(localized: "Pas encore de semaine réussie", bundle: .module))
     }
 
     private var sessionsTile: StatsTileContent {
@@ -137,7 +142,7 @@ private struct AttendanceMatrixCard: View {
         case 1: String(localized: "1 jour d'entraînement", bundle: .module)
         default: String(localized: "\(days) jours d'entraînement", bundle: .module)
         }
-        return "\(title) : \(count)"
+        return String(localized: "\(title) : \(count)", bundle: .module)
     }
 
     /// « Lundi en haut · Moins ○ ● ● ● ● Plus » : le sens de lecture et l'échelle d'encre.

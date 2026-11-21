@@ -39,7 +39,7 @@ private struct StrengthRecordsCard: View {
         StatsChartCard(title: String(localized: "Force", bundle: .module)) {
             if lines.isEmpty {
                 StatsEmptyNote(reason: String(localized: """
-                    aucun record sur les levés de base ni sur un exercice fait au moins 5 fois
+                    aucun record sur les mouvements de base ni sur un exercice fait au moins 5 fois
                     """, bundle: .module))
             } else {
                 VStack(spacing: 0) {
@@ -96,7 +96,7 @@ private struct StrengthRecordsCard: View {
     private func value(_ line: StrengthRecordLine) -> String {
         switch line.kind {
         case .repsAtWeight: String(localized: "\(Int(line.value.rounded())) reps", bundle: .module)
-        default: "\(PulseFormat.decimal(line.value, maxFractionDigits: 1)) kg"
+        default: String(localized: "\(PulseFormat.decimal(line.value, maxFractionDigits: 1)) kg", bundle: .module)
         }
     }
 
@@ -115,7 +115,7 @@ private struct StrengthRecordsCard: View {
         if let gain = line.gain, gain > 0 {
             return switch line.kind {
             case .repsAtWeight: String(localized: "+\(Int(gain.rounded())) reps", bundle: .module)
-            default: "+\(PulseFormat.decimal(gain, maxFractionDigits: 1)) kg"
+            default: String(localized: "+\(PulseFormat.decimal(gain, maxFractionDigits: 1)) kg", bundle: .module)
             }
         }
         return line.isNew ? RecordsSection.newMark : nil
@@ -127,7 +127,8 @@ private struct StrengthRecordsCard: View {
             ? value(line)
             : String(localized: "1RM estimé \(value(line))", bundle: .module)
         let parts = [record, origin(line)] + (mark(line).map { [$0] } ?? [])
-        return "\(line.name) : \(parts.joined(separator: ", "))."
+        let details = parts.joined(separator: ", ")
+        return String(localized: "\(line.name) : \(details).", bundle: .module)
     }
 }
 

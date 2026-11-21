@@ -212,13 +212,27 @@ private struct BalanceRow: View {
     private var ratioText: String {
         guard second > 0 else { return secondMissing }
         guard first > 0 else { return firstMissing }
-        let ratio = PulseFormat.decimal(Double(first) / Double(second), maxFractionDigits: 1)
-        return String(localized: "ratio \(ratio)", bundle: .module)
+        let value = Double(first) / Double(second)
+        return String(localized: "ratio \(Self.ratioText(value))", bundle: .module)
+    }
+
+    /// « 1,2 » ; deux décimales près d'une borne de `balanceRange` (« 0,66 », « 1,52 »), arrondies vers l'extérieur hors des
+    /// bornes (2 / 3 donne « 0,66 », pas « 0,67 ») : l'arrondi ne contredit jamais le signal.
+    static func ratioText(_ ratio: Double) -> String {
+        let range = MuscleStats.balanceRange
+        guard abs(ratio - range.lowerBound) <= 0.05 || abs(ratio - range.upperBound) <= 0.05 else {
+            return PulseFormat.decimal(ratio, maxFractionDigits: 1)
+        }
+        let shown = ratio < range.lowerBound ? (ratio * 100).rounded(.down) / 100
+            : ratio > range.upperBound ? (ratio * 100).rounded(.up) / 100 : ratio
+        return PulseFormat.decimal(shown, maxFractionDigits: 2)
     }
 
     /// « Pousser / tirer : 18 séries contre 9, ratio 2, déséquilibré. »
     private var accessibilityText: String {
-        guard first > 0 || second > 0 else { return "\(title) : \(StatsEmptyNote.title), \(emptyReason)." }
+        guard first > 0 || second > 0 else {
+            return String(localized: "\(title) : \(StatsEmptyNote.title), \(emptyReason).", bundle: .module)
+        }
         let verdict = isUnbalanced
             ? String(localized: "déséquilibré", bundle: .module)
             : String(localized: "équilibré", bundle: .module)
