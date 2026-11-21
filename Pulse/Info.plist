@@ -34,7 +34,7 @@
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSHealthShareUsageDescription</key>
-	<string>Pulse lit votre sommeil, votre variabilité cardiaque et votre fréquence cardiaque au repos pour calculer votre score de récupération du matin, ainsi que vos entraînements, votre poids et votre masse grasse pour suivre votre progression. Ces données restent sur votre iPhone.</string>
+	<string>Pulse lit votre sommeil, votre variabilité cardiaque et votre fréquence cardiaque au repos pour calculer votre score de récupération du matin, ainsi que vos entraînements, votre poids et votre masse grasse pour suivre votre progression. Ces données restent privées : elles sont gardées sur vos appareils et dans votre iCloud, jamais partagées.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>Pulse enregistre vos séances de musculation et vos prises de compléments dans Apple Santé.</string>
 	<key>NSSupportsLiveActivities</key>
