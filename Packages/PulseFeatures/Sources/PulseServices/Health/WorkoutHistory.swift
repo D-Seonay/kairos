@@ -45,10 +45,10 @@ public struct WorkoutHistory: Sendable {
         let anchor = windowIsCurrent ? try? await cache.anchor(for: signal.kind) : nil
         do {
             var changes = try await source.workoutChanges(of: signal, since: anchor, from: start)
-            // Apple Santé ne distingue pas un accès révoqué d'entraînements effacés : une lecture d'élargissement qui ne rend rien
-            // alors que le cache en gardait ne doit pas emporter les séances importées (et leur RPE, leurs notes). Rien n'est
-            // appliqué ni retenu, la lecture est retentée à la passe suivante.
-            if !windowIsCurrent, changes.added.isEmpty {
+            // Apple Santé ne distingue pas un accès révoqué d'entraînements effacés : une lecture complète (fenêtre élargie ou ancre
+            // illisible) qui ne rend rien alors que le cache en gardait ne doit pas emporter les séances importées (et leur RPE,
+            // leurs notes). Rien n'est appliqué ni retenu, la lecture est retentée à la passe suivante.
+            if changes.isFullRead, changes.added.isEmpty {
                 let cached = try await cache.samples(kind: signal.kind, from: .distantPast, to: .distantFuture)
                 if !cached.isEmpty { return false }
             }

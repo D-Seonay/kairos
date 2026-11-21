@@ -2,7 +2,7 @@ import Foundation
 import PulseDomain
 
 /// Repli de production quand Apple Santé n'est pas disponible sur l'appareil : chaque appel échoue, l'historique retombe sur le cache.
-public struct UnavailableHealthSource: HealthSampleSource, HealthWorkoutSource {
+public struct UnavailableHealthSource: HealthSampleSource, HealthWorkoutSource, HealthBodySource {
     public enum Failure: Error, Equatable {
         case unavailable
     }
@@ -22,6 +22,10 @@ public struct UnavailableHealthSource: HealthSampleSource, HealthWorkoutSource {
     }
 
     public func workoutChanges(of signal: WorkoutSignal, since anchor: Data?, from start: Date) async throws -> HealthSampleChanges {
+        throw Failure.unavailable
+    }
+
+    public func bodyChanges(of signal: BodySignal, since anchor: Data?, from start: Date) async throws -> HealthSampleChanges {
         throw Failure.unavailable
     }
 }

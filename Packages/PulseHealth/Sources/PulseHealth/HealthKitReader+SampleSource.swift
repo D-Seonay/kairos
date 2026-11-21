@@ -3,7 +3,7 @@ import HealthKit
 import PulseDomain
 
 /// La lecture Apple Santé vue par le moteur et les fonctionnalités. Aucune valeur lue n'est journalisée.
-extension HealthKitReader: HealthSampleSource, HealthWorkoutSource {
+extension HealthKitReader: HealthSampleSource, HealthWorkoutSource, HealthBodySource {
     public func requestAuthorization() async throws {
         try await store.requestAuthorization(toShare: [], read: HealthKitTypes.read)
     }
@@ -14,10 +14,11 @@ extension HealthKitReader: HealthSampleSource, HealthWorkoutSource {
         let dates = HKQuery.predicateForSamples(withStart: start, end: nil, options: [])
         switch signal {
         case .sdnn:
-            return try await quantityChanges(of: signal, .heartRateVariabilitySDNN, unit: .secondUnit(with: .milli),
+            return try await quantityChanges(of: signal.kind, .heartRateVariabilitySDNN, unit: .secondUnit(with: .milli),
                                              anchor: queryAnchor, dates: dates)
         case .restingHeartRate:
-            return try await quantityChanges(of: signal, .restingHeartRate, unit: Self.beatsPerMinute, anchor: queryAnchor, dates: dates)
+            return try await quantityChanges(of: signal.kind, .restingHeartRate, unit: Self.beatsPerMinute,
+                                             anchor: queryAnchor, dates: dates)
         case .sleep:
             return try await sleepChanges(anchor: queryAnchor, dates: dates)
         }
@@ -62,18 +63,18 @@ extension HealthKitReader: HealthSampleSource, HealthWorkoutSource {
     // MARK: - Lectures ancrées
 
     /// Un échantillon quantitatif est daté de sa fin, comme dans les lectures par période de `HealthReading`.
-    private func quantityChanges(of signal: NightSignal, _ identifier: HKQuantityTypeIdentifier, unit: HKUnit,
+    private func quantityChanges(of kind: HealthSampleKind, _ identifier: HKQuantityTypeIdentifier, unit: HKUnit, scale: Double = 1,
                                  anchor: HKQueryAnchor?, dates: NSPredicate) async throws -> HealthSampleChanges {
         let descriptor = HKAnchoredObjectQueryDescriptor(
             predicates: [.quantitySample(type: HKQuantityType(identifier), predicate: dates)], anchor: anchor)
         let result = try await descriptor.result(for: store)
         let added = result.addedSamples.map { sample in
             CachedHealthSample(
-                kind: signal.kind, start: sample.endDate, end: sample.endDate, value: sample.quantity.doubleValue(for: unit),
+                kind: kind, start: sample.endDate, end: sample.endDate, value: sample.quantity.doubleValue(for: unit) * scale,
                 healthKitUUID: sample.uuid.uuidString, sourceBundleID: sample.sourceRevision.source.bundleIdentifier,
                 fetchedAt: sample.endDate)
         }
-        return try Self.changes(of: signal, added: added, deleted: result.deletedObjects, newAnchor: result.newAnchor,
+        return try Self.changes(of: kind, added: added, deleted: result.deletedObjects, newAnchor: result.newAnchor,
                                 isFullRead: anchor == nil)
     }
 
@@ -88,13 +89,8 @@ extension HealthKitReader: HealthSampleSource, HealthWorkoutSource {
                 healthKitUUID: sample.uuid.uuidString, sourceBundleID: sample.sourceRevision.source.bundleIdentifier,
                 fetchedAt: sample.endDate)
         }
-        return try Self.changes(of: HealthSampleKind.sleep, added: added, deleted: result.deletedObjects, newAnchor: result.newAnchor,
+        return try Self.changes(of: .sleep, added: added, deleted: result.deletedObjects, newAnchor: result.newAnchor,
                                 isFullRead: anchor == nil)
-    }
-
-    private static func changes(of signal: NightSignal, added: [CachedHealthSample], deleted: [HKDeletedObject],
-                                newAnchor: HKQueryAnchor, isFullRead: Bool) throws -> HealthSampleChanges {
-        try changes(of: signal.kind, added: added, deleted: deleted, newAnchor: newAnchor, isFullRead: isFullRead)
     }
 
     private static func changes(of kind: HealthSampleKind, added: [CachedHealthSample], deleted: [HKDeletedObject],
@@ -129,6 +125,22 @@ extension HealthKitReader: HealthSampleSource, HealthWorkoutSource {
         }
         return try Self.changes(of: signal.kind, added: added, deleted: result.deletedObjects, newAnchor: result.newAnchor,
                                 isFullRead: queryAnchor == nil)
+    }
+
+    // MARK: - Poids et masse grasse
+
+    /// Le poids en kilos et la masse grasse en pourcentage 0…100 (HealthKit la rend en fraction), par la même requête ancrée que
+    /// les nuits (spec M7 §14).
+    public func bodyChanges(of signal: BodySignal, since anchor: Data?, from start: Date) async throws -> HealthSampleChanges {
+        let dates = HKQuery.predicateForSamples(withStart: start, end: nil, options: [])
+        switch signal {
+        case .bodyMass:
+            return try await quantityChanges(of: signal.kind, .bodyMass, unit: .gramUnit(with: .kilo),
+                                             anchor: anchor.flatMap(Self.decodedAnchor), dates: dates)
+        case .bodyFat:
+            return try await quantityChanges(of: signal.kind, .bodyFatPercentage, unit: .percent(), scale: 100,
+                                             anchor: anchor.flatMap(Self.decodedAnchor), dates: dates)
+        }
     }
 
     /// Une ancre illisible vaut une ancre absente : la lecture repart de zéro.

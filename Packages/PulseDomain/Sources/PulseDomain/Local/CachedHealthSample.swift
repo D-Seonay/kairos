@@ -6,6 +6,8 @@ public enum HealthSampleKind: String, Sendable, Codable, CaseIterable {
     case sleep
     case run
     case ride
+    case bodyMass
+    case bodyFat
 }
 
 /// Un échantillon Apple Santé mis en cache localement, reconstructible (spec M2 §5.4). Jamais synchronisé, jamais exporté.

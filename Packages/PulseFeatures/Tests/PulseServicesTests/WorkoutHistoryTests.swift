@@ -10,6 +10,8 @@ private actor ScriptedWorkoutSource: HealthWorkoutSource {
     var runs: [CachedHealthSample]? = []
     var rides: [CachedHealthSample]? = []
     var deleted: [String] = []
+    /// Vrai : la source rend toujours une lecture complète, comme quand l'ancre stockée est illisible.
+    var alwaysFullRead = false
     private var anchors: [WorkoutSignal: [Data?]] = [:]
 
     /// Les ancres reçues pour le type, dans l'ordre des lectures.
@@ -22,11 +24,15 @@ private actor ScriptedWorkoutSource: HealthWorkoutSource {
         self.deleted = deleted
     }
 
+    func set(alwaysFullRead: Bool) {
+        self.alwaysFullRead = alwaysFullRead
+    }
+
     func workoutChanges(of signal: WorkoutSignal, since anchor: Data?, from start: Date) async throws -> HealthSampleChanges {
         anchors[signal, default: []].append(anchor)
         guard let added = signal == .run ? runs : rides else { throw Failure() }
         return HealthSampleChanges(kind: signal.kind, added: added, deletedHealthKitUUIDs: signal == .run ? deleted : [],
-                                   anchor: Data("a".utf8), isFullRead: anchor == nil)
+                                   anchor: Data("a".utf8), isFullRead: anchor == nil || alwaysFullRead)
     }
 }
 
@@ -180,6 +186,19 @@ struct WorkoutHistoryTests {
         await history.refresh(now: now)
         #expect(await source.anchorsSeen(for: .run).suffix(2) == [nil, nil])
         #expect(try await imported().count == 1)
+    }
+
+    @Test func emptyFullReadWithCurrentWindowKeepsSessions() async throws {
+        // Fenêtre à jour, mais l'ancre est illisible : la source relit tout et ne rend rien (accès révoqué).
+        await source.set(runs: [run("r1", at: "2026-11-17T07:30")])
+        await history.refresh(now: now)
+        #expect(windows.days(for: .run) == WorkoutHistory.historyDays)
+        await source.set(runs: [])
+        await source.set(alwaysFullRead: true)
+
+        #expect(await !history.refresh(now: now))
+        #expect(try await imported().map(\.healthKitUUID) == ["r1"])
+        #expect(try await cache.samples(kind: .run, from: .distantPast, to: .distantFuture).count == 1)
     }
 
     @Test func emptyFirstReadWithEmptyCacheIsRetained() async throws {
