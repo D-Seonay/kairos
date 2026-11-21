@@ -16,6 +16,7 @@ let package = Package(
         .library(name: "LiveSessionFeature", targets: ["LiveSessionFeature"]),
         .library(name: "OnboardingFeature", targets: ["OnboardingFeature"]),
         .library(name: "PlanningFeature", targets: ["PlanningFeature"]),
+        .library(name: "ProfileFeature", targets: ["ProfileFeature"]),
         .library(name: "StatsFeature", targets: ["StatsFeature"]),
         .library(name: "SupplementsFeature", targets: ["SupplementsFeature"]),
         .library(name: "TodayFeature", targets: ["TodayFeature"]),
@@ -56,6 +57,13 @@ let package = Package(
         .target(
             name: "PlanningFeature",
             dependencies: ["PulseServices", "TrainFeature", designSystem, domain, content],
+            resources: [.process("Resources")],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .target(
+            name: "ProfileFeature",
+            dependencies: ["PulseServices", "StatsFeature", "SupplementsFeature", "TrainFeature", designSystem, domain, recoveryEngine,
+                           content],
             resources: [.process("Resources")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
@@ -112,6 +120,11 @@ let package = Package(
         .testTarget(
             name: "PlanningFeatureTests",
             dependencies: ["PlanningFeature", "TrainFeature", "PulseServices", domain, content],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .testTarget(
+            name: "ProfileFeatureTests",
+            dependencies: ["ProfileFeature", "PulseServices", domain, content],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(

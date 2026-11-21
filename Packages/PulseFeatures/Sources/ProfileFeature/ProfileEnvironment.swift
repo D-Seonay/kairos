@@ -1,0 +1,63 @@
+import Foundation
+import PulseDomain
+import PulseServices
+import SwiftUI
+
+/// Tout ce dont l'onglet Profil a besoin du dehors : le résumé, les pesées, les réglages, l'état d'Apple Santé, les données
+/// stockées (inspection, export, suppression), ce que seule l'app sait (notifications refusées, passage du jour, version,
+/// politique de confidentialité) et l'horloge.
+public struct ProfileEnvironment: Sendable {
+    public var profile: ProfileService
+    public var body: BodyService
+    public var settings: SettingsService
+    public var healthCache: any HealthSampleCache
+    public var inspector: any StoreInspector
+    public var exporter: any DataExporter
+    public var eraser: any DataEraser
+    /// Vrai quand les notifications de Pulse sont refusées dans les réglages d'iOS.
+    public var notificationsDenied: @Sendable () async -> Bool
+    /// « Relire maintenant » : lance le passage du jour.
+    public var refreshHealth: @Sendable () async -> Void
+    /// « 1.0.2 (14) ».
+    public var appVersion: String
+    /// Lue dans l'Info.plist ; `nil` tant qu'elle est vide (spec M7 §16).
+    public var privacyPolicyURL: URL?
+    public var calendar: Calendar
+    public var now: @Sendable () -> Date
+
+    public init(profile: ProfileService, body: BodyService, settings: SettingsService, healthCache: any HealthSampleCache,
+                inspector: any StoreInspector, exporter: any DataExporter, eraser: any DataEraser,
+                notificationsDenied: @escaping @Sendable () async -> Bool, refreshHealth: @escaping @Sendable () async -> Void,
+                appVersion: String, privacyPolicyURL: URL?, calendar: Calendar, now: @escaping @Sendable () -> Date) {
+        self.profile = profile
+        self.body = body
+        self.settings = settings
+        self.healthCache = healthCache
+        self.inspector = inspector
+        self.exporter = exporter
+        self.eraser = eraser
+        self.notificationsDenied = notificationsDenied
+        self.refreshHealth = refreshHealth
+        self.appVersion = appVersion
+        self.privacyPolicyURL = privacyPolicyURL
+        self.calendar = calendar
+        self.now = now
+    }
+}
+
+/// Les écrans qui restent dans la cible app (spec M7 §16) : le diagnostic Apple Santé, le debug « Données » et la confirmation de
+/// suppression. L'onglet Profil les reçoit plutôt que de les déplacer dans un package.
+public struct ProfileAppScreens {
+    public var healthDiagnostics: () -> AnyView
+    /// `nil` en Release : l'écran de debug n'existe qu'en DEBUG.
+    public var dataDebug: (() -> AnyView)?
+    /// `onErased` part une fois tout supprimé.
+    public var eraseConfirmation: (_ onErased: @escaping () async -> Void) -> AnyView
+
+    public init(healthDiagnostics: @escaping () -> AnyView, dataDebug: (() -> AnyView)?,
+                eraseConfirmation: @escaping (_ onErased: @escaping () async -> Void) -> AnyView) {
+        self.healthDiagnostics = healthDiagnostics
+        self.dataDebug = dataDebug
+        self.eraseConfirmation = eraseConfirmation
+    }
+}
