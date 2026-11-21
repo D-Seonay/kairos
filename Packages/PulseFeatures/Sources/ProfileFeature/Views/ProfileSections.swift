@@ -43,11 +43,14 @@ struct ProfileTiles: View {
             emptyText: String(localized: "Pas encore de séance", bundle: .module))
     }
 
+    /// Un score estimé d'après le questionnaire du matin le dit, comme sur l'accueil.
     private var scoreTile: ProfileTileContent {
         ProfileTileContent(
             title: String(localized: "Score du matin", bundle: .module),
             value: summary.morningScore.map { PulseFormat.integer($0, unit: nil) },
-            unit: String(localized: "sur 100", bundle: .module),
+            unit: summary.morningScoreIsEstimated
+                ? String(localized: "sur 100 · Estimé", bundle: .module)
+                : String(localized: "sur 100", bundle: .module),
             emptyText: String(localized: "Pas encore de score aujourd'hui", bundle: .module))
     }
 

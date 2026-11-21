@@ -5,7 +5,7 @@ import PulseServices
 import Testing
 
 struct ProfileServiceTests {
-    private func repositories(withScoreToday: Bool = true) async throws -> StatsRepositories {
+    private func repositories(withScoreToday: Bool = true, estimatedToday: Bool = false) async throws -> StatsRepositories {
         let repositories = StatsRepositories()
         let program = StatsFixtures.program()
         try await repositories.programs.save(program)
@@ -31,7 +31,8 @@ struct ProfileServiceTests {
         for day in withScoreToday ? [yesterday, today] : [yesterday] {
             let score = day == today ? 82.0 : 60.0
             try await repositories.recoveries.save(DailyRecovery(
-                day: day, score: score, category: RecoveryCategory(score: score), isEstimated: false, hrvScore: score,
+                day: day, score: score, category: RecoveryCategory(score: score), isEstimated: day == today && estimatedToday,
+                hrvScore: score,
                 restingHeartRateScore: score, sleepScore: score, calibration: .ready, createdAt: day, updatedAt: day))
         }
         return repositories
@@ -45,7 +46,7 @@ struct ProfileServiceTests {
         #expect(summary.sessionsTotal == 12)
         #expect(summary.firstSession == StatsFixtures.day(0, ofWeek: 18))
         #expect(summary.streakWeeks == 3)
-        #expect(summary.morningScore == 82)
+        #expect(summary.morningScore == 82 && !summary.morningScoreIsEstimated)
         #expect(summary.mainLifts.first?.exercise == .content(id: "back-squat-barbell"))
         #expect(summary.mainLifts.map(\.exercise) == [
             .content(id: "back-squat-barbell"), .content(id: "bench-press-barbell"),
@@ -59,7 +60,14 @@ struct ProfileServiceTests {
     @Test func noScoreToday() async throws {
         let summary = try await repositories(withScoreToday: false).profileService().summary()
 
-        #expect(summary.morningScore == nil)
+        #expect(summary.morningScore == nil && !summary.morningScoreIsEstimated)
+    }
+
+    @Test func estimatedScoreToday() async throws {
+        let summary = try await repositories(estimatedToday: true).profileService().summary()
+
+        #expect(summary.morningScore == 82)
+        #expect(summary.morningScoreIsEstimated)
     }
 
     @Test func emptyProfile() async throws {
