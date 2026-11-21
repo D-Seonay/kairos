@@ -1,0 +1,377 @@
+import Charts
+import PulseDesignSystem
+import PulseDomain
+import PulseServices
+import SwiftUI
+
+/// L'écran Poids (spec M7 §14), poussé depuis la page Profil : la tendance et la courbe des 90 derniers jours, la dernière masse
+/// grasse, « Ajouter une pesée » et les mesures de l'année avec leur source. Une saisie manuelle se modifie au toucher et se
+/// supprime par balayage ; une mesure Apple Santé n'a ni l'un ni l'autre.
+struct WeightScreen: View {
+    @State private var model: WeightModel
+
+    /// `onChanged` part après chaque écriture : la page Profil se recharge.
+    init(environment: ProfileEnvironment, onChanged: @escaping @MainActor () async -> Void) {
+        _model = State(initialValue: WeightModel(environment: environment, onChanged: onChanged))
+    }
+
+    var body: some View {
+        @Bindable var model = model
+        List {
+            if let message = model.errorMessage, model.editor == nil {
+                Section {
+                    Text(message)
+                        .font(.footnote)
+                        .foregroundStyle(PulsePalette.bad)
+                }
+                .listRowBackground(PulsePalette.surface)
+            }
+            if let overview = model.overview {
+                if overview.measurements.isEmpty {
+                    emptyState
+                } else {
+                    trendSection(overview.trend)
+                    addButton
+                    measurementsSection(overview)
+                }
+            } else if !model.hasLoaded {
+                ProgressView()
+                    .frame(maxWidth: .infinity, minHeight: 200)
+                    .listRowBackground(Color.clear)
+            }
+        }
+        .scrollContentBackground(.hidden)
+        .refreshable { await model.load() }
+        .pulseScreenBackground(aura: 0.5)
+        .navigationTitle(String(localized: "Poids", bundle: .module))
+        .pulseInlineTitle()
+        .sheet(item: $model.editor, onDismiss: model.closeEditor) { _ in
+            NavigationStack {
+                WeighInSheet(model: model)
+            }
+        }
+        .task { await model.load() }
+    }
+
+    private var calendar: Calendar { model.environment.calendar }
+
+    // MARK: Tendance
+
+    private func trendSection(_ trend: WeightTrend) -> some View {
+        let today = model.environment.now()
+        return Section {
+            VStack(alignment: .leading, spacing: 12) {
+                if let current = trend.current {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(ProfileText.weight(current))
+                            .font(PulseFont.value(.largeTitle))
+                            .foregroundStyle(PulsePalette.text)
+                        Text(ProfileText.trendCaption(trend, calendar: calendar, today: today))
+                            .font(.caption)
+                            .foregroundStyle(PulsePalette.text2)
+                        if let change = trend.change30Days {
+                            Text(ProfileText.weightChange(change))
+                                .font(.subheadline)
+                                .foregroundStyle(PulsePalette.text)
+                                .padding(.top, 4)
+                        }
+                    }
+                    .accessibilityElement(children: .combine)
+                } else {
+                    ProfileEmptyNote(heading: String(localized: "Pas encore de pesée", bundle: .module),
+                                     reason: String(localized: "seule la masse grasse a été mesurée", bundle: .module))
+                }
+                if let fat = trend.latestBodyFat {
+                    Text(String(localized: "Masse grasse \(ProfileText.bodyFat(fat, calendar: calendar, today: today))",
+                                bundle: .module))
+                        .font(.subheadline)
+                        .foregroundStyle(PulsePalette.text)
+                }
+                WeightChart(trend: trend, calendar: calendar, today: today)
+            }
+            .padding(.vertical, 8)
+        }
+        .listRowBackground(PulsePalette.surface)
+    }
+
+    private var addButton: some View {
+        Section {
+            Button(String(localized: "Ajouter une pesée", bundle: .module), action: model.startNew)
+                .buttonStyle(PrimaryButtonStyle())
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets())
+        }
+    }
+
+    // MARK: Mesures
+
+    private func measurementsSection(_ overview: BodyOverview) -> some View {
+        let today = model.environment.now()
+        return Section {
+            ForEach(overview.measurements) { measurement in
+                let row = MeasurementRow(measurement: measurement, calendar: calendar, today: today)
+                if measurement.source == .manual {
+                    Button { model.edit(measurement) } label: { row }
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button(role: .destructive) {
+                                Task { await model.delete(measurement) }
+                            } label: {
+                                Label(String(localized: "Supprimer", bundle: .module), systemImage: "trash")
+                            }
+                        }
+                        .accessibilityHint(String(localized: "Touche pour modifier la pesée", bundle: .module))
+                } else {
+                    row
+                }
+            }
+        } header: {
+            Text(String(localized: "Mesures", bundle: .module))
+        } footer: {
+            if !overview.hasAppleHealthData {
+                Text(Self.healthHint)
+            }
+        }
+        .listRowBackground(PulsePalette.surface)
+    }
+
+    /// Sans mesure lue, HealthKit ne dit pas si la lecture est refusée : l'écran renvoie vers Santé (spec M7 §14).
+    static var healthHint: String {
+        String(localized: "Aucune pesée dans Apple Santé. Vérifie l'accès de Pulse dans Santé → Partage.", bundle: .module)
+    }
+
+    // MARK: État vide
+
+    private var emptyState: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 12) {
+                IconChip(systemName: "scalemass", size: 44)
+                Text(String(localized: "Pas encore de pesée", bundle: .module))
+                    .font(PulseFont.title(.title3, weight: .semibold))
+                    .foregroundStyle(PulsePalette.text)
+                Text(Self.healthHint)
+                    .font(.footnote)
+                    .foregroundStyle(PulsePalette.text2)
+                    .fixedSize(horizontal: false, vertical: true)
+                Button(String(localized: "Ajouter une pesée", bundle: .module), action: model.startNew)
+                    .buttonStyle(PrimaryButtonStyle())
+            }
+            .padding(.vertical, 8)
+        }
+        .listRowBackground(PulsePalette.surface)
+    }
+}
+
+/// Une mesure : sa valeur (« 78,4 kg », « 17,5 % de masse grasse »), sa date et sa source.
+private struct MeasurementRow: View {
+    let measurement: BodyMeasurement
+    let calendar: Calendar
+    let today: Date
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(ProfileText.measurement(measurement))
+                    .font(PulseFont.value(.headline))
+                    .foregroundStyle(PulsePalette.text)
+                Text(ProfileText.shortDate(measurement.date, calendar: calendar, today: today))
+                    .font(.caption)
+                    .foregroundStyle(PulsePalette.text2)
+            }
+            Spacer(minLength: 8)
+            Text(ProfileText.source(measurement.source))
+                .font(.caption)
+                .foregroundStyle(PulsePalette.text2)
+        }
+        .frame(minHeight: 44)
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
+    }
+}
+
+// MARK: - Courbe
+
+/// Les 90 derniers jours : un point par jour pesé, la ligne de la tendance sur 7 jours. Le domaine des dates est épinglé aux 90
+/// jours et la zone du graphique rognée, comme les courbes de Stats.
+private struct WeightChart: View {
+    static let days = 90
+
+    let trend: WeightTrend
+    let calendar: Calendar
+    let today: Date
+
+    var body: some View {
+        let weighed = trend.days.filter { domain.contains($0.date) }
+        if weighed.isEmpty {
+            ProfileEmptyNote(heading: String(localized: "Aucune pesée sur 90 jours", bundle: .module), reason: emptyReason)
+        } else {
+            VStack(alignment: .leading, spacing: 8) {
+                chart(weighed: weighed, line: trend.trendPoints.filter { domain.contains($0.date) })
+                legend
+            }
+        }
+    }
+
+    /// Du début du jour, 89 jours avant aujourd'hui, au début de demain.
+    private var domain: ClosedRange<Date> {
+        let start = calendar.startOfDay(for: today)
+        let end = calendar.date(byAdding: .day, value: 1, to: start) ?? today
+        return (calendar.date(byAdding: .day, value: 1 - Self.days, to: start) ?? start)...end
+    }
+
+    private var emptyReason: String {
+        guard let last = trend.lastMeasured else {
+            return String(localized: "ajoute une pesée ou autorise le poids dans Apple Santé", bundle: .module)
+        }
+        let day = ProfileText.shortDate(last, calendar: calendar, today: today)
+        return String(localized: "dernière pesée le \(day)", bundle: .module)
+    }
+
+    private func chart(weighed: [WeightDay], line: [StatsPoint]) -> some View {
+        let dateLabel = String(localized: "Jour", bundle: .module)
+        let weightLabel = String(localized: "Poids", bundle: .module)
+        return Chart {
+            ForEach(line) { point in
+                LineMark(x: .value(dateLabel, point.date, unit: .day), y: .value(weightLabel, point.value),
+                         series: .value("Série", "trend"))
+                    .foregroundStyle(WeightInk.trend)
+                    .lineStyle(StrokeStyle(lineWidth: 2, lineJoin: .round))
+            }
+            ForEach(weighed) { day in
+                PointMark(x: .value(dateLabel, day.date, unit: .day), y: .value(weightLabel, day.weightKg))
+                    .foregroundStyle(WeightInk.weighIn)
+                    .symbolSize(24)
+            }
+        }
+        .chartXScale(domain: domain)
+        .chartPlotStyle { $0.clipped() }
+        .chartYScale(domain: .automatic(includesZero: false))
+        .weightAxes(calendar: calendar)
+        .frame(height: 180)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(summary(weighed: weighed))
+    }
+
+    private var legend: some View {
+        HStack(spacing: 14) {
+            legendItem(String(localized: "Pesée", bundle: .module)) {
+                Circle().fill(WeightInk.weighIn).frame(width: 7, height: 7)
+            }
+            legendItem(String(localized: "Tendance sur 7 jours", bundle: .module)) {
+                Capsule().fill(WeightInk.trend).frame(width: 14, height: 2)
+            }
+        }
+        .accessibilityHidden(true)
+    }
+
+    private func legendItem(_ label: String, @ViewBuilder mark: () -> some View) -> some View {
+        HStack(spacing: 6) {
+            mark()
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(PulsePalette.text2)
+        }
+    }
+
+    /// « Poids sur 90 jours : tendance 78,4 kg, de 77,6 à 80,3 kg, 30 pesées. »
+    private func summary(weighed: [WeightDay]) -> String {
+        let weights = weighed.map(\.weightKg)
+        let low = PulseFormat.decimal(weights.min() ?? .nan, maxFractionDigits: 1)
+        let high = ProfileText.weight(weights.max() ?? .nan)
+        let count = weighed.count == 1
+            ? String(localized: "1 pesée", bundle: .module)
+            : String(localized: "\(weighed.count) pesées", bundle: .module)
+        let range = String(localized: "de \(low) à \(high)", bundle: .module)
+        guard let current = trend.current else {
+            return String(localized: "Poids sur 90 jours : \(range), \(count).", bundle: .module)
+        }
+        return String(localized: "Poids sur 90 jours : tendance \(ProfileText.weight(current)), \(range), \(count).",
+                      bundle: .module)
+    }
+}
+
+/// L'encre de la courbe : la tendance en plein, les pesées en demi-teinte.
+private enum WeightInk {
+    static let trend = PulsePalette.ink
+    static let weighIn = PulsePalette.ink.opacity(0.4)
+}
+
+private extension View {
+    /// Les axes des courbes de Stats : filets pointillés, étiquettes grises, dates en « 12 nov. ».
+    func weightAxes(calendar: Calendar) -> some View {
+        chartXAxis {
+            AxisMarks(values: .automatic(desiredCount: 4)) { _ in
+                AxisGridLine(stroke: StrokeStyle(lineWidth: 1, dash: [2, 4])).foregroundStyle(PulsePalette.line)
+                AxisValueLabel(format: .dateTime.day().month(.abbreviated)).foregroundStyle(PulsePalette.muted)
+            }
+        }
+        .chartYAxis {
+            AxisMarks(position: .leading) { _ in
+                AxisGridLine(stroke: StrokeStyle(lineWidth: 1, dash: [2, 4])).foregroundStyle(PulsePalette.line)
+                AxisValueLabel().foregroundStyle(PulsePalette.muted)
+            }
+        }
+        .environment(\.locale, Locale(identifier: "fr_FR"))
+        .environment(\.calendar, calendar)
+        .environment(\.timeZone, calendar.timeZone)
+    }
+}
+
+#if DEBUG
+/// Prépare l'environnement de l'aperçu (avec deux saisies manuelles en plus des pesées d'Apple Santé) puis pousse l'écran.
+private struct WeightPreviewHost: View {
+    var withHistory = true
+    @State private var environment: ProfileEnvironment?
+
+    var body: some View {
+        NavigationStack {
+            if let environment {
+                WeightScreen(environment: environment) {}
+            } else {
+                ProgressView()
+            }
+        }
+        .task {
+            let environment = await ProfilePreviewSupport.environment(withHistory: withHistory)
+            if withHistory {
+                try? await environment.body.addManual(weightKg: 77.9, date: ProfilePreviewSupport.day(-1, hour: 7))
+                try? await environment.body.addManual(weightKg: 78.2, date: ProfilePreviewSupport.day(0, hour: 7))
+            }
+            self.environment = environment
+        }
+        .preferredColorScheme(.light)
+    }
+}
+
+/// La feuille de pesée ouverte sur une nouvelle pesée.
+private struct WeighInPreviewHost: View {
+    @State private var model: WeightModel?
+
+    var body: some View {
+        NavigationStack {
+            if let model {
+                WeighInSheet(model: model)
+            } else {
+                ProgressView()
+            }
+        }
+        .task {
+            let model = WeightModel(environment: await ProfilePreviewSupport.environment(withHistory: false)) {}
+            model.startNew()
+            self.model = model
+        }
+        .preferredColorScheme(.light)
+    }
+}
+
+#Preview("Poids") {
+    WeightPreviewHost()
+}
+
+#Preview("Poids, sans mesure") {
+    WeightPreviewHost(withHistory: false)
+}
+
+#Preview("Nouvelle pesée") {
+    WeighInPreviewHost()
+}
+#endif

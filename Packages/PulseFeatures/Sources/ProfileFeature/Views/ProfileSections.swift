@@ -156,7 +156,7 @@ struct WeightCard: View {
             Text(ProfileText.weight(current))
                 .font(PulseFont.value(.title))
                 .foregroundStyle(PulsePalette.text)
-            Text(caption(trend))
+            Text(ProfileText.trendCaption(trend, calendar: calendar, today: today))
                 .font(.caption)
                 .foregroundStyle(PulsePalette.text2)
         }
@@ -165,15 +165,6 @@ struct WeightCard: View {
                 .font(.subheadline)
                 .foregroundStyle(PulsePalette.text)
         }
-    }
-
-    /// « tendance sur 7 jours », ou « dernière mesure le 12 nov. » sans pesée depuis 14 jours (spec M7 §14).
-    private func caption(_ trend: WeightTrend) -> String {
-        if trend.isStale, let last = trend.lastMeasured {
-            let day = ProfileText.shortDate(last, calendar: calendar, today: today)
-            return String(localized: "dernière mesure le \(day)", bundle: .module)
-        }
-        return String(localized: "tendance sur 7 jours", bundle: .module)
     }
 }
 
@@ -359,7 +350,7 @@ struct ProfileLinks: View {
 }
 
 /// Une absence et sa raison, à la place d'un chiffre : jamais un zéro (spec M7 §2).
-private struct ProfileEmptyNote: View {
+struct ProfileEmptyNote: View {
     let heading: String
     let reason: String
 

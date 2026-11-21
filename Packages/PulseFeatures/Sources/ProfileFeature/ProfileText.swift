@@ -1,5 +1,6 @@
 import Foundation
 import PulseDesignSystem
+import PulseDomain
 import PulseServices
 
 /// Les formats français de la page Profil : `PulseFormat` pour les nombres, les dates et les temps de course comme dans Stats
@@ -52,6 +53,34 @@ enum ProfileText {
         guard reading.percent.isFinite else { return dash }
         let percent = "\(PulseFormat.decimal(reading.percent, maxFractionDigits: 1)) %"
         return [percent, shortDate(reading.date, calendar: calendar, today: today)].joined(separator: " · ")
+    }
+
+    /// « tendance sur 7 jours », ou « dernière mesure le 12 nov. » sans pesée depuis 14 jours (spec M7 §14).
+    static func trendCaption(_ trend: WeightTrend, calendar: Calendar, today: Date) -> String {
+        if trend.isStale, let last = trend.lastMeasured {
+            let day = shortDate(last, calendar: calendar, today: today)
+            return String(localized: "dernière mesure le \(day)", bundle: .module)
+        }
+        return String(localized: "tendance sur 7 jours", bundle: .module)
+    }
+
+    /// « 78,4 kg », « 17,5 % de masse grasse », ou les deux séparés d'un point médian : la valeur d'une ligne de mesure.
+    static func measurement(_ measurement: BodyMeasurement) -> String {
+        var parts: [String] = []
+        if let weight = measurement.weightKg { parts.append(self.weight(weight)) }
+        if let fat = measurement.bodyFatPercent, fat.isFinite {
+            parts.append(String(localized: "\(PulseFormat.decimal(fat, maxFractionDigits: 1)) % de masse grasse",
+                                bundle: .module))
+        }
+        return parts.isEmpty ? dash : parts.joined(separator: " · ")
+    }
+
+    /// « Apple Santé » ou « Saisie ».
+    static func source(_ source: MeasurementSource) -> String {
+        switch source {
+        case .appleHealth: String(localized: "Apple Santé", bundle: .module)
+        case .manual: String(localized: "Saisie", bundle: .module)
+        }
     }
 
     /// « 28 oct. », ou « 28 oct. 2025 » hors de l'année de `today` : la date d'une pesée ou d'un record.
