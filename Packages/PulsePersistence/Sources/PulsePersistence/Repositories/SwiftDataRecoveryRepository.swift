@@ -25,6 +25,7 @@ public actor SwiftDataRecoveryRepository: ModelActor, RecoveryRepository {
     }
 
     /// Le score va dans le magasin synchronisé, les valeurs brutes d'Apple Health dans le magasin local, en un seul `save()`.
+    /// Une ancienne ligne synchronisée perd ses valeurs brutes : celles de `recovery` font foi et partent dans la lecture locale.
     public func save(_ recovery: DailyRecovery) throws {
         var stamped = recovery
         stamped.day = calendar.startOfDay(for: recovery.day)
@@ -34,6 +35,7 @@ public actor SwiftDataRecoveryRepository: ModelActor, RecoveryRepository {
             stamped.id = existing.id
             stamped.createdAt = existing.createdAt
             existing.apply(stamped)
+            existing.clearHealthValues()
         } else {
             modelContext.insert(StoredDailyRecovery(stamped))
         }

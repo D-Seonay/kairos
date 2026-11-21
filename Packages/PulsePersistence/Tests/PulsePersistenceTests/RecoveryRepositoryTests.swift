@@ -133,4 +133,29 @@ import Testing
     let read = try await repository.dailyRecoveries(from: .distantPast, to: .distantFuture)
     #expect(read.first?.sdnnMs == 61)
 }
+
+@Test func savingOverALegacyRowClearsItsRawValues() async throws {
+    let box = try ModelContainerBox()
+    let repository = SwiftDataRecoveryRepository(modelContainer: box.container, calendar: Fixed.calendar)
+    var recovery = Sample.recovery(day: Fixed.calendar.startOfDay(for: Fixed.t0))
+    let context = ModelContext(box.container)
+    let row = StoredDailyRecovery(recovery)
+    row.sdnnMs = 61   // ancienne ligne : valeurs brutes encore dans le magasin synchronisé, pas de lecture locale
+    context.insert(row)
+    try context.save()
+    recovery.sdnnMs = nil
+    recovery.sdnnBaselineMs = nil
+    recovery.restingHeartRate = nil
+    recovery.restingHeartRateBaseline = nil
+    recovery.asleepMinutes = nil
+    recovery.deepMinutes = nil
+    try await repository.save(recovery)
+    let check = ModelContext(box.container)
+    #expect(try check.fetchCount(FetchDescriptor<StoredRecoveryReading>()) == 0)
+    let synced = try #require(try check.fetch(FetchDescriptor<StoredDailyRecovery>()).first)
+    #expect(synced.sdnnMs == nil && synced.sdnnBaselineMs == nil && synced.restingHeartRate == nil)
+    #expect(synced.restingHeartRateBaseline == nil && synced.asleepMinutes == nil && synced.deepMinutes == nil)
+    let read = try await repository.dailyRecoveries(from: .distantPast, to: .distantFuture)
+    #expect(read.count == 1 && read[0].sdnnMs == nil)
+}
 // swiftlint:enable force_unwrapping
