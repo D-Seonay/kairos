@@ -2,13 +2,14 @@ import LiveSessionFeature
 import PlanningFeature
 import PulseDesignSystem
 import PulseServices
+import StatsFeature
 import SupplementsFeature
 import SwiftUI
 import TodayFeature
 import TrainFeature
 
-/// Les cinq onglets de l'app. « Stats » arrive en M7. La séance en direct s'ouvre
-/// en plein écran par-dessus ; une séance en cours qui n'est pas à l'écran garde le bandeau « Reprendre la séance » en haut.
+/// Les cinq onglets de l'app. La séance en direct s'ouvre en plein écran par-dessus ; une séance en cours qui n'est pas à
+/// l'écran garde le bandeau « Reprendre la séance » en haut.
 struct MainTabView: View {
     enum Item: Hashable {
         case today
@@ -24,6 +25,7 @@ struct MainTabView: View {
     let today: TodayModel
     let train: TrainModel
     let planning: PlanningModel
+    let stats: StatsModel
     @Bindable var liveSession: LiveSessionCoordinator
     /// La saisie d'une séance passée, ouverte depuis l'onglet Séance.
     @Bindable var pastSession: PastSessionCoordinator
@@ -72,7 +74,7 @@ struct MainTabView: View {
                           onResumeSession: resume, onEnterPastSession: enterPastSession)
             }
             Tab(String(localized: "Stats"), systemImage: "chart.bar", value: Item.stats) {
-                comingSoon(String(localized: "Stats"), milestone: "M7")
+                StatsScreen(model: stats)
             }
             Tab(String(localized: "Profil"), systemImage: "person.crop.circle", value: Item.profile) {
                 ProfileHubView(dependencies: dependencies, supplements: supplements, firstName: firstName, onErased: onErased)
@@ -109,6 +111,7 @@ struct MainTabView: View {
             await today.refresh()
             await train.refresh()
             await planning.load()
+            await stats.load()
             // Une séance finie place le rappel « après la séance » et peut changer les jours d'entraînement.
             await supplements.load()
             await dependencies.supplementService.rescheduleReminders()
@@ -125,10 +128,5 @@ struct MainTabView: View {
 
     private var isShowingError: Binding<Bool> {
         Binding(get: { liveSession.errorMessage != nil }, set: { if !$0 { liveSession.dismissError() } })
-    }
-
-    private func comingSoon(_ title: String, milestone: String) -> some View {
-        ComingSoonView(title: title, milestone: milestone)
-            .pulseScreenBackground(aura: 0.4)
     }
 }
