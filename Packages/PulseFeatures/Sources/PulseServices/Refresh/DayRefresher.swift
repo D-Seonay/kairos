@@ -29,6 +29,8 @@ public final class DayRefresher: Sendable {
     private let antiInterference: AntiInterferenceService?
     /// La série, la semaine et la charge publiées avec l'instantané du widget (spec M6 §11).
     private let planning: PlanningService?
+    /// Le déplacement des valeurs Apple Santé laissées dans le magasin synchronisé, avant toute lecture (spec M8 §5.2).
+    private let relocation: (any HealthDataRelocating)?
     private let calendar: Calendar
     private let now: @Sendable () -> Date
     private let queue = SerialTaskQueue()
@@ -50,7 +52,7 @@ public final class DayRefresher: Sendable {
                 notifications: any NotificationScheduling, activity: any DayActivityLog,
                 scheduledDays: (any ScheduledDayRepository)? = nil, workoutHistory: WorkoutHistory? = nil,
                 bodyHistory: BodyHistory? = nil, antiInterference: AntiInterferenceService? = nil,
-                planning: PlanningService? = nil, calendar: Calendar,
+                planning: PlanningService? = nil, relocation: (any HealthDataRelocating)? = nil, calendar: Calendar,
                 now: @escaping @Sendable () -> Date) {
         self.profiles = profiles
         self.programs = programs
@@ -65,6 +67,7 @@ public final class DayRefresher: Sendable {
         self.bodyHistory = bodyHistory
         self.antiInterference = antiInterference
         self.planning = planning
+        self.relocation = relocation
         self.calendar = calendar
         self.now = now
     }
@@ -141,6 +144,8 @@ public final class DayRefresher: Sendable {
             activity.markOpened(at: now)
             await notifications.cancelMorningScore()
         }
+        // iCloud peut redescendre d'anciennes lignes à tout moment : on les déplace avant de lire. Un échec ne retient pas le passage.
+        _ = try? await relocation?.relocate()
         let history = await nightHistory.refresh(now: now)
         await workoutHistory?.refresh(now: now)
         await bodyHistory?.refresh(now: now)

@@ -11,11 +11,17 @@ public final class HealthWorkoutExporter: Sendable {
     private let writer: any WorkoutHealthWriting
     private let workouts: any WorkoutRepository
     private let profiles: any ProfileRepository
+    /// Les pesées, Apple Santé comprise : le profil n'en porte plus la valeur (spec M8 §5.3).
+    private let measurements: any BodyMeasurementRepository
+    private let calendar: Calendar
 
-    public init(writer: any WorkoutHealthWriting, workouts: any WorkoutRepository, profiles: any ProfileRepository) {
+    public init(writer: any WorkoutHealthWriting, workouts: any WorkoutRepository, profiles: any ProfileRepository,
+                measurements: any BodyMeasurementRepository, calendar: Calendar) {
         self.writer = writer
         self.workouts = workouts
         self.profiles = profiles
+        self.measurements = measurements
+        self.calendar = calendar
     }
 
     public func access() async -> HealthWriteAccess {
@@ -33,7 +39,8 @@ public final class HealthWorkoutExporter: Sendable {
         guard Self.isExportable(session), let endedAt = session.endedAt, await writer.writeAccess() == .authorized else {
             return session
         }
-        let weightKg = (try? await profiles.load())?.weightKg
+        let weightKg = await ProfileWeightSync.currentWeight(measurements: measurements, profiles: profiles, now: endedAt,
+                                                             calendar: calendar)
         let entry = StrengthWorkoutEntry(sessionID: session.id, start: session.startedAt, end: endedAt,
                                          energyKcal: Self.energyKcal(weightKg: weightKg, from: session.startedAt, to: endedAt))
         guard let id = try? await writer.save(entry) else { return session }

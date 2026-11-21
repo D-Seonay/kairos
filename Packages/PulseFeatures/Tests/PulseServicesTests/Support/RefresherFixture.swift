@@ -99,10 +99,10 @@ struct RefresherFixture {
 
     /// Sans `adopt`, il n'y a ni profil ni programme. Avec `gate`, chaque notification planifiée attend que la porte s'ouvre ;
     /// avec `publishGate`, chaque publication de l'instantané. Avec `planning`, le passage applique les règles anti-interférence
-    /// et publie la série et la semaine.
+    /// et publie la série et la semaine. `relocation` est le déplacement des valeurs Apple Santé lancé avant les lectures.
     init(scenario: HealthScenario, at start: String = "2026-11-02T08:00", holdingNotificationsAt gate: Gate? = nil,
          holdingPublishesAt publishGate: Gate? = nil, planning: Bool = false,
-         bodySamples: [BodySignal: [CachedHealthSample]] = [:]) {
+         bodySamples: [BodySignal: [CachedHealthSample]] = [:], relocation: (any HealthDataRelocating)? = nil) {
         let calendar = TestClock.calendar
         let clock = MutableClock(start)
         let recovery = InMemoryRecoveryRepository(calendar: calendar)
@@ -135,7 +135,7 @@ struct RefresherFixture {
                                            calendar: calendar),
             bodyHistory: BodyHistory(source: scenarioSource, cache: InMemoryHealthSampleCache(), measurements: measurements,
                                      profiles: profiles, windows: InMemoryHealthReadWindowStore(), calendar: calendar),
-            antiInterference: rules, planning: planningService, calendar: calendar, now: { clock.now })
+            antiInterference: rules, planning: planningService, relocation: relocation, calendar: calendar, now: { clock.now })
     }
 
     /// PPL 3 adopté (lundi Push, mardi repos), et un profil dont l'onboarding est terminé, sauf si `onboarded` est faux.

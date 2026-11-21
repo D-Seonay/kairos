@@ -48,9 +48,9 @@ public struct WorkoutHistory: Sendable {
             var changes = try await source.workoutChanges(of: signal, since: anchor, from: start)
             // Apple Santé ne distingue pas un accès révoqué d'entraînements effacés : une lecture complète (fenêtre élargie ou ancre
             // illisible) qui ne rend rien alors que le cache en gardait ne doit pas emporter les séances importées (et leur RPE,
-            // leurs notes). Le cache est local mais les séances passent par iCloud : sur un second appareil ou après une
-            // réinstallation, le cache est vide et les séances importées sont là. Dans les deux cas rien n'est appliqué ni retenu,
-            // la lecture est retentée à la passe suivante.
+            // leurs notes). Le cache et les séances importées sont tous deux locaux, mais le cache peut être vidé sans le magasin
+            // local (réinstallation partielle, cache purgé) : les séances importées sont alors là et le cache est vide. Dans les
+            // deux cas rien n'est appliqué ni retenu, la lecture est retentée à la passe suivante.
             if changes.isFullRead, changes.added.isEmpty {
                 let cached = try await cache.samples(kind: signal.kind, from: .distantPast, to: .distantFuture)
                 if !cached.isEmpty { return false }

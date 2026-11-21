@@ -36,10 +36,10 @@ public struct BodyHistory: Sendable {
             guard await sync(signal, from: start, to: end, fetchedAt: now) else { continue }
             changed = await align(signal, from: start, to: end, now: now) || changed
         }
-        // `UserProfile.weightKg` suit la tendance : un échec ici ne change pas ce que le passage rend.
-        if changed {
-            try? await ProfileWeightSync.apply(measurements: measurements, profiles: profiles, now: now, calendar: calendar)
-        }
+        // `UserProfile.weightKg` suit les pesées manuelles, à chaque passage et pas seulement quand une mesure change : le
+        // déplacement des pesées Apple Santé hors d'iCloud peut avoir eu lieu sans que ce passage n'ajoute rien. Un échec ici ne
+        // change pas ce que le passage rend.
+        try? await ProfileWeightSync.apply(measurements: measurements, profiles: profiles, now: now, calendar: calendar)
         return changed
     }
 
@@ -51,9 +51,9 @@ public struct BodyHistory: Sendable {
         do {
             var changes = try await source.bodyChanges(of: signal, since: anchor, from: start)
             // Apple Santé ne distingue pas un accès révoqué de pesées effacées : une lecture complète qui ne rend rien alors que le
-            // cache en gardait ne doit pas emporter les mesures importées. Le cache est local mais les mesures passent par iCloud :
-            // sur un second appareil ou après une réinstallation, le cache est vide et les mesures importées sont là. Dans les deux
-            // cas rien n'est appliqué ni retenu, la lecture est retentée.
+            // cache en gardait ne doit pas emporter les mesures importées. Le cache et les mesures importées sont tous deux locaux, mais
+            // le cache peut être vidé sans le magasin local (réinstallation partielle, cache purgé) : les mesures importées sont
+            // alors là et le cache est vide. Dans les deux cas rien n'est appliqué ni retenu, la lecture est retentée.
             if changes.isFullRead, changes.added.isEmpty {
                 let cached = try await cache.samples(kind: signal.kind, from: .distantPast, to: .distantFuture)
                 if !cached.isEmpty { return false }
