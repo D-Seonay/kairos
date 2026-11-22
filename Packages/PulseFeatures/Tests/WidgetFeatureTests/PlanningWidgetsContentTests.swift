@@ -27,6 +27,8 @@ struct PlanningWidgetsContentTests {
         #expect(content.streakWeeks == 6 && content.completedThisWeek == 1 && content.targetThisWeek == 4)
         #expect(content.weekDays == [.completed, .rest, .today, .upcoming, .upcoming, .rest, .rest])
         #expect(content.subtitle == "1 sur 4 cette semaine")
+        #expect(content.accessibilityLabel == "Série de 6 semaines, 1 séance sur 4 cette semaine. "
+            + "Lundi fait, mardi repos, aujourd'hui mercredi, jeudi à venir, vendredi à venir, samedi repos, dimanche repos")
     }
 
     @Test func aSnapshotOfAnotherDayFallsBackToTheSample() {
@@ -43,6 +45,52 @@ struct PlanningWidgetsContentTests {
         #expect(content.badgeText == "1 sur 4" && content.todayTitle == "Legs" && content.todayMeta == "Comme prévu")
         #expect(content.acwrRatio == 1.62 && content.acwrZoneText == "1,62 · risque de blessure")
         #expect(content.tomorrowText == "Demain : Fractionné")
+    }
+
+    @Test func weekSpeaksTheDaysWithoutMiddleDot() {
+        let content = WeekWidgetContent.make(snapshot: snapshot(), at: now, calendar: calendar)
+        #expect(content.accessibilityLabel == "Cette semaine : 1 séance faite sur 4. "
+            + "Lundi fait, mardi repos, aujourd'hui mercredi, jeudi à venir, vendredi à venir, samedi repos, dimanche repos. "
+            + "Aujourd'hui : Legs. Charge 1,62, risque de blessure. Demain, Fractionné")
+        #expect(!content.accessibilityLabel.contains("·"))
+        let sample = WeekWidgetContent.sample(at: now, calendar: calendar)
+        #expect(sample.accessibilityLabel.contains("Lundi fait, mardi fait, mercredi fait, jeudi repos, aujourd'hui vendredi"))
+        #expect(sample.accessibilityLabel.contains("Charge 1,12, zone optimale."))
+        #expect(!sample.accessibilityLabel.contains("·"))
+    }
+
+    @Test func weekWithoutLoadOrNextSessionStaysSpoken() {
+        let bare = WidgetSnapshot(day: WidgetClock.date("2026-11-04T00:00"), score: 72, category: .normal, isEstimated: false,
+                                  sessionTitle: nil, isLightened: false, streak: WidgetStreak(weeks: 6, completed: 1, target: 4),
+                                  week: snapshot().week, nextSession: nil, loadRatio: nil)
+        let content = WeekWidgetContent.make(snapshot: bare, at: now, calendar: calendar)
+        #expect(content.accessibilityLabel.hasSuffix("Aujourd'hui : Jour de repos. Charge après 28 jours. Rien de prévu cette semaine"))
+    }
+
+    @Test func spokenPaceReadsTheRangeInWords() {
+        #expect(WidgetPlanningText.spokenPace(fastest: 345, slowest: 365) == "5 minutes 45 à 6 minutes 5 par kilomètre")
+        #expect(WidgetPlanningText.spokenPace(fastest: 300, slowest: 330) == "5 minutes à 5 minutes 30 par kilomètre")
+    }
+
+    @Test func spokenDetailReadsSeparatorsAndUnits() {
+        #expect(WidgetPlanningText.spokenDetail("Sortie facile · 45 min") == "Sortie facile, 45 minutes")
+        #expect(WidgetPlanningText.spokenDetail("Course · 1 min") == "Course, 1 minute")
+        #expect(WidgetPlanningText.spokenDetail("Sortie longue · 12,5 km") == "Sortie longue, 12,5 kilomètres")
+        #expect(WidgetPlanningText.spokenDetail("5 exercices · 16 séries") == "5 exercices, 16 séries")
+    }
+
+    @Test func nextWorkoutSpeaksWithoutSeparatorsOrAbbreviations() {
+        let run = WidgetNextSession(title: "Endurance", date: WidgetClock.date("2026-11-07T00:00"), kind: .run,
+                                    detail: "Sortie facile · 45 min")
+        let content = NextWorkoutWidgetContent.make(snapshot: snapshot(next: run), at: now, calendar: calendar)
+        #expect(content.accessibilityLabel == "Prochaine séance : Samedi, Endurance, Sortie facile, 45 minutes")
+    }
+
+    @Test func nextWorkoutWithoutDetailHasNoTrailingComma() {
+        let bare = WidgetNextSession(title: "Push", date: WidgetClock.date("2026-11-07T00:00"), kind: .strength, detail: nil)
+        let content = NextWorkoutWidgetContent.make(snapshot: snapshot(next: bare), at: now, calendar: calendar)
+        #expect(content.accessibilityLabel == "Prochaine séance : Samedi, Push")
+        #expect(NextWorkoutWidgetContent.spokenLabel(timing: "Demain", title: "Push", detail: "") == "Prochaine séance : Demain, Push")
     }
 
     @Test func nextWorkoutNamesTheDay() {

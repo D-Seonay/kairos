@@ -70,4 +70,55 @@ enum WidgetPlanningText {
         formatter.dateFormat = "EEEE"
         return formatter.string(from: date).capitalized(with: Locale(identifier: "fr_FR"))
     }
+
+    // MARK: - Textes lus par VoiceOver
+
+    /// « Lundi fait, mardi repos, aujourd'hui mercredi, jeudi à venir » : l'état des 7 pastilles, jour par jour. Vide quand les
+    /// jours et les dates ne se correspondent pas.
+    static func spokenWeek(days: [StreakWidgetContent.DayState], dates: [Date], calendar: Calendar) -> String {
+        guard days.count == dates.count, !days.isEmpty else { return "" }
+        let parts = zip(days, dates).map { state, date -> String in
+            let name = PulseSpoken.weekday(date, calendar: calendar)
+            return switch state {
+            case .completed: String(localized: "\(name) fait", bundle: .module)
+            case .rest: String(localized: "\(name) repos", bundle: .module)
+            case .today: String(localized: "aujourd'hui \(name)", bundle: .module)
+            case .upcoming: String(localized: "\(name) à venir", bundle: .module)
+            }
+        }
+        let sentence = parts.joined(separator: ", ")
+        return sentence.prefix(1).uppercased() + sentence.dropFirst()
+    }
+
+    /// Les 7 jours de la semaine (du lundi au dimanche) de `date`, pour l'exemple sans instantané.
+    static func weekDates(containing date: Date, calendar: Calendar) -> [Date] {
+        let start = calendar.startOfDay(for: date)
+        let offset = (calendar.component(.weekday, from: start) + 5) % 7
+        guard let monday = calendar.date(byAdding: .day, value: -offset, to: start) else { return [] }
+        return (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: monday) }
+    }
+
+    /// « 5 minutes 45 à 6 minutes 5 par kilomètre » : la fourchette d'allure, en secondes par kilomètre.
+    static func spokenPace(fastest: Int, slowest: Int) -> String {
+        let from = PulseSpoken.duration(seconds: fastest)
+        let to = PulseSpoken.duration(seconds: slowest)
+        return String(localized: "\(from) à \(to) par kilomètre", bundle: .module)
+    }
+
+    /// Le détail d'une séance dit en toutes lettres : « Sortie facile · 45 min » donne « Sortie facile, 45 minutes », et
+    /// « 12,5 km » donne « 12,5 kilomètres ».
+    static func spokenDetail(_ detail: String) -> String {
+        var spoken = detail.replacing(" · ", with: ", ")
+        spoken = spoken.replacing(/(\d+) min\b/) { match in
+            PulseSpoken.duration(seconds: (Int(match.1) ?? 0) * 60)
+        }
+        spoken = spoken.replacing(/(\d+(?:[.,]\d+)?) km\b/) { match in
+            let number = String(match.1)
+            let value = Double(number.replacing(",", with: ".")) ?? 0
+            return value <= 1
+                ? String(localized: "\(number) kilomètre", bundle: .module)
+                : String(localized: "\(number) kilomètres", bundle: .module)
+        }
+        return spoken
+    }
 }

@@ -7,6 +7,10 @@ import SwiftUI
 public struct NextWorkoutWidgetSmallView: View {
     private let content: NextWorkoutWidgetContent
 
+    @ScaledMetric(relativeTo: .caption) private var headerSize = 12
+    @ScaledMetric(relativeTo: .title3) private var titleSize = 19
+    @ScaledMetric(relativeTo: .caption) private var zoneSize = 12
+
     public init(content: NextWorkoutWidgetContent) {
         self.content = content
     }
@@ -22,6 +26,7 @@ public struct NextWorkoutWidgetSmallView: View {
             zoneBars
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        // Un widget de 158 pt n'a pas la place des tailles d'accessibilité : l'étiquette VoiceOver porte tout le texte.
         .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(content.accessibilityLabel)
@@ -33,25 +38,26 @@ public struct NextWorkoutWidgetSmallView: View {
         } icon: {
             Image(systemName: "figure.run")
         }
-        .font(.system(size: 12, weight: .bold))
+        .font(.system(size: headerSize, weight: .bold))
         .foregroundStyle(PulsePalette.run)
         .lineLimit(1)
+        .minimumScaleFactor(0.8)
     }
 
     private var sessionTitle: some View {
         Text(content.title)
-            .font(.system(size: 19, weight: .semibold))
+            .font(.system(size: titleSize, weight: .semibold))
             .foregroundStyle(PulsePalette.text)
             .lineLimit(2)
-            .minimumScaleFactor(0.85)
+            .minimumScaleFactor(0.75)
     }
 
     private var zoneLabel: some View {
         Text(content.zoneText)
-            .font(.system(size: 11.5))
+            .font(.system(size: zoneSize))
             .foregroundStyle(PulsePalette.text2)
-            .lineLimit(1)
-            .minimumScaleFactor(0.85)
+            .lineLimit(2)
+            .minimumScaleFactor(0.75)
     }
 
     private var zoneBars: some View {
@@ -68,6 +74,16 @@ public struct NextWorkoutWidgetSmallView: View {
 
 #Preview("Petit Prochaine séance Widget") {
     NextWorkoutWidgetSmallView(content: .sample(at: Date(), calendar: Calendar(identifier: .gregorian)))
+        .padding(16)
+        .frame(width: 158, height: 158)
+        .background(PulsePalette.surface, in: RoundedRectangle(cornerRadius: 22))
+        .padding()
+        .background(PulsePalette.background)
+}
+
+#Preview("Petit Prochaine séance Widget, accessibilité 3") {
+    NextWorkoutWidgetSmallView(content: .sample(at: Date(), calendar: Calendar(identifier: .gregorian)))
+        .dynamicTypeSize(.accessibility3)
         .padding(16)
         .frame(width: 158, height: 158)
         .background(PulsePalette.surface, in: RoundedRectangle(cornerRadius: 22))

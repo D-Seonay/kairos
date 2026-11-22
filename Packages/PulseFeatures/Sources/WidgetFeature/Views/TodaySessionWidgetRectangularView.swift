@@ -7,6 +7,10 @@ import SwiftUI
 public struct TodaySessionWidgetRectangularView: View {
     private let content: TodaySessionWidgetContent
 
+    @ScaledMetric(relativeTo: .caption) private var detailSize = 12
+    @ScaledMetric(relativeTo: .footnote) private var titleSize = 13
+    @ScaledMetric(relativeTo: .caption) private var iconSize = 12
+
     public init(content: TodaySessionWidgetContent) {
         self.content = content
     }
@@ -15,15 +19,19 @@ public struct TodaySessionWidgetRectangularView: View {
         VStack(alignment: .leading, spacing: 2) {
             titleRow
             Text(content.accessorySubtitle)
-                .font(.system(size: 11.5))
+                .font(.system(size: detailSize))
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
+                .minimumScaleFactor(0.75)
             Text(content.accessoryDetail)
-                .font(.system(size: 11.5))
+                .font(.system(size: detailSize))
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
+                .minimumScaleFactor(0.75)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        // Le rectangle de l'écran verrouillé fait 66 pt de haut : l'étiquette VoiceOver porte tout le texte.
+        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(content.accessibilityLabel)
     }
@@ -31,16 +39,28 @@ public struct TodaySessionWidgetRectangularView: View {
     private var titleRow: some View {
         HStack(spacing: 5) {
             Image(systemName: content.isRest ? "bed.double.fill" : "dumbbell.fill")
-                .font(.system(size: 12))
+                .font(.system(size: iconSize))
             Text(content.accessoryTitle)
-                .font(.system(size: 13, weight: .bold))
+                .font(.system(size: titleSize, weight: .bold))
                 .lineLimit(1)
+                .minimumScaleFactor(0.75)
         }
     }
 }
 
 #Preview("Séance Rectangulaire") {
     TodaySessionWidgetRectangularView(content: .sample(at: Date(), calendar: Calendar(identifier: .gregorian)))
+        .frame(width: 164, height: 66)
+        .padding(8)
+        .background(.white.opacity(0.16), in: RoundedRectangle(cornerRadius: 16))
+        .foregroundStyle(.white)
+        .padding()
+        .background(.black)
+}
+
+#Preview("Séance Rectangulaire, accessibilité 3") {
+    TodaySessionWidgetRectangularView(content: .sample(at: Date(), calendar: Calendar(identifier: .gregorian)))
+        .dynamicTypeSize(.accessibility3)
         .frame(width: 164, height: 66)
         .padding(8)
         .background(.white.opacity(0.16), in: RoundedRectangle(cornerRadius: 16))

@@ -61,6 +61,20 @@ public struct WeekWidgetContent: Sendable, Equatable {
         self.accessibilityLabel = accessibilityLabel
     }
 
+    /// « Cette semaine : 3 séances faites sur 5. Lundi fait, … Aujourd'hui : Push. Charge 1,12, zone optimale. Demain, Fractionné » :
+    /// les nombres avec leurs mots, l'état des jours, sans point médian.
+    static func spokenLabel(week: String, title: String, load: String, next: String) -> String {
+        String(localized: "\(week) Aujourd'hui : \(title). Charge \(load). \(next)", bundle: .module)
+    }
+
+    /// « Cette semaine : 3 séances faites sur 5. Lundi fait, mardi fait… », les jours quand on les connaît.
+    static func spokenWeek(completed: Int, target: Int, days: String) -> String {
+        let sessions = PulseSpoken.count(completed, singular: String(localized: "séance faite", bundle: .module),
+                                         plural: String(localized: "séances faites", bundle: .module))
+        let summary = String(localized: "Cette semaine : \(sessions) sur \(target).", bundle: .module)
+        return days.isEmpty ? summary : "\(summary) \(days)."
+    }
+
     /// La semaine, la séance du jour, la charge et la prochaine séance de l'instantané du jour ; l'exemple sans instantané du
     /// jour ou sans semaine.
     public static func make(snapshot: WidgetSnapshot?, at date: Date, calendar: Calendar) -> WeekWidgetContent {
@@ -76,16 +90,25 @@ public struct WeekWidgetContent: Sendable, Equatable {
         let meta = snapshot.sessionTitle == nil ? String(localized: "Récupération", bundle: .module)
             : snapshot.isLightened ? String(localized: "Allégée selon ta forme", bundle: .module)
             : String(localized: "Comme prévu", bundle: .module)
-        let load = snapshot.loadRatio.map { ratio in
-            "\(WidgetPlanningText.ratio(ratio)) · \(WidgetPlanningText.zone(of: ratio).text.lowercased())"
-        } ?? String(localized: "après 28 jours", bundle: .module)
+        var load = String(localized: "après 28 jours", bundle: .module)
+        var spokenLoad = load
+        if let ratio = snapshot.loadRatio {
+            let reading = WidgetPlanningText.ratio(ratio)
+            let zone = WidgetPlanningText.zone(of: ratio).text.lowercased()
+            load = "\(reading) · \(zone)"
+            spokenLoad = "\(reading), \(zone)"
+        }
         let next = snapshot.nextSession.map { next in
             "\(WidgetPlanningText.timing(of: next.date, from: date, calendar: calendar)) : \(next.title)"
         } ?? String(localized: "Rien de prévu cette semaine", bundle: .module)
+        let spokenNext = snapshot.nextSession.map { next in
+            "\(WidgetPlanningText.timing(of: next.date, from: date, calendar: calendar)), \(next.title)"
+        } ?? next
         let completed = planning.streak.completed
         let target = planning.streak.target
-        let week = String(localized: "Cette semaine : \(completed) séances sur \(target) faites.", bundle: .module)
-        let spoken = String(localized: "\(week) Aujourd'hui : \(title). Charge \(load). \(next)", bundle: .module)
+        let spokenDays = WidgetPlanningText.spokenWeek(days: days.map(\.state), dates: planning.week.map(\.date), calendar: calendar)
+        let spoken = spokenLabel(week: spokenWeek(completed: completed, target: target, days: spokenDays), title: title,
+                                 load: spokenLoad, next: spokenNext)
         return WeekWidgetContent(
             badgeText: String(localized: "\(completed) sur \(target)", bundle: .module), days: days, todayTitle: title,
             todayMeta: meta, todayMuscleLevels: snapshot.sessionTitle.map(TodaySessionWidgetContent.defaultMuscleLevels(for:)) ?? [:],
@@ -108,9 +131,12 @@ public struct WeekWidgetContent: Sendable, Equatable {
         let acwr = String(localized: "1,12 · zone optimale", bundle: .module)
         let tomorrow = String(localized: "Demain : endurance 45 min, zone 2", bundle: .module)
         let badge = String(localized: "3 sur 5", bundle: .module)
-        let spoken = String(
-            localized: "Cette semaine : 3 séances sur 5 faites. Aujourd'hui : \(title). Charge 1,12 en zone optimale. \(tomorrow)",
-            bundle: .module
+        let days = WidgetPlanningText.spokenWeek(
+            days: dayItems.map(\.state), dates: WidgetPlanningText.weekDates(containing: date, calendar: calendar), calendar: calendar)
+        let spoken = spokenLabel(
+            week: spokenWeek(completed: 3, target: 5, days: days), title: title,
+            load: String(localized: "1,12, zone optimale", bundle: .module),
+            next: String(localized: "Demain, endurance 45 minutes, zone 2", bundle: .module)
         )
 
         return WeekWidgetContent(

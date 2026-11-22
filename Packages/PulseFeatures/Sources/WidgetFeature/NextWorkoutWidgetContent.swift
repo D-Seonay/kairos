@@ -37,6 +37,13 @@ public struct NextWorkoutWidgetContent: Sendable, Equatable {
         self.accessibilityLabel = accessibilityLabel
     }
 
+    /// « Prochaine séance : Samedi, Endurance, Sortie facile, 45 minutes » : seules les parties non vides sont dites, sans virgule
+    /// finale quand le détail manque.
+    static func spokenLabel(timing: String, title: String, detail: String) -> String {
+        let parts = [timing, title, detail].filter { !$0.isEmpty }.joined(separator: ", ")
+        return String(localized: "Prochaine séance : \(parts)", bundle: .module)
+    }
+
     /// La prochaine séance de l'instantané du jour ; l'exemple sans instantané du jour ou sans semaine.
     public static func make(snapshot: WidgetSnapshot?, at date: Date, calendar: Calendar) -> NextWorkoutWidgetContent {
         guard let planning = WidgetPlanningText.planning(snapshot, at: date, calendar: calendar) else {
@@ -50,7 +57,7 @@ public struct NextWorkoutWidgetContent: Sendable, Equatable {
         }
         let timing = WidgetPlanningText.timing(of: next.date, from: date, calendar: calendar)
         let detail = next.detail ?? ""
-        let spoken = String(localized: "Prochaine séance : \(timing), \(next.title), \(detail)", bundle: .module)
+        let spoken = spokenLabel(timing: timing, title: next.title, detail: WidgetPlanningText.spokenDetail(detail))
         return NextWorkoutWidgetContent(timingText: timing, title: next.title, zoneText: detail,
                                         activeZone: 0, inlineText: "\(next.title) · \(timing)",
                                         accessibilityLabel: spoken)
@@ -60,7 +67,11 @@ public struct NextWorkoutWidgetContent: Sendable, Equatable {
         let timing = String(localized: "Demain · 8:00", bundle: .module)
         let title = String(localized: "Endurance 45 min", bundle: .module)
         let zone = String(localized: "Zone 2 · 5:45 à 6:05 /km", bundle: .module)
-        let spoken = String(localized: "Prochaine séance : \(timing), \(title), \(zone)", bundle: .module)
+        let spoken = spokenLabel(
+            timing: String(localized: "Demain, \(PulseSpoken.clock(hour: 8, minute: 0))", bundle: .module),
+            title: String(localized: "Endurance 45 minutes", bundle: .module),
+            detail: String(localized: "zone 2, \(WidgetPlanningText.spokenPace(fastest: 345, slowest: 365))", bundle: .module)
+        )
         let inline = "\(title) · \(timing)"
         return NextWorkoutWidgetContent(
             timingText: timing,
