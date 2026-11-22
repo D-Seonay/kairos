@@ -213,4 +213,14 @@ struct StatsSectionPreview<Content: View>: View {
 #Preview("Stats, nouvel utilisateur") {
     StatsPreviewHost(withHistory: false)
 }
+
+#Preview("Stats, accessibilité 3") {
+    StatsPreviewHost()
+        .dynamicTypeSize(.accessibility3)
+}
+
+#Preview("Stats, Biométrie, accessibilité 3") {
+    StatsPreviewHost(view: .biometry)
+        .dynamicTypeSize(.accessibility3)
+}
 #endif

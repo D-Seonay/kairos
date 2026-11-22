@@ -44,6 +44,10 @@ struct StatsTileContent: Identifiable {
     /// Le titre affiché sans valeur : « Pas assez de données », sauf quand l'absence est un fait (« Pas encore de semaine
     /// réussie »).
     var emptyTitle: String = StatsEmptyNote.title
+    /// Ce que VoiceOver dit à la place du texte écrit quand il porte une abréviation ou une unité (« 58 bpm »).
+    var spokenTitle: String?
+    var spokenValue: String?
+    var spokenDetails: [String]?
 
     var id: String { title }
 }
@@ -69,20 +73,25 @@ struct StatsTileGrid: View {
 struct StatsTile: View {
     let content: StatsTileContent
     @ScaledMetric(relativeTo: .largeTitle) private var valueSize: CGFloat = 34
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
+        // Aux tailles d'accessibilité, ni la valeur ni le titre ne rétrécissent ni ne se coupent : la tuile grandit.
+        let isLarge = dynamicTypeSize.isAccessibilitySize
         ObsidianCard {
             VStack(alignment: .leading, spacing: 4) {
                 Text(content.title)
                     .pulseEyebrow()
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.8)
+                    .lineLimit(isLarge ? nil : 2)
+                    .minimumScaleFactor(isLarge ? 1 : 0.8)
+                    .fixedSize(horizontal: false, vertical: true)
                 if let value = content.value {
                     Text(value)
                         .font(PulseFont.score(size: valueSize))
                         .foregroundStyle(PulsePalette.text)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.5)
+                        .lineLimit(isLarge ? nil : 1)
+                        .minimumScaleFactor(isLarge ? 1 : 0.5)
+                        .fixedSize(horizontal: false, vertical: true)
                     ForEach(content.details, id: \.self) { detail in
                         Text(detail)
                             .font(.caption)
@@ -97,13 +106,7 @@ struct StatsTile: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(accessibilityText)
-    }
-
-    private var accessibilityText: String {
-        let parts = [content.title] + (content.value.map { [$0] + content.details }
-            ?? [content.emptyTitle, content.emptyReason])
-        return parts.joined(separator: ", ")
+        .accessibilityLabel(StatsText.tileSpoken(content))
     }
 }
 
@@ -129,27 +132,39 @@ struct StatsEmptyNote: View {
     }
 }
 
-/// La carte d'un graphique : son étiquette d'instrument, une valeur à droite, puis le graphique.
+/// La carte d'un graphique : son étiquette d'instrument, une valeur à droite, puis le graphique. Aux tailles d'accessibilité,
+/// la valeur passe sous le titre. `spokenTitle` dit le titre quand il porte une abréviation (« FC au repos »).
 struct StatsChartCard<Content: View>: View {
     let title: String
+    var spokenTitle: String?
     var trailing: String?
     @ViewBuilder let content: Content
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         ObsidianCard {
             VStack(alignment: .leading, spacing: 12) {
-                HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    Text(title)
-                        .pulseEyebrow(PulsePalette.text2)
-                        .accessibilityAddTraits(.isHeader)
-                    Spacer(minLength: 8)
-                    if let trailing {
-                        Text(trailing)
-                            .font(PulseFont.value(.headline))
-                            .foregroundStyle(PulsePalette.text)
-                    }
-                }
+                header
                 content
+            }
+        }
+    }
+
+    private var header: some View {
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
+            : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: 8))
+        return layout {
+            Text(title)
+                .pulseEyebrow(PulsePalette.text2)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityLabel(spokenTitle ?? title)
+                .accessibilityAddTraits(.isHeader)
+            if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 8) }
+            if let trailing {
+                Text(trailing)
+                    .font(PulseFont.value(.headline))
+                    .foregroundStyle(PulsePalette.text)
             }
         }
     }
@@ -159,18 +174,26 @@ struct StatsChartCard<Content: View>: View {
 struct StatsLegend: View {
     let items: [(label: String, style: Color)]
 
+    @ScaledMetric(relativeTo: .caption) private var swatch: CGFloat = 10
+
     var body: some View {
-        HStack(spacing: 14) {
-            ForEach(items.indices, id: \.self) { index in
-                HStack(spacing: 6) {
-                    RoundedRectangle(cornerRadius: 2).fill(items[index].style).frame(width: 10, height: 10)
-                    Text(items[index].label)
-                        .font(.caption)
-                        .foregroundStyle(PulsePalette.text2)
-                }
-            }
+        // Les entrées tiennent sur une ligne, sinon l'une sous l'autre : aucune ne déborde.
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 14) { entries }
+            VStack(alignment: .leading, spacing: 6) { entries }
         }
         .accessibilityHidden(true)
+    }
+
+    private var entries: some View {
+        ForEach(items.indices, id: \.self) { index in
+            HStack(spacing: 6) {
+                RoundedRectangle(cornerRadius: 2).fill(items[index].style).frame(width: swatch, height: swatch)
+                Text(items[index].label)
+                    .font(.caption)
+                    .foregroundStyle(PulsePalette.text2)
+            }
+        }
     }
 }
 
@@ -204,10 +227,19 @@ extension View {
     }
 }
 
-/// Les niveaux d'encre des séries : la plus importante en encre pleine, les autres de plus en plus claires.
+/// Les niveaux d'encre des séries : la plus importante en encre pleine, les autres de plus en plus claires. Une série qui porte
+/// une information atteint 3:1 contre le papier (`StatsInkContrastTests`) ; seul `zone`, un fond dit aussi par le texte, reste
+/// plus pâle.
 enum StatsInk {
+    static let fullOpacity = 1.0
+    static let mediumOpacity = 0.72
+    static let lightOpacity = 0.5
+    static let zoneOpacity = 0.07
+    /// Les cinq niveaux d'assiduité : le niveau 0 est le fond de la grille, les niveaux 1 à 4 de plus en plus encrés.
+    static let attendanceOpacities = [zoneOpacity, 0.5, 0.67, 0.83, 1.0]
+
     static let full = PulsePalette.ink
-    static let medium = PulsePalette.ink.opacity(0.5)
-    static let light = PulsePalette.ink.opacity(0.22)
-    static let zone = PulsePalette.ink.opacity(0.07)
+    static let medium = PulsePalette.ink.opacity(mediumOpacity)
+    static let light = PulsePalette.ink.opacity(lightOpacity)
+    static let zone = PulsePalette.ink.opacity(zoneOpacity)
 }

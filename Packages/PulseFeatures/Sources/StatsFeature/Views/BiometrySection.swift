@@ -15,9 +15,9 @@ struct BiometrySection: View {
         VStack(alignment: .leading, spacing: PulseMetrics.spacing) {
             StatsTileGrid(tiles: tiles)
             BaselineChartCard(title: String(localized: "Variabilité et ligne de base", bundle: .module),
-                              points: biometry.hrvPoints, unit: "ms", style: .points, window: window)
+                              measure: .hrv, points: biometry.hrvPoints, style: .points, window: window)
             BaselineChartCard(title: String(localized: "FC au repos", bundle: .module),
-                              points: biometry.restingPoints, unit: "bpm", style: .line, window: window)
+                              measure: .restingHeartRate, points: biometry.restingPoints, style: .line, window: window)
             SleepChartCard(points: biometry.sleepPoints, deepShare: biometry.deepShare, window: window)
             CategoriesCard(categories: biometry.categories, window: window)
         }
@@ -26,28 +26,43 @@ struct BiometrySection: View {
     private var tiles: [StatsTileContent] {
         let noNight = String(localized: "aucune nuit mesurée sur la période", bundle: .module)
         var sleepDetails = details(biometry.sleepMinutes)
+        var sleepSpoken = spokenDetails(biometry.sleepMinutes)
         if let deep = biometry.deepShare {
-            sleepDetails.insert(String(localized: "profond \(PulseFormat.integer(deep * 100, unit: "%"))", bundle: .module), at: 0)
+            let share = String(localized: "profond \(PulseFormat.integer(deep * 100, unit: "%"))", bundle: .module)
+            sleepDetails.insert(share, at: 0)
+            sleepSpoken.insert(share, at: 0)
         }
         return [
             StatsTileContent(title: String(localized: "Variabilité moyenne", bundle: .module),
                              value: biometry.hrv.map { PulseFormat.integer($0.value, unit: "ms") },
-                             details: details(biometry.hrv), emptyReason: noNight),
+                             details: details(biometry.hrv), emptyReason: noNight,
+                             spokenValue: biometry.hrv.map { BiometricMeasure.hrv.spoken($0.value) },
+                             spokenDetails: spokenDetails(biometry.hrv)),
             StatsTileContent(title: String(localized: "FC au repos", bundle: .module),
                              value: biometry.restingHeartRate.map { PulseFormat.integer($0.value, unit: "bpm") },
-                             details: details(biometry.restingHeartRate), emptyReason: noNight),
+                             details: details(biometry.restingHeartRate), emptyReason: noNight,
+                             spokenTitle: BiometricMeasure.restingHeartRate.spokenName,
+                             spokenValue: biometry.restingHeartRate.map { BiometricMeasure.restingHeartRate.spoken($0.value) },
+                             spokenDetails: spokenDetails(biometry.restingHeartRate)),
             StatsTileContent(title: String(localized: "Sommeil moyen", bundle: .module),
                              value: biometry.sleepMinutes.map { StatsText.duration(minutes: $0.value) },
-                             details: sleepDetails, emptyReason: SleepChartCard.emptyReason),
+                             details: sleepDetails, emptyReason: SleepChartCard.emptyReason,
+                             spokenValue: biometry.sleepMinutes.map { StatsText.durationSpoken(minutes: $0.value) },
+                             spokenDetails: sleepSpoken),
             StatsTileContent(title: String(localized: "Récupération moyenne", bundle: .module),
                              value: biometry.score.map { PulseFormat.integer($0.value, unit: nil) },
                              details: details(biometry.score),
-                             emptyReason: String(localized: "aucun score du matin sur la période", bundle: .module))
+                             emptyReason: String(localized: "aucun score du matin sur la période", bundle: .module),
+                             spokenDetails: spokenDetails(biometry.score))
         ]
     }
 
     private func details(_ comparison: StatsComparison?) -> [String] {
         window.comparisonText(comparison).map { [$0] } ?? []
+    }
+
+    private func spokenDetails(_ comparison: StatsComparison?) -> [String] {
+        StatsText.comparisonSpoken(comparison, days: window.period.days).map { [$0] } ?? []
     }
 }
 
@@ -61,13 +76,14 @@ private struct BaselineChartCard: View {
     }
 
     let title: String
+    let measure: BiometricMeasure
     let points: [BaselinePoint]
-    let unit: String
     let style: Style
     let window: StatsWindow
+    @ScaledMetric(relativeTo: .body) private var chartHeight: CGFloat = 160
 
     var body: some View {
-        StatsChartCard(title: title) {
+        StatsChartCard(title: title, spokenTitle: measure.spokenName) {
             if points.isEmpty {
                 StatsEmptyNote(reason: String(localized: "aucune nuit mesurée sur la période", bundle: .module))
             } else {
@@ -79,51 +95,45 @@ private struct BaselineChartCard: View {
     }
 
     private var chart: some View {
-        let unit = window.unit(of: window.period.chartBucket)
+        let bucket = window.period.chartBucket
+        let unit = window.unit(of: bucket)
         let dateLabel = String(localized: "Nuit", bundle: .module)
+        let valueLabel = measure.spokenName
         return Chart {
             ForEach(points) { point in
                 if let baseline = point.baseline {
-                    LineMark(x: .value(dateLabel, point.date, unit: unit), y: .value(title, baseline),
-                             series: .value("Série", "baseline"))
+                    LineMark(x: .value(dateLabel, point.date, unit: unit), y: .value(valueLabel, baseline),
+                             series: .value(String(localized: "Série", bundle: .module), "baseline"))
                         .foregroundStyle(StatsInk.medium)
                         .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [4, 4]))
+                        .accessibilityHidden(true)
                 }
                 switch style {
                 case .points:
-                    PointMark(x: .value(dateLabel, point.date, unit: unit), y: .value(title, point.value))
+                    let spoken = StatsText.baselinePointSpoken(measure: measure, point: point, bucket: bucket,
+                                                               calendar: window.calendar)
+                    PointMark(x: .value(dateLabel, point.date, unit: unit), y: .value(valueLabel, point.value))
                         .foregroundStyle(StatsInk.full)
                         .symbolSize(28)
+                        .accessibilityLabel(spoken.label)
+                        .accessibilityValue(spoken.value)
                 case .line:
-                    LineMark(x: .value(dateLabel, point.date, unit: unit), y: .value(title, point.value),
-                             series: .value("Série", "value"))
+                    // La FC au repos est une courbe : seule la ligne se dessine, le descripteur donne chaque valeur.
+                    LineMark(x: .value(dateLabel, point.date, unit: unit), y: .value(valueLabel, point.value),
+                             series: .value(String(localized: "Série", bundle: .module), "value"))
                         .foregroundStyle(StatsInk.full)
                         .lineStyle(StrokeStyle(lineWidth: 2, lineJoin: .round))
+                        .accessibilityHidden(true)
                 }
             }
         }
         .statsPinnedDomain(window)
         .chartYScale(domain: .automatic(includesZero: false))
         .statsAxes(calendar: window.calendar)
-        .frame(height: 160)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(summary)
-    }
-
-    /// « Variabilité et ligne de base, 30 jours : moyenne 56 ms, de 42 à 70 ms, ligne de base 54 ms. »
-    private var summary: String {
-        let values = points.map(\.value)
-        let baselines = points.compactMap(\.baseline)
-        let average = PulseFormat.integer(values.reduce(0, +) / Double(values.count), unit: unit)
-        let low = PulseFormat.integer(values.min() ?? .nan, unit: nil)
-        let high = PulseFormat.integer(values.max() ?? .nan, unit: unit)
-        let period = window.period.title
-        var text = String(localized: "\(title), \(period) : moyenne \(average), de \(low) à \(high)", bundle: .module)
-        if !baselines.isEmpty {
-            let baseline = PulseFormat.integer(baselines.reduce(0, +) / Double(baselines.count), unit: unit)
-            text += String(localized: ", ligne de base \(baseline)", bundle: .module)
-        }
-        return text + "."
+        .frame(height: chartHeight)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(StatsText.baselineSummary(measure: measure, points: points, period: window.period))
+        .accessibilityChartDescriptor(StatsChartDescriptors.baseline(measure: measure, points: points, window: window))
     }
 }
 
@@ -134,6 +144,7 @@ private struct SleepChartCard: View {
     let points: [SleepPoint]
     let deepShare: Double?
     let window: StatsWindow
+    @ScaledMetric(relativeTo: .body) private var chartHeight: CGFloat = 160
 
     static var emptyReason: String { String(localized: "aucune nuit de sommeil mesurée sur la période", bundle: .module) }
 
@@ -150,36 +161,33 @@ private struct SleepChartCard: View {
     }
 
     private var chart: some View {
-        let unit = window.unit(of: window.period.chartBucket)
+        let bucket = window.period.chartBucket
+        let unit = window.unit(of: bucket)
         let dateLabel = String(localized: "Nuit", bundle: .module)
-        let hoursLabel = String(localized: "Heures", bundle: .module)
+        let hoursLabel = String(localized: "Heures de sommeil", bundle: .module)
         return Chart(points) { point in
             let deep = min(point.deepMinutes ?? 0, point.asleepMinutes) / 60
+            let spoken = StatsText.sleepPointSpoken(point: point, bucket: bucket, calendar: window.calendar)
+            // La barre entière est lue une fois, avec le total et la part profonde ; la part profonde, dessinée par-dessus, est tue.
             BarMark(x: .value(dateLabel, point.date, unit: unit), yStart: .value(hoursLabel, deep),
                     yEnd: .value(hoursLabel, point.asleepMinutes / 60))
                 .foregroundStyle(StatsInk.light)
+                .accessibilityLabel(spoken.label)
+                .accessibilityValue(spoken.value)
             if deep > 0 {
                 BarMark(x: .value(dateLabel, point.date, unit: unit), yStart: .value(hoursLabel, 0),
                         yEnd: .value(hoursLabel, deep))
                     .foregroundStyle(StatsInk.full)
+                    .accessibilityHidden(true)
             }
         }
         .statsPinnedDomain(window)
         .statsAxes(calendar: window.calendar)
-        .frame(height: 160)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(summary)
-    }
-
-    /// « Sommeil, 30 jours : 7 h 12 en moyenne, profond 19 %. »
-    private var summary: String {
-        let average = StatsText.duration(minutes: points.map(\.asleepMinutes).reduce(0, +) / Double(points.count))
-        let period = window.period.title
-        var text = String(localized: "Sommeil, \(period) : \(average) en moyenne", bundle: .module)
-        if let deepShare {
-            text += String(localized: ", profond \(PulseFormat.integer(deepShare * 100, unit: "%"))", bundle: .module)
-        }
-        return text + "."
+        .frame(height: chartHeight)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(StatsText.sleepSummary(points: points, deepShare: deepShare, period: window.period, bucket: bucket,
+                                                   calendar: window.calendar))
+        .accessibilityChartDescriptor(StatsChartDescriptors.sleep(points: points, deepShare: deepShare, window: window))
     }
 }
 
@@ -189,6 +197,7 @@ private struct SleepChartCard: View {
 private struct CategoriesCard: View {
     let categories: [CategoryCount]
     let window: StatsWindow
+    @ScaledMetric(relativeTo: .body) private var rowHeight: CGFloat = 34
 
     var body: some View {
         StatsChartCard(title: String(localized: "Journées par état de forme", bundle: .module)) {
@@ -204,13 +213,17 @@ private struct CategoriesCard: View {
         let daysLabel = String(localized: "Jours", bundle: .module)
         let stateLabel = String(localized: "État", bundle: .module)
         return Chart(categories) { count in
+            let spoken = StatsText.categorySpoken(count)
             BarMark(x: .value(daysLabel, count.days), y: .value(stateLabel, count.category.localizedName))
                 .foregroundStyle(StatsInk.full)
                 .annotation(position: .trailing, spacing: 6) {
                     Text("\(count.days)")
                         .font(PulseFont.value(.caption, weight: .semibold))
                         .foregroundStyle(PulsePalette.text2)
+                        .accessibilityHidden(true)
                 }
+                .accessibilityLabel(spoken.label)
+                .accessibilityValue(spoken.value)
         }
         .chartXAxis(.hidden)
         .chartYAxis {
@@ -218,16 +231,10 @@ private struct CategoriesCard: View {
                 AxisValueLabel().foregroundStyle(PulsePalette.text2)
             }
         }
-        .frame(height: CGFloat(categories.count) * 34)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(summary)
-    }
-
-    /// « Journées par état de forme, 30 jours : Forme optimale 6, Forme normale 18, Fatigue modérée 5, Surmenage 1. »
-    private var summary: String {
-        let counts = categories.map { "\($0.category.localizedName) \($0.days)" }.joined(separator: ", ")
-        let period = window.period.title
-        return String(localized: "Journées par état de forme, \(period) : \(counts).", bundle: .module)
+        .frame(height: CGFloat(categories.count) * rowHeight)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(StatsText.categoriesSummary(categories, period: window.period))
+        .accessibilityChartDescriptor(StatsChartDescriptors.categories(categories, window: window))
     }
 }
 
@@ -242,5 +249,10 @@ private struct CategoriesCard: View {
 
 #Preview("Biométrie, sans historique") {
     StatsSectionPreview(withHistory: false) { snapshot, window in BiometrySection(biometry: snapshot.biometry, window: window) }
+}
+
+#Preview("Biométrie, accessibilité 3") {
+    StatsSectionPreview(period: .month) { snapshot, window in BiometrySection(biometry: snapshot.biometry, window: window) }
+        .dynamicTypeSize(.accessibility3)
 }
 #endif

@@ -28,7 +28,9 @@ public struct AccentPalette: Equatable, Sendable {
 /// Les `…RGBA` sont les tirages sombres, les `…LightRGBA` les tirages clairs ; les `Color` suivent l'apparence.
 public enum PulsePalette {
     /// L'encre des filets, des trames et des repères : noire sur le papier, blanche sur le noir.
-    public static let ink = Color(light: PulseRGBA(hex: 0x0B0B0A), dark: PulseRGBA(hex: 0xFFFFFF))
+    public static let ink = Color(light: inkLightRGBA, dark: inkRGBA)
+    public static let inkRGBA = PulseRGBA(hex: 0xFFFFFF)
+    public static let inkLightRGBA = PulseRGBA(hex: 0x0B0B0A)
     /// L'ombre portée des cartes : une ombre douce sur le papier, rien sur le noir.
     public static let cardShadow = Color(light: PulseRGBA(hex: 0x2A2418, opacity: 0.07), dark: PulseRGBA(hex: 0x000000, opacity: 0))
 

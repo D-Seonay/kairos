@@ -147,10 +147,14 @@ struct StatsModelTests {
 
         #expect(model.snapshot?.period == .month, "L'écran garde son dernier état")
         #expect(model.errorMessage == "Pulse n'a pas pu lire tes statistiques.")
+        #expect(model.failureCount == 1)
+        model.period = .quarter
+        await model.reloadTask?.value
+        #expect(model.failureCount == 2, "Un échec répété change de nouveau l'état annoncé")
 
         await workouts.setFailing(false)
         await model.load()
-        #expect(model.snapshot?.period == .week && model.errorMessage == nil)
+        #expect(model.snapshot?.period == .quarter && model.errorMessage == nil)
     }
 
     @Test func viewTitlesAreFrench() {

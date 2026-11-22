@@ -48,22 +48,27 @@ public struct StatsScreen: View {
             VStack(alignment: .leading, spacing: PulseMetrics.spacing) {
                 header
                 StatsViewSegment(model: model)
-                ChoicePills(options: StatsPeriod.allCases.map { (value: $0, label: $0.title) }, selection: periodSelection)
+                ChoicePills(options: StatsPeriod.allCases.map { (value: $0, label: $0.title) }, selection: periodSelection,
+                            groupLabel: String(localized: "Période", bundle: .module))
                 if let message = model.errorMessage {
                     Text(message)
                         .font(.footnote)
                         .foregroundStyle(PulsePalette.bad)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 if let snapshot = model.snapshot {
                     section(snapshot)
                 } else if !model.hasLoaded {
                     ProgressView()
+                        .accessibilityLabel(String(localized: "Chargement des statistiques", bundle: .module))
                         .frame(maxWidth: .infinity, minHeight: 200)
                 }
             }
             .padding(PulseMetrics.spacing)
         }
         .refreshable { await model.load() }
+        // Sur le conteneur, toujours présent : l'erreur est annoncée à chaque échec, même au texte identique.
+        .pulseAnnounceOnce(model.errorMessage, id: model.failureCount, isError: true)
     }
 
     private var header: some View {

@@ -22,20 +22,9 @@ struct MusclesSection: View {
         }
     }
 
-    /// « 14 séries », « 1 série », « 0,5 série » : des séries pondérées, une décimale au plus.
-    static func setsText(_ sets: Double) -> String {
-        let rounded = (sets * 10).rounded() / 10
-        let number = PulseFormat.decimal(rounded, maxFractionDigits: 1)
-        return rounded < 2
-            ? String(localized: "\(number) série", bundle: .module)
-            : String(localized: "\(number) séries", bundle: .module)
-    }
+    static func setsText(_ sets: Double) -> String { StatsText.setsText(sets) }
 
-    /// « abdominaux », « deltoïdes latéraux » : le nom du muscle au milieu d'une phrase.
-    static func inlineName(_ muscle: Muscle) -> String {
-        let name = muscle.localizedName
-        return name.prefix(1).lowercased() + name.dropFirst()
-    }
+    static func inlineName(_ muscle: Muscle) -> String { StatsText.inlineName(muscle) }
 }
 
 // MARK: - Carte et plus travaillés
@@ -44,13 +33,15 @@ struct MusclesSection: View {
 private struct MuscleMapCard: View {
     let muscles: MuscleStats
     let window: StatsWindow
+    @ScaledMetric(relativeTo: .body) private var mapHeight: CGFloat = 200
 
     var body: some View {
         StatsChartCard(title: String(localized: "Séries par muscle", bundle: .module), trailing: sessionsText) {
             if muscles.top.isEmpty {
                 StatsEmptyNote(reason: emptyReason)
             } else {
-                MuscleMapView(levels: MuscleIntensity.levels(weights: muscles.weights), label: mapLabel, height: 200)
+                MuscleMapView(levels: MuscleIntensity.levels(weights: muscles.weights),
+                              label: StatsText.mapSummary(top: muscles.top, period: window.period), height: mapHeight)
                     .frame(maxWidth: .infinity)
                 Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 8) {
                     ForEach(muscles.top) { load in
@@ -82,15 +73,6 @@ private struct MuscleMapCard: View {
         muscles.strengthSessions == 0
             ? String(localized: "aucune séance de musculation terminée sur la période", bundle: .module)
             : String(localized: "aucune série de travail d'un exercice connu sur la période", bundle: .module)
-    }
-
-    /// « Muscles travaillés, 30 jours : pectoraux 14 séries, quadriceps 12 séries, grands dorsaux 11,5 séries. »
-    private var mapLabel: String {
-        let names = muscles.top.prefix(3)
-            .map { "\(MusclesSection.inlineName($0.muscle)) \(MusclesSection.setsText($0.sets))" }
-            .joined(separator: ", ")
-        let period = window.period.title
-        return String(localized: "Muscles travaillés, \(period) : \(names).", bundle: .module)
     }
 }
 
@@ -151,11 +133,13 @@ private struct BalanceCard: View {
         StatsChartCard(title: String(localized: "Équilibre", bundle: .module)) {
             VStack(alignment: .leading, spacing: 14) {
                 BalanceRow(title: String(localized: "Pousser / tirer", bundle: .module),
+                           spokenTitle: String(localized: "Pousser et tirer", bundle: .module),
                            first: muscles.push, second: muscles.pull, isUnbalanced: muscles.isPushPullUnbalanced,
                            emptyReason: String(localized: "aucune série de poussée ni de tirage sur la période", bundle: .module),
                            firstMissing: String(localized: "aucune série de poussée", bundle: .module),
                            secondMissing: String(localized: "aucune série de tirage", bundle: .module))
                 BalanceRow(title: String(localized: "Haut / bas", bundle: .module),
+                           spokenTitle: String(localized: "Haut et bas du corps", bundle: .module),
                            first: muscles.upper, second: muscles.lower, isUnbalanced: muscles.isUpperLowerUnbalanced,
                            emptyReason: String(localized: "aucune série du haut ni du bas du corps sur la période",
                                                bundle: .module),
@@ -177,15 +161,18 @@ private struct BalanceCard: View {
     }
 }
 
-/// Une ligne d'équilibre : « 18 / 9 séries » et « ratio 2 » ; sans série d'aucun côté, « Pas assez de données ».
+/// Une ligne d'équilibre : « 18 / 9 séries » et « ratio 2 » ; sans série d'aucun côté, « Pas assez de données ». Hors de la
+/// plage équilibrée, le mot « déséquilibré » s'écrit, avec une icône : la couleur ne porte jamais seule l'information.
 private struct BalanceRow: View {
     let title: String
+    let spokenTitle: String
     let first: Int
     let second: Int
     let isUnbalanced: Bool
     let emptyReason: String
     let firstMissing: String
     let secondMissing: String
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -193,50 +180,40 @@ private struct BalanceRow: View {
             if first == 0, second == 0 {
                 StatsEmptyNote(reason: emptyReason)
             } else {
-                HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    Text(String(localized: "\(first) / \(second) séries", bundle: .module))
-                        .font(PulseFont.value(.title3))
-                        .foregroundStyle(PulsePalette.text)
-                    Spacer(minLength: 8)
-                    Text(ratioText)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(isUnbalanced ? PulsePalette.signal : PulsePalette.text2)
-                        .multilineTextAlignment(.trailing)
-                }
+                values
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(accessibilityText)
+        .accessibilityLabel(StatsText.balanceSpoken(title: spokenTitle, first: first, second: second, isUnbalanced: isUnbalanced,
+                                                    emptyReason: emptyReason, firstMissing: firstMissing,
+                                                    secondMissing: secondMissing))
     }
 
-    private var ratioText: String {
-        guard second > 0 else { return secondMissing }
-        guard first > 0 else { return firstMissing }
-        let value = Double(first) / Double(second)
-        return String(localized: "ratio \(Self.ratioText(value))", bundle: .module)
-    }
-
-    /// « 1,2 » ; deux décimales près d'une borne de `balanceRange` (« 0,66 », « 1,52 »), arrondies vers l'extérieur hors des
-    /// bornes (2 / 3 donne « 0,66 », pas « 0,67 ») : l'arrondi ne contredit jamais le signal.
-    static func ratioText(_ ratio: Double) -> String {
-        let range = MuscleStats.balanceRange
-        guard abs(ratio - range.lowerBound) <= 0.05 || abs(ratio - range.upperBound) <= 0.05 else {
-            return PulseFormat.decimal(ratio, maxFractionDigits: 1)
+    private var values: some View {
+        let isLarge = dynamicTypeSize.isAccessibilitySize
+        let layout = isLarge
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
+            : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: 8))
+        return layout {
+            Text(String(localized: "\(first) / \(second) séries", bundle: .module))
+                .font(PulseFont.value(.title3))
+                .foregroundStyle(PulsePalette.text)
+                .fixedSize(horizontal: false, vertical: true)
+            if !isLarge { Spacer(minLength: 8) }
+            VStack(alignment: isLarge ? .leading : .trailing, spacing: 2) {
+                Text(StatsText.balanceRatioText(first: first, second: second, firstMissing: firstMissing,
+                                                secondMissing: secondMissing))
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(isUnbalanced ? PulsePalette.signal : PulsePalette.text2)
+                    .multilineTextAlignment(isLarge ? .leading : .trailing)
+                    .fixedSize(horizontal: false, vertical: true)
+                if isUnbalanced {
+                    Label(String(localized: "déséquilibré", bundle: .module), systemImage: "exclamationmark.triangle")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(PulsePalette.signal)
+                }
+            }
         }
-        let shown = ratio < range.lowerBound ? (ratio * 100).rounded(.down) / 100
-            : ratio > range.upperBound ? (ratio * 100).rounded(.up) / 100 : ratio
-        return PulseFormat.decimal(shown, maxFractionDigits: 2)
-    }
-
-    /// « Pousser / tirer : 18 séries contre 9, ratio 2, déséquilibré. »
-    private var accessibilityText: String {
-        guard first > 0 || second > 0 else {
-            return String(localized: "\(title) : \(StatsEmptyNote.title), \(emptyReason).", bundle: .module)
-        }
-        let verdict = isUnbalanced
-            ? String(localized: "déséquilibré", bundle: .module)
-            : String(localized: "équilibré", bundle: .module)
-        return String(localized: "\(title) : \(first) séries contre \(second), \(ratioText), \(verdict).", bundle: .module)
     }
 }
 
@@ -251,5 +228,10 @@ private struct BalanceRow: View {
 
 #Preview("Muscles, sans historique") {
     StatsSectionPreview(withHistory: false) { snapshot, window in MusclesSection(muscles: snapshot.muscles, window: window) }
+}
+
+#Preview("Muscles, accessibilité 3") {
+    StatsSectionPreview(period: .month) { snapshot, window in MusclesSection(muscles: snapshot.muscles, window: window) }
+        .dynamicTypeSize(.accessibility3)
 }
 #endif

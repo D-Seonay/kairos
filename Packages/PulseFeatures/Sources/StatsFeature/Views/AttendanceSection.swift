@@ -27,12 +27,14 @@ struct AttendanceSection: View {
 
     private var streakTile: StatsTileContent {
         var details: [String] = []
+        var spoken: [String] = []
         if let week = attendance.streak.currentWeek {
             details.append(String(localized: "cette semaine \(week.count) / \(week.target)", bundle: .module))
+            spoken.append(String(localized: "cette semaine \(PulseSpoken.outOf(week.count, week.target))", bundle: .module))
         }
         return StatsTileContent(title: String(localized: "Série en cours", bundle: .module),
                                 value: attendance.sessionsTotal > 0 ? Self.weeksText(attendance.streak.streak) : nil,
-                                details: details, emptyReason: Self.noSessionYet)
+                                details: details, emptyReason: Self.noSessionYet, spokenDetails: spoken)
     }
 
     /// « 6 semaines, du 7 sept. au 18 oct. » : du lundi de la première semaine au dimanche de la dernière, sans dépasser
@@ -40,11 +42,16 @@ struct AttendanceSection: View {
     private var bestTile: StatsTileContent {
         let calendar = window.calendar
         var details: [String] = []
+        var spoken: [String] = []
         if let best = attendance.best {
             let sunday = calendar.date(byAdding: .day, value: 6, to: best.lastWeek) ?? best.lastWeek
+            let last = min(sunday, window.today)
             let start = StatsText.shortDate(best.firstWeek, calendar: calendar, today: window.today)
-            let end = StatsText.shortDate(min(sunday, window.today), calendar: calendar, today: window.today)
+            let end = StatsText.shortDate(last, calendar: calendar, today: window.today)
             details.append(String(localized: "du \(start) au \(end)", bundle: .module))
+            let spokenStart = StatsText.spokenDate(best.firstWeek, calendar: calendar, today: window.today)
+            let spokenEnd = StatsText.spokenDate(last, calendar: calendar, today: window.today)
+            spoken.append(String(localized: "du \(spokenStart) au \(spokenEnd)", bundle: .module))
         }
         let target = attendance.streak.currentWeek?.target ?? 1
         let reason = target == 1
@@ -53,33 +60,40 @@ struct AttendanceSection: View {
         return StatsTileContent(title: String(localized: "Meilleure série", bundle: .module),
                                 value: attendance.best.map { Self.weeksText($0.weeks) }, details: details,
                                 emptyReason: reason,
-                                emptyTitle: String(localized: "Pas encore de semaine réussie", bundle: .module))
+                                emptyTitle: String(localized: "Pas encore de semaine réussie", bundle: .module),
+                                spokenDetails: spoken)
     }
 
     private var sessionsTile: StatsTileContent {
         var details = [String(localized: "sur \(window.period.title)", bundle: .module)]
+        var spoken = details
         if let first = attendance.firstSession {
             let date = StatsText.shortDate(first, calendar: window.calendar, today: window.today)
             details.append(String(localized: "\(attendance.sessionsTotal) depuis le \(date)", bundle: .module))
+            let spokenDay = StatsText.spokenDate(first, calendar: window.calendar, today: window.today)
+            spoken.append(String(localized: "\(attendance.sessionsTotal) depuis le \(spokenDay)", bundle: .module))
         }
         return StatsTileContent(
             title: String(localized: "Séances", bundle: .module),
             value: attendance.sessionsInPeriod > 0 ? "\(attendance.sessionsInPeriod)" : nil, details: details,
             emptyReason: attendance.sessionsTotal == 0
-                ? Self.noSessionYet : String(localized: "aucune séance validée sur la période", bundle: .module))
+                ? Self.noSessionYet : String(localized: "aucune séance validée sur la période", bundle: .module),
+            spokenDetails: spoken)
     }
 
     private var durationTile: StatsTileContent {
         StatsTileContent(title: String(localized: "Durée moyenne", bundle: .module),
                          value: attendance.averageMinutes.map { StatsText.duration(minutes: $0) },
-                         emptyReason: String(localized: "aucune séance chronométrée sur la période", bundle: .module))
+                         emptyReason: String(localized: "aucune séance chronométrée sur la période", bundle: .module),
+                         spokenValue: attendance.averageMinutes.map { StatsText.durationSpoken(minutes: $0) })
     }
 
     private var hourTile: StatsTileContent {
         StatsTileContent(title: String(localized: "Heure habituelle", bundle: .module),
                          value: attendance.usualHour.map { String(localized: "\($0) h", bundle: .module) },
                          details: [String(localized: "début de séance le plus fréquent", bundle: .module)],
-                         emptyReason: String(localized: "aucune séance validée sur la période", bundle: .module))
+                         emptyReason: String(localized: "aucune séance validée sur la période", bundle: .module),
+                         spokenValue: attendance.usualHour.map { PulseSpoken.clock(hour: $0, minute: 0) })
     }
 
     private var regularityTile: StatsTileContent {
@@ -99,10 +113,11 @@ struct AttendanceSection: View {
 // MARK: - Matrice
 
 /// Seize colonnes de sept pastilles (lundi en haut, la semaine en cours à droite), à cinq niveaux d'encre. VoiceOver la lit
-/// semaine par semaine.
+/// semaine par semaine, avec les jours entraînés en valeur.
 private struct AttendanceMatrixCard: View {
     let weeks: [[AttendanceDay]]
     let calendar: Calendar
+    @ScaledMetric(relativeTo: .caption) private var swatch: CGFloat = 10
 
     var body: some View {
         StatsChartCard(title: String(localized: "16 dernières semaines", bundle: .module)) {
@@ -127,38 +142,40 @@ private struct AttendanceMatrixCard: View {
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(label(week, isCurrent: isCurrent))
+        .accessibilityLabel(StatsText.attendanceWeekLabel(week: week, isCurrent: isCurrent, calendar: calendar))
+        .accessibilityValue(StatsText.attendanceDays(week: week, calendar: calendar))
     }
 
-    /// « Semaine du 3 novembre : 4 jours d'entraînement » ; la semaine en cours le dit.
-    private func label(_ week: [AttendanceDay], isCurrent: Bool) -> String {
-        let monday = week.first.map { StatsText.dayMonth($0.date, calendar: calendar) } ?? ""
-        let title = isCurrent
-            ? String(localized: "Semaine en cours, du \(monday)", bundle: .module)
-            : String(localized: "Semaine du \(monday)", bundle: .module)
-        let days = week.filter { $0.level > 0 }.count
-        let count = switch days {
-        case 0: String(localized: "aucun jour d'entraînement", bundle: .module)
-        case 1: String(localized: "1 jour d'entraînement", bundle: .module)
-        default: String(localized: "\(days) jours d'entraînement", bundle: .module)
-        }
-        return String(localized: "\(title) : \(count)", bundle: .module)
-    }
-
-    /// « Lundi en haut · Moins ○ ● ● ● ● Plus » : le sens de lecture et l'échelle d'encre.
+    /// « Lundi en haut · Moins ○ ● ● ● ● Plus » : le sens de lecture et l'échelle d'encre ; sur deux lignes quand elle ne tient
+    /// pas.
     private var legend: some View {
-        HStack(spacing: 6) {
-            Text(String(localized: "Lundi en haut", bundle: .module))
-            Spacer(minLength: 8)
-            Text(String(localized: "Moins", bundle: .module))
-            ForEach(0..<5, id: \.self) { level in
-                AttendanceDot(level: level).frame(width: 10)
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 6) {
+                reading
+                Spacer(minLength: 8)
+                scale
             }
-            Text(String(localized: "Plus", bundle: .module))
+            VStack(alignment: .leading, spacing: 6) {
+                reading
+                HStack(spacing: 6) { scale }
+            }
         }
         .font(.caption)
         .foregroundStyle(PulsePalette.muted)
         .accessibilityHidden(true)
+    }
+
+    private var reading: some View {
+        Text(String(localized: "Lundi en haut", bundle: .module))
+    }
+
+    @ViewBuilder
+    private var scale: some View {
+        Text(String(localized: "Moins", bundle: .module))
+        ForEach(0..<StatsInk.attendanceOpacities.count, id: \.self) { level in
+            AttendanceDot(level: level).frame(width: swatch)
+        }
+        Text(String(localized: "Plus", bundle: .module))
     }
 }
 
@@ -166,8 +183,7 @@ private struct AttendanceMatrixCard: View {
 private struct AttendanceDot: View {
     let level: Int?
 
-    private static let inks = [StatsInk.zone, PulsePalette.ink.opacity(0.25), PulsePalette.ink.opacity(0.5),
-                               PulsePalette.ink.opacity(0.75), PulsePalette.ink]
+    private static let inks = StatsInk.attendanceOpacities.map { PulsePalette.ink.opacity($0) }
 
     var body: some View {
         Circle()
@@ -198,5 +214,12 @@ private struct AttendanceDot: View {
     StatsSectionPreview(withHistory: false) { snapshot, window in
         AttendanceSection(attendance: snapshot.attendance, window: window)
     }
+}
+
+#Preview("Assiduité, accessibilité 3") {
+    StatsSectionPreview(period: .month) { snapshot, window in
+        AttendanceSection(attendance: snapshot.attendance, window: window)
+    }
+    .dynamicTypeSize(.accessibility3)
 }
 #endif

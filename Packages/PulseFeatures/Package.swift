@@ -129,7 +129,7 @@ let package = Package(
         ),
         .testTarget(
             name: "StatsFeatureTests",
-            dependencies: ["StatsFeature", "PulseServices", domain, content],
+            dependencies: ["StatsFeature", "PulseServices", designSystem, domain, content],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(

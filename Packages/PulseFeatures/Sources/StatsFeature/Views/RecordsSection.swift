@@ -34,6 +34,7 @@ private struct StrengthRecordsCard: View {
     let lines: [StrengthRecordLine]
     let window: StatsWindow
     let open: (ExerciseReference) -> Void
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         StatsChartCard(title: String(localized: "Force", bundle: .module)) {
@@ -58,38 +59,49 @@ private struct StrengthRecordsCard: View {
         Button {
             open(line.exercise)
         } label: {
-            HStack(spacing: 12) {
+            // Aux tailles d'accessibilité, le nom d'exercice prend toute la largeur : la valeur et le gain passent dessous.
+            let layout = dynamicTypeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(alignment: .leading, spacing: 6))
+                : AnyLayout(HStackLayout(spacing: 12))
+            layout {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(line.name)
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(PulsePalette.text)
                         .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
                     Text(origin(line))
                         .font(.caption)
                         .foregroundStyle(PulsePalette.text2)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
-                Spacer(minLength: 8)
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text(value(line))
-                        .font(PulseFont.value(.headline))
-                        .foregroundStyle(PulsePalette.text)
-                    if let mark = mark(line) {
-                        Text(mark)
-                            .font(.caption.weight(.semibold))
+                if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 8) }
+                HStack(spacing: 12) {
+                    VStack(alignment: dynamicTypeSize.isAccessibilitySize ? .leading : .trailing, spacing: 2) {
+                        Text(value(line))
+                            .font(PulseFont.value(.headline))
                             .foregroundStyle(PulsePalette.text)
+                        if let mark = mark(line) {
+                            Text(mark)
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(PulsePalette.text)
+                        }
                     }
+                    if dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 8) }
+                    Image(systemName: "chevron.right")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(PulsePalette.muted)
                 }
-                Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(PulsePalette.muted)
             }
             .padding(.vertical, 10)
             .frame(minHeight: 44)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(accessibilityText(line))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(StatsText.strengthRecordSpoken(line, calendar: window.calendar, today: window.today))
         .accessibilityHint(String(localized: "Ouvre la progression de l'exercice", bundle: .module))
+        .accessibilityAddTraits(.isButton)
     }
 
     /// « 96 kg » pour un 1RM estimé, « 14 reps » pour un record de répétitions.
@@ -120,16 +132,6 @@ private struct StrengthRecordsCard: View {
         }
         return line.isNew ? RecordsSection.newMark : nil
     }
-
-    /// « Squat barre : 1RM estimé 96 kg, 85 kg × 5 · 28 oct., +2,5 kg. »
-    private func accessibilityText(_ line: StrengthRecordLine) -> String {
-        let record = line.kind == .repsAtWeight
-            ? value(line)
-            : String(localized: "1RM estimé \(value(line))", bundle: .module)
-        let parts = [record, origin(line)] + (mark(line).map { [$0] } ?? [])
-        let details = parts.joined(separator: ", ")
-        return String(localized: "\(line.name) : \(details).", bundle: .module)
-    }
 }
 
 // MARK: - Course
@@ -138,6 +140,7 @@ private struct StrengthRecordsCard: View {
 private struct RunRecordsCard: View {
     let runs: [RunBest]
     let window: StatsWindow
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         StatsChartCard(title: String(localized: "Course", bundle: .module)) {
@@ -150,11 +153,16 @@ private struct RunRecordsCard: View {
     }
 
     private func row(_ run: RunBest) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 12) {
+        let isLarge = dynamicTypeSize.isAccessibilitySize
+        let layout = isLarge
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 6))
+            : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: 12))
+        return layout {
             VStack(alignment: .leading, spacing: 2) {
                 Text(Self.title(run.distance))
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(PulsePalette.text)
+                    .fixedSize(horizontal: false, vertical: true)
                 if let detail = detail(run) {
                     Text(detail)
                         .font(.caption)
@@ -162,8 +170,8 @@ private struct RunRecordsCard: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
-            Spacer(minLength: 8)
-            VStack(alignment: .trailing, spacing: 2) {
+            if !isLarge { Spacer(minLength: 8) }
+            VStack(alignment: isLarge ? .leading : .trailing, spacing: 2) {
                 if let seconds = run.seconds {
                     Text(StatsText.raceTime(seconds: seconds))
                         .font(PulseFont.value(.headline))
@@ -180,7 +188,8 @@ private struct RunRecordsCard: View {
                 }
             }
         }
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(StatsText.runRecordSpoken(run, calendar: window.calendar, today: window.today))
     }
 
     /// « allure moyenne de la sortie du 14 sept. ».
@@ -210,5 +219,12 @@ private struct RunRecordsCard: View {
     StatsSectionPreview(withHistory: false) { snapshot, window in
         RecordsSection(records: snapshot.records, window: window) { _ in }
     }
+}
+
+#Preview("Records, accessibilité 3") {
+    StatsSectionPreview(period: .month) { snapshot, window in
+        RecordsSection(records: snapshot.records, window: window) { _ in }
+    }
+    .dynamicTypeSize(.accessibility3)
 }
 #endif
