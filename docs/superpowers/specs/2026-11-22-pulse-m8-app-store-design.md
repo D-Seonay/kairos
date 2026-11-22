@@ -102,7 +102,7 @@ Un service `HealthDataRelocation` dans `PulsePersistence` (acteur sur le même c
 1. Les `StoredDailyRecovery` dont une valeur brute n'est pas nulle : la valeur passe dans `StoredRecoveryReading` du jour (une valeur locale déjà présente l'emporte, elle est plus récente), puis les champs bruts sont mis à nul côté synchronisé.
 2. Les `StoredWorkoutSession` avec `source == appleHealth` : une ligne non supprimée est copiée dans `StoredImportedWorkout` si son identifiant n'y est pas déjà ; puis **toutes** ces lignes sont supprimées pour de vrai du magasin synchronisé, y compris celles marquées supprimées (une suppression logique laisse les valeurs dans iCloud). Leurs séries éventuelles partent en cascade.
 3. Les `StoredBodyMeasurement` avec `source == appleHealth` : même traitement.
-4. Un seul `save()` à la fin d'une étape ; une étape qui échoue ne retire rien d'iCloud et sera rejouée.
+4. Deux `save()` par étape, car un seul n'est pas garanti atomique entre les deux fichiers SQLite : d'abord les copies locales, puis le retrait côté synchronisé. Si le second échoue, il est annulé : rien n'a quitté iCloud, et le passage suivant trouve la copie déjà locale et ne fait plus que vider ou supprimer (relecture finale M8a). Les clés `StoredRecoveryReading.day`, `StoredImportedWorkout.id` et `StoredImportedBodyMeasurement.id` sont uniques.
 
 Le poids du profil (§5.3) a besoin de la tendance, qui vit dans `PulseServices` : ce n'est pas une étape de `HealthDataRelocation` (`PulsePersistence` ne dépend pas de `PulseFeatures`). Le passage du jour appelle `ProfileWeightSync` juste après le déplacement **(choix du constructeur)**.
 
@@ -113,7 +113,7 @@ Le poids du profil (§5.3) a besoin de la tendance, qui vit dans `PulseServices`
 ### 5.3 Poids du profil
 
 - `ProfileWeightSync` ne calcule plus la tendance que sur les pesées saisies dans Pulse. Si aucune pesée saisie ne tombe dans sa fenêtre de 30 jours, il prend la dernière pesée saisie. Sans pesée saisie du tout, il ne touche pas au profil, sauf le cas de déplacement ci-dessous.
-- Le poids utilisé par l'app (export d'une séance vers Apple Santé, affichage du profil) devient : la tendance de toutes les pesées si elle existe, sinon `UserProfile.weightKg`. Ce calcul vit dans un endroit unique (`BodyService` ou un petit type pur), appelé par `HealthWorkoutExporter` et l'écran Profil.
+- Le poids utilisé par l'app (export d'une séance vers Apple Santé, affichage du profil) devient : la tendance de toutes les pesées des 30 derniers jours si elle existe, sinon la dernière pesée, quelles que soient sa source et sa date, sinon `UserProfile.weightKg` (relecture finale M8a). Ce calcul vit dans un endroit unique (`BodyService` ou un petit type pur), appelé par `HealthWorkoutExporter` et l'écran Profil.
 - **Déplacement :** s'il existe des pesées Apple Santé et aucune pesée saisie, `UserProfile.weightKg` est mis à nul (la tendance Apple Santé, locale, prend le relais). S'il existe des pesées saisies, il prend leur tendance. Sans pesée du tout, la valeur de l'onboarding reste **(choix du constructeur)**.
 
 ### 5.4 Export, suppression, inspection
@@ -137,7 +137,7 @@ Le poids du profil (§5.3) a besoin de la tendance, qui vit dans `PulseServices`
 Un `PrivacyInfo.xcprivacy` dans la cible app et un dans l'extension widgets (les packages locaux sont compilés dans ces deux cibles) :
 - `NSPrivacyTracking` faux, aucun domaine de suivi.
 - `NSPrivacyCollectedDataTypes` vide : Pulse n'envoie rien à son développeur. Le CloudKit privé de l'utilisateur et HealthKit ne sont pas une collecte au sens d'Apple.
-- `NSPrivacyAccessedAPITypes` : `UserDefaults` avec la raison `CA92.1` (préférences de l'app) et `1C8F.1` (groupe d'apps partagé avec les widgets). Le constructeur cherche dans tout le code les autres API à raison déclarée (dates de fichier, temps de démarrage, espace disque, clavier actif) et ajoute ce qu'il trouve avec la bonne raison, ou rien.
+- `NSPrivacyAccessedAPITypes` : `UserDefaults` avec la raison `CA92.1` (préférences de l'app). Pas de `1C8F.1` : aucun code livré n'ouvre `UserDefaults(suiteName:)` sur le groupe d'apps, les widgets lisent un fichier du groupe (relecture finale M8a). Le constructeur cherche dans tout le code les autres API à raison déclarée (dates de fichier, temps de démarrage, espace disque, clavier actif) et ajoute ce qu'il trouve avec la bonne raison, ou rien.
 
 ### 6.2 Pages publiques
 
@@ -206,5 +206,6 @@ Un `PrivacyInfo.xcprivacy` dans la cible app et un dans l'extension widgets (les
 ## 11. Risques
 
 - **Désinstallation puis réinstallation.** Le magasin local repart vide. Les scores passés reviennent d'iCloud, mais sans leur détail brut : Pulse n'écrit le score que du jour, et ne recalcule pas les jours passés depuis le cache des nuits. Les courbes de biométrie des Stats repartent donc du jour de la réinstallation. Les courses et le poids reviennent par la lecture d'Apple Santé sur un an, sans le RPE corrigé ni la note des courses. Accepté sans reconstruction **(choix du constructeur)** : un nouvel iPhone restauré depuis une sauvegarde ou un transfert direct garde le magasin local, donc la perte ne touche que la désinstallation. C'est le prix de la règle 5.1.3(ii).
+- **Appareil encore sur un ancien build.** Un appareil resté sur un build d'avant M8a peut réimporter des courses (et des pesées) dans iCloud. Cet appareil-ci les déplace en local et les supprime d'iCloud à chaque passage du jour. Accepté jusqu'à ce que tous les appareils soient à jour.
 - **Revue sans données de santé** : le relecteur Apple n'a pas de nuits. Les notes de revue l'expliquent ; un mode démo reste le plan B (§2).
 - **Nom « Pulse » déjà pris** sur l'App Store : la fiche propose une alternative, le nom affiché sous l'icône peut rester « Pulse ».

@@ -1,6 +1,6 @@
 # Pulse — fiche App Store Connect
 
-Document à recopier dans App Store Connect. Version de l'app : 1.0.2 (le numéro de build est attribué à l'envoi). Dernière relecture contre le code : 22 novembre 2026, branche `m8-confidentialite`, commit `a72c6b6`.
+Document à recopier dans App Store Connect. Version de l'app : 1.0.2 (le numéro de build est attribué à l'envoi). Dernière relecture contre le code : 22 novembre 2026, branche `m8-confidentialite`, commit `deff2ec`.
 
 Si le code change (nouveau service, nouvelle donnée envoyée hors de l'iPhone, nouvelle analytics), reprends ce document et la politique de confidentialité avant de soumettre : chaque phrase doit rester vraie pour le build envoyé.
 
@@ -8,12 +8,12 @@ Si le code change (nouveau service, nouvelle donnée envoyée hors de l'iPhone, 
 
 **Réponse à donner : « Données non collectées »** (Data Not Collected).
 
-Justification, en deux phrases : Pulse n'a aucun serveur et n'envoie aucune donnée à son développeur ni à un tiers, aucun SDK d'analyse ou de publicité n'est embarqué. Les valeurs lues dans Apple Santé restent sur l'iPhone, et ce que l'utilisateur saisit ou ce que Pulse calcule ne se synchronise que dans le CloudKit privé de l'utilisateur, que le développeur ne peut pas lire.
+Justification, en deux phrases : Pulse n'a aucun serveur et n'envoie aucune donnée à son développeur ni à un tiers, aucun SDK d'analyse ou de publicité n'est embarqué. Pulse n'écrit jamais dans iCloud les valeurs lues dans Apple Santé : elles restent dans un magasin local de l'iPhone, et ce que l'utilisateur saisit ou ce que Pulse calcule ne se synchronise que dans le CloudKit privé de l'utilisateur, que le développeur ne peut pas lire.
 
-À coller si le champ « Notes » existe : *Pulse has no server and no analytics SDK. Apple Health values stay on the device (never written to iCloud). User-entered data and scores computed by Pulse sync only to the user's own private iCloud (CloudKit private database), which the developer cannot access.*
+À coller si le champ « Notes » existe : *Pulse has no server and no analytics SDK. Pulse never writes Apple Health values to iCloud: they stay in an on-device store that is never synced. User-entered data and scores computed by Pulse sync only to the user's own private iCloud (CloudKit private database), which the developer cannot access.*
 
 Cohérence avec le build :
-- `Pulse/PrivacyInfo.xcprivacy` et celui de l'extension widgets : `NSPrivacyTracking` faux, aucun domaine de suivi, `NSPrivacyCollectedDataTypes` vide, API `UserDefaults` avec les raisons `CA92.1` et `1C8F.1`.
+- `Pulse/PrivacyInfo.xcprivacy` et celui de l'extension widgets : `NSPrivacyTracking` faux, aucun domaine de suivi, `NSPrivacyCollectedDataTypes` vide, API `UserDefaults` avec la seule raison `CA92.1` : le code livré n'utilise que `UserDefaults.standard` (les suites nommées ne servent qu'aux tests d'interface en debug, hors groupe d'apps), et les widgets lisent un fichier du groupe d'apps, pas des préférences partagées. Pas de `1C8F.1`.
 - Pas d'e-mail ni de compte : « Connexion requise » reste décoché.
 - **URL de la politique de confidentialité** : `https://d-seonay.github.io/kairos/confidentialite/`
 
@@ -57,7 +57,7 @@ HOW THE APP USES HEALTH DATA
 Pulse reads from Apple Health: sleep, heart rate variability (SDNN), resting heart rate, heart rate, running and cycling workouts, body mass, body fat percentage, and (once, at onboarding, to prefill the profile form) height, date of birth and biological sex. It writes to Apple Health: strength training workouts (with estimated active energy) and supplement intakes (vitamin D, magnesium, caffeine, protein). Every permission is optional and can be refused separately.
 
 PRIVACY (guideline 5.1.3)
-Values read from Apple Health are stored on the device only. They are never written to iCloud and never leave the iPhone. iCloud (the user's private CloudKit database) only holds what the user types and what Pulse computes (workouts logged in Pulse, supplements, program, check-ins, recovery scores). No analytics, no advertising, no third-party SDK. The privacy policy is at https://d-seonay.github.io/kairos/confidentialite/ and support is at https://d-seonay.github.io/kairos/support/. Export and full erase are in Profile > Mes données (My data).
+Values read from Apple Health are stored in an on-device store that is never synced: Pulse never writes them to iCloud. Like all of the app's local data, they are part of the iPhone's own backup if the user has turned it on (iCloud or computer backup), and of the exports the user makes. Values proposed from Apple Health at onboarding (height, weight, date of birth, sex) are saved, and synced, only once the user validates the profile step; they then count as user input. iCloud (the user's private CloudKit database) only holds what the user types and what Pulse computes (workouts logged in Pulse, supplements, program, check-ins, recovery scores). No analytics, no advertising, no third-party SDK. The privacy policy is at https://d-seonay.github.io/kairos/confidentialite/ and support is at https://d-seonay.github.io/kairos/support/. Export and full erase are in Profile > Mes données (My data).
 
 THE REVIEW DEVICE HAS NO HEALTH DATA, WHICH IS EXPECTED
 The recovery score needs several nights of sleep, HRV and resting heart rate data from an Apple Watch or compatible device. On a device without them, Today shows a calibration or check-in state (three questions) instead of a measured score. This is normal behaviour, not an error. The measured score appears after a few nights of real data.
@@ -83,7 +83,7 @@ USAGE DES DONNÉES DE SANTÉ
 Pulse lit dans Apple Santé : le sommeil, la variabilité cardiaque (SDNN), la fréquence cardiaque au repos, la fréquence cardiaque, les entraînements de course et de vélo, le poids, la masse grasse, et (une seule fois, à l'accueil, pour préremplir le profil) la taille, la date de naissance et le sexe. Pulse écrit dans Apple Santé : les séances de musculation (avec l'énergie active estimée) et les prises de compléments (vitamine D, magnésium, caféine, protéines). Chaque autorisation est facultative et se refuse séparément.
 
 CONFIDENTIALITÉ (règle 5.1.3)
-Les valeurs lues dans Apple Santé restent sur l'appareil. Elles ne sont jamais écrites dans iCloud et ne quittent pas l'iPhone. iCloud (la base CloudKit privée de l'utilisateur) ne contient que ce que l'utilisateur saisit et ce que Pulse calcule (séances faites dans Pulse, compléments, programme, check-ins, scores de récupération). Aucune analytics, aucune publicité, aucun SDK tiers. Politique : https://d-seonay.github.io/kairos/confidentialite/ ; assistance : https://d-seonay.github.io/kairos/support/. L'export et la suppression totale sont dans Profil > Mes données.
+Les valeurs lues dans Apple Santé sont gardées dans un magasin de l'appareil qui ne se synchronise jamais : Pulse ne les écrit jamais dans iCloud. Comme toutes les données locales de l'app, elles font partie de la sauvegarde de l'iPhone si l'utilisateur l'a activée (iCloud ou ordinateur), et des exports qu'il fait lui-même. Les valeurs proposées depuis Apple Santé à l'accueil (taille, poids, date de naissance, sexe) ne sont enregistrées, et synchronisées, qu'une fois l'étape du profil validée ; elles comptent alors comme une saisie. iCloud (la base CloudKit privée de l'utilisateur) ne contient que ce que l'utilisateur saisit et ce que Pulse calcule (séances faites dans Pulse, compléments, programme, check-ins, scores de récupération). Aucune analytics, aucune publicité, aucun SDK tiers. Politique : https://d-seonay.github.io/kairos/confidentialite/ ; assistance : https://d-seonay.github.io/kairos/support/. L'export et la suppression totale sont dans Profil > Mes données.
 
 L'APPAREIL DE REVUE N'A PAS DE DONNÉES DE SANTÉ, C'EST NORMAL
 Le score de récupération demande plusieurs nuits de sommeil, de VFC et de fréquence cardiaque au repos venues d'une Apple Watch ou d'une montre compatible. Sans elles, l'écran Aujourd'hui affiche la calibration ou un check-in de trois questions à la place du score mesuré. Ce n'est pas une erreur. Le score mesuré apparaît après quelques nuits de vraies données.
@@ -149,7 +149,7 @@ WIDGETS
 Ton score et ta séance du jour sur l'écran d'accueil et l'écran verrouillé, et ta séance en cours en Live Activity.
 
 TES DONNÉES
-Pas de compte, pas de serveur, pas de publicité, aucune analytics. Les valeurs lues dans Apple Santé ne quittent jamais ton iPhone. Ce que tu saisis et ce que Pulse calcule se synchronise dans ton iCloud privé, auquel personne d'autre n'a accès. Tu exportes tout en JSON ou CSV, ou tu supprimes tout, depuis l'app.
+Pas de compte, pas de serveur, pas de publicité, aucune analytics. Pulse n'écrit jamais dans iCloud les valeurs lues dans Apple Santé : elles restent sur ton iPhone (et dans sa sauvegarde, si tu l'as activée). Ce que tu saisis et ce que Pulse calcule se synchronise dans ton iCloud privé, auquel personne d'autre n'a accès. Tu exportes tout en JSON ou CSV, ou tu supprimes tout, depuis l'app.
 
 Pulse n'est pas un dispositif médical. Le score et les ajustements sont des repères d'entraînement, pas un avis médical.
 ```
