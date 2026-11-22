@@ -240,6 +240,36 @@
           }
         }
       }
+    },
+    "%@ : %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : %@"
+          }
+        }
+      }
+    },
+    "%@ : %@, %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : %@, %@"
+          }
+        }
+      }
+    },
+    "réponds aux trois questions": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "réponds aux trois questions"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

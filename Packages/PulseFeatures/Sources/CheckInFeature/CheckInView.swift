@@ -8,6 +8,8 @@ public struct CheckInView: View {
     private let form: CheckInForm
     private let scrollable: Bool
     private let onSubmit: (CheckInAnswers) -> Void
+    /// La taille de l'estimation suit Dynamic Type : un grand chiffre reste lisible au réglage du texte choisi.
+    @ScaledMetric(relativeTo: .largeTitle) private var scoreSize: CGFloat = 64
 
     /// `scrollable: false` : le check-in s'intègre à une page qui défile déjà (l'accueil), sans défilement, marge ni fond propres.
     public init(form: CheckInForm, scrollable: Bool = true, onSubmit: @escaping (CheckInAnswers) -> Void) {
@@ -42,6 +44,8 @@ public struct CheckInView: View {
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
         }
+        // L'estimation change sous le focus à chaque réponse : on la dit dès qu'elle est disponible, puis quand elle change.
+        .pulseAnnounce(CheckInText.announcement(score: form.estimatedScore, category: category))
     }
 
     private var banner: some View {
@@ -73,7 +77,8 @@ public struct CheckInView: View {
                 .accessibilityAddTraits(.isHeader)
             ChoicePills(
                 options: question.options.map { (value: $0.value, label: $0.label) },
-                selection: binding(for: question)
+                selection: binding(for: question),
+                groupLabel: question.title
             )
         }
     }
@@ -92,13 +97,15 @@ public struct CheckInView: View {
                     .font(.footnote)
                     .foregroundStyle(PulsePalette.opalMuted)
                 Text(scoreText)
-                    .font(PulseFont.score(size: 64))
-                    .contentTransition(.numericText())
+                    .font(PulseFont.score(size: scoreSize))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+                    .pulseNumericTransition(value: form.estimatedScore ?? 0)
                 categoryLine
             }
             .frame(maxWidth: .infinity)
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel(estimationAccessibilityLabel)
+            .accessibilityLabel(CheckInText.estimation(score: form.estimatedScore, category: category))
         }
     }
 
@@ -128,18 +135,22 @@ public struct CheckInView: View {
     private var scoreText: String {
         form.estimatedScore.map { String(Int($0.rounded())) } ?? "–"
     }
-
-    private var estimationAccessibilityLabel: String {
-        let title = String(localized: "Estimation", bundle: .module)
-        guard let score = form.estimatedScore, let category else {
-            return "\(title), \(String(localized: "Réponds aux trois questions", bundle: .module))"
-        }
-        return "\(title), \(Int(score.rounded())), \(category.localizedName)"
-    }
 }
 
 #Preview("Vide") {
     CheckInView(form: CheckInForm(), onSubmit: { _ in })
+}
+
+#Preview("Vide, accessibilité 3") {
+    CheckInView(form: CheckInForm(), onSubmit: { _ in })
+        .dynamicTypeSize(.accessibility3)
+}
+
+#Preview("Rempli, accessibilité 3") {
+    let form = CheckInForm()
+    form.selection = [.sleep: 3, .pain: 3, .motivation: 3]
+    return CheckInView(form: form, onSubmit: { _ in })
+        .dynamicTypeSize(.accessibility3)
 }
 
 #Preview("Rempli") {

@@ -23,6 +23,61 @@ struct FactorFormatterTests {
         #expect(displays.allSatisfy { !$0.isMissing })
     }
 
+    @Test func spokenLabelsNameTheFactorItsValueAndItsReference() {
+        let labels = FactorFormatter.displays(for: recovery()).map(\.accessibilityLabel)
+        #expect(labels == [
+            "Sommeil, 5 heures 10 minutes, sommeil profond 7 %",
+            "Variabilité, 44 millisecondes, 18 % de moins que sur 14 jours",
+            "Fréquence cardiaque au repos, 54 battements par minute, 5 de plus que ta ligne de base"
+        ])
+    }
+
+    @Test func spokenLabelsAreFreeOfSymbolsAndAbbreviations() {
+        for label in FactorFormatter.displays(for: recovery()).map(\.accessibilityLabel) {
+            for forbidden in ["\u{2014}", "\u{2212}", "+", " ms", "bpm", "FC", " j "] { #expect(!label.contains(forbidden)) }
+        }
+    }
+
+    @Test func spokenLabelsSayWhichWayTheFactorMoved() {
+        let night = recovery(sdnn: 56.4, rhr: 47)
+        let labels = FactorFormatter.displays(for: night).map(\.accessibilityLabel)
+        #expect(labels[1] == "Variabilité, 56 millisecondes, 5 % de plus que sur 14 jours")
+        #expect(labels[2] == "Fréquence cardiaque au repos, 47 battements par minute, 2 de moins que ta ligne de base")
+    }
+
+    @Test func spokenLabelsSayWhenNothingMoved() {
+        let labels = FactorFormatter.displays(for: recovery(sdnn: 53.7, rhr: 49)).map(\.accessibilityLabel)
+        #expect(labels[1] == "Variabilité, 54 millisecondes, comme sur 14 jours")
+        #expect(labels[2] == "Fréquence cardiaque au repos, 49 battements par minute, comme ta ligne de base")
+    }
+
+    @Test func spokenLabelsOfMissingFactors() {
+        let sleep = FactorFormatter.displays(for: recovery(asleep: nil, deep: nil, missing: [.sleep]))[0]
+        #expect(sleep.accessibilityLabel == "Sommeil, pas de donnée cette nuit")
+        let hrv = FactorFormatter.displays(for: recovery(sdnn: nil, missing: [.hrv], calibration: .calibrating(nights: 3)))[1]
+        #expect(hrv.accessibilityLabel == "Variabilité, ligne de base en cours, 3 sur 5 nuits")
+        let heart = FactorFormatter.displays(for: recovery(rhr: nil, missing: [.restingHeartRate]))[2]
+        #expect(heart.accessibilityLabel == "Fréquence cardiaque au repos, pas de donnée cette nuit")
+    }
+
+    @Test func spokenLabelsWithoutDeepSleepOrBaseline() {
+        let sleep = FactorFormatter.displays(for: recovery(deep: nil))[0]
+        #expect(sleep.accessibilityLabel == "Sommeil, 5 heures 10 minutes, phases inconnues")
+        let night = DailyRecovery(
+            day: .distantPast, score: 72, category: .normal, isEstimated: false, sdnnMs: 44, restingHeartRate: 54,
+            asleepMinutes: 310, calibration: .calibrating(nights: 2), createdAt: .distantPast, updatedAt: .distantPast)
+        let labels = FactorFormatter.displays(for: night).map(\.accessibilityLabel)
+        #expect(labels[1] == "Variabilité, 44 millisecondes, ligne de base en cours")
+        #expect(labels[2] == "Fréquence cardiaque au repos, 54 battements par minute, ligne de base en cours")
+    }
+
+    @Test func spokenMarkers() {
+        #expect(FactorFormatter.spokenMarker(for: recovery(isEstimated: true)) == "estimé")
+        #expect(FactorFormatter.spokenMarker(for: recovery(calibration: .calibrating(nights: 9))) == "en calibration, 9 nuits")
+        #expect(FactorFormatter.spokenMarker(for: recovery(calibration: .calibrating(nights: 1))) == "en calibration, 1 nuit")
+        #expect(FactorFormatter.spokenMarker(for: recovery()) == nil)
+    }
+
     @Test func missingFactorReadsNoData() {
         let displays = FactorFormatter.displays(for: recovery(asleep: nil, deep: nil, missing: [.sleep]))
         let sleep = displays[0]

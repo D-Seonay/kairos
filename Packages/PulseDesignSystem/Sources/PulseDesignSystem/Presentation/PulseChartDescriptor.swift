@@ -14,15 +14,24 @@ public struct PulseChartDescriptor: AXChartDescriptorRepresentable {
     }
 
     /// L'axe vertical : son titre, l'unité dite en toutes lettres (« kilos », « séances ») et la plage de valeurs.
+    /// `valueText` dit une valeur à sa façon (« 1 kilo », « 2 séances » : le pluriel suit la valeur) ; sans lui, la valeur est
+    /// suivie de `unit`.
     public struct YAxis: Sendable {
         public let title: String
         public let unit: String
         public let range: ClosedRange<Double>
+        public let valueText: (@Sendable (Double) -> String)?
 
-        public init(title: String, unit: String, range: ClosedRange<Double>) {
+        public init(title: String, unit: String, range: ClosedRange<Double>, valueText: (@Sendable (Double) -> String)? = nil) {
             self.title = title
             self.unit = unit
             self.range = range
+            self.valueText = valueText
+        }
+
+        /// Ce que VoiceOver dit d'une valeur de l'axe.
+        func spoken(_ value: Double) -> String {
+            valueText?(value) ?? PulseChartDescriptor.speak(value: value, unit: unit)
         }
     }
 
@@ -82,7 +91,7 @@ public struct PulseChartDescriptor: AXChartDescriptorRepresentable {
             xAxis: makeXAxis(usable),
             yAxis: AXNumericDataAxisDescriptor(
                 title: yAxis.title, range: yAxis.range, gridlinePositions: [],
-                valueDescriptionProvider: { [unit = yAxis.unit] in Self.speak(value: $0, unit: unit) }
+                valueDescriptionProvider: { [yAxis] in yAxis.spoken($0) }
             ),
             series: usable.map(makeSeries)
         )

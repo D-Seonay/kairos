@@ -139,7 +139,7 @@ let package = Package(
         ),
         .testTarget(
             name: "TodayFeatureTests",
-            dependencies: ["TodayFeature", "PulseServices", "CheckInFeature", domain, recoveryEngine, content],
+            dependencies: ["TodayFeature", "PulseServices", "CheckInFeature", domain, recoveryEngine, content, designSystem],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(

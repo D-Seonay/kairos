@@ -68,6 +68,14 @@ private struct LoadingView: View {
         ZStack {
             PulsePalette.background.ignoresSafeArea()
             ProgressView()
+                .accessibilityLabel(String(localized: "Chargement"))
         }
     }
 }
+
+#if DEBUG
+#Preview("Chargement, accessibilité 3") {
+    LoadingView()
+        .dynamicTypeSize(.accessibility3)
+}
+#endif

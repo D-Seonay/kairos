@@ -55,6 +55,8 @@ public struct MobilitySheet: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.5)
                         .accessibilityLabel(Self.spokenText(remaining))
+                        // Le décompte change chaque seconde : VoiceOver ne le relit pas de lui-même.
+                        .accessibilityAddTraits(.updatesFrequently)
                     if isOver {
                         Text(String(localized: "Séance terminée", bundle: .module))
                             .font(.headline)
@@ -65,7 +67,14 @@ public struct MobilitySheet: View {
                 }
                 .frame(maxWidth: .infinity)
             }
+            // Le minuteur arrive à zéro (ou « Terminer ») sous le focus : on le dit.
+            .pulseAnnounce(Self.finishedAnnouncement(isOver: isOver))
         }
+    }
+
+    /// « Mobilité terminée » quand le minuteur est arrivé au bout ; `nil` tant qu'il tourne.
+    nonisolated static func finishedAnnouncement(isOver: Bool) -> String? {
+        isOver ? String(localized: "Mobilité terminée", bundle: .module) : nil
     }
 
     @ViewBuilder
@@ -134,4 +143,9 @@ public struct MobilitySheet: View {
 
 #Preview("Mobilité") {
     MobilitySheet()
+}
+
+#Preview("Mobilité, accessibilité 3") {
+    MobilitySheet()
+        .dynamicTypeSize(.accessibility3)
 }

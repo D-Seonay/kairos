@@ -1541,6 +1541,356 @@
           }
         }
       }
+    },
+    "%@ de moins que sur 14 jours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ de moins que sur 14 jours"
+          }
+        }
+      }
+    },
+    "%@ de plus que sur 14 jours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ de plus que sur 14 jours"
+          }
+        }
+      }
+    },
+    "%@ par minute" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ par minute"
+          }
+        }
+      }
+    },
+    "%@, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, %@"
+          }
+        }
+      }
+    },
+    "%@, %@, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, %@, %@"
+          }
+        }
+      }
+    },
+    "%lld de moins que ta ligne de base" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld de moins que ta ligne de base"
+          }
+        }
+      }
+    },
+    "%lld de plus que ta ligne de base" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld de plus que ta ligne de base"
+          }
+        }
+      }
+    },
+    "Fréquence cardiaque au repos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fréquence cardiaque au repos"
+          }
+        }
+      }
+    },
+    "Fréquence cardiaque au repos, 14 jours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fréquence cardiaque au repos, 14 jours"
+          }
+        }
+      }
+    },
+    "Mobilité terminée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mobilité terminée"
+          }
+        }
+      }
+    },
+    "Score mis à jour : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Score mis à jour : %@"
+          }
+        }
+      }
+    },
+    "Synchronisé à %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchronisé à %@"
+          }
+        }
+      }
+    },
+    "Séance faite, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance faite, %@"
+          }
+        }
+      }
+    },
+    "Ton score est prêt : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton score est prêt : %@"
+          }
+        }
+      }
+    },
+    "battement" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "battement"
+          }
+        }
+      }
+    },
+    "battements" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "battements"
+          }
+        }
+      }
+    },
+    "comme sur 14 jours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "comme sur 14 jours"
+          }
+        }
+      }
+    },
+    "comme ta ligne de base" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "comme ta ligne de base"
+          }
+        }
+      }
+    },
+    "effort perçu maximal %@ sur 10" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "effort perçu maximal %@ sur 10"
+          }
+        }
+      }
+    },
+    "en calibration, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "en calibration, %@"
+          }
+        }
+      }
+    },
+    "environ %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "environ %@"
+          }
+        }
+      }
+    },
+    "estimé" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "estimé"
+          }
+        }
+      }
+    },
+    "milliseconde" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "milliseconde"
+          }
+        }
+      }
+    },
+    "millisecondes" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "millisecondes"
+          }
+        }
+      }
+    },
+    "muscles principaux : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "muscles principaux : %@"
+          }
+        }
+      }
+    },
+    "nuit" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "nuit"
+          }
+        }
+      }
+    },
+    "nuits" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "nuits"
+          }
+        }
+      }
+    },
+    "record" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "record"
+          }
+        }
+      }
+    },
+    "records" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "records"
+          }
+        }
+      }
+    },
+    "sommeil profond %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sommeil profond %@"
+          }
+        }
+      }
+    },
+    "série" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "série"
+          }
+        }
+      }
+    },
+    "séries" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "séries"
+          }
+        }
+      }
+    },
+    "tendance en baisse" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "tendance en baisse"
+          }
+        }
+      }
+    },
+    "tendance en hausse" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "tendance en hausse"
+          }
+        }
+      }
+    },
+    "tendance stable" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "tendance stable"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

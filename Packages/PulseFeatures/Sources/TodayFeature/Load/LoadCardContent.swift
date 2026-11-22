@@ -14,6 +14,13 @@ enum LoadCardContent: Equatable {
                bundle: .module)
     }
 
+    /// « Charge d'entraînement : ratio 1,12, zone optimale » ; `nil` tant que la jauge est cachée.
+    var accessibilityLabel: String? {
+        guard case .ratio(_, let valueText, let zoneTitle, _) = self else { return nil }
+        let zone = zoneTitle.lowercased()
+        return String(localized: "Charge d'entraînement : ratio \(valueText), \(zone)", bundle: .module)
+    }
+
     static func make(_ result: ACWRResult?) -> LoadCardContent {
         guard let result else { return .hidden }
         let (title, advice) = texts(for: result.zone)

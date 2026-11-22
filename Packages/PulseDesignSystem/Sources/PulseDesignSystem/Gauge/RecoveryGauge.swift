@@ -7,6 +7,7 @@ import SwiftUI
 /// La couleur du texte et des graduations éteintes suit le `foregroundStyle` de l'environnement.
 /// `cardColor` détoure l'aiguille : le fond sur lequel la jauge est posée.
 /// `animatesReveal` à `false` pose le repère d'emblée sur le score : WidgetKit rend une image fixe, sans `onAppear` ni animation.
+/// `accessibilityLabel` remplace l'étiquette parlée (par exemple pour y ajouter « estimé »).
 public struct RecoveryGauge: View {
     public enum Style: Sendable {
         case large
@@ -58,6 +59,7 @@ public struct RecoveryGauge: View {
     private let style: Style
     private let cardColor: Color
     private let animatesReveal: Bool
+    private let accessibilityText: String?
 
     @State private var shownScore: Double
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -70,13 +72,15 @@ public struct RecoveryGauge: View {
         category: RecoveryCategory?,
         style: Style,
         cardColor: Color = PulsePalette.opal,
-        animatesReveal: Bool = true
+        animatesReveal: Bool = true,
+        accessibilityLabel: String? = nil
     ) {
         self.score = score
         self.category = category
         self.style = style
         self.cardColor = cardColor
         self.animatesReveal = animatesReveal
+        accessibilityText = accessibilityLabel
         _shownScore = State(initialValue: Self.initialScore(score: score, animatesReveal: animatesReveal))
     }
 
@@ -94,7 +98,7 @@ public struct RecoveryGauge: View {
         .aspectRatio(4 / 3, contentMode: .fit)
         .frame(maxWidth: style.idealWidth)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Self.accessibilityLabel(score: score, category: category))
+        .accessibilityLabel(accessibilityText ?? Self.accessibilityLabel(score: score, category: category))
         .onAppear(perform: reveal)
         .onChange(of: score) { reveal() }
     }
@@ -188,12 +192,12 @@ public struct RecoveryGauge: View {
     // MARK: Accessibilité
 
     /// Le score entier, borné à 0…100 ; `nil` sans score ou s'il n'est pas fini.
-    static func roundedScore(_ score: Double?) -> Int? {
+    nonisolated static func roundedScore(_ score: Double?) -> Int? {
         guard let score, score.isFinite else { return nil }
         return Int(min(max(score, 0), 100).rounded())
     }
 
-    public static func accessibilityLabel(score: Double?, category: RecoveryCategory?) -> String {
+    nonisolated public static func accessibilityLabel(score: Double?, category: RecoveryCategory?) -> String {
         guard let value = roundedScore(score) else {
             return String(localized: "Récupération pas encore calculée", bundle: .module)
         }

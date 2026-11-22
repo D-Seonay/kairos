@@ -1,4 +1,5 @@
 import Foundation
+import PulseDesignSystem
 import PulseDomain
 import PulseServices
 
@@ -16,6 +17,13 @@ struct WhyContent: Equatable, Sendable {
     struct Signal: Equatable, Sendable {
         var title: String
         var score: Int
+        /// Le titre tel que VoiceOver le dit quand il diffère de l'affiché (« Fréquence cardiaque au repos » pour « FC au repos »).
+        var spokenTitle: String?
+
+        /// « Sommeil, 56 sur 100 ».
+        var accessibilityLabel: String {
+            String(localized: "\(spokenTitle ?? title), \(PulseSpoken.outOf(score, 100))", bundle: .module)
+        }
     }
 
     /// Où en est la séance de la carte : à démarrer, en cours (le bouton la reprend) ou faite (plus de bouton ni de charges du jour).

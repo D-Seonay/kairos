@@ -176,7 +176,7 @@ private struct SignalBar: View {
             track
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(String(localized: "\(signal.title), \(signal.score) sur 100", bundle: .module))
+        .accessibilityLabel(signal.accessibilityLabel)
     }
 
     private var track: some View {
@@ -276,5 +276,10 @@ private struct WhyPreviewHost: View {
 
 #Preview("Surmenage") {
     WhyPreviewHost(scenario: .threeNights, answers: [.sleep: 0, .pain: 1, .motivation: 0])
+}
+
+#Preview("Score mesuré, accessibilité 3") {
+    WhyPreviewHost(scenario: .badNight)
+        .dynamicTypeSize(.accessibility3)
 }
 #endif

@@ -6,6 +6,7 @@ import SwiftUI
 /// ne couvre pas 28 jours, un texte explique à la place quand la jauge apparaîtra.
 struct LoadCard: View {
     let content: LoadCardContent
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         ObsidianCard {
@@ -16,8 +17,8 @@ struct LoadCard: View {
                     Text(LoadCardContent.hiddenText)
                         .font(.footnote)
                         .foregroundStyle(PulsePalette.text2)
-                case .ratio(let value, let valueText, let zoneTitle, let advice):
-                    LoadGauge(ratio: value, accessibilityLabel: gaugeLabel(valueText: valueText, zoneTitle: zoneTitle))
+                case .ratio(let value, let valueText, _, let advice):
+                    LoadGauge(ratio: value, accessibilityLabel: content.accessibilityLabel ?? "")
                     Text(sentence(valueText: valueText, advice: advice))
                         .font(.footnote)
                         .foregroundStyle(PulsePalette.text2)
@@ -54,10 +55,23 @@ struct LoadCard: View {
             let tint = Self.tint(for: ACWRZone(ratio: value))
             Text(zoneTitle)
                 .pulseEyebrow(tint)
-                .lineLimit(1)
+                .fixedSize(horizontal: false, vertical: true)
                 .padding(.horizontal, 10)
+                .padding(.vertical, dynamicTypeSize.isAccessibilitySize ? 4 : 0)
                 .frame(minHeight: 24)
-                .overlay(Capsule().strokeBorder(tint.opacity(0.4), lineWidth: 1))
+                .overlay { badgeOutline(tint: tint) }
+                // La jauge dit déjà la zone.
+                .accessibilityHidden(true)
+        }
+    }
+
+    /// Une capsule sur une ligne ; un rectangle arrondi quand le nom de la zone passe à la ligne.
+    @ViewBuilder
+    private func badgeOutline(tint: Color) -> some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            RoundedRectangle(cornerRadius: 12).strokeBorder(tint.opacity(0.4), lineWidth: 1)
+        } else {
+            Capsule().strokeBorder(tint.opacity(0.4), lineWidth: 1)
         }
     }
 
@@ -69,10 +83,6 @@ struct LoadCard: View {
             text[range].foregroundColor = PulsePalette.text
         }
         return text
-    }
-
-    private func gaugeLabel(valueText: String, zoneTitle: String) -> String {
-        String(localized: "Charge d'entraînement : ratio \(valueText), \(zoneTitle)", bundle: .module)
     }
 
     private static func tint(for zone: ACWRZone) -> Color {
@@ -96,4 +106,12 @@ struct LoadCard: View {
     LoadCard(content: .hidden)
         .padding()
         .background(PulsePalette.background)
+}
+
+#Preview("Charge, accessibilité 3") {
+    LoadCard(content: .ratio(value: 1.7, valueText: "1,7", zoneTitle: "Risque de blessure",
+                             advice: "Ta charge a bondi : allège les prochains jours."))
+        .padding()
+        .background(PulsePalette.background)
+        .dynamicTypeSize(.accessibility3)
 }

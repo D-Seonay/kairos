@@ -63,4 +63,21 @@ struct DoneCard: Equatable {
     var statsText: String {
         ([durationText, setsText, tonnageText] + [recordsText].compactMap { $0 }).joined(separator: " · ")
     }
+
+    /// « 55 minutes, 18 séries, 6 420 kilos, 2 records » : les mêmes chiffres, dits en toutes lettres.
+    var spokenStats: String {
+        let sets = PulseSpoken.count(setCount, singular: String(localized: "série", bundle: .module),
+                                     plural: String(localized: "séries", bundle: .module))
+        let records = recordCount > 0
+            ? [PulseSpoken.count(recordCount, singular: String(localized: "record", bundle: .module),
+                                 plural: String(localized: "records", bundle: .module))]
+            : []
+        return ([PulseSpoken.duration(seconds: durationMinutes * 60), sets, PulseSpoken.kilos(tonnageKg)] + records)
+            .joined(separator: ", ")
+    }
+
+    /// « Séance faite, 55 minutes, 18 séries, … » : le bloc du bilan lu d'un tenant.
+    var spokenLabel: String {
+        String(localized: "Séance faite, \(spokenStats)", bundle: .module)
+    }
 }

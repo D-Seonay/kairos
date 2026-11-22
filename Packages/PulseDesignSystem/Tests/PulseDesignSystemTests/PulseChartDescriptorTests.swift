@@ -48,6 +48,17 @@ private func descriptor(series: [PulseChartDescriptor.Series], xAxis: PulseChart
     #expect(PulseChartDescriptor.speak(value: 12, unit: "") == "12")
 }
 
+@Test func yValuesUseTheCallersWordingWhenGiven() throws {
+    let built = PulseChartDescriptor(
+        title: "Charge", summary: "", xAxis: .dates(title: "Date"),
+        yAxis: .init(title: "Charge", unit: "kilos", range: 0...10) { PulseSpoken.kilos($0) }, series: [], calendar: parisCalendar
+    ).makeChartDescriptor()
+    let provider = try #require(built.yAxis?.valueDescriptionProvider)
+    #expect(provider(1) == "1 kilo")
+    #expect(provider(2) == "2 kilos")
+    #expect(provider(62.5) == "62,5 kilos")
+}
+
 @Test func datesAreSpokenInFull() throws {
     let built = descriptor(series: [.init(name: "Réel", points: [.init(date: day(28), y: 10), .init(date: day(29), y: 12)])])
     let axis = try #require(built.xAxis as? AXNumericDataAxisDescriptor)

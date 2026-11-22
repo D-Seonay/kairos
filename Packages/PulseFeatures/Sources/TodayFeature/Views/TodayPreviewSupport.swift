@@ -133,6 +133,11 @@ struct TodayPreviewHost: View {
     TodayPreviewHost(scenario: .goodNight, now: TodayPreviewSupport.date(day: 2, hour: 8))
 }
 
+#Preview("Bonne nuit, accessibilité 3") {
+    TodayPreviewHost(scenario: .goodNight, now: TodayPreviewSupport.date(day: 2, hour: 8), load: .optimal)
+        .dynamicTypeSize(.accessibility3)
+}
+
 #Preview("Charge 1,12, zone optimale") {
     TodayPreviewHost(scenario: .goodNight, now: TodayPreviewSupport.date(day: 2, hour: 8), load: .optimal)
 }
@@ -163,6 +168,16 @@ struct TodayPreviewHost: View {
 
 #Preview("Check-in (trois nuits)") {
     TodayPreviewHost(scenario: .threeNights, now: TodayPreviewSupport.date(day: 2, hour: 8))
+}
+
+#Preview("Check-in, accessibilité 3") {
+    TodayPreviewHost(scenario: .threeNights, now: TodayPreviewSupport.date(day: 2, hour: 8))
+        .dynamicTypeSize(.accessibility3)
+}
+
+#Preview("Charge 1,7, accessibilité 3") {
+    TodayPreviewHost(scenario: .goodNight, now: TodayPreviewSupport.date(day: 2, hour: 8), load: .risk)
+        .dynamicTypeSize(.accessibility3)
 }
 
 #Preview("Jour de repos") {

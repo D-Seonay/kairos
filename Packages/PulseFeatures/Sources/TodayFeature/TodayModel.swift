@@ -95,6 +95,8 @@ public final class TodayModel {
         guard !isSubmittingCheckIn, case .needsCheckIn = score, let answers = checkIn.answers else { return }
         isSubmittingCheckIn = true
         defer { isSubmittingCheckIn = false }
+        // Un second échec redit le même message : l'effacer d'abord le fait annoncer de nouveau à VoiceOver.
+        errorMessage = nil
         do {
             let estimated = try await environment.refresher.saveCheckIn(answers)
             errorMessage = nil
