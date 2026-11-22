@@ -117,6 +117,6 @@ private struct WeekdayRow: View {
     /// « 5 exercices » pour une routine, « Jour de repos » sinon.
     private var detail: String {
         guard let assigned else { return String(localized: "Jour de repos", bundle: .module) }
-        return String(localized: "\(assigned.exercises.count) exercices", bundle: .module)
+        return TrainText.exercises(assigned.exercises.count)
     }
 }

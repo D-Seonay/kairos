@@ -23,9 +23,14 @@ struct ProgressionPane: View {
             : AnyLayout(HStackLayout(alignment: .top, spacing: 12))
         return layout {
             Indicator(title: String(localized: "1RM estimé", bundle: .module), value: oneRepMaxText,
-                      detail: changeText, detailColor: changeColor)
+                      detail: changeText, detailColor: changeColor,
+                      spoken: TrainText.indicatorSpoken(title: ExerciseSheetModel.oneRepMaxName, value: model.oneRepMaxSpokenText,
+                                                        detail: model.oneRepMaxChangeSpokenText))
             Indicator(title: String(localized: "Meilleure série", bundle: .module), value: bestSetText,
-                      detail: model.bestSet.map { model.dateText($0.date) }, detailColor: PulsePalette.text2)
+                      detail: model.bestSet.map { model.dateText($0.date) }, detailColor: PulsePalette.text2,
+                      spoken: TrainText.indicatorSpoken(title: String(localized: "Meilleure série", bundle: .module),
+                                                        value: model.bestSetSpokenText,
+                                                        detail: model.bestSet.map { model.dateText($0.date) }))
         }
     }
 
@@ -65,8 +70,8 @@ struct ProgressionPane: View {
                         .font(.caption)
                         .foregroundStyle(PulsePalette.muted)
                 }
-                if let summary = model.chartSummary {
-                    ExerciseProgressionChart(points: model.chart, summary: summary)
+                if let summary = model.chartSummary, let descriptor = model.chartDescriptor {
+                    ExerciseProgressionChart(points: model.chart, summary: summary, descriptor: descriptor)
                 } else {
                     Text(String(localized: "Aucune séance de charge sur 90 jours : la courbe apparaîtra avec la prochaine.",
                                 bundle: .module))
@@ -106,6 +111,8 @@ private struct Indicator: View {
     let value: String
     let detail: String?
     let detailColor: Color
+    /// La carte dite en mots : « Maximum estimé sur une répétition, 80 kilos, en hausse de 2,5 kilos en 30 jours ».
+    let spoken: String
 
     var body: some View {
         ObsidianCard {
@@ -124,7 +131,8 @@ private struct Indicator: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .accessibilityElement(children: .combine)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(spoken)
         }
     }
 }
@@ -161,7 +169,8 @@ private struct SessionLineRow: View {
                 }
             }
         }
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(TrainText.spokenHistoryLine(line, dateText: dateText))
     }
 
     private var tonnageText: String {
@@ -191,6 +200,8 @@ private struct IncrementCard: View {
                         .foregroundStyle(PulsePalette.text2)
                 }
             }
+            .accessibilityLabel(String(localized: "Incrément de charge", bundle: .module))
+            .accessibilityValue(PulseSpoken.kilos(model.increment))
             .frame(minHeight: 44)
         }
     }

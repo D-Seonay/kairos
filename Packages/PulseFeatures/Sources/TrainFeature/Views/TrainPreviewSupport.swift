@@ -119,4 +119,14 @@ struct TrainPreviewHost: View {
 #Preview("Sans programme") {
     TrainPreviewHost(now: TrainPreviewSupport.date(day: 2, hour: 9), templateID: nil)
 }
+
+#Preview("Lundi Push, ajustée, accessibilité XL") {
+    TrainPreviewHost(now: TrainPreviewSupport.date(day: 2, hour: 9), category: .moderateFatigue)
+        .dynamicTypeSize(.accessibility3)
+}
+
+#Preview("Séance en cours, accessibilité XL") {
+    TrainPreviewHost(now: TrainPreviewSupport.date(day: 2, hour: 9), sessionRunning: true)
+        .dynamicTypeSize(.accessibility3)
+}
 #endif

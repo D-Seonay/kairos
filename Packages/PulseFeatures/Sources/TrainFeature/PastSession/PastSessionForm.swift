@@ -30,6 +30,8 @@ public struct PastSessionForm: View {
                 Stepper(value: $draft.durationMinutes, in: PastSessionDraft.durationRange, step: PastSessionDraft.durationStep) {
                     Text(String(localized: "Durée : \(PulseFormat.duration(minutes: draft.durationMinutes))", bundle: .module))
                 }
+                .accessibilityLabel(String(localized: "Durée", bundle: .module))
+                .accessibilityValue(PulseSpoken.duration(seconds: draft.durationMinutes * 60))
                 .frame(minHeight: 44)
             }
             .listRowBackground(PulsePalette.surface)
@@ -60,6 +62,7 @@ public struct PastSessionForm: View {
         }
         .scrollContentBackground(.hidden)
         .background(PulsePalette.background)
+        .pulseAnnounceError(problem)
         .navigationTitle(String(localized: "Séance passée", bundle: .module))
         .pulseInlineTitle()
         .toolbar {
@@ -104,5 +107,10 @@ private struct PastSessionFormPreview: View {
 
 #Preview("Séance passée") {
     PastSessionFormPreview()
+}
+
+#Preview("Séance passée, accessibilité XL") {
+    PastSessionFormPreview()
+        .dynamicTypeSize(.accessibility3)
 }
 #endif

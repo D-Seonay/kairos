@@ -197,3 +197,12 @@ struct HevyImportModelTests {
         #expect(model.step == .summary)
     }
 }
+
+@MainActor @Suite struct HevyImportAnnouncementTests {
+    @Test func theResultIsAnnouncedWithTheImportedCount() {
+        #expect(HevyImportModel.doneAnnouncement(for: HevyImportResult(importedSessions: 42, createdExercises: 1, records: 3))
+            == "Import terminé : 42 séances importées")
+        #expect(HevyImportModel.doneAnnouncement(for: HevyImportResult(importedSessions: 1, createdExercises: 0, records: 0))
+            == "Import terminé : 1 séance importée")
+    }
+}

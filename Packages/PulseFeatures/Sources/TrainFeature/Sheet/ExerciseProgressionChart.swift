@@ -3,10 +3,12 @@ import PulseDesignSystem
 import PulseDomain
 import SwiftUI
 
-/// La courbe du meilleur 1RM estimé de chaque séance. Un résumé en une phrase tient lieu d'étiquette VoiceOver.
+/// La courbe du meilleur 1RM estimé de chaque séance. Une phrase de résumé tient lieu d'étiquette VoiceOver ; le descripteur
+/// donne le graphique audio et le détail point par point.
 struct ExerciseProgressionChart: View {
     let points: [ChartPoint]
     let summary: String
+    let descriptor: PulseChartDescriptor
     @Environment(\.pulseTheme) private var theme
 
     var body: some View {
@@ -36,7 +38,7 @@ struct ExerciseProgressionChart: View {
         }
         .environment(\.locale, Locale(identifier: "fr_FR"))
         .frame(height: 170)
-        .accessibilityElement(children: .ignore)
         .accessibilityLabel(summary)
+        .accessibilityChartDescriptor(descriptor)
     }
 }

@@ -109,13 +109,19 @@ public struct TrainView: View {
             .padding(PulseMetrics.spacing)
         }
         .refreshable { await model.refresh() }
+        .pulseAnnounceError(model.errorMessage)
+        .pulseAnnounceError(creationErrorMessage)
+    }
+
+    private var creationErrorMessage: String? {
+        creationFailed ? String(localized: "Pulse n'a pas pu créer la routine.", bundle: .module) : nil
     }
 
     private var routines: some View {
         VStack(alignment: .leading, spacing: 10) {
             routinesHeader
-            if creationFailed {
-                Text(String(localized: "Pulse n'a pas pu créer la routine.", bundle: .module))
+            if let message = creationErrorMessage {
+                Text(message)
                     .font(.footnote)
                     .foregroundStyle(PulsePalette.bad)
             }

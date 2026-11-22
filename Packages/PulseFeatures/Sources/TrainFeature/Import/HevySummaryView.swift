@@ -20,7 +20,8 @@ struct HevySummaryView: View {
                             SummaryLine(title: String(localized: "Séances à importer", bundle: .module),
                                         value: String(preview.newWorkouts.count))
                             if let period = model.periodText {
-                                SummaryLine(title: String(localized: "Période", bundle: .module), value: period)
+                                SummaryLine(title: String(localized: "Période", bundle: .module), value: period,
+                                        spokenValue: model.periodSpokenText)
                             }
                             SummaryLine(title: String(localized: "Exercices", bundle: .module), value: String(preview.names.count))
                             SummaryLine(title: String(localized: "Lignes de cardio détectées", bundle: .module),
@@ -51,6 +52,8 @@ struct HevySummaryView: View {
 private struct SummaryLine: View {
     let title: String
     let value: String
+    /// La valeur dite en mots quand le texte visible est abrégé (« sept. »).
+    var spokenValue: String?
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
@@ -63,6 +66,7 @@ private struct SummaryLine: View {
                 .foregroundStyle(PulsePalette.text)
                 .multilineTextAlignment(.trailing)
         }
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(String(localized: "\(title), \(spokenValue ?? value)", bundle: .module))
     }
 }

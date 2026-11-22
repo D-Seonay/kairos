@@ -11,22 +11,35 @@ extension TrainModel {
     /// La tuile Musculation : « Push · ajustée · ~ 55 min », « Repos · prochaine : Pull, mardi », « Course aujourd'hui »,
     /// « Aucun programme actif ».
     public var strengthSubtitle: String {
+        strengthSubtitle(spoken: false)
+    }
+
+    /// La même ligne dite en mots, sans « · » ni « ~ » : « Push, ajustée, environ 55 minutes ».
+    public var strengthSubtitleSpoken: String {
+        strengthSubtitle(spoken: true)
+    }
+
+    private func strengthSubtitle(spoken: Bool) -> String {
         guard let today else { return String(localized: "Séance du jour", bundle: .module) }
+        let separator = spoken ? ", " : " · "
         switch today.plannedDay {
         case .noProgram:
             return String(localized: "Aucun programme actif", bundle: .module)
         case .rest(let next):
             guard let next else { return String(localized: "Repos aujourd'hui", bundle: .module) }
             let when = daysUntil(next.weekday) == 1 ? String(localized: "demain", bundle: .module) : next.weekday.trainName
-            return String(localized: "Repos · prochaine : \(next.day.name), \(when)", bundle: .module)
+            return spoken ? String(localized: "Repos, prochaine : \(next.day.name), \(when)", bundle: .module)
+                : String(localized: "Repos · prochaine : \(next.day.name), \(when)", bundle: .module)
         case .run:
             return String(localized: "Course aujourd'hui", bundle: .module)
         case .strength(let day):
             let active = today.activeDay ?? day
             let minutes = SessionSummary.make(day: active, directory: directory).estimatedMinutes
-            let duration = String(localized: "~ \(minutes) min", bundle: .module)
-            guard today.status == .adjusted else { return String(localized: "\(day.name) · \(duration)", bundle: .module) }
-            return String(localized: "\(day.name) · ajustée · \(duration)", bundle: .module)
+            let duration = spoken ? TrainText.approximateMinutes(minutes) : String(localized: "~ \(minutes) min", bundle: .module)
+            var parts = [day.name]
+            if today.status == .adjusted { parts.append(String(localized: "ajustée", bundle: .module)) }
+            parts.append(duration)
+            return parts.joined(separator: separator)
         }
     }
 

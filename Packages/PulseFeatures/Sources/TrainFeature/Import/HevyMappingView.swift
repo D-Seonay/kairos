@@ -90,8 +90,7 @@ struct HevyMappingView: View {
     }
 
     private var importTitle: String {
-        let count = model.preview?.newWorkouts.count ?? 0
-        return String(localized: "Importer \(count) séances", bundle: .module)
+        TrainText.importTitle(sessions: model.preview?.newWorkouts.count ?? 0)
     }
 
     // MARK: - Menu et feuilles

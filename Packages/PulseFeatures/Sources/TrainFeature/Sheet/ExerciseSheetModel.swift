@@ -92,18 +92,60 @@ public final class ExerciseSheetModel {
         return MuscleIntensity.levels(weights: weights)
     }
 
-    /// Le résumé de la courbe pour VoiceOver : nombre de séances, premier et dernier point. `nil` sans point.
+    /// Le résumé de la courbe pour VoiceOver : nombre de séances, premier et dernier point, en mots. `nil` sans point.
     public var chartSummary: String? {
         guard let first = chart.first, let last = chart.last else { return nil }
-        let sessions = String(localized: "\(chart.count) séances", bundle: .module)
+        let sessions = TrainText.sessions(chart.count)
         let start = pointText(first)
-        guard chart.count > 1 else { return String(localized: "1RM estimé, \(sessions) : \(start).", bundle: .module) }
-        return String(localized: "1RM estimé, \(sessions) : \(start), puis \(pointText(last)).", bundle: .module)
+        let name = Self.oneRepMaxName
+        guard chart.count > 1 else { return String(localized: "\(name), \(sessions) : \(start).", bundle: .module) }
+        return String(localized: "\(name), \(sessions) : \(start), puis \(pointText(last)).", bundle: .module)
+    }
+
+    /// Le graphique audio de la courbe : axe des dates, axe du maximum estimé en kilos et une série ; `nil` sans point.
+    public var chartDescriptor: PulseChartDescriptor? {
+        guard let summary = chartSummary else { return nil }
+        let values = chart.map(\.value)
+        let (low, high) = (values.min() ?? 0, values.max() ?? 0)
+        let name = Self.oneRepMaxName
+        return PulseChartDescriptor(
+            title: name, summary: summary, xAxis: .dates(title: String(localized: "Date", bundle: .module)),
+            yAxis: .init(title: String(localized: "\(name), en kilos", bundle: .module), unit: String(localized: "kilos", bundle: .module),
+                         range: low < high ? low...high : (low - 1)...(high + 1), valueText: { PulseSpoken.kilos(Self.rounded($0)) }),
+            series: [.init(name: name, points: chart.map { .init(date: $0.date, y: $0.value) })], calendar: environment.calendar)
+    }
+
+    /// « Maximum estimé sur une répétition » : le 1RM, dit en mots.
+    static var oneRepMaxName: String {
+        String(localized: "Maximum estimé sur une répétition", bundle: .module)
+    }
+
+    /// « 80 kilos » ; « aucune valeur » sans séance de charge.
+    public var oneRepMaxSpokenText: String {
+        currentOneRepMax.map { PulseSpoken.kilos(Self.rounded($0)) } ?? String(localized: "aucune valeur", bundle: .module)
+    }
+
+    /// « en hausse de 2,5 kilos en 30 jours », « en baisse de 2 kilos en 30 jours », « inchangé en 30 jours » ; `nil` sans séance
+    /// d'il y a 30 jours ou plus.
+    public var oneRepMaxChangeSpokenText: String? {
+        guard let change = oneRepMaxChange30Days else { return nil }
+        let kilos = PulseSpoken.kilos(Self.rounded(abs(change)))
+        if Self.rounded(change) > 0 { return String(localized: "en hausse de \(kilos) en 30 jours", bundle: .module) }
+        if Self.rounded(change) < 0 { return String(localized: "en baisse de \(kilos) en 30 jours", bundle: .module) }
+        return String(localized: "inchangé en 30 jours", bundle: .module)
+    }
+
+    /// « 72,5 kilos, 5 répétitions » ; « aucune série » sans série.
+    public var bestSetSpokenText: String {
+        bestSet?.spokenText ?? String(localized: "aucune série", bundle: .module)
+    }
+
+    private nonisolated static func rounded(_ value: Double) -> Double {
+        (value * 10).rounded() / 10
     }
 
     private func pointText(_ point: ChartPoint) -> String {
-        let value = PulseFormat.decimal(point.value, maxFractionDigits: 1)
-        return String(localized: "\(value) kg le \(dateText(point.date))", bundle: .module)
+        String(localized: "\(PulseSpoken.kilos(Self.rounded(point.value))) le \(dateText(point.date))", bundle: .module)
     }
 
     /// « 26 octobre », dans le calendrier de l'environnement.

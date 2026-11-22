@@ -121,6 +121,7 @@ func pplProgram(withRun run: Bool = false) -> Program {
     let model = TrainModel(environment: saturday.environment)
     await model.refresh()
     #expect(model.strengthSubtitle == "Repos · prochaine : Push, lundi")
+    #expect(model.strengthSubtitleSpoken == "Repos, prochaine : Push, lundi")
 
     let sunday = TrainFixture(now: TrainClock.date(day: 8, hour: 9))
     try await sunday.activate(pplProgram())
@@ -135,6 +136,7 @@ func pplProgram(withRun run: Bool = false) -> Program {
     let model = TrainModel(environment: fixture.environment)
     await model.refresh()
     #expect(model.strengthSubtitle == "Push · ~ 15 min")
+    #expect(model.strengthSubtitleSpoken == "Push, environ 15 minutes")
 }
 
 @MainActor @Test func trainModelAddsARoutineToTheActiveProgram() async throws {

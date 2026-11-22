@@ -21,6 +21,8 @@ public struct HevyImportFlow: View {
             .navigationTitle(String(localized: "Importer depuis Hevy", bundle: .module))
             .pulseInlineTitle()
             .navigationBarBackButtonHidden(isImporting)
+            .pulseAnnounce(model.doneAnnouncement)
+            .pulseAnnounceError(model.failureAnnouncement)
     }
 
     @ViewBuilder
@@ -66,6 +68,7 @@ private struct HevyProgressView: View {
                     .accessibilityHidden(true)
             } else {
                 ProgressView()
+                    .accessibilityLabel(title)
             }
             Text(title)
                 .font(.headline)

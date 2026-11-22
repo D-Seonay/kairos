@@ -66,6 +66,28 @@ enum HistoryPreviewSupport {
     }
 }
 
+/// Affiche la feuille « Modifier » de la séance Hevy « Push » de l'aperçu.
+struct SessionCorrectionPreviewHost: View {
+    @State private var model: SessionDetailModel?
+
+    var body: some View {
+        NavigationStack {
+            if let model, let correction = model.correction() {
+                SessionCorrectionView(correction: correction, blocks: model.correctableBlocks, onSave: { _ in true })
+            } else {
+                ProgressView()
+            }
+        }
+        .task {
+            let environment = await HistoryPreviewSupport.environment()
+            let detail = SessionDetailModel(environment: environment, sessionID: HistoryPreviewSupport.pushID ?? UUID())
+            await detail.load()
+            model = detail
+        }
+        .preferredColorScheme(.light)
+    }
+}
+
 /// Affiche l'historique en mémoire dans une pile où toucher une séance ouvre son détail.
 struct HistoryPreviewHost: View {
     var withSessions = true
@@ -119,5 +141,20 @@ struct SessionDetailPreviewHost: View {
 
 #Preview("Détail d'une séance Hevy") {
     SessionDetailPreviewHost()
+}
+
+#Preview("Historique, accessibilité XL") {
+    HistoryPreviewHost()
+        .dynamicTypeSize(.accessibility3)
+}
+
+#Preview("Détail d'une séance, accessibilité XL") {
+    SessionDetailPreviewHost()
+        .dynamicTypeSize(.accessibility3)
+}
+
+#Preview("Correction d'une séance, accessibilité XL") {
+    SessionCorrectionPreviewHost()
+        .dynamicTypeSize(.accessibility3)
 }
 #endif

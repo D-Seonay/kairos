@@ -71,6 +71,7 @@ public struct ProgramEditorView: View {
         } message: {
             Text(String(localized: "Il ne sera plus actif ni proposé, mais tes séances le gardent.", bundle: .module))
         }
+        .pulseAnnounceError(errorMessage ?? model.errorMessage)
         .task { await model.load() }
     }
 
@@ -80,7 +81,8 @@ public struct ProgramEditorView: View {
     private func activeProgram(_ program: Program) -> some View {
         Section {
             Button { ask(.rename, text: program.name) } label: {
-                LabeledRow(title: program.name, detail: summary(of: program), systemImage: "pencil")
+                LabeledRow(title: program.name, detail: summary(of: program), spokenDetail: spokenSummary(of: program),
+                           systemImage: "pencil")
             }
             .accessibilityHint(String(localized: "Renomme le programme", bundle: .module))
         } header: {
@@ -131,12 +133,10 @@ public struct ProgramEditorView: View {
     private func routineRow(_ day: RoutineDay, in program: Program) -> some View {
         if day.kind == .run {
             LabeledRow(title: day.name, detail: String(localized: "Course · modifiable plus tard", bundle: .module),
-                       systemImage: "lock.fill")
-                .accessibilityElement(children: .combine)
+                       spokenDetail: String(localized: "Course, modifiable plus tard", bundle: .module), systemImage: "lock.fill")
         } else {
             NavigationLink(value: TrainDestination.routine(program: program.id, day: day.id)) {
-                LabeledRow(title: day.name, detail: String(localized: "\(day.exercises.count) exercices", bundle: .module),
-                           systemImage: nil)
+                LabeledRow(title: day.name, detail: TrainText.exercises(day.exercises.count), systemImage: nil)
             }
             .swipeActions(edge: .trailing) {
                 Button(String(localized: "Supprimer", bundle: .module), role: .destructive) { removal = day }
@@ -158,7 +158,8 @@ public struct ProgramEditorView: View {
         Section {
             ForEach(model.otherPrograms) { other in
                 Button { perform { try await model.activate(other.id) } } label: {
-                    LabeledRow(title: other.name, detail: summary(of: other), systemImage: "arrow.triangle.swap")
+                    LabeledRow(title: other.name, detail: summary(of: other), spokenDetail: spokenSummary(of: other),
+                               systemImage: "arrow.triangle.swap")
                 }
                 .accessibilityHint(String(localized: "Rend ce programme actif", bundle: .module))
                 .swipeActions(edge: .trailing) {
@@ -194,8 +195,11 @@ public struct ProgramEditorView: View {
     // MARK: - Actions
 
     private func summary(of program: Program) -> String {
-        [String(localized: "\(program.days.count) routines", bundle: .module),
-         String(localized: "\(program.sessionsPerWeek) séances par semaine", bundle: .module)].joined(separator: " · ")
+        TrainText.programSummary(routineCount: program.days.count, sessionsPerWeek: program.sessionsPerWeek)
+    }
+
+    private func spokenSummary(of program: Program) -> String {
+        TrainText.programSummarySpoken(routineCount: program.days.count, sessionsPerWeek: program.sessionsPerWeek)
     }
 
     private func ask(_ kind: NamePrompt, text: String) {
@@ -294,6 +298,8 @@ private struct ProgramTemplateChoice: Identifiable {
 private struct LabeledRow: View {
     let title: String
     let detail: String
+    /// Le détail dit en mots quand il contient des signes (« · ») que VoiceOver lirait mal.
+    var spokenDetail: String?
     let systemImage: String?
 
     var body: some View {
@@ -317,5 +323,21 @@ private struct LabeledRow: View {
         }
         .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
         .contentShape(Rectangle())
+        .modifier(SpokenDetailModifier(label: spokenDetail.map { String(localized: "\(title), \($0)", bundle: .module) }))
+    }
+}
+
+/// Lit `label` à la place du texte visible quand il y en a un ; sans lui, le titre et le détail sont lus ensemble.
+private struct SpokenDetailModifier: ViewModifier {
+    let label: String?
+
+    func body(content: Content) -> some View {
+        if let label {
+            content
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(label)
+        } else {
+            content
+        }
     }
 }

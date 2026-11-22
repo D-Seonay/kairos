@@ -183,3 +183,28 @@ private func hevyPush(_ fixture: TrainFixture, status: SessionStatus = .complete
     #expect(saved.tonnageKg == 80 * 5 + 90 * 4)
     #expect(model.session?.note == "Corrigée")
 }
+
+@MainActor @Test func detailSaysSetsSummaryAndMusclesInWords() async throws {
+    let fixture = TrainFixture()
+    try await fixture.log(on: TrainClock.date(month: 10, day: 5, hour: 18), sets: [LoggedSet(weightKg: 60, reps: 5)])
+    let session = try await hevyPush(fixture)
+    _ = try await fixture.environment.records.recomputeAll()
+    let model = SessionDetailModel(environment: fixture.environment, sessionID: session.id)
+    await model.load()
+    let first = try #require(model.blocks.first)
+    #expect(first.sets.map(\.spokenText) == ["40 kilos, 10 répétitions", "80 kilos, 5 répétitions", "82,5 kilos, 4 répétitions"])
+    #expect(model.summaryText.contains(" · ") && model.summaryText.contains("kg"))
+    #expect(!model.summarySpokenText.contains(" · ") && !model.summarySpokenText.contains("kg"))
+    #expect(model.summarySpokenText.hasPrefix("1 heure, 3 séries") || model.summarySpokenText.hasPrefix("1 heure 0"))
+    #expect(model.headerSpokenText.contains("importée de Hevy") && model.headerSpokenText.hasSuffix(model.summarySpokenText))
+    #expect(model.musclesSpokenText.hasPrefix("Muscles sollicités par la séance. "))
+    #expect(model.musclesSpokenText.contains("Pectoraux, intensité "))
+}
+
+@MainActor @Test func detailSaysOneWorkingSetInTheSingular() async throws {
+    let fixture = TrainFixture()
+    let session = try await fixture.log(on: TrainClock.date(month: 10, day: 12, hour: 18), sets: [LoggedSet(weightKg: 80, reps: 5)])
+    let model = SessionDetailModel(environment: fixture.environment, sessionID: session.id)
+    await model.load()
+    #expect(model.summaryText.contains("1 série ·") && model.summarySpokenText.contains("1 série,"))
+}

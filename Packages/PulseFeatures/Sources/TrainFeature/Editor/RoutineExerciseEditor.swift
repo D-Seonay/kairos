@@ -37,16 +37,25 @@ struct RoutineExerciseEditor: View {
 
     private func header(_ exercise: RoutineExercise) -> some View {
         let name = model.name(of: exercise.exercise)
-        let summary = self.summary(of: exercise)
+        let tracksDuration = model.tracksDuration(exercise.exercise)
+        let summary = TrainText.routineExerciseSummary(exercise, tracksDuration: tracksDuration)
+        let hasIssue = model.issues[index] != nil
         return Button(action: onToggle) {
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(name)
                         .font(.headline)
                         .foregroundStyle(PulsePalette.text)
-                    Text(summary)
-                        .font(.footnote)
-                        .foregroundStyle(model.issues[index] == nil ? PulsePalette.text2 : PulsePalette.bad)
+                    // Une erreur ne tient pas qu'à la couleur : une icône précède le résumé tant que la ligne est repliée.
+                    HStack(alignment: .firstTextBaseline, spacing: 4) {
+                        if hasIssue {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .accessibilityHidden(true)
+                        }
+                        Text(summary)
+                    }
+                    .font(.footnote)
+                    .foregroundStyle(hasIssue ? PulsePalette.bad : PulsePalette.text2)
                 }
                 .multilineTextAlignment(.leading)
                 Spacer(minLength: 0)
@@ -67,22 +76,11 @@ struct RoutineExerciseEditor: View {
         // Un style explicite : seul l'en-tête répond à l'appui, pas les commandes de la ligne.
         .buttonStyle(.plain)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(String(localized: "\(name), \(summary)", bundle: .module))
+        .accessibilityLabel(TrainText.routineExerciseLabel(name: name, exercise: exercise, tracksDuration: tracksDuration,
+                                                           hasIssue: hasIssue))
         .accessibilityHint(isExpanded ? String(localized: "Replie les réglages", bundle: .module)
                             : String(localized: "Déplie les réglages", bundle: .module))
         .accessibilityAddTraits(.isButton)
-    }
-
-    /// « 3 × 8–12 · RPE 8 · repos 2 min » ; « Par série · 4–12 · … » avec une fourchette par série ; « 30–60 s » pour un exercice tenu.
-    private func summary(of exercise: RoutineExercise) -> String {
-        let unit = model.tracksDuration(exercise.exercise) ? " s" : ""
-        let range = "\(exercise.repsMin)–\(exercise.repsMax)\(unit)"
-        let volume = exercise.setTargets == nil
-            ? String(localized: "\(exercise.sets) × \(range)", bundle: .module)
-            : String(localized: "Par série · \(range)", bundle: .module)
-        let rpe = PulseFormat.decimal(exercise.targetRPE, maxFractionDigits: 1)
-        let rest = PulseFormat.restDuration(seconds: exercise.restSeconds)
-        return String(localized: "\(volume) · RPE \(rpe) · repos \(rest)", bundle: .module)
     }
 
     // MARK: - Commandes
@@ -92,22 +90,40 @@ struct RoutineExerciseEditor: View {
         Stepper(value: Binding(get: { exercise.sets }, set: { model.setSets($0, at: index) }), in: RoutineRules.sets) {
             label(String(localized: "Séries : \(exercise.sets)", bundle: .module))
         }
+        .accessibilityLabel(String(localized: "Séries", bundle: .module))
+        .accessibilityValue(TrainText.sets(exercise.sets))
         .frame(minHeight: 44)
         Toggle(isOn: Binding(get: { exercise.setTargets != nil }, set: { model.setPerSetTargets($0, at: index) })) {
             label(String(localized: "Par série", bundle: .module))
         }
         .frame(minHeight: 44)
         repetitions(exercise)
+        pacing(exercise)
+        options(exercise)
+    }
+
+    /// Le RPE cible et le repos.
+    @ViewBuilder
+    private func pacing(_ exercise: RoutineExercise) -> some View {
         Stepper(value: Binding(get: { exercise.targetRPE }, set: { model.setRPE($0, at: index) }), in: RoutineRules.rpe,
                 step: RoutineRules.rpeStep) {
             label(String(localized: "RPE cible : \(PulseFormat.decimal(exercise.targetRPE, maxFractionDigits: 1))", bundle: .module))
         }
+        .accessibilityLabel(String(localized: "RPE cible", bundle: .module))
+        .accessibilityValue(PulseFormat.decimal(exercise.targetRPE, maxFractionDigits: 1))
         .frame(minHeight: 44)
         Stepper(value: Binding(get: { exercise.restSeconds }, set: { model.setRest($0, at: index) }), in: RoutineRules.rest,
                 step: RoutineRules.restStep) {
             label(String(localized: "Repos : \(PulseFormat.restDuration(seconds: exercise.restSeconds))", bundle: .module))
         }
+        .accessibilityLabel(String(localized: "Repos", bundle: .module))
+        .accessibilityValue(PulseSpoken.duration(seconds: exercise.restSeconds))
         .frame(minHeight: 44)
+    }
+
+    /// Le super set, l'incrément, les erreurs et le retrait.
+    @ViewBuilder
+    private func options(_ exercise: RoutineExercise) -> some View {
         Toggle(isOn: Binding(get: { model.isSuperset(at: index) }, set: { _ in model.toggleSuperset(at: index) })) {
             label(String(localized: "Super set avec l'exercice suivant", bundle: .module))
         }
@@ -119,6 +135,8 @@ struct RoutineExerciseEditor: View {
             label(String(localized: "Incrément : \(PulseFormat.decimal(model.increment(for: exercise.exercise), maxFractionDigits: 2)) kg",
                          bundle: .module))
         }
+        .accessibilityLabel(String(localized: "Incrément de charge", bundle: .module))
+        .accessibilityValue(PulseSpoken.kilos(model.increment(for: exercise.exercise)))
         .frame(minHeight: 44)
         ForEach(model.issues[index] ?? [], id: \.self) { issue in
             Text(issue.message(tracksDuration: model.tracksDuration(exercise.exercise)))
@@ -145,7 +163,9 @@ struct RoutineExerciseEditor: View {
                     Text(String(localized: "Série \(position + 1)", bundle: .module))
                         .font(.footnote.weight(.semibold))
                         .foregroundStyle(PulsePalette.text2)
-                    RangeSteppers(target: target, held: held) { model.updateSetTarget($0, set: position, at: index) }
+                    RangeSteppers(target: target, held: held, setNumber: position + 1) {
+                        model.updateSetTarget($0, set: position, at: index)
+                    }
                 }
             }
         } else {
@@ -165,6 +185,8 @@ struct RoutineExerciseEditor: View {
 private struct RangeSteppers: View {
     let target: SetTarget
     let held: Bool
+    /// Le numéro de la série (à partir de 1) quand la fourchette est propre à une série ; `nil` pour la fourchette commune.
+    var setNumber: Int?
     let onChange: (SetTarget) -> Void
 
     var body: some View {
@@ -176,12 +198,16 @@ private struct RangeSteppers: View {
             Text(String(localized: "Minimum : \(target.repsMin) \(unit)", bundle: .module))
                 .foregroundStyle(PulsePalette.text)
         }
+        .accessibilityLabel(TrainText.rangeStepperLabel(isMaximum: false, tracksDuration: held, setNumber: setNumber))
+        .accessibilityValue(TrainText.rangeStepperValue(target.repsMin, tracksDuration: held))
         .frame(minHeight: 44)
         Stepper(value: Binding(get: { target.repsMax }, set: { onChange(SetTarget(repsMin: min(target.repsMin, $0), repsMax: $0)) }),
                 in: bounds, step: step) {
             Text(String(localized: "Maximum : \(target.repsMax) \(unit)", bundle: .module))
                 .foregroundStyle(PulsePalette.text)
         }
+        .accessibilityLabel(TrainText.rangeStepperLabel(isMaximum: true, tracksDuration: held, setNumber: setNumber))
+        .accessibilityValue(TrainText.rangeStepperValue(target.repsMax, tracksDuration: held))
         .frame(minHeight: 44)
     }
 }

@@ -21,10 +21,13 @@ public struct SessionSetLine: Identifiable, Equatable, Sendable {
     public var type: SetType
     public var rpe: Double?
     public var isRecord: Bool
+    /// La même série dite en mots : « 70 kilos, 5 répétitions », « assistance de 15 kilos, 8 répétitions », « 45 secondes ».
+    public var spokenText: String
 
-    public init(id: UUID, text: String, type: SetType, rpe: Double?, isRecord: Bool) {
+    public init(id: UUID, text: String, spokenText: String? = nil, type: SetType, rpe: Double?, isRecord: Bool) {
         self.id = id
         self.text = text
+        self.spokenText = spokenText ?? text
         self.type = type
         self.rpe = rpe
         self.isRecord = isRecord
@@ -55,6 +58,8 @@ public final class SessionDetailModel {
     public private(set) var session: WorkoutSession?
     public private(set) var blocks: [SessionExerciseBlock] = []
     public private(set) var muscleLevels: [MuscleMapRegion: Int] = [:]
+    /// Ce que VoiceOver lit pour la carte musculaire : « Muscles sollicités par la séance. Pectoraux, intensité forte. … ».
+    public private(set) var musclesSpokenText = ""
     /// Vrai une fois la séance lue, qu'elle ait été trouvée ou non.
     public private(set) var hasLoaded = false
     public private(set) var isMissing = false
@@ -79,11 +84,18 @@ public final class SessionDetailModel {
             isMissing = session == nil
             blocks = session.map(makeBlocks(of:)) ?? []
             muscleLevels = session.map { MuscleIntensity.levels(weights: muscleWeights(of: $0)) } ?? [:]
+            musclesSpokenText = session.map { Self.musclesSpokenText(weights: muscleWeights(of: $0)) } ?? ""
             errorMessage = nil
             hasLoaded = true
         } catch {
             errorMessage = String(localized: "Pulse n'a pas pu lire cette séance.", bundle: .module)
         }
+    }
+
+    /// « Muscles sollicités par la séance. Pectoraux, intensité forte. Triceps, intensité moyenne. »
+    static func musclesSpokenText(weights: [Muscle: Double]) -> String {
+        let summary = MuscleMapSummary.text(levels: MuscleIntensity.byMuscle(weights: weights))
+        return String(localized: "Muscles sollicités par la séance. \(summary)", bundle: .module)
     }
 
     /// Vrai si la séance a au moins une série hors échauffement.
@@ -145,6 +157,7 @@ public final class SessionDetailModel {
         isMissing = true
         blocks = []
         muscleLevels = [:]
+        musclesSpokenText = ""
     }
 
     /// « lundi 12 octobre 2026 à 18:00 », dans le calendrier de l'environnement.
@@ -157,16 +170,37 @@ public final class SessionDetailModel {
 
     /// « 1 h 05 · 12 séries · 4 250 kg · 2 records » (les éléments inconnus ou nuls sont omis).
     public var summaryText: String {
+        summary(spoken: false)
+    }
+
+    /// « 1 heure 5 minutes, 12 séries, 4 250 kilos, 2 records » : `summaryText` dit en mots.
+    public var summarySpokenText: String {
+        summary(spoken: true)
+    }
+
+    /// Ce que VoiceOver lit en tête du détail : la date, les marques « importée de Hevy » et « abandonnée », puis le résumé dit.
+    public var headerSpokenText: String {
+        guard let session else { return "" }
+        var parts = [dateText]
+        if session.source == .hevy { parts.append(String(localized: "importée de Hevy", bundle: .module)) }
+        if session.status == .abandoned { parts.append(String(localized: "abandonnée", bundle: .module)) }
+        parts.append(summarySpokenText)
+        return parts.joined(separator: ", ")
+    }
+
+    private func summary(spoken: Bool) -> String {
         guard let session else { return "" }
         let working = session.sets.filter { $0.setType != .warmup }
         var parts: [String] = []
-        if let minutes = HistoryModel.durationMinutes(of: session), minutes > 0 { parts.append(PulseFormat.duration(minutes: minutes)) }
-        parts.append(String(localized: "\(working.count) séries", bundle: .module))
+        if let minutes = HistoryModel.durationMinutes(of: session), minutes > 0 {
+            parts.append(spoken ? PulseSpoken.duration(seconds: minutes * 60) : PulseFormat.duration(minutes: minutes))
+        }
+        parts.append(TrainText.sets(working.count))
         let tonnage = SessionTonnage.kilograms(of: session.sets, loadKind: directory.loadKind(of:))
-        if tonnage > 0 { parts.append(HistoryRow.tonnage(tonnage)) }
+        if tonnage > 0 { parts.append(spoken ? TrainText.tonnage(tonnage) : HistoryRow.tonnage(tonnage)) }
         let records = working.filter(\.isPersonalRecord).count
-        if records > 0 { parts.append(String(localized: "\(records) records", bundle: .module)) }
-        return parts.joined(separator: " · ")
+        if records > 0 { parts.append(TrainText.records(records)) }
+        return parts.joined(separator: spoken ? ", " : " · ")
     }
 
     // MARK: - Interne
@@ -199,7 +233,9 @@ public final class SessionDetailModel {
     }
 
     private func line(for set: WorkoutSet) -> SessionSetLine {
-        SessionSetLine(id: set.id, text: Self.text(of: set), type: set.setType, rpe: set.rpe, isRecord: set.isPersonalRecord)
+        SessionSetLine(id: set.id, text: Self.text(of: set),
+                       spokenText: TrainText.spokenSet(of: set, loadKind: directory.loadKind(of: set.exercise)), type: set.setType,
+                       rpe: set.rpe, isRecord: set.isPersonalRecord)
     }
 
     /// « 70 × 5 » ; sans charge « 8 » ; une série tenue « 45 s » ; « — » sans rien de saisi.

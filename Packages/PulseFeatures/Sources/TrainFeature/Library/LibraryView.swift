@@ -48,6 +48,7 @@ public struct LibraryView: View {
                 CustomExerciseForm(model: model.creator(), onSaved: { _ in Task { await model.load() } })
             }
         }
+        .pulseAnnounceError(model.errorMessage)
         .task { await model.load() }
     }
 
@@ -55,8 +56,10 @@ public struct LibraryView: View {
 
     private var filters: some View {
         VStack(alignment: .leading, spacing: 8) {
-            ChoicePills(options: groupOptions, selection: groupSelection)
-            ChoicePills(options: equipmentOptions, selection: equipmentSelection)
+            ChoicePills(options: groupOptions, selection: groupSelection,
+                        groupLabel: String(localized: "Filtrer par groupe musculaire", bundle: .module))
+            ChoicePills(options: equipmentOptions, selection: equipmentSelection,
+                        groupLabel: String(localized: "Filtrer par matériel", bundle: .module))
         }
     }
 
@@ -138,11 +141,11 @@ public struct LibraryView: View {
     private var confirmBar: some View {
         if model.mode == .pick(multiple: true) {
             let count = model.selection.count
-            Button(count == 0 ? String(localized: "Ajouter", bundle: .module)
-                    : String(localized: "Ajouter (\(count))", bundle: .module)) {
+            Button(TrainText.addSelectionTitle(count: count)) {
                 onPick(model.confirm())
             }
             .buttonStyle(PrimaryButtonStyle())
+            .accessibilityLabel(TrainText.addSelectionSpoken(count: count))
             .disabled(count == 0)
             .padding(PulseMetrics.spacing)
             .background(.bar)
@@ -193,7 +196,7 @@ private struct ExerciseRow: View {
         }
         .buttonStyle(.plain)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(String(localized: "\(info.name), \(subtitle)", bundle: .module))
+        .accessibilityLabel(String(localized: "\(info.name), \(spokenSubtitle)", bundle: .module))
         .accessibilityHint(hint)
         .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
         .accessibilityIdentifier(TrainIdentifiers.exerciseRowPrefix + info.id.identifier)
@@ -228,11 +231,13 @@ private struct ExerciseRow: View {
 
     /// « Pectoraux · barre · 1RM 65 kg ».
     private var subtitle: String {
-        var parts = [info.group.localizedName, info.equipment.localizedName.lowercased()]
-        if let oneRepMax {
-            parts.append(String(localized: "1RM \(PulseFormat.decimal(oneRepMax, maxFractionDigits: 1)) kg", bundle: .module))
-        }
-        return parts.joined(separator: " · ")
+        TrainText.exerciseRowSubtitle(group: info.group.localizedName, equipment: info.equipment.localizedName, oneRepMax: oneRepMax)
+    }
+
+    /// « Pectoraux, barre, maximum estimé 65 kilos ».
+    private var spokenSubtitle: String {
+        TrainText.exerciseRowSubtitleSpoken(group: info.group.localizedName, equipment: info.equipment.localizedName,
+                                            oneRepMax: oneRepMax)
     }
 
     private var hint: String {

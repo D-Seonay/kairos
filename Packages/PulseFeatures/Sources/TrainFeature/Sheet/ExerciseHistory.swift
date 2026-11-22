@@ -23,14 +23,18 @@ public struct ExerciseHistoryLine: Identifiable, Equatable, Sendable {
     public var date: Date
     /// Les séries hors échauffement : « 70 × 5 · 5 », « 60 × 8 · 70 × 5 · 5 », « 45 s · 40 s ».
     public var setsText: String
+    /// Les mêmes séries dites en mots : « 70 kilos, 2 séries de 5 répétitions ». Vaut `setsText` quand rien d'autre n'est donné.
+    public var spokenSetsText: String
     public var maxRPE: Double?
     public var tonnageKg: Double
     public var hasRecord: Bool
 
-    public init(id: UUID, date: Date, setsText: String, maxRPE: Double?, tonnageKg: Double, hasRecord: Bool) {
+    public init(id: UUID, date: Date, setsText: String, spokenSetsText: String? = nil, maxRPE: Double?, tonnageKg: Double,
+                hasRecord: Bool) {
         self.id = id
         self.date = date
         self.setsText = setsText
+        self.spokenSetsText = spokenSetsText ?? setsText
         self.maxRPE = maxRPE
         self.tonnageKg = tonnageKg
         self.hasRecord = hasRecord
@@ -44,18 +48,26 @@ public struct BestSet: Equatable, Sendable {
     public var reps: Int
     public var date: Date
     public var isAssisted: Bool
+    /// Vrai pour un exercice au poids du corps, dont la charge est un lest.
+    public var isBodyweight: Bool
 
-    public init(weightKg: Double, reps: Int, date: Date, isAssisted: Bool = false) {
+    public init(weightKg: Double, reps: Int, date: Date, isAssisted: Bool = false, isBodyweight: Bool = false) {
         self.weightKg = weightKg
         self.reps = reps
         self.date = date
         self.isAssisted = isAssisted
+        self.isBodyweight = isBodyweight
     }
 
     /// « 72,5 × 5 », « −15 × 8 » pour une assistance ; « 12 répétitions » sans charge.
     public var text: String {
-        guard weightKg > 0 else { return String(localized: "\(reps) répétitions", bundle: .module) }
+        guard weightKg > 0 else { return TrainText.repetitions(reps) }
         return "\(ExerciseHistory.weightText(weightKg, isAssisted: isAssisted)) × \(reps)"
+    }
+
+    /// « 72,5 kilos, 5 répétitions », « assistance de 15 kilos, 8 répétitions », « 12 répétitions » : `text` dit en mots.
+    public var spokenText: String {
+        TrainText.spokenBestSet(self)
     }
 }
 
@@ -111,7 +123,8 @@ struct ExerciseHistory {
                 let weight = set.actualWeightKg ?? 0
                 let key = isAssisted ? [-weight, Double(reps)] : [estimate(weight: weight, reps: reps) ?? 0, weight, Double(reps)]
                 if best == nil || !key.lexicographicallyPrecedes(best?.key ?? []) {
-                    best = (BestSet(weightKg: weight, reps: reps, date: performance.session.startedAt, isAssisted: isAssisted), key)
+                    best = (BestSet(weightKg: weight, reps: reps, date: performance.session.startedAt, isAssisted: isAssisted,
+                                    isBodyweight: loadKind == .bodyweight), key)
                 }
             }
         }
@@ -124,6 +137,7 @@ struct ExerciseHistory {
             ExerciseHistoryLine(
                 id: performance.session.id, date: performance.session.startedAt,
                 setsText: Self.setsText(performance.sets, isAssisted: loadKind == .assisted),
+                spokenSetsText: TrainText.spokenSets(performance.sets, loadKind: loadKind),
                 maxRPE: performance.sets.compactMap(\.rpe).max(),
                 tonnageKg: SessionTonnage.kilograms(of: performance.sets) { _ in loadKind },
                 hasRecord: performance.sets.contains(where: \.isPersonalRecord))

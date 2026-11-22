@@ -43,14 +43,14 @@ struct RoutineRow: View {
             }
             .buttonStyle(PressableButtonStyle())
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel(String(localized: "\(routine.day.name), \(subtitle)", bundle: .module))
+            .accessibilityLabel(String(localized: "\(routine.day.name), \(spokenSubtitle)", bundle: .module))
             .accessibilityHint(String(localized: "Ouvre l'éditeur de la routine", bundle: .module))
             .accessibilityAddTraits(.isButton)
             .accessibilityIdentifier(TrainIdentifiers.routinePrefix + routine.day.id.uuidString)
         } else {
             summaryContent
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel(String(localized: "\(routine.day.name), \(subtitle)", bundle: .module))
+                .accessibilityLabel(String(localized: "\(routine.day.name), \(spokenSubtitle)", bundle: .module))
                 .accessibilityIdentifier(TrainIdentifiers.routinePrefix + routine.day.id.uuidString)
         }
     }
@@ -78,30 +78,11 @@ struct RoutineRow: View {
 
     /// Musculation : exercices, durée estimée, jours. Course : type, objectif, jours.
     private var subtitle: String {
-        var parts: [String] = []
-        if routine.day.kind == .run {
-            parts.append(routine.day.runType?.localizedName ?? String(localized: "Course", bundle: .module))
-            if let target = runTarget { parts.append(target) }
-        } else {
-            parts.append(String(localized: "\(routine.exerciseCount) exercices", bundle: .module))
-            parts.append(String(localized: "~ \(routine.estimatedMinutes) min", bundle: .module))
-        }
-        parts.append(days)
-        return parts.joined(separator: " · ")
+        TrainText.routineSubtitle(routine)
     }
 
-    private var runTarget: String? {
-        if let minutes = routine.day.runTargetMinutes {
-            return String(localized: "\(minutes) min", bundle: .module)
-        }
-        guard let km = routine.day.runTargetKm else { return nil }
-        let distance = km.formatted(.number.precision(.fractionLength(0...1)).locale(Locale(identifier: "fr_FR")))
-        return String(localized: "\(distance) km", bundle: .module)
-    }
-
-    /// « lundi, jeudi » ; « hors semaine type » pour une routine qu'aucun jour ne planifie.
-    private var days: String {
-        guard !routine.weekdays.isEmpty else { return String(localized: "hors semaine type", bundle: .module) }
-        return routine.weekdays.map(\.trainName).joined(separator: ", ")
+    /// Le même résumé dit en mots : « environ 55 minutes » plutôt que « ~ 55 min ».
+    private var spokenSubtitle: String {
+        TrainText.routineSubtitleSpoken(routine)
     }
 }

@@ -21,16 +21,6 @@
         }
       }
     },
-    "%@ kg le %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ kg le %@"
-          }
-        }
-      }
-    },
     "%@ km" : {
       "localizations" : {
         "fr" : {
@@ -67,16 +57,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ · RPE %@ · repos %@"
-          }
-        }
-      }
-    },
-    "%@ · ajustée · %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ · ajustée · %@"
           }
         }
       }
@@ -151,122 +131,12 @@
         }
       }
     },
-    "%lld exercices" : {
-      "localizations" : {
-        "fr" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld exercice"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld exercices"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "%lld min" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld min"
-          }
-        }
-      }
-    },
-    "%lld records" : {
-      "localizations" : {
-        "fr" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld record"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld records"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "%lld routines" : {
-      "localizations" : {
-        "fr" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld routine"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld routines"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "%lld répétitions" : {
-      "localizations" : {
-        "fr" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld répétition"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld répétitions"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "%lld séances" : {
-      "localizations" : {
-        "fr" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld séance"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld séances"
-                }
-              }
-            }
           }
         }
       }
@@ -281,56 +151,12 @@
         }
       }
     },
-    "%lld séances par semaine" : {
-      "localizations" : {
-        "fr" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld séance par semaine"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld séances par semaine"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "%lld séances sans exercice retenu non importées" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld séances sans exercice retenu non importées"
-          }
-        }
-      }
-    },
-    "%lld séries" : {
-      "localizations" : {
-        "fr" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld série"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld séries"
-                }
-              }
-            }
           }
         }
       }
@@ -433,26 +259,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "1RM estimé (kg)"
-          }
-        }
-      }
-    },
-    "1RM estimé, %@ : %@, puis %@." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "1RM estimé, %@ : %@, puis %@."
-          }
-        }
-      }
-    },
-    "1RM estimé, %@ : %@." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "1RM estimé, %@ : %@."
           }
         }
       }
@@ -1407,28 +1213,6 @@
         }
       }
     },
-    "Importer %lld séances" : {
-      "localizations" : {
-        "fr" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Importer %lld séance"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Importer %lld séances"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "Importer depuis Hevy" : {
       "localizations" : {
         "fr" : {
@@ -1725,16 +1509,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Muscles sollicités"
-          }
-        }
-      }
-    },
-    "Muscles sollicités par la séance" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Muscles sollicités par la séance"
           }
         }
       }
@@ -3145,6 +2919,746 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "« %@ » est en cours : reprends-la avant d'en lancer une autre."
+          }
+        }
+      }
+    },
+    "exercice" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "exercice"
+          }
+        }
+      }
+    },
+    "exercices" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "exercices"
+          }
+        }
+      }
+    },
+    "série" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "série"
+          }
+        }
+      }
+    },
+    "séries" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "séries"
+          }
+        }
+      }
+    },
+    "séance" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "séance"
+          }
+        }
+      }
+    },
+    "séances" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "séances"
+          }
+        }
+      }
+    },
+    "routine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "routine"
+          }
+        }
+      }
+    },
+    "routines" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "routines"
+          }
+        }
+      }
+    },
+    "records" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "records"
+          }
+        }
+      }
+    },
+    "répétition" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "répétition"
+          }
+        }
+      }
+    },
+    "répétitions" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "répétitions"
+          }
+        }
+      }
+    },
+    "seconde" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "seconde"
+          }
+        }
+      }
+    },
+    "secondes" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "secondes"
+          }
+        }
+      }
+    },
+    "%@ kilomètre" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kilomètre"
+          }
+        }
+      }
+    },
+    "%@ kilomètres" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kilomètres"
+          }
+        }
+      }
+    },
+    "%@ séance importée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ séance importée"
+          }
+        }
+      }
+    },
+    "%@ séances importées" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ séances importées"
+          }
+        }
+      }
+    },
+    "Importer %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importer %@"
+          }
+        }
+      }
+    },
+    "non renseignée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "non renseignée"
+          }
+        }
+      }
+    },
+    " puis " : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " puis "
+          }
+        }
+      }
+    },
+    ", puis " : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ", puis "
+          }
+        }
+      }
+    },
+    "échauffement" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "échauffement"
+          }
+        }
+      }
+    },
+    "dégressive" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "dégressive"
+          }
+        }
+      }
+    },
+    "à l'échec" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "à l'échec"
+          }
+        }
+      }
+    },
+    "%@ au total" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ au total"
+          }
+        }
+      }
+    },
+    "maximum estimé %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "maximum estimé %@"
+          }
+        }
+      }
+    },
+    "Ajouter %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter %@"
+          }
+        }
+      }
+    },
+    "environ %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "environ %@"
+          }
+        }
+      }
+    },
+    "%@ par semaine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ par semaine"
+          }
+        }
+      }
+    },
+    "%@ de %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ de %@"
+          }
+        }
+      }
+    },
+    "par série, de %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "par série, de %@"
+          }
+        }
+      }
+    },
+    "repos %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "repos %@"
+          }
+        }
+      }
+    },
+    "%@, à corriger" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, à corriger"
+          }
+        }
+      }
+    },
+    "%lld %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld %@"
+          }
+        }
+      }
+    },
+    "%lld à %lld %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld à %lld %@"
+          }
+        }
+      }
+    },
+    "Répétitions minimum" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Répétitions minimum"
+          }
+        }
+      }
+    },
+    "Répétitions maximum" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Répétitions maximum"
+          }
+        }
+      }
+    },
+    "Durée minimale" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Durée minimale"
+          }
+        }
+      }
+    },
+    "Durée maximale" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Durée maximale"
+          }
+        }
+      }
+    },
+    "%@, série %lld" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, série %lld"
+          }
+        }
+      }
+    },
+    "Charge de la série %lld, en kilos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Charge de la série %lld, en kilos"
+          }
+        }
+      }
+    },
+    "Répétitions de la série %lld" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Répétitions de la série %lld"
+          }
+        }
+      }
+    },
+    "Durée de la série %lld, en secondes" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Durée de la série %lld, en secondes"
+          }
+        }
+      }
+    },
+    "lest de %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "lest de %@"
+          }
+        }
+      }
+    },
+    "assistance de %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "assistance de %@"
+          }
+        }
+      }
+    },
+    "Repos, prochaine : %@, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repos, prochaine : %@, %@"
+          }
+        }
+      }
+    },
+    "ajustée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ajustée"
+          }
+        }
+      }
+    },
+    "Filtrer par groupe musculaire" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filtrer par groupe musculaire"
+          }
+        }
+      }
+    },
+    "Filtrer par matériel" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filtrer par matériel"
+          }
+        }
+      }
+    },
+    "Chargement de la séance" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chargement de la séance"
+          }
+        }
+      }
+    },
+    "RPE de la série %lld" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RPE de la série %lld"
+          }
+        }
+      }
+    },
+    "Aucun" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun"
+          }
+        }
+      }
+    },
+    "Muscles sollicités par la séance. %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muscles sollicités par la séance. %@"
+          }
+        }
+      }
+    },
+    "Chargement de l'historique" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chargement de l'historique"
+          }
+        }
+      }
+    },
+    "Chargement de la fiche" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chargement de la fiche"
+          }
+        }
+      }
+    },
+    "%@, %@ : %@." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, %@ : %@."
+          }
+        }
+      }
+    },
+    "%@, %@ : %@, puis %@." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, %@ : %@, puis %@."
+          }
+        }
+      }
+    },
+    "%@, en kilos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, en kilos"
+          }
+        }
+      }
+    },
+    "kilos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kilos"
+          }
+        }
+      }
+    },
+    "Maximum estimé sur une répétition" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maximum estimé sur une répétition"
+          }
+        }
+      }
+    },
+    "aucune valeur" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "aucune valeur"
+          }
+        }
+      }
+    },
+    "en hausse de %@ en 30 jours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "en hausse de %@ en 30 jours"
+          }
+        }
+      }
+    },
+    "en baisse de %@ en 30 jours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "en baisse de %@ en 30 jours"
+          }
+        }
+      }
+    },
+    "inchangé en 30 jours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inchangé en 30 jours"
+          }
+        }
+      }
+    },
+    "aucune série" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "aucune série"
+          }
+        }
+      }
+    },
+    "%@ le %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ le %@"
+          }
+        }
+      }
+    },
+    "Import terminé : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import terminé : %@"
+          }
+        }
+      }
+    },
+    "Séries" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séries"
+          }
+        }
+      }
+    },
+    "RPE cible" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RPE cible"
+          }
+        }
+      }
+    },
+    "Chargement de la routine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chargement de la routine"
+          }
+        }
+      }
+    },
+    "Terminer le réordonnancement" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminer le réordonnancement"
+          }
+        }
+      }
+    },
+    "Réordonner les exercices" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réordonner les exercices"
+          }
+        }
+      }
+    },
+    "Course, modifiable plus tard" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Course, modifiable plus tard"
+          }
+        }
+      }
+    },
+    "Durée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Durée"
           }
         }
       }

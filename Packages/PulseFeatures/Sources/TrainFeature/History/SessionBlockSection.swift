@@ -50,7 +50,7 @@ private struct SetRow: View {
         }
         .frame(minHeight: 44)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(accessibilityText)
+        .accessibilityLabel(TrainText.sessionSetSpoken(set))
     }
 
     private var typeLabel: String? {
@@ -60,13 +60,5 @@ private struct SetRow: View {
         case .drop: String(localized: "Dégressive", bundle: .module)
         case .failure: String(localized: "À l'échec", bundle: .module)
         }
-    }
-
-    private var accessibilityText: String {
-        var parts = [set.text]
-        if let typeLabel { parts.append(typeLabel) }
-        if let rpe = set.rpe { parts.append(String(localized: "RPE \(PulseFormat.decimal(rpe, maxFractionDigits: 1))", bundle: .module)) }
-        if set.isRecord { parts.append(String(localized: "record", bundle: .module)) }
-        return parts.joined(separator: ", ")
     }
 }
