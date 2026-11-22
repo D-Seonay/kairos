@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import PulseDesignSystem
 import PulseDomain
 import PulseServices
 
@@ -22,6 +23,11 @@ public final class SupplementsModel {
     public var editor: Editor?
 
     @ObservationIgnored let environment: SupplementsEnvironment
+    /// Dit une phrase à VoiceOver (une prise, un archivage, une erreur) ; les tests la remplacent. Le modèle est partagé par l'écran,
+    /// la carte de l'accueil et le récap : l'annonce part une seule fois, d'ici.
+    @ObservationIgnored var announce: @MainActor (_ text: String, _ isError: Bool) -> Void = { text, isError in
+        PulseAnnouncement.post(text, isError: isError)
+    }
     /// Les compléments en cours d'écriture : une deuxième touche sur la même coche attend la première.
     @ObservationIgnored private var toggling: Set<UUID> = []
 
@@ -41,7 +47,7 @@ public final class SupplementsModel {
             overview = try await environment.service.overview()
             errorMessage = nil
         } catch {
-            errorMessage = String(localized: "Pulse n'a pas pu lire tes compléments.", bundle: .module)
+            fail(String(localized: "Pulse n'a pas pu lire tes compléments.", bundle: .module))
         }
         hasLoaded = true
     }
@@ -59,9 +65,15 @@ public final class SupplementsModel {
             }
             errorMessage = nil
         } catch {
-            errorMessage = String(localized: "Pulse n'a pas pu enregistrer ta prise.", bundle: .module)
+            fail(String(localized: "Pulse n'a pas pu enregistrer ta prise.", bundle: .module))
+            await load()
+            return
         }
         await load()
+        // L'élément du jour, à jour : le bouton qu'on vient de toucher a peut-être disparu (la prochaine prise le remplace).
+        if let updated = self.item(for: id), updated.isTaken != item.isTaken {
+            announce(Self.takenAnnouncement(item: updated, taken: overview.takenCount, due: overview.dueCount), false)
+        }
     }
 
     /// L'élément du jour d'un complément, à jour.
@@ -111,7 +123,7 @@ public final class SupplementsModel {
             try await environment.service.save(supplement)
             errorMessage = nil
         } catch {
-            errorMessage = String(localized: "Pulse n'a pas pu enregistrer le complément.", bundle: .module)
+            fail(String(localized: "Pulse n'a pas pu enregistrer le complément.", bundle: .module))
             return false
         }
         editor = nil
@@ -124,11 +136,18 @@ public final class SupplementsModel {
         do {
             try await environment.service.archive(id: supplement.id)
             errorMessage = nil
+            announce(Self.archivedAnnouncement(supplement.name), false)
         } catch {
-            errorMessage = String(localized: "Pulse n'a pas pu archiver le complément.", bundle: .module)
+            fail(String(localized: "Pulse n'a pas pu archiver le complément.", bundle: .module))
         }
         editor = nil
         await load()
+    }
+
+    /// Affiche l'erreur et l'annonce, chaque fois : la même erreur deux fois de suite est dite deux fois.
+    private func fail(_ message: String) {
+        errorMessage = message
+        announce(message, true)
     }
 
     // MARK: - Textes
@@ -141,6 +160,56 @@ public final class SupplementsModel {
     /// « 1 000 UI · 8:00 », la dose et l'heure prévue.
     public static func detail(_ item: SupplementDueItem) -> String {
         "\(SupplementText.dose(of: item.supplement)) · \(SupplementText.planned(item))"
+    }
+
+    /// « 1 000 unités internationales, à 8 heures » : la dose et l'heure prévue, dites.
+    public static func detailSpoken(_ item: SupplementDueItem) -> String {
+        let dose = SupplementLabels.doseSpoken(item.supplement.dose, unit: item.supplement.unit)
+        return "\(dose), \(SupplementLabels.plannedSpoken(item))"
+    }
+
+    /// « 1 000 unités internationales, Jours d'entraînement » : un complément pas prévu aujourd'hui.
+    public static func notDueSpoken(_ supplement: Supplement, days: String) -> String {
+        "\(SupplementLabels.doseSpoken(supplement.dose, unit: supplement.unit)), \(days)"
+    }
+
+    /// « Pris » ou « Pas pris » : la valeur de la coche d'un complément.
+    static func takenValue(_ isTaken: Bool) -> String {
+        isTaken ? String(localized: "Pris", bundle: .module) : String(localized: "Pas pris", bundle: .module)
+    }
+
+    /// « Vitamine D3, 1 000 unités internationales, à 8 heures, pris » : la ligne d'un complément, son état avec.
+    static func rowSpoken(_ item: SupplementDueItem) -> String {
+        var parts = [item.supplement.name, detailSpoken(item), takenValue(item.isTaken).lowercased()]
+        if item.supplement.isLowOnStock { parts.append(String(localized: "stock bas", bundle: .module)) }
+        return parts.joined(separator: ", ")
+    }
+
+    /// « 2 sur 5 pris ».
+    static func summarySpoken(taken: Int, due: Int) -> String {
+        String(localized: "\(PulseSpoken.outOf(taken, due)) pris", bundle: .module)
+    }
+
+    /// « Vitamine D3 pris. 3 sur 5 pris. » ; décochée, « Vitamine D3, pas pris. 2 sur 5 pris. ». `item` est l'élément après la
+    /// touche, `taken` et `due` les comptes du jour après elle.
+    static func takenAnnouncement(item: SupplementDueItem, taken: Int, due: Int) -> String {
+        let name = item.supplement.name
+        let count = summarySpoken(taken: taken, due: due)
+        guard item.isTaken else { return String(localized: "\(name), pas pris. \(count).", bundle: .module) }
+        let sentence = String(localized: "\(name) pris. \(count).", bundle: .module)
+        guard due > 0, taken == due else { return sentence }
+        return "\(sentence) \(String(localized: "Tout est pris pour aujourd'hui.", bundle: .module))"
+    }
+
+    /// « Whey archivé. »
+    static func archivedAnnouncement(_ name: String) -> String {
+        String(localized: "\(name) archivé.", bundle: .module)
+    }
+
+    /// « 85 pour cent », ou « pas encore de jour prévu » : la régularité dite.
+    static func rateSpoken(_ regularity: SupplementRegularity?) -> String {
+        guard let rate = regularity?.rate else { return String(localized: "pas encore de jour prévu", bundle: .module) }
+        return String(localized: "\(Int((rate * 100).rounded())) pour cent", bundle: .module)
     }
 
     /// « 85 % », ou « — » sans jour dû.

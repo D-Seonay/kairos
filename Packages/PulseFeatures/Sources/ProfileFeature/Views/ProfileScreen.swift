@@ -55,6 +55,7 @@ public struct ProfileScreen: View {
                     Text(message)
                         .font(.footnote)
                         .foregroundStyle(PulsePalette.bad)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 if let summary = model.summary {
                     ProfileTiles(summary: summary, trend: model.body?.trend, calendar: calendar, today: today)
@@ -65,12 +66,14 @@ public struct ProfileScreen: View {
                 } else if !model.hasLoaded {
                     ProgressView()
                         .frame(maxWidth: .infinity, minHeight: 200)
+                        .accessibilityLabel(String(localized: "Chargement du profil", bundle: .module))
                 }
                 ProfileLinks(onOpenStats: onOpenStats)
             }
             .padding(PulseMetrics.spacing)
         }
         .refreshable { await model.load() }
+        .pulseAnnounceOnce(model.errorMessage, id: model.failureCount, isError: true)
     }
 
     @ViewBuilder
@@ -97,21 +100,26 @@ private struct ProfileHeader: View {
     let summary: ProfileSummary?
     let calendar: Calendar
     @ScaledMetric(relativeTo: .largeTitle) private var badgeSize: CGFloat = 56
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
+    /// La pastille à côté du prénom ; aux tailles d'accessibilité, au-dessus, et le prénom passe à la ligne sans rétrécir.
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        let isLarge = dynamicTypeSize.isAccessibilitySize
+        let layout = isLarge
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 10))
+            : AnyLayout(HStackLayout(spacing: 14))
+        return VStack(alignment: .leading, spacing: 6) {
             Text(String(localized: "Profil", bundle: .module))
                 .pulseEyebrow(PulsePalette.text2)
-            HStack(spacing: 14) {
+            layout {
                 initial
                 VStack(alignment: .leading, spacing: 2) {
                     Text(name)
                         .font(PulseFont.title(.largeTitle, weight: .semibold))
                         .tracking(-0.6)
                         .foregroundStyle(PulsePalette.text)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.6)
-                        .accessibilityAddTraits(.isHeader)
+                        .lineLimit(isLarge ? nil : 1)
+                        .minimumScaleFactor(isLarge ? 1 : 0.6)
                     if let summary {
                         Text(ProfileText.sessionsSince(summary.sessionsTotal, firstSession: summary.firstSession,
                                                        calendar: calendar))
@@ -123,7 +131,16 @@ private struct ProfileHeader: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(spoken)
+        .accessibilityAddTraits(.isHeader)
+    }
+
+    private var spoken: String {
+        let sessions = summary.map {
+            ProfileText.sessionsSinceSpoken($0.sessionsTotal, firstSession: $0.firstSession, calendar: calendar)
+        }
+        return ProfileText.headerSpoken(name: name, sessions: sessions)
     }
 
     private var firstName: String? {
@@ -146,7 +163,7 @@ private struct ProfileHeader: View {
             }
         }
         .foregroundStyle(PulsePalette.page)
-        .frame(width: badgeSize, height: badgeSize)
+        .frame(width: min(badgeSize, 80), height: min(badgeSize, 80))
         .background(Circle().fill(PulsePalette.ink))
         .accessibilityHidden(true)
     }

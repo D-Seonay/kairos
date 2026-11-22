@@ -13,6 +13,8 @@ public final class SettingsModel {
     public private(set) var health: HealthReadStatus?
     public private(set) var notificationsDenied = false
     public private(set) var errorMessage: String?
+    /// Un échec de plus : la même erreur revue est annoncée à nouveau.
+    public private(set) var failureCount = 0
     public private(set) var isRefreshingHealth = false
     public private(set) var hasLoaded = false
 
@@ -30,9 +32,9 @@ public final class SettingsModel {
             profile = try await environment.settings.load()
             errorMessage = nil
         } catch {
-            errorMessage = error as? SettingsError == .noProfile
+            fail(error as? SettingsError == .noProfile
                 ? Self.message(for: error)
-                : String(localized: "Pulse n'a pas pu lire tes réglages.", bundle: .module)
+                : String(localized: "Pulse n'a pas pu lire tes réglages.", bundle: .module))
         }
         await readHealth()
         await refreshNotificationStatus()
@@ -54,7 +56,7 @@ public final class SettingsModel {
             errorMessage = nil
             if changed { onProfileSaved(saved) }
         } catch {
-            errorMessage = Self.message(for: error)
+            fail(Self.message(for: error))
             if let stored = try? await environment.settings.load() { profile = stored }
         }
     }
@@ -70,7 +72,7 @@ public final class SettingsModel {
         let normalized = trimmed.replacingOccurrences(of: ",", with: ".")
         guard normalized.allSatisfy({ $0.isASCII && ($0.isNumber || $0 == ".") }), let height = Double(normalized),
               height.isFinite else {
-            errorMessage = Self.message(for: SettingsError.invalidHeight)
+            fail(Self.message(for: SettingsError.invalidHeight))
             return
         }
         await update { $0.heightCm = height }
@@ -106,6 +108,11 @@ public final class SettingsModel {
         if !granted { await update { apply(&$0, false) } }
     }
 
+    private func fail(_ message: String) {
+        errorMessage = message
+        failureCount += 1
+    }
+
     /// Une lecture du cache qui échoue garde l'état précédent.
     private func readHealth() async {
         if let status = try? await HealthReadStatus.read(cache: environment.healthCache) { health = status }
@@ -113,11 +120,11 @@ public final class SettingsModel {
 
     static func message(for error: any Error) -> String {
         switch error as? SettingsError {
-        case .invalidHeight: String(localized: "Entre une taille entre 100 et 250 cm.", bundle: .module)
+        case .invalidHeight: String(localized: "Entre une taille entre 100 et 250 centimètres.", bundle: .module)
         case .invalidIncrement: String(localized: "L'incrément doit être positif.", bundle: .module)
-        case .invalidRest: String(localized: "Choisis un repos de 60, 90, 120 ou 180 s.", bundle: .module)
-        case .invalidDeadline: String(localized: "Choisis une heure entre 6 h et 12 h.", bundle: .module)
-        case .invalidPlates: String(localized: "Garde au moins un disque et une barre de plus de 0 kg.", bundle: .module)
+        case .invalidRest: String(localized: "Choisis un repos de 60, 90, 120 ou 180 secondes.", bundle: .module)
+        case .invalidDeadline: String(localized: "Choisis une heure entre 6 heures et 12 heures.", bundle: .module)
+        case .invalidPlates: String(localized: "Garde au moins un disque et une barre de plus de 0 kilo.", bundle: .module)
         case .noProfile: String(localized: "Ton profil est introuvable.", bundle: .module)
         case nil: String(localized: "Pulse n'a pas pu enregistrer ce réglage.", bundle: .module)
         }

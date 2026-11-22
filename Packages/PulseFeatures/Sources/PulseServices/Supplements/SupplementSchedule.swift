@@ -26,6 +26,15 @@ public struct SupplementDueItem: Sendable, Equatable, Identifiable {
 
     public var id: UUID { supplement.id }
     public var isTaken: Bool { intake != nil }
+
+    public init(supplement: Supplement, moment: SupplementMoment, plannedMinutes: Int, intake: SupplementIntake? = nil,
+                isWorkoutFinished: Bool = false) {
+        self.supplement = supplement
+        self.moment = moment
+        self.plannedMinutes = plannedMinutes
+        self.intake = intake
+        self.isWorkoutFinished = isWorkoutFinished
+    }
 }
 
 /// Ce que l'on sait pour planifier les compléments (spec M5 §4) : les compléments, les prises, les jours d'entraînement du

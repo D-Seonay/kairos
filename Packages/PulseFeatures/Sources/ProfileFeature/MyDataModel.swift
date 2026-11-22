@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import PulseDesignSystem
 import PulseDomain
 
 /// L'état de l'écran Mes données (spec M7 §16) : ce que le téléphone stocke, l'état d'iCloud et les exports. La suppression
@@ -14,6 +15,8 @@ public final class MyDataModel {
     public private(set) var shareURL: URL?
     public private(set) var isBusy = false
     public private(set) var errorMessage: String?
+    /// Une lecture ou un export raté de plus : la même erreur revue est annoncée à nouveau.
+    public private(set) var failureCount = 0
     /// Faux jusqu'à la première lecture : les comptes affichent « Pas encore lu » plutôt qu'un zéro.
     public private(set) var hasRefreshed = false
 
@@ -30,6 +33,7 @@ public final class MyDataModel {
             errorMessage = nil
         } catch {
             errorMessage = String(localized: "Pulse n'a pas pu lire tes données.", bundle: .module)
+            failureCount += 1
         }
         cloudStatus = await environment.inspector.cloudAccountStatus()
         hasRefreshed = true
@@ -56,7 +60,21 @@ public final class MyDataModel {
             shareURL = try await work(environment.exporter)
         } catch {
             errorMessage = String(localized: "Pulse n'a pas pu exporter tes données.", bundle: .module)
+            failureCount += 1
         }
+    }
+
+    /// Le compte d'une table : « Pas encore lu » avant la première lecture, « — » pour une table qui n'a pas pu être comptée,
+    /// jamais un zéro inventé.
+    public static func countText(_ count: Int?, hasRefreshed: Bool) -> String {
+        guard hasRefreshed else { return String(localized: "Pas encore lu", bundle: .module) }
+        return count.map { PulseFormat.integer(Double($0), unit: nil) } ?? "\u{2014}"
+    }
+
+    /// Ce que VoiceOver lit du compte : « indisponible » à la place du tiret.
+    public static func countSpoken(_ count: Int?, hasRefreshed: Bool) -> String {
+        guard hasRefreshed, count == nil else { return countText(count, hasRefreshed: hasRefreshed) }
+        return String(localized: "indisponible", bundle: .module)
     }
 
     /// La phrase qui accompagne l'état du compte iCloud ; « Pas encore lu » avant la première lecture.

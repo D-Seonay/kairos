@@ -124,7 +124,7 @@ let package = Package(
         ),
         .testTarget(
             name: "ProfileFeatureTests",
-            dependencies: ["ProfileFeature", "PulseServices", domain, content],
+            dependencies: ["ProfileFeature", "PulseServices", designSystem, domain, content],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(

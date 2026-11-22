@@ -42,6 +42,28 @@ enum SupplementsPreviewSupport {
     }
 }
 
+#Preview("Compléments, très grand texte") {
+    NavigationStack {
+        SupplementsView(model: SupplementsPreviewSupport.model())
+    }
+    .dynamicTypeSize(.accessibility3)
+}
+
+#Preview("Nouveau complément, très grand texte") {
+    NavigationStack {
+        SupplementFormView(model: SupplementsPreviewSupport.model(), editing: nil)
+    }
+    .dynamicTypeSize(.accessibility3)
+}
+
+#Preview("Carte de l'accueil, très grand texte") {
+    let model = SupplementsPreviewSupport.model()
+    SupplementsCard(model: model) {}
+        .padding()
+        .task { await model.load() }
+        .dynamicTypeSize(.accessibility3)
+}
+
 #Preview("Carte de l'accueil") {
     let model = SupplementsPreviewSupport.model()
     SupplementsCard(model: model) {}

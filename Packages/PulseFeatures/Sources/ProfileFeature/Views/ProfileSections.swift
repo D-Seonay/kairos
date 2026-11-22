@@ -51,6 +51,7 @@ struct ProfileTiles: View {
             unit: summary.morningScoreIsEstimated
                 ? String(localized: "sur 100 · Estimé", bundle: .module)
                 : String(localized: "sur 100", bundle: .module),
+            spoken: summary.morningScore.map { ProfileText.morningScoreSpoken($0, isEstimated: summary.morningScoreIsEstimated) },
             emptyText: String(localized: "Pas encore de score aujourd'hui", bundle: .module))
     }
 
@@ -61,9 +62,11 @@ struct ProfileTiles: View {
         if trend?.isStale == true, let last = trend?.lastMeasured {
             unit = String(localized: "kg au \(ProfileText.shortDate(last, calendar: calendar, today: today))", bundle: .module)
         }
+        let staleSince = trend?.isStale == true ? trend?.lastMeasured : nil
         return ProfileTileContent(
             title: String(localized: "Poids", bundle: .module),
             value: current.map { PulseFormat.decimal($0, maxFractionDigits: 1) }, unit: unit,
+            spoken: current.map { ProfileText.trendWeightSpoken($0, staleSince: staleSince, calendar: calendar, today: today) },
             emptyText: String(localized: "Pas encore de pesée", bundle: .module))
     }
 }
@@ -72,20 +75,23 @@ struct ProfileTiles: View {
 private struct ProfileTile: View {
     let content: ProfileTileContent
     @ScaledMetric(relativeTo: .largeTitle) private var valueSize: CGFloat = 30
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
+    /// Aux tailles d'accessibilité, ni limite de lignes ni réduction : le titre et la valeur passent à la ligne entiers.
     var body: some View {
-        ObsidianCard {
+        let isLarge = dynamicTypeSize.isAccessibilitySize
+        return ObsidianCard {
             VStack(alignment: .leading, spacing: 4) {
                 Text(content.title)
                     .pulseEyebrow()
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.8)
+                    .lineLimit(isLarge ? nil : 2)
+                    .minimumScaleFactor(isLarge ? 1 : 0.8)
                 if let value = content.value {
                     Text(value)
                         .font(PulseFont.score(size: valueSize))
                         .foregroundStyle(PulsePalette.text)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.5)
+                        .lineLimit(isLarge ? nil : 1)
+                        .minimumScaleFactor(isLarge ? 1 : 0.5)
                     if let unit = content.unit {
                         Text(unit)
                             .font(.caption)
@@ -107,9 +113,8 @@ private struct ProfileTile: View {
     }
 
     private var accessibilityText: String {
-        guard let value = content.value else { return [content.title, content.emptyText].joined(separator: ", ") }
-        let reading = content.spoken ?? ([value] + (content.unit.map { [$0] } ?? [])).joined(separator: " ")
-        return [content.title, reading].joined(separator: ", ")
+        ProfileText.tileSpoken(title: content.title, value: content.value, unit: content.unit, spoken: content.spoken,
+                               emptyText: content.emptyText)
     }
 }
 
@@ -147,7 +152,8 @@ struct WeightCard: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .accessibilityElement(children: .combine)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(ProfileText.weightCardSpoken(trend: trend, calendar: calendar, today: today))
         }
         .buttonStyle(PressableButtonStyle())
         .accessibilityHint(String(localized: "Ouvre l'écran Poids", bundle: .module))
@@ -180,6 +186,7 @@ struct RecordsWall: View {
     let calendar: Calendar
     let today: Date
     let onOpenRecords: () -> Void
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -197,7 +204,8 @@ struct RecordsWall: View {
                         row(title: ProfileText.runTitle(run.distance),
                             detail: run.date.map { ProfileText.shortDate($0, calendar: calendar, today: today) },
                             value: run.seconds.map { ProfileText.raceTime(seconds: $0) },
-                            missing: String(localized: "Pas encore couru", bundle: .module))
+                            missing: String(localized: "Pas encore couru", bundle: .module),
+                            spoken: ProfileText.runRecordSpoken(run, calendar: calendar, today: today))
                     }
                 }
             }
@@ -207,15 +215,21 @@ struct RecordsWall: View {
     /// Le record d'un levé de base, nommé par le répertoire d'exercices ; sans record, son nom français et « Pas encore de record ».
     private func liftRow(_ id: String) -> some View {
         let line = lifts.first { $0.exercise == .content(id: id) }
-        return row(title: line?.name ?? ProfileText.mainLiftName(id),
+        let title = line?.name ?? ProfileText.mainLiftName(id)
+        return row(title: title,
                    detail: line.map { ProfileText.shortDate($0.date, calendar: calendar, today: today) },
                    value: line.map(ProfileText.recordValue),
-                   missing: String(localized: "Pas encore de record", bundle: .module))
+                   missing: String(localized: "Pas encore de record", bundle: .module),
+                   spoken: ProfileText.liftRecordSpoken(title: title, line: line, calendar: calendar, today: today))
     }
 
     /// Sans valeur (un levé sans record, une distance jamais couverte) : `missing`.
-    private func row(title: String, detail: String?, value: String?, missing: String) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 12) {
+    /// Titre et valeur côte à côte ; aux tailles d'accessibilité, la valeur sous le titre. VoiceOver lit `spoken`, la valeur d'abord.
+    private func row(title: String, detail: String?, value: String?, missing: String, spoken: String) -> some View {
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
+            : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: 12))
+        return layout {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.subheadline.weight(.semibold))
@@ -226,7 +240,7 @@ struct RecordsWall: View {
                         .foregroundStyle(PulsePalette.text2)
                 }
             }
-            Spacer(minLength: 8)
+            if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 8) }
             if let value {
                 Text(value)
                     .font(PulseFont.value(.headline))
@@ -238,7 +252,8 @@ struct RecordsWall: View {
             }
         }
         .padding(.vertical, 10)
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(spoken)
     }
 }
 
@@ -258,9 +273,14 @@ struct BadgeShelfSection: View {
                     ForEach(shelf.earned) { badge in
                         row(badge) {
                             if let earnedAt = badge.earnedAt {
-                                Text(ProfileText.shortDate(earnedAt, calendar: calendar, today: today))
-                                    .font(.caption)
-                                    .foregroundStyle(PulsePalette.text2)
+                                // Une coche en plus de la date : un badge obtenu se distingue sans dépendre de la teinte.
+                                HStack(spacing: 4) {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .accessibilityHidden(true)
+                                    Text(ProfileText.shortDate(earnedAt, calendar: calendar, today: today))
+                                }
+                                .font(.caption)
+                                .foregroundStyle(PulsePalette.text2)
                             }
                         }
                     }
@@ -293,7 +313,8 @@ struct BadgeShelfSection: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(ProfileText.badgeAccessibility(badge, calendar: calendar, today: today))
     }
 
     private static func icon(_ kind: BadgeKind) -> String {

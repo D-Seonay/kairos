@@ -89,7 +89,7 @@ struct SettingsModelTests {
 
         await model.update { $0.defaultRestSeconds = 75 }
 
-        #expect(model.errorMessage == "Choisis un repos de 60, 90, 120 ou 180 s.")
+        #expect(model.errorMessage == "Choisis un repos de 60, 90, 120 ou 180 secondes.")
         #expect(model.profile == stored, "Le profil stocké est relu, inchangé")
         #expect(try await profiles.load() == stored)
         #expect(saved.profiles.isEmpty)
@@ -106,15 +106,33 @@ struct SettingsModelTests {
 
         _ = try await storeProfile()
         let cases: [(String, @Sendable (inout UserProfile) -> Void)] = [
-            ("Entre une taille entre 100 et 250 cm.", { $0.heightCm = 90 }),
+            ("Entre une taille entre 100 et 250 centimètres.", { $0.heightCm = 90 }),
             ("L'incrément doit être positif.", { $0.upperIncrementKg = 0 }),
-            ("Choisis une heure entre 6 h et 12 h.", { $0.morningScoreDeadlineMinutes = 780 }),
-            ("Garde au moins un disque et une barre de plus de 0 kg.", { $0.availablePlatesKg = [] })
+            ("Choisis une heure entre 6 heures et 12 heures.", { $0.morningScoreDeadlineMinutes = 780 }),
+            ("Garde au moins un disque et une barre de plus de 0 kilo.", { $0.availablePlatesKg = [] })
         ]
         for (message, change) in cases {
             await model.update(change)
             #expect(model.errorMessage == message)
         }
+    }
+
+    @Test func everyRefusedSettingCountsAsAFailure() async throws {
+        _ = try await storeProfile()
+        let model = SettingsModel(environment: environment()) { _ in }
+        await model.load()
+        #expect(model.failureCount == 0)
+
+        await model.update { $0.heightCm = 90 }
+        await model.update { $0.heightCm = 90 }
+        #expect(model.errorMessage == "Entre une taille entre 100 et 250 centimètres.")
+        #expect(model.failureCount == 2, "La même erreur deux fois : deux annonces")
+
+        await model.commitHeight("abc")
+        #expect(model.failureCount == 3)
+
+        await model.update { $0.heightCm = 180 }
+        #expect(model.errorMessage == nil && model.failureCount == 3)
     }
 
     @Test func quickPlateTapsBothLand() async throws {
@@ -140,7 +158,7 @@ struct SettingsModelTests {
         #expect(model.profile?.heightCm == 178.5)
 
         await model.commitHeight("abc")
-        #expect(model.errorMessage == "Entre une taille entre 100 et 250 cm.")
+        #expect(model.errorMessage == "Entre une taille entre 100 et 250 centimètres.")
         #expect(model.profile?.heightCm == 178.5)
 
         await model.commitHeight("")

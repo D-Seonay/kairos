@@ -174,6 +174,11 @@ struct ProfilePreviewHost: View {
     ProfilePreviewHost()
 }
 
+#Preview("Profil, très grand texte") {
+    ProfilePreviewHost()
+        .dynamicTypeSize(.accessibility3)
+}
+
 #Preview("Profil, nouvel utilisateur") {
     ProfilePreviewHost(withHistory: false)
 }

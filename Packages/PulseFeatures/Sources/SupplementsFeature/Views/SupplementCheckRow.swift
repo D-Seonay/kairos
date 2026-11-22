@@ -8,35 +8,54 @@ public struct SupplementCheckRow: View {
     private let item: SupplementDueItem
     private let onToggle: () -> Void
     private let onOpen: (() -> Void)?
+    private let onArchive: (() -> Void)?
 
-    public init(item: SupplementDueItem, onToggle: @escaping () -> Void, onOpen: (() -> Void)? = nil) {
+    public init(item: SupplementDueItem, onToggle: @escaping () -> Void, onOpen: (() -> Void)? = nil,
+                onArchive: (() -> Void)? = nil) {
         self.item = item
         self.onToggle = onToggle
         self.onOpen = onOpen
+        self.onArchive = onArchive
     }
 
     public var body: some View {
         HStack(spacing: 12) {
             if let onOpen {
-                Button(action: onOpen) { label }
-                    .buttonStyle(PressableButtonStyle())
-                    .accessibilityHint(String(localized: "Modifie le complément", bundle: .module))
+                openButton(onOpen)
             } else {
                 label
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(SupplementsModel.rowSpoken(item))
             }
+            // La coche est un interrupteur : son nom ne change pas, son état se lit dans la valeur.
             Button(action: onToggle) {
                 Image(systemName: item.isTaken ? "checkmark.circle.fill" : "circle")
                     .font(.title2)
                     .foregroundStyle(item.isTaken ? PulsePalette.text : PulsePalette.muted)
                     .frame(width: 44, height: 44)
                     .contentShape(Rectangle())
+                    .accessibilityHidden(true)
             }
             .buttonStyle(PressableButtonStyle())
             .sensoryFeedback(.success, trigger: item.isTaken) { _, taken in taken }
-            .accessibilityLabel(item.isTaken
-                ? String(localized: "Décocher : \(item.supplement.name)", bundle: .module)
-                : String(localized: "Marquer comme pris : \(item.supplement.name)", bundle: .module))
+            .accessibilityLabel(item.supplement.name)
+            .accessibilityValue(SupplementsModel.takenValue(item.isTaken))
+            .accessibilityAddTraits(.isToggle)
             .accessibilityIdentifier(SupplementsIdentifiers.check(item.supplement.name))
+        }
+    }
+
+    /// La ligne qui ouvre le formulaire ; « Archiver » est une action nommée, comme le menu contextuel.
+    @ViewBuilder
+    private func openButton(_ onOpen: @escaping () -> Void) -> some View {
+        let button = Button(action: onOpen) { label }
+            .buttonStyle(PressableButtonStyle())
+            .accessibilityLabel(SupplementsModel.rowSpoken(item))
+            .accessibilityHint(String(localized: "Modifie le complément", bundle: .module))
+        if let onArchive {
+            button.accessibilityAction(named: String(localized: "Archiver", bundle: .module), onArchive)
+        } else {
+            button
         }
     }
 
@@ -57,7 +76,7 @@ public struct SupplementCheckRow: View {
             if item.supplement.isLowOnStock {
                 Image(systemName: "exclamationmark.circle.fill")
                     .foregroundStyle(PulsePalette.bad)
-                    .accessibilityLabel(String(localized: "Stock bas", bundle: .module))
+                    .accessibilityHidden(true)
             }
         }
         .frame(minHeight: 44)

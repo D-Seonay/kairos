@@ -147,6 +147,9 @@ struct ProfileModelTests {
         #expect(model.summary?.sessionsTotal == 3, "L'écran garde son dernier état")
         #expect(model.body?.trend.current == 78.4, "Le poids et le résumé viennent de la même lecture")
         #expect(model.errorMessage == "Pulse n'a pas pu lire ton profil.")
+        #expect(model.failureCount == 1)
+        await model.load()
+        #expect(model.failureCount == 2, "La même erreur une seconde fois : annoncée à nouveau")
 
         await workouts.setFailing(false)
         let start = ProfileTestClock.date(2026, 11, 19, hour: 18)

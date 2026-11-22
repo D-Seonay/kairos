@@ -23,6 +23,7 @@ struct WeightScreen: View {
                     Text(message)
                         .font(.footnote)
                         .foregroundStyle(PulsePalette.bad)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 .listRowBackground(PulsePalette.surface)
             }
@@ -37,11 +38,13 @@ struct WeightScreen: View {
             } else if !model.hasLoaded {
                 ProgressView()
                     .frame(maxWidth: .infinity, minHeight: 200)
+                    .accessibilityLabel(String(localized: "Chargement des pesées", bundle: .module))
                     .listRowBackground(Color.clear)
             }
         }
         .scrollContentBackground(.hidden)
         .refreshable { await model.load() }
+        .pulseAnnounceOnce(model.errorMessage, id: model.failureCount, isError: true)
         .pulseScreenBackground(aura: 0.5)
         .navigationTitle(String(localized: "Poids", bundle: .module))
         .pulseInlineTitle()
@@ -76,7 +79,8 @@ struct WeightScreen: View {
                                 .padding(.top, 4)
                         }
                     }
-                    .accessibilityElement(children: .combine)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(ProfileText.weightTrendSpoken(trend, calendar: calendar, today: today) ?? "")
                 } else {
                     ProfileEmptyNote(heading: String(localized: "Pas encore de pesée", bundle: .module),
                                      reason: String(localized: "seule la masse grasse a été mesurée", bundle: .module))
@@ -86,6 +90,7 @@ struct WeightScreen: View {
                                 bundle: .module))
                         .font(.subheadline)
                         .foregroundStyle(PulsePalette.text)
+                        .accessibilityLabel(ProfileText.bodyFatLineSpoken(trend, calendar: calendar, today: today) ?? "")
                 }
                 // Sans aucun jour pesé, la note du dessus suffit : pas de seconde note à la place de la courbe.
                 if !trend.days.isEmpty {
@@ -169,9 +174,14 @@ private struct MeasurementRow: View {
     let measurement: BodyMeasurement
     let calendar: Calendar
     let today: Date
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
+    /// La valeur, la date et la source sur une ligne ; aux tailles d'accessibilité, l'une sous l'autre.
     var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 12) {
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
+            : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: 12))
+        return layout {
             VStack(alignment: .leading, spacing: 2) {
                 Text(ProfileText.measurement(measurement))
                     .font(PulseFont.value(.headline))
@@ -180,142 +190,15 @@ private struct MeasurementRow: View {
                     .font(.caption)
                     .foregroundStyle(PulsePalette.text2)
             }
-            Spacer(minLength: 8)
+            if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 8) }
             Text(ProfileText.source(measurement.source))
                 .font(.caption)
                 .foregroundStyle(PulsePalette.text2)
         }
         .frame(minHeight: 44)
         .contentShape(Rectangle())
-        .accessibilityElement(children: .combine)
-    }
-}
-
-// MARK: - Courbe
-
-/// Les 90 derniers jours : un point par jour pesé, la ligne de la tendance sur 7 jours. Le domaine des dates est épinglé aux 90
-/// jours et la zone du graphique rognée, comme les courbes de Stats.
-private struct WeightChart: View {
-    static let days = 90
-
-    let trend: WeightTrend
-    let calendar: Calendar
-    let today: Date
-
-    var body: some View {
-        let weighed = trend.days.filter { domain.contains($0.date) }
-        if weighed.isEmpty {
-            ProfileEmptyNote(heading: String(localized: "Aucune pesée sur 90 jours", bundle: .module), reason: emptyReason)
-        } else {
-            VStack(alignment: .leading, spacing: 8) {
-                chart(weighed: weighed, line: trend.trendPoints.filter { domain.contains($0.date) })
-                legend
-            }
-        }
-    }
-
-    /// Du début du jour, 89 jours avant aujourd'hui, au début de demain.
-    private var domain: ClosedRange<Date> {
-        let start = calendar.startOfDay(for: today)
-        let end = calendar.date(byAdding: .day, value: 1, to: start) ?? today
-        return (calendar.date(byAdding: .day, value: 1 - Self.days, to: start) ?? start)...end
-    }
-
-    private var emptyReason: String {
-        guard let last = trend.lastMeasured else {
-            return String(localized: "ajoute une pesée ou autorise le poids dans Apple Santé", bundle: .module)
-        }
-        let day = ProfileText.shortDate(last, calendar: calendar, today: today)
-        return String(localized: "dernière pesée le \(day)", bundle: .module)
-    }
-
-    private func chart(weighed: [WeightDay], line: [StatsPoint]) -> some View {
-        let dateLabel = String(localized: "Jour", bundle: .module)
-        let weightLabel = String(localized: "Poids", bundle: .module)
-        return Chart {
-            ForEach(line) { point in
-                LineMark(x: .value(dateLabel, point.date, unit: .day), y: .value(weightLabel, point.value),
-                         series: .value("Série", "trend"))
-                    .foregroundStyle(WeightInk.trend)
-                    .lineStyle(StrokeStyle(lineWidth: 2, lineJoin: .round))
-            }
-            ForEach(weighed) { day in
-                PointMark(x: .value(dateLabel, day.date, unit: .day), y: .value(weightLabel, day.weightKg))
-                    .foregroundStyle(WeightInk.weighIn)
-                    .symbolSize(24)
-            }
-        }
-        .chartXScale(domain: domain)
-        .chartPlotStyle { $0.clipped() }
-        .chartYScale(domain: .automatic(includesZero: false))
-        .weightAxes(calendar: calendar)
-        .frame(height: 180)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(summary(weighed: weighed))
-    }
-
-    private var legend: some View {
-        HStack(spacing: 14) {
-            legendItem(String(localized: "Pesée", bundle: .module)) {
-                Circle().fill(WeightInk.weighIn).frame(width: 7, height: 7)
-            }
-            legendItem(String(localized: "Tendance sur 7 jours", bundle: .module)) {
-                Capsule().fill(WeightInk.trend).frame(width: 14, height: 2)
-            }
-        }
-        .accessibilityHidden(true)
-    }
-
-    private func legendItem(_ label: String, @ViewBuilder mark: () -> some View) -> some View {
-        HStack(spacing: 6) {
-            mark()
-            Text(label)
-                .font(.caption)
-                .foregroundStyle(PulsePalette.text2)
-        }
-    }
-
-    /// « Poids sur 90 jours : tendance 78,4 kg, de 77,6 à 80,3 kg, 30 pesées. »
-    private func summary(weighed: [WeightDay]) -> String {
-        let weights = weighed.map(\.weightKg)
-        let low = PulseFormat.decimal(weights.min() ?? .nan, maxFractionDigits: 1)
-        let high = ProfileText.weight(weights.max() ?? .nan)
-        let count = weighed.count == 1
-            ? String(localized: "1 pesée", bundle: .module)
-            : String(localized: "\(weighed.count) pesées", bundle: .module)
-        let range = String(localized: "de \(low) à \(high)", bundle: .module)
-        guard let current = trend.current else {
-            return String(localized: "Poids sur 90 jours : \(range), \(count).", bundle: .module)
-        }
-        return String(localized: "Poids sur 90 jours : tendance \(ProfileText.weight(current)), \(range), \(count).",
-                      bundle: .module)
-    }
-}
-
-/// L'encre de la courbe : la tendance en plein, les pesées en demi-teinte.
-private enum WeightInk {
-    static let trend = PulsePalette.ink
-    static let weighIn = PulsePalette.ink.opacity(0.4)
-}
-
-private extension View {
-    /// Les axes des courbes de Stats : filets pointillés, étiquettes grises, dates en « 12 nov. ».
-    func weightAxes(calendar: Calendar) -> some View {
-        chartXAxis {
-            AxisMarks(values: .automatic(desiredCount: 4)) { _ in
-                AxisGridLine(stroke: StrokeStyle(lineWidth: 1, dash: [2, 4])).foregroundStyle(PulsePalette.line)
-                AxisValueLabel(format: .dateTime.day().month(.abbreviated)).foregroundStyle(PulsePalette.muted)
-            }
-        }
-        .chartYAxis {
-            AxisMarks(position: .leading) { _ in
-                AxisGridLine(stroke: StrokeStyle(lineWidth: 1, dash: [2, 4])).foregroundStyle(PulsePalette.line)
-                AxisValueLabel().foregroundStyle(PulsePalette.muted)
-            }
-        }
-        .environment(\.locale, Locale(identifier: "fr_FR"))
-        .environment(\.calendar, calendar)
-        .environment(\.timeZone, calendar.timeZone)
+        .accessibilityLabel(ProfileText.measurementSpoken(measurement, calendar: calendar, today: today))
     }
 }
 
@@ -368,6 +251,16 @@ private struct WeighInPreviewHost: View {
 
 #Preview("Poids") {
     WeightPreviewHost()
+}
+
+#Preview("Poids, très grand texte") {
+    WeightPreviewHost()
+        .dynamicTypeSize(.accessibility3)
+}
+
+#Preview("Nouvelle pesée, très grand texte") {
+    WeighInPreviewHost()
+        .dynamicTypeSize(.accessibility3)
 }
 
 #Preview("Poids, sans mesure") {

@@ -33,15 +33,18 @@ struct AdaptationSettingsSection: View {
 
     private func increment(_ title: String, value: Binding<Double>) -> some View {
         Stepper(value: value, in: Self.incrementRange, step: Self.incrementStep) {
-            HStack {
+            AdaptiveRow { isLarge in
                 Text(title)
                     .foregroundStyle(PulsePalette.text)
-                Spacer(minLength: 8)
+                if !isLarge { Spacer(minLength: 8) }
                 Text(ProfileText.weight(value.wrappedValue))
                     .font(PulseFont.value(.body))
                     .foregroundStyle(PulsePalette.text)
             }
         }
+        // Le titre est le nom, la valeur dite (« 2,5 kilos ») suit chaque ajustement.
+        .accessibilityLabel(title)
+        .accessibilityValue(ProfileText.weightSpoken(value.wrappedValue))
         .frame(minHeight: 44)
     }
 }
@@ -61,9 +64,11 @@ struct SessionSettingsSection: View {
         Section {
             SettingsToggle(title: String(localized: "Échauffement automatique", bundle: .module),
                            isOn: model.binding(profile.autoWarmupEnabled) { $0.autoWarmupEnabled = $1 })
-            pills(String(localized: "Repos par défaut", bundle: .module)) {
+            let restTitle = String(localized: "Repos par défaut", bundle: .module)
+            pills(restTitle, spoken: restTitle) { group in
                 ChoicePills(options: SettingsService.restChoices.map { ($0, String(localized: "\($0) s", bundle: .module)) },
-                            selection: model.selection(profile.defaultRestSeconds) { $0.defaultRestSeconds = $1 })
+                            selection: model.selection(profile.defaultRestSeconds) { $0.defaultRestSeconds = $1 },
+                            groupLabel: group, spokenLabel: { ProfileText.restSpoken($0) })
                 // Le moteur ne prend ce repos que pour un exercice sans repos au catalogue ; les lignes de routine gardent le leur.
                 Text(String(
                     localized: "S'applique aux exercices sans repos conseillé. Les exercices de ton programme gardent leur propre repos.",
@@ -72,12 +77,15 @@ struct SessionSettingsSection: View {
                     .foregroundStyle(PulsePalette.text2)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            pills(String(localized: "Barre (kg)", bundle: .module)) {
+            pills(String(localized: "Barre (kg)", bundle: .module), spoken: String(localized: "Barre", bundle: .module)) { group in
                 ChoicePills(options: Self.barChoices.map { ($0, Self.kilos($0)) },
-                            selection: model.selection(profile.barWeightKg) { $0.barWeightKg = $1 })
+                            selection: model.selection(profile.barWeightKg) { $0.barWeightKg = $1 },
+                            groupLabel: group, spokenLabel: { ProfileText.plateSpoken($0) })
             }
-            pills(String(localized: "Disques disponibles (kg)", bundle: .module)) {
-                MultiChoicePills(options: Self.plateChoices.map { ($0, Self.kilos($0)) }, selection: plates)
+            pills(String(localized: "Disques disponibles (kg)", bundle: .module),
+                  spoken: String(localized: "Disques disponibles", bundle: .module)) { group in
+                MultiChoicePills(options: Self.plateChoices.map { ($0, Self.kilos($0)) }, selection: plates,
+                                 groupLabel: group, spokenLabel: { ProfileText.plateSpoken($0) })
             }
         } header: {
             Text(String(localized: "Séance", bundle: .module))
@@ -85,11 +93,13 @@ struct SessionSettingsSection: View {
         .listRowBackground(PulsePalette.surface)
     }
 
-    private func pills(_ title: String, @ViewBuilder content: () -> some View) -> some View {
+    /// Le titre visible et les pastilles ; VoiceOver lit `spoken` une fois, comme nom du groupe, et chaque pastille avec son unité.
+    private func pills(_ title: String, spoken: String, @ViewBuilder content: (String) -> some View) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(title)
                 .foregroundStyle(PulsePalette.text)
-            content()
+                .accessibilityHidden(true)
+            content(spoken)
         }
         .padding(.vertical, 6)
     }
@@ -141,6 +151,8 @@ struct NotificationSettingsSection: View {
                 }
                 .pickerStyle(.menu)
                 .tint(PulsePalette.text2)
+                .accessibilityValue(ProfileText.clockSpoken(
+                    minutes: profile.morningScoreDeadlineMinutes ?? MorningNotificationRule.defaultDeadlineMinutes))
                 .frame(minHeight: 44)
             }
             SettingsToggle(title: String(localized: "Rappels de compléments", bundle: .module),
