@@ -21,27 +21,33 @@ struct CalibrationView: View {
         }
     }
 
+    /// Le titre, l'explication et le check-in défilent ensemble : à `accessibility3` ils débordent d'un écran.
     private var checkIn: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text(String(localized: "Pas encore de score mesuré", bundle: .module))
-                    .font(PulseFont.title(.title2))
-                    .foregroundStyle(PulsePalette.text)
-                    .accessibilityAddTraits(.isHeader)
-                Text(explanation)
-                    .font(.subheadline)
-                    .foregroundStyle(PulsePalette.text2)
-                if let message = model.errorMessage {
-                    Text(message)
-                        .font(.footnote)
-                        .foregroundStyle(PulsePalette.bad)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(String(localized: "Pas encore de score mesuré", bundle: .module))
+                        .font(PulseFont.title(.title2))
+                        .foregroundStyle(PulsePalette.text)
+                        .accessibilityAddTraits(.isHeader)
+                    Text(explanation)
+                        .font(.subheadline)
+                        .foregroundStyle(PulsePalette.text2)
+                    if let message = model.errorMessage {
+                        Text(message)
+                            .font(.footnote)
+                            .foregroundStyle(PulsePalette.bad)
+                    }
+                }
+                .padding(.bottom, 20)
+                CheckInView(form: model.checkIn, scrollable: false) { _ in
+                    Task { await model.submitCheckIn() }
                 }
             }
-            .padding([.horizontal, .top], PulseMetrics.spacing)
-            CheckInView(form: model.checkIn) { _ in
-                Task { await model.submitCheckIn() }
-            }
+            .padding(PulseMetrics.spacing)
         }
+        .background(PulsePalette.background)
+        .pulseAnnounceError(model.errorMessage)
     }
 
     private var explanation: String {
@@ -81,5 +87,15 @@ private struct ReadingView: View {
 
 #Preview("Trois nuits") {
     OnboardingFlowView(model: OnboardingPreviewSupport.model(step: .calibration, scenario: .threeNights))
+}
+
+#Preview("Bonne nuit, accessibilité XL") {
+    OnboardingFlowView(model: OnboardingPreviewSupport.model(step: .calibration, scenario: .goodNight))
+        .dynamicTypeSize(.accessibility3)
+}
+
+#Preview("Trois nuits, accessibilité XL") {
+    OnboardingFlowView(model: OnboardingPreviewSupport.model(step: .calibration, scenario: .threeNights))
+        .dynamicTypeSize(.accessibility3)
 }
 #endif

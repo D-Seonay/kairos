@@ -12,6 +12,22 @@ public struct WeekWidgetLargeView: View {
     }
 
     public var body: some View {
+        WeekWidgetLargeViewBody(content: content)
+            .dynamicTypeSize(...WidgetTypeCap.weekLarge)
+    }
+}
+
+/// Le contenu de la vue, plafonné par `WeekWidgetLargeView` : ses `@ScaledMetric` lisent la taille déjà plafonnée.
+struct WeekWidgetLargeViewBody: View {
+    let content: WeekWidgetContent
+
+    @ScaledMetric(relativeTo: .subheadline) private var titleSize = 15
+    @ScaledMetric(relativeTo: .caption2) private var smallSize = 11
+    @ScaledMetric(relativeTo: .caption) private var metaSize = 12
+    @ScaledMetric(relativeTo: .caption) private var tomorrowSize = 12
+    @ScaledMetric(relativeTo: .caption2) private var bubbleSize = 28
+
+    var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             headerRow
             daysRow
@@ -22,7 +38,6 @@ public struct WeekWidgetLargeView: View {
             tomorrowRow
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(content.accessibilityLabel)
     }
@@ -30,11 +45,14 @@ public struct WeekWidgetLargeView: View {
     private var headerRow: some View {
         HStack {
             Text(WeekWidgetContent.displayName)
-                .font(.system(size: 15, weight: .bold))
+                .font(.system(size: titleSize, weight: .bold))
                 .foregroundStyle(PulsePalette.text)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
             Spacer()
             Text(content.badgeText)
-                .font(.system(size: 11, weight: .bold))
+                .font(.system(size: smallSize, weight: .bold))
+                .lineLimit(1)
                 .padding(.horizontal, 7)
                 .padding(.vertical, 2.5)
                 .background(Color(PulsePalette.accent(for: .amber).accent).opacity(0.18))
@@ -48,7 +66,7 @@ public struct WeekWidgetLargeView: View {
             ForEach(Array(content.days.enumerated()), id: \.offset) { _, day in
                 VStack(spacing: 5) {
                     Text(day.letter)
-                        .font(.system(size: 11, weight: .semibold))
+                        .font(.system(size: smallSize, weight: .semibold))
                         .foregroundStyle(PulsePalette.muted)
                     dayBubble(for: day)
                 }
@@ -70,9 +88,9 @@ public struct WeekWidgetLargeView: View {
                             lineWidth: 1.5
                         )
                 )
-                .frame(width: 28, height: 28)
+                .frame(width: bubbleSize, height: bubbleSize)
             Image(systemName: day.iconName)
-                .font(.system(size: 11, weight: .bold))
+                .font(.system(size: smallSize, weight: .bold))
                 .foregroundStyle(
                     isToday ? Color(PulsePalette.accent(for: .amber).accent)
                         : (day.state == .completed ? PulsePalette.text : PulsePalette.muted)
@@ -92,16 +110,18 @@ public struct WeekWidgetLargeView: View {
                 .frame(width: 72)
             VStack(alignment: .leading, spacing: 2) {
                 Text(String(localized: "Aujourd'hui", bundle: .module))
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.system(size: smallSize, weight: .semibold))
                     .foregroundStyle(PulsePalette.muted)
                 Text(content.todayTitle)
-                    .font(.system(size: 15, weight: .bold))
+                    .font(.system(size: titleSize, weight: .bold))
                     .foregroundStyle(PulsePalette.text)
-                    .lineLimit(1)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.75)
                 Text(content.todayMeta)
-                    .font(.system(size: 12))
+                    .font(.system(size: metaSize))
                     .foregroundStyle(PulsePalette.text2)
-                    .lineLimit(1)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.75)
             }
         }
     }
@@ -110,12 +130,17 @@ public struct WeekWidgetLargeView: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Text(String(localized: "Charge 7 j / 28 j", bundle: .module))
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.system(size: smallSize, weight: .semibold))
                     .foregroundStyle(PulsePalette.muted)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
                 Spacer()
                 Text(content.acwrZoneText)
-                    .font(.system(size: 11, weight: .bold))
+                    .font(.system(size: smallSize, weight: .bold))
                     .foregroundStyle(PulsePalette.ok)
+                    .multilineTextAlignment(.trailing)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.75)
             }
             loadBar
         }
@@ -153,18 +178,29 @@ public struct WeekWidgetLargeView: View {
     private var tomorrowRow: some View {
         HStack(spacing: 6) {
             Image(systemName: "figure.run")
-                .font(.system(size: 11, weight: .bold))
+                .font(.system(size: smallSize, weight: .bold))
                 .foregroundStyle(PulsePalette.run)
             Text(content.tomorrowText)
-                .font(.system(size: 11.5))
+                .font(.system(size: tomorrowSize))
                 .foregroundStyle(PulsePalette.muted)
-                .lineLimit(1)
+                .lineLimit(2)
+                .minimumScaleFactor(0.75)
         }
     }
 }
 
 #Preview("Grand Semaine") {
     WeekWidgetLargeView(content: .sample(at: Date(), calendar: Calendar(identifier: .gregorian)))
+        .padding(16)
+        .frame(width: 338, height: 338)
+        .background(PulsePalette.surface, in: RoundedRectangle(cornerRadius: 22))
+        .padding()
+        .background(PulsePalette.background)
+}
+
+#Preview("Grand Semaine, accessibilité 3") {
+    WeekWidgetLargeView(content: .sample(at: Date(), calendar: Calendar(identifier: .gregorian)))
+        .dynamicTypeSize(.accessibility3)
         .padding(16)
         .frame(width: 338, height: 338)
         .background(PulsePalette.surface, in: RoundedRectangle(cornerRadius: 22))

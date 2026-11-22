@@ -147,6 +147,9 @@ public struct LiveExercise: Sendable, Equatable, Codable, Identifiable {
     public var dayNote: String?
     /// « Dernière fois 70 × 5 · 5 ».
     public var lastTimeText: String?
+    /// La même chose dite à VoiceOver : « Dernière fois : 70 kilos, 5 répétitions, puis 5 répétitions ». Optionnel : une
+    /// séance enregistrée avant M8 se relit sans.
+    public var lastTimeSpoken: String?
     public var note: String?
     public var sets: [LiveSet]
     /// L'échauffement automatique de l'exercice, pour le recalculer quand la première charge de travail change ; `nil` quand
@@ -159,7 +162,8 @@ public struct LiveExercise: Sendable, Equatable, Codable, Identifiable {
 
     public init(id: UUID = UUID(), exercise: ExerciseReference, name: String, loadKind: LoadKind, tracksDuration: Bool,
                 isBarbell: Bool, incrementKg: Double, supersetGroup: Int? = nil, restSeconds: Int, rpeCap: Double? = nil,
-                dayNote: String? = nil, lastTimeText: String? = nil, note: String? = nil, sets: [LiveSet],
+                dayNote: String? = nil, lastTimeText: String? = nil, lastTimeSpoken: String? = nil, note: String? = nil,
+                sets: [LiveSet],
                 warmupPlan: LiveWarmupPlan? = nil, replacedExercise: ExerciseReference? = nil,
                 replacementReason: ReplacementReason? = nil) {
         self.id = id
@@ -174,6 +178,7 @@ public struct LiveExercise: Sendable, Equatable, Codable, Identifiable {
         self.rpeCap = rpeCap
         self.dayNote = dayNote
         self.lastTimeText = lastTimeText
+        self.lastTimeSpoken = lastTimeSpoken
         self.note = note
         self.sets = sets
         self.warmupPlan = warmupPlan
@@ -200,6 +205,9 @@ public struct LiveSet: Sendable, Equatable, Codable, Identifiable {
     public var setType: SetType
     /// La même série la dernière fois : « 70 × 5 ».
     public var previous: String?
+    /// La même chose dite à VoiceOver : « 70 kilos, 5 répétitions ». Optionnel : une séance enregistrée avant M8 se relit
+    /// sans.
+    public var previousSpoken: String?
     public var proposed: ProposedSet
     public var weightKg: Double?
     public var reps: Int?
@@ -209,12 +217,13 @@ public struct LiveSet: Sendable, Equatable, Codable, Identifiable {
     public var isEdited: Bool
     public var completedAt: Date?
 
-    public init(id: UUID = UUID(), setType: SetType = .working, previous: String? = nil, proposed: ProposedSet,
-                weightKg: Double? = nil, reps: Int? = nil, durationSeconds: Int? = nil, rpe: Double? = nil,
-                isEdited: Bool = false, completedAt: Date? = nil) {
+    public init(id: UUID = UUID(), setType: SetType = .working, previous: String? = nil, previousSpoken: String? = nil,
+                proposed: ProposedSet, weightKg: Double? = nil, reps: Int? = nil, durationSeconds: Int? = nil,
+                rpe: Double? = nil, isEdited: Bool = false, completedAt: Date? = nil) {
         self.id = id
         self.setType = setType
         self.previous = previous
+        self.previousSpoken = previousSpoken
         self.proposed = proposed
         self.weightKg = weightKg
         self.reps = reps
@@ -225,9 +234,9 @@ public struct LiveSet: Sendable, Equatable, Codable, Identifiable {
     }
 
     /// Une série qui prend les valeurs de sa proposition.
-    public init(proposed: ProposedSet, previous: String?) {
-        self.init(previous: previous, proposed: proposed, weightKg: proposed.weightKg, reps: proposed.reps,
-                  durationSeconds: proposed.durationSeconds)
+    public init(proposed: ProposedSet, previous: String?, previousSpoken: String? = nil) {
+        self.init(previous: previous, previousSpoken: previousSpoken, proposed: proposed, weightKg: proposed.weightKg,
+                  reps: proposed.reps, durationSeconds: proposed.durationSeconds)
     }
 }
 

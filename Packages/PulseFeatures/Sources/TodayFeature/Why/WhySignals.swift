@@ -43,7 +43,9 @@ enum WhySignals {
              weight: WhyContent.rounded(RecoveryCalculator.nominalWeight(for: factor) / total * 100),
              score: WhyContent.rounded(recovery.subScore(of: factor) ?? 0))
         }
-        let signals = rows.map { WhyContent.Signal(title: title(of: $0.factor), score: $0.score) }
+        let signals = rows.map {
+            WhyContent.Signal(title: title(of: $0.factor), score: $0.score, spokenTitle: spokenTitle(of: $0.factor))
+        }
         return Result(signals: signals, formula: formula(terms: rows.map { ($0.weight, $0.score) }, result: recovery.score))
     }
 
@@ -53,6 +55,11 @@ enum WhySignals {
         case .restingHeartRate: String(localized: "FC au repos", bundle: .module)
         case .sleep: String(localized: "Sommeil", bundle: .module)
         }
+    }
+
+    /// Le titre dit en toutes lettres quand l'affiché abrège (« FC »).
+    private static func spokenTitle(of factor: Factor) -> String? {
+        factor == .restingHeartRate ? String(localized: "Fréquence cardiaque au repos", bundle: .module) : nil
     }
 
     // MARK: - Score estimé

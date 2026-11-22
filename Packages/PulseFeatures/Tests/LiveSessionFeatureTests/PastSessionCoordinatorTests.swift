@@ -77,6 +77,8 @@ struct PastSessionCoordinatorTests {
     @Test func theHeaderSaysTheDateAndTheEnteredDuration() {
         #expect(LiveHeader.pastDateText(start: interval.start, end: interval.end, calendar: LiveClock.calendar)
             == "Mercredi 28 octobre · 18:00 – 19:05")
+        #expect(LiveHeader.pastDateSpokenText(start: interval.start, end: interval.end, calendar: LiveClock.calendar)
+            == "Mercredi 28 octobre, de 18 heures à 19 heures 5")
         #expect(LiveHeader.minutes(from: interval.start, to: interval.end) == 65)
     }
 }

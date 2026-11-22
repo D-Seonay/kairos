@@ -13,12 +13,26 @@ enum WhyReading {
     /// À partir de cet écart arrondi, la FC au repos est dite en hausse ou en baisse.
     private static let heartRateThresholdBpm = 2
 
+    /// Écrit à l'écran (« 5 bpm », « 5 h 10 ») ou dit par VoiceOver (« 5 battements par minute », « 5 heures 10 minutes »).
+    enum Style {
+        case written, spoken
+    }
+
     static func make(recovery: DailyRecovery, session: TodaySession) -> String {
+        make(recovery: recovery, session: session, style: .written)
+    }
+
+    /// La même lecture, avec les unités dites en toutes lettres : sans « bpm » ni « 5 h 10 ».
+    static func spokenText(recovery: DailyRecovery, session: TodaySession) -> String {
+        make(recovery: recovery, session: session, style: .spoken)
+    }
+
+    private static func make(recovery: DailyRecovery, session: TodaySession, style: Style) -> String {
         var sentences: [String]
         if recovery.isEstimated {
             sentences = [String(localized: "Pas de données de nuit : ce score vient de ton check-in.", bundle: .module)]
         } else {
-            sentences = measured(recovery)
+            sentences = measured(recovery, style: style)
         }
         sentences.append(contentsOf: conclusion(recovery.category, session: session))
         return sentences.joined(separator: " ")
@@ -26,10 +40,11 @@ enum WhyReading {
 
     // MARK: - Nuit mesurée
 
-    private static func measured(_ recovery: DailyRecovery) -> [String] {
+    private static func measured(_ recovery: DailyRecovery, style: Style) -> [String] {
         let present = recovery.presentFactors
         var sentences: [String] = []
-        let clauses = [hrv(recovery, present), restingHeartRate(recovery, present), sleep(recovery, present)].compactMap { $0 }
+        let clauses = [hrv(recovery, present), restingHeartRate(recovery, present, style), sleep(recovery, present, style)]
+            .compactMap { $0 }
         if !clauses.isEmpty {
             sentences.append(sentence(from: clauses))
         }
@@ -64,11 +79,15 @@ enum WhyReading {
         return String(localized: "ta variabilité cardiaque est proche de ta moyenne de 14 jours", bundle: .module)
     }
 
-    private static func restingHeartRate(_ recovery: DailyRecovery, _ present: [Factor]) -> String? {
+    private static func restingHeartRate(_ recovery: DailyRecovery, _ present: [Factor], _ style: Style)
+        -> String? {
         guard present.contains(.restingHeartRate), let bpm = recovery.restingHeartRate,
               let baseline = recovery.restingHeartRateBaseline else { return nil }
         let change = WhyContent.rounded(bpm - baseline)
-        let amount = "\(abs(change)) bpm"
+        let amount = switch style {
+        case .written: "\(abs(change)) bpm"
+        case .spoken: TrendTile.spokenValue(.restingHeartRate, Double(abs(change)))
+        }
         if change >= heartRateThresholdBpm {
             return String(localized: "ta fréquence au repos a pris \(amount)", bundle: .module)
         }
@@ -78,9 +97,12 @@ enum WhyReading {
         return String(localized: "ta fréquence au repos est stable", bundle: .module)
     }
 
-    private static func sleep(_ recovery: DailyRecovery, _ present: [Factor]) -> String? {
+    private static func sleep(_ recovery: DailyRecovery, _ present: [Factor], _ style: Style) -> String? {
         guard present.contains(.sleep), let minutes = recovery.asleepMinutes else { return nil }
-        let duration = PulseFormat.duration(minutes: minutes)
+        let duration = switch style {
+        case .written: PulseFormat.duration(minutes: minutes)
+        case .spoken: PulseSpoken.duration(seconds: minutes * 60)
+        }
         if minutes < shortSleepMinutes {
             return String(localized: "tu n'as dormi que \(duration)", bundle: .module)
         }

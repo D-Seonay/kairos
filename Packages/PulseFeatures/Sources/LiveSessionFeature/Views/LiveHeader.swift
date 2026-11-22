@@ -5,60 +5,63 @@ import SwiftUI
 
 /// L'en-tête de la séance (spec M4 §14.2) : le titre, « Terminer », le menu « Abandonner », puis la durée écoulée, le tonnage et
 /// les séries de travail faites sur prévues. Une séance passée (§19.4) montre sa date, sa durée saisie, et « Annuler la
-/// saisie » à la place d'« Abandonner ». Les confirmations sont celles de l'appelant.
+/// saisie » à la place d'« Abandonner ». Les confirmations sont celles de l'appelant. Aux tailles d'accessibilité, les boutons
+/// passent sous le titre et les statistiques en colonne.
 struct LiveHeader: View {
     let session: LiveSession
     let onFinish: () -> Void
     let onAbandon: () -> Void
     var calendar: Calendar = .current
     @Environment(\.pulseTheme) private var theme
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
-        let palette = PulsePalette.accent(for: theme)
+        let isLarge = typeSize.isAccessibilitySize
+        let titleRow = isLarge ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4)) : AnyLayout(HStackLayout(spacing: 8))
+        let statsRow = isLarge ? AnyLayout(VStackLayout(alignment: .leading, spacing: 6)) : AnyLayout(HStackLayout())
         VStack(spacing: 4) {
-            HStack(spacing: 8) {
+            titleRow {
                 Text(Self.titleText(session.title))
                     .font(PulseFont.title(.title3))
                     .foregroundStyle(PulsePalette.text)
-                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .accessibilityAddTraits(.isHeader)
-                menu
-                Button(action: onFinish) {
-                    Text(String(localized: "Terminer", bundle: .module))
-                        .font(PulseFont.title(.subheadline))
-                        .foregroundStyle(Color(palette.accentInk))
-                        .padding(.horizontal, 18)
-                        .frame(minHeight: LiveSetRow.targetHeight)
-                        .background(Color(palette.accent), in: Capsule())
-                        .contentShape(Capsule())
+                HStack(spacing: 8) {
+                    menu
+                    finishButton
                 }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier(LiveSessionIdentifiers.finishButton)
             }
             if let pastEndedAt = session.pastEndedAt {
                 Text(Self.pastDateText(start: session.startedAt, end: pastEndedAt, calendar: calendar))
+                    .accessibilityLabel(Self.pastDateSpokenText(start: session.startedAt, end: pastEndedAt, calendar: calendar))
                     .font(.footnote)
                     .foregroundStyle(PulsePalette.text2)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
-            HStack {
+            statsRow {
                 if let pastEndedAt = session.pastEndedAt {
                     let minutes = Self.minutes(from: session.startedAt, to: pastEndedAt)
-                    stat(String(localized: "Durée", bundle: .module), spoken: PulseFormat.duration(minutes: minutes)) {
+                    stat(String(localized: "Durée", bundle: .module), spoken: Self.durationSpokenText(minutes: minutes)) {
                         Text(PulseFormat.duration(minutes: minutes))
                     }
                 } else {
-                    stat(String(localized: "Durée", bundle: .module)) {
-                        Text(timerInterval: session.startedAt...Date.distantFuture, pauseTime: nil, countsDown: false,
-                             showsHours: false)
+                    // Le chrono visible se met à jour seul ; VoiceOver dit la durée à la minute près.
+                    TimelineView(.periodic(from: session.startedAt, by: 60)) { context in
+                        stat(String(localized: "Durée", bundle: .module),
+                             spoken: Self.elapsedSpokenText(from: session.startedAt, to: context.date), updatesFrequently: true) {
+                            Text(timerInterval: session.startedAt...Date.distantFuture, pauseTime: nil, countsDown: false,
+                                 showsHours: false)
+                        }
                     }
                 }
-                stat(String(localized: "Tonnage", bundle: .module), spoken: Self.tonnageText(kg: session.tonnageKg)) {
+                stat(String(localized: "Tonnage", bundle: .module), spoken: Self.tonnageSpokenText(kg: session.tonnageKg),
+                     numeric: session.tonnageKg) {
                     Text(Self.tonnageText(kg: session.tonnageKg))
                 }
                 stat(String(localized: "Séries", bundle: .module),
-                     spoken: Self.progressAccessibilityText(done: session.doneWorkingSets, planned: session.plannedWorkingSets)) {
+                     spoken: Self.progressAccessibilityText(done: session.doneWorkingSets, planned: session.plannedWorkingSets),
+                     numeric: Double(session.doneWorkingSets)) {
                     Text(Self.progressText(done: session.doneWorkingSets, planned: session.plannedWorkingSets))
                 }
             }
@@ -66,8 +69,23 @@ struct LiveHeader: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 4)
         // Une série validée fait rouler le tonnage et le compte des séries.
-        .animation(.snappy, value: session.tonnageKg)
-        .animation(.snappy, value: session.doneWorkingSets)
+        .pulseAnimation(.snappy, value: session.tonnageKg)
+        .pulseAnimation(.snappy, value: session.doneWorkingSets)
+    }
+
+    private var finishButton: some View {
+        let palette = PulsePalette.accent(for: theme)
+        return Button(action: onFinish) {
+            Text(String(localized: "Terminer", bundle: .module))
+                .font(PulseFont.title(.subheadline))
+                .foregroundStyle(Color(palette.accentInk))
+                .padding(.horizontal, 18)
+                .frame(minHeight: LiveSetRow.targetHeight)
+                .background(Color(palette.accent), in: Capsule())
+                .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier(LiveSessionIdentifiers.finishButton)
     }
 
     private var menu: some View {
@@ -88,28 +106,29 @@ struct LiveHeader: View {
         .accessibilityIdentifier(LiveSessionIdentifiers.menuButton)
     }
 
-    /// Une statistique. Avec `spoken`, VoiceOver lit cette phrase ; sans elle, il lit le nom puis la valeur (la durée, que
-    /// `Text(timerInterval:)` met à jour seul).
-    @ViewBuilder
-    private func stat(_ name: String, spoken: String? = nil, @ViewBuilder value: () -> some View) -> some View {
-        let content = VStack(spacing: 0) {
+    /// Une statistique : VoiceOver lit son nom puis `spoken`. `numeric` fait rouler les chiffres quand la valeur change ;
+    /// `updatesFrequently` pour la durée qui court.
+    private func stat(_ name: String, spoken: String, numeric: Double? = nil, updatesFrequently: Bool = false,
+                      @ViewBuilder value: () -> some View) -> some View {
+        let isLarge = typeSize.isAccessibilitySize
+        return VStack(alignment: isLarge ? .leading : .center, spacing: 0) {
             Text(name).pulseEyebrow()
-            value()
-                .font(PulseFont.value(.title2))
-                .contentTransition(.numericText())
-                .foregroundStyle(PulsePalette.text)
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
+            Group {
+                if let numeric {
+                    value().pulseNumericTransition(value: numeric)
+                } else {
+                    value()
+                }
+            }
+            .font(PulseFont.value(.title2))
+            .foregroundStyle(PulsePalette.text)
+            .minimumScaleFactor(0.8)
         }
-        .frame(maxWidth: .infinity)
-        if let spoken {
-            content
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel(name)
-                .accessibilityValue(spoken)
-        } else {
-            content.accessibilityElement(children: .combine)
-        }
+        .frame(maxWidth: .infinity, alignment: isLarge ? .leading : .center)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(name)
+        .accessibilityValue(spoken)
+        .accessibilityAddTraits(updatesFrequently ? .updatesFrequently : [])
     }
 }
 
@@ -141,6 +160,17 @@ extension LiveHeader {
         return "\(day.prefix(1).uppercased())\(day.dropFirst()) · \(time(start)) – \(time(end))"
     }
 
+    /// « Mercredi 28 octobre, de 18 heures à 19 heures 5 » : `pastDateText` dit en mots.
+    nonisolated static func pastDateSpokenText(start: Date, end: Date, calendar: Calendar) -> String {
+        let weekday = PulseSpoken.weekday(start, calendar: calendar)
+        let day = "\(weekday.prefix(1).uppercased())\(weekday.dropFirst()) \(PulseSpoken.date(start, calendar: calendar))"
+        let clock = { (date: Date) in
+            let parts = calendar.dateComponents([.hour, .minute], from: date)
+            return PulseSpoken.clock(hour: parts.hour ?? 0, minute: parts.minute ?? 0)
+        }
+        return String(localized: "\(day), de \(clock(start)) à \(clock(end))", bundle: .module)
+    }
+
     /// La durée saisie, en minutes arrondies.
     nonisolated static func minutes(from start: Date, to end: Date) -> Int {
         Int((max(0, end.timeIntervalSince(start)) / 60).rounded())
@@ -149,5 +179,22 @@ extension LiveHeader {
     /// « 1240 kg », « 62,5 kg ».
     nonisolated static func tonnageText(kg: Double) -> String {
         String(localized: "\(PulseFormat.decimal(kg, maxFractionDigits: 1)) kg", bundle: .module)
+    }
+
+    /// « 1 240 kilos ».
+    nonisolated static func tonnageSpokenText(kg: Double) -> String {
+        PulseSpoken.kilos((kg * 10).rounded() / 10)
+    }
+
+    /// « 1 heure 5 minutes » : la durée saisie d'une séance passée.
+    nonisolated static func durationSpokenText(minutes: Int) -> String {
+        PulseSpoken.duration(seconds: max(0, minutes) * 60)
+    }
+
+    /// « 12 minutes » : la durée écoulée à la minute près ; « Moins d'une minute » au début.
+    nonisolated static func elapsedSpokenText(from start: Date, to now: Date) -> String {
+        let minutes = Int(max(0, now.timeIntervalSince(start)) / 60)
+        guard minutes > 0 else { return String(localized: "Moins d'une minute", bundle: .module) }
+        return durationSpokenText(minutes: minutes)
     }
 }

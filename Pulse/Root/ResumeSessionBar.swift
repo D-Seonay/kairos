@@ -29,6 +29,8 @@ struct ResumeSessionBar: View {
                     Text(startedAt, style: .timer)
                         .font(.subheadline.monospacedDigit())
                         .foregroundStyle(PulsePalette.text2)
+                        // Le chrono avance seul : VoiceOver sait qu'il change sans cesse.
+                        .accessibilityAddTraits(.updatesFrequently)
                 }
                 .accessibilityElement(children: .combine)
                 buttons
@@ -59,3 +61,18 @@ struct ResumeSessionBar: View {
         }
     }
 }
+
+#if DEBUG
+#Preview("Reprendre la séance, accessibilité 3") {
+    ResumeSessionBar(title: "Push", startedAt: Date(timeIntervalSinceNow: -1_800), onResume: {}, onAbandon: {})
+        .padding()
+        .background(PulsePalette.background)
+        .dynamicTypeSize(.accessibility3)
+}
+
+#Preview("Reprendre la séance") {
+    ResumeSessionBar(title: "Push", startedAt: Date(timeIntervalSinceNow: -1_800), onResume: {}, onAbandon: {})
+        .padding()
+        .background(PulsePalette.background)
+}
+#endif

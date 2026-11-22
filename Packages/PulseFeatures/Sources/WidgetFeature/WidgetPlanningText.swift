@@ -70,4 +70,60 @@ enum WidgetPlanningText {
         formatter.dateFormat = "EEEE"
         return formatter.string(from: date).capitalized(with: Locale(identifier: "fr_FR"))
     }
+
+    // MARK: - Textes lus par VoiceOver
+
+    /// « Lundi fait, mardi repos, aujourd'hui mercredi, à venir, jeudi à venir » : l'état des 7 pastilles, jour par jour. Aujourd'hui
+    /// se dit toujours « aujourd'hui », quel que soit son état. Un jour manqué se dit « repos », comme il se voit : pas de reproche.
+    static func spokenWeek(_ week: [WidgetDay], calendar: Calendar) -> String {
+        let parts = week.map { day -> String in
+            let name = PulseSpoken.weekday(day.date, calendar: calendar)
+            let status = switch day.state {
+            case .done: String(localized: "fait", bundle: .module)
+            case .planned: String(localized: "à venir", bundle: .module)
+            case .missed, .rest: String(localized: "repos", bundle: .module)
+            }
+            return day.isToday ? String(localized: "aujourd'hui \(name), \(status)", bundle: .module)
+                : String(localized: "\(name) \(status)", bundle: .module)
+        }
+        let sentence = parts.joined(separator: ", ")
+        return sentence.prefix(1).uppercased() + sentence.dropFirst()
+    }
+
+    /// La semaine de l'exemple : trois jours faits, un repos, aujourd'hui vendredi prévu, une course samedi, un repos dimanche.
+    static func sampleWeek(containing date: Date, calendar: Calendar) -> [WidgetDay] {
+        let layout: [(WidgetDayKind, WidgetDayState)] = [(.strength, .done), (.run, .done), (.strength, .done), (.rest, .rest),
+                                                         (.strength, .planned), (.run, .planned), (.rest, .rest)]
+        return zip(weekDates(containing: date, calendar: calendar), layout).enumerated().map { index, entry in
+            WidgetDay(date: entry.0, kind: entry.1.0, state: entry.1.1, isToday: index == 4)
+        }
+    }
+
+    /// Les 7 jours de la semaine (du lundi au dimanche) de `date`, pour l'exemple sans instantané.
+    static func weekDates(containing date: Date, calendar: Calendar) -> [Date] {
+        let start = calendar.startOfDay(for: date)
+        let offset = (calendar.component(.weekday, from: start) + 5) % 7
+        guard let monday = calendar.date(byAdding: .day, value: -offset, to: start) else { return [] }
+        return (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: monday) }
+    }
+
+    /// « 5 minutes 45 à 6 minutes 5 par kilomètre » : la fourchette d'allure, en secondes par kilomètre.
+    static func spokenPace(fastest: Int, slowest: Int) -> String {
+        let from = PulseSpoken.duration(seconds: fastest)
+        let to = PulseSpoken.duration(seconds: slowest)
+        return String(localized: "\(from) à \(to) par kilomètre", bundle: .module)
+    }
+
+    /// Le détail d'une séance dit en toutes lettres : « Sortie facile · 45 min » donne « Sortie facile, 45 minutes », et
+    /// « 12,5 km » donne « 12,5 kilomètres ».
+    static func spokenDetail(_ detail: String) -> String {
+        var spoken = detail.replacing(" · ", with: ", ")
+        spoken = spoken.replacing(/(\d+) min\b/) { match in
+            PulseSpoken.duration(seconds: (Int(match.1) ?? 0) * 60)
+        }
+        spoken = spoken.replacing(/(\d+(?:[.,]\d+)?) km\b/) { match in
+            PulseSpoken.kilometres(Double(match.1.replacing(",", with: ".")) ?? 0)
+        }
+        return spoken
+    }
 }

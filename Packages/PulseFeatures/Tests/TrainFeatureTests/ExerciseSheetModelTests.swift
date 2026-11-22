@@ -192,6 +192,8 @@ private func benchFixture() async throws -> TrainFixture {
     #expect(summary.contains("26 octobre"))
     #expect(summary.contains("80"))
     #expect(summary.contains("81,6"))
+    #expect(summary.hasPrefix("Maximum estimé sur une répétition, 3 séances : "))
+    #expect(summary.contains(" kilos le 2 octobre") && !summary.contains("kg") && !summary.contains("1RM"))
     let empty = ExerciseSheetModel(environment: TrainFixture().environment, reference: bench)
     await empty.load()
     #expect(empty.chartSummary == nil)
@@ -222,4 +224,58 @@ private func benchFixture() async throws -> TrainFixture {
     #expect(BestSet(weightKg: 72.5, reps: 5, date: date).text == "72,5 × 5")
     #expect(BestSet(weightKg: 0, reps: 12, date: date).text == "12 répétitions")
     #expect(BestSet(weightKg: 0, reps: 12, date: date, isAssisted: true).text == "12 répétitions")
+}
+
+@MainActor @Test func sheetBuildsAnAudioGraphDescriptorFromTheChart() async throws {
+    let fixture = try await benchFixture()
+    let model = ExerciseSheetModel(environment: fixture.environment, reference: bench)
+    await model.load()
+    let built = try #require(model.chartDescriptor).makeChartDescriptor()
+    #expect(built.title == "Maximum estimé sur une répétition")
+    #expect(built.summary == model.chartSummary)
+    #expect(built.series.count == 1 && built.series[0].dataPoints.count == model.chart.count)
+    let values = model.chart.map(\.value)
+    #expect(built.yAxis?.range == (values.min() ?? 0)...(values.max() ?? 0))
+    let provider = try #require(built.yAxis?.valueDescriptionProvider)
+    #expect(provider(1) == "1 kilo" && provider(80) == "80 kilos")
+    let empty = ExerciseSheetModel(environment: TrainFixture().environment, reference: bench)
+    await empty.load()
+    #expect(empty.chartDescriptor == nil)
+}
+
+@MainActor @Test func sheetSaysItsIndicatorsInWords() async throws {
+    let fixture = try await benchFixture()
+    let model = ExerciseSheetModel(environment: fixture.environment, reference: bench)
+    await model.load()
+    #expect(model.oneRepMaxSpokenText.hasSuffix(" kilos") && !model.oneRepMaxSpokenText.contains("kg"))
+    #expect(model.bestSetSpokenText.hasSuffix("répétitions") || model.bestSetSpokenText.hasSuffix("répétition"))
+    #expect(model.bestSetSpokenText.contains(" kilos, "))
+    let change = try #require(model.oneRepMaxChangeSpokenText)
+    #expect(change.hasSuffix(" en 30 jours") && (change.hasPrefix("en hausse de") || change.hasPrefix("en baisse de")
+        || change == "inchangé en 30 jours"))
+    let empty = ExerciseSheetModel(environment: TrainFixture().environment, reference: bench)
+    await empty.load()
+    #expect(empty.oneRepMaxSpokenText == "aucune valeur" && empty.bestSetSpokenText == "aucune série")
+    #expect(empty.oneRepMaxChangeSpokenText == nil)
+}
+
+@MainActor @Test func historyLinesCarrySpokenSets() async throws {
+    let fixture = TrainFixture()
+    let date = TrainClock.date(month: 10, day: 26, hour: 18)
+    try await fixture.log(on: date, sets: [LoggedSet(weightKg: 70, reps: 5), LoggedSet(weightKg: 70, reps: 5)])
+    let model = ExerciseSheetModel(environment: fixture.environment, reference: bench)
+    await model.load()
+    #expect(model.recentSessions.first?.setsText == "70 × 5 · 5")
+    #expect(model.recentSessions.first?.spokenSetsText == "70 kilos, 2 séries de 5 répétitions")
+}
+
+@MainActor @Test func sheetSpeaksEachChartPointWithItsDateAndValue() async throws {
+    let fixture = try await benchFixture()
+    let model = ExerciseSheetModel(environment: fixture.environment, reference: bench)
+    await model.load()
+    let first = try #require(model.chart.first)
+    let spoken = model.pointSpoken(first)
+    #expect(spoken.label == "2 octobre")
+    #expect(spoken.value.hasSuffix(" kilos") && !spoken.value.contains("kg"))
+    #expect(model.pointSpoken(ChartPoint(date: first.date, value: 1)).value == "1 kilo")
 }

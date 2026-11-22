@@ -20,8 +20,9 @@ public final class LiveSessionModel {
     @ObservationIgnored let environment: LiveSessionEnvironment
     @ObservationIgnored private let haptics: LiveSessionHaptics
     @ObservationIgnored private var pendingChanges = 0
-    /// Le début du repos dont la fin a déjà fait vibrer : +30 s ne la fait pas vibrer deux fois.
-    @ObservationIgnored private var vibratedRestStart: Date?
+    /// Le début du repos dont la fin a déjà fait vibrer : +30 s ne la fait pas vibrer deux fois. L'écran s'en sert aussi pour
+    /// annoncer la fin du repos à VoiceOver.
+    private(set) var reachedRestEnd: Date?
 
     init(session: LiveSession, environment: LiveSessionEnvironment, haptics: LiveSessionHaptics = .system) {
         self.session = session
@@ -65,8 +66,9 @@ public final class LiveSessionModel {
     }
 
     /// Une touche du clavier. « Suivant » passe de la charge aux répétitions (ou secondes), puis à la série suivante de
-    /// l'exercice, puis ferme le clavier ; les autres touches modifient la valeur.
-    public func keypadKey(_ key: KeypadInput.Key) async {
+    /// l'exercice, puis ferme le clavier ; les autres touches modifient la valeur. `onInput` reçoit le tampon avant et après la
+    /// touche, avant l'enregistrement : l'écran le dit à VoiceOver sans attendre la sauvegarde.
+    public func keypadKey(_ key: KeypadInput.Key, onInput: ((_ before: String, _ after: String) -> Void)? = nil) async {
         guard let focus else { return }
         if key == .next {
             advance(from: focus)
@@ -76,6 +78,7 @@ public final class LiveSessionModel {
         let value = keypad.apply(key)
         // Une touche sans effet (virgule sur des répétitions, effacement d'un champ vide) ne modifie pas la série.
         guard keypad.text != before else { return }
+        onInput?(before, keypad.text)
         haptics.light()
         switch focus.kind {
         case .weight:
@@ -212,8 +215,8 @@ public final class LiveSessionModel {
 
     /// L'écran appelle cette méthode quand le repos arrive à sa fin : une vibration longue, une seule fois par repos.
     public func didReachRestEnd() {
-        guard let rest = session.rest, vibratedRestStart != rest.startedAt else { return }
-        vibratedRestStart = rest.startedAt
+        guard let rest = session.rest, reachedRestEnd != rest.startedAt else { return }
+        reachedRestEnd = rest.startedAt
         haptics.restEnded()
     }
 

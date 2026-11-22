@@ -8,6 +8,8 @@ import PulseServices
 public final class StatsModel {
     public private(set) var snapshot: StatsSnapshot?
     public private(set) var errorMessage: String?
+    /// Le nombre de lectures échouées : chaque échec, même au texte identique, s'annonce à VoiceOver.
+    public private(set) var failureCount = 0
     public private(set) var hasLoaded = false
     public var view: StatsView = .load
     /// Changer la période relit les statistiques.
@@ -42,6 +44,7 @@ public final class StatsModel {
                 errorMessage = nil
             } catch {
                 errorMessage = String(localized: "Pulse n'a pas pu lire tes statistiques.", bundle: .module)
+                failureCount += 1
             }
         } while requested != period
         hasLoaded = true

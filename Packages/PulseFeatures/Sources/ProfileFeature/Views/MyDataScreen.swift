@@ -26,6 +26,7 @@ struct MyDataScreen: View {
                     Text(message)
                         .font(.footnote)
                         .foregroundStyle(PulsePalette.bad)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 .listRowBackground(PulsePalette.surface)
             }
@@ -43,6 +44,14 @@ struct MyDataScreen: View {
         .pulseInlineTitle()
         .sheet(isPresented: $showsErase) { screens.eraseConfirmation(onErased) }
         .task { await model.refresh() }
+        .pulseAnnounceOnce(model.errorMessage, id: model.failureCount, isError: true)
+        // Un export tourne puis son bouton de partage surgit : début et fin sont annoncés.
+        .onChange(of: model.isBusy) { _, isBusy in
+            if isBusy { PulseAnnouncement.post(ProfileText.exportStarted) }
+        }
+        .onChange(of: model.shareURL) { _, url in
+            if url != nil { PulseAnnouncement.post(ProfileText.exportReady) }
+        }
     }
 
     // MARK: Sur ce téléphone
@@ -67,15 +76,12 @@ struct MyDataScreen: View {
 
     /// Avant la première lecture « Pas encore lu » ; une table qui n'a pas pu être comptée « — », jamais un zéro inventé.
     private func countRow(_ title: String, _ table: StoreTable) -> some View {
-        LabeledContent(title, value: countText(table))
+        LabeledContent(title, value: MyDataModel.countText(model.counts[table], hasRefreshed: model.hasRefreshed))
             .foregroundStyle(PulsePalette.text)
             .frame(minHeight: 44)
-            .accessibilityElement(children: .combine)
-    }
-
-    private func countText(_ table: StoreTable) -> String {
-        guard model.hasRefreshed else { return String(localized: "Pas encore lu", bundle: .module) }
-        return model.counts[table].map { PulseFormat.integer(Double($0), unit: nil) } ?? "—"
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(title)
+            .accessibilityValue(MyDataModel.countSpoken(model.counts[table], hasRefreshed: model.hasRefreshed))
     }
 
     // MARK: Exporter
@@ -111,7 +117,10 @@ struct MyDataScreen: View {
             Text(title)
                 .foregroundStyle(PulsePalette.text)
             Spacer(minLength: 8)
-            if model.isBusy { ProgressView() }
+            if model.isBusy {
+                ProgressView()
+                    .accessibilityLabel(ProfileText.exportStarted)
+            }
         }
         .frame(minHeight: 44)
     }
@@ -214,6 +223,11 @@ private struct MyDataPreviewHost: View {
 
 #Preview("Mes données") {
     MyDataPreviewHost(privacyPolicyURL: URL(string: "https://example.com/confidentialite"))
+}
+
+#Preview("Mes données, très grand texte") {
+    MyDataPreviewHost(privacyPolicyURL: URL(string: "https://example.com/confidentialite"))
+        .dynamicTypeSize(.accessibility3)
 }
 
 #Preview("Mes données, Release") {

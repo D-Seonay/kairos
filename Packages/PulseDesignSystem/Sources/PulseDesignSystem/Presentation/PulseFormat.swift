@@ -38,11 +38,23 @@ public enum PulseFormat {
     /// « 1,12 », « 7,5 », « 8 » : virgule décimale, aucune décimale superflue, pas de séparateur de milliers.
     /// Une valeur non finie donne « — ».
     public static func decimal(_ value: Double, maxFractionDigits: Int) -> String {
+        formatted(value, maxFractionDigits: maxFractionDigits, grouping: .never)
+    }
+
+    /// « 12 450 », « 62,5 » : virgule décimale et espace fine insécable entre les milliers (`fr_FR`), aucune décimale
+    /// superflue. Une valeur non finie donne « — ».
+    public static func grouped(_ value: Double, maxFractionDigits: Int) -> String {
+        formatted(value, maxFractionDigits: maxFractionDigits, grouping: .automatic)
+    }
+
+    private static func formatted(
+        _ value: Double, maxFractionDigits: Int, grouping: NumberFormatStyleConfiguration.Grouping
+    ) -> String {
         guard value.isFinite else { return dash }
         let style = FloatingPointFormatStyle<Double>.number
             .locale(Locale(identifier: "fr_FR"))
             .precision(.fractionLength(0...max(0, maxFractionDigits)))
-            .grouping(.never)
+            .grouping(grouping)
         return value.formatted(style)
     }
 

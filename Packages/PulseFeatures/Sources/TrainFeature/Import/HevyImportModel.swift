@@ -75,6 +75,12 @@ public final class HevyImportModel {
         return first == last ? first : String(localized: "du \(first) au \(last)", bundle: .module)
     }
 
+    /// « du 3 septembre 2026 au 26 octobre 2026 » : la période en toutes lettres, pour VoiceOver ; `nil` sans séance nouvelle.
+    public var periodSpokenText: String? {
+        guard let period = preview?.period else { return nil }
+        return TrainText.spokenPeriod(from: spokenDayText(period.lowerBound), to: spokenDayText(period.upperBound))
+    }
+
     /// Ce que le résumé précise sous les chiffres : les séances de cardio seul laissées de côté, puis pourquoi il n'y a rien à
     /// importer, ou que le cardio des séances importées est proposé en « Ignoré ».
     public var summaryNotes: [String] {
@@ -89,6 +95,23 @@ public final class HevyImportModel {
                                 bundle: .module))
         }
         return notes
+    }
+
+    /// « Import terminé : 42 séances importées » : ce que VoiceOver annonce quand le bilan s'affiche.
+    public static func doneAnnouncement(for result: HevyImportResult) -> String {
+        String(localized: "Import terminé : \(TrainText.importedSessions(result.importedSessions))", bundle: .module)
+    }
+
+    /// L'annonce du bilan quand l'import est terminé ; `nil` sinon.
+    public var doneAnnouncement: String? {
+        guard case .done(let result) = step else { return nil }
+        return Self.doneAnnouncement(for: result)
+    }
+
+    /// Le message d'échec quand l'import ou la lecture a échoué ; `nil` sinon.
+    public var failureAnnouncement: String? {
+        guard case .failed(let message) = step else { return nil }
+        return message
     }
 
     /// Ce que le bilan dit des séances non importées : rien n'est écarté sans un mot (spec M4 §13.2).
@@ -276,5 +299,9 @@ public final class HevyImportModel {
 
     private func dayText(_ date: Date) -> String {
         environment.text(of: date) { $0.day().month(.abbreviated).year() }
+    }
+
+    private func spokenDayText(_ date: Date) -> String {
+        environment.text(of: date) { $0.day().month(.wide).year() }
     }
 }

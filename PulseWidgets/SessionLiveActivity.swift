@@ -63,6 +63,18 @@ extension PulseSessionAttributes.ContentState {
     }
 }
 
+#Preview("Verrouillé, accessibilité 3") {
+    SessionLockScreenView(state: SessionActivityModel(content: .resting, isStale: false))
+        .background(PulsePalette.liveBackground)
+        .environment(\.dynamicTypeSize, .accessibility3)
+}
+
+#Preview("Verrouillé, apparence claire du système") {
+    SessionLockScreenView(state: SessionActivityModel(content: .resting, isStale: false))
+        .background(PulsePalette.liveBackground)
+        .environment(\.colorScheme, .light)
+}
+
 #Preview("Verrouillé", as: .content, using: PulseSessionAttributes.preview) {
     SessionLiveActivity()
 } contentStates: {

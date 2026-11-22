@@ -30,9 +30,13 @@ public struct AuraBackground: View {
         .frame(maxHeight: .infinity, alignment: .top)
         .allowsHitTesting(false)
         .accessibilityHidden(true)
-        .onAppear {
-            guard !reduceMotion else { return }
-            withAnimation(.easeInOut(duration: 14).repeatForever(autoreverses: true)) { phase = 1 }
+        // Le halo dérive tant que « Réduire les animations » est inactif, et s'arrête si le réglage change à l'écran.
+        .onChange(of: reduceMotion, initial: true) { _, reduced in
+            if reduced {
+                PulseMotion.perform(nil, reduceMotion: true) { phase = 0 }
+            } else {
+                PulseMotion.perform(.easeInOut(duration: 14).repeatForever(autoreverses: true), reduceMotion: false) { phase = 1 }
+            }
         }
     }
 }

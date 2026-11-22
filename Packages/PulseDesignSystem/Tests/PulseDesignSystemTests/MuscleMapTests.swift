@@ -99,8 +99,51 @@ import Testing
     let off = PulsePalette.muscleOffRGBA
     #expect(MuscleIntensity.color(level: 4, accent: accent) == accent)
     let half = MuscleIntensity.color(level: 2, accent: accent)
-    #expect(abs(half.red - (accent.red * 0.56 + off.red * 0.44)) < 1e-9)
-    #expect(abs(half.blue - (accent.blue * 0.56 + off.blue * 0.44)) < 1e-9)
+    #expect(abs(half.red - (accent.red * 0.7 + off.red * 0.3)) < 1e-9)
+    #expect(abs(half.blue - (accent.blue * 0.7 + off.blue * 0.3)) < 1e-9)
     let first = MuscleIntensity.color(level: 1, accent: accent)
-    #expect(abs(first.green - (accent.green * 0.32 + off.green * 0.68)) < 1e-9)
+    #expect(abs(first.green - (accent.green * 0.5 + off.green * 0.5)) < 1e-9)
+}
+
+@Test func levelOneStaysDistinguishableFromTheUnlitBody() {
+    let off = PulsePalette.muscleOffLightRGBA
+    for theme in Theme.allCases {
+        let first = MuscleIntensity.color(level: 1, accent: PulsePalette.accent(for: theme).accent.light, off: off)
+        #expect(Contrast.ratio(first, on: off) >= 3, "\(theme)")
+    }
+}
+
+@Test func muscleIntensitiesFollowTheQuarterRule() {
+    let intensities = MuscleIntensity.byMuscle(weights: [.chest: 4, .triceps: 3, .frontDelts: 1.5, .abs: 0])
+    #expect(intensities == [.chest: .maximum, .triceps: .strong, .frontDelts: .moderate])
+    #expect(MuscleIntensity.byMuscle(weights: [.chest: 100, .biceps: 0.1])[.biceps] == .light)
+    #expect(MuscleIntensity.byMuscle(weights: [:]).isEmpty)
+}
+
+@Test func summaryListsTheStrongestMusclesFirst() {
+    let text = MuscleMapSummary.text(levels: [.triceps: .moderate, .chest: .strong])
+    #expect(text == "Pectoraux, intensité forte. Triceps, intensité moyenne.")
+}
+
+@Test func summarySortsTiesByName() {
+    let text = MuscleMapSummary.text(levels: [.quads: .strong, .biceps: .strong, .abs: .strong, .calves: .light])
+    #expect(text == "Abdominaux, intensité forte. Biceps, intensité forte. Quadriceps, intensité forte. Mollets, intensité légère.")
+}
+
+@Test func summaryNamesEveryMuscleInFrench() {
+    for muscle in Muscle.allCases {
+        let text = MuscleMapSummary.text(levels: [muscle: .light])
+        #expect(text.hasSuffix(", intensité légère."))
+        #expect(!text.contains("_") && text.first?.isUppercase == true)
+        #expect(text.lowercased() != text)
+    }
+    #expect(MuscleMapSummary.text(levels: [.frontDelts: .maximum]) == "Deltoïdes antérieurs, intensité très forte.")
+}
+
+@Test func emptySummaryReadsAsNoMuscle() {
+    #expect(MuscleMapSummary.text(levels: [:]) == "Aucun muscle travaillé")
+}
+
+@Test func accentSharesRaiseTheLowLevels() {
+    #expect(MuscleIntensity.accentShares == [0.5, 0.7, 0.85, 1])
 }

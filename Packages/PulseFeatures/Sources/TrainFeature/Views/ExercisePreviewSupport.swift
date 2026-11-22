@@ -89,6 +89,25 @@ struct ExercisePreviewHost<Content: View>: View {
     ExercisePreviewHost { CustomExerciseForm(model: CustomExerciseModel(environment: $0, draft: nil, editing: nil)) }
 }
 
+#Preview("Bibliothèque, accessibilité XL") {
+    ExercisePreviewHost { LibraryView(model: LibraryModel(environment: $0, mode: .browse)) }
+        .dynamicTypeSize(.accessibility3)
+}
+
+#Preview("Fiche, progression, accessibilité XL") {
+    ExercisePreviewHost {
+        let model = ExerciseSheetModel(environment: $0, reference: ExercisePreviewSupport.bench)
+        model.tab = .progression
+        return ExerciseSheetView(model: model)
+    }
+    .dynamicTypeSize(.accessibility3)
+}
+
+#Preview("Nouvel exercice, accessibilité XL") {
+    ExercisePreviewHost { CustomExerciseForm(model: CustomExerciseModel(environment: $0, draft: nil, editing: nil)) }
+        .dynamicTypeSize(.accessibility3)
+}
+
 #Preview("Exercice depuis l'import") {
     ExercisePreviewHost {
         CustomExerciseForm(model: CustomExerciseModel(environment: $0, draft: HevyNameGuesser.draft(for: "Shrug (Haltère)"),

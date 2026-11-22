@@ -181,7 +181,7 @@ enum ProfileText {
     }
 
     /// Le format en français, dans le calendrier et le fuseau donnés.
-    private static func style(_ base: Date.FormatStyle, calendar: Calendar) -> Date.FormatStyle {
+    static func style(_ base: Date.FormatStyle, calendar: Calendar) -> Date.FormatStyle {
         var style = base
         style.locale = french
         style.calendar = calendar

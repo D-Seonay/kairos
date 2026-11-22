@@ -12,8 +12,7 @@ struct WeighInSheet: View {
         Form {
             Section {
                 HStack(spacing: 8) {
-                    TextField(String(localized: "Poids", bundle: .module), text: weightText,
-                              prompt: Text(verbatim: "78,4"))
+                    TextField(ProfileText.weightFieldLabel, text: weightText, prompt: Text(verbatim: "78,4"))
                         .pulseNumericKeyboard()
                         .focused($isWeightFocused)
                         .font(PulseFont.value(.title2))
@@ -24,6 +23,9 @@ struct WeighInSheet: View {
                         .accessibilityHidden(true)
                 }
                 .frame(minHeight: 44)
+                // Toute la ligne est tactile, pas seulement la hauteur du texte.
+                .contentShape(Rectangle())
+                .onTapGesture { isWeightFocused = true }
             } header: {
                 Text(String(localized: "Poids en kilos", bundle: .module))
             }
@@ -42,6 +44,7 @@ struct WeighInSheet: View {
                     Text(message)
                         .font(.footnote)
                         .foregroundStyle(PulsePalette.bad)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 .listRowBackground(PulsePalette.surface)
             }
@@ -63,6 +66,7 @@ struct WeighInSheet: View {
                 .disabled(model.isSaving)
             }
         }
+        .pulseAnnounceOnce(model.editorError, id: model.editorFailureCount, isError: true)
         .presentationDetents([.medium, .large])
         .onAppear { isWeightFocused = !isEditing }
     }

@@ -25,6 +25,7 @@ struct SettingsScreen: View {
                     Text(message)
                         .font(.footnote)
                         .foregroundStyle(PulsePalette.bad)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 .listRowBackground(PulsePalette.surface)
             }
@@ -41,12 +42,14 @@ struct SettingsScreen: View {
             } else if !model.hasLoaded {
                 ProgressView()
                     .frame(maxWidth: .infinity, minHeight: 200)
+                    .accessibilityLabel(String(localized: "Chargement des réglages", bundle: .module))
                     .listRowBackground(Color.clear)
             }
             AboutSettingsSection(appVersion: model.environment.appVersion)
         }
         .scrollContentBackground(.hidden)
         .scrollDismissesKeyboard(.interactively)
+        .pulseAnnounceOnce(model.errorMessage, id: model.failureCount, isError: true)
         .pulseScreenBackground(aura: 0.5)
         .navigationTitle(String(localized: "Paramètres", bundle: .module))
         .pulseInlineTitle()
@@ -68,7 +71,8 @@ struct DisplaySettingsSection: View {
     var body: some View {
         Section {
             ChoicePills(options: Theme.allCases.map { ($0, $0.title) },
-                        selection: model.selection(profile.theme) { $0.theme = $1 })
+                        selection: model.selection(profile.theme) { $0.theme = $1 },
+                        groupLabel: String(localized: "Ambiance", bundle: .module))
                 .padding(.vertical, 6)
         } header: {
             Text(String(localized: "Affichage", bundle: .module))
@@ -145,6 +149,11 @@ private struct SettingsPreviewHost: View {
 
 #Preview("Paramètres") {
     SettingsPreviewHost()
+}
+
+#Preview("Paramètres, très grand texte") {
+    SettingsPreviewHost()
+        .dynamicTypeSize(.accessibility3)
 }
 
 #Preview("Paramètres, notifications coupées") {

@@ -15,7 +15,7 @@ struct WhyView: View {
         ScrollView {
             if let why = model.why {
                 VStack(alignment: .leading, spacing: 20) {
-                    ReadingCard(text: why.reading)
+                    ReadingCard(text: why.reading, spokenText: why.spokenReading)
                     ChangesSection(changes: why.changes)
                     SignalsSection(signals: why.signals, formula: why.formula, rule: why.rule)
                     ActionButtons(model: model, why: why, onStart: onStart, onResume: onResume)
@@ -32,6 +32,7 @@ struct WhyView: View {
 /// « Lecture de ce matin » sur la carte opale.
 private struct ReadingCard: View {
     let text: String
+    let spokenText: String
 
     var body: some View {
         OpalCard {
@@ -44,6 +45,7 @@ private struct ReadingCard: View {
                     .font(.body.weight(.semibold))
                     .foregroundStyle(PulsePalette.opalInk)
                     .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityLabel(spokenText)
             }
         }
     }
@@ -98,7 +100,8 @@ private struct ChangeRow: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.vertical, 12)
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(change.accessibilityLabel)
     }
 
     private var pill: some View {
@@ -176,7 +179,7 @@ private struct SignalBar: View {
             track
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(String(localized: "\(signal.title), \(signal.score) sur 100", bundle: .module))
+        .accessibilityLabel(signal.accessibilityLabel)
     }
 
     private var track: some View {
@@ -276,5 +279,10 @@ private struct WhyPreviewHost: View {
 
 #Preview("Surmenage") {
     WhyPreviewHost(scenario: .threeNights, answers: [.sleep: 0, .pain: 1, .motivation: 0])
+}
+
+#Preview("Score mesuré, accessibilité 3") {
+    WhyPreviewHost(scenario: .badNight)
+        .dynamicTypeSize(.accessibility3)
 }
 #endif

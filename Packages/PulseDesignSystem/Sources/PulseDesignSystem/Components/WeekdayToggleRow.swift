@@ -10,8 +10,21 @@ public struct WeekdayToggleRow: View {
         _selection = selection
     }
 
+    /// Ce que VoiceOver lit après le nom du jour.
+    nonisolated static func spokenValue(isRest: Bool) -> String {
+        isRest
+            ? String(localized: "Jour de repos", bundle: .module)
+            : String(localized: "Jour d'entraînement possible", bundle: .module)
+    }
+
+    /// Le nom du groupe des sept jours.
+    nonisolated static var groupLabel: String {
+        String(localized: "Jours de repos imposés", bundle: .module)
+    }
+
     public var body: some View {
-        HStack(spacing: 6) {
+        // 4 points entre les jours : (375 - 32 - 24) / 7 = 45,6 points de large sur un iPhone de 375, au-dessus de 44.
+        HStack(spacing: 4) {
             ForEach(Weekday.allCases, id: \.self) { day in
                 let isRest = selection.contains(day)
                 Button {
@@ -28,10 +41,12 @@ public struct WeekdayToggleRow: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(day.localizedName)
-                .accessibilityValue(isRest ? String(localized: "Jour de repos", bundle: .module) : "")
+                .accessibilityValue(Self.spokenValue(isRest: isRest))
                 .accessibilityAddTraits(isRest ? .isSelected : [])
             }
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(Self.groupLabel)
     }
 
     private var shape: RoundedRectangle {
@@ -99,4 +114,9 @@ private struct WeekdayToggleRowPreview: View {
 
 #Preview {
     WeekdayToggleRowPreview()
+}
+
+#Preview("Accessibilité 3") {
+    WeekdayToggleRowPreview()
+        .dynamicTypeSize(.accessibility3)
 }

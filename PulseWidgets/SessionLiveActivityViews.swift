@@ -5,9 +5,18 @@ import SwiftUI
 import WidgetFeature
 
 /// Les couleurs de la Live Activity. L'extension ne lit pas le thème du profil : elle prend l'accent par défaut (Ivoire).
+/// La séance est toujours sombre (fond noir) : l'accent et son encre sont fixés à leurs tirages sombres. Avec le tirage dynamique,
+/// l'apparence claire du système rendrait l'accent en encre noire sur le noir de l'activité (1,1:1).
 enum SessionActivityStyle {
-    static let accent = Color(PulsePalette.accent(for: .amber).accent)
-    static let accentInk = Color(PulsePalette.accent(for: .amber).accentInk)
+    static let accent = Color(PulsePalette.accent(for: .amber).accent.dark)
+    static let accentInk = Color(PulsePalette.accent(for: .amber).accentInk.dark)
+}
+
+extension View {
+    /// La Live Activity pose un fond noir quelle que soit l'apparence du système : ses vues se composent toujours en sombre.
+    func sessionActivityDark() -> some View {
+        environment(\.colorScheme, .dark)
+    }
 }
 
 /// L'état affiché de l'activité. Une activité périmée (`staleDate` = fin du repos) compte comme hors repos : l'écran verrouillé et
@@ -152,7 +161,9 @@ struct SessionLockScreenView: View {
             }
         }
         .padding(16)
+        // L'écran verrouillé de la Live Activity plafonne à 160 pt de haut : au-delà, les boutons du repos seraient rognés.
         .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+        .sessionActivityDark()
     }
 
     private var header: some View {
@@ -184,11 +195,13 @@ struct SessionIslandLeading: View {
         if let interval = state.restInterval {
             SessionRestRing(interval: interval)
                 .frame(width: 40, height: 40)
+                .sessionActivityDark()
         } else {
             Image(systemName: "dumbbell.fill")
                 .font(.title3)
                 .foregroundStyle(SessionActivityStyle.accent)
                 .accessibilityHidden(true)
+                .sessionActivityDark()
         }
     }
 }
@@ -201,6 +214,7 @@ struct SessionIslandTrailing: View {
         SessionClockText(state: state)
             .font(PulseFont.value(.title))
             .foregroundStyle(SessionActivityStyle.accent)
+            .sessionActivityDark()
     }
 }
 
@@ -217,6 +231,7 @@ struct SessionIslandBottom: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+        .sessionActivityDark()
     }
 }
 
@@ -230,6 +245,7 @@ struct SessionCompactTime: View {
             .foregroundStyle(SessionActivityStyle.accent)
             .multilineTextAlignment(.trailing)
             .frame(maxWidth: 52, alignment: .trailing)
+            .sessionActivityDark()
     }
 }
 
@@ -242,10 +258,12 @@ struct SessionMinimalView: View {
             SessionRestRing(interval: interval)
                 .padding(2)
                 .accessibilityLabel(state.spokenLabel)
+                .sessionActivityDark()
         } else {
             Image(systemName: "dumbbell.fill")
                 .foregroundStyle(SessionActivityStyle.accent)
                 .accessibilityLabel(state.spokenLabel)
+                .sessionActivityDark()
         }
     }
 }

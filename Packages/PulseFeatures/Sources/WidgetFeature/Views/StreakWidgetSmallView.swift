@@ -12,6 +12,27 @@ public struct StreakWidgetSmallView: View {
     }
 
     public var body: some View {
+        StreakWidgetSmallViewBody(content: content)
+            .dynamicTypeSize(...WidgetTypeCap.streakSmall)
+    }
+}
+
+/// Le contenu de la vue, plafonné par `StreakWidgetSmallView` : ses `@ScaledMetric` lisent la taille déjà plafonnée.
+struct StreakWidgetSmallViewBody: View {
+    let content: StreakWidgetContent
+
+    /// Les anneaux « à venir » et « repos » et le tiret doivent faire au moins 3:1 sur le dégradé, dans les deux apparences
+    /// (mesuré avec l'encre du widget sur la mi-course du dégradé : 3,5:1 et plus).
+    private static let upcomingRingOpacity = 0.6
+    private static let restRingOpacity = 0.55
+    private static let restDashOpacity = 0.6
+
+    @ScaledMetric(relativeTo: .caption) private var headerSize = 12
+    @ScaledMetric(relativeTo: .largeTitle) private var numberSize = 44
+    @ScaledMetric(relativeTo: .footnote) private var unitSize = 13
+    @ScaledMetric(relativeTo: .caption) private var footerSize = 12
+
+    var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
             Spacer(minLength: 4)
@@ -22,7 +43,6 @@ public struct StreakWidgetSmallView: View {
             footer
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(content.accessibilityLabel)
     }
@@ -33,20 +53,23 @@ public struct StreakWidgetSmallView: View {
         } icon: {
             Image(systemName: "flame.fill")
         }
-        .font(.system(size: 12, weight: .bold))
+        .font(.system(size: headerSize, weight: .bold))
         .opacity(0.85)
         .lineLimit(1)
+        .minimumScaleFactor(0.8)
     }
 
     private var streakNumber: some View {
         HStack(alignment: .firstTextBaseline, spacing: 4) {
             Text("\(content.streakWeeks)")
-                .font(.system(size: 44, weight: .light).monospacedDigit())
+                .font(.system(size: numberSize, weight: .light).monospacedDigit())
                 .monospacedDigit()
                 .lineLimit(1)
+                .minimumScaleFactor(0.7)
             Text(String(localized: "semaines", bundle: .module))
-                .font(.system(size: 13, weight: .bold))
+                .font(.system(size: unitSize, weight: .bold))
                 .lineLimit(1)
+                .minimumScaleFactor(0.7)
         }
     }
 
@@ -75,15 +98,15 @@ public struct StreakWidgetSmallView: View {
                 .frame(width: 14, height: 14)
         case .upcoming:
             Circle()
-                .strokeBorder(Color.primary.opacity(0.35), lineWidth: 1.5)
+                .strokeBorder(Color.primary.opacity(Self.upcomingRingOpacity), lineWidth: 1.5)
                 .frame(width: 14, height: 14)
         case .rest:
             Circle()
-                .strokeBorder(Color.primary.opacity(0.2), lineWidth: 1)
+                .strokeBorder(Color.primary.opacity(Self.restRingOpacity), lineWidth: 1)
                 .frame(width: 14, height: 14)
                 .overlay(
                     Rectangle()
-                        .fill(Color.primary.opacity(0.4))
+                        .fill(Color.primary.opacity(Self.restDashOpacity))
                         .frame(width: 6, height: 1.5)
                 )
         }
@@ -91,16 +114,34 @@ public struct StreakWidgetSmallView: View {
 
     private var footer: some View {
         Text(content.subtitle)
-            .font(.system(size: 11.5, weight: .bold))
+            .font(.system(size: footerSize, weight: .bold))
             .opacity(0.9)
-            .lineLimit(1)
-            .minimumScaleFactor(0.85)
+            .lineLimit(2)
+            .minimumScaleFactor(0.75)
     }
 }
 
 #Preview("Petit Streak Widget") {
     let amber = PulsePalette.accent(for: .amber)
     StreakWidgetSmallView(content: .sample(at: Date(), calendar: Calendar(identifier: .gregorian)))
+        .foregroundStyle(Color(amber.accentInk))
+        .padding(16)
+        .frame(width: 158, height: 158)
+        .background(
+            LinearGradient(
+                colors: [Color(amber.accent2), Color(amber.accent)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            ),
+            in: RoundedRectangle(cornerRadius: 22)
+        )
+        .padding()
+}
+
+#Preview("Petit Streak Widget, accessibilité 3") {
+    let amber = PulsePalette.accent(for: .amber)
+    StreakWidgetSmallView(content: .sample(at: Date(), calendar: Calendar(identifier: .gregorian)))
+        .dynamicTypeSize(.accessibility3)
         .foregroundStyle(Color(amber.accentInk))
         .padding(16)
         .frame(width: 158, height: 158)

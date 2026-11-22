@@ -291,22 +291,252 @@
         }
       }
     },
-    "%@ : %lld répétitions au poids du corps, nouveau record": {
+    "%@ : %@ à %@ kg, nouveau record": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ : %lld répétitions au poids du corps, nouveau record"
+            "value": "%@ : %@ à %@ kg, nouveau record"
           }
         }
       }
     },
-    "%@ : %lld répétitions à %@ kg, nouveau record": {
+    "Dernière fois : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dernière fois : %@"
+          }
+        }
+      }
+    },
+    ", puis " : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ", puis "
+          }
+        }
+      }
+    },
+    "lest de %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "lest de %@"
+          }
+        }
+      }
+    },
+    "assistance de %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "assistance de %@"
+          }
+        }
+      }
+    },
+    "%lld seconde" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld seconde"
+          }
+        }
+      }
+    },
+    "%lld secondes" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld secondes"
+          }
+        }
+      }
+    },
+    "%lld répétition" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld répétition"
+          }
+        }
+      }
+    },
+    "%lld répétitions" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld répétitions"
+          }
+        }
+      }
+    },
+    "%lld exercice" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld exercice"
+          }
+        }
+      }
+    },
+    "%lld exercices" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld exercices"
+          }
+        }
+      }
+    },
+    "%lld série" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld série"
+          }
+        }
+      }
+    },
+    "%lld séries" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld séries"
+          }
+        }
+      }
+    },
+    "%@ · %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · %@"
+          }
+        }
+      }
+    },
+    "%@, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, %@"
+          }
+        }
+      }
+    },
+    "sans lest" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sans lest"
+          }
+        }
+      }
+    },
+    "sans assistance" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sans assistance"
+          }
+        }
+      }
+    },
+    "%@ kilo" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kilo"
+          }
+        }
+      }
+    },
+    "%@ kilos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kilos"
+          }
+        }
+      }
+    },
+    "%@ : %@, nouveau record de charge": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ : %lld répétitions à %@ kg, nouveau record"
+            "value": "%@ : %@, nouveau record de charge"
+          }
+        }
+      }
+    },
+    "%@ : maximum estimé sur une répétition %@, nouveau record": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : maximum estimé sur une répétition %@, nouveau record"
+          }
+        }
+      }
+    },
+    "%@ : %@ au poids du corps, nouveau record": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : %@ au poids du corps, nouveau record"
+          }
+        }
+      }
+    },
+    "%@ : %@ à %@, nouveau record": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : %@ à %@, nouveau record"
+          }
+        }
+      }
+    },
+    "%@ : %@ avec un lest de %@, nouveau record": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : %@ avec un lest de %@, nouveau record"
+          }
+        }
+      }
+    },
+    "%@ : %@ avec une assistance de %@, nouveau record": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : %@ avec une assistance de %@, nouveau record"
           }
         }
       }

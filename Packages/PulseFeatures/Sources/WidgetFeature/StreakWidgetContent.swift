@@ -54,17 +54,36 @@ public struct StreakWidgetContent: Sendable, Equatable {
         }
         let streak = planning.streak
         return content(weeks: streak.weeks, completed: streak.completed, target: streak.target,
-                       days: planning.week.map(WidgetPlanningText.state(of:)))
+                       days: planning.week.map(WidgetPlanningText.state(of:)),
+                       spokenDays: spokenDays(of: planning.week, calendar: calendar))
     }
 
     public static func sample(at date: Date, calendar: Calendar) -> StreakWidgetContent {
-        content(weeks: 14, completed: 3, target: 5, days: [.completed, .completed, .completed, .rest, .today, .upcoming, .rest])
+        let week = WidgetPlanningText.sampleWeek(containing: date, calendar: calendar)
+        return content(weeks: 14, completed: 3, target: 5, days: week.map(WidgetPlanningText.state(of:)),
+                       spokenDays: WidgetPlanningText.spokenWeek(week, calendar: calendar))
     }
 
-    private static func content(weeks: Int, completed: Int, target: Int, days: [DayState]) -> StreakWidgetContent {
+    /// « Série de 14 semaines, 3 séances sur 5 cette semaine. Lundi fait, mardi fait… » : les nombres avec leurs mots, puis l'état
+    /// des jours quand on le connaît.
+    static func spokenLabel(weeks: Int, completed: Int, target: Int, week: String) -> String {
+        let weeksText = PulseSpoken.count(weeks, singular: String(localized: "semaine", bundle: .module),
+                                          plural: String(localized: "semaines", bundle: .module))
+        let sessionsText = PulseSpoken.count(completed, singular: String(localized: "séance", bundle: .module),
+                                             plural: String(localized: "séances", bundle: .module))
+        let summary = String(localized: "Série de \(weeksText), \(sessionsText) sur \(target) cette semaine", bundle: .module)
+        return week.isEmpty ? summary : "\(summary). \(week)"
+    }
+
+    private static func spokenDays(of week: [WidgetDay], calendar: Calendar) -> String {
+        WidgetPlanningText.spokenWeek(week, calendar: calendar)
+    }
+
+    private static func content(weeks: Int, completed: Int, target: Int, days: [DayState], spokenDays: String) -> StreakWidgetContent {
         let subtitleText = String(localized: "\(completed) sur \(target) cette semaine", bundle: .module)
         let inline = String(localized: "\(weeks) sem. · \(completed)/\(target)", bundle: .module)
-        let label = String(localized: "Série de \(weeks) semaines, \(completed) séances sur \(target) cette semaine", bundle: .module)
+        let label = spokenLabel(weeks: weeks, completed: completed, target: target,
+                                week: spokenDays)
         return StreakWidgetContent(
             streakWeeks: weeks,
             completedThisWeek: completed,

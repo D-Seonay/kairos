@@ -2,7 +2,7 @@ import PulseDesignSystem
 import PulseDomain
 import SwiftUI
 
-/// Les trois tuiles de tendance sur 14 jours, sur deux colonnes ; une seule colonne aux tailles d'accessibilité.
+/// Les trois tuiles de tendance sur 14 jours, sur deux colonnes ; une seule colonne dès les grandes tailles de texte (xxxLarge).
 struct TrendTilesView: View {
     let tiles: [TrendTile]
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -16,7 +16,7 @@ struct TrendTilesView: View {
     }
 
     private var columns: [GridItem] {
-        let count = dynamicTypeSize.isAccessibilitySize ? 1 : 2
+        let count = dynamicTypeSize >= .xxxLarge ? 1 : 2
         return Array(repeating: GridItem(.flexible(), spacing: 10, alignment: .top), count: count)
     }
 }
@@ -31,13 +31,11 @@ private struct TrendTileView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(tile.title)
                     .pulseEyebrow()
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+                    .fixedSize(horizontal: false, vertical: true)
                 Text(tile.valueText)
                     .font(PulseFont.value(.title, weight: .regular))
                     .foregroundStyle(PulsePalette.text)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.6)
+                    .fixedSize(horizontal: false, vertical: true)
                 Sparkline(values: tile.values, color: color)
                     .frame(height: 36)
                     .padding(.top, 6)
@@ -56,18 +54,30 @@ private struct TrendTileView: View {
     }
 }
 
-#Preview("Tuiles de tendance") {
-    TrendTilesView(tiles: [
+private enum TrendTilesPreview {
+    static let tiles = [
         TrendTile(factor: .hrv, title: "Variabilité, 14 jours", valueText: "44 ms",
                   values: [46, 48, 45, 47, 50, 49, 46, 48, 47, nil, 45, 44, 43, 44],
-                  accessibilityLabel: "Variabilité, 14 jours, dernière valeur 44 ms"),
+                  accessibilityLabel: "Variabilité, 14 jours, dernière valeur 44 millisecondes, tendance stable"),
         TrendTile(factor: .restingHeartRate, title: "FC repos, 14 jours", valueText: "54 bpm",
                   values: [50, 51, 50, 52, 51, 50, 52, 53, 52, 54, 53, 54, 55, 54],
-                  accessibilityLabel: "FC repos, 14 jours, dernière valeur 54 bpm"),
+                  accessibilityLabel: "Fréquence cardiaque au repos, 14 jours, dernière valeur 54 battements par minute, "
+                      + "tendance en hausse"),
         TrendTile(factor: .sleep, title: "Sommeil, 14 jours", valueText: "7 h 12",
                   values: [440, 420, 450, 430, 400, 380, 440, 460, 430, 420, 410, 400, 390, 432],
-                  accessibilityLabel: "Sommeil, 14 jours, moyenne 7 h 12")
-    ])
-    .padding()
-    .background(PulsePalette.background)
+                  accessibilityLabel: "Sommeil, 14 jours, moyenne 7 heures 12 minutes, tendance stable")
+    ]
+}
+
+#Preview("Tuiles de tendance") {
+    TrendTilesView(tiles: TrendTilesPreview.tiles)
+        .padding()
+        .background(PulsePalette.background)
+}
+
+#Preview("Tuiles de tendance, accessibilité 3") {
+    TrendTilesView(tiles: TrendTilesPreview.tiles)
+        .padding()
+        .background(PulsePalette.background)
+        .dynamicTypeSize(.accessibility3)
 }

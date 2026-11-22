@@ -64,7 +64,7 @@ struct WeightModelTests {
     @Test func invalidDraftShowsMessageAndKeepsSheet() async throws {
         let (model, changes) = model()
         await model.load()
-        let message = "Entre un poids entre 20 et 400 kg."
+        let message = "Entre un poids entre 20 et 400 kilos."
         for text in ["12", "401", "", "  ", "abc", "78,4,1"] {
             model.startNew()
             model.editor?.weightText = text
@@ -220,4 +220,34 @@ actor FailingSaveMeasurements: BodyMeasurementRepository {
 @MainActor
 final class ChangeCounter {
     var value = 0
+}
+
+@MainActor
+struct WeightModelFailureTests {
+    @Test func repeatedIdenticalSheetErrorsCountAgain() async throws {
+        let calendar = ProfileTestClock.calendar
+        let clock: @Sendable () -> Date = { ProfileTestClock.now }
+        let profiles = InMemoryProfileRepository()
+        let service = ProfileService(profiles: profiles, programs: InMemoryProgramRepository(), workouts: InMemoryWorkoutRepository(),
+                                     recoveries: InMemoryRecoveryRepository(calendar: calendar),
+                                     records: InMemoryPersonalRecordRepository(), userExercises: InMemoryUserExerciseRepository(),
+                                     library: .bundled, calendar: calendar, now: clock)
+        let environment = ProfileEnvironment(
+            profile: service, body: BodyService(measurements: InMemoryBodyMeasurementRepository(), profiles: profiles,
+                                                calendar: calendar, now: clock),
+            settings: SettingsService(profiles: profiles, now: clock) { _, _ in }, healthCache: InMemoryHealthSampleCache(),
+            inspector: SilentInspector(), exporter: SilentExporter(), eraser: SilentEraser(), notificationStatus: { .authorized },
+            requestNotificationAuthorization: { true }, refreshHealth: {}, appVersion: "1.0.2 (14)", privacyPolicyURL: nil,
+            calendar: calendar, now: clock)
+        let model = WeightModel(environment: environment) {}
+        await model.load()
+        model.startNew()
+        model.editor?.weightText = "12"
+        await model.save()
+        let first = model.editorFailureCount
+        await model.save()
+        #expect(model.editorError == WeightModel.invalidWeightMessage)
+        #expect(model.editorFailureCount == first + 1, "La même erreur, annoncée une seconde fois")
+        #expect(first == 1 && model.failureCount == 0, "Les erreurs de la feuille ne touchent pas celles de l'écran")
+    }
 }

@@ -28,7 +28,7 @@ struct ProfileSettingsSection: View {
             .pickerStyle(.menu)
             .tint(PulsePalette.text2)
             .frame(minHeight: 44)
-            SettingsTextField(title: String(localized: "Taille", bundle: .module),
+            SettingsTextField(title: String(localized: "Taille", bundle: .module), spokenTitle: ProfileText.heightFieldLabel,
                               prompt: String(localized: "Facultatif", bundle: .module), stored: Self.height(profile.heightCm),
                               unit: String(localized: "cm", bundle: .module), isNumeric: true) { [model] text in
                 await model.commitHeight(text)
@@ -51,6 +51,8 @@ struct ProfileSettingsSection: View {
             }), in: ...today, displayedComponents: .date) {
                 birthDateLabel
             }
+            .accessibilityLabel(String(localized: "Date de naissance", bundle: .module))
+            .accessibilityHint(ProfileText.birthDateHint)
             .environment(\.locale, Locale(identifier: "fr_FR"))
             .environment(\.calendar, calendar)
             .environment(\.timeZone, calendar.timeZone)
@@ -60,15 +62,17 @@ struct ProfileSettingsSection: View {
                 let suggested = calendar.date(byAdding: .year, value: -30, to: calendar.startOfDay(for: today)) ?? today
                 Task { await model.update { $0.birthDate = suggested } }
             } label: {
-                HStack {
+                AdaptiveRow { isLarge in
                     birthDateLabel
-                    Spacer(minLength: 8)
+                    if !isLarge { Spacer(minLength: 8) }
                     Text(String(localized: "Renseigner", bundle: .module))
                         .font(.subheadline)
                         .foregroundStyle(PulsePalette.text2)
                 }
             }
             .frame(minHeight: 44)
+            .accessibilityLabel(String(localized: "Renseigner la date de naissance", bundle: .module))
+            .accessibilityHint(ProfileText.birthDateHint)
         }
     }
 
@@ -96,6 +100,8 @@ struct ProfileSettingsSection: View {
 /// et rend la valeur stockée ensuite : le champ la reprend, même quand le texte a été refusé.
 struct SettingsTextField: View {
     let title: String
+    /// Le nom lu par VoiceOver quand il dit plus que le titre (« Taille, en centimètres ») ; l'unité visible est tue.
+    var spokenTitle: String?
     let prompt: String
     let stored: String
     var unit: String?
@@ -105,22 +111,28 @@ struct SettingsTextField: View {
     @FocusState private var isFocused: Bool
 
     var body: some View {
-        HStack(spacing: 8) {
+        AdaptiveRow { isLarge in
             Text(title)
                 .foregroundStyle(PulsePalette.text)
-            Spacer(minLength: 8)
-            field
-                .multilineTextAlignment(.trailing)
-                .foregroundStyle(PulsePalette.text)
-                .focused($isFocused)
-                .onSubmit { isFocused = false }
-            if let unit {
-                Text(unit)
-                    .foregroundStyle(PulsePalette.text2)
-                    .accessibilityHidden(true)
+                .accessibilityHidden(true)
+            if !isLarge { Spacer(minLength: 8) }
+            HStack(spacing: 8) {
+                field
+                    .multilineTextAlignment(isLarge ? .leading : .trailing)
+                    .foregroundStyle(PulsePalette.text)
+                    .focused($isFocused)
+                    .onSubmit { isFocused = false }
+                if let unit {
+                    Text(unit)
+                        .foregroundStyle(PulsePalette.text2)
+                        .accessibilityHidden(true)
+                }
             }
         }
         .frame(minHeight: 44)
+        // Toute la ligne est tactile, pas seulement la hauteur du texte.
+        .contentShape(Rectangle())
+        .onTapGesture { isFocused = true }
         .onChange(of: isFocused) { _, focused in
             if !focused { commit() }
         }
@@ -131,7 +143,7 @@ struct SettingsTextField: View {
 
     @ViewBuilder
     private var field: some View {
-        let label = TextField(title, text: $text, prompt: Text(prompt))
+        let label = TextField(spokenTitle ?? title, text: $text, prompt: Text(prompt))
         if isNumeric {
             label
                 .pulseNumericKeyboard()
@@ -184,6 +196,8 @@ struct HealthSettingsSection: View {
                     .font(.footnote)
                     .foregroundStyle(PulsePalette.text2)
                     .frame(minHeight: 32)
+                    .accessibilityLabel(ProfileText.lastReadSpoken(health.lastRead, calendar: model.environment.calendar,
+                                                                   today: model.environment.now()))
             } else {
                 Text(String(localized: "Pulse n'a pas pu lire l'état d'Apple Santé.", bundle: .module))
                     .font(.subheadline)
@@ -196,11 +210,19 @@ struct HealthSettingsSection: View {
                     Text(String(localized: "Relire maintenant", bundle: .module))
                         .foregroundStyle(PulsePalette.text)
                     Spacer(minLength: 8)
-                    if model.isRefreshingHealth { ProgressView() }
+                    if model.isRefreshingHealth {
+                        ProgressView()
+                            .accessibilityLabel(ProfileText.healthReadStarted)
+                    }
                 }
             }
             .disabled(model.isRefreshingHealth)
             .frame(minHeight: 44)
+            // La relecture se lance d'une touche et finit sans que le focus bouge : début et fin sont annoncés. Posé sur ce seul
+            // bouton, pas sur la section (un modificateur de section se répète par rangée).
+            .onChange(of: model.isRefreshingHealth) { _, isRefreshing in
+                PulseAnnouncement.post(isRefreshing ? ProfileText.healthReadStarted : ProfileText.healthReadFinished)
+            }
             NavigationLink {
                 screens.healthDiagnostics()
             } label: {
@@ -219,18 +241,20 @@ struct HealthSettingsSection: View {
     }
 
     private func row(_ kind: HealthSampleKind, latest: Date?) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 12) {
+        AdaptiveRow(spacing: 12) { isLarge in
             Text(ProfileText.healthKind(kind))
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(PulsePalette.text)
-            Spacer(minLength: 8)
+            if !isLarge { Spacer(minLength: 8) }
             Text(latestText(latest))
                 .font(.footnote)
                 .foregroundStyle(latest == nil ? PulsePalette.muted : PulsePalette.text2)
-                .multilineTextAlignment(.trailing)
+                .multilineTextAlignment(isLarge ? .leading : .trailing)
         }
         .frame(minHeight: 36)
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(ProfileText.healthRowSpoken(kind, latest: latest, calendar: model.environment.calendar,
+                                                        today: model.environment.now()))
     }
 
     private func latestText(_ latest: Date?) -> String {

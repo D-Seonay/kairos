@@ -1,6 +1,86 @@
 {
   "sourceLanguage" : "fr",
   "strings" : {
+    "%@ %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ %@"
+          }
+        }
+      }
+    },
+    "%@ %lld" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ %lld"
+          }
+        }
+      }
+    },
+    "%@ kilo" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kilo"
+          }
+        }
+      }
+    },
+    "%@ kilomètre" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kilomètre"
+          }
+        }
+      }
+    },
+    "%@ kilomètres" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kilomètres"
+          }
+        }
+      }
+    },
+    "%@ kilos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kilos"
+          }
+        }
+      }
+    },
+    "%@ par kilomètre" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ par kilomètre"
+          }
+        }
+      }
+    },
+    "%@, intensité %@." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, intensité %@."
+          }
+        }
+      }
+    },
     "%lld h" : {
       "localizations" : {
         "fr" : {
@@ -17,6 +97,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld h %@"
+          }
+        }
+      }
+    },
+    "%lld heure" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld heure"
+          }
+        }
+      }
+    },
+    "%lld heures" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld heures"
           }
         }
       }
@@ -41,12 +141,62 @@
         }
       }
     },
+    "%lld minute" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld minute"
+          }
+        }
+      }
+    },
+    "%lld minutes" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld minutes"
+          }
+        }
+      }
+    },
     "%lld s" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld s"
+          }
+        }
+      }
+    },
+    "%lld seconde" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld seconde"
+          }
+        }
+      }
+    },
+    "%lld secondes" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld secondes"
+          }
+        }
+      }
+    },
+    "%lld sur %lld" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld sur %lld"
           }
         }
       }
@@ -81,12 +231,72 @@
         }
       }
     },
+    "Abdominaux" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abdominaux"
+          }
+        }
+      }
+    },
+    "Abducteurs" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abducteurs"
+          }
+        }
+      }
+    },
     "Acier" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Acier"
+          }
+        }
+      }
+    },
+    "Adducteurs" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adducteurs"
+          }
+        }
+      }
+    },
+    "Aucun muscle travaillé" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun muscle travaillé"
+          }
+        }
+      }
+    },
+    "Avant-bras" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avant-bras"
+          }
+        }
+      }
+    },
+    "Biceps" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biceps"
           }
         }
       }
@@ -98,6 +308,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "D"
+          }
+        }
+      }
+    },
+    "Deltoïdes antérieurs" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deltoïdes antérieurs"
+          }
+        }
+      }
+    },
+    "Deltoïdes latéraux" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deltoïdes latéraux"
+          }
+        }
+      }
+    },
+    "Deltoïdes postérieurs" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deltoïdes postérieurs"
           }
         }
       }
@@ -118,6 +358,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Endurance"
+          }
+        }
+      }
+    },
+    "répétition" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "répétition"
+          }
+        }
+      }
+    },
+    "répétitions" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "répétitions"
           }
         }
       }
@@ -152,6 +412,26 @@
         }
       }
     },
+    "Fessiers" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fessiers"
+          }
+        }
+      }
+    },
+    "Fléchisseurs de hanche" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fléchisseurs de hanche"
+          }
+        }
+      }
+    },
     "Force" : {
       "localizations" : {
         "fr" : {
@@ -182,12 +462,52 @@
         }
       }
     },
+    "forte" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "forte"
+          }
+        }
+      }
+    },
+    "Grands dorsaux" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grands dorsaux"
+          }
+        }
+      }
+    },
+    "Haut du dos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Haut du dos"
+          }
+        }
+      }
+    },
     "Hybride" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hybride"
+          }
+        }
+      }
+    },
+    "Ischio-jambiers" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ischio-jambiers"
           }
         }
       }
@@ -223,12 +543,32 @@
         }
       }
     },
+    "Jour d'entraînement possible" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jour d'entraînement possible"
+          }
+        }
+      }
+    },
     "Jour de repos" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Jour de repos"
+          }
+        }
+      }
+    },
+    "Jours de repos imposés" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jours de repos imposés"
           }
         }
       }
@@ -240,6 +580,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "L"
+          }
+        }
+      }
+    },
+    "légère" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "légère"
+          }
+        }
+      }
+    },
+    "Lombaires" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lombaires"
           }
         }
       }
@@ -281,6 +641,66 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mercredi"
+          }
+        }
+      }
+    },
+    "Mollets" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mollets"
+          }
+        }
+      }
+    },
+    "moyenne" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "moyenne"
+          }
+        }
+      }
+    },
+    "Obliques" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obliques"
+          }
+        }
+      }
+    },
+    "Pas assez de données." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas assez de données."
+          }
+        }
+      }
+    },
+    "Pectoraux" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pectoraux"
+          }
+        }
+      }
+    },
+    "Quadriceps" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quadriceps"
           }
         }
       }
@@ -372,6 +792,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Surmenage"
+          }
+        }
+      }
+    },
+    "Trapèzes" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trapèzes"
+          }
+        }
+      }
+    },
+    "très forte" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "très forte"
+          }
+        }
+      }
+    },
+    "Triceps" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Triceps"
           }
         }
       }

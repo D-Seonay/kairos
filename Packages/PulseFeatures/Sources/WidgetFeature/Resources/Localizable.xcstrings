@@ -1,12 +1,42 @@
 {
   "sourceLanguage" : "fr",
   "strings" : {
+    "%@ %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ %@"
+          }
+        }
+      }
+    },
+    "%@ Aujourd'hui : %@. Charge %@. %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ Aujourd'hui : %@. Charge %@. %@"
+          }
+        }
+      }
+    },
     "%@ · estimé" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ · estimé"
+          }
+        }
+      }
+    },
+    "%@ à %@ par kilomètre" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ à %@ par kilomètre"
           }
         }
       }
@@ -50,6 +80,196 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "+30 s"
+          }
+        }
+      }
+    },
+    "1,12, zone optimale" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1,12, zone optimale"
+          }
+        }
+      }
+    },
+    "aujourd'hui %@, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "aujourd'hui %@, %@"
+          }
+        }
+      }
+    },
+    "Cette semaine : %@ sur %lld." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette semaine : %@ sur %lld."
+          }
+        }
+      }
+    },
+    "Demain, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demain, %@"
+          }
+        }
+      }
+    },
+    "Demain, endurance 45 minutes, zone 2" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demain, endurance 45 minutes, zone 2"
+          }
+        }
+      }
+    },
+    "Endurance 45 minutes" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Endurance 45 minutes"
+          }
+        }
+      }
+    },
+    "fait" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "fait"
+          }
+        }
+      }
+    },
+    "moins %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "moins %@"
+          }
+        }
+      }
+    },
+    "plus %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "plus %@"
+          }
+        }
+      }
+    },
+    "Prochaine séance : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prochaine séance : %@"
+          }
+        }
+      }
+    },
+    "repos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "repos"
+          }
+        }
+      }
+    },
+    "semaine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "semaine"
+          }
+        }
+      }
+    },
+    "séance" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "séance"
+          }
+        }
+      }
+    },
+    "séance faite" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "séance faite"
+          }
+        }
+      }
+    },
+    "séances" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "séances"
+          }
+        }
+      }
+    },
+    "séances faites" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "séances faites"
+          }
+        }
+      }
+    },
+    "Série de %@, %@ sur %lld cette semaine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Série de %@, %@ sur %lld cette semaine"
+          }
+        }
+      }
+    },
+    "zone 2, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "zone 2, %@"
+          }
+        }
+      }
+    },
+    "à venir" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "à venir"
           }
         }
       }
@@ -190,16 +410,6 @@
         }
       }
     },
-    "Cette semaine : 3 séances sur 5 faites. Aujourd'hui : %@. Charge 1,12 en zone optimale. %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cette semaine : 3 séances sur 5 faites. Aujourd'hui : %@. Charge 1,12 en zone optimale. %@"
-          }
-        }
-      }
-    },
     "Charge" : {
       "localizations" : {
         "fr" : {
@@ -336,16 +546,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Prochaine séance"
-          }
-        }
-      }
-    },
-    "Prochaine séance : %@, %@, %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prochaine séance : %@, %@, %@"
           }
         }
       }
@@ -517,16 +717,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Série"
-          }
-        }
-      }
-    },
-    "Série de %lld semaines, %lld séances sur %lld cette semaine" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Série de %lld semaines, %lld séances sur %lld cette semaine"
           }
         }
       }

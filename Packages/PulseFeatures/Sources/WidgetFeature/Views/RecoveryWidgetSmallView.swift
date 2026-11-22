@@ -22,7 +22,8 @@ public struct RecoveryWidgetSmallView: View {
                 Image(systemName: "heart.fill")
             }
             .font(.system(.caption2, weight: .semibold))
-            .foregroundStyle(.secondary)
+            // Le gris hiérarchique `.secondary` tombe sous 4,5:1 sur l'opale ; l'encre à 70 % reste au-dessus, comme `opalMuted` (58 %).
+            .opacity(0.7)
             .lineLimit(1)
             RecoveryGauge(score: content.score.map(Double.init), category: content.category, style: .compact, animatesReveal: false)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -41,7 +42,7 @@ public struct RecoveryWidgetSmallView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         // Un widget de 158 pt n'a pas la place des tailles d'accessibilité : l'étiquette VoiceOver porte tout le texte.
-        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+        .dynamicTypeSize(...WidgetTypeCap.recoverySmall)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(content.accessibilityLabel)
     }
@@ -63,5 +64,15 @@ public struct RecoveryWidgetSmallView: View {
         .frame(width: 158, height: 158)
         .background(.black, in: RoundedRectangle(cornerRadius: 22))
         .foregroundStyle(.white)
+        .padding()
+}
+
+#Preview("Séance allégée, sur opale, accessibilité 3") {
+    RecoveryWidgetSmallView(content: .sample(at: Date(timeIntervalSinceReferenceDate: 0), calendar: Calendar(identifier: .gregorian)))
+        .dynamicTypeSize(.accessibility3)
+        .foregroundStyle(PulsePalette.opalInk)
+        .padding(16)
+        .frame(width: 158, height: 158)
+        .background(PulsePalette.opal, in: RoundedRectangle(cornerRadius: 22))
         .padding()
 }

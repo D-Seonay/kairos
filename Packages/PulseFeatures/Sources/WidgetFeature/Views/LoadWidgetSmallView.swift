@@ -12,6 +12,21 @@ public struct LoadWidgetSmallView: View {
     }
 
     public var body: some View {
+        LoadWidgetSmallViewBody(content: content)
+            .dynamicTypeSize(...WidgetTypeCap.loadSmall)
+    }
+}
+
+/// Le contenu de la vue, plafonné par `LoadWidgetSmallView` : ses `@ScaledMetric` lisent la taille déjà plafonnée.
+struct LoadWidgetSmallViewBody: View {
+    let content: LoadWidgetContent
+
+    @ScaledMetric(relativeTo: .caption) private var headerSize = 12
+    @ScaledMetric(relativeTo: .largeTitle) private var ratioSize = 38
+    @ScaledMetric(relativeTo: .caption) private var zoneSize = 12.5
+    @ScaledMetric(relativeTo: .caption2) private var boundsSize = 11
+
+    var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
             Spacer(minLength: 4)
@@ -23,7 +38,6 @@ public struct LoadWidgetSmallView: View {
             boundsRow
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(content.accessibilityLabel)
     }
@@ -34,24 +48,27 @@ public struct LoadWidgetSmallView: View {
         } icon: {
             Image(systemName: "chart.line.uptrend.xyaxis")
         }
-        .font(.system(size: 12, weight: .bold))
+        .font(.system(size: headerSize, weight: .bold))
         .foregroundStyle(PulsePalette.muted)
         .lineLimit(1)
+        .minimumScaleFactor(0.8)
     }
 
     private var bigRatio: some View {
         Text(content.ratioText)
-            .font(.system(size: 38, weight: .light).monospacedDigit())
+            .font(.system(size: ratioSize, weight: .light).monospacedDigit())
             .foregroundStyle(PulsePalette.text)
             .monospacedDigit()
             .lineLimit(1)
+            .minimumScaleFactor(0.7)
     }
 
     private var zoneLabel: some View {
         Text(content.zoneText)
-            .font(.system(size: 12.5, weight: .bold))
+            .font(.system(size: zoneSize, weight: .bold))
             .foregroundStyle(content.isOptimal ? PulsePalette.ok : PulsePalette.warn)
-            .lineLimit(1)
+            .lineLimit(2)
+            .minimumScaleFactor(0.8)
     }
 
     private var gaugeBar: some View {
@@ -89,13 +106,23 @@ public struct LoadWidgetSmallView: View {
             Spacer()
             Text("1,3")
         }
-        .font(.system(size: 11, weight: .semibold))
+        .font(.system(size: boundsSize, weight: .semibold))
         .foregroundStyle(PulsePalette.muted)
     }
 }
 
 #Preview("Petit Charge Widget") {
     LoadWidgetSmallView(content: .sample(at: Date(), calendar: Calendar(identifier: .gregorian)))
+        .padding(16)
+        .frame(width: 158, height: 158)
+        .background(PulsePalette.surface, in: RoundedRectangle(cornerRadius: 22))
+        .padding()
+        .background(PulsePalette.background)
+}
+
+#Preview("Petit Charge Widget, accessibilité 3") {
+    LoadWidgetSmallView(content: .sample(at: Date(), calendar: Calendar(identifier: .gregorian)))
+        .dynamicTypeSize(.accessibility3)
         .padding(16)
         .frame(width: 158, height: 158)
         .background(PulsePalette.surface, in: RoundedRectangle(cornerRadius: 22))

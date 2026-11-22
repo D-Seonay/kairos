@@ -32,6 +32,7 @@ public struct SessionDetailView: View {
                 message(failure)
             } else {
                 ProgressView()
+                    .accessibilityLabel(String(localized: "Chargement de la séance", bundle: .module))
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
@@ -59,6 +60,7 @@ public struct SessionDetailView: View {
                 SessionCorrectionView(correction: draft.correction, blocks: model.correctableBlocks, onSave: save)
             }
         }
+        .pulseAnnounceError(errorMessage ?? model.errorMessage)
         .task { await model.load() }
     }
 
@@ -123,7 +125,8 @@ public struct SessionDetailView: View {
                     .foregroundStyle(PulsePalette.text)
             }
             .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-            .accessibilityElement(children: .combine)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(model.headerSpokenText)
         }
         .listRowBackground(PulsePalette.surface)
     }
@@ -131,7 +134,7 @@ public struct SessionDetailView: View {
     private var muscles: some View {
         Section {
             MuscleMapView(levels: model.muscleLevels,
-                          label: String(localized: "Muscles sollicités par la séance", bundle: .module), height: 220)
+                          label: model.musclesSpokenText, height: 220)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
         } header: {

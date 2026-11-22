@@ -1,6 +1,7 @@
 import PulseDesignSystem
 import PulseDomain
 import PulseServices
+import SwiftUI
 
 /// Les textes d'une ligne de série, en fonctions pures pour les tester : colonne de charge, pastille du type, étiquette VoiceOver.
 extension LiveSetRow {
@@ -40,7 +41,69 @@ extension LiveSetRow {
         }
     }
 
+    /// Les lignes passent sur deux lignes dès `xLarge` : au-delà, les colonnes qui suivent le texte ne laissent plus la place
+    /// au précédent.
+    nonisolated static func usesStackedLayout(_ size: DynamicTypeSize) -> Bool {
+        size >= .xLarge
+    }
+
+    /// Le titre visible d'une cellule quand la ligne passe sur deux lignes : « Charge (kg) », « Reps », « Sec ».
+    nonisolated static func cellTitle(for kind: KeypadField.Kind, loadKind: LoadKind) -> String {
+        switch kind {
+        case .weight:
+            switch loadKind {
+            case .external: String(localized: "Charge (kg)", bundle: .module)
+            case .bodyweight: String(localized: "Lest (kg)", bundle: .module)
+            case .assisted: String(localized: "Assistance (kg)", bundle: .module)
+            }
+        case .reps: String(localized: "Reps", bundle: .module)
+        case .duration: String(localized: "Sec", bundle: .module)
+        }
+    }
+
     // MARK: VoiceOver
+
+    /// Le nom parlé de la cellule de charge : « Charge en kilos », « Lest en kilos », « Assistance en kilos ».
+    nonisolated static func weightSpokenTitle(for loadKind: LoadKind) -> String {
+        switch loadKind {
+        case .external: String(localized: "Charge en kilos", bundle: .module)
+        case .bodyweight: String(localized: "Lest en kilos", bundle: .module)
+        case .assisted: String(localized: "Assistance en kilos", bundle: .module)
+        }
+    }
+
+    /// La valeur parlée d'une cellule : « 62,5, proposé », « 62,5 », « vide ».
+    nonisolated static func cellSpokenValue(text: String, isEmpty: Bool, isProposed: Bool) -> String {
+        if isEmpty { return String(localized: "vide", bundle: .module) }
+        return isProposed ? String(localized: "\(text), proposé", bundle: .module) : text
+    }
+
+    /// Le précédent dit en mots : « Précédent : 70 kilos, 5 répétitions ». Une séance enregistrée avant M8 n'a que le texte
+    /// visible, lu tel quel.
+    nonisolated static func previousSpokenText(for set: LiveSet) -> String {
+        if let spoken = set.previousSpoken { return String(localized: "Précédent : \(spoken)", bundle: .module) }
+        if let previous = set.previous { return String(localized: "Précédent \(previous)", bundle: .module) }
+        return String(localized: "Pas de série précédente", bundle: .module)
+    }
+
+    /// La coche : « Série 2 », « Série 1, échauffement ». Les valeurs sont dites par les cellules.
+    nonisolated static func checkSpokenLabel(index: Int, type: SetType) -> String {
+        let title = String(localized: "Série \(index + 1)", bundle: .module)
+        guard let type = typeName(type) else { return title }
+        return String(localized: "\(title), \(type)", bundle: .module)
+    }
+
+    nonisolated static func checkSpokenValue(isDone: Bool) -> String {
+        isDone ? String(localized: "validée", bundle: .module) : String(localized: "non validée", bundle: .module)
+    }
+
+    /// « 70 kilos, 5 répétitions », « lest de 10 kilos, 8 répétitions », « 45 secondes » : les valeurs d'une série, sans celles
+    /// qui manquent ; `nil` sans aucune valeur.
+    nonisolated static func plannedSpokenText(for set: LiveSet, loadKind: LoadKind, tracksDuration: Bool) -> String? {
+        let values = spokenValues(of: set, loadKind: loadKind, tracksDuration: tracksDuration).filter { !$0.isMissing }
+        guard !values.isEmpty else { return nil }
+        return values.map(\.text).joined(separator: ", ")
+    }
 
     /// « Série 2, proposé 70 kilos, 5 répétitions, non validée ». `index` est la position de la série dans l'exercice, à partir
     /// de 0. « proposé » précède la première valeur tant que la série n'a ni été modifiée ni validée.
@@ -96,26 +159,19 @@ extension LiveSetRow {
             values.append(set.durationSeconds.map { SpokenValue(text: seconds($0)) }
                 ?? SpokenValue(text: String(localized: "durée à saisir", bundle: .module), isMissing: true))
         } else {
-            values.append(set.reps.map { SpokenValue(text: repetitions($0)) }
+            values.append(set.reps.map { SpokenValue(text: PulseSpoken.repetitions($0)) }
                 ?? SpokenValue(text: String(localized: "répétitions à saisir", bundle: .module), isMissing: true))
         }
         return values
     }
 
     /// « 1 kilo », « 1,5 kilo » : le pluriel commence à 2.
-    private nonisolated static func kilos(_ value: Double) -> String {
-        let text = PulseFormat.decimal(value, maxFractionDigits: 2)
-        return abs(value) < 2 ? String(localized: "\(text) kilo", bundle: .module)
-            : String(localized: "\(text) kilos", bundle: .module)
+    nonisolated static func kilos(_ value: Double) -> String {
+        PulseSpoken.kilos(value)
     }
 
-    private nonisolated static func repetitions(_ count: Int) -> String {
-        count == 1 ? String(localized: "1 répétition", bundle: .module)
-            : String(localized: "\(count) répétitions", bundle: .module)
-    }
-
-    private nonisolated static func seconds(_ count: Int) -> String {
-        count == 1 ? String(localized: "1 seconde", bundle: .module)
-            : String(localized: "\(count) secondes", bundle: .module)
+    nonisolated static func seconds(_ count: Int) -> String {
+        PulseSpoken.count(count, singular: String(localized: "seconde", bundle: .module),
+                          plural: String(localized: "secondes", bundle: .module))
     }
 }

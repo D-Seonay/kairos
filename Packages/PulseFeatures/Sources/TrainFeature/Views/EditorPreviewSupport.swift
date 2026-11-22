@@ -32,12 +32,15 @@ struct ProgramEditorPreviewHost: View {
 /// Affiche l'éditeur de la première routine du programme en mémoire.
 struct RoutineEditorPreviewHost: View {
     var templateID: String? = "ppl-3"
+    /// Vrai pour montrer le premier exercice déplié, avec ses réglages.
+    var expandsFirstExercise = false
     @State private var editor: RoutineEditorModel?
 
     var body: some View {
         NavigationStack {
             if let editor {
                 RoutineEditorView(model: editor)
+                    .expandingFirstExercise(expandsFirstExercise)
             } else {
                 ProgressView()
             }
@@ -67,5 +70,15 @@ struct RoutineEditorPreviewHost: View {
 
 #Preview("Routine : Push") {
     RoutineEditorPreviewHost()
+}
+
+#Preview("Routine : Push, exercice déplié, accessibilité XL") {
+    RoutineEditorPreviewHost(expandsFirstExercise: true)
+        .dynamicTypeSize(.accessibility3)
+}
+
+#Preview("Programme : PPL en 3 jours, accessibilité XL") {
+    ProgramEditorPreviewHost()
+        .dynamicTypeSize(.accessibility3)
 }
 #endif

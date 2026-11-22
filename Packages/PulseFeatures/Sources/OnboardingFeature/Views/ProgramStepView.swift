@@ -18,6 +18,7 @@ struct ProgramStepView: View {
                          à ton curseur est en tête.
                         """,
                     bundle: .module))
+            WeekPreviewLegend()
             VStack(spacing: 10) {
                 ForEach(model.templates) { template in
                     ProgramTemplateCard(
@@ -60,6 +61,7 @@ struct ProgramTemplateCard: View {
     let isSelected: Bool
     let onSelect: () -> Void
     @Environment(\.pulseTheme) private var theme
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         let palette = PulsePalette.accent(for: theme)
@@ -72,21 +74,12 @@ struct ProgramTemplateCard: View {
         } label: {
             ObsidianCard {
                 VStack(alignment: .leading, spacing: 10) {
-                    HStack(alignment: .firstTextBaseline, spacing: 8) {
-                        Text(template.name.fr)
-                            .font(.headline)
-                            .foregroundStyle(PulsePalette.text)
-                        Spacer(minLength: 0)
-                        if isRecommended { recommendedBadge(palette) }
-                    }
+                    header(palette)
                     Text(template.summary.fr)
                         .font(.subheadline)
                         .foregroundStyle(PulsePalette.text2)
                         .multilineTextAlignment(.leading)
-                    HStack(spacing: 8) {
-                        tag(String(localized: "\(ProgramWeekPreview.sessionCount(week)) séances par semaine", bundle: .module))
-                        tag(template.recommendedFor.focus.localizedName)
-                    }
+                    tags(week)
                     WeekPreviewRow(days: week)
                 }
             }
@@ -96,6 +89,42 @@ struct ProgramTemplateCard: View {
         .buttonStyle(.plain)
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
+
+    /// Le nom et le badge « Recommandé » sur une ligne ; le badge passe sous le nom aux tailles d'accessibilité.
+    @ViewBuilder
+    private func header(_ palette: AccentPalette) -> some View {
+        let name = Text(template.name.fr)
+            .font(.headline)
+            .foregroundStyle(PulsePalette.text)
+        if dynamicTypeSize.isAccessibilitySize {
+            VStack(alignment: .leading, spacing: 6) {
+                name
+                if isRecommended { recommendedBadge(palette) }
+            }
+        } else {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                name
+                Spacer(minLength: 0)
+                if isRecommended { recommendedBadge(palette) }
+            }
+        }
+    }
+
+    /// Les séances par semaine et le focus : côte à côte, ou l'un sous l'autre quand ils ne tiennent pas sur une ligne.
+    private func tags(_ week: [WeekPreviewDay]) -> some View {
+        let sessions = String(localized: "\(ProgramWeekPreview.sessionCount(week)) séances par semaine", bundle: .module)
+        let focus = template.recommendedFor.focus.localizedName
+        return ViewThatFits(in: .horizontal) {
+            HStack(spacing: 8) {
+                tag(sessions)
+                tag(focus)
+            }
+            VStack(alignment: .leading, spacing: 6) {
+                tag(sessions)
+                tag(focus)
+            }
+        }
     }
 
     private func recommendedBadge(_ palette: AccentPalette) -> some View {
@@ -117,7 +146,8 @@ struct ProgramTemplateCard: View {
     }
 }
 
-/// Les sept jours L à D : musculation en accent, course en cyan, repos en gris.
+/// Les sept jours L à D : la couleur ne porte pas seule le type de jour. Un pictogramme (haltère, coureur) marque une séance, et
+/// un repos est tracé en pointillés.
 struct WeekPreviewRow: View {
     let days: [WeekPreviewDay]
     @Environment(\.pulseTheme) private var theme
@@ -125,16 +155,31 @@ struct WeekPreviewRow: View {
     var body: some View {
         HStack(spacing: 6) {
             ForEach(days.indices, id: \.self) { index in
-                let day = days[index]
-                Text(day.weekday.onboardingInitial)
-                    .font(.system(.footnote, weight: .bold))
-                    .foregroundStyle(foreground(day.kind))
-                    .frame(maxWidth: .infinity, minHeight: 32)
-                    .background(background(day.kind), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+                cell(days[index])
             }
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(ProgramWeekPreview.accessibilityLabel(for: days))
+    }
+
+    private func cell(_ day: WeekPreviewDay) -> some View {
+        let shape = RoundedRectangle(cornerRadius: 9, style: .continuous)
+        return VStack(spacing: 2) {
+            Text(day.weekday.onboardingInitial)
+                .font(.system(.footnote, weight: .bold))
+            if let systemImage = day.kind.systemImage {
+                Image(systemName: systemImage)
+                    .font(.caption2)
+            }
+        }
+        .foregroundStyle(foreground(day.kind))
+        .frame(maxWidth: .infinity, minHeight: 44)
+        .background(background(day.kind), in: shape)
+        .overlay {
+            if day.kind == .rest {
+                shape.strokeBorder(PulsePalette.muted.opacity(0.6), style: StrokeStyle(lineWidth: 1, dash: [3, 3]))
+            }
+        }
     }
 
     private func foreground(_ kind: WeekPreviewDay.Kind) -> Color {
@@ -154,8 +199,50 @@ struct WeekPreviewRow: View {
     }
 }
 
+/// La légende des aperçus de semaine : un pictogramme par type de jour, avec son nom. Les cartes la lisent déjà jour par jour à
+/// VoiceOver, la légende est donc masquée.
+struct WeekPreviewLegend: View {
+    var body: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 16) { items }
+            VStack(alignment: .leading, spacing: 6) { items }
+        }
+        .font(.footnote)
+        .foregroundStyle(PulsePalette.text2)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityHidden(true)
+    }
+
+    @ViewBuilder
+    private var items: some View {
+        item(WeekPreviewDay.Kind.strength.localizedName.capitalized) {
+            if let image = WeekPreviewDay.Kind.strength.systemImage { Image(systemName: image) }
+        }
+        item(WeekPreviewDay.Kind.run.localizedName.capitalized) {
+            if let image = WeekPreviewDay.Kind.run.systemImage { Image(systemName: image) }
+        }
+        item(WeekPreviewDay.Kind.rest.localizedName.capitalized) {
+            RoundedRectangle(cornerRadius: 3, style: .continuous)
+                .strokeBorder(PulsePalette.muted.opacity(0.6), style: StrokeStyle(lineWidth: 1, dash: [3, 3]))
+                .frame(width: 14, height: 14)
+        }
+    }
+
+    private func item(_ title: String, @ViewBuilder mark: () -> some View) -> some View {
+        HStack(spacing: 6) {
+            mark()
+            Text(title)
+        }
+    }
+}
+
 #if DEBUG
 #Preview {
     OnboardingFlowView(model: OnboardingPreviewSupport.model(step: .program))
+}
+
+#Preview("Programme, accessibilité XL") {
+    OnboardingFlowView(model: OnboardingPreviewSupport.model(step: .program))
+        .dynamicTypeSize(.accessibility3)
 }
 #endif

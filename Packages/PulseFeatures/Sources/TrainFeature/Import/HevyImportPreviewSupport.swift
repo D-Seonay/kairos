@@ -74,4 +74,14 @@ private struct HevyImportPreviewHost: View {
 #Preview("Fichier refusé") {
     HevyImportPreviewHost(stage: .failed)
 }
+
+#Preview("Correspondance, accessibilité XL") {
+    HevyImportPreviewHost(stage: .mapping)
+        .dynamicTypeSize(.accessibility3)
+}
+
+#Preview("Bilan, accessibilité XL") {
+    HevyImportPreviewHost(stage: .done)
+        .dynamicTypeSize(.accessibility3)
+}
 #endif

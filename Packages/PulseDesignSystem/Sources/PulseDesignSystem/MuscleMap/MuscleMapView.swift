@@ -3,6 +3,7 @@ import SwiftUI
 
 /// La carte musculaire : face et dos côte à côte. Corps en `muscleBody`, régions de base éteintes en `muscleOff`,
 /// niveaux 1 à 4 en mélange accent / `muscleOff`. Les régions en surimpression ne sont dessinées que si elles sont allumées.
+/// `label` est lu par VoiceOver à la place du dessin : les appelants passent `MuscleMapSummary.text`, qui donne les niveaux.
 public struct MuscleMapView: View {
     private let levels: [MuscleMapRegion: Int]
     private let label: String
@@ -24,6 +25,7 @@ public struct MuscleMapView: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(label)
+        .accessibilityAddTraits(.isImage)
     }
 
     private func silhouette(_ side: MuscleMapSide) -> some View {
@@ -61,7 +63,22 @@ public struct MuscleMapView: View {
 }
 
 #Preview("Séance Push") {
-    MuscleMapView(levels: [.chest: 4, .triceps: 3, .frontDeltoid: 2], label: "Pectoraux, triceps, épaules", height: 320)
-        .padding()
-        .background(PulsePalette.background)
+    MuscleMapView(
+        levels: [.chest: 4, .triceps: 3, .frontDeltoid: 2],
+        label: MuscleMapSummary.text(levels: [.chest: .maximum, .triceps: .strong, .frontDelts: .moderate]),
+        height: 320
+    )
+    .padding()
+    .background(PulsePalette.background)
+}
+
+#Preview("Accessibilité 3") {
+    MuscleMapView(
+        levels: [.chest: 4, .triceps: 3, .frontDeltoid: 2],
+        label: MuscleMapSummary.text(levels: [.chest: .maximum, .triceps: .strong, .frontDelts: .moderate]),
+        height: 200
+    )
+    .padding()
+    .background(PulsePalette.background)
+    .dynamicTypeSize(.accessibility3)
 }

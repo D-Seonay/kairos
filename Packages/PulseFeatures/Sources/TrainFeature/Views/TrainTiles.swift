@@ -17,7 +17,8 @@ struct TrainTiles: View {
             ? AnyLayout(VStackLayout(spacing: 12))
             : AnyLayout(HStackLayout(alignment: .top, spacing: 12))
         layout {
-            StrengthTile(subtitle: model.strengthSubtitle, onOpenToday: onOpenToday, onStart: onStart)
+            StrengthTile(subtitle: model.strengthSubtitle, spokenSubtitle: model.strengthSubtitleSpoken,
+                         onOpenToday: onOpenToday, onStart: onStart)
             RunTile(nextRun: model.nextRun, daysUntil: model.nextRun.flatMap { model.daysUntil($0.weekday) })
         }
     }
@@ -26,6 +27,7 @@ struct TrainTiles: View {
 /// La séance de musculation du jour : toucher la tuile ouvre l'accueil, « Démarrer » lance la séance (un bouton à part).
 private struct StrengthTile: View {
     let subtitle: String
+    let spokenSubtitle: String
     let onOpenToday: () -> Void
     let onStart: (() -> Void)?
 
@@ -47,7 +49,7 @@ private struct StrengthTile: View {
                 }
                 .buttonStyle(PressableButtonStyle())
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel(String(localized: "Musculation : \(subtitle)", bundle: .module))
+                .accessibilityLabel(String(localized: "Musculation : \(spokenSubtitle)", bundle: .module))
                 .accessibilityHint(String(localized: "Ouvre l'accueil, où démarrer la séance du jour", bundle: .module))
                 .accessibilityAddTraits(.isButton)
                 .accessibilityIdentifier(TrainIdentifiers.strengthTile)

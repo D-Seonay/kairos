@@ -11,6 +11,7 @@ struct SupplementFormView: View {
     @State private var draft: SupplementDraft
     @State private var isConfirmingArchive = false
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     init(model: SupplementsModel, editing: Supplement?) {
         self.model = model
@@ -71,6 +72,7 @@ struct SupplementFormView: View {
                     ForEach(SupplementCatalog.suggestions) { suggestion in
                         Button(suggestion.name) { draft.apply(suggestion) }
                             .buttonStyle(PillButtonStyle(prominent: draft.suggestionID == suggestion.id))
+                            .accessibilityAddTraits(draft.suggestionID == suggestion.id ? .isSelected : [])
                     }
                 }
                 .padding(.vertical, 4)
@@ -92,24 +94,45 @@ struct SupplementFormView: View {
                 ForEach(SupplementForm.allCases, id: \.self) { Text(SupplementLabels.form($0)).tag($0) }
             }
             .frame(minHeight: 44)
-            HStack {
-                Text(String(localized: "Dose par prise", bundle: .module))
-                Spacer()
-                TextField(String(localized: "Dose", bundle: .module), value: $draft.dose,
-                          format: .number.locale(Locale(identifier: "fr_FR")))
-                    .pulseNumericKeyboard()
-                    .multilineTextAlignment(.trailing)
-                    .frame(maxWidth: 100)
-                    .accessibilityIdentifier(SupplementsIdentifiers.formDose)
-                Picker(String(localized: "Unité", bundle: .module), selection: $draft.unit) {
-                    ForEach(DoseUnit.allCases, id: \.self) { Text(SupplementLabels.unit($0)).tag($0) }
-                }
-                .labelsHidden()
-                .pickerStyle(.menu)
-            }
-            .frame(minHeight: 44)
+            doseRow
         }
         .listRowBackground(PulsePalette.surface)
+    }
+
+    /// « Dose par prise », le champ et l'unité : trois éléments liés. Le titre est lu par le champ, l'unité est la valeur du sélecteur.
+    private var doseRow: some View {
+        let title = String(localized: "Dose par prise", bundle: .module)
+        // Le titre est lu par VoiceOver ; l'invite visible reste courte, pour ne pas être coupée dans la rangée.
+        let field = TextField(title, value: $draft.dose, format: .number.locale(Locale(identifier: "fr_FR")),
+                              prompt: Text(String(localized: "Dose", bundle: .module)))
+            .pulseNumericKeyboard()
+            .accessibilityIdentifier(SupplementsIdentifiers.formDose)
+        let unit = Picker(String(localized: "Unité", bundle: .module), selection: $draft.unit) {
+            ForEach(DoseUnit.allCases, id: \.self) { Text(SupplementLabels.unit($0)).tag($0) }
+        }
+        .labelsHidden()
+        .pickerStyle(.menu)
+        .accessibilityLabel(String(localized: "Unité", bundle: .module))
+        .accessibilityValue(SupplementLabels.unitSpoken(draft.unit))
+        return Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(title).accessibilityHidden(true)
+                    HStack {
+                        field.frame(maxWidth: .infinity, alignment: .leading)
+                        unit
+                    }
+                }
+            } else {
+                HStack {
+                    Text(title).accessibilityHidden(true)
+                    Spacer()
+                    field.multilineTextAlignment(.trailing).frame(maxWidth: 100)
+                    unit
+                }
+            }
+        }
+        .frame(minHeight: 44)
     }
 
     private var moment: some View {
@@ -120,6 +143,7 @@ struct SupplementFormView: View {
                         Image(systemName: SupplementLabels.timingIcon(timing))
                             .frame(width: 24)
                             .foregroundStyle(PulsePalette.text2)
+                            .accessibilityHidden(true)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(SupplementText.timing(timing)).foregroundStyle(PulsePalette.text)
                             Text(SupplementLabels.timingDetail(timing)).font(.footnote).foregroundStyle(PulsePalette.text2)
@@ -127,6 +151,7 @@ struct SupplementFormView: View {
                         Spacer()
                         if draft.timing == timing {
                             Image(systemName: "checkmark").foregroundStyle(PulsePalette.text)
+                                .accessibilityHidden(true)
                         }
                     }
                     .frame(minHeight: 44)
@@ -181,14 +206,24 @@ struct SupplementFormView: View {
         .listRowBackground(PulsePalette.surface)
     }
 
+    /// Le titre est le nom du champ pour VoiceOver ; « — » n'est que l'indice visuel d'un champ vide.
     private func numberRow(_ title: String, value: Binding<Double?>) -> some View {
-        HStack {
-            Text(title)
-            Spacer()
-            TextField(String(localized: "—", bundle: .module), value: value, format: .number.locale(Locale(identifier: "fr_FR")))
-                .pulseNumericKeyboard()
-                .multilineTextAlignment(.trailing)
-                .frame(maxWidth: 100)
+        let field = TextField(title, value: value, format: .number.locale(Locale(identifier: "fr_FR")),
+                              prompt: Text(String(localized: "—", bundle: .module)))
+            .pulseNumericKeyboard()
+        return Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(title).accessibilityHidden(true)
+                    field
+                }
+            } else {
+                HStack {
+                    Text(title).accessibilityHidden(true)
+                    Spacer()
+                    field.multilineTextAlignment(.trailing).frame(maxWidth: 100)
+                }
+            }
         }
         .frame(minHeight: 44)
     }

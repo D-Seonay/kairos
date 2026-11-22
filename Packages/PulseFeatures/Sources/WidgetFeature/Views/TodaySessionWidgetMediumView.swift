@@ -12,12 +12,29 @@ public struct TodaySessionWidgetMediumView: View {
     }
 
     public var body: some View {
+        TodaySessionWidgetMediumViewBody(content: content)
+            .dynamicTypeSize(...WidgetTypeCap.sessionMedium)
+    }
+}
+
+/// Le contenu de la vue, plafonné par `TodaySessionWidgetMediumView` : ses `@ScaledMetric` lisent la taille déjà plafonnée.
+struct TodaySessionWidgetMediumViewBody: View {
+    let content: TodaySessionWidgetContent
+
+    @ScaledMetric(relativeTo: .body) private var restIconSize = 26
+    @ScaledMetric(relativeTo: .headline) private var titleSize = 16
+    @ScaledMetric(relativeTo: .caption) private var metaSize = 12
+    @ScaledMetric(relativeTo: .caption2) private var eyebrowSize = 11
+    @ScaledMetric(relativeTo: .caption2) private var tagSize = 11
+    @ScaledMetric(relativeTo: .caption) private var buttonSize = 12.5
+    @ScaledMetric(relativeTo: .caption2) private var buttonIconSize = 11
+
+    var body: some View {
         HStack(spacing: 14) {
             muscleMap
             details
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(content.accessibilityLabel)
     }
@@ -33,7 +50,7 @@ public struct TodaySessionWidgetMediumView: View {
                     .fill(PulsePalette.surface2)
                     .frame(width: 64, height: 64)
                 Image(systemName: "bed.double.fill")
-                    .font(.system(size: 26))
+                    .font(.system(size: restIconSize))
                     .foregroundStyle(PulsePalette.muted)
             }
             .frame(width: 88)
@@ -44,13 +61,15 @@ public struct TodaySessionWidgetMediumView: View {
         VStack(alignment: .leading, spacing: 3) {
             headerRow
             Text(content.title)
-                .font(.system(size: 16, weight: .semibold))
+                .font(.system(size: titleSize, weight: .semibold))
                 .foregroundStyle(PulsePalette.text)
-                .lineLimit(1)
+                .lineLimit(2)
+                .minimumScaleFactor(0.75)
             Text(content.metaText)
-                .font(.system(size: 12))
+                .font(.system(size: metaSize))
                 .foregroundStyle(PulsePalette.text2)
-                .lineLimit(1)
+                .lineLimit(2)
+                .minimumScaleFactor(0.75)
             Spacer(minLength: 2)
             actionButton
         }
@@ -60,9 +79,10 @@ public struct TodaySessionWidgetMediumView: View {
     private var headerRow: some View {
         HStack(spacing: 6) {
             Text(TodaySessionWidgetContent.displayName)
-                .font(.system(size: 11, weight: .semibold))
+                .font(.system(size: eyebrowSize, weight: .semibold))
                 .foregroundStyle(PulsePalette.muted)
                 .lineLimit(1)
+                .minimumScaleFactor(0.8)
             if content.isAdjusted {
                 adjustedTag
             }
@@ -72,9 +92,9 @@ public struct TodaySessionWidgetMediumView: View {
     private var adjustedTag: some View {
         HStack(spacing: 3) {
             Image(systemName: "sparkles")
-                .font(.system(size: 8, weight: .bold))
+                .font(.system(size: tagSize, weight: .bold))
             Text(String(localized: "Ajustée", bundle: .module))
-                .font(.system(size: 9.5, weight: .bold))
+                .font(.system(size: tagSize, weight: .bold))
         }
         .padding(.horizontal, 6)
         .padding(.vertical, 2)
@@ -86,12 +106,14 @@ public struct TodaySessionWidgetMediumView: View {
     private var actionButton: some View {
         HStack(spacing: 6) {
             Image(systemName: "play.fill")
-                .font(.system(size: 10, weight: .bold))
+                .font(.system(size: buttonIconSize, weight: .bold))
             Text(content.buttonText)
-                .font(.system(size: 12.5, weight: .bold))
+                .font(.system(size: buttonSize, weight: .bold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 30)
+        .frame(minHeight: 30)
         .background(Color(PulsePalette.accent(for: .amber).accent))
         .foregroundStyle(Color(PulsePalette.accent(for: .amber).accentInk))
         .clipShape(Capsule())
@@ -100,6 +122,16 @@ public struct TodaySessionWidgetMediumView: View {
 
 #Preview("Moyen Séance du jour") {
     TodaySessionWidgetMediumView(content: .sample(at: Date(), calendar: Calendar(identifier: .gregorian)))
+        .padding(16)
+        .frame(width: 338, height: 158)
+        .background(PulsePalette.surface, in: RoundedRectangle(cornerRadius: 22))
+        .padding()
+        .background(PulsePalette.background)
+}
+
+#Preview("Moyen Séance du jour, accessibilité 3") {
+    TodaySessionWidgetMediumView(content: .sample(at: Date(), calendar: Calendar(identifier: .gregorian)))
+        .dynamicTypeSize(.accessibility3)
         .padding(16)
         .frame(width: 338, height: 158)
         .background(PulsePalette.surface, in: RoundedRectangle(cornerRadius: 22))

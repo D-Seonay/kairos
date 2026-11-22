@@ -7,6 +7,5 @@ public enum OnboardingIdentifiers {
     public static let goalsContinue = "onboarding.goals.continue"
     public static let programAdopt = "onboarding.program.adopt"
     public static let calibrationScore = "onboarding.calibration.score"
-    public static let calibrationCategory = "onboarding.calibration.category"
     public static let calibrationFinish = "onboarding.calibration.finish"
 }

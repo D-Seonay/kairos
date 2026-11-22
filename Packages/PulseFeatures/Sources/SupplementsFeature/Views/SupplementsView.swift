@@ -7,6 +7,7 @@ import SwiftUI
 /// coches, les conseils, le stock et la régularité. À pousser dans une `NavigationStack` (accueil, profil).
 public struct SupplementsView: View {
     private let model: SupplementsModel
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     public init(model: SupplementsModel) {
         self.model = model
@@ -36,7 +37,7 @@ public struct SupplementsView: View {
             }
             .padding(PulseMetrics.spacing)
         }
-        .refreshable { await model.load() }
+        .refreshable { await model.load(announcesFailure: true) }
         .pulseScreenBackground(aura: 0.5)
         .navigationTitle(String(localized: "Compléments", bundle: .module))
         .pulseInlineTitle()
@@ -54,7 +55,7 @@ public struct SupplementsView: View {
                 SupplementFormView(model: model, editing: editor.supplement)
             }
         }
-        .task { await model.load() }
+        .task { await model.load(announcesFailure: true) }
     }
 
     @ViewBuilder
@@ -82,7 +83,8 @@ public struct SupplementsView: View {
                 VStack(spacing: 4) {
                     ForEach(items) { item in
                         SupplementCheckRow(item: item, onToggle: { Task { await model.toggle(item) } },
-                                           onOpen: { model.edit(item.supplement) })
+                                           onOpen: { model.edit(item.supplement) },
+                                           onArchive: { Task { await model.archive(item.supplement) } })
                             .contextMenu { archiveButton(item.supplement) }
                     }
                 }
@@ -99,6 +101,10 @@ public struct SupplementsView: View {
                              detail: "\(SupplementText.dose(of: supplement)) · \(SupplementLabels.days(supplement.days))")
                 }
                 .buttonStyle(PressableButtonStyle())
+                .accessibilityLabel(SupplementsModel.notDueRowSpoken(supplement, days: SupplementLabels.days(supplement.days)))
+                .accessibilityAction(named: String(localized: "Archiver", bundle: .module)) {
+                    Task { await model.archive(supplement) }
+                }
                 .contextMenu { archiveButton(supplement) }
             }
         }
@@ -142,8 +148,9 @@ public struct SupplementsView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     ForEach(tracked) { supplement in
                         let stock = supplement.stockDoses ?? 0
+                        let fraction = Self.stockFraction(stock, threshold: supplement.lowStockThreshold)
                         bar(title: supplement.name, value: SupplementsModel.stockText(stock),
-                            fraction: Self.stockFraction(stock, threshold: supplement.lowStockThreshold),
+                            spokenValue: SupplementsModel.stockText(stock), fraction: fraction,
                             tint: supplement.isLowOnStock ? PulsePalette.bad : PulsePalette.text)
                     }
                     if !low.isEmpty {
@@ -164,7 +171,7 @@ public struct SupplementsView: View {
                     ForEach(model.overview.supplements) { supplement in
                         let regularity = model.overview.regularity[supplement.id]
                         bar(title: supplement.name, value: SupplementsModel.rateText(regularity),
-                            fraction: regularity?.rate ?? 0, tint: PulsePalette.text)
+                            spokenValue: SupplementsModel.rateSpoken(regularity), fraction: regularity?.rate ?? 0, tint: PulsePalette.text)
                     }
                     Text(String(localized: "Jours pris sur jours prévus, depuis la création du complément.", bundle: .module))
                         .font(.caption)
@@ -174,29 +181,54 @@ public struct SupplementsView: View {
         }
     }
 
-    private func bar(title: String, value: String, fraction: Double, tint: Color) -> some View {
-        HStack(spacing: 10) {
-            Text(title)
-                .font(.subheadline)
-                .foregroundStyle(PulsePalette.text)
-                .lineLimit(1)
-                .frame(width: 110, alignment: .leading)
-            GeometryReader { proxy in
-                Capsule()
-                    .fill(PulsePalette.surface2)
-                    .overlay(alignment: .leading) {
-                        Capsule().fill(tint).frame(width: proxy.size.width * min(1, max(0, fraction)))
+    /// Le nom, la barre et la valeur sur une ligne ; aux tailles d'accessibilité, le nom entier et la valeur au-dessus de la barre.
+    @ViewBuilder
+    private func bar(title: String, value: String, spokenValue: String, fraction: Double, tint: Color) -> some View {
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(alignment: .firstTextBaseline, spacing: 10) {
+                        barTitle(title)
+                        Spacer(minLength: 8)
+                        barValue(value)
                     }
+                    track(fraction: fraction, tint: tint)
+                }
+            } else {
+                HStack(spacing: 10) {
+                    barTitle(title).frame(width: 110, alignment: .leading)
+                    track(fraction: fraction, tint: tint)
+                    barValue(value).frame(minWidth: 56, alignment: .trailing)
+                }
             }
-            .frame(height: 8)
-            Text(value)
-                .font(.subheadline.weight(.semibold).monospacedDigit())
-                .foregroundStyle(PulsePalette.text)
-                .frame(minWidth: 56, alignment: .trailing)
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(title)
-        .accessibilityValue(value)
+        .accessibilityValue(spokenValue)
+    }
+
+    private func barTitle(_ title: String) -> some View {
+        Text(title)
+            .font(.subheadline)
+            .foregroundStyle(PulsePalette.text)
+            .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
+    }
+
+    private func barValue(_ value: String) -> some View {
+        Text(value)
+            .font(.subheadline.weight(.semibold).monospacedDigit())
+            .foregroundStyle(PulsePalette.text)
+    }
+
+    private func track(fraction: Double, tint: Color) -> some View {
+        GeometryReader { proxy in
+            Capsule()
+                .fill(PulsePalette.surface2)
+                .overlay(alignment: .leading) {
+                    Capsule().fill(tint).frame(width: proxy.size.width * min(1, max(0, fraction)))
+                }
+        }
+        .frame(height: 8)
     }
 
     /// Le remplissage de la barre de stock : plein à quatre fois le seuil (30 doses sans seuil).
@@ -248,7 +280,9 @@ struct SupplementSummaryCard: View {
                             .font(.subheadline)
                             .foregroundStyle(PulsePalette.text2)
                     }
-                    .accessibilityElement(children: .combine)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(SupplementsModel.summarySpoken(taken: model.overview.takenCount,
+                                                                       due: model.overview.dueCount))
                     .accessibilityIdentifier(SupplementsIdentifiers.summary)
                     segments
                     if let next = model.overview.next {
@@ -279,9 +313,14 @@ struct SupplementSummaryCard: View {
 struct NextIntakeRow: View {
     let item: SupplementDueItem
     let onTake: () -> Void
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
+    /// Le texte et « Pris » côte à côte ; aux tailles d'accessibilité, « Pris » sous le texte.
     var body: some View {
-        HStack(spacing: 12) {
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12))
+            : AnyLayout(HStackLayout(spacing: 12))
+        layout {
             VStack(alignment: .leading, spacing: 2) {
                 Text(String(localized: "Prochaine prise", bundle: .module))
                     .pulseEyebrow(PulsePalette.text2)
@@ -291,9 +330,11 @@ struct NextIntakeRow: View {
                 Text(SupplementsModel.detail(item))
                     .font(.footnote)
                     .foregroundStyle(PulsePalette.text2)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .accessibilityElement(children: .combine)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(SupplementsModel.nextIntakeSpoken(item))
             Button(action: onTake) {
                 Label(String(localized: "Pris", bundle: .module), systemImage: "checkmark")
             }

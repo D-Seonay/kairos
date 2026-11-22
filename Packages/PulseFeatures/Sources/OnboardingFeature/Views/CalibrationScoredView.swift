@@ -9,6 +9,7 @@ struct ScoredView: View {
     let recovery: DailyRecovery
     let baseline: BaselineSummary
     @Environment(\.pulseTheme) private var theme
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         OnboardingScreen(errorMessage: model.errorMessage) {
@@ -21,6 +22,9 @@ struct ScoredView: View {
                 identifier: OnboardingIdentifiers.calibrationFinish, style: PrimaryButtonStyle()
             ) { await model.finish() }
         }
+        // Le score prend la place de la lecture : le focus VoiceOver serait resté sur un élément disparu.
+        .pulseAnnounceOnce(
+            OnboardingCopy.scoreReadyAnnouncement(recovery: recovery), id: recovery.id, announcesOnAppear: true)
     }
 
     // MARK: - Score
@@ -28,18 +32,22 @@ struct ScoredView: View {
     private var scoreHeader: some View {
         VStack(spacing: 8) {
             if baseline.nightsAnalyzed > 0 { nightsPill }
+            // Le titre, la jauge, la catégorie et la pastille d'état disent une seule valeur : un seul élément, porté par la jauge.
             Text(String(localized: "Ta récupération ce matin", bundle: .module))
                 .font(.subheadline)
                 .foregroundStyle(PulsePalette.text2)
                 .padding(.top, 10)
-            RecoveryGauge(score: recovery.score, category: recovery.category, style: .large, cardColor: PulsePalette.background)
+                .accessibilityHidden(true)
+            RecoveryGauge(
+                score: recovery.score, category: recovery.category, style: .large, cardColor: PulsePalette.background,
+                accessibilityLabel: OnboardingCopy.scoreAccessibility(recovery: recovery))
                 .foregroundStyle(PulsePalette.text)
                 .accessibilityAddTraits(.isStaticText)
                 .accessibilityIdentifier(OnboardingIdentifiers.calibrationScore)
             Text(recovery.category.localizedName)
                 .font(.system(.body, weight: .bold))
                 .foregroundStyle(recovery.category.tone.color(onOpal: false))
-                .accessibilityIdentifier(OnboardingIdentifiers.calibrationCategory)
+                .accessibilityHidden(true)
             if let marker = OnboardingCopy.marker(for: recovery) {
                 Text(marker)
                     .font(.system(.caption, weight: .semibold))
@@ -47,6 +55,7 @@ struct ScoredView: View {
                     .padding(.horizontal, 10)
                     .frame(minHeight: 24)
                     .background(PulsePalette.surface2, in: Capsule())
+                    .accessibilityHidden(true)
             }
         }
         .frame(maxWidth: .infinity)
@@ -94,14 +103,28 @@ struct ScoredView: View {
         return rows.contains(where: \.isPending) ? nil : Self.baselineNote
     }
 
+    /// Titre, valeur et écart sur une ligne ; sous le titre, aux tailles d'accessibilité, où la valeur en attente est longue.
     private func baselineRow(_ row: BaselineRow) -> some View {
-        HStack {
+        let isLarge = dynamicTypeSize.isAccessibilitySize
+        let layout = isLarge
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
+            : AnyLayout(HStackLayout())
+        return layout {
             Text(row.title)
                 .foregroundStyle(PulsePalette.text2)
-            Spacer(minLength: 8)
+            if !isLarge { Spacer(minLength: 8) }
+            baselineValue(row, isLarge: isLarge)
+        }
+        .font(.subheadline)
+        .padding(.vertical, 10)
+        .accessibilityElement(children: .combine)
+    }
+
+    private func baselineValue(_ row: BaselineRow, isLarge: Bool) -> some View {
+        HStack(spacing: 8) {
             Text(row.value)
                 .font(row.isPending ? .subheadline : .body.weight(.bold).monospacedDigit())
-                .multilineTextAlignment(.trailing)
+                .multilineTextAlignment(isLarge ? .leading : .trailing)
                 .foregroundStyle(row.isPending ? PulsePalette.text2 : PulsePalette.text)
             if let deviation = row.deviation {
                 Text(deviation)
@@ -109,9 +132,6 @@ struct ScoredView: View {
                     .foregroundStyle(PulsePalette.muted)
             }
         }
-        .font(.subheadline)
-        .padding(.vertical, 10)
-        .accessibilityElement(children: .combine)
     }
 
     private static var baselineNote: String {

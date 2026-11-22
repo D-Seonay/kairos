@@ -3,17 +3,24 @@ import PulseDomain
 import SwiftUI
 
 /// Le choix du RPE par pilules, de 6 à 10 par pas de 0,5 (spec M4 §14.4), et « — » pour l'effacer. Choisir ferme le panneau.
+/// À l'ouverture, VoiceOver se place sur le titre. L'appelant plafonne sa taille de texte ; trois colonnes aux tailles
+/// d'accessibilité.
 struct RPEPicker: View {
     /// Les valeurs que le modèle accepte.
     static let values: [Double] = stride(from: 6.0, through: 10.0, by: 0.5).map { $0 }
 
     let title: String
+    let spokenTitle: String
     let selection: Double?
     let onSelect: (Double?) -> Void
     let onClose: () -> Void
     @Environment(\.pulseTheme) private var theme
+    @Environment(\.dynamicTypeSize) private var typeSize
+    @AccessibilityFocusState private var isTitleFocused: Bool
 
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 5)
+    private var columns: [GridItem] {
+        Array(repeating: GridItem(.flexible(), spacing: 6), count: typeSize.isAccessibilitySize ? 3 : 5)
+    }
 
     var body: some View {
         VStack(spacing: 6) {
@@ -21,9 +28,11 @@ struct RPEPicker: View {
                 Text(title)
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(PulsePalette.text2)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+                    .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityLabel(spokenTitle)
+                    .accessibilityAddTraits(.isHeader)
+                    .accessibilityFocused($isTitleFocused)
                 Button(action: onClose) {
                     Image(systemName: "chevron.down")
                         .font(.headline)
@@ -48,6 +57,13 @@ struct RPEPicker: View {
         .padding(.bottom, 8)
         .background(PulsePalette.surface)
         .accessibilityElement(children: .contain)
+        .accessibilityLabel(spokenTitle)
+        .pulseAnnounce(spokenTitle)
+        .task {
+            // Le panneau monte du bas : le focus attend la fin de son arrivée.
+            guard (try? await Task.sleep(for: .milliseconds(300))) != nil else { return }
+            isTitleFocused = true
+        }
     }
 
     private func pill(label: String, isSelected: Bool, spoken: String, identifier: String,
@@ -79,5 +95,10 @@ struct RPEPicker: View {
     /// « Développé couché · Série 2 · RPE ».
     nonisolated static func title(exercise: String, setIndex: Int) -> String {
         String(localized: "\(exercise) · Série \(setIndex + 1) · RPE", bundle: .module)
+    }
+
+    /// « Développé couché, série 2, RPE » : le titre dit sans symbole.
+    nonisolated static func spokenTitle(exercise: String, setIndex: Int) -> String {
+        String(localized: "\(exercise), série \(setIndex + 1), RPE", bundle: .module)
     }
 }

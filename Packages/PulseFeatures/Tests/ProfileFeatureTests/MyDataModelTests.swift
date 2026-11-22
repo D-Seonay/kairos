@@ -105,6 +105,15 @@ struct MyDataModelTests {
         #expect(!model.isBusy)
     }
 
+    @Test func everyFailedExportCountsAsAFailure() async {
+        let model = model(exporter: ScriptedExporter(failing: true))
+
+        await model.exportJSON()
+        await model.exportCSV()
+
+        #expect(model.failureCount == 2, "La même erreur deux fois : deux annonces")
+    }
+
     @Test func cloudTextCoversEveryStatus() {
         #expect(MyDataModel.cloudText(.noAccount) == "Aucun compte iCloud : tes données restent sur ce téléphone.")
         #expect(MyDataModel.cloudText(.restricted) == "Le compte iCloud est restreint : la synchronisation est coupée.")

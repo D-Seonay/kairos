@@ -55,13 +55,11 @@ struct HevyMappingRow: View {
     }
 
     private var counts: String {
-        let sessions = String(localized: "\(summary.sessionCount) séances", bundle: .module)
-        let sets = String(localized: "\(summary.setCount) séries", bundle: .module)
-        return String(localized: "\(sessions) · \(sets)", bundle: .module)
+        TrainText.mappingCounts(sessions: summary.sessionCount, sets: summary.setCount)
     }
 
     private var accessibilityText: String {
-        let review = needsReview ? String(localized: ", à vérifier", bundle: .module) : ""
-        return String(localized: "\(summary.name), \(counts). Choix : \(choiceLabel)\(review)", bundle: .module)
+        TrainText.mappingRowSpoken(name: summary.name, sessions: summary.sessionCount, sets: summary.setCount,
+                                   choice: choiceLabel, needsReview: needsReview)
     }
 }

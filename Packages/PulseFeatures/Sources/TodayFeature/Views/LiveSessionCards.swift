@@ -16,7 +16,8 @@ struct DoneSessionCard: View {
                     .font(.subheadline.weight(.semibold).monospacedDigit())
                     .foregroundStyle(PulsePalette.text)
             }
-            .accessibilityElement(children: .combine)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(card.spokenLabel)
             .accessibilityIdentifier(TodayIdentifiers.sessionDone)
         }
         .frame(maxWidth: .infinity, alignment: .leading)

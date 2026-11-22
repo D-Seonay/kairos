@@ -33,5 +33,7 @@ struct OtherWidgetsContentTests {
         #expect(content.timingText == "Demain · 8:00")
         #expect(content.activeZone == 2)
         #expect(content.inlineText == "Endurance 45 min · Demain · 8:00")
+        #expect(content.accessibilityLabel == "Prochaine séance : Demain, 8 heures, Endurance 45 minutes, "
+            + "zone 2, 5 minutes 45 à 6 minutes 5 par kilomètre")
     }
 }

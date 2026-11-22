@@ -11,6 +11,8 @@ public final class ProfileModel {
     public private(set) var body: BodyOverview?
     public private(set) var errorMessage: String?
     public private(set) var hasLoaded = false
+    /// Une lecture ratée de plus : la même erreur revue est annoncée à nouveau.
+    public private(set) var failureCount = 0
 
     @ObservationIgnored let environment: ProfileEnvironment
     /// Prévient l'app qu'un réglage a réécrit le profil (thème, prénom) ; appelé par les écrans poussés depuis la page.
@@ -52,6 +54,7 @@ public final class ProfileModel {
                 errorMessage = nil
             } catch {
                 errorMessage = String(localized: "Pulse n'a pas pu lire ton profil.", bundle: .module)
+                failureCount += 1
             }
         } while needsReload
         hasLoaded = true

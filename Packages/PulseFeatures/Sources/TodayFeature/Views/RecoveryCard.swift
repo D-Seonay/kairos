@@ -10,6 +10,8 @@ struct RecoveryCard: View {
     let score: TodayScore?
     let factors: [FactorDisplay]
     let marker: String?
+    /// Le marqueur tel que VoiceOver le dit (« estimé », « en calibration, 9 nuits »).
+    var spokenMarker: String?
     var onWhy: () -> Void = {}
 
     var body: some View {
@@ -31,7 +33,9 @@ struct RecoveryCard: View {
         OpalCard(heat: recovery.score) {
             VStack(spacing: 16) {
                 CardHeader(title: String(localized: "Récupération", bundle: .module), category: recovery.category, marker: marker)
-                RecoveryGauge(score: recovery.score, category: recovery.category, style: .large)
+                // La jauge dit aussi la catégorie et le marqueur : la pastille de l'en-tête n'est pas relue.
+                RecoveryGauge(score: recovery.score, category: recovery.category, style: .large,
+                              accessibilityLabel: RecoveryCardText.gaugeLabel(recovery: recovery, marker: spokenMarker))
                     .frame(maxWidth: .infinity)
                     .accessibilityAddTraits(.isStaticText)
                     .accessibilityIdentifier(TodayIdentifiers.score)
@@ -112,7 +116,9 @@ private struct CardHeader: View {
     @ViewBuilder
     private var badge: some View {
         if let category {
+            // La jauge de la carte dit déjà la catégorie et le marqueur.
             CategoryBadge(category: category, marker: marker, onOpal: true)
+                .accessibilityHidden(true)
         }
     }
 }
@@ -140,13 +146,14 @@ private struct WhyLink: View {
     }
 }
 
-/// Sommeil, variabilité, FC repos : côte à côte, empilées aux tailles d'accessibilité.
+/// Sommeil, variabilité, FC repos : côte à côte, empilées dès les grandes tailles de texte (xxLarge) : trois colonnes ne
+/// tiennent plus sans tronquer « Variabilité ».
 private struct FactorColumns: View {
     let factors: [FactorDisplay]
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        let layout = dynamicTypeSize.isAccessibilitySize
+        let layout = dynamicTypeSize >= .xxLarge
             ? AnyLayout(VStackLayout(alignment: .leading, spacing: 14))
             : AnyLayout(HStackLayout(alignment: .top, spacing: 8))
         layout {
@@ -160,8 +167,7 @@ private struct FactorColumns: View {
         VStack(alignment: .leading, spacing: 2) {
             Text(factor.title)
                 .pulseEyebrow(PulsePalette.opalMuted)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
+                .fixedSize(horizontal: false, vertical: true)
             Text(factor.value)
                 .font(PulseFont.value(.title2, weight: .regular))
                 .foregroundStyle(factor.isMissing ? PulsePalette.opalMuted : PulsePalette.opalInk)
@@ -171,6 +177,7 @@ private struct FactorColumns: View {
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(factor.accessibilityLabel)
     }
 }

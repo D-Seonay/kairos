@@ -21,6 +21,7 @@ public struct HistoryView: View {
                 list
             } else {
                 ProgressView()
+                    .accessibilityLabel(String(localized: "Chargement de l'historique", bundle: .module))
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
@@ -34,6 +35,7 @@ public struct HistoryView: View {
         } message: {
             Text(String(localized: "Tes séances Pulse restent. Tes records sont recalculés.", bundle: .module))
         }
+        .pulseAnnounceError(errorMessage ?? model.errorMessage)
         .task { await model.load() }
     }
 
@@ -59,7 +61,7 @@ public struct HistoryView: View {
                 Section {
                     ForEach(month.sessions) { line in
                         NavigationLink(value: TrainDestination.session(line.id)) {
-                            HistoryRow(line: line, dateText: model.dateText(line.date))
+                            HistoryRow(line: line, dateText: model.dateText(line.date), spokenDateText: model.spokenDateText(line.date))
                         }
                         .accessibilityIdentifier(TrainIdentifiers.historyRowPrefix + line.id.uuidString)
                     }

@@ -36,6 +36,10 @@ public final class WeightModel {
     public private(set) var overview: BodyOverview?
     /// Les erreurs de l'écran : lecture, suppression.
     public private(set) var errorMessage: String?
+    /// Un échec de l'écran de plus (lecture, suppression) : la même erreur revue est annoncée à nouveau.
+    public private(set) var failureCount = 0
+    /// Un échec de la feuille de plus : le poids refusé deux fois de suite est annoncé deux fois.
+    public private(set) var editorFailureCount = 0
     /// Les erreurs de la feuille (poids refusé, date à venir, écriture ratée), affichées dans la feuille.
     public private(set) var editorError: String?
     public private(set) var hasLoaded = false
@@ -50,9 +54,9 @@ public final class WeightModel {
         self.onChanged = onChanged
     }
 
-    /// « Entre un poids entre 20 et 400 kg. »
+    /// « Entre un poids entre 20 et 400 kilos. »
     static var invalidWeightMessage: String {
-        String(localized: "Entre un poids entre 20 et 400 kg.", bundle: .module)
+        String(localized: "Entre un poids entre 20 et 400 kilos.", bundle: .module)
     }
 
     /// Relit les pesées. Une lecture qui échoue garde l'affichage précédent et le dit.
@@ -62,6 +66,7 @@ public final class WeightModel {
             errorMessage = nil
         } catch {
             errorMessage = String(localized: "Pulse n'a pas pu lire tes pesées.", bundle: .module)
+            failureCount += 1
         }
         hasLoaded = true
     }
@@ -97,11 +102,11 @@ public final class WeightModel {
     public func save() async {
         guard let draft = editor, !isSaving else { return }
         guard let weight = draft.weightKg, BodyService.weightRange.contains(weight) else {
-            editorError = Self.invalidWeightMessage
+            failEditor(Self.invalidWeightMessage)
             return
         }
         guard draft.date <= environment.now() else {
-            editorError = String(localized: "Choisis une date passée.", bundle: .module)
+            failEditor(String(localized: "Choisis une date passée.", bundle: .module))
             return
         }
         isSaving = true
@@ -118,10 +123,10 @@ public final class WeightModel {
                 try await environment.body.addManual(weightKg: weight, date: draft.date)
             }
         } catch BodyServiceError.invalidWeight {
-            editorError = Self.invalidWeightMessage
+            failEditor(Self.invalidWeightMessage)
             return
         } catch {
-            editorError = String(localized: "Pulse n'a pas pu enregistrer ta pesée.", bundle: .module)
+            failEditor(String(localized: "Pulse n'a pas pu enregistrer ta pesée.", bundle: .module))
             return
         }
         editorError = nil
@@ -137,9 +142,15 @@ public final class WeightModel {
             try await environment.body.deleteManual(id: measurement.id)
         } catch {
             errorMessage = String(localized: "Pulse n'a pas pu supprimer la pesée.", bundle: .module)
+            failureCount += 1
             return
         }
         await load()
         await onChanged()
+    }
+
+    private func failEditor(_ message: String) {
+        editorError = message
+        editorFailureCount += 1
     }
 }

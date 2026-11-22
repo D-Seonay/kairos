@@ -82,4 +82,13 @@ struct WelcomeView: View {
         WelcomeView(model: OnboardingPreviewSupport.model(step: .welcome))
     }
 }
+
+#Preview("Bienvenue, accessibilité XL") {
+    ZStack {
+        PulsePalette.background.ignoresSafeArea()
+        AuraBackground().ignoresSafeArea()
+        WelcomeView(model: OnboardingPreviewSupport.model(step: .welcome))
+    }
+    .dynamicTypeSize(.accessibility3)
+}
 #endif

@@ -12,6 +12,7 @@ public struct PlanningView: View {
     private let onStartSession: (SessionLaunch) -> Void
     private let onResumeSession: () -> Void
     @State private var path: [PlanningDestination] = []
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// `train` donne la séance du jour ajustée au score et son lancement, comme l'onglet Séance ; `onStartSession` démarre la
     /// séance rendue ; `onResumeSession` rouvre celle en cours.
@@ -64,13 +65,15 @@ public struct PlanningView: View {
                         .font(.footnote)
                         .foregroundStyle(PulsePalette.bad)
                 }
+                // Sept colonnes ne tiennent pas au-delà de `xxxLarge`, et la liste « Cette semaine » donne les mêmes jours en grand.
                 WeekStrip(model: model) { day in
                     if let destination = model.destination(for: day) {
                         path.append(destination)
                     } else {
-                        withAnimation { proxy.scrollTo(day.id, anchor: .center) }
+                        PulseMotion.perform(.default, reduceMotion: reduceMotion) { proxy.scrollTo(day.id, anchor: .center) }
                     }
                 }
+                .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                 if let today = model.today {
                     TodayPlanCard(model: model, train: train, day: today, onStart: start, onResume: onResumeSession)
                 }
@@ -80,6 +83,7 @@ public struct PlanningView: View {
             .padding(PulseMetrics.spacing)
         }
         .refreshable { await refresh() }
+        .pulseAnnounceError(model.errorMessage)
     }
 
     private var header: some View {
@@ -115,18 +119,23 @@ public struct PlanningView: View {
         }
     }
 
+    @ViewBuilder
     private var monthEntry: some View {
-        Button { path.append(.month) } label: {
+        let button = Button { path.append(.month) } label: {
             PulseRow(systemImage: "flame", title: String(localized: "Mois et série", bundle: .module), detail: streakText)
         }
         .buttonStyle(PressableButtonStyle())
         .accessibilityIdentifier(PlanningIdentifiers.month)
+        if let streak = model.streak, let week = streak.currentWeek {
+            button.accessibilityLabel(PlanningText.monthEntrySpoken(weeks: streak.streak, count: week.count, target: week.target))
+        } else {
+            button
+        }
     }
 
     private var streakText: String {
         guard let streak = model.streak, let week = streak.currentWeek else { return "" }
-        let weeks = String(localized: "Série de \(streak.streak) semaines", bundle: .module)
-        return String(localized: "\(weeks) · \(week.count) sur \(week.target) cette semaine", bundle: .module)
+        return PlanningText.streakRow(weeks: streak.streak, count: week.count, target: week.target)
     }
 
     /// Lance la séance du jour de l'onglet Séance ; avec une séance déjà en cours, la rouvre.

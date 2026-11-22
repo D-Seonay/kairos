@@ -14,7 +14,18 @@ public struct RoutineEditorView: View {
     @State private var confirmsDiscard = false
     @State private var isSaving = false
     @State private var errorMessage: String?
+    /// Vrai quand l'aperçu veut le premier exercice déplié à l'ouverture.
+    private var expandsFirstExercise = false
     @Environment(\.dismiss) private var dismiss
+
+    #if DEBUG
+    /// La même vue, avec son premier exercice déplié : pour les aperçus.
+    func expandingFirstExercise(_ expands: Bool) -> RoutineEditorView {
+        var copy = self
+        copy.expandsFirstExercise = expands
+        return copy
+    }
+    #endif
 
     /// Le modèle est gardé par l'écran : le premier reçu l'emporte, comme le veut `@State`.
     public init(model: RoutineEditorModel) {
@@ -35,6 +46,7 @@ public struct RoutineEditorView: View {
                 loadFailure(message)
             } else {
                 ProgressView()
+                    .accessibilityLabel(String(localized: "Chargement de la routine", bundle: .module))
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
@@ -67,7 +79,11 @@ public struct RoutineEditorView: View {
                     }
             }
         }
-        .task { await model.load() }
+        .pulseAnnounceError(errorMessage ?? model.errorMessage)
+        .task {
+            await model.load()
+            if expandsFirstExercise { expanded = model.day.exercises.first?.id }
+        }
     }
 
     /// La lecture a échoué : le message et de quoi réessayer, plutôt qu'un indicateur sans fin.
@@ -93,6 +109,7 @@ public struct RoutineEditorView: View {
                 Text(summary)
                     .font(.footnote)
                     .foregroundStyle(PulsePalette.text2)
+                    .accessibilityLabel(spokenSummary)
             }
             .listRowBackground(PulsePalette.surface)
             Section {
@@ -125,12 +142,15 @@ public struct RoutineEditorView: View {
     private var header: some View {
         HStack {
             Text(String(localized: "Exercices", bundle: .module))
+                .accessibilityAddTraits(.isHeader)
             Spacer()
             if model.day.exercises.count > 1 {
                 Button(isReordering ? String(localized: "OK", bundle: .module) : String(localized: "Ordonner", bundle: .module)) {
                     isReordering.toggle()
                 }
                 .textCase(nil)
+                .accessibilityLabel(isReordering ? String(localized: "Terminer le réordonnancement", bundle: .module)
+                                        : String(localized: "Réordonner les exercices", bundle: .module))
                 .frame(minHeight: 44)
             }
         }
@@ -146,8 +166,12 @@ public struct RoutineEditorView: View {
 
     /// « 5 exercices · ~ 55 min ».
     private var summary: String {
-        [String(localized: "\(model.day.exercises.count) exercices", bundle: .module),
-         String(localized: "~ \(model.estimatedMinutes) min", bundle: .module)].joined(separator: " · ")
+        TrainText.editorSummary(exerciseCount: model.day.exercises.count, estimatedMinutes: model.estimatedMinutes)
+    }
+
+    /// « 5 exercices, environ 55 minutes ».
+    private var spokenSummary: String {
+        TrainText.editorSummarySpoken(exerciseCount: model.day.exercises.count, estimatedMinutes: model.estimatedMinutes)
     }
 
     // MARK: - Actions

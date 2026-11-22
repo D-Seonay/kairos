@@ -124,12 +124,12 @@ let package = Package(
         ),
         .testTarget(
             name: "ProfileFeatureTests",
-            dependencies: ["ProfileFeature", "PulseServices", domain, content],
+            dependencies: ["ProfileFeature", "PulseServices", designSystem, domain, content],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(
             name: "StatsFeatureTests",
-            dependencies: ["StatsFeature", "PulseServices", domain, content],
+            dependencies: ["StatsFeature", "PulseServices", designSystem, domain, content],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(
@@ -139,7 +139,7 @@ let package = Package(
         ),
         .testTarget(
             name: "TodayFeatureTests",
-            dependencies: ["TodayFeature", "PulseServices", "CheckInFeature", domain, recoveryEngine, content],
+            dependencies: ["TodayFeature", "PulseServices", "CheckInFeature", domain, recoveryEngine, content, designSystem],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(

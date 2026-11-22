@@ -1,6 +1,7 @@
 #if DEBUG
 import Foundation
 import PulseContent
+import PulseDesignSystem
 import PulseDomain
 import PulseRecoveryEngine
 import PulseServices
@@ -146,8 +147,59 @@ private struct LivePreviewHost: View {
     LivePreviewHost(scenario: .past)
 }
 
+/// Prépare une séance neuve puis affiche une feuille ou un panneau de l'écran dessus.
+private struct LiveSheetPreviewHost<Content: View>: View {
+    @ViewBuilder let content: (LiveSessionModel) -> Content
+    @State private var model: LiveSessionModel?
+
+    var body: some View {
+        Group {
+            if let model {
+                content(model)
+            } else {
+                ProgressView()
+            }
+        }
+        .task { model = await LivePreviewSupport.model(.fresh) }
+        .preferredColorScheme(.dark)
+    }
+}
+
 #Preview("Accessibilité XL") {
     LivePreviewHost(scenario: .keypad)
         .dynamicTypeSize(.accessibility3)
+}
+
+#Preview("Repos en cours, accessibilité XL") {
+    LivePreviewHost(scenario: .resting)
+        .dynamicTypeSize(.accessibility3)
+}
+
+#Preview("RPE, accessibilité XL") {
+    // Comme dans l'écran : les pilules s'arrêtent à `accessibility1`.
+    VStack {
+        Spacer()
+        RPEPicker(title: RPEPicker.title(exercise: "Développé couché", setIndex: 1),
+                  spokenTitle: RPEPicker.spokenTitle(exercise: "Développé couché", setIndex: 1),
+                  selection: 7.5, onSelect: { _ in }, onClose: {})
+            .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+    }
+    .background(PulsePalette.liveBackground)
+    .dynamicTypeSize(.accessibility3)
+    .preferredColorScheme(.dark)
+}
+
+#Preview("Disques, accessibilité XL") {
+    LiveSheetPreviewHost { model in
+        PlateCalculatorSheet(model: model, exerciseID: model.session.exercises[0].id)
+    }
+    .dynamicTypeSize(.accessibility3)
+}
+
+#Preview("Remplacer, accessibilité XL") {
+    LiveSheetPreviewHost { model in
+        ReplaceExerciseSheet(model: model, exercise: model.session.exercises[0])
+    }
+    .dynamicTypeSize(.accessibility3)
 }
 #endif

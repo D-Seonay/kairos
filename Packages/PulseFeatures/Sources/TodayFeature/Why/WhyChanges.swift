@@ -39,7 +39,9 @@ enum WhyChanges {
             return Change(pill: cap, title: title, detail: detail)
         case .rest:
             let extra = adjustment.value.map { "+" + PulseFormat.integer($0, unit: nil) } ?? "+"
-            return Change(pill: extra, title: title, detail: longerRest(adjusted: adjusted, original: original, directory: directory))
+            return Change(pill: extra, title: title,
+                          detail: longerRest(adjusted: adjusted, original: original, directory: directory),
+                          spokenDetail: longerRest(adjusted: adjusted, original: original, directory: directory, spoken: true))
         case .replaceWithMobility:
             let minutes = PulseFormat.integer(adjustment.value ?? Double(SessionAdjuster.mobilityMinutes), unit: nil)
             return Change(pill: minutes, title: title,
@@ -75,11 +77,13 @@ enum WhyChanges {
     }
 
     /// « 2 min 45 au lieu de 2 min sur A. » : le premier exercice de la séance.
-    private static func longerRest(adjusted: AdjustedSession, original: RoutineDay, directory: ExerciseDirectory) -> String? {
+    /// `spoken` : « 2 minutes 45 au lieu de 2 minutes sur A. » (les unités en toutes lettres).
+    private static func longerRest(adjusted: AdjustedSession, original: RoutineDay, directory: ExerciseDirectory,
+                                   spoken: Bool = false) -> String? {
         guard let first = adjusted.day.exercises.min(by: { $0.order < $1.order }),
               let before = original.exercises.first(where: { $0.id == first.id }) else { return nil }
-        let new = PulseFormat.restDuration(seconds: first.restSeconds)
-        let old = PulseFormat.restDuration(seconds: before.restSeconds)
+        let new = spoken ? PulseSpoken.duration(seconds: first.restSeconds) : PulseFormat.restDuration(seconds: first.restSeconds)
+        let old = spoken ? PulseSpoken.duration(seconds: before.restSeconds) : PulseFormat.restDuration(seconds: before.restSeconds)
         let name = SessionPlanLine.name(of: first.exercise, directory: directory)
         return String(localized: "\(new) au lieu de \(old) sur \(name).", bundle: .module)
     }

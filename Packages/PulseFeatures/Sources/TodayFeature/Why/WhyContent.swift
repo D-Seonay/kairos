@@ -1,4 +1,5 @@
 import Foundation
+import PulseDesignSystem
 import PulseDomain
 import PulseServices
 
@@ -10,12 +11,27 @@ struct WhyContent: Equatable, Sendable {
         var pill: String
         var title: String
         var detail: String?
+        /// Le détail tel que VoiceOver le dit quand il diffère de l'affiché (« 2 minutes 45 au lieu de 2 minutes … »).
+        var spokenDetail: String?
+
+        /// « Titre, détail » : la rangée lue d'un tenant, la pastille tue.
+        var accessibilityLabel: String {
+            guard let detail = spokenDetail ?? detail else { return title }
+            return String(localized: "\(title), \(detail)", bundle: .module)
+        }
     }
 
     /// Un signal du score et sa valeur de 0 à 100 : une mesure de la nuit, ou une réponse du check-in.
     struct Signal: Equatable, Sendable {
         var title: String
         var score: Int
+        /// Le titre tel que VoiceOver le dit quand il diffère de l'affiché (« Fréquence cardiaque au repos » pour « FC au repos »).
+        var spokenTitle: String?
+
+        /// « Sommeil, 56 sur 100 ».
+        var accessibilityLabel: String {
+            String(localized: "\(spokenTitle ?? title), \(PulseSpoken.outOf(score, 100))", bundle: .module)
+        }
     }
 
     /// Où en est la séance de la carte : à démarrer, en cours (le bouton la reprend) ou faite (plus de bouton ni de charges du jour).
@@ -36,6 +52,8 @@ struct WhyContent: Equatable, Sendable {
     }
 
     var reading: String
+    /// La lecture avec les unités dites en toutes lettres, pour VoiceOver.
+    var spokenReading: String
     var changes: [Change]
     var signals: [Signal]
     var formula: String
@@ -51,6 +69,7 @@ struct WhyContent: Equatable, Sendable {
         let signals = WhySignals.make(recovery: recovery, checkIn: checkIn)
         return WhyContent(
             reading: WhyReading.make(recovery: recovery, session: session),
+            spokenReading: WhyReading.spokenText(recovery: recovery, session: session),
             changes: WhyChanges.make(recovery: recovery, session: session, directory: directory,
                                      loadAdjustments: progress == .done ? nil : loadAdjustments, listsLoads: progress != .done),
             signals: signals.signals,

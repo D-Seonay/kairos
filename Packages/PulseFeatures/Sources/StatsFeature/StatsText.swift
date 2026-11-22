@@ -5,7 +5,7 @@ import PulseServices
 /// Les formats français des cinq vues Stats : `PulseFormat` pour les nombres et les durées, les temps de course en plus.
 enum StatsText {
     /// Une valeur impossible à afficher (non finie, négative) donne « — », comme `PulseFormat`.
-    private static let dash = "\u{2014}"
+    static let dash = "\u{2014}"
 
     /// « 2 140 », « 91 200 » : milliers séparés d'une espace fine insécable, sans décimale (comme `PlanningText.tonnage`).
     static func number(_ value: Double) -> String {

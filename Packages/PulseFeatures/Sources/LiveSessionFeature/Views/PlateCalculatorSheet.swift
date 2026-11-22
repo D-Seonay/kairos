@@ -17,7 +17,9 @@ struct PlateCalculatorSheet: View {
     @State private var plates: Set<Double> = []
     @State private var hasLoaded = false
     @State private var saveFailed = false
+    @ScaledMetric(relativeTo: .largeTitle) private var scoreSize: CGFloat = 52
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         NavigationStack {
@@ -72,22 +74,35 @@ struct PlateCalculatorSheet: View {
         }
     }
 
+    private func result(for load: Double) -> PlateResult {
+        PlateCalculator.load(targetKg: load, barKg: barKg ?? 20, availablePlatesKg: Array(plates))
+    }
+
+    /// Applique une charge aux séries restantes, puis dit la nouvelle charge et ses disques.
+    private func apply(_ load: Double, exercise: LiveExercise) async {
+        await model.setRemainingLoad(load, exercise: exercise.id)
+        guard let updated = self.exercise, let current = currentLoad(of: updated) else { return }
+        PulseAnnouncement.post(Self.loadAnnouncement(load: current, result: result(for: current)))
+    }
+
     @ViewBuilder
     private func loaded(_ load: Double, exercise: LiveExercise) -> some View {
-        let result = PlateCalculator.load(targetKg: load, barKg: barKg ?? 20, availablePlatesKg: Array(plates))
-        HStack(alignment: .center, spacing: 12) {
-            stepButton(systemImage: "minus", label: String(localized: "Moins 2,5 kilos", bundle: .module)) {
-                Task { await model.setRemainingLoad(max(0, load - Self.step), exercise: exercise.id) }
+        let result = result(for: load)
+        if typeSize.isAccessibilitySize {
+            // La charge au-dessus, les deux boutons dessous : la valeur garde toute la largeur.
+            VStack(spacing: 12) {
+                loadText(load)
+                HStack(spacing: 12) {
+                    minusButton(load, exercise: exercise)
+                    Spacer()
+                    plusButton(load, exercise: exercise)
+                }
             }
-            Text(verbatim: "\(PulseFormat.decimal(load, maxFractionDigits: 2)) kg")
-                .font(PulseFont.score(size: 52))
-                .contentTransition(.numericText(value: load))
-                .animation(.snappy, value: load)
-                .frame(maxWidth: .infinity)
-                .accessibilityLabel(String(localized: "Charge \(PulseFormat.decimal(load, maxFractionDigits: 2)) kilos",
-                                           bundle: .module))
-            stepButton(systemImage: "plus", label: String(localized: "Plus 2,5 kilos", bundle: .module)) {
-                Task { await model.setRemainingLoad(load + Self.step, exercise: exercise.id) }
+        } else {
+            HStack(alignment: .center, spacing: 12) {
+                minusButton(load, exercise: exercise)
+                loadText(load)
+                plusButton(load, exercise: exercise)
             }
         }
         switch result {
@@ -97,6 +112,7 @@ struct PlateCalculatorSheet: View {
             Text(Self.perSideText(loading))
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(PulsePalette.text)
+                .accessibilityLabel(Self.perSideSpokenText(loading))
         case .approximate(let lower, let upper):
             PlateBarDiagram(perSide: (lower ?? upper)?.perSide ?? [])
                 .frame(height: 120)
@@ -106,15 +122,39 @@ struct PlateCalculatorSheet: View {
             HStack(spacing: 8) {
                 ForEach([lower, upper].compactMap { $0 }, id: \.totalKg) { choice in
                     Button(String(localized: "\(PulseFormat.decimal(choice.totalKg, maxFractionDigits: 2)) kg", bundle: .module)) {
-                        Task { await model.setRemainingLoad(choice.totalKg, exercise: exercise.id) }
+                        Task { await apply(choice.totalKg, exercise: exercise) }
                     }
                     .buttonStyle(PillButtonStyle())
+                    .accessibilityLabel(Self.choiceSpokenText(choice))
                 }
             }
         }
         Text(String(localized: "La charge s'applique aux séries restantes de l'exercice.", bundle: .module))
             .font(.caption)
             .foregroundStyle(PulsePalette.muted)
+    }
+
+    private func loadText(_ load: Double) -> some View {
+        Text(verbatim: "\(PulseFormat.decimal(load, maxFractionDigits: 2)) kg")
+            .font(PulseFont.score(size: scoreSize))
+            .lineLimit(1)
+            .minimumScaleFactor(0.5)
+            .pulseNumericTransition(value: load)
+            .pulseAnimation(.snappy, value: load)
+            .frame(maxWidth: .infinity)
+            .accessibilityLabel(Self.loadSpokenText(load))
+    }
+
+    private func minusButton(_ load: Double, exercise: LiveExercise) -> some View {
+        stepButton(systemImage: "minus", label: String(localized: "Moins 2,5 kilos", bundle: .module)) {
+            Task { await apply(max(0, load - Self.step), exercise: exercise) }
+        }
+    }
+
+    private func plusButton(_ load: Double, exercise: LiveExercise) -> some View {
+        stepButton(systemImage: "plus", label: String(localized: "Plus 2,5 kilos", bundle: .module)) {
+            Task { await apply(load + Self.step, exercise: exercise) }
+        }
     }
 
     private func stepButton(systemImage: String, label: String, action: @escaping () -> Void) -> some View {
@@ -132,23 +172,77 @@ struct PlateCalculatorSheet: View {
         return String(localized: "Par côté : \(plates) kg", bundle: .module)
     }
 
+    /// « Par côté : 25 kilos, 15 kilos et 1,25 kilo » ; « Barre seule ».
+    nonisolated static func perSideSpokenText(_ loading: PlateLoading) -> String {
+        guard let plates = spokenPlates(loading) else { return String(localized: "Barre seule", bundle: .module) }
+        return String(localized: "Par côté : \(plates)", bundle: .module)
+    }
+
+    /// « Appliquer 90 kilos, par côté 25 kilos et 10 kilos » : un choix de charge faisable.
+    nonisolated static func choiceSpokenText(_ loading: PlateLoading) -> String {
+        let total = PulseSpoken.kilos(loading.totalKg)
+        guard let plates = spokenPlates(loading) else {
+            return String(localized: "Appliquer \(total), barre seule", bundle: .module)
+        }
+        return String(localized: "Appliquer \(total), par côté \(plates)", bundle: .module)
+    }
+
+    /// « Charge 62,5 kilos ».
+    nonisolated static func loadSpokenText(_ load: Double) -> String {
+        String(localized: "Charge \(PulseSpoken.kilos(load))", bundle: .module)
+    }
+
+    /// Dit après ±2,5 kg ou un choix : « 70 kilos. Par côté : 20 kilos et 5 kilos » ; « 71 kilos. Impossible tout juste avec
+    /// tes disques ».
+    nonisolated static func loadAnnouncement(load: Double, result: PlateResult) -> String {
+        let total = PulseSpoken.kilos(load)
+        switch result {
+        case .exact(let loading):
+            return String(localized: "\(total). \(perSideSpokenText(loading))", bundle: .module)
+        case .approximate:
+            return String(localized: "\(total). Impossible tout juste avec tes disques", bundle: .module)
+        }
+    }
+
+    /// « 2,5 kilos » : une pilule de barre ou de disque.
+    nonisolated static func plateSpokenText(_ kg: Double) -> String {
+        PulseSpoken.kilos(kg)
+    }
+
+    /// « 25 kilos, 15 kilos et 1,25 kilo » ; `nil` pour la barre seule.
+    private nonisolated static func spokenPlates(_ loading: PlateLoading) -> String? {
+        let plates = loading.perSide.map(PulseSpoken.kilos)
+        guard let last = plates.last else { return nil }
+        guard plates.count > 1 else { return last }
+        let head = plates.dropLast().joined(separator: ", ")
+        return String(localized: "\(head) et \(last)", bundle: .module)
+    }
+
     // MARK: Barre et disques
 
     private var settings: some View {
         VStack(alignment: .leading, spacing: 12) {
             PulseSectionHeader(String(localized: "Barre et disques", bundle: .module))
             Text(String(localized: "Barre", bundle: .module)).pulseEyebrow()
-            ChoicePills(options: Self.barChoices.map { ($0, Self.kilos($0)) }, selection: $barKg)
+            ChoicePills(options: Self.barChoices.map { ($0, Self.kilos($0)) }, selection: $barKg,
+                        groupLabel: String(localized: "Barre", bundle: .module), spokenLabel: { Self.plateSpokenText($0) })
             Text(String(localized: "Disques disponibles", bundle: .module)).pulseEyebrow()
-            MultiChoicePills(options: Self.plateChoices.map { ($0, Self.kilos($0)) }, selection: $plates)
-            if saveFailed {
-                Text(String(localized: "Pulse n'a pas pu enregistrer ta barre et tes disques.", bundle: .module))
+            MultiChoicePills(options: Self.plateChoices.map { ($0, Self.kilos($0)) }, selection: $plates,
+                             groupLabel: String(localized: "Disques disponibles", bundle: .module),
+                             spokenLabel: { Self.plateSpokenText($0) })
+            if let message = saveFailureMessage {
+                Text(message)
                     .font(.footnote)
                     .foregroundStyle(PulsePalette.bad)
             }
         }
+        .pulseAnnounceError(saveFailureMessage)
         .onChange(of: barKg) { save() }
         .onChange(of: plates) { save() }
+    }
+
+    private var saveFailureMessage: String? {
+        saveFailed ? String(localized: "Pulse n'a pas pu enregistrer ta barre et tes disques.", bundle: .module) : nil
     }
 
     private static func kilos(_ value: Double) -> String {

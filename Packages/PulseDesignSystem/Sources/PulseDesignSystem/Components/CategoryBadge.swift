@@ -8,6 +8,7 @@ public struct CategoryBadge: View {
     private let category: RecoveryCategory
     private let marker: String?
     let onOpal: Bool
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     public init(category: RecoveryCategory, marker: String? = nil, onOpal: Bool = false) {
         self.category = category
@@ -24,15 +25,29 @@ public struct CategoryBadge: View {
                 .textCase(.uppercase)
                 .tracking(1)
                 .foregroundStyle(category.tone == .critical ? color : PulsePalette.text)
-                .lineLimit(1)
+                // Le nom et son marqueur sont une valeur d'état : ils passent à la ligne au lieu d'être tronqués.
+                .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.leading, 9)
         .padding(.trailing, 11)
         .frame(minHeight: 26)
-        .background(PulsePalette.opal.opacity(0.85), in: Capsule())
-        .overlay(Capsule().strokeBorder(color.opacity(0.32), lineWidth: 1))
+        .background { chrome(color: color) }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(text)
+    }
+
+    /// Une capsule sur une ligne ; un rectangle arrondi quand le texte passe à la ligne, pour que les coins n'écrasent pas le texte.
+    @ViewBuilder
+    private func chrome(color: Color) -> some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            RoundedRectangle(cornerRadius: 13)
+                .fill(PulsePalette.opal.opacity(0.85))
+                .overlay(RoundedRectangle(cornerRadius: 13).strokeBorder(color.opacity(0.32), lineWidth: 1))
+        } else {
+            Capsule()
+                .fill(PulsePalette.opal.opacity(0.85))
+                .overlay(Capsule().strokeBorder(color.opacity(0.32), lineWidth: 1))
+        }
     }
 
     private var text: String {
@@ -73,6 +88,17 @@ struct StateMark: View {
     .padding()
     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     .background(PulsePalette.background)
+}
+
+#Preview("Accessibilité 3") {
+    VStack(alignment: .leading, spacing: 10) {
+        CategoryBadge(category: .normal, marker: "En calibration (9 nuits)")
+        CategoryBadge(category: .overreached, marker: "Estimé")
+    }
+    .padding()
+    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    .background(PulsePalette.background)
+    .dynamicTypeSize(.accessibility3)
 }
 
 #Preview("Sur carte opale") {

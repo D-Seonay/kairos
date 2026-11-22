@@ -45,6 +45,24 @@ private func field(_ model: LiveSessionModel, exercise: Int = 0, set: Int, _ kin
     #expect(stored == model.session)
 }
 
+@MainActor @Test func keypadInputIsReportedBeforeTheSaveAndOnlyWhenItChanges() async throws {
+    let fixture = LiveFixture()
+    try await fixture.seedBenchHistory()
+    let model = try await fixture.startedModel()
+    model.focus(field(model, set: 0, .weight))
+    var inputs: [String] = []
+    await model.keypadKey(.digit(7)) { before, after in
+        // Le tampon est déjà à jour, la série pas encore enregistrée.
+        #expect(before == "62,5" && after == "7")
+        #expect(model.session.exercises[0].sets[0].weightKg == 62.5)
+        inputs.append(after)
+    }
+    await model.keypadKey(.next) { _, after in inputs.append(after) }
+    model.focus(field(model, set: 0, .reps))
+    await model.keypadKey(.comma) { _, after in inputs.append(after) }
+    #expect(inputs == ["7"])
+}
+
 @MainActor @Test func keypadKeysEditTheRepsAndTheSeconds() async throws {
     let fixture = LiveFixture()
     let model = try await fixture.startedModel(LiveFixture.plankLaunch)

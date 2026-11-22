@@ -54,6 +54,7 @@ public struct CustomExerciseForm: View {
                     .disabled(!model.canSave || isWorking)
             }
         }
+        .pulseAnnounceError(errorMessage)
         .confirmationDialog(String(localized: "Archiver cet exercice ?", bundle: .module), isPresented: $confirmsArchive,
                             titleVisibility: .visible) {
             Button(String(localized: "Archiver", bundle: .module), role: .destructive) { Task { await archive() } }
@@ -83,7 +84,8 @@ public struct CustomExerciseForm: View {
             .listRowBackground(PulsePalette.surface)
             Section(String(localized: "Muscles secondaires", bundle: .module)) {
                 MultiChoicePills(options: Muscle.allCases.filter { $0 != model.primaryMuscle }.map { ($0, $0.localizedName) },
-                                 selection: $model.secondaryMuscles)
+                                 selection: $model.secondaryMuscles,
+                                 groupLabel: String(localized: "Muscles secondaires", bundle: .module))
                     .padding(.vertical, 4)
             }
             .listRowBackground(PulsePalette.surface)
@@ -113,9 +115,13 @@ public struct CustomExerciseForm: View {
                 Text(String(localized: "Incrément : \(PulseFormat.decimal(model.incrementKg, maxFractionDigits: 2)) kg",
                             bundle: .module))
             }
+            .accessibilityLabel(String(localized: "Incrément de charge", bundle: .module))
+            .accessibilityValue(PulseSpoken.kilos(model.incrementKg))
             Stepper(value: $model.restSeconds, in: 15...600, step: 15) {
                 Text(String(localized: "Repos : \(PulseFormat.restDuration(seconds: model.restSeconds))", bundle: .module))
             }
+            .accessibilityLabel(String(localized: "Repos", bundle: .module))
+            .accessibilityValue(PulseSpoken.duration(seconds: model.restSeconds))
         }
         .listRowBackground(PulsePalette.surface)
     }

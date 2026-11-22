@@ -117,6 +117,7 @@ private struct SessionBadge: View {
 }
 
 /// Mini-carte musculaire, séries, durée, RPE maximum et trois muscles principaux ; empilés aux tailles d'accessibilité.
+/// VoiceOver lit une seule phrase (`SessionSummary.spokenText`) : la carte et les listes visibles sont muettes.
 private struct SessionOverview: View {
     let summary: SessionSummary
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -128,7 +129,7 @@ private struct SessionOverview: View {
         layout {
             MuscleMapView(levels: MuscleIntensity.levels(weights: summary.muscleWeights), label: musclesLabel, height: 110)
             VStack(alignment: .leading, spacing: 6) {
-                Text(statsText)
+                Text(summary.statsText)
                     .font(.subheadline.weight(.semibold).monospacedDigit())
                     .foregroundStyle(PulsePalette.text)
                 if !summary.topMuscles.isEmpty {
@@ -138,18 +139,31 @@ private struct SessionOverview: View {
                 }
             }
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(summary.spokenText)
     }
 
+    /// La carte musculaire dit chaque muscle et son intensité ; la phrase du conteneur la masque, elle reste juste si on la sort.
     private var musclesLabel: String {
-        let names = summary.topMuscles.map(\.localizedName).joined(separator: ", ")
-        return String(localized: "Muscles sollicités : \(names)", bundle: .module)
+        MuscleMapSummary.text(levels: MuscleIntensity.byMuscle(weights: summary.muscleWeights))
     }
 
-    /// « 19 séries · ~ 55 min · RPE max 8 ».
-    private var statsText: String {
-        let sets = String(localized: "\(summary.setCount) séries", bundle: .module)
-        let duration = String(localized: "~ \(PulseFormat.duration(minutes: summary.estimatedMinutes))", bundle: .module)
-        let rpe = PulseFormat.decimal(summary.maxRPE, maxFractionDigits: 1)
-        return [sets, duration, String(localized: "RPE max \(rpe)", bundle: .module)].joined(separator: " · ")
-    }
 }
+
+#if DEBUG
+#Preview("Séance, accessibilité 3") {
+    ScrollView {
+        VStack(alignment: .leading, spacing: 16) {
+            StrengthSessionCard(card: StrengthCard(
+                title: "Push", badge: .adjusted,
+                summary: SessionSummary(setCount: 19, estimatedMinutes: 55, maxRPE: 7.5, topMuscles: [.chest, .triceps, .frontDelts],
+                                        muscleWeights: [.chest: 10, .triceps: 6, .frontDelts: 4]),
+                showsWhy: true, originButton: "Séance d'origine", startButton: "Démarrer la séance"),
+                                onWhy: {}, onOrigin: {})
+        }
+        .padding()
+    }
+    .background(PulsePalette.background)
+    .dynamicTypeSize(.accessibility3)
+}
+#endif

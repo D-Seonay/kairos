@@ -4,7 +4,6 @@ import SwiftUI
 /// Le parcours de premier lancement : fond, aura, barre d'étapes et bouton retour, puis l'écran de l'étape courante.
 public struct OnboardingFlowView: View {
     @Bindable private var model: OnboardingModel
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public init(model: OnboardingModel) {
         self.model = model
@@ -19,11 +18,11 @@ public struct OnboardingFlowView: View {
                     header
                     content
                         .id(model.step)
-                        .transition(.opacity)
+                        .pulseTransition(.opacity)
                 }
             }
         }
-        .animation(reduceMotion ? nil : .easeInOut(duration: 0.25), value: model.step)
+        .pulseAnimation(.easeInOut(duration: 0.25), value: model.step)
         .task { await model.start() }
         .task(id: model.step) { await stepDidChange() }
     }

@@ -7,6 +7,7 @@ import SwiftUI
 public struct SupplementsCard: View {
     private let model: SupplementsModel
     private let onOpen: () -> Void
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     public init(model: SupplementsModel, onOpen: @escaping () -> Void) {
         self.model = model
@@ -35,26 +36,54 @@ public struct SupplementsCard: View {
         }
     }
 
+    /// Le titre, l'alerte de stock, le compte et le chevron sur une ligne ; aux tailles d'accessibilité, le titre au-dessus.
     private var header: some View {
-        HStack(spacing: 8) {
-            Label(String(localized: "Compléments", bundle: .module), systemImage: "pills")
-                .pulseEyebrow(PulsePalette.text2)
-            if !model.overview.lowStock.isEmpty {
-                Image(systemName: "exclamationmark.circle.fill")
-                    .foregroundStyle(PulsePalette.bad)
-                    .accessibilityLabel(String(localized: "Stock bas", bundle: .module))
+        let title = Label(String(localized: "Compléments", bundle: .module), systemImage: "pills")
+            .pulseEyebrow(PulsePalette.text2)
+        return Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 8) {
+                    title
+                    HStack(spacing: 8) {
+                        stockAlert
+                        countChip
+                        Spacer(minLength: 8)
+                        RowChevron()
+                    }
+                }
+            } else {
+                HStack(spacing: 8) {
+                    title
+                    stockAlert
+                    Spacer(minLength: 8)
+                    countChip
+                    RowChevron()
+                }
             }
-            Spacer(minLength: 8)
-            if model.overview.dueCount > 0 {
-                Text(model.countText)
-                    .pulseEyebrow(PulsePalette.text)
-                    .padding(.horizontal, 10)
-                    .frame(minHeight: 24)
-                    .overlay(Capsule().strokeBorder(PulsePalette.ink.opacity(0.2), lineWidth: 1))
-            }
-            RowChevron()
         }
         .frame(minHeight: 44)
         .contentShape(Rectangle())
+    }
+
+    @ViewBuilder
+    private var stockAlert: some View {
+        if !model.overview.lowStock.isEmpty {
+            Image(systemName: "exclamationmark.circle.fill")
+                .foregroundStyle(PulsePalette.bad)
+                .accessibilityLabel(String(localized: "Stock bas", bundle: .module))
+        }
+    }
+
+    /// Le compte « 2 sur 5 », dit « 2 sur 5 pris ».
+    @ViewBuilder
+    private var countChip: some View {
+        if model.overview.dueCount > 0 {
+            Text(model.countText)
+                .pulseEyebrow(PulsePalette.text)
+                .padding(.horizontal, 10)
+                .frame(minHeight: 24)
+                .overlay(Capsule().strokeBorder(PulsePalette.ink.opacity(0.2), lineWidth: 1))
+                .accessibilityLabel(SupplementsModel.summarySpoken(taken: model.overview.takenCount, due: model.overview.dueCount))
+        }
     }
 }

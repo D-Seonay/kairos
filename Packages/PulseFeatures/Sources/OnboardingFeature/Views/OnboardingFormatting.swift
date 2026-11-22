@@ -77,6 +77,15 @@ enum ProgramWeekPreview {
 }
 
 extension WeekPreviewDay.Kind {
+    /// Le pictogramme qui double la couleur de l'aperçu : un haltère, un coureur ; `nil` pour un repos, tracé en pointillés.
+    var systemImage: String? {
+        switch self {
+        case .strength: "dumbbell.fill"
+        case .run: "figure.run"
+        case .rest: nil
+        }
+    }
+
     var localizedName: String {
         switch self {
         case .strength: String(localized: "musculation", bundle: .module)
@@ -214,5 +223,71 @@ enum OnboardingCopy {
             return String(localized: "En calibration (\(nights) nuits)", bundle: .module)
         }
         return nil
+    }
+
+    // MARK: - VoiceOver
+
+    /// L'unité d'une mesure saisie, pour la dire après le titre du champ.
+    enum MeasureUnit: Equatable {
+        case centimeters
+        case kilograms
+        case pounds
+
+        init(_ weightUnit: WeightUnit) {
+            self = weightUnit == .lb ? .pounds : .kilograms
+        }
+
+        /// « centimètres », « kilos », « livres ».
+        var spokenName: String {
+            switch self {
+            case .centimeters: String(localized: "centimètres", bundle: .module)
+            case .kilograms: String(localized: "kilos", bundle: .module)
+            case .pounds: String(localized: "livres", bundle: .module)
+            }
+        }
+    }
+
+    /// « Ton score est prêt : 58 sur 100, fatigue modérée », suivi de « estimé » pour un score issu du check-in.
+    static func scoreReadyAnnouncement(recovery: DailyRecovery) -> String {
+        var text = String(localized: "Ton score est prêt : \(scoreSummary(recovery))", bundle: .module)
+        if recovery.isEstimated { text += ", " + estimatedWord }
+        return text
+    }
+
+    /// « Ta récupération ce matin : 58 sur 100, fatigue modérée, estimé » : le titre, la jauge, la catégorie et la pastille
+    /// d'état lus d'un seul élément. Une ligne de base en construction se dit « en calibration, 9 nuits ».
+    static func scoreAccessibility(recovery: DailyRecovery) -> String {
+        var text = String(localized: "Ta récupération ce matin : \(scoreSummary(recovery))", bundle: .module)
+        if recovery.isEstimated {
+            text += ", " + estimatedWord
+        } else if case .calibrating(let nights) = recovery.calibration {
+            let count = PulseSpoken.count(nights, singular: String(localized: "nuit", bundle: .module),
+                                          plural: String(localized: "nuits", bundle: .module))
+            text += ", " + String(localized: "en calibration, \(count)", bundle: .module)
+        }
+        return text
+    }
+
+    /// « Taille, en centimètres », « Poids actuel, en kilos » : l'unité du champ, que l'écran affiche à côté de la saisie.
+    static func measureLabel(title: String, unit: MeasureUnit) -> String {
+        String(localized: "\(title), en \(unit.spokenName)", bundle: .module)
+    }
+
+    /// « 3 séances par semaine » pour la pilule « 3 ».
+    static func sessionsPerWeekLabel(_ count: Int) -> String {
+        let sessions = PulseSpoken.count(count, singular: String(localized: "séance", bundle: .module),
+                                         plural: String(localized: "séances", bundle: .module))
+        return String(localized: "\(sessions) par semaine", bundle: .module)
+    }
+
+    private static var estimatedWord: String {
+        String(localized: "estimé", bundle: .module)
+    }
+
+    /// « 58 sur 100, fatigue modérée » : le score arrondi et borné à 0…100, puis la catégorie en minuscules.
+    private static func scoreSummary(_ recovery: DailyRecovery) -> String {
+        let score = recovery.score.isFinite ? Int(min(max(recovery.score, 0), 100).rounded()) : 0
+        let category = recovery.category.localizedName.lowercased()
+        return String(localized: "\(PulseSpoken.outOf(score, 100)), \(category)", bundle: .module)
     }
 }

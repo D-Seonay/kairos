@@ -164,7 +164,7 @@ struct WhyContentTests {
         let content = try WhyFixture.content(WhyFixture.recovery())
         #expect(content.signals == [
             WhyContent.Signal(title: "Variabilité", score: 59),
-            WhyContent.Signal(title: "FC au repos", score: 58),
+            WhyContent.Signal(title: "FC au repos", score: 58, spokenTitle: "Fréquence cardiaque au repos"),
             WhyContent.Signal(title: "Sommeil", score: 56)
         ])
     }

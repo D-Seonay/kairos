@@ -17,12 +17,16 @@ struct LiveSessionPlannerTests {
         #expect(bench.dayNote == "Même charge, une série en moins, RPE 7,5 max, repos 2:45")
         #expect(bench.lastTimeText == "Dernière fois 60 × 12 · 70 × 5 · 5")
         #expect(bench.sets.map(\.previous) == ["60 × 12", "70 × 5"])
+        #expect(bench.lastTimeSpoken
+                == "Dernière fois : 60 kilos, 12 répétitions, puis 70 kilos, 5 répétitions, puis 5 répétitions")
+        #expect(bench.sets.map(\.previousSpoken) == ["60 kilos, 12 répétitions", "70 kilos, 5 répétitions"])
         #expect(bench.restSeconds == 165 && bench.rpeCap == 7.5)
         #expect(session.appliedAdjustments.map(\.kind) == [.volume, .rpeCap, .rest])
         // Pas d'historique ni de RPE abaissé : seul le repos a changé.
         let pecDeck = session.exercises[1]
         #expect(pecDeck.dayNote == "Repos 1:45" && pecDeck.rpeCap == nil && pecDeck.lastTimeText == nil)
         #expect(pecDeck.sets.map(\.previous) == [nil, nil, nil])
+        #expect(pecDeck.lastTimeSpoken == nil && pecDeck.sets.map(\.previousSpoken) == [nil, nil, nil])
     }
 
     @Test func aNormalDayAddsTheLoadAdjustment() {
@@ -158,6 +162,26 @@ struct LiveSessionPlannerTests {
         #expect(session.exercises[1].sets.map(\.previous) == ["−20 × 8"])
         #expect(session.exercises[2].sets.map(\.previous) == ["45 s"])
         #expect(session.exercises[2].lastTimeText == "Dernière fois 45 s")
+    }
+
+    @Test func spokenPreviousTextsSayTheUnits() {
+        let history = [
+            Fix.pullUp: [Fix.done(Fix.pullUp, 10, 8), Fix.done(Fix.pullUp, 10, 7), Fix.done(Fix.pullUp, nil, 6)],
+            Fix.assistedPullUp: [Fix.done(Fix.assistedPullUp, 20, 1)],
+            Fix.plank: [Fix.done(Fix.plank, nil, nil, seconds: 45)],
+            Fix.pecDeck: [Fix.done(Fix.pecDeck, 1.5, 10)]
+        ]
+        let day = Fix.day([Fix.exercise(Fix.pullUp, order: 0), Fix.exercise(Fix.assistedPullUp, order: 1, sets: 1),
+                          Fix.exercise(Fix.plank, order: 2, sets: 1, reps: 30...60), Fix.exercise(Fix.pecDeck, order: 3, sets: 1)])
+        let session = Fix.session(Fix.launch(day, nil), history: history)
+        #expect(session.exercises[0].sets.map(\.previousSpoken)
+                == ["lest de 10 kilos, 8 répétitions", "lest de 10 kilos, 7 répétitions", "6 répétitions"])
+        #expect(session.exercises[0].lastTimeSpoken
+                == "Dernière fois : lest de 10 kilos, 8 répétitions, puis 7 répétitions, puis sans lest, 6 répétitions")
+        #expect(session.exercises[1].sets.map(\.previousSpoken) == ["assistance de 20 kilos, 1 répétition"])
+        #expect(session.exercises[2].sets.map(\.previousSpoken) == ["45 secondes"])
+        #expect(session.exercises[2].lastTimeSpoken == "Dernière fois : 45 secondes")
+        #expect(session.exercises[3].lastTimeSpoken == "Dernière fois : 1,5 kilo, 10 répétitions")
     }
 
     @Test func decimalsAreFrench() {

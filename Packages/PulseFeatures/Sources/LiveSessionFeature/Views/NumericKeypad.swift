@@ -3,13 +3,16 @@ import PulseDomain
 import SwiftUI
 
 /// Le clavier numérique intégré (spec M4 §14.4), sans clavier système : chiffres, virgule, effacement, −/+ de l'incrément et
-/// « Suivant ». Chaque touche fait 56 pt. La barre du haut dit ce qui est édité, et ferme le clavier.
+/// « Suivant ». Chaque touche fait 56 pt. La barre du haut dit ce qui est édité, et ferme le clavier. À l'ouverture, VoiceOver
+/// se place sur ce titre ; quand le champ change, le nouveau titre est annoncé. L'appelant plafonne sa taille de texte.
 struct NumericKeypad: View {
     let title: String
+    let spokenTitle: String
     let field: KeypadField.Kind
     let increment: Double
     let onKey: (KeypadInput.Key) -> Void
     let onClose: () -> Void
+    @AccessibilityFocusState private var isTitleFocused: Bool
 
     var body: some View {
         VStack(spacing: 6) {
@@ -17,9 +20,11 @@ struct NumericKeypad: View {
                 Text(title)
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(PulsePalette.text2)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+                    .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityLabel(spokenTitle)
+                    .accessibilityAddTraits(.isHeader)
+                    .accessibilityFocused($isTitleFocused)
                 Button(action: onClose) {
                     Image(systemName: "chevron.down")
                         .font(.headline)
@@ -42,7 +47,14 @@ struct NumericKeypad: View {
         .padding(.bottom, 8)
         .background(PulsePalette.surface)
         .accessibilityElement(children: .contain)
+        .accessibilityLabel(spokenTitle)
         .accessibilityIdentifier(LiveSessionIdentifiers.keypad)
+        .pulseAnnounce(spokenTitle)
+        .task {
+            // Le clavier monte du bas : le focus attend la fin de son arrivée.
+            guard (try? await Task.sleep(for: .milliseconds(300))) != nil else { return }
+            isTitleFocused = true
+        }
     }
 
     private func digit(_ value: Int) -> some View {
@@ -125,10 +137,54 @@ extension NumericKeypad {
         return (sign < 0 ? "\u{2212}" : "+") + amount
     }
 
+    /// « Retirer 2,5 kilos », « Ajouter 1 répétition », « Ajouter 5 secondes ».
     nonisolated static func stepSpokenText(for field: KeypadField.Kind, increment: Double, sign: Int) -> String {
-        let amount = PulseFormat.decimal(stepSize(for: field, increment: increment), maxFractionDigits: 2)
+        let size = stepSize(for: field, increment: increment)
+        let amount = switch field {
+        case .weight: LiveSetRow.kilos(size)
+        case .reps: PulseSpoken.repetitions(Int(size))
+        case .duration: LiveSetRow.seconds(Int(size))
+        }
         return sign < 0 ? String(localized: "Retirer \(amount)", bundle: .module)
             : String(localized: "Ajouter \(amount)", bundle: .module)
+    }
+
+    /// « Développé couché, série 2, charge en kilos » : le titre du clavier, dit sans symbole.
+    nonisolated static func spokenTitle(exercise: String, setIndex: Int, field: KeypadField.Kind, loadKind: LoadKind) -> String {
+        let fieldName = switch field {
+        case .weight:
+            switch loadKind {
+            case .external: String(localized: "charge en kilos", bundle: .module)
+            case .bodyweight: String(localized: "lest en kilos", bundle: .module)
+            case .assisted: String(localized: "assistance en kilos", bundle: .module)
+            }
+        case .reps: String(localized: "répétitions", bundle: .module)
+        case .duration: String(localized: "secondes", bundle: .module)
+        }
+        return String(localized: "\(exercise), série \(setIndex + 1), \(fieldName)", bundle: .module)
+    }
+
+    /// La valeur du champ après une touche : « 62,5 kilos », « 8 répétitions », « 45 secondes », « 62 virgule » (virgule en
+    /// attente), « vide ».
+    nonisolated static func valueAnnouncement(field: KeypadField.Kind, text: String) -> String {
+        guard !text.isEmpty else { return String(localized: "vide", bundle: .module) }
+        if text.hasSuffix(",") {
+            return String(localized: "\(String(text.dropLast())) virgule", bundle: .module)
+        }
+        guard let value = Double(text.replacingOccurrences(of: ",", with: ".")) else { return text }
+        return switch field {
+        case .weight: LiveSetRow.kilos(value)
+        case .reps: PulseSpoken.repetitions(Int(value))
+        case .duration: LiveSetRow.seconds(Int(value))
+        }
+    }
+
+    /// Ce qu'une touche fait dire : la nouvelle valeur du champ ; `nil` pour « Suivant » (le titre change et s'annonce) ou une
+    /// touche sans effet.
+    nonisolated static func keypadAnnouncement(key: KeypadInput.Key, before: String, after: String,
+                                               field: KeypadField.Kind) -> String? {
+        guard key != .next, before != after else { return nil }
+        return valueAnnouncement(field: field, text: after)
     }
 
     private nonisolated static func stepSize(for field: KeypadField.Kind, increment: Double) -> Double {

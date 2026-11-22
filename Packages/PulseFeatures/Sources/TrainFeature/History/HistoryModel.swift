@@ -94,6 +94,11 @@ public final class HistoryModel {
         environment.text(of: date) { $0.weekday(.abbreviated).day().month(.abbreviated) }
     }
 
+    /// « lundi 27 octobre » en toutes lettres, pour VoiceOver.
+    public func spokenDateText(_ date: Date) -> String {
+        environment.text(of: date) { $0.weekday(.wide).day().month(.wide) }
+    }
+
     // MARK: - Interne
 
     private func line(for session: WorkoutSession, directory: ExerciseDirectory) -> HistoryLine {

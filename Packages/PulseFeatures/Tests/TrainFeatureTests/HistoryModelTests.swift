@@ -104,3 +104,11 @@ private actor FlakyWorkoutRepository: WorkoutRepository {
     #expect(model.errorMessage == nil)
     #expect(model.hasLoaded)
 }
+
+@MainActor @Test func historySpeaksDatesWithoutAbbreviations() async throws {
+    let fixture = TrainFixture()
+    let model = HistoryModel(environment: fixture.environment)
+    let date = TrainClock.date(month: 10, day: 27, hour: 18)
+    #expect(model.dateText(date) == "mar. 27 oct.")
+    #expect(model.spokenDateText(date) == "mardi 27 octobre")
+}

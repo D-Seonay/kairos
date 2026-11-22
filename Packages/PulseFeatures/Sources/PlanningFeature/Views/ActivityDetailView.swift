@@ -28,12 +28,17 @@ struct ActivityDetailView: View {
                     ForEach(model.metrics, id: \.label) { metric in
                         LabeledContent(metric.label, value: metric.value)
                             .foregroundStyle(PulsePalette.text)
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel(metric.label)
+                            .accessibilityValue(metric.spokenValue)
                     }
                 }
                 .listRowBackground(PulsePalette.surface)
                 Section {
                     Picker(String(localized: "RPE ressenti", bundle: .module), selection: $model.rpe) {
-                        Text(String(localized: "—", bundle: .module)).tag(Double?.none)
+                        Text(String(localized: "—", bundle: .module))
+                            .accessibilityLabel(String(localized: "Non renseigné", bundle: .module))
+                            .tag(Double?.none)
                         ForEach(Self.rpeValues, id: \.self) { rpe in
                             Text(PulseFormat.decimal(rpe, maxFractionDigits: 1)).tag(Double?.some(rpe))
                         }
@@ -63,6 +68,7 @@ struct ActivityDetailView: View {
         .background(PulsePalette.background)
         .navigationTitle(model.session?.title ?? String(localized: "Course", bundle: .module))
         .pulseInlineTitle()
+        .pulseAnnounceError(model.errorMessage)
         .toolbar {
             if model.hasChanges {
                 ToolbarItem(placement: .confirmationAction) {

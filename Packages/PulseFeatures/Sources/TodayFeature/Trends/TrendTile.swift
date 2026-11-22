@@ -37,21 +37,96 @@ struct TrendTile: Equatable {
     }
 
     private static func last(_ factor: Factor, title: String, values: [Double?], format: (Double) -> String) -> TrendTile {
-        let text = values.compactMap { $0 }.last.map(format)
-        let label = text.map { String(localized: "\(title), dernière valeur \($0)", bundle: .module) }
-        return TrendTile(factor: factor, title: title, valueText: text ?? dash, values: values,
-                         accessibilityLabel: label ?? noData(title))
+        let latest = values.compactMap { $0 }.last
+        let spokenTitle = spokenTitle(factor)
+        let label = latest.map { value -> String in
+            let spoken = String(localized: "\(spokenTitle), dernière valeur \(spokenValue(factor, value))", bundle: .module)
+            return withDirection(spoken, values: values)
+        }
+        return TrendTile(factor: factor, title: title, valueText: latest.map(format) ?? dash, values: values,
+                         accessibilityLabel: label ?? noData(spokenTitle))
     }
 
     private static func average(_ factor: Factor, title: String, values: [Double?]) -> TrendTile {
         let present = values.compactMap { $0 }
-        let text = present.isEmpty ? nil : PulseFormat.duration(minutes: Int((present.reduce(0, +) / Double(present.count)).rounded()))
-        let label = text.map { String(localized: "\(title), moyenne \($0)", bundle: .module) }
-        return TrendTile(factor: factor, title: title, valueText: text ?? dash, values: values,
-                         accessibilityLabel: label ?? noData(title))
+        let mean = present.isEmpty ? nil : (present.reduce(0, +) / Double(present.count)).rounded()
+        let spokenTitle = spokenTitle(factor)
+        let label = mean.map { value -> String in
+            let spoken = String(localized: "\(spokenTitle), moyenne \(spokenValue(factor, value))", bundle: .module)
+            return withDirection(spoken, values: values)
+        }
+        return TrendTile(factor: factor, title: title, valueText: mean.map { PulseFormat.duration(minutes: Int($0)) } ?? dash,
+                         values: values, accessibilityLabel: label ?? noData(spokenTitle))
     }
 
     private static func noData(_ title: String) -> String {
         String(localized: "\(title), aucune donnée", bundle: .module)
+    }
+
+    // MARK: - Parlé
+
+    /// Le titre tel que VoiceOver le dit : « Fréquence cardiaque au repos, 14 jours » (le titre affiché abrège en « FC repos »).
+    static func spokenTitle(_ factor: Factor) -> String {
+        switch factor {
+        case .hrv: String(localized: "Variabilité, 14 jours", bundle: .module)
+        case .restingHeartRate: String(localized: "Fréquence cardiaque au repos, 14 jours", bundle: .module)
+        case .sleep: String(localized: "Sommeil, 14 jours", bundle: .module)
+        }
+    }
+
+    /// « 44 millisecondes », « 54 battements par minute », « 7 heures 12 » (le sommeil se donne en minutes).
+    static func spokenValue(_ factor: Factor, _ value: Double) -> String {
+        guard value.isFinite, abs(value) < 1e9 else { return "" }
+        let rounded = Int(value.rounded())
+        switch factor {
+        case .hrv:
+            return PulseSpoken.count(rounded, singular: String(localized: "milliseconde", bundle: .module),
+                                     plural: String(localized: "millisecondes", bundle: .module))
+        case .restingHeartRate:
+            let beats = PulseSpoken.count(rounded, singular: String(localized: "battement", bundle: .module),
+                                          plural: String(localized: "battements", bundle: .module))
+            return String(localized: "\(beats) par minute", bundle: .module)
+        case .sleep:
+            return PulseSpoken.duration(seconds: rounded * 60)
+        }
+    }
+
+    /// Le sens de la tendance : la dernière semaine contre celle d'avant.
+    enum Direction: Equatable {
+        case up, down, steady
+
+        var spoken: String {
+            switch self {
+            case .up: String(localized: "tendance en hausse", bundle: .module)
+            case .down: String(localized: "tendance en baisse", bundle: .module)
+            case .steady: String(localized: "tendance stable", bundle: .module)
+            }
+        }
+    }
+
+    /// Le sens de la tendance : la moyenne de la dernière semaine contre celle de la semaine d'avant, « stable » sous 5 % d'écart.
+    /// `nil` sans deux mesures de chaque côté (ou sans moyenne de référence) : une tendance ne se devine pas.
+    static func direction(of values: [Double?]) -> Direction? {
+        guard values.count >= days else { return nil }
+        let window = Array(values.suffix(days))
+        let half = days / 2
+        let older = window.prefix(half).compactMap { $0 }
+        let recent = window.suffix(half).compactMap { $0 }
+        guard older.count >= minimumMeasures, recent.count >= minimumMeasures else { return nil }
+        let before = older.reduce(0, +) / Double(older.count)
+        let after = recent.reduce(0, +) / Double(recent.count)
+        guard before > 0 else { return nil }
+        let change = (after - before) / before
+        if change > steadyShare { return .up }
+        if change < -steadyShare { return .down }
+        return .steady
+    }
+
+    private static let steadyShare = 0.05
+    private static let minimumMeasures = 2
+
+    private static func withDirection(_ text: String, values: [Double?]) -> String {
+        guard let direction = direction(of: values) else { return text }
+        return String(localized: "\(text), \(direction.spoken)", bundle: .module)
     }
 }

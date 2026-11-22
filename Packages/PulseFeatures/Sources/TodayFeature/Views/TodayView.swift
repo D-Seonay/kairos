@@ -42,7 +42,7 @@ public struct TodayView: View {
                     .buttonStyle(PrimaryButtonStyle())
                     .accessibilityIdentifier(TodayIdentifiers.sessionStart)
                 }
-                .animation(.snappy, value: startTitle)
+                .pulseAnimation(.snappy, value: startTitle)
                 .hidingNavigationBar()
                 .navigationDestination(isPresented: $model.isShowingWhy) {
                     WhyView(model: model, onStart: startSession, onResume: onResumeSession)
@@ -54,6 +54,12 @@ public struct TodayView: View {
         .sheet(item: $model.sheet) { sheet in
             switch sheet {
             case .mobility: MobilitySheet()
+            }
+        }
+        // Le score qui arrive ou change sous le focus (lecture Santé, check-in validé) est dit à voix haute.
+        .onChange(of: model.score) { old, new in
+            if let announcement = TodayModel.scoreAnnouncement(old: old, new: new) {
+                PulseAnnouncement.post(announcement)
             }
         }
         // Le retour au premier plan est rafraîchi par la racine de l'app, quel que soit l'onglet affiché.
@@ -118,8 +124,11 @@ public struct TodayView: View {
                     Task { await model.submitCheckIn() }
                 }
             }
+            // Le message apparaît sous le focus, sur un conteneur qui reste là : l'annonce suit son changement.
+            .pulseAnnounceError(model.errorMessage)
         } else {
-            RecoveryCard(score: model.score, factors: model.factors, marker: model.marker, onWhy: model.showWhy)
+            RecoveryCard(score: model.score, factors: model.factors, marker: model.marker, spokenMarker: model.spokenMarker,
+                         onWhy: model.showWhy)
         }
     }
 }
@@ -130,7 +139,7 @@ private struct TodayHeader: View {
     let onOpenProfile: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .top, spacing: 8) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(model.dateText)
@@ -172,9 +181,13 @@ private struct TodayHeader: View {
             .frame(minHeight: 32)
             .background(PulsePalette.surface.opacity(0.6), in: Capsule())
             .overlay(Capsule().strokeBorder(PulsePalette.ink.opacity(0.2), lineWidth: 1))
+            // La pastille reste à 32 points ; la cible tactile monte à 44.
+            .padding(.vertical, 6)
+            .contentShape(Rectangle())
         }
         .buttonStyle(PressableButtonStyle())
         .disabled(model.isLoading)
+        .accessibilityLabel(model.syncAccessibilityText)
         .accessibilityHint(String(localized: "Relit tes données Apple Santé", bundle: .module))
     }
 

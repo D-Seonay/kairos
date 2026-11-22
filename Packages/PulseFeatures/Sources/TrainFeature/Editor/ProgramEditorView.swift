@@ -71,6 +71,7 @@ public struct ProgramEditorView: View {
         } message: {
             Text(String(localized: "Il ne sera plus actif ni proposé, mais tes séances le gardent.", bundle: .module))
         }
+        .pulseAnnounceError(errorMessage ?? model.errorMessage)
         .task { await model.load() }
     }
 
@@ -82,6 +83,7 @@ public struct ProgramEditorView: View {
             Button { ask(.rename, text: program.name) } label: {
                 LabeledRow(title: program.name, detail: summary(of: program), systemImage: "pencil")
             }
+            .accessibilityLabel(TrainText.rowSpoken(title: program.name, detail: spokenSummary(of: program)))
             .accessibilityHint(String(localized: "Renomme le programme", bundle: .module))
         } header: {
             Text(String(localized: "Programme actif", bundle: .module))
@@ -132,11 +134,12 @@ public struct ProgramEditorView: View {
         if day.kind == .run {
             LabeledRow(title: day.name, detail: String(localized: "Course · modifiable plus tard", bundle: .module),
                        systemImage: "lock.fill")
-                .accessibilityElement(children: .combine)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(TrainText.rowSpoken(title: day.name,
+                                                        detail: String(localized: "Course, modifiable plus tard", bundle: .module)))
         } else {
             NavigationLink(value: TrainDestination.routine(program: program.id, day: day.id)) {
-                LabeledRow(title: day.name, detail: String(localized: "\(day.exercises.count) exercices", bundle: .module),
-                           systemImage: nil)
+                LabeledRow(title: day.name, detail: TrainText.exercises(day.exercises.count), systemImage: nil)
             }
             .swipeActions(edge: .trailing) {
                 Button(String(localized: "Supprimer", bundle: .module), role: .destructive) { removal = day }
@@ -160,6 +163,7 @@ public struct ProgramEditorView: View {
                 Button { perform { try await model.activate(other.id) } } label: {
                     LabeledRow(title: other.name, detail: summary(of: other), systemImage: "arrow.triangle.swap")
                 }
+                .accessibilityLabel(TrainText.rowSpoken(title: other.name, detail: spokenSummary(of: other)))
                 .accessibilityHint(String(localized: "Rend ce programme actif", bundle: .module))
                 .swipeActions(edge: .trailing) {
                     Button(String(localized: "Archiver", bundle: .module), role: .destructive) {
@@ -194,8 +198,11 @@ public struct ProgramEditorView: View {
     // MARK: - Actions
 
     private func summary(of program: Program) -> String {
-        [String(localized: "\(program.days.count) routines", bundle: .module),
-         String(localized: "\(program.sessionsPerWeek) séances par semaine", bundle: .module)].joined(separator: " · ")
+        TrainText.programSummary(routineCount: program.days.count, sessionsPerWeek: program.sessionsPerWeek)
+    }
+
+    private func spokenSummary(of program: Program) -> String {
+        TrainText.programSummarySpoken(routineCount: program.days.count, sessionsPerWeek: program.sessionsPerWeek)
     }
 
     private func ask(_ kind: NamePrompt, text: String) {
