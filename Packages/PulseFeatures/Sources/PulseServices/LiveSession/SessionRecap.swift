@@ -8,11 +8,14 @@ public struct BeatenRecord: Sendable, Equatable {
     public var exerciseName: String
     public var kind: RecordKind
     public var text: String
+    /// Le même texte dit en mots pour VoiceOver : « kilos » pour « kg », « maximum estimé sur une répétition » pour « 1RM estimé ».
+    public var spokenText: String
 
-    public init(exerciseName: String, kind: RecordKind, text: String) {
+    public init(exerciseName: String, kind: RecordKind, text: String, spokenText: String? = nil) {
         self.exerciseName = exerciseName
         self.kind = kind
         self.text = text
+        self.spokenText = spokenText ?? text
     }
 }
 
@@ -100,7 +103,8 @@ extension SessionRecap {
             .filter { $0.sessionID == draft.id && $0.setID.map(result.recordSetIDs.contains) == true }
             .map { record in
                 BeatenRecord(exerciseName: record.exerciseName, kind: record.kind,
-                             text: text(of: record, loadKind: loadKind(record.exercise)))
+                             text: text(of: record, loadKind: loadKind(record.exercise)),
+                             spokenText: spokenText(of: record, loadKind: loadKind(record.exercise)))
             }
     }
 
@@ -129,6 +133,35 @@ extension SessionRecap {
             }
             let weight = sign + LiveSessionText.decimal(weightKg)
             return String(localized: "\(name) : \(reps) répétitions à \(weight) kg, nouveau record", bundle: .module)
+        }
+    }
+
+    /// Le texte d'un record dit en mots : « … : 72,5 kilos, nouveau record de charge », « … : maximum estimé sur une répétition
+    /// 84 kilos, nouveau record », « … : 8 répétitions à 70 kilos, nouveau record », « … : 8 répétitions avec un lest de 10 kilos,
+    /// nouveau record ».
+    static func spokenText(of record: PersonalRecord, loadKind: LoadKind) -> String {
+        let name = record.exerciseName
+        switch record.kind {
+        case .maxWeight:
+            let weight = LiveSessionText.kilosSpoken(record.value)
+            return String(localized: "\(name) : \(weight), nouveau record de charge", bundle: .module)
+        case .estimatedOneRepMax:
+            let estimate = LiveSessionText.kilosSpoken((record.value * 10).rounded() / 10)
+            return String(localized: "\(name) : maximum estimé sur une répétition \(estimate), nouveau record", bundle: .module)
+        case .repsAtWeight:
+            let reps = Int(record.value)
+            let count = reps <= 1 ? String(localized: "\(reps) répétition", bundle: .module)
+                : String(localized: "\(reps) répétitions", bundle: .module)
+            let weightKg = record.weightKg ?? 0
+            if loadKind != .external, weightKg <= 0 {
+                return String(localized: "\(name) : \(count) au poids du corps, nouveau record", bundle: .module)
+            }
+            let weight = LiveSessionText.kilosSpoken(weightKg)
+            return switch loadKind {
+            case .external: String(localized: "\(name) : \(count) à \(weight), nouveau record", bundle: .module)
+            case .bodyweight: String(localized: "\(name) : \(count) avec un lest de \(weight), nouveau record", bundle: .module)
+            case .assisted: String(localized: "\(name) : \(count) avec une assistance de \(weight), nouveau record", bundle: .module)
+            }
         }
     }
 

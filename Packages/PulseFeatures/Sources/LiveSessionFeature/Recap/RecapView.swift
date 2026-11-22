@@ -39,19 +39,23 @@ public struct RecapView: View {
                     noteField
                     if model.healthAccess == .denied { healthDeniedNote }
                 } else if model.errorMessage == nil {
-                    ProgressView().padding(.top, 80)
+                    ProgressView()
+                        .accessibilityLabel(String(localized: "Préparation du récap", bundle: .module))
+                        .padding(.top, 80)
                 }
                 if let message = model.errorMessage {
                     Text(message)
                         .font(.footnote)
                         .foregroundStyle(PulsePalette.bad)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .accessibilityAddTraits(.updatesFrequently)
                 }
             }
             .padding(16)
         }
         .scrollDismissesKeyboard(.interactively)
+        .pulseAnnounceError(model.errorMessage)
+        .pulseAnnounceOnce(Self.recordsAnnouncement(model.recap?.beatenRecords ?? []), id: model.recap?.startedAt,
+                           announcesOnAppear: true)
         .pulseScreenBackground()
         .safeAreaInset(edge: .bottom, spacing: 0) { actions }
         .sheet(isPresented: isExplainingHealth) {
@@ -73,7 +77,7 @@ public struct RecapView: View {
                 Apple Santé : écriture refusée, la séance reste dans Pulse. Tu peux l'autoriser dans Réglages › Santé › Pulse.
                 """, bundle: .module))
         } icon: {
-            Image(systemName: "heart.slash")
+            Image(systemName: "heart.slash").accessibilityHidden(true)
         }
         .font(.footnote)
         .foregroundStyle(PulsePalette.muted)
@@ -104,15 +108,20 @@ public struct RecapView: View {
     private func stats(_ recap: SessionRecap) -> some View {
         let columns = typeSize.isAccessibilitySize ? 1 : 2
         return LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: columns), spacing: 8) {
-            stat(PulseFormat.duration(minutes: recap.durationMinutes), String(localized: "Durée", bundle: .module))
-            stat(PulseFormat.decimal(recap.tonnageKg, maxFractionDigits: 1), String(localized: "kg soulevés", bundle: .module))
-            stat("\(recap.workingSets)", String(localized: "Séries", bundle: .module))
+            stat(PulseFormat.duration(minutes: recap.durationMinutes), String(localized: "Durée", bundle: .module),
+                 spoken: Self.statSpoken(.duration(minutes: recap.durationMinutes)))
+            stat(PulseFormat.decimal(recap.tonnageKg, maxFractionDigits: 1), String(localized: "kg soulevés", bundle: .module),
+                 spoken: Self.statSpoken(.tonnage(kg: recap.tonnageKg)))
+            stat("\(recap.workingSets)", String(localized: "Séries", bundle: .module),
+                 spoken: Self.statSpoken(.sets(recap.workingSets)))
             stat("\(recap.beatenRecords.count)", Self.recordsTitle(recap.beatenRecords.count),
+                 spoken: Self.statSpoken(.records(recap.beatenRecords.count)),
                  color: recap.beatenRecords.isEmpty ? PulsePalette.text : PulsePalette.gold)
         }
     }
 
-    private func stat(_ value: String, _ name: String, color: Color = PulsePalette.text) -> some View {
+    private func stat(_ value: String, _ name: String, spoken: (name: String, value: String),
+                      color: Color = PulsePalette.text) -> some View {
         VStack(spacing: 2) {
             Text(value)
                 .font(PulseFont.value(.largeTitle))
@@ -126,8 +135,8 @@ public struct RecapView: View {
         .padding(.vertical, 12)
         .background(PulsePalette.surface, in: RoundedRectangle(cornerRadius: PulseMetrics.radiusSmall, style: .continuous))
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(name)
-        .accessibilityValue(value)
+        .accessibilityLabel(spoken.name)
+        .accessibilityValue(spoken.value)
     }
 
     private func records(_ records: [BeatenRecord]) -> some View {
@@ -136,10 +145,11 @@ public struct RecapView: View {
                 Label {
                     Text(record.text).font(.subheadline).foregroundStyle(PulsePalette.text)
                 } icon: {
-                    Image(systemName: "trophy.fill").foregroundStyle(PulsePalette.gold)
+                    Image(systemName: "trophy.fill").foregroundStyle(PulsePalette.gold).accessibilityHidden(true)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .accessibilityElement(children: .combine)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(record.spokenText)
             }
         }
     }
@@ -148,46 +158,22 @@ public struct RecapView: View {
 
     private func muscles(_ recap: SessionRecap) -> some View {
         let largest = max(1, recap.setsPerGroup.map(\.1).max() ?? 1)
-        return card(title: String(localized: "Muscles travaillés", bundle: .module), detail: String(localized: "séries", bundle: .module)) {
+        return card(title: String(localized: "Muscles travaillés", bundle: .module), detail: String(localized: "séries", bundle: .module),
+                    detailIsSpoken: false) {
             MuscleMapView(levels: MuscleIntensity.levels(weights: recap.muscleWeights),
                           label: Self.musclesLabel(recap.setsPerGroup), height: 200)
                 .frame(maxWidth: .infinity)
             ForEach(Array(recap.setsPerGroup.enumerated()), id: \.offset) { _, entry in
-                groupBar(group: entry.0, count: entry.1, fraction: Double(entry.1) / Double(largest))
+                RecapGroupBar(group: entry.0, count: entry.1, fraction: Double(entry.1) / Double(largest))
             }
         }
-    }
-
-    private func groupBar(group: MuscleGroup, count: Int, fraction: Double) -> some View {
-        HStack(spacing: 10) {
-            Text(group.localizedName)
-                .font(.subheadline)
-                .foregroundStyle(PulsePalette.text)
-                .frame(width: 96, alignment: .leading)
-            GeometryReader { proxy in
-                Capsule()
-                    .fill(PulsePalette.surface2)
-                    .overlay(alignment: .leading) {
-                        Capsule()
-                            .fill(Color(PulsePalette.accent(for: theme).accent))
-                            .frame(width: proxy.size.width * fraction)
-                    }
-            }
-            .frame(height: 8)
-            Text("\(count)")
-                .font(.subheadline.weight(.bold).monospacedDigit())
-                .foregroundStyle(PulsePalette.text)
-                .frame(minWidth: 24, alignment: .trailing)
-        }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(group.localizedName)
-        .accessibilityValue(Self.setsText(count))
     }
 
     // MARK: Effort et note
 
     private func effort() -> some View {
-        card(title: String(localized: "Effort global ressenti", bundle: .module), detail: model.effortText) {
+        card(title: String(localized: "Effort global ressenti", bundle: .module), detail: model.effortText,
+                     detailIsSpoken: false) {
             Slider(value: Binding(get: { Double(model.rpe) }, set: { model.rpe = Int($0.rounded()) }),
                    in: Double(RecapModel.rpeRange.lowerBound)...Double(RecapModel.rpeRange.upperBound), step: 1)
                 .tint(Color(PulsePalette.accent(for: theme).accent))
@@ -259,20 +245,26 @@ public struct RecapView: View {
         .background(PulsePalette.background)
     }
 
-    private func card(title: String, detail: String? = nil, @ViewBuilder content: () -> some View) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
+    /// `detailIsSpoken` est faux quand le détail double ce que VoiceOver dit déjà ailleurs (le curseur d'effort, l'unité des barres).
+    private func card(title: String, detail: String? = nil, detailIsSpoken: Bool = true,
+                      @ViewBuilder content: () -> some View) -> some View {
+        let layout = typeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4)) : AnyLayout(HStackLayout())
+        return VStack(alignment: .leading, spacing: 10) {
+            layout {
                 Text(title)
                     .font(.headline)
                     .foregroundStyle(PulsePalette.text)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .accessibilityAddTraits(.isHeader)
-                Spacer()
                 if let detail {
                     Text(detail)
                         .font(.subheadline.weight(.semibold).monospacedDigit())
                         .foregroundStyle(PulsePalette.text2)
+                        .accessibilityHidden(!detailIsSpoken)
                 }
             }
+            .accessibilityElement(children: .combine)
             content()
         }
         .padding(PulseMetrics.spacing)

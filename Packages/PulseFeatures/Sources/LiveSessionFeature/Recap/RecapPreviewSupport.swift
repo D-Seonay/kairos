@@ -64,4 +64,9 @@ private struct FinishFlowPreviewHost: View {
 #Preview("Terminer") {
     FinishFlowPreviewHost()
 }
+
+#Preview("Terminer, accessibilité XL") {
+    FinishFlowPreviewHost()
+        .dynamicTypeSize(.accessibility3)
+}
 #endif

@@ -70,10 +70,11 @@ private struct AnnounceOnceModifier: ViewModifier {
     let message: String?
     let id: AnyHashable
     let isError: Bool
+    let announcesOnAppear: Bool
     @State private var announced: Set<AnyHashable> = []
 
     func body(content: Content) -> some View {
-        content.onChange(of: Trigger(message: message, id: id)) { _, trigger in
+        content.onChange(of: Trigger(message: message, id: id), initial: announcesOnAppear) { _, trigger in
             guard let text = trigger.message,
                   PulseAnnouncement.shouldAnnounce(text, id: trigger.id, announced: announced) else { return }
             announced.insert(trigger.id)
@@ -95,7 +96,10 @@ public extension View {
     }
 
     /// Annonce `message` une seule fois par `id` (la fin d'un repos, un record) : la même valeur revue ne se répète pas.
-    func pulseAnnounceOnce(_ message: String?, id: some Hashable, isError: Bool = false) -> some View {
-        modifier(AnnounceOnceModifier(message: message, id: AnyHashable(id), isError: isError))
+    /// `announcesOnAppear` annonce aussi un message déjà là à l'apparition de la vue (un récap chargé avant qu'elle s'affiche).
+    func pulseAnnounceOnce(_ message: String?, id: some Hashable, isError: Bool = false,
+                           announcesOnAppear: Bool = false) -> some View {
+        modifier(AnnounceOnceModifier(message: message, id: AnyHashable(id), isError: isError,
+                                      announcesOnAppear: announcesOnAppear))
     }
 }

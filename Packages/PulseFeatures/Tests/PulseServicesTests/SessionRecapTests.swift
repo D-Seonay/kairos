@@ -19,7 +19,8 @@ struct SessionRecapTests {
         #expect(recap.tonnageKg == 1_082.5)   // 60 × 12 + 72,5 × 5
         #expect(recap.durationMinutes == 55)
         #expect(recap.beatenRecords == [BeatenRecord(exerciseName: "Développé couché à la barre", kind: .maxWeight,
-                                                     text: "Développé couché à la barre : 72,5 kg, nouveau record de charge")])
+                                                     text: "Développé couché à la barre : 72,5 kg, nouveau record de charge",
+                                                     spokenText: "Développé couché à la barre : 72,5 kilos, nouveau record de charge")])
         #expect(recap.suggestedRPE == 7)
     }
 
@@ -36,6 +37,9 @@ struct SessionRecapTests {
         #expect(recap.beatenRecords.map(\.kind) == [.estimatedOneRepMax, .repsAtWeight])
         #expect(recap.beatenRecords.map(\.text) == ["Développé couché à la barre : 1RM estimé 86,7 kg, nouveau record",
                                                     "Développé couché à la barre : 6 répétitions à 70 kg, nouveau record"])
+        #expect(recap.beatenRecords.map(\.spokenText) == [
+            "Développé couché à la barre : maximum estimé sur une répétition 86,7 kilos, nouveau record",
+            "Développé couché à la barre : 6 répétitions à 70 kilos, nouveau record"])
     }
 
     @Test func aBodyweightRecordNamesTheBodyweightOrTheBelt() async throws {
@@ -45,6 +49,8 @@ struct SessionRecapTests {
         let recap = try await service.recap(endedAt: fixture.clock.now)
         #expect(recap.beatenRecords.map(\.text) == ["Tractions : 10 répétitions au poids du corps, nouveau record",
                                                     "Tractions : 6 répétitions à +10 kg, nouveau record"])
+        #expect(recap.beatenRecords.map(\.spokenText) == ["Tractions : 10 répétitions au poids du corps, nouveau record",
+                                                          "Tractions : 6 répétitions avec un lest de 10 kilos, nouveau record"])
     }
 
     @Test func recapWeighsMusclesAndCountsSetsPerGroup() async throws {

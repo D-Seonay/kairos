@@ -1736,6 +1736,46 @@
           }
         }
       }
+    },
+    "Nouveau record !" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouveau record !"
+          }
+        }
+      }
+    },
+    "%lld nouveaux records !" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld nouveaux records !"
+          }
+        }
+      }
+    },
+    "%@ %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ %@"
+          }
+        }
+      }
+    },
+    "Préparation du récap" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Préparation du récap"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

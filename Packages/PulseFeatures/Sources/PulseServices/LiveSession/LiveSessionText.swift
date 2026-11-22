@@ -130,7 +130,7 @@ enum LiveSessionText {
     }
 
     /// « 1 kilo », « 1,5 kilo », « 70 kilos » : le pluriel commence à 2.
-    private static func kilosSpoken(_ kg: Double) -> String {
+    static func kilosSpoken(_ kg: Double) -> String {
         let text = decimal(kg)
         return abs(kg) < 2 ? String(localized: "\(text) kilo", bundle: .module)
             : String(localized: "\(text) kilos", bundle: .module)

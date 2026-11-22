@@ -440,6 +440,66 @@
           }
         }
       }
+    },
+    "%@ : %@, nouveau record de charge": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : %@, nouveau record de charge"
+          }
+        }
+      }
+    },
+    "%@ : maximum estimé sur une répétition %@, nouveau record": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : maximum estimé sur une répétition %@, nouveau record"
+          }
+        }
+      }
+    },
+    "%@ : %@ au poids du corps, nouveau record": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : %@ au poids du corps, nouveau record"
+          }
+        }
+      }
+    },
+    "%@ : %@ à %@, nouveau record": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : %@ à %@, nouveau record"
+          }
+        }
+      }
+    },
+    "%@ : %@ avec un lest de %@, nouveau record": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : %@ avec un lest de %@, nouveau record"
+          }
+        }
+      }
+    },
+    "%@ : %@ avec une assistance de %@, nouveau record": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : %@ avec une assistance de %@, nouveau record"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
