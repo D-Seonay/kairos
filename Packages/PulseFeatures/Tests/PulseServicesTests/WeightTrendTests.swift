@@ -144,6 +144,15 @@ struct WeightTrendTests {
         #expect(current == 77)
     }
 
+    /// Sans tendance sur 30 jours, la dernière pesée l'emporte, quelle que soit sa source : le profil n'a plus de poids dès que
+    /// des pesées Apple Santé existent.
+    @Test func currentWeightFallsBackOnTheLatestWeighInOfAnySource() async throws {
+        let (profile, current) = try await sync([measurement(77, daysAgo: 45), measurement(76, daysAgo: 40)], profileWeight: 80)
+
+        #expect(profile?.weightKg == nil)
+        #expect(current == 76)
+    }
+
     @Test func profileWeightUntouchedWithoutAnyWeighIn() async throws {
         let (profile, current) = try await sync([], profileWeight: 77)
 

@@ -37,6 +37,9 @@ public final class OnboardingModel {
     /// Numéro de la calibration en cours : une lecture périmée (retour arrière, nouvelle lecture) n'écrit plus rien.
     @ObservationIgnored var calibrationGeneration = 0
     @ObservationIgnored var isSubmittingCheckIn = false
+    /// Valeurs d'Apple Santé placées dans le brouillon et pas encore validées à l'étape du profil : le formulaire les montre,
+    /// mais elles ne sont ni enregistrées ni synchronisées avant `continueFromProfile()`.
+    @ObservationIgnored var unvalidatedHints: HealthProfileHints?
 
     public init(environment: OnboardingEnvironment) {
         self.environment = environment
@@ -63,6 +66,10 @@ public final class OnboardingModel {
             profile = stored
         }
         step = environment.stepStore.load() ?? .welcome
+        if step == .profile, let hints = try? await environment.health.profileHints() {
+            // Les propositions d'Apple Santé n'ont pas été enregistrées : on les relit à la reprise.
+            prefill(from: hints)
+        }
         if step.rawValue >= OnboardingStep.program.rawValue {
             await restoreProgramSelection()
         }
@@ -92,15 +99,18 @@ public final class OnboardingModel {
     public func allowHealth() async {
         errorMessage = nil
         healthSkipped = false
+        var hints: HealthProfileHints?
         do {
             try await environment.health.requestAuthorization()
-            if let hints = try? await environment.health.profileHints() {
-                prefill(from: hints)
-            }
+            hints = try? await environment.health.profileHints()
         } catch {
             errorMessage = String(localized: "Pulse n'a pas pu accéder à Apple Santé. Tu peux continuer sans.", bundle: .module)
         }
-        await advance(to: .profile)
+        // Le brouillon est enregistré avant de recevoir les propositions : elles restent en mémoire jusqu'à la validation.
+        guard await advance(to: .profile) else { return }
+        if let hints {
+            prefill(from: hints)
+        }
     }
 
     public func skipHealth() async {
@@ -114,6 +124,8 @@ public final class OnboardingModel {
         let increments = profile.strengthLevel.defaultIncrementsKg
         profile.upperIncrementKg = increments.upper
         profile.lowerIncrementKg = increments.lower
+        // Valider l'étape vaut accord pour les valeurs proposées par Apple Santé : elles partent avec le brouillon.
+        unvalidatedHints = nil
         await advance(to: .goals)
     }
 
@@ -199,7 +211,7 @@ public final class OnboardingModel {
     func saveDraft() async -> Bool {
         profile.updatedAt = environment.now()
         do {
-            try await environment.profiles.save(profile)
+            try await environment.profiles.save(withoutUnvalidatedHints(profile))
             return true
         } catch {
             errorMessage = Self.saveFailureMessage
@@ -228,14 +240,39 @@ public final class OnboardingModel {
         choseCustomProgram = step == .calibration && profile.activeProgramID == nil
     }
 
-    /// Ne remplit que les champs encore vides ; le sexe seulement s'il vaut `.unspecified`.
+    /// Ne remplit que les champs encore vides ; le sexe seulement s'il vaut `.unspecified`. Retient ce qui a été rempli,
+    /// pour ne pas l'enregistrer avant la validation de l'étape du profil.
     private func prefill(from hints: HealthProfileHints) {
+        var applied = unvalidatedHints ?? HealthProfileHints()
         if profile.sex == .unspecified, let sex = hints.sex {
             profile.sex = sex
+            applied.sex = sex
         }
-        profile.birthDate = profile.birthDate ?? hints.birthDate
-        profile.heightCm = profile.heightCm ?? hints.heightCm
-        profile.weightKg = profile.weightKg ?? hints.weightKg
+        if profile.birthDate == nil, let birthDate = hints.birthDate {
+            profile.birthDate = birthDate
+            applied.birthDate = birthDate
+        }
+        if profile.heightCm == nil, let heightCm = hints.heightCm {
+            profile.heightCm = heightCm
+            applied.heightCm = heightCm
+        }
+        if profile.weightKg == nil, let weightKg = hints.weightKg {
+            profile.weightKg = weightKg
+            applied.weightKg = weightKg
+        }
+        unvalidatedHints = applied
+    }
+
+    /// Le brouillon tel qu'il peut être enregistré : un champ qui porte encore la valeur proposée par Apple Santé, non validée,
+    /// repart vide. Une valeur modifiée à la main est gardée.
+    private func withoutUnvalidatedHints(_ draft: UserProfile) -> UserProfile {
+        guard let hints = unvalidatedHints else { return draft }
+        var saved = draft
+        if let sex = hints.sex, saved.sex == sex { saved.sex = .unspecified }
+        if let birthDate = hints.birthDate, saved.birthDate == birthDate { saved.birthDate = nil }
+        if let heightCm = hints.heightCm, saved.heightCm == heightCm { saved.heightCm = nil }
+        if let weightKg = hints.weightKg, saved.weightKg == weightKg { saved.weightKg = nil }
+        return saved
     }
 
     /// Enregistre le programme adopté et renvoie son id ; `nil` pour « Je construis le mien » ou un modèle introuvable.

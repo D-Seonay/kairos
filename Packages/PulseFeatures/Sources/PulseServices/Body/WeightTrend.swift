@@ -133,16 +133,22 @@ public enum ProfileWeightSync {
         try await profiles.save(profile)
     }
 
-    /// Le poids utilisé par les calculs : la tendance de toutes les pesées des 30 derniers jours (Apple Santé comprise, lue sur
-    /// l'appareil), sinon le poids du profil.
+    /// Le poids utilisé par les calculs (lu sur l'appareil, Apple Santé comprise) : la tendance de toutes les pesées des 30 derniers
+    /// jours, sinon la dernière pesée, quelle que soit sa source et sa date (la pesée manuelle l'emporte le même jour), sinon le
+    /// poids du profil.
     public static func currentWeight(measurements: any BodyMeasurementRepository, profiles: any ProfileRepository, now: Date,
                                      calendar: Calendar) async -> Double? {
         let today = calendar.startOfDay(for: now)
         let start = calendar.date(byAdding: .day, value: -lookbackDays, to: today) ?? today
         let end = calendar.date(byAdding: .day, value: 1, to: today) ?? now
-        if let recent = try? await measurements.measurements(from: start, to: end),
-           let current = WeightTrend.make(measurements: recent, now: now, calendar: calendar).current {
-            return current
+        if let all = try? await measurements.measurements(from: .distantPast, to: end) {
+            let recent = all.filter { $0.date >= start }
+            if let current = WeightTrend.make(measurements: recent, now: now, calendar: calendar).current {
+                return current
+            }
+            if let latest = WeightTrend.make(measurements: all, now: now, calendar: calendar).days.last {
+                return latest.weightKg
+            }
         }
         return (try? await profiles.load())?.weightKg
     }

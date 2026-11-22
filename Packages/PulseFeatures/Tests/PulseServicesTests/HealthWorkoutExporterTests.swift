@@ -49,6 +49,18 @@ struct HealthWorkoutExporterTests {
         #expect(await writer.saved.values.first?.energyKcal == 400)
     }
 
+    @Test func exportUsesAnOldHealthWeighInForEnergy() async throws {
+        try await profiles.save(UserProfile(createdAt: .t0, updatedAt: .t0))
+        let date = TestClock.calendar.date(byAdding: .day, value: -40, to: start) ?? start
+        try await measurements.save(BodyMeasurement(date: date, weightKg: 76, source: .appleHealth, createdAt: date, updatedAt: date))
+        let writer = StubWorkoutHealthWriter()
+        let saved = session()
+        try await workouts.save(saved)
+        _ = await exporter(writer).export(saved)
+        // 5 MET × 76 kg (dernière pesée Apple Santé, vieille de 40 jours ; le profil n'a pas de poids) × 1 h.
+        #expect(await writer.saved.values.first?.energyKcal == 380)
+    }
+
     @Test func withoutWeightTheEnergyIsOmitted() async throws {
         let writer = StubWorkoutHealthWriter()
         let saved = session()
