@@ -1891,6 +1891,26 @@
           }
         }
       }
+    },
+    "Synchro, pas encore" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchro, pas encore"
+          }
+        }
+      }
+    },
+    "Synchro, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchro, %@"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

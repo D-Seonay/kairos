@@ -125,10 +125,11 @@ public enum FactorFormatter {
         return String(localized: "comme sur 14 jours", bundle: .module)
     }
 
-    /// « 5 de plus que ta ligne de base », « 3 de moins que ta ligne de base », « comme ta ligne de base ».
+    /// « 5 battements de plus que ta ligne de base », « 1 battement de moins que ta ligne de base », « comme ta ligne de base ».
     private static func spokenHeartRateChange(_ difference: Double) -> String {
         let rounded = Int(exactly: difference.rounded()) ?? 0
-        let amount = abs(rounded)
+        let amount = PulseSpoken.count(abs(rounded), singular: String(localized: "battement", bundle: .module),
+                                       plural: String(localized: "battements", bundle: .module))
         if rounded > 0 { return String(localized: "\(amount) de plus que ta ligne de base", bundle: .module) }
         if rounded < 0 { return String(localized: "\(amount) de moins que ta ligne de base", bundle: .module) }
         return String(localized: "comme ta ligne de base", bundle: .module)

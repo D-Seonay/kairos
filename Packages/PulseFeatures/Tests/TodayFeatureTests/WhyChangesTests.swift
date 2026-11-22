@@ -29,6 +29,28 @@ struct WhyChangesTests {
                                              detail: "Celles de ta dernière séance, sans surcharge progressive aujourd'hui."))
     }
 
+    @Test func restChangeIsSpokenInFull() throws {
+        let content = try WhyFixture.content(WhyFixture.recovery())
+        let bench = try WhyFixture.name("bench-press-barbell")
+        #expect(content.changes[2].spokenDetail == "2 minutes 45 au lieu de 2 minutes sur \(bench).")
+        #expect(content.changes[2].accessibilityLabel
+            == "Repos rallongés de 45 secondes, 2 minutes 45 au lieu de 2 minutes sur \(bench).")
+        // Sans détail parlé propre, la rangée lit le détail écrit ; sans détail, le titre seul.
+        #expect(content.changes[3].spokenDetail == nil)
+        #expect(content.changes[3].accessibilityLabel
+            == "Charges inchangées, Celles de ta dernière séance, sans surcharge progressive aujourd'hui.")
+        #expect(Change(pill: "✓", title: "Rien à alléger aujourd'hui.", detail: nil).accessibilityLabel == "Rien à alléger aujourd'hui.")
+    }
+
+    @Test func spokenRestNeverAbbreviates() throws {
+        for score in [75.0, 58.0] {
+            let content = try WhyFixture.content(WhyFixture.recovery(score: score))
+            for detail in content.changes.compactMap(\.spokenDetail) {
+                for forbidden in [" min ", " s ", " s."] { #expect(!detail.contains(forbidden), "« \(detail) »") }
+            }
+        }
+    }
+
     @Test func normalAddsRestAndKeepsTheLoads() throws {
         let content = try WhyFixture.content(WhyFixture.recovery(score: 75))
         let bench = try WhyFixture.name("bench-press-barbell")

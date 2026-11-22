@@ -72,11 +72,11 @@ struct SpokenTextTests {
 
     @Test func syncLabelSaysTheTimeNaturally() {
         let calendar = TodayClock.calendar
-        #expect(TodayModel.syncAccessibilityText(lastSync: nil, calendar: calendar) == "Pas encore synchronisé")
+        #expect(TodayModel.syncAccessibilityText(lastSync: nil, calendar: calendar) == "Synchro, pas encore")
         #expect(TodayModel.syncAccessibilityText(lastSync: TodayClock.date("2026-11-02T08:00"), calendar: calendar)
-            == "Synchronisé à 8 heures")
+            == "Synchro, 8 heures")
         #expect(TodayModel.syncAccessibilityText(lastSync: TodayClock.date("2026-11-02T18:30"), calendar: calendar)
-            == "Synchronisé à 18 heures 30")
+            == "Synchro, 18 heures 30")
     }
 
     // MARK: - Annonce du score

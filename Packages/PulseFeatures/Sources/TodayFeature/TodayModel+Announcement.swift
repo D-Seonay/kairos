@@ -18,12 +18,13 @@ extension TodayModel {
         return String(localized: "Score mis à jour : \(text)", bundle: .module)
     }
 
-    /// « Synchronisé à 8 heures 30 », « Pas encore synchronisé » : l'heure de la dernière lecture dite en toutes lettres.
+    /// « Synchro, 8 heures 30 », « Synchro, pas encore » : le mot affiché (pour la Commande vocale) suivi de l'heure de la dernière
+    /// lecture dite en toutes lettres.
     nonisolated static func syncAccessibilityText(lastSync: Date?, calendar: Calendar) -> String {
-        guard let lastSync else { return String(localized: "Pas encore synchronisé", bundle: .module) }
+        guard let lastSync else { return String(localized: "Synchro, pas encore", bundle: .module) }
         let parts = calendar.dateComponents([.hour, .minute], from: lastSync)
         let time = PulseSpoken.clock(hour: parts.hour ?? 0, minute: parts.minute ?? 0)
-        return String(localized: "Synchronisé à \(time)", bundle: .module)
+        return String(localized: "Synchro, \(time)", bundle: .module)
     }
 
     /// L'étiquette de la pastille de synchronisation.

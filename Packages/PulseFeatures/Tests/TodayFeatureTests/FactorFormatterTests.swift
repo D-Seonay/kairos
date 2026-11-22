@@ -28,7 +28,7 @@ struct FactorFormatterTests {
         #expect(labels == [
             "Sommeil, 5 heures 10 minutes, sommeil profond 7 %",
             "Variabilité, 44 millisecondes, 18 % de moins que sur 14 jours",
-            "Fréquence cardiaque au repos, 54 battements par minute, 5 de plus que ta ligne de base"
+            "Fréquence cardiaque au repos, 54 battements par minute, 5 battements de plus que ta ligne de base"
         ])
     }
 
@@ -42,7 +42,12 @@ struct FactorFormatterTests {
         let night = recovery(sdnn: 56.4, rhr: 47)
         let labels = FactorFormatter.displays(for: night).map(\.accessibilityLabel)
         #expect(labels[1] == "Variabilité, 56 millisecondes, 5 % de plus que sur 14 jours")
-        #expect(labels[2] == "Fréquence cardiaque au repos, 47 battements par minute, 2 de moins que ta ligne de base")
+        #expect(labels[2] == "Fréquence cardiaque au repos, 47 battements par minute, 2 battements de moins que ta ligne de base")
+    }
+
+    @Test func spokenHeartRateSingularUnit() {
+        let labels = FactorFormatter.displays(for: recovery(rhr: 48)).map(\.accessibilityLabel)
+        #expect(labels[2] == "Fréquence cardiaque au repos, 48 battements par minute, 1 battement de moins que ta ligne de base")
     }
 
     @Test func spokenLabelsSayWhenNothingMoved() {
