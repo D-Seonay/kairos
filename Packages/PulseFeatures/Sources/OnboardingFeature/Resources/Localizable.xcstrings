@@ -1246,6 +1246,156 @@
           }
         }
       }
+    },
+    "Ton score est prêt : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton score est prêt : %@"
+          }
+        }
+      }
+    },
+    "Ta récupération ce matin : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ta récupération ce matin : %@"
+          }
+        }
+      }
+    },
+    "%@, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, %@"
+          }
+        }
+      }
+    },
+    "estimé" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "estimé"
+          }
+        }
+      }
+    },
+    "en calibration, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "en calibration, %@"
+          }
+        }
+      }
+    },
+    "nuit" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "nuit"
+          }
+        }
+      }
+    },
+    "nuits" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "nuits"
+          }
+        }
+      }
+    },
+    "séance" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "séance"
+          }
+        }
+      }
+    },
+    "séances" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "séances"
+          }
+        }
+      }
+    },
+    "%@ par semaine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ par semaine"
+          }
+        }
+      }
+    },
+    "%@, en %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, en %@"
+          }
+        }
+      }
+    },
+    "centimètres" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "centimètres"
+          }
+        }
+      }
+    },
+    "kilos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kilos"
+          }
+        }
+      }
+    },
+    "livres" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "livres"
+          }
+        }
+      }
+    },
+    "Renseigner la date de naissance" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renseigner la date de naissance"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

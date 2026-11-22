@@ -5,6 +5,7 @@ import SwiftUI
 /// Écran 3, `profil-init` : prénom, morphologie, unités et niveaux. Rien n'est obligatoire, « Continuer » n'est jamais bloqué.
 struct ProfileStepView: View {
     @Bindable var model: OnboardingModel
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         OnboardingScreen(errorMessage: model.errorMessage) {
@@ -15,12 +16,14 @@ struct ProfileStepView: View {
             VStack(spacing: 14) {
                 nameField
                 sexField
-                HStack(alignment: .top, spacing: 8) {
+                pair {
                     birthDateField
+                } second: {
                     heightField
                 }
-                HStack(alignment: .top, spacing: 8) {
+                pair {
                     weightField
+                } second: {
                     unitField
                 }
                 levelField(
@@ -50,6 +53,19 @@ struct ProfileStepView: View {
 
     // MARK: - Champs
 
+    /// Deux champs côte à côte ; l'un sous l'autre aux tailles d'accessibilité, où leurs valeurs se couperaient.
+    private func pair<First: View, Second: View>(
+        @ViewBuilder _ first: () -> First, @ViewBuilder second: () -> Second
+    ) -> some View {
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 14))
+            : AnyLayout(HStackLayout(alignment: .top, spacing: 8))
+        return layout {
+            first()
+            second()
+        }
+    }
+
     private var nameField: some View {
         OnboardingField(title: String(localized: "Prénom affiché", bundle: .module)) {
             TextField(
@@ -67,7 +83,7 @@ struct ProfileStepView: View {
                 Text(String(localized: "Homme", bundle: .module)).tag(Sex.male)
                 Text(String(localized: "Autre", bundle: .module)).tag(Sex.unspecified)
             }
-            .pickerStyle(.segmented)
+            .adaptiveSegmentedPicker()
             .labelsHidden()
         }
     }
@@ -76,11 +92,16 @@ struct ProfileStepView: View {
         OnboardingField(title: String(localized: "Date de naissance", bundle: .module)) {
             Group {
                 if model.profile.birthDate == nil {
-                    Button(String(localized: "Renseigner", bundle: .module)) {
+                    Button {
                         model.profile.birthDate = model.suggestedBirthDate
+                    } label: {
+                        Text(String(localized: "Renseigner", bundle: .module))
+                            .frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
+                            .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                     .foregroundStyle(PulsePalette.text2)
+                    .accessibilityLabel(String(localized: "Renseigner la date de naissance", bundle: .module))
                 } else {
                     DatePicker(
                         String(localized: "Date de naissance", bundle: .module), selection: birthDateBinding,
@@ -96,7 +117,7 @@ struct ProfileStepView: View {
         OnboardingField(title: String(localized: "Taille", bundle: .module)) {
             measureInput(
                 title: String(localized: "Taille", bundle: .module), value: $model.profile.heightCm,
-                unit: String(localized: "cm", bundle: .module))
+                unit: String(localized: "cm", bundle: .module), spokenUnit: .centimeters)
         }
     }
 
@@ -104,36 +125,47 @@ struct ProfileStepView: View {
         OnboardingField(title: String(localized: "Poids actuel", bundle: .module)) {
             measureInput(
                 title: String(localized: "Poids actuel", bundle: .module), value: weightBinding,
-                unit: model.profile.weightUnit.rawValue)
+                unit: model.profile.weightUnit.rawValue, spokenUnit: OnboardingCopy.MeasureUnit(model.profile.weightUnit))
         }
     }
 
     private var unitField: some View {
         OnboardingField(title: String(localized: "Unités", bundle: .module)) {
             Picker(String(localized: "Unités", bundle: .module), selection: $model.profile.weightUnit) {
-                Text(String(localized: "kg", bundle: .module)).tag(WeightUnit.kg)
-                Text(String(localized: "lb", bundle: .module)).tag(WeightUnit.lb)
+                Text(String(localized: "kg", bundle: .module))
+                    .accessibilityLabel(OnboardingCopy.MeasureUnit.kilograms.spokenName)
+                    .tag(WeightUnit.kg)
+                Text(String(localized: "lb", bundle: .module))
+                    .accessibilityLabel(OnboardingCopy.MeasureUnit.pounds.spokenName)
+                    .tag(WeightUnit.lb)
             }
-            .pickerStyle(.segmented)
+            .adaptiveSegmentedPicker()
             .labelsHidden()
             .frame(minHeight: 48)
         }
     }
 
-    private func measureInput(title: String, value: Binding<Double?>, unit: String) -> some View {
+    /// La saisie d'une mesure : l'unité visible à côté est masquée, le champ la dit dans son étiquette.
+    private func measureInput(
+        title: String, value: Binding<Double?>, unit: String, spokenUnit: OnboardingCopy.MeasureUnit
+    ) -> some View {
         HStack(spacing: 6) {
             TextField(title, value: value, format: .number.precision(.fractionLength(0...1)))
                 .pulseNumericKeyboard()
+                .accessibilityLabel(OnboardingCopy.measureLabel(title: title, unit: spokenUnit))
             Text(unit)
                 .font(.subheadline)
                 .foregroundStyle(PulsePalette.muted)
+                .accessibilityHidden(true)
         }
         .onboardingInput()
     }
 
     private func levelField(title: String, selection: Binding<TrainingLevel?>, labels: [String]) -> some View {
         OnboardingField(title: title) {
-            ChoicePills(options: Array(zip(TrainingLevel.allCases, labels)).map { (value: $0.0, label: $0.1) }, selection: selection)
+            ChoicePills(
+                options: Array(zip(TrainingLevel.allCases, labels)).map { (value: $0.0, label: $0.1) }, selection: selection,
+                groupLabel: title)
         }
     }
 
@@ -170,5 +202,10 @@ struct ProfileStepView: View {
 #if DEBUG
 #Preview {
     OnboardingFlowView(model: OnboardingPreviewSupport.model(step: .profile))
+}
+
+#Preview("Profil, accessibilité XL") {
+    OnboardingFlowView(model: OnboardingPreviewSupport.model(step: .profile))
+        .dynamicTypeSize(.accessibility3)
 }
 #endif

@@ -71,25 +71,42 @@ public final class ActivityDetailModel {
         return String(localized: "\(day) à \(time)", bundle: .module)
     }
 
-    /// Les mesures lues, dans l'ordre de l'écran ; une mesure absente est omise.
-    public var metrics: [(label: String, value: String)] {
+    /// Les mesures lues, dans l'ordre de l'écran ; une mesure absente est omise. `spokenValue` est ce que VoiceOver lit.
+    public var metrics: [ActivityMetric] {
         guard let session else { return [] }
-        var rows: [(String, String)] = []
+        var rows: [ActivityMetric] = []
         if let meters = session.distanceMeters, meters > 0 {
-            rows.append((String(localized: "Distance", bundle: .module), PlanningText.distance(meters: meters)))
+            rows.append(ActivityMetric(
+                label: String(localized: "Distance", bundle: .module), value: PlanningText.distance(meters: meters),
+                spokenValue: PlanningText.distanceSpoken(meters: meters)))
         }
         if let minutes = session.durationMinutes, minutes > 0 {
-            rows.append((String(localized: "Durée", bundle: .module), PulseFormat.duration(minutes: Int(minutes.rounded()))))
+            let rounded = Int(minutes.rounded())
+            rows.append(ActivityMetric(
+                label: String(localized: "Durée", bundle: .module), value: PulseFormat.duration(minutes: rounded),
+                spokenValue: PulseSpoken.duration(seconds: rounded * 60)))
         }
-        if session.kind == .run, let pace = PlanningText.pace(minutes: session.durationMinutes, meters: session.distanceMeters) {
-            rows.append((String(localized: "Allure", bundle: .module), pace))
+        if session.kind == .run, let pace = PlanningText.pace(minutes: session.durationMinutes, meters: session.distanceMeters),
+           let spoken = PlanningText.paceSpoken(minutes: session.durationMinutes, meters: session.distanceMeters) {
+            rows.append(ActivityMetric(label: String(localized: "Allure", bundle: .module), value: pace, spokenValue: spoken))
         }
         if let heartRate = session.averageHeartRate, heartRate > 0 {
-            rows.append((String(localized: "FC moyenne", bundle: .module), "\(Int(heartRate.rounded())) bpm"))
+            let rounded = Int(heartRate.rounded())
+            rows.append(ActivityMetric(
+                label: String(localized: "FC moyenne", bundle: .module), value: "\(rounded) bpm",
+                spokenValue: PlanningText.heartRateSpoken(rounded)))
         }
         if let estimated = session.estimatedRPE {
-            rows.append((String(localized: "RPE estimé", bundle: .module), PulseFormat.decimal(estimated, maxFractionDigits: 1)))
+            let value = PulseFormat.decimal(estimated, maxFractionDigits: 1)
+            rows.append(ActivityMetric(label: String(localized: "RPE estimé", bundle: .module), value: value, spokenValue: value))
         }
         return rows
     }
+}
+
+/// Une mesure de l'écran de détail : son libellé, sa valeur affichée et la même valeur sans abréviation pour VoiceOver.
+public struct ActivityMetric: Equatable, Sendable {
+    public let label: String
+    public let value: String
+    public let spokenValue: String
 }

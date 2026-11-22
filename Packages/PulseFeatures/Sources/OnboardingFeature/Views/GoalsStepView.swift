@@ -43,7 +43,8 @@ struct GoalsStepView: View {
             OnboardingSectionTitle(String(localized: "Séances par semaine", bundle: .module))
             ChoicePills(
                 options: (2...6).map { (value: $0, label: String($0)) },
-                selection: model.optionalBinding(\.trainingDaysPerWeek))
+                selection: model.optionalBinding(\.trainingDaysPerWeek),
+                spokenLabel: { OnboardingCopy.sessionsPerWeekLabel($0) })
         }
     }
 
@@ -112,5 +113,10 @@ struct GoalsStepView: View {
 #if DEBUG
 #Preview {
     OnboardingFlowView(model: OnboardingPreviewSupport.model(step: .goals))
+}
+
+#Preview("Objectifs, accessibilité XL") {
+    OnboardingFlowView(model: OnboardingPreviewSupport.model(step: .goals))
+        .dynamicTypeSize(.accessibility3)
 }
 #endif

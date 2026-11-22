@@ -143,13 +143,36 @@ public final class PlanningModel {
     /// « Validée · 11 240 kg », « Manquée », « Sortie facile · 45 min », « Déplacée de mardi », « Legs déplacée à samedi »,
     /// « Choisi à l'inscription », ou la raison d'une règle anti-interférence (« Déplacée : 36 h après les jambes »).
     public func detail(of day: PlanningDay) -> String {
+        detail(of: day, spoken: false)
+    }
+
+    /// Le détail d'un jour tel que VoiceOver le lit : « Validée, 11 240 kilos », « Sortie facile, 45 minutes », sans point
+    /// médian ni abréviation.
+    public func spokenDetail(of day: PlanningDay) -> String {
+        detail(of: day, spoken: true)
+    }
+
+    /// « mercredi 18, aujourd'hui, Legs, Prévue » : ce que VoiceOver lit d'un jour de la bande ou de la liste.
+    func accessibilityText(of day: PlanningDay) -> String {
+        PlanningText.dayAccessibility(
+            weekday: weekdayName(day.date), number: dayNumber(day), isToday: day.isToday, title: title(of: day),
+            detail: spokenDetail(of: day))
+    }
+
+    private func detail(of day: PlanningDay, spoken: Bool) -> String {
         if day.state == .planned || day.state == .rest, let line = day.scheduled, AntiInterference.isRule(line),
            let reason = line.moveReasonText {
             return reason
         }
         switch day.state {
         case .done:
-            let results = day.sessions.map(PlanningText.result(of:)).joined(separator: " + ")
+            let results = day.sessions.map { PlanningText.result(of: $0, spoken: spoken) }
+                .joined(separator: spoken ? String(localized: " et ", bundle: .module) : " + ")
+            if spoken {
+                return day.routine == nil
+                    ? String(localized: "En plus, \(results)", bundle: .module)
+                    : String(localized: "Validée, \(results)", bundle: .module)
+            }
             return day.routine == nil
                 ? String(localized: "En plus · \(results)", bundle: .module)
                 : String(localized: "Validée · \(results)", bundle: .module)
@@ -160,7 +183,7 @@ public final class PlanningModel {
                 return String(localized: "Déplacée de \(weekdayName(origin))", bundle: .module)
             }
             guard let routine = day.routine else { return "" }
-            return routine.kind == .run ? PlanningText.run(routine) : String(localized: "Prévue", bundle: .module)
+            return routine.kind == .run ? PlanningText.run(routine, spoken: spoken) : String(localized: "Prévue", bundle: .module)
         case .rest:
             if let moved = days.first(where: { $0.movedFrom.map { environment.calendar.isDate($0, inSameDayAs: day.date) } ?? false }),
                let routine = moved.routine {

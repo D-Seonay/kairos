@@ -70,7 +70,8 @@ struct OnboardingInfoRow: View {
     }
 }
 
-/// Un champ du formulaire : son libellé au-dessus, sa saisie dans un cadre (`.field`).
+/// Un champ du formulaire : son libellé au-dessus, sa saisie dans un cadre (`.field`). Le contrôle porte le même libellé
+/// pour VoiceOver (champ, sélecteur ou groupe de pilules) : le titre visible n'est pas lu une seconde fois.
 struct OnboardingField<Content: View>: View {
     let title: String
     @ViewBuilder let content: Content
@@ -79,13 +80,32 @@ struct OnboardingField<Content: View>: View {
         VStack(alignment: .leading, spacing: 6) {
             Text(title)
                 .pulseEyebrow()
+                .accessibilityHidden(true)
             content
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
+/// Un sélecteur segmenté, qui devient un menu aux tailles d'accessibilité : ses segments tronqueraient leurs libellés.
+private struct AdaptiveSegmentedPicker: ViewModifier {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    func body(content: Content) -> some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            content.pickerStyle(.menu)
+        } else {
+            content.pickerStyle(.segmented)
+        }
+    }
+}
+
 extension View {
+    /// Segmenté, ou menu aux tailles d'accessibilité.
+    func adaptiveSegmentedPicker() -> some View {
+        modifier(AdaptiveSegmentedPicker())
+    }
+
     /// Le cadre d'une saisie : fond `surface`, bord `line`.
     func onboardingInput() -> some View {
         let shape = RoundedRectangle(cornerRadius: PulseMetrics.radiusSmall, style: .continuous)
@@ -108,16 +128,37 @@ extension OnboardingModel {
     }
 }
 
-/// Le squelette d'un écran : contenu défilant, pied collé en bas avec le bouton principal et le message d'erreur.
+/// Le squelette d'un écran : contenu défilant, pied collé en bas avec le bouton principal et le message d'erreur. Aux tailles
+/// d'accessibilité le pied descend à la fin du contenu : collé, il occuperait la moitié de l'écran sans défiler.
 struct OnboardingScreen<Content: View, Footer: View>: View {
     let errorMessage: String?
     @ViewBuilder let content: Content
     @ViewBuilder let footer: Footer
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                scroll(footerInside: true)
+            } else {
+                scroll(footerInside: false)
+                    .safeAreaInset(edge: .bottom, spacing: 0) {
+                        footerBlock
+                            .padding(.horizontal, PulseMetrics.spacing)
+                            .padding(.top, 14)
+                            .padding(.bottom, 8)
+                            .background(fade)
+                    }
+            }
+        }
+        .pulseAnnounceError(errorMessage)
+    }
+
+    private func scroll(footerInside: Bool) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
                 content
+                if footerInside { footerBlock }
             }
             .padding(.horizontal, PulseMetrics.spacing)
             .padding(.top, 18)
@@ -125,21 +166,18 @@ struct OnboardingScreen<Content: View, Footer: View>: View {
         }
         .scrollBounceBehavior(.basedOnSize)
         .scrollDismissesKeyboard(.interactively)
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            VStack(spacing: 10) {
-                if let errorMessage {
-                    Text(errorMessage)
-                        .font(.footnote)
-                        .foregroundStyle(PulsePalette.bad)
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: .infinity)
-                }
-                footer
+    }
+
+    private var footerBlock: some View {
+        VStack(spacing: 10) {
+            if let errorMessage {
+                Text(errorMessage)
+                    .font(.footnote)
+                    .foregroundStyle(PulsePalette.bad)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
             }
-            .padding(.horizontal, PulseMetrics.spacing)
-            .padding(.top, 14)
-            .padding(.bottom, 8)
-            .background(fade)
+            footer
         }
     }
 

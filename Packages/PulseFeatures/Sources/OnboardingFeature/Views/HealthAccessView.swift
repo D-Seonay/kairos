@@ -63,4 +63,9 @@ struct HealthAccessView: View {
 #Preview {
     OnboardingFlowView(model: OnboardingPreviewSupport.model(step: .health))
 }
+
+#Preview("Apple Santé, accessibilité XL") {
+    OnboardingFlowView(model: OnboardingPreviewSupport.model(step: .health))
+        .dynamicTypeSize(.accessibility3)
+}
 #endif

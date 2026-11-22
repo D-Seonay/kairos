@@ -30,6 +30,7 @@ struct MonthView: View {
         .pulseScreenBackground(aura: 0.4)
         .navigationTitle(String(localized: "Mois et série", bundle: .module))
         .pulseInlineTitle()
+        .pulseAnnounceError(model.errorMessage)
         .task { await model.load() }
     }
 
@@ -81,21 +82,28 @@ struct MonthView: View {
         }
     }
 
+    /// Les trois marques sur une ligne ; l'une sous l'autre quand elles ne tiennent pas.
     private var legend: some View {
-        HStack(spacing: 16) {
-            legendItem(String(localized: "Séance validée", bundle: .module)) {
-                Circle().fill(PulsePalette.ink).frame(width: 10, height: 10)
-            }
-            legendItem(String(localized: "Prévue", bundle: .module)) {
-                Circle().strokeBorder(PulsePalette.ink, lineWidth: 1).frame(width: 10, height: 10)
-            }
-            legendItem(String(localized: "Deux séances ou record", bundle: .module)) {
-                Circle().fill(PulsePalette.signal).frame(width: 5, height: 5)
-            }
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 16) { legendItems }
+            VStack(alignment: .leading, spacing: 8) { legendItems }
         }
         .font(.caption)
         .foregroundStyle(PulsePalette.text2)
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    @ViewBuilder
+    private var legendItems: some View {
+        legendItem(String(localized: "Séance validée", bundle: .module)) {
+            Circle().fill(PulsePalette.ink).frame(width: 10, height: 10)
+        }
+        legendItem(String(localized: "Prévue", bundle: .module)) {
+            Circle().strokeBorder(PulsePalette.ink, lineWidth: 1).frame(width: 10, height: 10)
+        }
+        legendItem(String(localized: "Deux séances ou record", bundle: .module)) {
+            Circle().fill(PulsePalette.signal).frame(width: 5, height: 5)
+        }
     }
 
     private func legendItem(_ text: String, @ViewBuilder mark: () -> some View) -> some View {
@@ -151,23 +159,15 @@ private struct MonthDayCell: View {
 struct StreakCard: View {
     let streak: StreakSummary
     let weekText: String
+    /// Le grand chiffre suit Dynamic Type, comme les tuiles des statistiques.
+    @ScaledMetric(relativeTo: .largeTitle) private var scoreSize: CGFloat = 52
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         OpalCard {
             VStack(alignment: .leading, spacing: 14) {
-                HStack(alignment: .firstTextBaseline, spacing: 10) {
-                    Image(systemName: "flame.fill")
-                        .font(.title2)
-                        .foregroundStyle(streak.streak > 0 ? PulsePalette.signal : PulsePalette.opalMuted)
-                        .accessibilityHidden(true)
-                    Text("\(streak.streak)")
-                        .font(PulseFont.score(size: 52))
-                        .foregroundStyle(PulsePalette.opalInk)
-                    Text(String(localized: "semaines d'affilée", bundle: .module))
-                        .font(.subheadline)
-                        .foregroundStyle(PulsePalette.opalMuted)
-                }
-                .accessibilityElement(children: .combine)
+                counter
+                    .accessibilityElement(children: .combine)
                 Text(weekText)
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(PulsePalette.opalInk)
@@ -185,6 +185,25 @@ struct StreakCard: View {
                     .foregroundStyle(PulsePalette.opalMuted)
                     .fixedSize(horizontal: false, vertical: true)
             }
+        }
+    }
+
+    /// La flamme, le compteur et « semaines d'affilée » sur une ligne ; en colonne aux tailles d'accessibilité.
+    private var counter: some View {
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 6))
+            : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: 10))
+        return layout {
+            Image(systemName: "flame.fill")
+                .font(.title2)
+                .foregroundStyle(streak.streak > 0 ? PulsePalette.signal : PulsePalette.opalMuted)
+                .accessibilityHidden(true)
+            Text("\(streak.streak)")
+                .font(PulseFont.score(size: scoreSize))
+                .foregroundStyle(PulsePalette.opalInk)
+            Text(String(localized: "semaines d'affilée", bundle: .module))
+                .font(.subheadline)
+                .foregroundStyle(PulsePalette.opalMuted)
         }
     }
 

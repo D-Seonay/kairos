@@ -5,13 +5,13 @@ import SwiftUI
 import TrainFeature
 
 /// La bande des 7 jours (maquette `planning`) : aujourd'hui en plein, un point plein pour un jour validé, creux pour un jour
-/// prévu.
+/// prévu. Elle double la liste « Cette semaine » : l'appelant la plafonne à `...xxxLarge`, sept colonnes ne tiennent pas plus.
 struct WeekStrip: View {
     let model: PlanningModel
     let onSelect: (PlanningDay) -> Void
 
     var body: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 4) {
             ForEach(model.days) { day in
                 Button { onSelect(day) } label: {
                     VStack(spacing: 4) {
@@ -22,7 +22,7 @@ struct WeekStrip: View {
                         mark(day)
                     }
                     .foregroundStyle(day.isToday ? PulsePalette.page : PulsePalette.text)
-                    .frame(maxWidth: .infinity, minHeight: 64)
+                    .frame(minWidth: 44, maxWidth: .infinity, minHeight: 64)
                     .background {
                         RoundedRectangle(cornerRadius: PulseMetrics.radiusTiny)
                             .fill(day.isToday ? PulsePalette.ink : PulsePalette.surface)
@@ -30,14 +30,11 @@ struct WeekStrip: View {
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(PressableButtonStyle())
-                .accessibilityLabel(accessibilityText(day))
+                .accessibilityLabel(model.accessibilityText(of: day))
+                .accessibilityAddTraits(day.isToday ? .isSelected : [])
                 .accessibilityIdentifier(PlanningIdentifiers.stripPrefix + model.dayNumber(day))
             }
         }
-    }
-
-    private func accessibilityText(_ day: PlanningDay) -> String {
-        "\(model.weekdayName(day.date)) \(model.dayNumber(day)), \(model.title(of: day)), \(model.detail(of: day))"
     }
 
     @ViewBuilder
@@ -61,27 +58,27 @@ struct TodayPlanCard: View {
     let day: PlanningDay
     let onStart: () -> Void
     let onResume: () -> Void
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         OpalCard {
             VStack(alignment: .leading, spacing: 12) {
-                HStack(spacing: 12) {
+                HStack(alignment: .top, spacing: 12) {
                     IconChip(systemName: model.icon(of: day), tone: .inverted)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(String(localized: "Aujourd'hui · \(model.weekdayName(day.date)) \(model.dayNumber(day))", bundle: .module))
-                            .pulseEyebrow(PulsePalette.opalMuted)
-                        Text(model.title(of: day))
-                            .font(PulseFont.title(.title2, weight: .semibold))
-                            .foregroundStyle(PulsePalette.opalInk)
+                    VStack(alignment: .leading, spacing: 6) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(heading(spoken: false))
+                                .pulseEyebrow(PulsePalette.opalMuted)
+                                .accessibilityLabel(heading(spoken: true))
+                            Text(model.title(of: day))
+                                .font(PulseFont.title(.title2, weight: .semibold))
+                                .foregroundStyle(PulsePalette.opalInk)
+                        }
+                        // Aux tailles d'accessibilité, le badge passe sous le titre : à côté, il l'écraserait.
+                        if isLightened, dynamicTypeSize.isAccessibilitySize { adjustedBadge }
                     }
                     Spacer(minLength: 0)
-                    if train.today?.isLightened == true, day.routine?.kind == .strength {
-                        Text(String(localized: "Ajustée", bundle: .module))
-                            .font(.caption.weight(.semibold))
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .overlay(Capsule().strokeBorder(PulsePalette.opalLine))
-                    }
+                    if isLightened, !dynamicTypeSize.isAccessibilitySize { adjustedBadge }
                 }
                 Text(subtitle)
                     .font(.subheadline)
@@ -97,6 +94,22 @@ struct TodayPlanCard: View {
             }
         }
         .accessibilityIdentifier(PlanningIdentifiers.todayCard)
+    }
+
+    private var isLightened: Bool {
+        train.today?.isLightened == true && day.routine?.kind == .strength
+    }
+
+    private var adjustedBadge: some View {
+        Text(String(localized: "Ajustée", bundle: .module))
+            .font(.caption.weight(.semibold))
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .overlay(Capsule().strokeBorder(PulsePalette.opalLine))
+    }
+
+    private func heading(spoken: Bool) -> String {
+        PlanningText.todayHeading(weekday: model.weekdayName(day.date), number: model.dayNumber(day), spoken: spoken)
     }
 
     private var subtitle: String {
@@ -129,6 +142,8 @@ struct WeekDayRow: View {
     let day: PlanningDay
     /// Ouvre la séance faite ; `nil` sans séance faite.
     let onOpen: (() -> Void)?
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @ScaledMetric(relativeTo: .title3) private var dateWidth: CGFloat = 40
 
     var body: some View {
         Group {
@@ -152,6 +167,7 @@ struct WeekDayRow: View {
             }
         }
         .accessibilityElement(children: .combine)
+        .accessibilityLabel(model.accessibilityText(of: day))
         .accessibilityAction(named: String(localized: "Déplacer", bundle: .module)) {
             if !model.targets(for: day).isEmpty { model.moving = day }
         }
@@ -164,25 +180,7 @@ struct WeekDayRow: View {
     private var row: some View {
         ObsidianCard {
             HStack(spacing: 14) {
-                VStack(spacing: 0) {
-                    Text(model.weekdayText(day))
-                        .font(.caption)
-                        .foregroundStyle(PulsePalette.text2)
-                    Text(model.dayNumber(day))
-                        .font(.title3.weight(.semibold).monospacedDigit())
-                        .foregroundStyle(PulsePalette.text)
-                }
-                .frame(width: 40)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(model.title(of: day))
-                        .font(.headline)
-                        .foregroundStyle(day.state == .missed ? PulsePalette.text2 : PulsePalette.text)
-                    Text(model.detail(of: day))
-                        .font(.footnote)
-                        .foregroundStyle(PulsePalette.text2)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                dateAndTexts
                 trailing
             }
             .frame(minHeight: 44)
@@ -192,6 +190,51 @@ struct WeekDayRow: View {
             if day.isToday {
                 RoundedRectangle(cornerRadius: PulseMetrics.radius).strokeBorder(PulsePalette.ink, lineWidth: 1.5)
             }
+        }
+    }
+
+    /// La date, puis la séance et son détail : côte à côte, ou la date au-dessus aux tailles d'accessibilité.
+    private var dateAndTexts: some View {
+        let isLarge = dynamicTypeSize.isAccessibilitySize
+        let layout = isLarge
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 6))
+            : AnyLayout(HStackLayout(spacing: 14))
+        return layout {
+            dateColumn(isLarge: isLarge)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(model.title(of: day))
+                    .font(.headline)
+                    .foregroundStyle(day.state == .missed ? PulsePalette.text2 : PulsePalette.text)
+                Text(model.detail(of: day))
+                    .font(.footnote)
+                    .foregroundStyle(PulsePalette.text2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    @ViewBuilder
+    private func dateColumn(isLarge: Bool) -> some View {
+        if isLarge {
+            HStack(spacing: 8) {
+                Text(model.weekdayText(day))
+                    .font(.caption)
+                    .foregroundStyle(PulsePalette.text2)
+                Text(model.dayNumber(day))
+                    .font(.title3.weight(.semibold).monospacedDigit())
+                    .foregroundStyle(PulsePalette.text)
+            }
+        } else {
+            VStack(spacing: 0) {
+                Text(model.weekdayText(day))
+                    .font(.caption)
+                    .foregroundStyle(PulsePalette.text2)
+                Text(model.dayNumber(day))
+                    .font(.title3.weight(.semibold).monospacedDigit())
+                    .foregroundStyle(PulsePalette.text)
+            }
+            .frame(width: dateWidth)
         }
     }
 

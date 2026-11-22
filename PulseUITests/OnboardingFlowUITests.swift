@@ -28,8 +28,8 @@ final class OnboardingFlowUITests: XCTestCase {
         // Le cadran porte l'identifiant et le trait « texte statique » : il est exposé comme `staticText`.
         let calibrationScore = app.staticTexts["onboarding.calibration.score"]
         XCTAssertTrue(calibrationScore.waitForExistence(timeout: 15))
-        // La catégorie est un `Text` simple : `staticText`, dont le libellé est le nom localisé.
-        XCTAssertEqual(app.staticTexts["onboarding.calibration.category"].label, "Forme optimale")
+        // Le cadran dit le score et la catégorie d'un seul élément (VoiceOver) : le libellé contient le nom de la catégorie.
+        XCTAssertTrue(calibrationScore.label.localizedCaseInsensitiveContains("forme optimale"))
 
         tapWhenHittable(app.buttons["onboarding.calibration.finish"], in: app)
 
