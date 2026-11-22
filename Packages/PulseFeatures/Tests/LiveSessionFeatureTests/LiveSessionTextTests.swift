@@ -181,7 +181,7 @@ import Testing
         #expect(NumericKeypad.stepText(for: .weight, increment: 2.5, sign: 1) == "+2,5")
         #expect(NumericKeypad.stepText(for: .reps, increment: 2.5, sign: -1) == "\u{2212}1")
         #expect(NumericKeypad.stepText(for: .duration, increment: 2.5, sign: 1) == "+5")
-        #expect(NumericKeypad.stepSpokenText(for: .weight, increment: 2.5, sign: -1) == "Retirer 2,5")
+        #expect(NumericKeypad.stepSpokenText(for: .weight, increment: 2.5, sign: -1) == "Retirer 2,5 kilos")
         #expect(NumericKeypad.identifier(for: .digit(7)) == "live.key.7")
         #expect(NumericKeypad.identifier(for: .next) == "live.key.next")
     }

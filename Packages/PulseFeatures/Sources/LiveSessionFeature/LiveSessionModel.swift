@@ -20,8 +20,9 @@ public final class LiveSessionModel {
     @ObservationIgnored let environment: LiveSessionEnvironment
     @ObservationIgnored private let haptics: LiveSessionHaptics
     @ObservationIgnored private var pendingChanges = 0
-    /// Le début du repos dont la fin a déjà fait vibrer : +30 s ne la fait pas vibrer deux fois.
-    @ObservationIgnored private var vibratedRestStart: Date?
+    /// Le début du repos dont la fin a déjà fait vibrer : +30 s ne la fait pas vibrer deux fois. L'écran s'en sert aussi pour
+    /// annoncer la fin du repos à VoiceOver.
+    private(set) var reachedRestEnd: Date?
 
     init(session: LiveSession, environment: LiveSessionEnvironment, haptics: LiveSessionHaptics = .system) {
         self.session = session
@@ -212,8 +213,8 @@ public final class LiveSessionModel {
 
     /// L'écran appelle cette méthode quand le repos arrive à sa fin : une vibration longue, une seule fois par repos.
     public func didReachRestEnd() {
-        guard let rest = session.rest, vibratedRestStart != rest.startedAt else { return }
-        vibratedRestStart = rest.startedAt
+        guard let rest = session.rest, reachedRestEnd != rest.startedAt else { return }
+        reachedRestEnd = rest.startedAt
         haptics.restEnded()
     }
 

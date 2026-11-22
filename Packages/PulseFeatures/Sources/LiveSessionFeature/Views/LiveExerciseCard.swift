@@ -27,7 +27,7 @@ struct LiveExerciseCard: View {
         Section {
             header
                 .listRowBackground(Self.background(top: true))
-            if !typeSize.isAccessibilitySize {
+            if !LiveSetRow.usesStackedLayout(typeSize) {
                 LiveColumnsHeader(loadKind: exercise.loadKind, tracksDuration: exercise.tracksDuration)
                     .listRowBackground(Self.background())
             }
@@ -51,8 +51,11 @@ struct LiveExerciseCard: View {
 
     // MARK: En-tête
 
+    /// Aux tailles d'accessibilité, les boutons passent sous le nom pour lui laisser toute la largeur.
     private var header: some View {
-        HStack(alignment: .top, spacing: 8) {
+        let layout = typeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4)) : AnyLayout(HStackLayout(alignment: .top, spacing: 8))
+        return layout {
             VStack(alignment: .leading, spacing: 4) {
                 Button {
                     isShowingSheet = true
@@ -65,13 +68,17 @@ struct LiveExerciseCard: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                // Un titre : le rotor « Titres » saute d'un exercice à l'autre.
+                .accessibilityAddTraits(.isHeader)
                 .accessibilityHint(String(localized: "Ouvre la fiche de l'exercice", bundle: .module))
                 details
             }
-            if exercise.isBarbell && exercise.loadKind == .external {
-                platesButton
+            HStack(spacing: 8) {
+                if exercise.isBarbell && exercise.loadKind == .external {
+                    platesButton
+                }
+                menu
             }
-            menu
         }
         .padding(.horizontal, 12)
         .padding(.top, 4)
@@ -113,7 +120,13 @@ struct LiveExerciseCard: View {
             Text(lastTime).font(.footnote).foregroundStyle(PulsePalette.text2)
         }
         if let dayNote = exercise.dayNote {
-            Label(dayNote, systemImage: "sparkles").font(.footnote).foregroundStyle(accent)
+            Label {
+                Text(dayNote)
+            } icon: {
+                Image(systemName: "sparkles").accessibilityHidden(true)
+            }
+            .font(.footnote)
+            .foregroundStyle(accent)
         }
         if let cap = exercise.rpeCap {
             Text(Self.rpeCapText(cap)).font(.footnote.weight(.semibold)).foregroundStyle(PulsePalette.warn)
@@ -228,6 +241,7 @@ struct LiveExerciseCard: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(Self.addSetSpokenText(exercise: exercise.name))
         .accessibilityIdentifier(LiveSessionIdentifiers.addSet)
     }
 
@@ -256,32 +270,40 @@ extension LiveExerciseCard {
         return String(localized: "Super set \(String(letter))", bundle: .module)
     }
 
+    /// « Ajouter une série à Développé couché » : chaque carte a son bouton, VoiceOver dit lequel.
+    nonisolated static func addSetSpokenText(exercise: String) -> String {
+        String(localized: "Ajouter une série à \(exercise)", bundle: .module)
+    }
+
     /// « 2,5 kg » : un incrément de charge.
     nonisolated static func incrementText(_ incrementKg: Double) -> String {
         String(localized: "\(PulseFormat.decimal(incrementKg, maxFractionDigits: 2)) kg", bundle: .module)
     }
 }
 
-/// Les titres des colonnes d'une carte, alignés sur les cellules de `LiveSetRow`.
+/// Les titres des colonnes d'une carte, alignés sur les cellules de `LiveSetRow` : mêmes largeurs, qui suivent le texte.
 private struct LiveColumnsHeader: View {
     let loadKind: LoadKind
     let tracksDuration: Bool
+    @ScaledMetric(relativeTo: .title2) private var weightWidth = LiveSetRow.weightWidth
+    @ScaledMetric(relativeTo: .title2) private var valueWidth = LiveSetRow.valueWidth
+    @ScaledMetric(relativeTo: .title2) private var rpeWidth = LiveSetRow.rpeWidth
 
     var body: some View {
         HStack(spacing: 6) {
             Text(String(localized: "Série", bundle: .module)).frame(width: LiveSetRow.badgeWidth)
             Text(String(localized: "Précédent", bundle: .module)).frame(maxWidth: .infinity)
-            Text(LiveSetRow.weightColumnTitle(for: loadKind)).frame(width: LiveSetRow.weightWidth)
+            Text(LiveSetRow.weightColumnTitle(for: loadKind)).frame(width: weightWidth)
             Text(tracksDuration ? String(localized: "Sec", bundle: .module) : String(localized: "Reps", bundle: .module))
-                .frame(width: LiveSetRow.valueWidth)
-            Text(String(localized: "RPE", bundle: .module)).frame(width: LiveSetRow.rpeWidth)
+                .frame(width: valueWidth)
+            Text(String(localized: "RPE", bundle: .module)).frame(width: rpeWidth)
             Color.clear.frame(width: LiveSetRow.targetHeight, height: 1)
         }
         .font(.caption2.weight(.semibold))
         .foregroundStyle(PulsePalette.muted)
         .lineLimit(1)
         .minimumScaleFactor(0.7)
-        .padding(.horizontal, 12)
+        .padding(.horizontal, LiveSetRow.horizontalPadding)
         .padding(.vertical, 2)
         .accessibilityHidden(true)
     }

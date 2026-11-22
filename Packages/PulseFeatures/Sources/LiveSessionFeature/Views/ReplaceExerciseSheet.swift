@@ -49,7 +49,9 @@ struct ReplaceExerciseSheet: View {
     private var alternatives: some View {
         PulseSectionHeader(String(localized: "Alternatives", bundle: .module))
         if isLoading {
-            ProgressView().frame(maxWidth: .infinity)
+            ProgressView()
+                .frame(maxWidth: .infinity)
+                .accessibilityLabel(Self.loadingSpokenText)
         } else if options.isEmpty {
             Text(String(localized: "Pas d'alternative avec ton matériel. Cherche un autre exercice.", bundle: .module))
                 .font(.subheadline)
@@ -68,6 +70,7 @@ struct ReplaceExerciseSheet: View {
                 }
             }
             .buttonStyle(PressableButtonStyle())
+            .accessibilityLabel(Self.optionSpokenLabel(name: option.info.name, replacement: option.exercise))
             .accessibilityHint(String(localized: "Remplace \(exercise.name) pour les séries restantes", bundle: .module))
         }
         Button {
@@ -129,6 +132,30 @@ struct ReplaceExerciseSheet: View {
             parts.append(String(localized: "charge estimée", bundle: .module))
         }
         return parts.joined(separator: " · ")
+    }
+
+    /// « Chargement des alternatives » : ce que la roue d'attente fait.
+    nonisolated static var loadingSpokenText: String {
+        String(localized: "Chargement des alternatives", bundle: .module)
+    }
+
+    /// « 2 séries, 24 kilos, 10 répétitions, charge estimée » : `proposalText` dit en mots.
+    nonisolated static func proposalSpokenText(_ replacement: LiveExercise) -> String {
+        let working = replacement.sets.filter { $0.setType != .warmup }
+        var parts = [PulseSpoken.count(working.count, singular: String(localized: "série", bundle: .module),
+                                       plural: String(localized: "séries", bundle: .module))]
+        guard let first = working.first else { return parts[0] }
+        if let weight = first.proposed.weightKg { parts.append(LiveSetRow.kilos(weight)) }
+        if let reps = first.proposed.reps { parts.append(LiveSetRow.repetitions(reps)) }
+        if replacement.lastTimeText == nil, first.proposed.weightKg != nil {
+            parts.append(String(localized: "charge estimée", bundle: .module))
+        }
+        return parts.joined(separator: ", ")
+    }
+
+    /// « Développé haltères, 2 séries, 24 kilos, 10 répétitions, charge estimée ».
+    nonisolated static func optionSpokenLabel(name: String, replacement: LiveExercise) -> String {
+        String(localized: "\(name), \(proposalSpokenText(replacement))", bundle: .module)
     }
 
     private static func icon(for equipment: Equipment) -> String {

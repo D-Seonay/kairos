@@ -13,7 +13,6 @@ public struct LiveSessionView: View {
     @State private var rpeSet: UUID?
     @State private var isAddingExercise = false
     @Environment(\.pulseTheme) private var theme
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public init(model: LiveSessionModel, onFinish: @escaping () -> Void, onAbandon: @escaping () -> Void) {
         self.model = model
@@ -30,14 +29,16 @@ public struct LiveSessionView: View {
                     .foregroundStyle(PulsePalette.bad)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 16)
-                    .accessibilityAddTraits(.updatesFrequently)
             }
             exerciseList
         }
         .background(PulsePalette.liveBackground.ignoresSafeArea())
         .safeAreaInset(edge: .bottom, spacing: 0) { bottomPanel }
-        .animation(reduceMotion ? nil : .snappy(duration: 0.2), value: model.focus)
-        .animation(reduceMotion ? nil : .snappy(duration: 0.2), value: rpeSet)
+        .pulseAnimation(.snappy(duration: 0.2), value: model.focus)
+        .pulseAnimation(.snappy(duration: 0.2), value: rpeSet)
+        .pulseAnnounceError(model.errorMessage)
+        // Le bandeau de repos est lu après toute la liste : son début et sa fin sont annoncés, une fois chacun.
+        .pulseAnnounceOnce(restAnnouncement?.text, id: restAnnouncement?.event)
         .sheet(isPresented: $isAddingExercise) { library }
         .preferredColorScheme(.dark)
     }
@@ -84,7 +85,16 @@ public struct LiveSessionView: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(Self.addExerciseSpokenText)
         .accessibilityIdentifier(LiveSessionIdentifiers.addExercise)
+    }
+
+    nonisolated static var addExerciseSpokenText: String {
+        String(localized: "Ajouter un exercice", bundle: .module)
+    }
+
+    private var restAnnouncement: RestBanner.Announcement? {
+        RestBanner.announcement(for: model.session.rest, endReached: model.reachedRestEnd, in: model.session)
     }
 
     private var library: some View {
@@ -109,19 +119,34 @@ public struct LiveSessionView: View {
             if let rest = model.session.rest {
                 RestBanner(model: model, rest: rest)
             }
+            // Le clavier et les pilules restent utilisables : leur texte s'arrête à `accessibility1`.
             if let target = rpeTarget {
                 RPEPicker(title: RPEPicker.title(exercise: target.exercise.name, setIndex: target.index),
+                          spokenTitle: RPEPicker.spokenTitle(exercise: target.exercise.name, setIndex: target.index),
                           selection: target.set.rpe, onSelect: { rpe in
                     rpeSet = nil
                     Task { await model.setRPE(rpe, set: target.set.id) }
                 }, onClose: { rpeSet = nil })
+                .dynamicTypeSize(...DynamicTypeSize.accessibility1)
             } else if let focus = model.focus, let target = target(of: focus.set) {
                 NumericKeypad(
                     title: NumericKeypad.title(exercise: target.exercise.name, setIndex: target.index, field: focus.kind,
                                                loadKind: target.exercise.loadKind),
+                    spokenTitle: NumericKeypad.spokenTitle(exercise: target.exercise.name, setIndex: target.index,
+                                                           field: focus.kind, loadKind: target.exercise.loadKind),
                     field: focus.kind, increment: target.exercise.incrementKg,
-                    onKey: { key in Task { await model.keypadKey(key) } }, onClose: { model.focus(nil) })
+                    onKey: { key in Task { await press(key, field: focus.kind) } }, onClose: { model.focus(nil) })
+                .dynamicTypeSize(...DynamicTypeSize.accessibility1)
             }
+        }
+    }
+
+    /// Une touche du clavier, puis la nouvelle valeur du champ dite à VoiceOver.
+    private func press(_ key: KeypadInput.Key, field: KeypadField.Kind) async {
+        let before = model.keypad.text
+        await model.keypadKey(key)
+        if let text = NumericKeypad.keypadAnnouncement(key: key, before: before, after: model.keypad.text, field: field) {
+            PulseAnnouncement.post(text)
         }
     }
 

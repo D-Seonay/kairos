@@ -1316,6 +1316,406 @@
           }
         }
       }
+    },
+    "Charge (kg)" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Charge (kg)"
+          }
+        }
+      }
+    },
+    "Lest (kg)" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lest (kg)"
+          }
+        }
+      }
+    },
+    "Assistance (kg)" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Assistance (kg)"
+          }
+        }
+      }
+    },
+    "Charge en kilos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Charge en kilos"
+          }
+        }
+      }
+    },
+    "Lest en kilos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lest en kilos"
+          }
+        }
+      }
+    },
+    "Assistance en kilos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Assistance en kilos"
+          }
+        }
+      }
+    },
+    "%@, proposé" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, proposé"
+          }
+        }
+      }
+    },
+    "%@, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, %@"
+          }
+        }
+      }
+    },
+    "répétition" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "répétition"
+          }
+        }
+      }
+    },
+    "répétitions" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "répétitions"
+          }
+        }
+      }
+    },
+    "seconde" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "seconde"
+          }
+        }
+      }
+    },
+    "secondes" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "secondes"
+          }
+        }
+      }
+    },
+    "Ouvre le clavier" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvre le clavier"
+          }
+        }
+      }
+    },
+    "Ouvre le choix du RPE" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvre le choix du RPE"
+          }
+        }
+      }
+    },
+    "Repos de %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repos de %@"
+          }
+        }
+      }
+    },
+    "Repos terminé" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repos terminé"
+          }
+        }
+      }
+    },
+    "Repos terminé. Série suivante : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repos terminé. Série suivante : %@"
+          }
+        }
+      }
+    },
+    "Repos passé" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repos passé"
+          }
+        }
+      }
+    },
+    "Repos passé. Série suivante : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repos passé. Série suivante : %@"
+          }
+        }
+      }
+    },
+    "charge en kilos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "charge en kilos"
+          }
+        }
+      }
+    },
+    "lest en kilos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "lest en kilos"
+          }
+        }
+      }
+    },
+    "assistance en kilos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "assistance en kilos"
+          }
+        }
+      }
+    },
+    "%@, série %lld, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, série %lld, %@"
+          }
+        }
+      }
+    },
+    "%@ virgule" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ virgule"
+          }
+        }
+      }
+    },
+    "%@, série %lld, RPE" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, série %lld, RPE"
+          }
+        }
+      }
+    },
+    "Ajouter un exercice" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter un exercice"
+          }
+        }
+      }
+    },
+    "Moins d'une minute" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moins d'une minute"
+          }
+        }
+      }
+    },
+    "Ajouter une série à %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter une série à %@"
+          }
+        }
+      }
+    },
+    "Par côté : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Par côté : %@"
+          }
+        }
+      }
+    },
+    "Appliquer %@, barre seule" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appliquer %@, barre seule"
+          }
+        }
+      }
+    },
+    "Appliquer %@, par côté %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appliquer %@, par côté %@"
+          }
+        }
+      }
+    },
+    "Charge %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Charge %@"
+          }
+        }
+      }
+    },
+    "%@. %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@. %@"
+          }
+        }
+      }
+    },
+    "%@. Impossible tout juste avec tes disques" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@. Impossible tout juste avec tes disques"
+          }
+        }
+      }
+    },
+    "%@ et %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ et %@"
+          }
+        }
+      }
+    },
+    "Barre" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Barre"
+          }
+        }
+      }
+    },
+    "Disques disponibles" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disques disponibles"
+          }
+        }
+      }
+    },
+    "Chargement des alternatives" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chargement des alternatives"
+          }
+        }
+      }
+    },
+    "série" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "série"
+          }
+        }
+      }
+    },
+    "charge estimée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "charge estimée"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"
