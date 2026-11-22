@@ -21,9 +21,10 @@ public enum PulseSpoken {
     }
 
     /// « 8,2 kilomètres », « 1,5 kilomètre », « 1 kilomètre ». Une décimale au plus ; le singulier s'applique sous 2, d'après la
-    /// valeur arrondie telle qu'elle est dite : 1,96 donne « 2 kilomètres ».
+    /// valeur arrondie telle qu'elle est dite : 1,96 donne « 2 kilomètres ». L'arrondi au pair le plus proche est celui des
+    /// formateurs qui affichent la distance : 1,45 km s'affiche « 1,4 km » et se dit « 1,4 kilomètre ».
     public static func kilometres(_ km: Double) -> String {
-        let rounded = (km * 10).rounded() / 10
+        let rounded = (km * 10).rounded(.toNearestOrEven) / 10
         let number = PulseFormat.grouped(rounded, maxFractionDigits: 1)
         return abs(rounded) < 2
             ? String(localized: "\(number) kilomètre", bundle: .module)

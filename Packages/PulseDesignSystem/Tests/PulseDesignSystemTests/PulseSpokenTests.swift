@@ -48,6 +48,8 @@ private let parisCalendar: Calendar = {
 @Test func kilometresPluralFollowsTheRoundedValue() {
     // 1,96 s'arrondit à 2 : dit « 2 kilomètres », jamais « 2 kilomètre ».
     #expect(PulseSpoken.kilometres(1.96) == "2 kilomètres")
+    #expect(PulseSpoken.kilometres(1.45) == "1,4 kilomètre")
+    #expect(PulseSpoken.kilometres(5.25) == "5,2 kilomètres")
     #expect(PulseSpoken.kilometres(1.94) == "1,9 kilomètre")
 }
 
