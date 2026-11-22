@@ -134,6 +134,7 @@ private struct ProfileHeader: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(spoken)
         .accessibilityAddTraits(.isHeader)
+        .accessibilityIdentifier(ProfileIdentifiers.screen)
     }
 
     private var spoken: String {

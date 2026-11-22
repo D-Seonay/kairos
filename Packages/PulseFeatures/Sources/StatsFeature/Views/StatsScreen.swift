@@ -80,6 +80,7 @@ public struct StatsScreen: View {
                 .tracking(-0.6)
                 .foregroundStyle(PulsePalette.text)
                 .accessibilityAddTraits(.isHeader)
+                .accessibilityIdentifier(StatsIdentifiers.screen)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }

@@ -40,13 +40,13 @@ final class AccessibilityAuditUITests: XCTestCase {
         try audit(app, screen: "Planning")
 
         openTab("Stats", in: app)
-        XCTAssertTrue(app.scrollViews.firstMatch.waitForExistence(timeout: 10))
+        // Le titre de l'onglet (`stats.screen`) : il n'existe que sur Stats, contrairement à un défilement du Planning encore là.
+        XCTAssertTrue(app.descendants(matching: .any)["stats.screen"].waitForExistence(timeout: 10))
         try audit(app, screen: "Stats")
 
         openTab("Profil", in: app)
-        XCTAssertTrue(app.scrollViews.firstMatch.waitForExistence(timeout: 10)
-            || app.tables.firstMatch.waitForExistence(timeout: 10)
-            || app.collectionViews.firstMatch.waitForExistence(timeout: 10))
+        // L'en-tête du profil (`profile.screen`) : propre à l'onglet Profil.
+        XCTAssertTrue(app.descendants(matching: .any)["profile.screen"].waitForExistence(timeout: 10))
         try audit(app, screen: "Profil")
 
         // Séance libre : l'écran de séance en direct, puis le récap après « Terminer ».
@@ -100,7 +100,8 @@ final class AccessibilityAuditUITests: XCTestCase {
 
     // MARK: Aide
 
-    /// Attend l'élément, le fait défiler vers le haut jusqu'à ce qu'il soit touchable (au plus `maxSwipes` fois), puis le touche.
+    /// Attend l'élément, puis glisse le doigt vers le haut (`swipeUp`, qui montre le contenu plus bas) tant qu'il n'est pas
+    /// touchable, au plus `maxSwipes` fois, avant de le toucher.
     @MainActor
     private func tapWhenHittable(_ element: XCUIElement, in app: XCUIApplication, timeout: TimeInterval = 5) {
         XCTAssertTrue(element.waitForExistence(timeout: timeout), "Élément introuvable : \(element)")

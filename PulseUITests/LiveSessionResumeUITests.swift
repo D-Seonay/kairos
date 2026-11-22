@@ -80,13 +80,14 @@ final class LiveSessionResumeUITests: XCTestCase {
         key.tap()
     }
 
-    /// La validation passe par le service : l'étiquette de la coche change après le toucher. On attend qu'elle finisse par
-    /// « validée » (et non « non validée »).
+    /// La validation passe par le service : la valeur de la coche change après le toucher (le nom reste « Série N »). On attend
+    /// qu'elle soit exactement « validée » (et non « non validée »).
     @MainActor
     private func waitUntilValidated(_ check: XCUIElement, _ message: String = "Série non validée", timeout: TimeInterval = 10) {
-        let validated = NSPredicate(format: "label ENDSWITH %@", ", validée")
+        let validated = NSPredicate(format: "value == %@", "validée")
         let expectation = XCTNSPredicateExpectation(predicate: validated, object: check)
-        XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: timeout), .completed, "\(message) : \(check.label)")
+        let state = "\(check.label), \(String(describing: check.value))"
+        XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: timeout), .completed, "\(message) : \(state)")
     }
 
     /// Attend l'élément, le fait défiler vers le haut jusqu'à ce qu'il soit touchable (au plus `maxSwipes` fois), puis le touche.

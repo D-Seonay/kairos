@@ -29,7 +29,10 @@ final class SupplementsUITests: XCTestCase {
         tapWhenHittable(app.buttons["supplements.form.save"], in: app)
 
         // Créatine à 8:00, et il est 7:00 : c'est la prochaine prise.
-        tapWhenHittable(app.buttons["supplements.check.Créatine"], in: app, timeout: 10)
+        // La coche est un interrupteur (nom = le complément, valeur « Pris » / « Pas pris ») : XCTest peut la ranger sous
+        // `button` ou `switch`, on interroge donc `.any`.
+        let check = app.descendants(matching: .any).matching(identifier: "supplements.check.Créatine").firstMatch
+        tapWhenHittable(check, in: app, timeout: 10)
         let summary = app.descendants(matching: .any).matching(identifier: "supplements.summary").firstMatch
         XCTAssertTrue(summary.waitForExistence(timeout: 5))
         let predicate = NSPredicate(format: "label CONTAINS %@", "sur 1 pris")
