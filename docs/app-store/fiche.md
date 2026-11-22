@@ -1,6 +1,6 @@
 # Pulse — fiche App Store Connect
 
-Document à recopier dans App Store Connect. Version de l'app : 1.0.2 (le numéro de build est attribué à l'envoi). Dernière relecture contre le code : 22 novembre 2026, branche `m8-confidentialite`.
+Document à recopier dans App Store Connect. Version de l'app : 1.0.2 (le numéro de build est attribué à l'envoi). Dernière relecture contre le code : 22 novembre 2026, branche `m8-confidentialite`, commit `a72c6b6`.
 
 Si le code change (nouveau service, nouvelle donnée envoyée hors de l'iPhone, nouvelle analytics), reprends ce document et la politique de confidentialité avant de soumettre : chaque phrase doit rester vraie pour le build envoyé.
 
@@ -137,7 +137,7 @@ SCORE DE RÉCUPÉRATION
 Chaque matin, Pulse lit ton sommeil, ta variabilité cardiaque (VFC) et ta fréquence cardiaque au repos dans Apple Santé, et les compare à ta propre ligne de base. Tu vois un score, ce qui l'explique, et ce qui manque quand une mesure est absente. Pas de montre ? Un check-in de trois questions prend le relais.
 
 SÉANCES DE MUSCULATION
-Un programme adapté à ton niveau, ton matériel et tes zones sensibles, une séance live avec chrono de repos, séries, records et récap. Pulse ajuste la séance du jour selon ta récupération, et n'augmente les charges que lorsque ta ligne de base le permet. Tu peux aussi faire une séance libre, saisir une séance passée ou importer ton historique depuis Hevy.
+Un programme adapté à ton niveau, ton matériel et tes douleurs ou limitations, une séance live avec chrono de repos, séries, records et récap. Pulse ajuste la séance du jour selon ta récupération, et n'augmente les charges que lorsque ta ligne de base le permet. Tu peux aussi faire une séance libre, saisir une séance passée ou importer ton historique depuis Hevy.
 
 PLANNING ET STATISTIQUES
 Ton planning de la semaine, ta charge d'entraînement sur 28 jours, tes courbes de VFC et de fréquence cardiaque, tes muscles travaillés, ton assiduité et tes records. Tes courses et sorties à vélo d'Apple Santé comptent dans ta charge.
@@ -146,7 +146,7 @@ COMPLÉMENTS
 Suis tes prises de vitamine D, de magnésium, de caféine et de protéines, ton stock et ta régularité, avec des rappels. Pulse ne conseille jamais de dose.
 
 WIDGETS
-Ton score et ta séance du jour sur l'écran d'accueil et l'écran verrouillé.
+Ton score et ta séance du jour sur l'écran d'accueil et l'écran verrouillé, et ta séance en cours en Live Activity.
 
 TES DONNÉES
 Pas de compte, pas de serveur, pas de publicité, aucune analytics. Les valeurs lues dans Apple Santé ne quittent jamais ton iPhone. Ce que tu saisis et ce que Pulse calcule se synchronise dans ton iCloud privé, auquel personne d'autre n'a accès. Tu exportes tout en JSON ou CSV, ou tu supprimes tout, depuis l'app.
@@ -154,7 +154,7 @@ Pas de compte, pas de serveur, pas de publicité, aucune analytics. Les valeurs 
 Pulse n'est pas un dispositif médical. Le score et les ajustements sont des repères d'entraînement, pas un avis médical.
 ```
 
-Points à contrôler avant de coller : chaque fonction citée existe dans le build soumis (widgets, écran verrouillé, import Hevy, rappels de compléments).
+Points à contrôler avant de coller : chaque fonction citée existe dans le build soumis (widgets, écran verrouillé, Live Activity, import Hevy, rappels de compléments).
 
 ### Mots-clés (100 caractères max, séparés par des virgules, sans espace)
 
