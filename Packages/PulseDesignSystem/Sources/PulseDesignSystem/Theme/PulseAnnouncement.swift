@@ -9,6 +9,11 @@ public enum PulseAnnouncement {
         AccessibilityNotification.Announcement(message).post()
     }
 
+    /// Annonce une erreur : priorité haute, la parole en cours est coupée.
+    public static func postError(_ text: String) {
+        post(text, isError: true)
+    }
+
     /// Vrai quand la valeur passe à un texte non vide, différent du précédent.
     static func shouldAnnounce(from previous: String?, to current: String?) -> Bool {
         guard let current, !current.isEmpty else { return false }
@@ -60,6 +65,11 @@ public extension View {
     /// résultat qui apparaît sous le focus (`isError` coupe la parole en cours).
     func pulseAnnounce(_ message: String?, isError: Bool = false) -> some View {
         modifier(AnnounceModifier(message: message, isError: isError))
+    }
+
+    /// Annonce un message d'erreur dès qu'il apparaît ou change, en priorité haute.
+    func pulseAnnounceError(_ message: String?) -> some View {
+        pulseAnnounce(message, isError: true)
     }
 
     /// Annonce `message` une seule fois par `id` (la fin d'un repos, un record) : la même valeur revue ne se répète pas.

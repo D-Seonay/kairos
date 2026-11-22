@@ -28,6 +28,13 @@ private let parisCalendar: Calendar = {
     #expect(PulseSpoken.kilos(12450) == "12\u{202F}450 kilos")
 }
 
+@Test func kilosPluralFollowsTheSpokenValue() {
+    #expect(PulseSpoken.kilos(1.996) == "2 kilos")
+    #expect(PulseSpoken.kilos(1.994) == "1,99 kilo")
+    #expect(PulseSpoken.kilos(0.5) == "0,5 kilo")
+    #expect(PulseSpoken.kilos(2) == "2 kilos")
+}
+
 @Test func durationsAreSpokenWithoutAbbreviations() {
     #expect(PulseSpoken.duration(seconds: 45) == "45 secondes")
     #expect(PulseSpoken.duration(seconds: 59) == "59 secondes")

@@ -44,11 +44,7 @@ private struct PulseNumericTransitionModifier: ViewModifier {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     func body(content: Content) -> some View {
-        if reduceMotion {
-            content
-        } else {
-            content.contentTransition(.numericText(value: value))
-        }
+        content.contentTransition(reduceMotion ? .identity : .numericText(value: value))
     }
 }
 

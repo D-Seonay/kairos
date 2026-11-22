@@ -1,6 +1,56 @@
 {
   "sourceLanguage" : "fr",
   "strings" : {
+    "%@ %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ %@"
+          }
+        }
+      }
+    },
+    "%@ %lld" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ %lld"
+          }
+        }
+      }
+    },
+    "%@ kilo" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kilo"
+          }
+        }
+      }
+    },
+    "%@ kilos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kilos"
+          }
+        }
+      }
+    },
+    "%@ par kilomètre" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ par kilomètre"
+          }
+        }
+      }
+    },
     "%lld h" : {
       "localizations" : {
         "fr" : {
@@ -17,6 +67,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld h %@"
+          }
+        }
+      }
+    },
+    "%lld heure" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld heure"
+          }
+        }
+      }
+    },
+    "%lld heures" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld heures"
           }
         }
       }
@@ -41,12 +111,62 @@
         }
       }
     },
+    "%lld minute" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld minute"
+          }
+        }
+      }
+    },
+    "%lld minutes" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld minutes"
+          }
+        }
+      }
+    },
     "%lld s" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld s"
+          }
+        }
+      }
+    },
+    "%lld seconde" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld seconde"
+          }
+        }
+      }
+    },
+    "%lld secondes" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld secondes"
+          }
+        }
+      }
+    },
+    "%lld sur %lld" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld sur %lld"
           }
         }
       }
