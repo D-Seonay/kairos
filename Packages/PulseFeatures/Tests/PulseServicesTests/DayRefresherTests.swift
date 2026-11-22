@@ -1,6 +1,7 @@
 import Foundation
 import PulseDomain
 import PulseServices
+import Synchronization
 import Testing
 
 enum RefreshTestFailure: Error {
@@ -30,6 +31,46 @@ struct DayRefresherTests {
 
         let stored = try await fixture.measurements.measurements(from: .distantPast, to: .distantFuture)
         #expect(stored.map(\.weightKg) == [78.2] && stored.first?.source == .appleHealth)
+    }
+
+    @Test func passRelocatesBeforeReadingHealth() async throws {
+        let holder = Mutex<SwitchableHealthSource?>(nil)
+        let reads = Mutex<[Int]>([])
+        let relocation = RecordingHealthDataRelocation(result: true) {
+            let source = holder.withLock { $0 }
+            let count = await source?.changeCalls
+            reads.withLock { $0.append(count ?? -1) }
+        }
+        let fixture = RefresherFixture(scenario: .goodNight, relocation: relocation)
+        holder.withLock { $0 = fixture.source }
+        try await fixture.adopt()
+
+        await fixture.refresher.refresh(origin: .foreground)
+
+        #expect(await relocation.callCount == 1)
+        // Aucune lecture d'Apple Santé n'avait encore eu lieu quand le déplacement a été appelé, et il y en a eu ensuite.
+        #expect(reads.withLock { $0 } == [0])
+        #expect(await fixture.source.changeCalls > 0)
+    }
+
+    @Test func aFailingRelocationDoesNotStopThePass() async throws {
+        let relocation = RecordingHealthDataRelocation(fails: true)
+        let fixture = RefresherFixture(scenario: .goodNight, relocation: relocation)
+        try await fixture.adopt()
+
+        let refresh = await fixture.refresher.refresh(origin: .foreground)
+
+        #expect(await relocation.callCount == 1)
+        #expect(try recovery(refresh).category == .optimal)
+    }
+
+    @Test func nothingIsRelocatedBeforeTheOnboarding() async throws {
+        let relocation = RecordingHealthDataRelocation()
+        let fixture = RefresherFixture(scenario: .goodNight, relocation: relocation)
+
+        await fixture.refresher.refresh(origin: .background)
+
+        #expect(await relocation.callCount == 0)
     }
 
     @Test func foregroundRefreshScoresPlansAndPublishes() async throws {

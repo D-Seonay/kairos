@@ -107,4 +107,67 @@ struct WeightTrendTests {
         #expect(result.days.isEmpty && result.current == nil && result.lastMeasured == nil)
         #expect(result.latestBodyFat?.percent == 18)
     }
+
+    // MARK: - Poids du profil (spec M8 §5.3)
+
+    private func sync(_ measurements: [BodyMeasurement], profileWeight: Double?) async throws -> (UserProfile?, Double?) {
+        let profiles = InMemoryProfileRepository()
+        try await profiles.save(UserProfile(weightKg: profileWeight, createdAt: now, updatedAt: now))
+        let repository = InMemoryBodyMeasurementRepository(measurements)
+        try await ProfileWeightSync.apply(measurements: repository, profiles: profiles, now: now, calendar: TestClock.calendar)
+        let current = await ProfileWeightSync.currentWeight(measurements: repository, profiles: profiles, now: now,
+                                                            calendar: TestClock.calendar)
+        return (try await profiles.load(), current)
+    }
+
+    @Test func profileWeightIgnoresHealthWeighIns() async throws {
+        let weighIns = (0..<3).flatMap { [measurement(80, daysAgo: $0, source: .manual), measurement(70, daysAgo: $0, at: "08:00")] }
+
+        let (profile, _) = try await sync(weighIns, profileWeight: nil)
+
+        #expect(profile?.weightKg == 80)
+    }
+
+    @Test func profileWeightTakesTheLastManualWhenOld() async throws {
+        let weighIns = [measurement(82, daysAgo: 90, source: .manual), measurement(78, daysAgo: 1), measurement(78, daysAgo: 0)]
+
+        let (profile, current) = try await sync(weighIns, profileWeight: 80)
+
+        #expect(profile?.weightKg == 82)
+        #expect(current == 78)
+    }
+
+    @Test func profileWeightClearsWhenOnlyHealthWeighInsExist() async throws {
+        let (profile, current) = try await sync([measurement(78, daysAgo: 1), measurement(76, daysAgo: 0)], profileWeight: 77)
+
+        #expect(profile?.weightKg == nil)
+        #expect(current == 77)
+    }
+
+    /// Sans tendance sur 30 jours, la dernière pesée l'emporte, quelle que soit sa source : le profil n'a plus de poids dès que
+    /// des pesées Apple Santé existent.
+    @Test func currentWeightFallsBackOnTheLatestWeighInOfAnySource() async throws {
+        let (profile, current) = try await sync([measurement(77, daysAgo: 45), measurement(76, daysAgo: 40)], profileWeight: 80)
+
+        #expect(profile?.weightKg == nil)
+        #expect(current == 76)
+    }
+
+    @Test func profileWeightUntouchedWithoutAnyWeighIn() async throws {
+        let (profile, current) = try await sync([], profileWeight: 77)
+
+        #expect(profile?.weightKg == 77 && profile?.updatedAt == now)
+        #expect(current == 77)
+    }
+
+    @Test func profileWeightIsNotRewrittenWhenUnchanged() async throws {
+        let later = TestClock.date("2026-11-21T12:00")
+        let profiles = InMemoryProfileRepository()
+        try await profiles.save(UserProfile(weightKg: 80, createdAt: now, updatedAt: now))
+        let repository = InMemoryBodyMeasurementRepository([measurement(80, daysAgo: 0, source: .manual)])
+
+        try await ProfileWeightSync.apply(measurements: repository, profiles: profiles, now: later, calendar: TestClock.calendar)
+
+        #expect(try await profiles.load()?.updatedAt == now)
+    }
 }

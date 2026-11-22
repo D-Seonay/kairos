@@ -185,12 +185,24 @@ struct BodyHistoryTests {
         #expect(windows.days(for: .bodyMass) == BodyHistory.historyDays)
     }
 
-    @Test func alignmentSyncsProfileWeight() async throws {
+    @Test func importedWeightNeverEntersTheProfile() async throws {
         try await profiles.save(UserProfile(weightKg: 80, createdAt: now, updatedAt: now))
         await source.set([.bodyMass: [sample(.bodyMass, "w1", 77.9, at: "2026-11-19T07:30")]])
 
         #expect(await history.refresh(now: now))
-        #expect(try await profiles.load()?.weightKg == 77.9)
+        // Seules des pesées Apple Santé existent : le profil, synchronisé par iCloud, n'en garde rien.
+        #expect(try await profiles.load()?.weightKg == nil)
+    }
+
+    @Test func profileWeightIsSyncedOnEveryPassEvenWithoutChange() async throws {
+        let manual = BodyMeasurement(date: TestClock.date("2026-11-19T21:00"), weightKg: 79.2, source: .manual,
+                                     createdAt: now, updatedAt: now)
+        try await measurements.save(manual)
+        try await profiles.save(UserProfile(weightKg: 80, createdAt: now, updatedAt: now))
+        await source.set([:])
+
+        #expect(await history.refresh(now: now) == false)
+        #expect(try await profiles.load()?.weightKg == 79.2)
     }
 
     @Test func missingProfileDoesNotMakeRefreshFail() async throws {

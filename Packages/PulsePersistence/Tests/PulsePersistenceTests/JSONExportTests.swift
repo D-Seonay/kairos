@@ -90,3 +90,15 @@ private func makeExporter(_ container: ModelContainerBox, directory: URL? = nil)
     #expect(doc.workoutSessions.flatMap(\.sets).contains { $0.durationSeconds == 45 })
     #expect(doc.workoutSessions.flatMap(\.exerciseNotes).map(\.text) == ["Coudes serrés"])
 }
+
+@Test func exportIncludesLocalHealthValues() async throws {
+    let box = try ModelContainerBox()
+    try await SwiftDataRecoveryRepository(modelContainer: box.container, calendar: Fixed.calendar).save(Sample.recovery())
+    try await SwiftDataWorkoutRepository(modelContainer: box.container).save(Sample.importedRun())
+    try await SwiftDataBodyMeasurementRepository(modelContainer: box.container).save(Sample.measurement())
+    let url = try await makeExporter(box).exportJSON()
+    let json = try String(contentsOf: url, encoding: .utf8)
+    #expect(json.contains("\"sdnnMs\" : 50"))
+    #expect(json.contains("\"healthKitUUID\" : \"RUN\""))
+    #expect(json.contains("\"healthKitUUID\" : \"ABC\""))
+}

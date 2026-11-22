@@ -13,26 +13,39 @@ import Testing
     try context.save()
     #expect(try context.fetchCount(FetchDescriptor<StoredCachedHealthSample>()) == 1)
     #expect(try context.fetchCount(FetchDescriptor<StoredHealthQueryAnchor>()) == 1)
-    #expect(PersistenceStack.localModels.count == 3)
+    #expect(PersistenceStack.localModels.count == 6)
     #expect(PersistenceStack.syncedModels.count == 15)
     #expect(PulseSchemaV1.models.count == 17 && PulseSchemaV2.models.count == 17 && PulseSchemaV3.models.count == 18)
+    #expect(PulseSchemaV4.models.count == 21)
+}
+
+/// Une récupération sans ses six valeurs brutes, qui ne passent plus par le magasin synchronisé.
+private func withoutRawValues(_ recovery: DailyRecovery) -> DailyRecovery {
+    var bare = recovery
+    bare.sdnnMs = nil
+    bare.sdnnBaselineMs = nil
+    bare.restingHeartRate = nil
+    bare.restingHeartRateBaseline = nil
+    bare.asleepMinutes = nil
+    bare.deepMinutes = nil
+    return bare
 }
 
 @Test func newM3FieldsRoundTripThroughStoredModels() {
     var recovery = Sample.recovery()
     recovery.originalSessionChosen = false
-    #expect(StoredDailyRecovery(recovery).toDomain() == recovery)
+    #expect(StoredDailyRecovery(recovery).toDomain() == withoutRawValues(recovery))
     let profile = UserProfile(firstName: "Mathéo", createdAt: Fixed.t0, updatedAt: Fixed.t1)
     #expect(StoredProfile(profile).toDomain() == profile)
 }
 
 @Test func recoveryCheckInSupplementRoundTrip() throws {
     let recovery = Sample.recovery(estimated: true)
-    #expect(StoredDailyRecovery(recovery).toDomain() == recovery)
+    #expect(StoredDailyRecovery(recovery).toDomain() == withoutRawValues(recovery))
     var full = Sample.recovery()
     full.calibration = .ready
     full.frozenAt = Fixed.t1
-    #expect(StoredDailyRecovery(full).toDomain() == full)
+    #expect(StoredDailyRecovery(full).toDomain() == withoutRawValues(full))
     let checkIn = Sample.checkIn()
     #expect(StoredCheckIn(checkIn).toDomain() == checkIn)
     let supplement = Sample.supplement()
@@ -55,4 +68,14 @@ import Testing
     #expect(StoredCachedHealthSample(sleep).toDomain() == sleep)
     let snapshot = Sample.snapshot()
     #expect(StoredActiveSessionSnapshot(snapshot).toDomain() == snapshot)
+}
+
+@Test func clearHealthValuesNilsTheSixRawFields() {
+    let row = StoredDailyRecovery(Sample.recovery())
+    row.sdnnMs = 50
+    row.deepMinutes = 80
+    row.clearHealthValues()
+    #expect(row.sdnnMs == nil && row.sdnnBaselineMs == nil && row.restingHeartRate == nil)
+    #expect(row.restingHeartRateBaseline == nil && row.asleepMinutes == nil && row.deepMinutes == nil)
+    #expect(row.score == 72)
 }

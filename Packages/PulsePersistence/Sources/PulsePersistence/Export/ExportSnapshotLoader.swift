@@ -43,20 +43,30 @@ public actor ExportSnapshotLoader {
                                            [SortDescriptor(\.name), SortDescriptor(\.createdAt)]).map { $0.toDomain() }
         snapshot.exerciseSettings = try fetch(StoredExerciseSettings.self, #Predicate { $0.deletedAt == nil },
                                               [SortDescriptor(\.createdAt), SortDescriptor(\.id)]).map { $0.toDomain() }
-        snapshot.workoutSessions = try fetch(StoredWorkoutSession.self, #Predicate { $0.deletedAt == nil },
-                                             [SortDescriptor(\.startedAt), SortDescriptor(\.createdAt)]).map { $0.toDomain() }
+        // Les séances Pulse (magasin synchronisé) et les séances importées d'Apple Health (magasin local), fusionnées.
+        let synced = try fetch(StoredWorkoutSession.self, #Predicate { $0.deletedAt == nil },
+                               [SortDescriptor(\.startedAt), SortDescriptor(\.createdAt)]).map { $0.toDomain() }
+        let imported = try fetch(StoredImportedWorkout.self, #Predicate { $0.deletedAt == nil },
+                                 [SortDescriptor(\.startedAt), SortDescriptor(\.createdAt)]).map { $0.toDomain() }
+        snapshot.workoutSessions = (synced + imported).sorted { ($0.startedAt, $0.createdAt) < ($1.startedAt, $1.createdAt) }
         snapshot.scheduledDays = try fetch(StoredScheduledDay.self, #Predicate { $0.deletedAt == nil },
                                            [SortDescriptor(\.date), SortDescriptor(\.createdAt)]).map { $0.toDomain() }
-        snapshot.dailyRecoveries = try fetch(StoredDailyRecovery.self, #Predicate { $0.deletedAt == nil },
-                                             [SortDescriptor(\.day)]).map { $0.toDomain() }
+        // Les valeurs brutes d'Apple Health viennent du magasin local, recollées sur chaque score.
+        let recoveries = try fetch(StoredDailyRecovery.self, #Predicate { $0.deletedAt == nil },
+                                   [SortDescriptor(\.day)]).map { $0.toDomain() }
+        let readings = try fetch(StoredRecoveryReading.self, #Predicate { _ in true }, [SortDescriptor(\.day)])
+        snapshot.dailyRecoveries = RecoveryReadingJoin.fill(recoveries, with: readings)
         snapshot.checkIns = try fetch(StoredCheckIn.self, #Predicate { $0.deletedAt == nil }, [SortDescriptor(\.day)])
             .map { $0.toDomain() }
         snapshot.supplements = try fetch(StoredSupplement.self, #Predicate { $0.deletedAt == nil },
                                          [SortDescriptor(\.order), SortDescriptor(\.createdAt)]).map { $0.toDomain() }
         snapshot.supplementIntakes = try fetch(StoredSupplementIntake.self, #Predicate { $0.deletedAt == nil },
                                                [SortDescriptor(\.takenAt), SortDescriptor(\.createdAt)]).map { $0.toDomain() }
-        snapshot.bodyMeasurements = try fetch(StoredBodyMeasurement.self, #Predicate { $0.deletedAt == nil },
-                                              [SortDescriptor(\.date), SortDescriptor(\.createdAt)]).map { $0.toDomain() }
+        let manual = try fetch(StoredBodyMeasurement.self, #Predicate { $0.deletedAt == nil },
+                               [SortDescriptor(\.date), SortDescriptor(\.createdAt)]).map { $0.toDomain() }
+        let healthMeasures = try fetch(StoredImportedBodyMeasurement.self, #Predicate { $0.deletedAt == nil },
+                                       [SortDescriptor(\.date), SortDescriptor(\.createdAt)]).map { $0.toDomain() }
+        snapshot.bodyMeasurements = (manual + healthMeasures).sorted { ($0.date, $0.createdAt) < ($1.date, $1.createdAt) }
         snapshot.personalRecords = try fetch(StoredPersonalRecord.self, #Predicate { $0.deletedAt == nil },
                                              [SortDescriptor(\.date, order: .reverse)]).map { $0.toDomain() }
         return snapshot

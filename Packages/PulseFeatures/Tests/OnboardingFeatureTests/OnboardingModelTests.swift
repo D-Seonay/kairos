@@ -54,6 +54,50 @@ struct OnboardingModelTests {
         #expect(model.profile.birthDate != nil)
     }
 
+    /// Les valeurs proposées par Apple Santé restent dans le formulaire : rien n'est enregistré (ni synchronisé) avant que
+    /// l'étape du profil soit validée.
+    @Test func healthHintsAreSavedOnlyOnceTheProfileIsValidated() async throws {
+        let fixture = OnboardingFixture()
+        let model = fixture.makeModel()
+        await model.start()
+        await model.begin()
+        model.profile.firstName = "Léa"
+        await model.allowHealth()
+        #expect(model.profile.weightKg == 74.5 && model.profile.sex == .male)
+        let draft = try #require(try await fixture.profiles.load())
+        #expect(draft.firstName == "Léa")
+        #expect(draft.sex == .unspecified && draft.birthDate == nil && draft.heightCm == nil && draft.weightKg == nil)
+        model.profile.heightCm = 181
+        await model.continueFromProfile()
+        let validated = try #require(try await fixture.profiles.load())
+        #expect(validated.weightKg == 74.5 && validated.sex == .male && validated.birthDate != nil && validated.heightCm == 181)
+    }
+
+    @Test func goingBackFromTheProfileStepDoesNotSaveHealthHints() async throws {
+        let fixture = OnboardingFixture()
+        let model = fixture.makeModel()
+        await model.start()
+        await model.begin()
+        await model.allowHealth()
+        model.goBack()
+        await model.skipHealth()
+        let draft = try #require(try await fixture.profiles.load())
+        #expect(draft.weightKg == nil && draft.sex == .unspecified)
+    }
+
+    @Test func resumingOnTheProfileStepFetchesHealthHintsAgain() async throws {
+        let fixture = OnboardingFixture()
+        try await fixture.profiles.save(UserProfile(firstName: "Léa", createdAt: now))
+        fixture.stepStore.save(.profile)
+        let model = fixture.makeModel()
+        await model.start()
+        #expect(model.step == .profile)
+        #expect(model.profile.firstName == "Léa" && model.profile.weightKg == 74.5)
+        #expect(try await fixture.profiles.load()?.weightKg == nil)
+        await model.continueFromProfile()
+        #expect(try await fixture.profiles.load()?.weightKg == 74.5)
+    }
+
     @Test func allowHealthKeepsAnExplicitSex() async {
         let model = OnboardingFixture().makeModel()
         await model.start()

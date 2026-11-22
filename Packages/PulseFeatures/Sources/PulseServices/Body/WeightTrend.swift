@@ -98,22 +98,58 @@ public struct WeightTrend: Sendable, Equatable {
     }
 }
 
-/// Garde `UserProfile.weightKg` sur la dernière tendance (spec M7 §14).
+/// Garde `UserProfile.weightKg` sur le poids saisi dans Pulse (spec M7 §14, M8 §5.3) : le profil est synchronisé par iCloud, les
+/// pesées Apple Santé ne le sont pas (M8a), donc aucune valeur d'Apple Santé n'y entre.
 public enum ProfileWeightSync {
-    /// Met `UserProfile.weightKg` sur la tendance (arrondie au dixième) s'il diffère ; rien sans tendance ni profil. Les 30 derniers
-    /// jours suffisent à une tendance de 7 jours.
+    /// Les jours d'une tendance : 7 jours de moyenne, 30 jours de lecture.
+    private static let lookbackDays = 30
+
+    /// Met `UserProfile.weightKg` sur la tendance (arrondie au dixième) des pesées **manuelles** des 30 derniers jours, faute de
+    /// tendance sur le poids de la dernière pesée manuelle. Sans pesée manuelle, le poids est effacé si des pesées Apple Santé
+    /// existent (il ne doit plus porter une valeur issue d'Apple Santé), et laissé tel quel sinon. N'écrit que si la valeur change ;
+    /// rien sans profil.
     public static func apply(measurements: any BodyMeasurementRepository, profiles: any ProfileRepository, now: Date,
                              calendar: Calendar) async throws {
         let today = calendar.startOfDay(for: now)
-        let start = calendar.date(byAdding: .day, value: -30, to: today) ?? today
+        let start = calendar.date(byAdding: .day, value: -lookbackDays, to: today) ?? today
         let end = calendar.date(byAdding: .day, value: 1, to: today) ?? now
-        let recent = try await measurements.measurements(from: start, to: end)
-        guard let current = WeightTrend.make(measurements: recent, now: now, calendar: calendar).current,
-              var profile = try await profiles.load() else { return }
-        let rounded = (current * 10).rounded() / 10
-        guard profile.weightKg != rounded else { return }
-        profile.weightKg = rounded
+        let all = try await measurements.measurements(from: .distantPast, to: end)
+        let manual = all.filter { $0.source == .manual && $0.weightKg != nil }
+        let target: Double?
+        if !manual.isEmpty {
+            let recent = manual.filter { $0.date >= start }
+            let latest = manual.max { lhs, rhs in lhs.date != rhs.date ? lhs.date < rhs.date : lhs.createdAt < rhs.createdAt }
+            guard let weight = WeightTrend.make(measurements: recent, now: now, calendar: calendar).current ?? latest?.weightKg
+            else { return }
+            target = (weight * 10).rounded() / 10
+        } else if all.contains(where: { $0.source == .appleHealth && $0.weightKg != nil }) {
+            target = nil
+        } else {
+            return
+        }
+        guard var profile = try await profiles.load(), profile.weightKg != target else { return }
+        profile.weightKg = target
         profile.updatedAt = now
         try await profiles.save(profile)
+    }
+
+    /// Le poids utilisé par les calculs (lu sur l'appareil, Apple Santé comprise) : la tendance de toutes les pesées des 30 derniers
+    /// jours, sinon la dernière pesée, quelle que soit sa source et sa date (la pesée manuelle l'emporte le même jour), sinon le
+    /// poids du profil.
+    public static func currentWeight(measurements: any BodyMeasurementRepository, profiles: any ProfileRepository, now: Date,
+                                     calendar: Calendar) async -> Double? {
+        let today = calendar.startOfDay(for: now)
+        let start = calendar.date(byAdding: .day, value: -lookbackDays, to: today) ?? today
+        let end = calendar.date(byAdding: .day, value: 1, to: today) ?? now
+        if let all = try? await measurements.measurements(from: .distantPast, to: end) {
+            let recent = all.filter { $0.date >= start }
+            if let current = WeightTrend.make(measurements: recent, now: now, calendar: calendar).current {
+                return current
+            }
+            if let latest = WeightTrend.make(measurements: all, now: now, calendar: calendar).days.last {
+                return latest.weightKg
+            }
+        }
+        return (try? await profiles.load())?.weightKg
     }
 }

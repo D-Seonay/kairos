@@ -40,6 +40,22 @@ import Testing
     #expect(user.loadKind == .external && user.isCompound == false && user.tracksDuration == false)
 }
 
+@Test func v3StoreOpensAsV4KeepingData() async throws {
+    let directory = try makeStoreDirectory()
+    defer { try? FileManager.default.removeItem(at: directory) }
+    try writeV3Store(in: directory)
+
+    let container = try PersistenceStack.makeContainer(directory: directory)
+    let context = ModelContext(container)
+    let recoveries = try context.fetch(FetchDescriptor<StoredDailyRecovery>())
+    #expect(recoveries.count == 1)
+    #expect(recoveries.first?.sdnnMs == 50)
+    let sessions = try context.fetch(FetchDescriptor<StoredWorkoutSession>())
+    #expect(sessions.count == 1)
+    #expect(sessions.first?.source == SessionSource.appleHealth.rawValue)
+    #expect(try context.fetchCount(FetchDescriptor<StoredRecoveryReading>()) == 0)
+}
+
 private func makeStoreDirectory() throws -> URL {
     let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
     try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
@@ -54,13 +70,18 @@ private let v2SyncedModels: [any PersistentModel.Type] = [
     StoredSupplement.self, StoredSupplementIntake.self, StoredBodyMeasurement.self, StoredPersonalRecord.self
 ]
 
+/// Les modèles locaux d'avant la V4.
+private let v3LocalModels: [any PersistentModel.Type] = [
+    StoredCachedHealthSample.self, StoredHealthQueryAnchor.self, StoredActiveSessionSnapshot.self
+]
+
 /// Ouvre un conteneur sans plan de migration sur `synced.store` et `local.store` de `directory`, pour une version figée.
 private func makeFrozenContainer(_ version: any VersionedSchema.Type, synced: [any PersistentModel.Type],
                                  in directory: URL) throws -> ModelContainer {
     let configurations = [
         ModelConfiguration("synced", schema: Schema(synced), url: directory.appending(path: "synced.store"),
                            cloudKitDatabase: .none),
-        ModelConfiguration("local", schema: Schema(PersistenceStack.localModels), url: directory.appending(path: "local.store"),
+        ModelConfiguration("local", schema: Schema(v3LocalModels), url: directory.appending(path: "local.store"),
                            cloudKitDatabase: .none)
     ]
     return try ModelContainer(for: Schema(versionedSchema: version), configurations: configurations)
@@ -132,4 +153,19 @@ private func insertV2Session(in context: ModelContext) {
         set.session = session
         context.insert(set)
     }
+}
+
+/// Écrit un magasin V3 : une récupération avec un SDNN de 50 et une séance importée d'Apple Health.
+private func writeV3Store(in directory: URL) throws {
+    let container = try makeFrozenContainer(PulseSchemaV3.self, synced: PersistenceStack.syncedModels, in: directory)
+    let context = ModelContext(container)
+    let recovery = StoredDailyRecovery(DailyRecovery(day: Fixed.calendar.startOfDay(for: Fixed.t0), score: 60, category: .normal,
+                                                     isEstimated: false, calibration: .ready,
+                                                     createdAt: Fixed.t0, updatedAt: Fixed.t0))
+    recovery.sdnnMs = 50   // `init` n'écrit plus les valeurs brutes : on reproduit l'ancienne ligne V3
+    context.insert(recovery)
+    let session = StoredWorkoutSession(WorkoutSession(startedAt: Fixed.t0, kind: .run, source: .appleHealth, status: .completed,
+                                                      title: "Course", createdAt: Fixed.t0, updatedAt: Fixed.t0))
+    context.insert(session)
+    try context.save()
 }

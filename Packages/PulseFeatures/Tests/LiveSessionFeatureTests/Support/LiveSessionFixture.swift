@@ -85,7 +85,9 @@ struct LiveFixture {
         let records = RecordsService(workouts: workouts, records: personalRecords, userExercises: userExercises,
                                      library: library, now: now)
         let workouts = workouts
-        let health = healthWriter.map { HealthWorkoutExporter(writer: $0, workouts: workouts, profiles: profiles) }
+        let health = healthWriter.map { HealthWorkoutExporter(
+            writer: $0, workouts: workouts, profiles: profiles, measurements: InMemoryBodyMeasurementRepository(),
+            calendar: calendar) }
         service = ActiveSessionService(store: store, workouts: workouts, profiles: profiles,
                                        settings: InMemoryExerciseSettingsRepository(), userExercises: userExercises,
                                        records: records, library: library, restNotifier: notifier, activity: activity,

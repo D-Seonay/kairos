@@ -7,6 +7,7 @@ import Testing
 struct HealthWorkoutExporterTests {
     private let workouts = InMemoryWorkoutRepository()
     private let profiles = InMemoryProfileRepository()
+    private let measurements = InMemoryBodyMeasurementRepository()
     private let start = TestClock.date("2026-11-02T08:00")
     private let end = TestClock.date("2026-11-02T09:00")
 
@@ -16,7 +17,8 @@ struct HealthWorkoutExporterTests {
     }
 
     private func exporter(_ writer: StubWorkoutHealthWriter) -> HealthWorkoutExporter {
-        HealthWorkoutExporter(writer: writer, workouts: workouts, profiles: profiles)
+        HealthWorkoutExporter(writer: writer, workouts: workouts, profiles: profiles, measurements: measurements,
+                              calendar: TestClock.calendar)
     }
 
     @Test func aCompletedPulseSessionIsWrittenWithItsEnergyAndKeepsItsHealthID() async throws {
@@ -31,6 +33,32 @@ struct HealthWorkoutExporterTests {
         let id = try #require(written.healthKitUUID)
         #expect(await writer.saved.keys.map(\.uuidString) == [id])
         #expect(try await workouts.session(id: saved.id)?.healthKitUUID == id)
+    }
+
+    @Test func exportUsesTheHealthTrendForEnergy() async throws {
+        try await profiles.save(UserProfile(createdAt: .t0, updatedAt: .t0))
+        for daysAgo in 0..<3 {
+            let date = TestClock.calendar.date(byAdding: .day, value: -daysAgo, to: start) ?? start
+            try await measurements.save(BodyMeasurement(date: date, weightKg: 80, source: .appleHealth, createdAt: date, updatedAt: date))
+        }
+        let writer = StubWorkoutHealthWriter()
+        let saved = session()
+        try await workouts.save(saved)
+        _ = await exporter(writer).export(saved)
+        // 5 MET × 80 kg (la tendance Apple Santé, le profil n'a pas de poids) × 1 h.
+        #expect(await writer.saved.values.first?.energyKcal == 400)
+    }
+
+    @Test func exportUsesAnOldHealthWeighInForEnergy() async throws {
+        try await profiles.save(UserProfile(createdAt: .t0, updatedAt: .t0))
+        let date = TestClock.calendar.date(byAdding: .day, value: -40, to: start) ?? start
+        try await measurements.save(BodyMeasurement(date: date, weightKg: 76, source: .appleHealth, createdAt: date, updatedAt: date))
+        let writer = StubWorkoutHealthWriter()
+        let saved = session()
+        try await workouts.save(saved)
+        _ = await exporter(writer).export(saved)
+        // 5 MET × 76 kg (dernière pesée Apple Santé, vieille de 40 jours ; le profil n'a pas de poids) × 1 h.
+        #expect(await writer.saved.values.first?.energyKcal == 380)
     }
 
     @Test func withoutWeightTheEnergyIsOmitted() async throws {
@@ -78,7 +106,8 @@ struct HealthWorkoutExporterTests {
     @Test func finishingALiveSessionWritesItToAppleHealth() async throws {
         let fixture = ActiveSessionFixture()
         let writer = StubWorkoutHealthWriter()
-        let health = HealthWorkoutExporter(writer: writer, workouts: fixture.workouts, profiles: fixture.profiles)
+        let health = HealthWorkoutExporter(writer: writer, workouts: fixture.workouts, profiles: fixture.profiles,
+                                       measurements: InMemoryBodyMeasurementRepository(), calendar: TestClock.calendar)
         let clock = fixture.clock
         let records = RecordsService(workouts: fixture.workouts, records: InMemoryPersonalRecordRepository(),
                                      userExercises: fixture.userExercises, library: .bundled, now: { clock.now })

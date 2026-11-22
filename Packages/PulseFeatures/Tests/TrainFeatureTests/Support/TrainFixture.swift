@@ -63,7 +63,9 @@ struct TrainFixture {
             store: InMemoryActiveSessionStore(), workouts: workouts, profiles: profiles, settings: exerciseSettings,
             userExercises: userExercises, records: records, library: library, restNotifier: StubRestTimerNotifier(),
             activity: StubSessionActivityController(), calendar: calendar, now: clock,
-            health: healthWriter.map { HealthWorkoutExporter(writer: $0, workouts: workouts, profiles: profiles) })
+            health: healthWriter.map { HealthWorkoutExporter(
+                writer: $0, workouts: workouts, profiles: profiles, measurements: InMemoryBodyMeasurementRepository(),
+                calendar: calendar) })
         environment = TrainEnvironment(
             profiles: profiles, programs: programs, recovery: recovery, workouts: workouts, userExercises: userExercises,
             exerciseSettings: exerciseSettings, personalRecords: personalRecords, records: records,
