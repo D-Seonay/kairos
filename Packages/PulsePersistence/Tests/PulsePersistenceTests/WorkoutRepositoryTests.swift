@@ -188,3 +188,14 @@ private func counts(_ container: ModelContainer) throws -> (synced: Int, local: 
     #expect(stored.synced == 0 && stored.local == 1)
     #expect(try await repo.sessions(from: .distantPast, to: .distantFuture).map(\.id) == [session.id])
 }
+
+/// Avec la clé unique, réimporter une course supprimée réécrit la même ligne au lieu d'en créer une seconde.
+@Test func reimportingADeletedRunReusesItsRow() async throws {
+    let repo = SwiftDataWorkoutRepository(modelContainer: try TestContainer.make())
+    let run = Sample.importedRun()
+    try await repo.save(run)
+    try await repo.delete(id: run.id)
+    try await repo.save(run)
+    #expect(try counts(repo.modelContainer).local == 1)
+    #expect(try await repo.session(id: run.id)?.distanceMeters == 8_000)
+}

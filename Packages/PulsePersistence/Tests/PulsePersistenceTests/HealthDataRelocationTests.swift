@@ -212,3 +212,68 @@ private func syncedHealthRuns(_ context: ModelContext) throws -> Int {
     #expect(readings.count == 1 && readings.first?.sdnnMs == 60)
     #expect(try check.fetch(FetchDescriptor<StoredDailyRecovery>()).allSatisfy(hasNoRawValue))
 }
+
+private struct SyncedPhaseFailure: Error {}
+
+private func syncedHealthWeighIns(_ context: ModelContext) throws -> Int {
+    let health = MeasurementSource.appleHealth.rawValue
+    return try context.fetchCount(FetchDescriptor<StoredBodyMeasurement>(predicate: #Predicate { $0.source == health }))
+}
+
+/// Deux temps par étape (Review M8a, point 1) : si le retrait côté synchronisé échoue, les copies locales restent enregistrées et
+/// le magasin synchronisé n'a pas bougé ; le passage suivant ne fait que vider ou supprimer, sans doublon.
+@Test func failedSyncedPhaseKeepsLocalCopiesAndNextPassOnlyClears() async throws {
+    let box = try ModelContainerBox()
+    let context = ModelContext(box.container)
+    context.insert(legacyRecovery())
+    context.insert(legacyRun())
+    context.insert(StoredBodyMeasurement(Sample.measurement()))
+    try context.save()
+    let relocation = SwiftDataHealthDataRelocation(modelContainer: box.container)
+    await relocation.failSyncedPhase(with: SyncedPhaseFailure())
+    await #expect(throws: SyncedPhaseFailure.self) { try await relocation.relocate() }
+    let afterFailure = ModelContext(box.container)
+    #expect(try afterFailure.fetchCount(FetchDescriptor<StoredRecoveryReading>()) == 1)
+    #expect(try afterFailure.fetchCount(FetchDescriptor<StoredImportedWorkout>()) == 1)
+    #expect(try afterFailure.fetchCount(FetchDescriptor<StoredImportedBodyMeasurement>()) == 1)
+    let untouched = try #require(try afterFailure.fetch(FetchDescriptor<StoredDailyRecovery>()).first)
+    #expect(untouched.sdnnMs == 50)
+    #expect(try syncedHealthRuns(afterFailure) == 1 && syncedHealthWeighIns(afterFailure) == 1)
+
+    await relocation.failSyncedPhase(with: nil)
+    #expect(try await relocation.relocate())
+    let check = ModelContext(box.container)
+    #expect(try check.fetchCount(FetchDescriptor<StoredRecoveryReading>()) == 1)
+    #expect(try check.fetchCount(FetchDescriptor<StoredImportedWorkout>()) == 1)
+    #expect(try check.fetchCount(FetchDescriptor<StoredImportedBodyMeasurement>()) == 1)
+    #expect(try check.fetch(FetchDescriptor<StoredDailyRecovery>()).allSatisfy(hasNoRawValue))
+    #expect(try syncedHealthRuns(check) == 0 && syncedHealthWeighIns(check) == 0)
+}
+
+/// État laissé par un premier temps enregistré sans le second : copie locale et ligne synchronisée coexistent.
+@Test func alreadyCopiedWeighInIsOnlyDeleted() async throws {
+    let box = try ModelContainerBox()
+    let context = ModelContext(box.container)
+    let row = StoredBodyMeasurement(Sample.measurement())
+    context.insert(row)
+    context.insert(StoredImportedBodyMeasurement(row.toDomain()))
+    try context.save()
+    #expect(try await SwiftDataHealthDataRelocation(modelContainer: box.container).relocate())
+    let check = ModelContext(box.container)
+    #expect(try syncedHealthWeighIns(check) == 0)
+    #expect(try check.fetch(FetchDescriptor<StoredImportedBodyMeasurement>()).map(\.id) == [row.id])
+}
+
+/// Même état pour une nuit : la lecture locale déjà écrite reste seule, la ligne synchronisée est vidée.
+@Test func alreadyCopiedNightIsOnlyCleared() async throws {
+    let box = try ModelContainerBox()
+    let context = ModelContext(box.container)
+    let row = legacyRecovery()
+    context.insert(row)
+    context.insert(StoredRecoveryReading(day: row.day, from: row.toDomain(), at: row.updatedAt))
+    try context.save()
+    #expect(try await SwiftDataHealthDataRelocation(modelContainer: box.container).relocate())
+    let check = ModelContext(box.container)
+    #expect(try check.fetchCount(FetchDescriptor<StoredRecoveryReading>()) == 1)
+    #expect(try check.fetch(FetchDescriptor<StoredDailyRecovery>()).allSatisfy(hasNoRawValue))
+}

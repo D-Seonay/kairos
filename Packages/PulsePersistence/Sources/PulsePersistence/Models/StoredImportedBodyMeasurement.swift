@@ -3,9 +3,10 @@ import PulseDomain
 import SwiftData
 
 /// Mesure de poids ou de masse grasse importée d'Apple Health, gardée dans le magasin local : jamais synchronisée avec iCloud.
+/// `id` est une clé unique (le magasin local n'est pas soumis aux règles de CloudKit).
 @Model
 public final class StoredImportedBodyMeasurement {
-    public var id: UUID = UUID()
+    @Attribute(.unique) public var id: UUID = UUID()
     public var date: Date = Date()
     public var weightKg: Double?
     public var bodyFatPercent: Double?

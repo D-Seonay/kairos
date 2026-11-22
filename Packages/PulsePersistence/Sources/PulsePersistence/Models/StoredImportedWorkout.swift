@@ -3,10 +3,11 @@ import PulseDomain
 import SwiftData
 
 /// Séance importée d'Apple Health (fréquence cardiaque, durée, distance), gardée dans le magasin local : jamais synchronisée
-/// avec iCloud. Une séance importée n'a pas de séries.
+/// avec iCloud. Une séance importée n'a pas de séries. `id` est une clé unique (le magasin local n'est pas soumis aux règles
+/// de CloudKit).
 @Model
 public final class StoredImportedWorkout {
-    public var id: UUID = UUID()
+    @Attribute(.unique) public var id: UUID = UUID()
     public var startedAt: Date = Date()
     public var endedAt: Date?
     public var kind: String = SessionKind.strength.rawValue

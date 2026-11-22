@@ -70,7 +70,7 @@ StoredImportedBodyMeasurement.createdAt: Date
 StoredImportedBodyMeasurement.date: Date
 StoredImportedBodyMeasurement.deletedAt: Optional<Date>
 StoredImportedBodyMeasurement.healthKitUUID: Optional<String>
-StoredImportedBodyMeasurement.id: UUID
+StoredImportedBodyMeasurement.id: UUID [options: unique]
 StoredImportedBodyMeasurement.source: String
 StoredImportedBodyMeasurement.updatedAt: Date
 StoredImportedBodyMeasurement.weightKg: Optional<Double>
@@ -84,7 +84,7 @@ StoredImportedWorkout.endedAt: Optional<Date>
 StoredImportedWorkout.estimatedRPE: Optional<Double>
 StoredImportedWorkout.exerciseNotes: Optional<Data>
 StoredImportedWorkout.healthKitUUID: Optional<String>
-StoredImportedWorkout.id: UUID
+StoredImportedWorkout.id: UUID [options: unique]
 StoredImportedWorkout.kind: String
 StoredImportedWorkout.note: Optional<String>
 StoredImportedWorkout.overallRPE: Optional<Double>
@@ -156,7 +156,7 @@ StoredProgram.updatedAt: Date
 StoredProgram.weekLayout: Optional<Data>
 StoredRecoveryReading.asleepMinutes: Optional<Int>
 StoredRecoveryReading.createdAt: Date
-StoredRecoveryReading.day: Date
+StoredRecoveryReading.day: Date [options: unique]
 StoredRecoveryReading.deepMinutes: Optional<Int>
 StoredRecoveryReading.restingHeartRate: Optional<Double>
 StoredRecoveryReading.restingHeartRateBaseline: Optional<Double>

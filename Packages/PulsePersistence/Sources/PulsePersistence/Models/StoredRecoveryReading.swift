@@ -3,9 +3,10 @@ import PulseDomain
 import SwiftData
 
 /// Les six valeurs brutes lues dans Apple Health pour un jour, gardées dans le magasin local : jamais synchronisées avec iCloud.
+/// Une seule lecture par jour : `day` est une clé unique (le magasin local n'est pas soumis aux règles de CloudKit).
 @Model
 public final class StoredRecoveryReading {
-    public var day: Date = Date()
+    @Attribute(.unique) public var day: Date = Date()
     public var sdnnMs: Double?
     public var sdnnBaselineMs: Double?
     public var restingHeartRate: Double?

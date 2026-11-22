@@ -4,6 +4,7 @@ import PulseDomain
 import SwiftData
 import Testing
 
+// `UserProfile.weightKg` est couvert par WeightTrendTests (PulseFeatures) : PulsePersistence n'atteint pas `ProfileWeightSync`.
 /// Frontière de confidentialité (M8a) : aucune valeur Apple Health ne reste dans le magasin synchronisé avec iCloud.
 @Test func syncedStoreHoldsNoHealthValue() async throws {
     let box = try ModelContainerBox()
@@ -20,4 +21,24 @@ import Testing
     #expect(try context.fetchCount(FetchDescriptor<StoredWorkoutSession>(predicate: #Predicate { $0.source == health })) == 0)
     let healthMeasure = MeasurementSource.appleHealth.rawValue
     #expect(try context.fetchCount(FetchDescriptor<StoredBodyMeasurement>(predicate: #Predicate { $0.source == healthMeasure })) == 0)
+}
+
+/// Clés uniques des modèles locaux (Review M8a, point 2) : deux lignes de même clé enregistrées ensemble n'en font qu'une.
+@Test func localHealthModelsKeepOneRowPerKey() throws {
+    let box = try ModelContainerBox()
+    let context = ModelContext(box.container)
+    let day = Fixed.calendar.startOfDay(for: Fixed.t0)
+    context.insert(StoredRecoveryReading(day: day, from: Sample.recovery(day: day), at: Fixed.t1))
+    context.insert(StoredRecoveryReading(day: day, from: Sample.recovery(day: day), at: Fixed.t2))
+    let run = Sample.importedRun()
+    context.insert(StoredImportedWorkout(run))
+    context.insert(StoredImportedWorkout(run))
+    let weighIn = Sample.measurement()
+    context.insert(StoredImportedBodyMeasurement(weighIn))
+    context.insert(StoredImportedBodyMeasurement(weighIn))
+    try context.save()
+    let check = ModelContext(box.container)
+    #expect(try check.fetchCount(FetchDescriptor<StoredRecoveryReading>()) == 1)
+    #expect(try check.fetchCount(FetchDescriptor<StoredImportedWorkout>()) == 1)
+    #expect(try check.fetchCount(FetchDescriptor<StoredImportedBodyMeasurement>()) == 1)
 }

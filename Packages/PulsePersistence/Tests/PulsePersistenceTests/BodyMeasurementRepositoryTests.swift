@@ -79,3 +79,14 @@ private func manualCopy(of measurement: BodyMeasurement) -> BodyMeasurement {
     let stored = try counts(repo.modelContainer)
     #expect(stored.synced == 0 && stored.local == 1)
 }
+
+/// Avec la clé unique, réimporter une pesée supprimée réécrit la même ligne au lieu d'en créer une seconde.
+@Test func reimportingADeletedWeighInReusesItsRow() async throws {
+    let repo = SwiftDataBodyMeasurementRepository(modelContainer: try TestContainer.make())
+    let weighIn = Sample.measurement()
+    try await repo.save(weighIn)
+    try await repo.delete(id: weighIn.id)
+    try await repo.save(weighIn)
+    #expect(try ModelContext(repo.modelContainer).fetchCount(FetchDescriptor<StoredImportedBodyMeasurement>()) == 1)
+    #expect(try await repo.measurements(from: .distantPast, to: .distantFuture).map(\.id) == [weighIn.id])
+}
