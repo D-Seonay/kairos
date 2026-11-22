@@ -1,22 +1,22 @@
 {
   "sourceLanguage" : "fr",
   "strings" : {
+    "%@ %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ %@"
+          }
+        }
+      }
+    },
     "%@ Aujourd'hui : %@. Charge %@. %@" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ Aujourd'hui : %@. Charge %@. %@"
-          }
-        }
-      }
-    },
-    "%@ fait" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ fait"
           }
         }
       }
@@ -41,16 +41,6 @@
         }
       }
     },
-    "%@ repos" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ repos"
-          }
-        }
-      }
-    },
     "%@ · estimé" : {
       "localizations" : {
         "fr" : {
@@ -67,16 +57,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ à %@ par kilomètre"
-          }
-        }
-      }
-    },
-    "%@ à venir" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ à venir"
           }
         }
       }
@@ -134,12 +114,12 @@
         }
       }
     },
-    "aujourd'hui %@" : {
+    "aujourd'hui %@, %@" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "aujourd'hui %@"
+            "value" : "aujourd'hui %@, %@"
           }
         }
       }
@@ -184,12 +164,72 @@
         }
       }
     },
+    "fait" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "fait"
+          }
+        }
+      }
+    },
+    "moins %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "moins %@"
+          }
+        }
+      }
+    },
+    "plus %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "plus %@"
+          }
+        }
+      }
+    },
     "Prochaine séance : %@" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Prochaine séance : %@"
+          }
+        }
+      }
+    },
+    "repos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "repos"
+          }
+        }
+      }
+    },
+    "répétition" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "répétition"
+          }
+        }
+      }
+    },
+    "répétitions" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "répétitions"
           }
         }
       }
@@ -260,6 +300,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "zone 2, %@"
+          }
+        }
+      }
+    },
+    "à venir" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "à venir"
           }
         }
       }

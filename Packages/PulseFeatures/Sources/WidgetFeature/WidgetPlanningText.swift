@@ -73,21 +73,30 @@ enum WidgetPlanningText {
 
     // MARK: - Textes lus par VoiceOver
 
-    /// « Lundi fait, mardi repos, aujourd'hui mercredi, jeudi à venir » : l'état des 7 pastilles, jour par jour. Vide quand les
-    /// jours et les dates ne se correspondent pas.
-    static func spokenWeek(days: [StreakWidgetContent.DayState], dates: [Date], calendar: Calendar) -> String {
-        guard days.count == dates.count, !days.isEmpty else { return "" }
-        let parts = zip(days, dates).map { state, date -> String in
-            let name = PulseSpoken.weekday(date, calendar: calendar)
-            return switch state {
-            case .completed: String(localized: "\(name) fait", bundle: .module)
-            case .rest: String(localized: "\(name) repos", bundle: .module)
-            case .today: String(localized: "aujourd'hui \(name)", bundle: .module)
-            case .upcoming: String(localized: "\(name) à venir", bundle: .module)
+    /// « Lundi fait, mardi repos, aujourd'hui mercredi, à venir, jeudi à venir » : l'état des 7 pastilles, jour par jour. Aujourd'hui
+    /// se dit toujours « aujourd'hui », quel que soit son état. Un jour manqué se dit « repos », comme il se voit : pas de reproche.
+    static func spokenWeek(_ week: [WidgetDay], calendar: Calendar) -> String {
+        let parts = week.map { day -> String in
+            let name = PulseSpoken.weekday(day.date, calendar: calendar)
+            let status = switch day.state {
+            case .done: String(localized: "fait", bundle: .module)
+            case .planned: String(localized: "à venir", bundle: .module)
+            case .missed, .rest: String(localized: "repos", bundle: .module)
             }
+            return day.isToday ? String(localized: "aujourd'hui \(name), \(status)", bundle: .module)
+                : String(localized: "\(name) \(status)", bundle: .module)
         }
         let sentence = parts.joined(separator: ", ")
         return sentence.prefix(1).uppercased() + sentence.dropFirst()
+    }
+
+    /// La semaine de l'exemple : trois jours faits, un repos, aujourd'hui vendredi prévu, une course samedi, un repos dimanche.
+    static func sampleWeek(containing date: Date, calendar: Calendar) -> [WidgetDay] {
+        let layout: [(WidgetDayKind, WidgetDayState)] = [(.strength, .done), (.run, .done), (.strength, .done), (.rest, .rest),
+                                                         (.strength, .planned), (.run, .planned), (.rest, .rest)]
+        return zip(weekDates(containing: date, calendar: calendar), layout).enumerated().map { index, entry in
+            WidgetDay(date: entry.0, kind: entry.1.0, state: entry.1.1, isToday: index == 4)
+        }
     }
 
     /// Les 7 jours de la semaine (du lundi au dimanche) de `date`, pour l'exemple sans instantané.
@@ -115,7 +124,7 @@ enum WidgetPlanningText {
         spoken = spoken.replacing(/(\d+(?:[.,]\d+)?) km\b/) { match in
             let number = String(match.1)
             let value = Double(number.replacing(",", with: ".")) ?? 0
-            return value <= 1
+            return value < 2
                 ? String(localized: "\(number) kilomètre", bundle: .module)
                 : String(localized: "\(number) kilomètres", bundle: .module)
         }

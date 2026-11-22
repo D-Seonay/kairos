@@ -5,13 +5,23 @@ import SwiftUI
 public struct LoadWidgetCircularView: View {
     private let content: LoadWidgetContent
 
-    @ScaledMetric(relativeTo: .footnote) private var ratioSize = 14
-
     public init(content: LoadWidgetContent) {
         self.content = content
     }
 
     public var body: some View {
+        LoadWidgetCircularViewBody(content: content)
+            .dynamicTypeSize(...WidgetTypeCap.loadCircular)
+    }
+}
+
+/// Le contenu de la vue, plafonné par `LoadWidgetCircularView` : ses `@ScaledMetric` lisent la taille déjà plafonnée.
+struct LoadWidgetCircularViewBody: View {
+    let content: LoadWidgetContent
+
+    @ScaledMetric(relativeTo: .footnote) private var ratioSize = 14
+
+    var body: some View {
         Gauge(value: min(max(content.ratio, 0.5), 2.0), in: 0.5...2.0) {
             Text("ACWR")
         } currentValueLabel: {
@@ -20,8 +30,6 @@ public struct LoadWidgetCircularView: View {
                 .minimumScaleFactor(0.7)
         }
         .gaugeStyle(.accessoryCircularCapacity)
-        // La jauge de l'écran verrouillé est fixe : l'étiquette VoiceOver porte tout le texte.
-        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         .accessibilityLabel(content.accessibilityLabel)
     }
 }

@@ -28,7 +28,7 @@ struct PlanningWidgetsContentTests {
         #expect(content.weekDays == [.completed, .rest, .today, .upcoming, .upcoming, .rest, .rest])
         #expect(content.subtitle == "1 sur 4 cette semaine")
         #expect(content.accessibilityLabel == "Série de 6 semaines, 1 séance sur 4 cette semaine. "
-            + "Lundi fait, mardi repos, aujourd'hui mercredi, jeudi à venir, vendredi à venir, samedi repos, dimanche repos")
+            + "Lundi fait, mardi repos, aujourd'hui mercredi, à venir, jeudi à venir, vendredi à venir, samedi repos, dimanche repos")
     }
 
     @Test func aSnapshotOfAnotherDayFallsBackToTheSample() {
@@ -50,7 +50,7 @@ struct PlanningWidgetsContentTests {
     @Test func weekSpeaksTheDaysWithoutMiddleDot() {
         let content = WeekWidgetContent.make(snapshot: snapshot(), at: now, calendar: calendar)
         #expect(content.accessibilityLabel == "Cette semaine : 1 séance faite sur 4. "
-            + "Lundi fait, mardi repos, aujourd'hui mercredi, jeudi à venir, vendredi à venir, samedi repos, dimanche repos. "
+            + "Lundi fait, mardi repos, aujourd'hui mercredi, à venir, jeudi à venir, vendredi à venir, samedi repos, dimanche repos. "
             + "Aujourd'hui : Legs. Charge 1,62, risque de blessure. Demain, Fractionné")
         #expect(!content.accessibilityLabel.contains("·"))
         let sample = WeekWidgetContent.sample(at: now, calendar: calendar)
@@ -76,6 +76,10 @@ struct PlanningWidgetsContentTests {
         #expect(WidgetPlanningText.spokenDetail("Sortie facile · 45 min") == "Sortie facile, 45 minutes")
         #expect(WidgetPlanningText.spokenDetail("Course · 1 min") == "Course, 1 minute")
         #expect(WidgetPlanningText.spokenDetail("Sortie longue · 12,5 km") == "Sortie longue, 12,5 kilomètres")
+        #expect(WidgetPlanningText.spokenDetail("Sortie · 1 km") == "Sortie, 1 kilomètre")
+        #expect(WidgetPlanningText.spokenDetail("Sortie · 1,5 km") == "Sortie, 1,5 kilomètre")
+        #expect(WidgetPlanningText.spokenDetail("Sortie · 2 km") == "Sortie, 2 kilomètres")
+        #expect(WidgetPlanningText.spokenDetail("Sortie · 1,99 km") == "Sortie, 1,99 kilomètre")
         #expect(WidgetPlanningText.spokenDetail("5 exercices · 16 séries") == "5 exercices, 16 séries")
     }
 

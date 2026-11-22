@@ -7,17 +7,27 @@ import SwiftUI
 public struct WeekWidgetLargeView: View {
     private let content: WeekWidgetContent
 
+    public init(content: WeekWidgetContent) {
+        self.content = content
+    }
+
+    public var body: some View {
+        WeekWidgetLargeViewBody(content: content)
+            .dynamicTypeSize(...WidgetTypeCap.weekLarge)
+    }
+}
+
+/// Le contenu de la vue, plafonné par `WeekWidgetLargeView` : ses `@ScaledMetric` lisent la taille déjà plafonnée.
+struct WeekWidgetLargeViewBody: View {
+    let content: WeekWidgetContent
+
     @ScaledMetric(relativeTo: .subheadline) private var titleSize = 15
     @ScaledMetric(relativeTo: .caption2) private var smallSize = 11
     @ScaledMetric(relativeTo: .caption) private var metaSize = 12
     @ScaledMetric(relativeTo: .caption) private var tomorrowSize = 12
     @ScaledMetric(relativeTo: .caption2) private var bubbleSize = 28
 
-    public init(content: WeekWidgetContent) {
-        self.content = content
-    }
-
-    public var body: some View {
+    var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             headerRow
             daysRow
@@ -28,9 +38,6 @@ public struct WeekWidgetLargeView: View {
             tomorrowRow
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        // Sept jours et trois blocs tiennent dans 338 pt de haut jusqu'à xxxLarge, pas au-delà : l'étiquette VoiceOver porte tout le
-        // texte.
-        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(content.accessibilityLabel)
     }

@@ -15,17 +15,23 @@ struct StreakWidgetContentTests {
         #expect(content.subtitle == "3 sur 5 cette semaine")
         #expect(content.inlineText == "14 sem. · 3/5")
         #expect(content.accessibilityLabel == "Série de 14 semaines, 3 séances sur 5 cette semaine. "
-            + "Lundi fait, mardi fait, mercredi fait, jeudi repos, aujourd'hui vendredi, samedi à venir, dimanche repos")
+            + "Lundi fait, mardi fait, mercredi fait, jeudi repos, aujourd'hui vendredi, à venir, samedi à venir, dimanche repos")
     }
 
     @Test func spokenWeekNamesEachDayWithItsState() {
         let calendar = WidgetClock.calendar
-        let monday = WidgetClock.date("2026-11-02T00:00")
-        let dates = (0..<7).map { calendar.date(byAdding: .day, value: $0, to: monday) ?? monday }
-        let days: [StreakWidgetContent.DayState] = [.completed, .rest, .today, .upcoming, .upcoming, .rest, .rest]
-        #expect(WidgetPlanningText.spokenWeek(days: days, dates: dates, calendar: calendar)
-            == "Lundi fait, mardi repos, aujourd'hui mercredi, jeudi à venir, vendredi à venir, samedi repos, dimanche repos")
-        #expect(WidgetPlanningText.spokenWeek(days: [.completed], dates: dates, calendar: calendar) == "")
+        let dates = WidgetPlanningText.weekDates(containing: WidgetClock.date("2026-11-04T09:00"), calendar: calendar)
+        func week(today: Int, _ states: [WidgetDayState]) -> [WidgetDay] {
+            states.enumerated().map { WidgetDay(date: dates[$0.offset], kind: .strength, state: $0.element, isToday: $0.offset == today) }
+        }
+        let planned = week(today: 2, [.done, .missed, .planned, .planned, .planned, .rest, .rest])
+        #expect(WidgetPlanningText.spokenWeek(planned, calendar: calendar)
+            == "Lundi fait, mardi repos, aujourd'hui mercredi, à venir, jeudi à venir, vendredi à venir, samedi repos, dimanche repos")
+        let done = week(today: 2, [.done, .done, .done, .planned, .planned, .rest, .rest])
+        #expect(WidgetPlanningText.spokenWeek(done, calendar: calendar).contains("aujourd'hui mercredi, fait, jeudi à venir"))
+        let rest = week(today: 6, [.done, .done, .done, .done, .done, .rest, .rest])
+        #expect(WidgetPlanningText.spokenWeek(rest, calendar: calendar).hasSuffix("samedi repos, aujourd'hui dimanche, repos"))
+        #expect(WidgetPlanningText.spokenWeek([], calendar: calendar) == "")
     }
 
     @Test func spokenLabelCountsInWords() {

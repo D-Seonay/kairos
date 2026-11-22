@@ -7,15 +7,25 @@ import SwiftUI
 public struct TodaySessionWidgetRectangularView: View {
     private let content: TodaySessionWidgetContent
 
-    @ScaledMetric(relativeTo: .caption) private var detailSize = 12
-    @ScaledMetric(relativeTo: .footnote) private var titleSize = 13
-    @ScaledMetric(relativeTo: .caption) private var iconSize = 12
-
     public init(content: TodaySessionWidgetContent) {
         self.content = content
     }
 
     public var body: some View {
+        TodaySessionWidgetRectangularViewBody(content: content)
+            .dynamicTypeSize(...WidgetTypeCap.sessionRectangular)
+    }
+}
+
+/// Le contenu de la vue, plafonné par `TodaySessionWidgetRectangularView` : ses `@ScaledMetric` lisent la taille déjà plafonnée.
+struct TodaySessionWidgetRectangularViewBody: View {
+    let content: TodaySessionWidgetContent
+
+    @ScaledMetric(relativeTo: .caption) private var detailSize = 12
+    @ScaledMetric(relativeTo: .footnote) private var titleSize = 13
+    @ScaledMetric(relativeTo: .caption) private var iconSize = 12
+
+    var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             titleRow
             Text(content.accessorySubtitle)
@@ -30,8 +40,6 @@ public struct TodaySessionWidgetRectangularView: View {
                 .minimumScaleFactor(0.75)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        // Le rectangle de l'écran verrouillé fait 66 pt de haut : l'étiquette VoiceOver porte tout le texte.
-        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(content.accessibilityLabel)
     }

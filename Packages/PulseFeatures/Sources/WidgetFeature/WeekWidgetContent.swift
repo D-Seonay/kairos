@@ -106,7 +106,7 @@ public struct WeekWidgetContent: Sendable, Equatable {
         } ?? next
         let completed = planning.streak.completed
         let target = planning.streak.target
-        let spokenDays = WidgetPlanningText.spokenWeek(days: days.map(\.state), dates: planning.week.map(\.date), calendar: calendar)
+        let spokenDays = WidgetPlanningText.spokenWeek(planning.week, calendar: calendar)
         let spoken = spokenLabel(week: spokenWeek(completed: completed, target: target, days: spokenDays), title: title,
                                  load: spokenLoad, next: spokenNext)
         return WeekWidgetContent(
@@ -131,8 +131,7 @@ public struct WeekWidgetContent: Sendable, Equatable {
         let acwr = String(localized: "1,12 · zone optimale", bundle: .module)
         let tomorrow = String(localized: "Demain : endurance 45 min, zone 2", bundle: .module)
         let badge = String(localized: "3 sur 5", bundle: .module)
-        let days = WidgetPlanningText.spokenWeek(
-            days: dayItems.map(\.state), dates: WidgetPlanningText.weekDates(containing: date, calendar: calendar), calendar: calendar)
+        let days = WidgetPlanningText.spokenWeek(WidgetPlanningText.sampleWeek(containing: date, calendar: calendar), calendar: calendar)
         let spoken = spokenLabel(
             week: spokenWeek(completed: 3, target: 5, days: days), title: title,
             load: String(localized: "1,12, zone optimale", bundle: .module),

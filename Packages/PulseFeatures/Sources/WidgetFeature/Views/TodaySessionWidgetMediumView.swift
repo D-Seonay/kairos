@@ -7,6 +7,20 @@ import SwiftUI
 public struct TodaySessionWidgetMediumView: View {
     private let content: TodaySessionWidgetContent
 
+    public init(content: TodaySessionWidgetContent) {
+        self.content = content
+    }
+
+    public var body: some View {
+        TodaySessionWidgetMediumViewBody(content: content)
+            .dynamicTypeSize(...WidgetTypeCap.sessionMedium)
+    }
+}
+
+/// Le contenu de la vue, plafonné par `TodaySessionWidgetMediumView` : ses `@ScaledMetric` lisent la taille déjà plafonnée.
+struct TodaySessionWidgetMediumViewBody: View {
+    let content: TodaySessionWidgetContent
+
     @ScaledMetric(relativeTo: .body) private var restIconSize = 26
     @ScaledMetric(relativeTo: .headline) private var titleSize = 16
     @ScaledMetric(relativeTo: .caption) private var metaSize = 12
@@ -15,18 +29,12 @@ public struct TodaySessionWidgetMediumView: View {
     @ScaledMetric(relativeTo: .caption) private var buttonSize = 12.5
     @ScaledMetric(relativeTo: .caption2) private var buttonIconSize = 11
 
-    public init(content: TodaySessionWidgetContent) {
-        self.content = content
-    }
-
-    public var body: some View {
+    var body: some View {
         HStack(spacing: 14) {
             muscleMap
             details
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        // Un widget de 158 pt de haut n'a pas la place des tailles d'accessibilité : l'étiquette VoiceOver porte tout le texte.
-        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(content.accessibilityLabel)
     }

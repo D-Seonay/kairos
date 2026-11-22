@@ -42,7 +42,7 @@ public struct RecoveryWidgetSmallView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         // Un widget de 158 pt n'a pas la place des tailles d'accessibilité : l'étiquette VoiceOver porte tout le texte.
-        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+        .dynamicTypeSize(...WidgetTypeCap.recoverySmall)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(content.accessibilityLabel)
     }

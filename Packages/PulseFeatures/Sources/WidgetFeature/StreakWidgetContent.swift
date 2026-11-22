@@ -59,10 +59,9 @@ public struct StreakWidgetContent: Sendable, Equatable {
     }
 
     public static func sample(at date: Date, calendar: Calendar) -> StreakWidgetContent {
-        content(weeks: 14, completed: 3, target: 5, days: [.completed, .completed, .completed, .rest, .today, .upcoming, .rest],
-                spokenDays: WidgetPlanningText.spokenWeek(
-                    days: [.completed, .completed, .completed, .rest, .today, .upcoming, .rest],
-                    dates: WidgetPlanningText.weekDates(containing: date, calendar: calendar), calendar: calendar))
+        let week = WidgetPlanningText.sampleWeek(containing: date, calendar: calendar)
+        return content(weeks: 14, completed: 3, target: 5, days: week.map(WidgetPlanningText.state(of:)),
+                       spokenDays: WidgetPlanningText.spokenWeek(week, calendar: calendar))
     }
 
     /// « Série de 14 semaines, 3 séances sur 5 cette semaine. Lundi fait, mardi fait… » : les nombres avec leurs mots, puis l'état
@@ -77,7 +76,7 @@ public struct StreakWidgetContent: Sendable, Equatable {
     }
 
     private static func spokenDays(of week: [WidgetDay], calendar: Calendar) -> String {
-        WidgetPlanningText.spokenWeek(days: week.map(WidgetPlanningText.state(of:)), dates: week.map(\.date), calendar: calendar)
+        WidgetPlanningText.spokenWeek(week, calendar: calendar)
     }
 
     private static func content(weeks: Int, completed: Int, target: Int, days: [DayState], spokenDays: String) -> StreakWidgetContent {

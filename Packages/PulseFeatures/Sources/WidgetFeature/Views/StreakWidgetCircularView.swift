@@ -7,14 +7,24 @@ import SwiftUI
 public struct StreakWidgetCircularView: View {
     private let content: StreakWidgetContent
 
-    @ScaledMetric(relativeTo: .body) private var flameSize = 15
-    @ScaledMetric(relativeTo: .title3) private var numberSize = 20
-
     public init(content: StreakWidgetContent) {
         self.content = content
     }
 
     public var body: some View {
+        StreakWidgetCircularViewBody(content: content)
+            .dynamicTypeSize(...WidgetTypeCap.streakCircular)
+    }
+}
+
+/// Le contenu de la vue, plafonné par `StreakWidgetCircularView` : ses `@ScaledMetric` lisent la taille déjà plafonnée.
+struct StreakWidgetCircularViewBody: View {
+    let content: StreakWidgetContent
+
+    @ScaledMetric(relativeTo: .body) private var flameSize = 15
+    @ScaledMetric(relativeTo: .title3) private var numberSize = 20
+
+    var body: some View {
         VStack(spacing: 2) {
             Image(systemName: "flame.fill")
                 .font(.system(size: flameSize))
@@ -25,8 +35,6 @@ public struct StreakWidgetCircularView: View {
                 .minimumScaleFactor(0.7)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        // Le cercle de l'écran verrouillé est fixe : l'étiquette VoiceOver porte tout le texte.
-        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(content.accessibilityLabel)
     }

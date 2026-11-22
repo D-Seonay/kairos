@@ -7,16 +7,26 @@ import SwiftUI
 public struct LoadWidgetSmallView: View {
     private let content: LoadWidgetContent
 
-    @ScaledMetric(relativeTo: .caption) private var headerSize = 12
-    @ScaledMetric(relativeTo: .largeTitle) private var ratioSize = 38
-    @ScaledMetric(relativeTo: .caption) private var zoneSize = 12.5
-    @ScaledMetric(relativeTo: .caption2) private var boundsSize = 11
-
     public init(content: LoadWidgetContent) {
         self.content = content
     }
 
     public var body: some View {
+        LoadWidgetSmallViewBody(content: content)
+            .dynamicTypeSize(...WidgetTypeCap.loadSmall)
+    }
+}
+
+/// Le contenu de la vue, plafonné par `LoadWidgetSmallView` : ses `@ScaledMetric` lisent la taille déjà plafonnée.
+struct LoadWidgetSmallViewBody: View {
+    let content: LoadWidgetContent
+
+    @ScaledMetric(relativeTo: .caption) private var headerSize = 12
+    @ScaledMetric(relativeTo: .largeTitle) private var ratioSize = 38
+    @ScaledMetric(relativeTo: .caption) private var zoneSize = 12.5
+    @ScaledMetric(relativeTo: .caption2) private var boundsSize = 11
+
+    var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
             Spacer(minLength: 4)
@@ -28,8 +38,6 @@ public struct LoadWidgetSmallView: View {
             boundsRow
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        // Un widget de 158 pt n'a pas la place des tailles d'accessibilité : l'étiquette VoiceOver porte tout le texte.
-        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(content.accessibilityLabel)
     }

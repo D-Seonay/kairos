@@ -7,6 +7,20 @@ import SwiftUI
 public struct StreakWidgetSmallView: View {
     private let content: StreakWidgetContent
 
+    public init(content: StreakWidgetContent) {
+        self.content = content
+    }
+
+    public var body: some View {
+        StreakWidgetSmallViewBody(content: content)
+            .dynamicTypeSize(...WidgetTypeCap.streakSmall)
+    }
+}
+
+/// Le contenu de la vue, plafonné par `StreakWidgetSmallView` : ses `@ScaledMetric` lisent la taille déjà plafonnée.
+struct StreakWidgetSmallViewBody: View {
+    let content: StreakWidgetContent
+
     /// Les anneaux « à venir » et « repos » et le tiret doivent faire au moins 3:1 sur le dégradé, dans les deux apparences
     /// (mesuré avec l'encre du widget sur la mi-course du dégradé : 3,5:1 et plus).
     private static let upcomingRingOpacity = 0.6
@@ -18,11 +32,7 @@ public struct StreakWidgetSmallView: View {
     @ScaledMetric(relativeTo: .footnote) private var unitSize = 13
     @ScaledMetric(relativeTo: .caption) private var footerSize = 12
 
-    public init(content: StreakWidgetContent) {
-        self.content = content
-    }
-
-    public var body: some View {
+    var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
             Spacer(minLength: 4)
@@ -33,8 +43,6 @@ public struct StreakWidgetSmallView: View {
             footer
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        // Un widget de 158 pt n'a pas la place des tailles d'accessibilité : l'étiquette VoiceOver porte tout le texte.
-        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(content.accessibilityLabel)
     }

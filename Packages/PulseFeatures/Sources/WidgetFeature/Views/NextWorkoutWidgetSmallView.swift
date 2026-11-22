@@ -7,15 +7,25 @@ import SwiftUI
 public struct NextWorkoutWidgetSmallView: View {
     private let content: NextWorkoutWidgetContent
 
-    @ScaledMetric(relativeTo: .caption) private var headerSize = 12
-    @ScaledMetric(relativeTo: .title3) private var titleSize = 19
-    @ScaledMetric(relativeTo: .caption) private var zoneSize = 12
-
     public init(content: NextWorkoutWidgetContent) {
         self.content = content
     }
 
     public var body: some View {
+        NextWorkoutWidgetSmallViewBody(content: content)
+            .dynamicTypeSize(...WidgetTypeCap.nextWorkoutSmall)
+    }
+}
+
+/// Le contenu de la vue, plafonné par `NextWorkoutWidgetSmallView` : ses `@ScaledMetric` lisent la taille déjà plafonnée.
+struct NextWorkoutWidgetSmallViewBody: View {
+    let content: NextWorkoutWidgetContent
+
+    @ScaledMetric(relativeTo: .caption) private var headerSize = 12
+    @ScaledMetric(relativeTo: .title3) private var titleSize = 19
+    @ScaledMetric(relativeTo: .caption) private var zoneSize = 12
+
+    var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
             Spacer(minLength: 4)
@@ -26,8 +36,6 @@ public struct NextWorkoutWidgetSmallView: View {
             zoneBars
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        // Un widget de 158 pt n'a pas la place des tailles d'accessibilité : l'étiquette VoiceOver porte tout le texte.
-        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(content.accessibilityLabel)
     }
