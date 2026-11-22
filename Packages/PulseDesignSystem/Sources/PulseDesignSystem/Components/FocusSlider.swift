@@ -5,6 +5,7 @@ import SwiftUI
 public struct FocusSlider: View {
     @Binding private var focus: Double
     @Environment(\.pulseTheme) private var theme
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     public init(focus: Binding<Double>) {
         _focus = focus
@@ -17,24 +18,54 @@ public struct FocusSlider: View {
 
     public var body: some View {
         VStack(spacing: 6) {
-            HStack {
-                Label(String(localized: "Force", bundle: .module), systemImage: "dumbbell.fill")
-                Spacer()
-                Text(FocusSplit.label(focus: focus))
-                    .monospacedDigit()
-                    .accessibilityHidden(true)
-                Spacer()
-                Label(String(localized: "Endurance", bundle: .module), systemImage: "figure.run")
-                    .labelStyle(TrailingIconLabelStyle())
-            }
-            .font(.system(.subheadline, weight: .bold))
-            .foregroundStyle(PulsePalette.text)
+            captions
+                .font(.system(.subheadline, weight: .bold))
+                .foregroundStyle(PulsePalette.text)
 
             Slider(value: snappedFocus, in: 0...1, step: 0.1)
                 .tint(Color(PulsePalette.accent(for: theme).accent))
                 .accessibilityLabel(String(localized: "Équilibre force endurance", bundle: .module))
                 .accessibilityValue(FocusSplit.label(focus: focus))
 
+            extremes
+                .font(.footnote)
+                .foregroundStyle(PulsePalette.text2)
+                .accessibilityHidden(true)
+        }
+    }
+
+    /// « Force | 60 / 40 | Endurance » : sur une rangée, en colonne aux tailles d'accessibilité.
+    @ViewBuilder
+    private var captions: some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            VStack(alignment: .leading, spacing: 4) {
+                force
+                ratio
+                endurance
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        } else {
+            HStack {
+                force
+                Spacer()
+                ratio
+                Spacer()
+                endurance
+            }
+        }
+    }
+
+    /// « 100 % musculation | Hybride | 100 % running » : même règle.
+    @ViewBuilder
+    private var extremes: some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(String(localized: "100 % musculation", bundle: .module))
+                Text(String(localized: "Hybride", bundle: .module))
+                Text(String(localized: "100 % running", bundle: .module))
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        } else {
             HStack {
                 Text(String(localized: "100 % musculation", bundle: .module))
                 Spacer()
@@ -42,10 +73,22 @@ public struct FocusSlider: View {
                 Spacer()
                 Text(String(localized: "100 % running", bundle: .module))
             }
-            .font(.footnote)
-            .foregroundStyle(PulsePalette.text2)
-            .accessibilityHidden(true)
         }
+    }
+
+    private var force: some View {
+        Label(String(localized: "Force", bundle: .module), systemImage: "dumbbell.fill")
+    }
+
+    private var ratio: some View {
+        Text(FocusSplit.label(focus: focus))
+            .monospacedDigit()
+            .accessibilityHidden(true)
+    }
+
+    private var endurance: some View {
+        Label(String(localized: "Endurance", bundle: .module), systemImage: "figure.run")
+            .labelStyle(TrailingIconLabelStyle())
     }
 }
 
@@ -71,4 +114,9 @@ private struct FocusSliderPreview: View {
 
 #Preview {
     FocusSliderPreview()
+}
+
+#Preview("Accessibilité 3") {
+    FocusSliderPreview()
+        .dynamicTypeSize(.accessibility3)
 }

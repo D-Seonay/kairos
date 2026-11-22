@@ -62,6 +62,8 @@ public struct RecoveryGauge: View {
     @State private var shownScore: Double
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorScheme) private var colorScheme
+    /// « sur 100 » grandit avec Dynamic Type, jusqu'à 1,5 fois : le score, lui, reste dimensionné par le cadran (grands chiffres).
+    @ScaledMetric(relativeTo: .caption2) private var captionScale: CGFloat = 1
 
     public init(
         score: Double?,
@@ -157,10 +159,10 @@ public struct RecoveryGauge: View {
                 .minimumScaleFactor(0.5)
             if style.showsCaption {
                 Text(String(localized: "sur 100", bundle: .module))
-                    .font(.system(size: max(10, side * 0.045), weight: .medium, design: .monospaced))
+                    .font(.system(size: max(10, side * 0.045) * min(captionScale, 1.5), weight: .medium, design: .monospaced))
                     .textCase(.uppercase)
                     .tracking(1.6)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(PulsePalette.opalMuted)
             }
         }
         .padding(.top, side * 0.15)
@@ -278,6 +280,16 @@ private struct GaugePreviewRow: View {
             .padding()
     }
     .background(PulsePalette.background)
+}
+
+#Preview("Accessibilité 3") {
+    OpalCard(heat: 70) {
+        RecoveryGauge(score: 58, category: .moderateFatigue, style: .large, cardColor: PulsePalette.opal)
+            .frame(maxWidth: .infinity)
+    }
+    .padding()
+    .background(PulsePalette.background)
+    .dynamicTypeSize(.accessibility3)
 }
 
 #Preview("Compact, sur fond sombre") {

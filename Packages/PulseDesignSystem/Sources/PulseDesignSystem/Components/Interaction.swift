@@ -51,8 +51,8 @@ private struct PillBody: View {
         let palette = PulsePalette.accent(for: theme)
         configuration.label
             .font(.subheadline.weight(.semibold))
-            .lineLimit(1)
-            .fixedSize()
+            // Jamais tronquée : le texte passe à la ligne quand la place manque, et la pastille grandit en hauteur.
+            .fixedSize(horizontal: false, vertical: true)
             .foregroundStyle(prominent ? Color(palette.accentInk) : PulsePalette.text)
             .padding(.horizontal, 16)
             .frame(minWidth: 44, minHeight: 36)
@@ -86,13 +86,20 @@ public struct IconChip: View {
 
     private let systemName: String
     private let tone: Tone
-    private let size: CGFloat
+    private let baseSize: CGFloat
+    @ScaledMetric(relativeTo: .body) private var scaledSize: CGFloat = 40
     @Environment(\.pulseTheme) private var theme
 
     public init(systemName: String, tone: Tone = .neutral, size: CGFloat = 40) {
         self.systemName = systemName
         self.tone = tone
-        self.size = size
+        baseSize = size
+        _scaledSize = ScaledMetric(wrappedValue: size, relativeTo: .body)
+    }
+
+    /// Le rond suit Dynamic Type, sans dépasser le double de sa taille de base : au-delà, il mangerait la ligne.
+    private var size: CGFloat {
+        min(scaledSize, baseSize * 2)
     }
 
     public var body: some View {
@@ -127,6 +134,12 @@ public struct IconChip: View {
 public struct PulseSectionHeader<Actions: View>: View {
     private let title: String
     private let actions: Actions
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    /// Aux tailles d'accessibilité, les actions s'empilent sous le titre au lieu de se serrer côte à côte.
+    nonisolated static func stacksActions(accessibilitySize: Bool) -> Bool {
+        accessibilitySize
+    }
 
     public init(_ title: String, @ViewBuilder actions: () -> Actions) {
         self.title = title
@@ -134,19 +147,31 @@ public struct PulseSectionHeader<Actions: View>: View {
     }
 
     public var body: some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(alignment: .center, spacing: 8) {
-                titleText
-                Spacer(minLength: 8)
-                HStack(spacing: 8) { actions }
-            }
+        content
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.top, 8)
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        if Self.stacksActions(accessibilitySize: dynamicTypeSize.isAccessibilitySize) {
             VStack(alignment: .leading, spacing: 6) {
                 titleText
-                HStack(spacing: 8) { actions }
+                VStack(alignment: .leading, spacing: 8) { actions }
+            }
+        } else {
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .center, spacing: 8) {
+                    titleText
+                    Spacer(minLength: 8)
+                    HStack(spacing: 8) { actions }
+                }
+                VStack(alignment: .leading, spacing: 6) {
+                    titleText
+                    HStack(spacing: 8) { actions }
+                }
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.top, 8)
     }
 
     private var titleText: some View {
@@ -254,6 +279,20 @@ private struct DockedActionBar<Content: View>: View {
         .padding(.horizontal, PulseMetrics.spacing)
         .padding(.bottom, 8)
     }
+}
+
+#Preview("Accessibilité 3") {
+    VStack(alignment: .leading, spacing: 14) {
+        PulseSectionHeader("Mes routines") {
+            Button("Mon programme") {}.buttonStyle(PillButtonStyle())
+            Button("+ Nouvelle") {}.buttonStyle(PillButtonStyle(prominent: true))
+        }
+        PulseRow(systemImage: "book.closed", title: "Bibliothèque d'exercices", detail: "Fiches et consignes")
+    }
+    .padding()
+    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    .background(PulsePalette.background)
+    .dynamicTypeSize(.accessibility3)
 }
 
 #Preview("Composants d'interaction") {
