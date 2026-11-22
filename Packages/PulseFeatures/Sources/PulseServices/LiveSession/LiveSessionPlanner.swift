@@ -84,8 +84,10 @@ public enum LiveSessionPlanner {
                                                            rounding: rounding) : proposal.sets
         let working = proposedSets.enumerated().map { index, proposed in
             let before = index < lastSets.count ? lastSets[index] : nil
-            return LiveSet(proposed: proposed, previous: LiveSessionText.previous(before, loadKind: loadKind,
-                                                                                  tracksDuration: tracksDuration))
+            return LiveSet(proposed: proposed,
+                           previous: LiveSessionText.previous(before, loadKind: loadKind, tracksDuration: tracksDuration),
+                           previousSpoken: LiveSessionText.previousSpoken(before, loadKind: loadKind,
+                                                                          tracksDuration: tracksDuration))
         }
         let primaryMuscles = Set(info?.primaryMuscles ?? [])
         let warms = loadKind == .external && !tracksDuration && WarmupPlanner.isEligible(
@@ -101,7 +103,9 @@ public enum LiveSessionPlanner {
             restSeconds: routineExercise.restSeconds, rpeCap: lowered ? routineExercise.targetRPE : nil,
             dayNote: LiveSessionText.dayNote(loadAdjustment: proposal.loadAdjustment, hasHistory: !lastSets.isEmpty,
                                              policy: context.policy, planned: planned, adjusted: routineExercise),
-            lastTimeText: LiveSessionText.lastTime(lastSets, loadKind: loadKind, tracksDuration: tracksDuration), sets: sets,
+            lastTimeText: LiveSessionText.lastTime(lastSets, loadKind: loadKind, tracksDuration: tracksDuration),
+            lastTimeSpoken: LiveSessionText.lastTimeSpoken(lastSets, loadKind: loadKind, tracksDuration: tracksDuration),
+            sets: sets,
             warmupPlan: warmupPlan)
         return (exercise, proposal.loadAdjustment)
     }

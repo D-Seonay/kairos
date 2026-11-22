@@ -4,7 +4,7 @@ import PulseServices
 import SwiftUI
 
 /// Une série : le numéro (son menu change le type), le précédent, la charge, les répétitions (ou secondes), le RPE et la coche.
-/// Les cibles font 56 pt de haut et au moins 44 de large. Dès `xxLarge`, la ligne passe sur deux lignes et chaque cellule
+/// Les cibles font 56 pt de haut et au moins 44 de large. Dès `xLarge`, la ligne passe sur deux lignes et chaque cellule
 /// porte son titre.
 struct LiveSetRow: View {
     static let targetHeight: CGFloat = 56
@@ -27,7 +27,6 @@ struct LiveSetRow: View {
     @ScaledMetric(relativeTo: .title2) private var valueWidth = LiveSetRow.valueWidth
     @ScaledMetric(relativeTo: .title2) private var rpeWidth = LiveSetRow.rpeWidth
     @Environment(\.dynamicTypeSize) private var typeSize
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         Group {
@@ -122,11 +121,11 @@ struct LiveSetRow: View {
         Text(set.previous ?? "\u{2014}")
             .font(.footnote.monospacedDigit())
             .foregroundStyle(PulsePalette.muted)
-            .lineLimit(1)
+            .lineLimit(2)
             .minimumScaleFactor(0.7)
+            .multilineTextAlignment(.center)
             .frame(maxWidth: .infinity, minHeight: Self.targetHeight)
-            .accessibilityLabel(set.previous.map { String(localized: "Précédent \($0)", bundle: .module) }
-                                ?? String(localized: "Pas de série précédente", bundle: .module))
+            .accessibilityLabel(Self.previousSpokenText(for: set))
     }
 
     // MARK: Valeurs
@@ -170,6 +169,12 @@ struct LiveSetRow: View {
         String(localized: "Ouvre le clavier", bundle: .module)
     }
 
+    /// Vrai tant que le repos court : sa fin atteinte (`reachedRestEnd`, observé) retire l'action « Passer le repos ».
+    private var isRestRunning: Bool {
+        guard let rest = model.session.rest, model.reachedRestEnd != rest.startedAt else { return false }
+        return model.restRemaining(at: .now) != nil
+    }
+
     /// Une largeur qui suit le texte sur la ligne unique ; les cellules se partagent la ligne quand elle passe sur deux lignes.
     private func width(_ scaled: CGFloat) -> CGFloat? {
         Self.usesStackedLayout(typeSize) ? nil : scaled
@@ -201,7 +206,7 @@ struct LiveSetRow: View {
                 // Une série validée s'allume : la lueur menthe dit « fait » d'un coup d'œil, entre deux séries.
                 .shadow(color: isDone ? PulsePalette.ok.opacity(0.55) : .clear, radius: 10)
                 .scaleEffect(isDone ? 1 : 0.92)
-                .animation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.55), value: isDone)
+                .pulseAnimation(.spring(response: 0.3, dampingFraction: 0.55), value: isDone)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(Self.checkSpokenLabel(index: index, type: set.setType))
@@ -211,7 +216,7 @@ struct LiveSetRow: View {
         .accessibilityIdentifier(LiveSessionIdentifiers.check(exercise: exerciseIndex, set: index))
         // Le bandeau de repos est lu après toute la liste : on peut passer le repos depuis n'importe quelle coche.
         .accessibilityActions {
-            if model.session.rest != nil {
+            if isRestRunning {
                 Button(String(localized: "Passer le repos", bundle: .module)) {
                     Task { await RestBanner.skipRest(on: model) }
                 }

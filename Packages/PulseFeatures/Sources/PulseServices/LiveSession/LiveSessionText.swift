@@ -68,6 +68,74 @@ enum LiveSessionText {
         return String(localized: "Dernière fois \(list)", bundle: .module)
     }
 
+    // MARK: VoiceOver
+
+    /// « 70 kilos, 5 répétitions », « lest de 10 kilos, 8 répétitions », « 45 secondes » : `previous` dit en mots ; `nil` sans
+    /// valeur.
+    static func previousSpoken(_ set: WorkoutSet?, loadKind: LoadKind, tracksDuration: Bool) -> String? {
+        guard let set, let parts = spokenParts(of: set, loadKind: loadKind, tracksDuration: tracksDuration) else { return nil }
+        return joinedSpoken(weight: parts.weight, value: parts.value)
+    }
+
+    /// « Dernière fois : 60 kilos, 12 répétitions, puis 70 kilos, 5 répétitions, puis 5 répétitions » : `lastTime` dit en
+    /// mots. Comme à l'écran, une série qui garde la charge de la précédente ne dit que sa valeur.
+    static func lastTimeSpoken(_ sets: [WorkoutSet], loadKind: LoadKind, tracksDuration: Bool) -> String? {
+        var texts: [String] = []
+        var previousWeight: String?
+        for set in sets {
+            guard let parts = parts(of: set, loadKind: loadKind, tracksDuration: tracksDuration),
+                  let spoken = spokenParts(of: set, loadKind: loadKind, tracksDuration: tracksDuration) else { continue }
+            if texts.isEmpty || parts.weight != previousWeight {
+                let weight = spoken.weight ?? (previousWeight == nil ? nil : noLoadSpoken(loadKind))
+                texts.append(joinedSpoken(weight: weight, value: spoken.value))
+            } else {
+                texts.append(spoken.value)
+            }
+            previousWeight = parts.weight
+        }
+        guard !texts.isEmpty else { return nil }
+        let list = texts.joined(separator: String(localized: ", puis ", bundle: .module))
+        return String(localized: "Dernière fois : \(list)", bundle: .module)
+    }
+
+    private static func spokenParts(of set: WorkoutSet, loadKind: LoadKind, tracksDuration: Bool) -> Parts? {
+        let weightKg = set.actualWeightKg ?? 0
+        let weight: String? = switch loadKind {
+        case .external: set.actualWeightKg.map(kilosSpoken)
+        case .bodyweight: weightKg > 0 ? String(localized: "lest de \(kilosSpoken(weightKg))", bundle: .module) : nil
+        case .assisted: weightKg > 0 ? String(localized: "assistance de \(kilosSpoken(weightKg))", bundle: .module) : nil
+        }
+        if tracksDuration {
+            guard let seconds = set.durationSeconds else { return nil }
+            return Parts(weight: weight, value: seconds <= 1 ? String(localized: "\(seconds) seconde", bundle: .module)
+                            : String(localized: "\(seconds) secondes", bundle: .module))
+        }
+        guard let reps = set.actualReps else { return nil }
+        return Parts(weight: weight, value: reps <= 1 ? String(localized: "\(reps) répétition", bundle: .module)
+                        : String(localized: "\(reps) répétitions", bundle: .module))
+    }
+
+    private static func joinedSpoken(weight: String?, value: String) -> String {
+        guard let weight else { return value }
+        return String(localized: "\(weight), \(value)", bundle: .module)
+    }
+
+    /// Une série sans charge après une série chargée (« 0 × 6 » à l'écran).
+    private static func noLoadSpoken(_ loadKind: LoadKind) -> String {
+        switch loadKind {
+        case .external: kilosSpoken(0)
+        case .bodyweight: String(localized: "sans lest", bundle: .module)
+        case .assisted: String(localized: "sans assistance", bundle: .module)
+        }
+    }
+
+    /// « 1 kilo », « 1,5 kilo », « 70 kilos » : le pluriel commence à 2.
+    private static func kilosSpoken(_ kg: Double) -> String {
+        let text = decimal(kg)
+        return abs(kg) < 2 ? String(localized: "\(text) kilo", bundle: .module)
+            : String(localized: "\(text) kilos", bundle: .module)
+    }
+
     /// Les valeurs prévues d'une série en séance, pour la notification et la Live Activity : « 70 kg × 5 », « +10 kg × 8 »,
     /// « 8 rép. », « 30 s » ; `nil` sans valeur.
     static func planned(_ set: LiveSet, of exercise: LiveExercise) -> String? {

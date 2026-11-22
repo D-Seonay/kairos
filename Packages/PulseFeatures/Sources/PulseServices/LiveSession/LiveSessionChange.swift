@@ -134,7 +134,8 @@ extension LiveSession {
             for index in exercise.sets.indices.dropFirst(setIndex + 1) {
                 let next = exercise.sets[index]
                 guard !next.isEdited, next.completedAt == nil, next.setType != .warmup else { continue }
-                exercise.sets[index] = LiveSet(id: next.id, setType: next.setType, previous: next.previous, proposed: proposal,
+                exercise.sets[index] = LiveSet(id: next.id, setType: next.setType, previous: next.previous,
+                                               previousSpoken: next.previousSpoken, proposed: proposal,
                                                weightKg: proposal.weightKg, reps: proposal.reps,
                                                durationSeconds: proposal.durationSeconds, rpe: next.rpe)
             }

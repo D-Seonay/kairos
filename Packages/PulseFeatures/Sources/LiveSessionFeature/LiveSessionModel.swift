@@ -66,8 +66,9 @@ public final class LiveSessionModel {
     }
 
     /// Une touche du clavier. « Suivant » passe de la charge aux répétitions (ou secondes), puis à la série suivante de
-    /// l'exercice, puis ferme le clavier ; les autres touches modifient la valeur.
-    public func keypadKey(_ key: KeypadInput.Key) async {
+    /// l'exercice, puis ferme le clavier ; les autres touches modifient la valeur. `onInput` reçoit le tampon avant et après la
+    /// touche, avant l'enregistrement : l'écran le dit à VoiceOver sans attendre la sauvegarde.
+    public func keypadKey(_ key: KeypadInput.Key, onInput: ((_ before: String, _ after: String) -> Void)? = nil) async {
         guard let focus else { return }
         if key == .next {
             advance(from: focus)
@@ -77,6 +78,7 @@ public final class LiveSessionModel {
         let value = keypad.apply(key)
         // Une touche sans effet (virgule sur des répétitions, effacement d'un champ vide) ne modifie pas la série.
         guard keypad.text != before else { return }
+        onInput?(before, keypad.text)
         haptics.light()
         switch focus.kind {
         case .weight:

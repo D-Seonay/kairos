@@ -41,9 +41,10 @@ extension LiveSetRow {
         }
     }
 
-    /// Les lignes passent sur deux lignes dès `xxLarge` : au-delà, les colonnes fixes n'ont plus la place de leurs valeurs.
+    /// Les lignes passent sur deux lignes dès `xLarge` : au-delà, les colonnes qui suivent le texte ne laissent plus la place
+    /// au précédent.
     nonisolated static func usesStackedLayout(_ size: DynamicTypeSize) -> Bool {
-        size >= .xxLarge
+        size >= .xLarge
     }
 
     /// Le titre visible d'une cellule quand la ligne passe sur deux lignes : « Charge (kg) », « Reps », « Sec ».
@@ -75,6 +76,14 @@ extension LiveSetRow {
     nonisolated static func cellSpokenValue(text: String, isEmpty: Bool, isProposed: Bool) -> String {
         if isEmpty { return String(localized: "vide", bundle: .module) }
         return isProposed ? String(localized: "\(text), proposé", bundle: .module) : text
+    }
+
+    /// Le précédent dit en mots : « Précédent : 70 kilos, 5 répétitions ». Une séance enregistrée avant M8 n'a que le texte
+    /// visible, lu tel quel.
+    nonisolated static func previousSpokenText(for set: LiveSet) -> String {
+        if let spoken = set.previousSpoken { return String(localized: "Précédent : \(spoken)", bundle: .module) }
+        if let previous = set.previous { return String(localized: "Précédent \(previous)", bundle: .module) }
+        return String(localized: "Pas de série précédente", bundle: .module)
     }
 
     /// La coche : « Série 2 », « Série 1, échauffement ». Les valeurs sont dites par les cellules.

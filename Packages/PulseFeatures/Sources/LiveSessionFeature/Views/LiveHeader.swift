@@ -34,6 +34,7 @@ struct LiveHeader: View {
             }
             if let pastEndedAt = session.pastEndedAt {
                 Text(Self.pastDateText(start: session.startedAt, end: pastEndedAt, calendar: calendar))
+                    .accessibilityLabel(Self.pastDateSpokenText(start: session.startedAt, end: pastEndedAt, calendar: calendar))
                     .font(.footnote)
                     .foregroundStyle(PulsePalette.text2)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -157,6 +158,17 @@ extension LiveHeader {
             .weekday(.wide).day().month(.wide))
         let time = { (date: Date) in FinishFlowModel.timeText(date, calendar: calendar) }
         return "\(day.prefix(1).uppercased())\(day.dropFirst()) · \(time(start)) – \(time(end))"
+    }
+
+    /// « Mercredi 28 octobre, de 18 heures à 19 heures 5 » : `pastDateText` dit en mots.
+    nonisolated static func pastDateSpokenText(start: Date, end: Date, calendar: Calendar) -> String {
+        let weekday = PulseSpoken.weekday(start, calendar: calendar)
+        let day = "\(weekday.prefix(1).uppercased())\(weekday.dropFirst()) \(PulseSpoken.date(start, calendar: calendar))"
+        let clock = { (date: Date) in
+            let parts = calendar.dateComponents([.hour, .minute], from: date)
+            return PulseSpoken.clock(hour: parts.hour ?? 0, minute: parts.minute ?? 0)
+        }
+        return String(localized: "\(day), de \(clock(start)) à \(clock(end))", bundle: .module)
     }
 
     /// La durée saisie, en minutes arrondies.

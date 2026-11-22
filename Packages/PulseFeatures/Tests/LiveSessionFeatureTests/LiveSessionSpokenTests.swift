@@ -52,7 +52,8 @@ import Testing
 
     @Test func rowsStackFromTheLargerTextSizes() {
         #expect(!LiveSetRow.usesStackedLayout(.large))
-        #expect(!LiveSetRow.usesStackedLayout(.xLarge))
+        #expect(!LiveSetRow.usesStackedLayout(.medium))
+        #expect(LiveSetRow.usesStackedLayout(.xLarge))
         #expect(LiveSetRow.usesStackedLayout(.xxLarge))
         #expect(LiveSetRow.usesStackedLayout(.accessibility3))
     }
@@ -64,6 +65,16 @@ import Testing
         #expect(LiveSetRow.plannedSpokenText(for: hold, loadKind: .bodyweight, tracksDuration: true) == "45 secondes")
         let empty = LiveSet(proposed: ProposedSet(), previous: nil)
         #expect(LiveSetRow.plannedSpokenText(for: empty, loadKind: .external, tracksDuration: false) == nil)
+    }
+
+    @Test func previousIsSpokenInWordsOrAsWrittenForAnOldSession() {
+        var set = LiveSet(proposed: ProposedSet(weightKg: 70, reps: 5), previous: "70 × 5",
+                          previousSpoken: "70 kilos, 5 répétitions")
+        #expect(LiveSetRow.previousSpokenText(for: set) == "Précédent : 70 kilos, 5 répétitions")
+        set.previousSpoken = nil
+        #expect(LiveSetRow.previousSpokenText(for: set) == "Précédent 70 × 5")
+        set.previous = nil
+        #expect(LiveSetRow.previousSpokenText(for: set) == "Pas de série précédente")
     }
 
     @Test func addButtonsNameTheirTarget() {

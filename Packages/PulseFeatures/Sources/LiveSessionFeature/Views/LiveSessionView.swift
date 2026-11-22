@@ -141,12 +141,13 @@ public struct LiveSessionView: View {
         }
     }
 
-    /// Une touche du clavier, puis la nouvelle valeur du champ dite à VoiceOver.
+    /// Une touche du clavier ; la nouvelle valeur du champ est dite à VoiceOver dès la saisie, avant l'enregistrement, en
+    /// priorité basse pour ne pas couper « Repos terminé ».
     private func press(_ key: KeypadInput.Key, field: KeypadField.Kind) async {
-        let before = model.keypad.text
-        await model.keypadKey(key)
-        if let text = NumericKeypad.keypadAnnouncement(key: key, before: before, after: model.keypad.text, field: field) {
-            PulseAnnouncement.post(text)
+        await model.keypadKey(key) { before, after in
+            if let text = NumericKeypad.keypadAnnouncement(key: key, before: before, after: after, field: field) {
+                PulseAnnouncement.post(text, priority: .low)
+            }
         }
     }
 

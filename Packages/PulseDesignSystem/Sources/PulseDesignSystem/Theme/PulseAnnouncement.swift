@@ -2,11 +2,33 @@ import SwiftUI
 
 /// Les annonces VoiceOver : ce qui change à l'écran sans que le focus bouge (une erreur, une fin de repos, un record).
 public enum PulseAnnouncement {
+    /// La priorité d'une annonce. `low` attend que la parole en cours soit finie et ne coupe rien (la valeur d'une touche
+    /// derrière « Repos terminé ») ; `normal` est le défaut ; `high` coupe la parole en cours (une erreur).
+    public enum Priority: Sendable {
+        case low
+        case normal
+        case high
+    }
+
     /// Annonce `text`. Une erreur coupe la parole en cours (priorité haute), le reste attend son tour.
     public static func post(_ text: String, isError: Bool = false) {
+        post(text, priority: isError ? .high : .normal)
+    }
+
+    /// Annonce `text` avec la priorité donnée.
+    public static func post(_ text: String, priority: Priority) {
+        AccessibilityNotification.Announcement(message(text, priority: priority)).post()
+    }
+
+    /// Le texte de l'annonce, marqué de sa priorité.
+    static func message(_ text: String, priority: Priority) -> AttributedString {
         var message = AttributedString(text)
-        message.accessibilitySpeechAnnouncementPriority = isError ? .high : .default
-        AccessibilityNotification.Announcement(message).post()
+        message.accessibilitySpeechAnnouncementPriority = switch priority {
+        case .low: .low
+        case .normal: .default
+        case .high: .high
+        }
+        return message
     }
 
     /// Annonce une erreur : priorité haute, la parole en cours est coupée.

@@ -117,7 +117,10 @@ struct LiveExerciseCard: View {
                 .foregroundStyle(accent)
         }
         if let lastTime = exercise.lastTimeText {
-            Text(lastTime).font(.footnote).foregroundStyle(PulsePalette.text2)
+            Text(lastTime)
+                .font(.footnote)
+                .foregroundStyle(PulsePalette.text2)
+                .accessibilityLabel(exercise.lastTimeSpoken ?? lastTime)
         }
         if let dayNote = exercise.dayNote {
             Label {

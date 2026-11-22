@@ -28,6 +28,32 @@ struct LiveSessionCodingTests {
         #expect(LiveSession.decode(try future.encoded()) == nil)
     }
 
+    /// Une séance enregistrée avant M8 n'a pas les textes parlés : elle se relit, sans eux.
+    @Test func aSnapshotSavedBeforeTheSpokenTextsStillDecodes() throws {
+        let session = session()
+        #expect(session.exercises[0].lastTimeSpoken != nil && session.exercises[0].sets.contains { $0.previousSpoken != nil })
+        var json = try #require(try JSONSerialization.jsonObject(with: session.encoded()) as? [String: Any])
+        var exercises = try #require(json["exercises"] as? [[String: Any]])
+        for index in exercises.indices {
+            exercises[index]["lastTimeSpoken"] = nil
+            var sets = try #require(exercises[index]["sets"] as? [[String: Any]])
+            for setIndex in sets.indices { sets[setIndex]["previousSpoken"] = nil }
+            exercises[index]["sets"] = sets
+        }
+        json["exercises"] = exercises
+        let old = try JSONSerialization.data(withJSONObject: json)
+        #expect(String(bytes: old, encoding: .utf8)?.contains("Spoken") == false)
+
+        var expected = session
+        for index in expected.exercises.indices {
+            expected.exercises[index].lastTimeSpoken = nil
+            for setIndex in expected.exercises[index].sets.indices {
+                expected.exercises[index].sets[setIndex].previousSpoken = nil
+            }
+        }
+        #expect(LiveSession.decode(old) == expected)
+    }
+
     @Test func anUnreadableSnapshotIsNil() throws {
         #expect(LiveSession.decode(Data("pas du JSON".utf8)) == nil)
         #expect(LiveSession.decode(Data("{}".utf8)) == nil)
