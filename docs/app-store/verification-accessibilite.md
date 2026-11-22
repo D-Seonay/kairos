@@ -44,6 +44,7 @@ Pour chaque écran : balayer de gauche à droite du début à la fin. L'ordre do
 - [ ] La carte de séance se lit en une phrase (titre, durée, trois muscles principaux). La carte musculaire est masquée ici : c'est voulu. Vérifier que l'intensité par muscle ne manque pas.
 - [ ] Le titre de séance est repérable avec le rotor « En-têtes ».
 - [ ] « Démarrer » est annoncé comme bouton ; une fois la séance faite, la carte dit « Séance faite, 55 minutes, 18 séries, 6 420 kilos, 2 records ».
+- [ ] Score annoncé alors qu'un autre onglet est affiché : ouvrir Stats ou Planning, puis laisser le score changer (retour de l'app au premier plan, nuit Santé qui arrive). Noter si « Score mis à jour : … » ou « Ton score est prêt : … » est annoncé hors de l'onglet Aujourd'hui, et si c'est gênant.
 - [ ] Après une nouvelle saisie du check-in qui change la note ou la catégorie : « Score mis à jour : … ». Sans changement : aucune annonce.
 - [ ] Une erreur de check-in est annoncée, et l'est de nouveau si le même échec se répète.
 - [ ] Écran « Pourquoi » : la lecture de ce matin dit « 5 battements par minute », « 5 heures 10 minutes » (pas « bpm », pas « 5 h 10 »). Les signaux se lisent avec leur nom complet (« Fréquence cardiaque au repos »).
@@ -66,6 +67,7 @@ Pour chaque écran : balayer de gauche à droite du début à la fin. L'ordre do
 ### Séance en direct
 
 - [ ] L'ordre : titre, « Terminer », menu, durée, tonnage, séries, puis les exercices dans l'ordre. Le menu dit « Abandonner » et « Annuler la saisie » pour une séance passée.
+- [ ] Taille de texte par défaut, sur un petit iPhone (375 pt de large) : durée, tonnage et séries de l'en-tête s'affichent en entier. La limite de lignes a été retirée : une valeur longue passe à la ligne au lieu d'être coupée, vérifier que l'en-tête ne déborde pas ni ne se chevauche.
 - [ ] Les trois stats du bandeau se disent « Durée … », « Tonnage … kilos », « Séries, 3 sur 12 ». Elles roulent sans spam VoiceOver.
 - [ ] Une rangée de série se lit en une phrase : numéro, charge, répétitions, « Précédent : 70 kilos, 5 répétitions », état « validée » ou « non validée ». Pas de « 70 × 5 ».
 - [ ] La coche dit « validée » après le toucher ; l'action « Passer le repos » n'est proposée que pendant un repos qui court.
@@ -96,7 +98,7 @@ Pour chaque écran : balayer de gauche à droite du début à la fin. L'ordre do
 - [ ] Les rangées de la semaine : « Validée, 11 240 kilos », « Sortie facile, 45 minutes » ; l'activation du bouton fonctionne toujours.
 - [ ] La carte du jour dit « Aujourd'hui, mercredi 18 » sans point médian.
 - [ ] Détail d'une course : l'allure se dit « 5 minutes 29 par kilomètre », la distance en kilomètres, la fréquence « battements par minute » ; une valeur absente dit « Non renseigné », pas « tiret ».
-- [ ] Mois et série : la légende se lit ; la carte de série dit « 1 semaine » (singulier) et non « 1 semaines » (écart reporté du chantier : à contrôler, visible et dit).
+- [ ] Mois et série : la légende se lit ; la rangée « Mois et série » et la carte de série disent « 1 semaine » (singulier) et non « 1 semaines », visible comme dit, et la rangée est lue sans point médian.
 - [ ] Une séance déplacée : la raison dit « 36 heures » et non « 36 h » (écart reporté : à contrôler).
 - [ ] Erreurs de chargement annoncées.
 
@@ -117,7 +119,7 @@ Pour chaque écran : balayer de gauche à droite du début à la fin. L'ordre do
 - [ ] Poids : le résumé du graphique dit « à 78 kilos » (sans plage si le minimum et le maximum sont égaux), les points se parcourent un par un avec leur date et leur valeur.
 - [ ] Ligne de pesée et lignes de paramètres : activées par un toucher, mais VoiceOver ne doit pas annoncer un « bouton » en trop. Ces rangées utilisent un geste de toucher : si un bouton fantôme s'annonce ou si l'activation par double toucher échoue, le signaler.
 - [ ] Paramètres : chaque interrupteur dit son nom et « activé » ou « désactivé » ; les actions nommées (supprimer une pesée) sont dans le rotor « Actions ».
-- [ ] « Version 1.0.2 (14) » est lue avec sa ponctuation : à écouter ; écart connu, hors audit.
+- [ ] « Version 1.0.2 (numéro de build) » est lue avec sa ponctuation : à écouter ; écart connu, hors audit.
 - [ ] Mes données : l'écran de suppression se lit en entier, la confirmation est une alerte claire.
 - [ ] Apple Santé (relecture) : « Relire maintenant » annonce son résultat une seule fois, pas une fois par ligne de la section.
 - [ ] Licences : la liste se lit rangée par rangée.
@@ -162,6 +164,7 @@ Réglages → Accessibilité → Affichage et taille du texte → Police plus gr
 - [ ] Compléments : les rangées passent en colonne, les doses ne sont jamais tronquées.
 - [ ] Widgets : le plafond est xxxLarge. Les widgets de 158 pt et le rectangle de 66 pt reposent sur une réduction automatique du texte : aucune capture n'a été faite. Regarder chacun à xxxLarge sur l'iPhone, sur l'écran d'accueil et l'écran verrouillé, et noter tout texte coupé en haut ou en bas.
 - [ ] Live Activity et Dynamic Island : le texte reste entier au plus grand réglage.
+- [ ] Pilules de choix (objectifs, période des Stats, réglages) dans une rangée serrée, **à la taille par défaut** : un libellé long peut passer sur deux lignes. Vérifier qu'il n'est jamais coupé et que la rangée garde une cible de 44 pt.
 - [ ] Retour à la taille par défaut en fin de passe.
 
 ## 4. Réduire les animations
@@ -173,8 +176,8 @@ Réglages → Accessibilité → Mouvement → Réduire les animations activé. 
 - [ ] La jauge de récupération apparaît posée (graduations et aiguille sans balayage), le score ne fait plus rouler ses chiffres.
 - [ ] Le check-in : l'estimation change sans roulement de chiffres.
 - [ ] Séance en direct : la coche de série ne rebondit plus, le tonnage et le compte des séries changent sans rouler.
-- [ ] Boutons : plus d'effet de réduction à l'appui (échelle).
-- [ ] Planning : les changements de semaine ou de mois se font sans glissement.
+- [ ] Boutons : l'effet d'échelle à l'appui reste (le bouton se réduit toujours sous le doigt), mais il s'applique d'un coup, sans animation.
+- [ ] Planning : le seul mouvement animé est le défilement vers un jour ; il passe par `PulseMotion` et saute directement au jour, sans défiler, quand le réglage est activé.
 - [ ] Onboarding : le passage d'une étape à l'autre se fait en fondu.
 - [ ] Stats et Profil : aucune barre ni courbe ne se dessine en s'animant.
 

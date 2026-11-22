@@ -44,26 +44,6 @@
         }
       }
     },
-    "%@ kilo" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ kilo"
-          }
-        }
-      }
-    },
-    "%@ kilos" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ kilos"
-          }
-        }
-      }
-    },
     "%@, série %lld" : {
       "localizations" : {
         "fr" : {
@@ -83,16 +63,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld répétitions"
-          }
-        }
-      }
-    },
-    "%lld secondes" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld secondes"
           }
         }
       }
@@ -183,26 +153,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "−kg"
-          }
-        }
-      }
-    },
-    "1 répétition" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "1 répétition"
-          }
-        }
-      }
-    },
-    "1 seconde" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "1 seconde"
           }
         }
       }
@@ -1393,16 +1343,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@, %@"
-          }
-        }
-      }
-    },
-    "répétition" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "répétition"
           }
         }
       }

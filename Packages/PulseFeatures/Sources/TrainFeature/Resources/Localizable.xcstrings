@@ -3043,26 +3043,6 @@
         }
       }
     },
-    "%@ kilomètre" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ kilomètre"
-          }
-        }
-      }
-    },
-    "%@ kilomètres" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ kilomètres"
-          }
-        }
-      }
-    },
     "%@ séance importée" : {
       "localizations" : {
         "fr" : {

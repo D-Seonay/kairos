@@ -51,16 +51,6 @@
         }
       }
     },
-    "%@, %lld sur 100" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@, %lld sur 100"
-          }
-        }
-      }
-    },
     "%@, aucune donnée" : {
       "localizations" : {
         "fr" : {
@@ -94,56 +84,12 @@
     "%lld" : {
 
     },
-    "%lld minutes" : {
-      "localizations" : {
-        "fr" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld minute"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld minutes"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "%lld records" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld records"
-          }
-        }
-      }
-    },
-    "%lld secondes" : {
-      "localizations" : {
-        "fr" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld seconde"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld secondes"
-                }
-              }
-            }
           }
         }
       }
@@ -708,16 +654,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Motivation"
-          }
-        }
-      }
-    },
-    "Muscles sollicités : %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Muscles sollicités : %@"
           }
         }
       }
@@ -1648,16 +1584,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Score mis à jour : %@"
-          }
-        }
-      }
-    },
-    "Synchronisé à %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Synchronisé à %@"
           }
         }
       }

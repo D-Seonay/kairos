@@ -21,26 +21,6 @@
         }
       }
     },
-    "%@ kilomètre" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ kilomètre"
-          }
-        }
-      }
-    },
-    "%@ kilomètres" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ kilomètres"
-          }
-        }
-      }
-    },
     "%@ · estimé" : {
       "localizations" : {
         "fr" : {
@@ -210,26 +190,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "repos"
-          }
-        }
-      }
-    },
-    "répétition" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "répétition"
-          }
-        }
-      }
-    },
-    "répétitions" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "répétitions"
           }
         }
       }

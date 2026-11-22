@@ -291,22 +291,12 @@
         }
       }
     },
-    "%@ : %lld répétitions au poids du corps, nouveau record": {
+    "%@ : %@ à %@ kg, nouveau record": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ : %lld répétitions au poids du corps, nouveau record"
-          }
-        }
-      }
-    },
-    "%@ : %lld répétitions à %@ kg, nouveau record": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ : %lld répétitions à %@ kg, nouveau record"
+            "value": "%@ : %@ à %@ kg, nouveau record"
           }
         }
       }
@@ -387,6 +377,56 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld répétitions"
+          }
+        }
+      }
+    },
+    "%lld exercice" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld exercice"
+          }
+        }
+      }
+    },
+    "%lld exercices" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld exercices"
+          }
+        }
+      }
+    },
+    "%lld série" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld série"
+          }
+        }
+      }
+    },
+    "%lld séries" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld séries"
+          }
+        }
+      }
+    },
+    "%@ · %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · %@"
           }
         }
       }

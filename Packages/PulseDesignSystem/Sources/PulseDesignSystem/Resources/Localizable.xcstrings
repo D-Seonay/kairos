@@ -31,6 +31,26 @@
         }
       }
     },
+    "%@ kilomètre" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kilomètre"
+          }
+        }
+      }
+    },
+    "%@ kilomètres" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kilomètres"
+          }
+        }
+      }
+    },
     "%@ kilos" : {
       "localizations" : {
         "fr" : {
@@ -338,6 +358,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Endurance"
+          }
+        }
+      }
+    },
+    "répétition" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "répétition"
+          }
+        }
+      }
+    },
+    "répétitions" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "répétitions"
           }
         }
       }
