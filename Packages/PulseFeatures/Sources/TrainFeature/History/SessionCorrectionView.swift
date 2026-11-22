@@ -156,5 +156,6 @@ struct RPEPicker: View {
             Text(shortTitle ?? title)
         }
         .accessibilityLabel(title)
+        .accessibilityValue(value.map { PulseFormat.decimal($0, maxFractionDigits: 1) } ?? String(localized: "Aucun", bundle: .module))
     }
 }

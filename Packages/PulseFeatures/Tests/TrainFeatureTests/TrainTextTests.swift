@@ -228,4 +228,11 @@ import Testing
         #expect(TrainText.spokenPeriod(from: "3 septembre 2026", to: "26 octobre 2026") == "du 3 septembre 2026 au 26 octobre 2026")
         #expect(TrainText.spokenPeriod(from: "3 septembre 2026", to: "3 septembre 2026") == "3 septembre 2026")
     }
+
+    @Test func rowsAndAlternativesAreSaidWithoutDots() {
+        #expect(TrainText.rowSpoken(title: "Mon programme", detail: "4 routines, 3 séances par semaine")
+            == "Mon programme, 4 routines, 3 séances par semaine")
+        #expect(TrainText.alternativeSpoken(name: "Squat gobelet", pattern: "Squat", equipment: "Haltère")
+            == "Squat gobelet, Squat, haltère")
+    }
 }

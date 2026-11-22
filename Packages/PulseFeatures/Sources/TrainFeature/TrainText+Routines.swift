@@ -141,6 +141,16 @@ extension TrainText {
         }
     }
 
+    /// « Mon programme, 4 routines, 3 séances par semaine » : une ligne de liste dont le détail est dit en mots.
+    static func rowSpoken(title: String, detail: String) -> String {
+        String(localized: "\(title), \(detail)", bundle: .module)
+    }
+
+    /// « Squat, Squat, barre » : une alternative d'exercice, sans « · ».
+    static func alternativeSpoken(name: String, pattern: String, equipment: String) -> String {
+        String(localized: "\(name), \(pattern), \(equipment.lowercased())", bundle: .module)
+    }
+
     // MARK: - Interne
 
     private static func repetitionsUnit(_ count: Int) -> String {

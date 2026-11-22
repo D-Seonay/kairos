@@ -6,7 +6,7 @@ struct HistoryRow: View {
     let line: HistoryLine
     let dateText: String
     /// La date en toutes lettres, pour VoiceOver.
-    var spokenDateText: String?
+    let spokenDateText: String
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
@@ -22,7 +22,7 @@ struct HistoryRow: View {
         .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
         .contentShape(Rectangle())
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(TrainText.historyRowSpoken(line, spokenDate: spokenDateText ?? dateText))
+        .accessibilityLabel(TrainText.historyRowSpoken(line, spokenDate: spokenDateText))
     }
 
     /// Le titre, les marques et les records : sur une ligne, ou en colonne aux tailles d'accessibilité où le titre serait écrasé.

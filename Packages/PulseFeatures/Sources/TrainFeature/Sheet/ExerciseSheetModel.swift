@@ -115,6 +115,11 @@ public final class ExerciseSheetModel {
             series: [.init(name: name, points: chart.map { .init(date: $0.date, y: $0.value) })], calendar: environment.calendar)
     }
 
+    /// Un point de la courbe dit en mots : la date « 26 octobre » et la valeur « 80 kilos ».
+    public func pointSpoken(_ point: ChartPoint) -> (label: String, value: String) {
+        (PulseSpoken.date(point.date, calendar: environment.calendar), PulseSpoken.kilos(Self.rounded(point.value)))
+    }
+
     /// « Maximum estimé sur une répétition » : le 1RM, dit en mots.
     static var oneRepMaxName: String {
         String(localized: "Maximum estimé sur une répétition", bundle: .module)

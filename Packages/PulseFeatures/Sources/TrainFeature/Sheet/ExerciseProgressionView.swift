@@ -71,7 +71,8 @@ struct ProgressionPane: View {
                         .foregroundStyle(PulsePalette.muted)
                 }
                 if let summary = model.chartSummary, let descriptor = model.chartDescriptor {
-                    ExerciseProgressionChart(points: model.chart, summary: summary, descriptor: descriptor)
+                    ExerciseProgressionChart(points: model.chart, summary: summary, descriptor: descriptor,
+                                             spokenPoint: { model.pointSpoken($0) })
                 } else {
                     Text(String(localized: "Aucune séance de charge sur 90 jours : la courbe apparaîtra avec la prochaine.",
                                 bundle: .module))

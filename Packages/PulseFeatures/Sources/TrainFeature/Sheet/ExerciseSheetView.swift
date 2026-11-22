@@ -274,7 +274,9 @@ private struct AlternativesPane: View {
                 Button { onOpen(alternative.reference) } label: { row(alternative) }
                     .buttonStyle(.plain)
                     .accessibilityElement(children: .ignore)
-                    .accessibilityLabel(String(localized: "\(alternative.name), \(spokenSubtitle(alternative))", bundle: .module))
+                    .accessibilityLabel(TrainText.alternativeSpoken(
+                        name: alternative.name, pattern: alternative.pattern.localizedName,
+                        equipment: alternative.equipment.localizedName))
                     .accessibilityHint(String(localized: "Ouvre la fiche de l'exercice", bundle: .module))
                     .accessibilityAddTraits(.isButton)
             }
@@ -306,9 +308,5 @@ private struct AlternativesPane: View {
 
     private func subtitle(_ alternative: ExerciseInfo) -> String {
         "\(alternative.pattern.localizedName) · \(alternative.equipment.localizedName.lowercased())"
-    }
-
-    private func spokenSubtitle(_ alternative: ExerciseInfo) -> String {
-        "\(alternative.pattern.localizedName), \(alternative.equipment.localizedName.lowercased())"
     }
 }

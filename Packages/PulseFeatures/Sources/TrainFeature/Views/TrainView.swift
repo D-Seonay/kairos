@@ -164,6 +164,8 @@ public struct TrainView: View {
     /// Crée une routine vide dans le programme actif et ouvre son éditeur.
     private func createRoutine() {
         Task {
+            // Remis à zéro avant chaque essai : un échec répété change de nouveau l'état et est annoncé.
+            creationFailed = false
             do {
                 let id = try await model.addRoutine(named: String(localized: "Nouvelle routine", bundle: .module))
                 guard let programID = model.program?.id else { return }

@@ -268,3 +268,14 @@ private func benchFixture() async throws -> TrainFixture {
     #expect(model.recentSessions.first?.setsText == "70 × 5 · 5")
     #expect(model.recentSessions.first?.spokenSetsText == "70 kilos, 2 séries de 5 répétitions")
 }
+
+@MainActor @Test func sheetSpeaksEachChartPointWithItsDateAndValue() async throws {
+    let fixture = try await benchFixture()
+    let model = ExerciseSheetModel(environment: fixture.environment, reference: bench)
+    await model.load()
+    let first = try #require(model.chart.first)
+    let spoken = model.pointSpoken(first)
+    #expect(spoken.label == "2 octobre")
+    #expect(spoken.value.hasSuffix(" kilos") && !spoken.value.contains("kg"))
+    #expect(model.pointSpoken(ChartPoint(date: first.date, value: 1)).value == "1 kilo")
+}

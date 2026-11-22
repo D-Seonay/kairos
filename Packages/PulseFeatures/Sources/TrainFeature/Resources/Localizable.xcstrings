@@ -253,16 +253,6 @@
         }
       }
     },
-    "1RM estimé (kg)" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "1RM estimé (kg)"
-          }
-        }
-      }
-    },
     "1RM estimé, 90 jours" : {
       "localizations" : {
         "fr" : {
@@ -3659,6 +3649,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Durée"
+          }
+        }
+      }
+    },
+    "%@, %@, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, %@, %@"
+          }
+        }
+      }
+    },
+    "Maximum estimé en kilos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maximum estimé en kilos"
           }
         }
       }
