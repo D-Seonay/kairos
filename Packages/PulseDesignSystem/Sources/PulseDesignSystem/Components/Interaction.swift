@@ -15,13 +15,12 @@ public struct PressableButtonStyle: ButtonStyle {
 
 private struct PressableBody: View {
     let configuration: ButtonStyleConfiguration
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         configuration.label
             .scaleEffect(configuration.isPressed ? 0.975 : 1)
             .opacity(configuration.isPressed ? 0.88 : 1)
-            .animation(reduceMotion ? nil : .spring(response: 0.28, dampingFraction: 0.7), value: configuration.isPressed)
+            .pulseAnimation(.spring(response: 0.28, dampingFraction: 0.7), value: configuration.isPressed)
             .sensoryFeedback(.impact(weight: .light), trigger: configuration.isPressed) { _, pressed in pressed }
     }
 }
@@ -47,7 +46,6 @@ private struct PillBody: View {
     let prominent: Bool
     @Environment(\.pulseTheme) private var theme
     @Environment(\.isEnabled) private var isEnabled
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         let palette = PulsePalette.accent(for: theme)
@@ -70,7 +68,7 @@ private struct PillBody: View {
             .contentShape(Rectangle())
             .scaleEffect(configuration.isPressed ? 0.95 : 1)
             .opacity(isEnabled ? 1 : 0.35)
-            .animation(reduceMotion ? nil : .spring(response: 0.25, dampingFraction: 0.65), value: configuration.isPressed)
+            .pulseAnimation(.spring(response: 0.25, dampingFraction: 0.65), value: configuration.isPressed)
             .sensoryFeedback(.impact(weight: .light), trigger: configuration.isPressed) { _, pressed in pressed }
     }
 }
@@ -238,7 +236,7 @@ public extension View {
         safeAreaInset(edge: .bottom, spacing: 0) {
             if isPresented {
                 DockedActionBar(content: action())
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .pulseTransition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
     }

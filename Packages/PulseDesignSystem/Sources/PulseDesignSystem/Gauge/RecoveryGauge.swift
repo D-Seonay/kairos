@@ -151,8 +151,8 @@ public struct RecoveryGauge: View {
             Text(verbatim: Self.roundedScore(score).map(String.init) ?? "—")
                 .font(PulseFont.score(size: side * style.scoreScale))
                 // Un nouveau score fait rouler les chiffres au lieu de les remplacer d'un coup.
-                .contentTransition(.numericText(value: Double(Self.roundedScore(score) ?? 0)))
-                .animation(reduceMotion ? nil : .snappy, value: Self.roundedScore(score))
+                .pulseNumericTransition(value: Double(Self.roundedScore(score) ?? 0))
+                .pulseAnimation(.snappy, value: Self.roundedScore(score))
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
             if style.showsCaption {
@@ -173,7 +173,7 @@ public struct RecoveryGauge: View {
         if reduceMotion || !animatesReveal {
             shownScore = target
         } else {
-            withAnimation(.spring(response: 1.1, dampingFraction: 0.82)) { shownScore = target }
+            PulseMotion.perform(.spring(response: 1.1, dampingFraction: 0.82), reduceMotion: reduceMotion) { shownScore = target }
         }
     }
 

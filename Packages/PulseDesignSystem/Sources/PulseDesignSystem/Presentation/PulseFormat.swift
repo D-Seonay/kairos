@@ -46,6 +46,17 @@ public enum PulseFormat {
         return value.formatted(style)
     }
 
+    /// « 12 450 », « 62,5 » : virgule décimale et espace fine insécable entre les milliers (`fr_FR`), aucune décimale
+    /// superflue. Une valeur non finie donne « — ».
+    public static func grouped(_ value: Double, maxFractionDigits: Int) -> String {
+        guard value.isFinite else { return dash }
+        let style = FloatingPointFormatStyle<Double>.number
+            .locale(Locale(identifier: "fr_FR"))
+            .precision(.fractionLength(0...max(0, maxFractionDigits)))
+            .grouping(.automatic)
+        return value.formatted(style)
+    }
+
     /// « +3 % », « −18 % », « 0 % ».
     public static func signedPercent(_ value: Double) -> String {
         guard let number = signed(value) else { return dash }
