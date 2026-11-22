@@ -93,7 +93,7 @@ Le RPE corrigé et la note saisis sur une course importée suivent la course sur
   - `SwiftDataWorkoutRepository` route `save` et `delete` selon `source` ; `sessions(from:to:)` fusionne les deux magasins dans le même ordre qu'aujourd'hui (`startedAt`, puis `createdAt`) ; `session(id:)` cherche dans les deux. `lastSets` ne change pas (une course n'a pas de séries).
   - `SwiftDataBodyMeasurementRepository` route de même selon `source`.
   - Un changement de `source` sur une ligne existante n'arrive pas dans l'app ; s'il arrivait, la ligne est déplacée (écrite d'un côté, supprimée de l'autre).
-- **Une seule transaction ?** Les deux configurations partagent un `ModelContainer` et un `ModelContext`, donc un seul `save()` écrit les deux magasins. Le constructeur vérifie ce point par un test ; s'il ne tient pas, l'ordre est : écrire le local, puis le synchronisé.
+- **Ordre d'écriture.** Un `save()` qui touche les deux magasins n'est pas garanti atomique entre les deux fichiers. Le déplacement (§5.2) écrit donc en deux temps : il enregistre d'abord les copies locales, puis il vide ou supprime côté synchronisé dans un second `save()` (corrigé après la relecture finale de M8a).
 
 ### 5.2 Déplacement de l'existant
 
@@ -141,7 +141,7 @@ Un `PrivacyInfo.xcprivacy` dans la cible app et un dans l'extension widgets (les
 
 ### 6.2 Pages publiques
 
-- `docs/confidentialite/index.html` : politique de confidentialité en français, page statique autonome (pas de script, pas de police distante, style papier monochrome de l'app). Contenu : ce que Pulse lit dans Apple Santé et pourquoi ; ce qu'il y écrit ; où vivent les données (appareil ; iCloud privé de l'utilisateur pour ce qu'il saisit et les scores calculés ; les valeurs d'Apple Santé ne quittent pas l'appareil) ; aucun serveur, aucune analytics, aucun tiers, aucune publicité ; rapports de plantage d'Apple seulement si l'utilisateur les partage ; export et suppression depuis l'app ; « pas un dispositif médical » ; date de mise à jour ; contact.
+- `docs/confidentialite/index.html` : politique de confidentialité en français, page statique autonome (pas de script, pas de police distante, style papier monochrome de l'app). Contenu : ce que Pulse lit dans Apple Santé et pourquoi ; ce qu'il y écrit ; où vivent les données (appareil ; iCloud privé de l'utilisateur pour ce qu'il saisit et les scores calculés ; les valeurs d'Apple Santé ne sont jamais écrites dans la synchronisation iCloud ; comme toutes les données locales de l'app, elles font partie de la sauvegarde de l'iPhone si elle est activée, et des exports) ; aucun serveur, aucune analytics, aucun tiers, aucune publicité ; rapports de plantage d'Apple seulement si l'utilisateur les partage ; export et suppression depuis l'app ; « pas un dispositif médical » ; date de mise à jour ; contact.
 - `docs/support/index.html` : page d'assistance (questions fréquentes : score absent, montre non Apple, calibration, export, suppression ; contact).
 - **Contact** : les issues GitHub du dépôt **(choix du constructeur)**. Une adresse e-mail n'est publiée que si Mathéo en donne une.
 - **Publication** : GitHub Pages sur `master`, dossier `/docs`, ce qui donne `https://d-seonay.github.io/kairos/confidentialite/` et `/support/`. Un fichier `docs/.nojekyll` empêche Jekyll de transformer les specs et plans en pages (le dépôt est déjà public, rien de nouveau n'est exposé). Activer Pages est une action sur le dépôt : faite par Mathéo, ou par moi avec son accord explicite.
