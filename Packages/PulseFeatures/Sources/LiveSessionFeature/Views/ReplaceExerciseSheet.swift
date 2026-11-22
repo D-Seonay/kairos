@@ -146,7 +146,7 @@ struct ReplaceExerciseSheet: View {
                                        plural: String(localized: "séries", bundle: .module))]
         guard let first = working.first else { return parts[0] }
         if let weight = first.proposed.weightKg { parts.append(LiveSetRow.kilos(weight)) }
-        if let reps = first.proposed.reps { parts.append(LiveSetRow.repetitions(reps)) }
+        if let reps = first.proposed.reps { parts.append(PulseSpoken.repetitions(reps)) }
         if replacement.lastTimeText == nil, first.proposed.weightKg != nil {
             parts.append(String(localized: "charge estimée", bundle: .module))
         }

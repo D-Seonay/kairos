@@ -20,6 +20,21 @@ public enum PulseSpoken {
             : String(localized: "\(number) kilos", bundle: .module)
     }
 
+    /// « 8,2 kilomètres », « 1,5 kilomètre », « 1 kilomètre ». Une décimale au plus ; le singulier s'applique sous 2, d'après la
+    /// valeur arrondie telle qu'elle est dite : 1,96 donne « 2 kilomètres ».
+    public static func kilometres(_ km: Double) -> String {
+        let rounded = (km * 10).rounded() / 10
+        let number = PulseFormat.grouped(rounded, maxFractionDigits: 1)
+        return abs(rounded) < 2
+            ? String(localized: "\(number) kilomètre", bundle: .module)
+            : String(localized: "\(number) kilomètres", bundle: .module)
+    }
+
+    /// « 1 répétition », « 8 répétitions ».
+    public static func repetitions(_ n: Int) -> String {
+        count(n, singular: String(localized: "répétition", bundle: .module), plural: String(localized: "répétitions", bundle: .module))
+    }
+
     /// « 45 secondes », « 1 minute 30 », « 2 heures 5 minutes », « 1 heure 45 minutes 7 ». Les secondes qui suivent des
     /// minutes se disent sans unité ; l'unité reste quand rien ne les précède ou qu'elles suivent des heures seules.
     public static func duration(seconds: Int) -> String {

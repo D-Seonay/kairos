@@ -201,7 +201,7 @@ struct StreakCard: View {
             Text("\(streak.streak)")
                 .font(PulseFont.score(size: scoreSize))
                 .foregroundStyle(PulsePalette.opalInk)
-            Text(String(localized: "semaines d'affilée", bundle: .module))
+            Text(PlanningText.weeksInARow(streak.streak))
                 .font(.subheadline)
                 .foregroundStyle(PulsePalette.opalMuted)
         }
@@ -227,7 +227,6 @@ struct StreakCard: View {
     }
 
     private var pillarText: String {
-        let done = streak.weeks.filter(\.isSuccess).count
-        return String(localized: "\(done) semaines réussies sur les \(streak.weeks.count) dernières", bundle: .module)
+        PlanningText.pillarText(successes: streak.weeks.filter(\.isSuccess).count, total: streak.weeks.count)
     }
 }

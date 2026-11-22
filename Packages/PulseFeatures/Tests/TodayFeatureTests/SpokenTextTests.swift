@@ -30,6 +30,11 @@ struct SpokenTextTests {
         #expect(summary(rpe: 0, muscles: []).spokenText == "19 séries, environ 55 minutes")
     }
 
+    @Test func sessionStatsLineAgreesInNumber() {
+        #expect(summary().statsText == "19 séries · ~ 55 min · RPE max 8")
+        #expect(summary(sets: 1, minutes: 75, rpe: 7.5).statsText == "1 série · ~ 1 h 15 · RPE max 7,5")
+    }
+
     @Test func sessionSummaryNeverUsesSymbols() {
         let text = summary().spokenText
         for forbidden in ["~", "RPE", "·", "min "] { #expect(!text.contains(forbidden)) }

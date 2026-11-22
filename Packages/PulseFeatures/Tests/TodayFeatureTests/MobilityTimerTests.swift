@@ -58,9 +58,11 @@ struct MobilityTimerTests {
 @MainActor
 struct MobilitySheetTests {
     @Test func spokenTextNamesMinutesAndSeconds() {
-        #expect(MobilitySheet.spokenText(1135) == "Temps restant 18 minutes 55 secondes")
+        #expect(MobilitySheet.spokenText(1135) == "Temps restant 18 minutes 55")
+        #expect(MobilitySheet.spokenText(61) == "Temps restant 1 minute 1")
         #expect(MobilitySheet.spokenText(60) == "Temps restant 1 minute")
+        #expect(MobilitySheet.spokenText(45) == "Temps restant 45 secondes")
         #expect(MobilitySheet.spokenText(1) == "Temps restant 1 seconde")
-        #expect(MobilitySheet.spokenText(0).hasPrefix("Temps restant 0 seconde"))
+        #expect(MobilitySheet.spokenText(0) == "Temps restant 0 seconde")
     }
 }

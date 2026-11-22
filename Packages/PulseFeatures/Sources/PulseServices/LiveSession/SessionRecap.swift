@@ -122,8 +122,9 @@ extension SessionRecap {
         case .repsAtWeight:
             let reps = Int(record.value)
             let weightKg = record.weightKg ?? 0
+            let count = LiveSessionText.repetitions(reps)
             if loadKind != .external, weightKg <= 0 {
-                return String(localized: "\(name) : \(reps) répétitions au poids du corps, nouveau record", bundle: .module)
+                return String(localized: "\(name) : \(count) au poids du corps, nouveau record", bundle: .module)
             }
             // Le lest et l'aide s'écrivent comme dans la colonne « précédent » : « +10 », « −20 ».
             let sign = switch loadKind {
@@ -132,7 +133,7 @@ extension SessionRecap {
             case .assisted: "−"
             }
             let weight = sign + LiveSessionText.decimal(weightKg)
-            return String(localized: "\(name) : \(reps) répétitions à \(weight) kg, nouveau record", bundle: .module)
+            return String(localized: "\(name) : \(count) à \(weight) kg, nouveau record", bundle: .module)
         }
     }
 
@@ -150,8 +151,7 @@ extension SessionRecap {
             return String(localized: "\(name) : maximum estimé sur une répétition \(estimate), nouveau record", bundle: .module)
         case .repsAtWeight:
             let reps = Int(record.value)
-            let count = reps <= 1 ? String(localized: "\(reps) répétition", bundle: .module)
-                : String(localized: "\(reps) répétitions", bundle: .module)
+            let count = LiveSessionText.repetitions(reps)
             let weightKg = record.weightKg ?? 0
             if loadKind != .external, weightKg <= 0 {
                 return String(localized: "\(name) : \(count) au poids du corps, nouveau record", bundle: .module)

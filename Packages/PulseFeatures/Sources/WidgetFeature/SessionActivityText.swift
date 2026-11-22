@@ -59,8 +59,7 @@ public enum SessionActivityText {
             return PulseSpoken.duration(seconds: seconds)
         }
         if let match = text.wholeMatch(of: /(\d+)(?: rép\.)?/), let reps = Int(match.1) {
-            return PulseSpoken.count(reps, singular: String(localized: "répétition", bundle: .module),
-                                     plural: String(localized: "répétitions", bundle: .module))
+            return PulseSpoken.repetitions(reps)
         }
         return nil
     }

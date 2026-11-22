@@ -39,20 +39,6 @@ enum TrainText {
                           plural: String(localized: "records", bundle: .module))
     }
 
-    /// « 1 répétition », « 8 répétitions ».
-    static func repetitions(_ count: Int) -> String {
-        PulseSpoken.count(count, singular: String(localized: "répétition", bundle: .module),
-                          plural: String(localized: "répétitions", bundle: .module))
-    }
-
-    /// « 1 kilomètre », « 1,5 kilomètre », « 10 kilomètres » : le pluriel commence à 2.
-    static func kilometres(_ kilometres: Double) -> String {
-        let number = PulseFormat.grouped(kilometres, maxFractionDigits: 1)
-        return abs(kilometres) < 2
-            ? String(localized: "\(number) kilomètre", bundle: .module)
-            : String(localized: "\(number) kilomètres", bundle: .module)
-    }
-
     /// « 1 séance importée », « 42 séances importées » : le participe s'accorde, le singulier va jusqu'à 1.
     static func importedSessions(_ count: Int) -> String {
         let number = PulseFormat.grouped(Double(count), maxFractionDigits: 0)
@@ -224,7 +210,7 @@ enum TrainText {
     }
 
     private static func value(reps: Int?, durationSeconds: Int?) -> Value? {
-        if let reps, reps > 0 { return Value(text: repetitions(reps)) }
+        if let reps, reps > 0 { return Value(text: PulseSpoken.repetitions(reps)) }
         if let durationSeconds, durationSeconds > 0 { return Value(text: PulseSpoken.duration(seconds: durationSeconds)) }
         return nil
     }

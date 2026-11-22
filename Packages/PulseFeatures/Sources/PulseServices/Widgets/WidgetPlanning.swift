@@ -59,13 +59,23 @@ public struct WidgetPlanning: Sendable, Equatable {
         }
     }
 
+    /// « 5 exercices · 16 séries », « 1 exercice · 1 série » : le singulier jusqu'à 1. Les widgets le disent sans le point médian
+    /// (`WidgetPlanningText.spokenDetail`).
+    static func strengthDetail(exercises: Int, sets: Int) -> String {
+        let exercisesText = exercises <= 1 ? String(localized: "\(exercises) exercice", bundle: .module)
+            : String(localized: "\(exercises) exercices", bundle: .module)
+        let setsText = sets <= 1 ? String(localized: "\(sets) série", bundle: .module)
+            : String(localized: "\(sets) séries", bundle: .module)
+        return String(localized: "\(exercisesText) · \(setsText)", bundle: .module)
+    }
+
     /// « 5 exercices · 16 séries » pour la musculation, « Sortie facile · 45 min » pour une course.
     static func detail(of routine: RoutineDay) -> String? {
         switch routine.kind {
         case .strength:
             guard !routine.exercises.isEmpty else { return nil }
             let sets = routine.exercises.reduce(0) { $0 + $1.sets }
-            return String(localized: "\(routine.exercises.count) exercices · \(sets) séries", bundle: .module)
+            return strengthDetail(exercises: routine.exercises.count, sets: sets)
         case .run:
             var parts = [routine.runType?.localizedName ?? String(localized: "Course", bundle: .module)]
             if let minutes = routine.runTargetMinutes {

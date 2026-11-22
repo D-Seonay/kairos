@@ -122,11 +122,7 @@ enum WidgetPlanningText {
             PulseSpoken.duration(seconds: (Int(match.1) ?? 0) * 60)
         }
         spoken = spoken.replacing(/(\d+(?:[.,]\d+)?) km\b/) { match in
-            let number = String(match.1)
-            let value = Double(number.replacing(",", with: ".")) ?? 0
-            return value < 2
-                ? String(localized: "\(number) kilomètre", bundle: .module)
-                : String(localized: "\(number) kilomètres", bundle: .module)
+            PulseSpoken.kilometres(Double(match.1.replacing(",", with: ".")) ?? 0)
         }
         return spoken
     }

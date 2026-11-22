@@ -111,8 +111,7 @@ enum LiveSessionText {
                             : String(localized: "\(seconds) secondes", bundle: .module))
         }
         guard let reps = set.actualReps else { return nil }
-        return Parts(weight: weight, value: reps <= 1 ? String(localized: "\(reps) répétition", bundle: .module)
-                        : String(localized: "\(reps) répétitions", bundle: .module))
+        return Parts(weight: weight, value: repetitions(reps))
     }
 
     private static func joinedSpoken(weight: String?, value: String) -> String {
@@ -129,11 +128,19 @@ enum LiveSessionText {
         }
     }
 
-    /// « 1 kilo », « 1,5 kilo », « 70 kilos » : le pluriel commence à 2.
+    /// « 1 kilo », « 1,5 kilo », « 70 kilos », « 12 450 kilos » : le pluriel commence à 2, d'après la valeur arrondie telle
+    /// qu'elle est dite (1,996 donne « 2 kilos »), et les milliers sont séparés par une espace fine insécable.
     static func kilosSpoken(_ kg: Double) -> String {
-        let text = decimal(kg)
-        return abs(kg) < 2 ? String(localized: "\(text) kilo", bundle: .module)
+        let text = kg.formatted(.number.locale(french).grouping(.automatic).precision(.fractionLength(0...2)))
+        let spoken = (kg * 100).rounded() / 100
+        return abs(spoken) < 2 ? String(localized: "\(text) kilo", bundle: .module)
             : String(localized: "\(text) kilos", bundle: .module)
+    }
+
+    /// « 1 répétition », « 8 répétitions » : le singulier jusqu'à 1.
+    static func repetitions(_ count: Int) -> String {
+        count <= 1 ? String(localized: "\(count) répétition", bundle: .module)
+            : String(localized: "\(count) répétitions", bundle: .module)
     }
 
     /// Les valeurs prévues d'une série en séance, pour la notification et la Live Activity : « 70 kg × 5 », « +10 kg × 8 »,

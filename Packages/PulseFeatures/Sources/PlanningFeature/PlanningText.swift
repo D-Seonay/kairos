@@ -34,14 +34,40 @@ enum PlanningText {
 
     /// « 8,2 kilomètres », « 1 kilomètre ».
     static func distanceSpoken(meters: Double) -> String {
-        kilometersSpoken((meters / 1000).formatted(.number.precision(.fractionLength(0...1)).locale(Locale(identifier: "fr_FR"))),
-                         isSingular: (meters / 1000 * 10).rounded() / 10 < 2)
+        PulseSpoken.kilometres(meters / 1000)
     }
 
-    private static func kilometersSpoken(_ value: String, isSingular: Bool) -> String {
-        isSingular
-            ? String(localized: "\(value) kilomètre", bundle: .module)
-            : String(localized: "\(value) kilomètres", bundle: .module)
+    /// « Série de 3 semaines · 2 sur 5 cette semaine » ; dit « Série de 3 semaines, 2 sur 5 cette semaine » : le point médian
+    /// n'est pas lu.
+    static func streakRow(weeks: Int, count: Int, target: Int, spoken: Bool = false) -> String {
+        let streak = String(localized: "Série de \(weeksText(weeks))", bundle: .module)
+        let progress = String(localized: "\(count) sur \(target) cette semaine", bundle: .module)
+        return spoken
+            ? String(localized: "\(streak), \(progress)", bundle: .module)
+            : String(localized: "\(streak) · \(progress)", bundle: .module)
+    }
+
+    /// « Mois et série, Série de 3 semaines, 2 sur 5 cette semaine » : la rangée qui ouvre le mois, d'un seul tenant.
+    static func monthEntrySpoken(weeks: Int, count: Int, target: Int) -> String {
+        let title = String(localized: "Mois et série", bundle: .module)
+        return String(localized: "\(title), \(streakRow(weeks: weeks, count: count, target: target, spoken: true))", bundle: .module)
+    }
+
+    /// « 1 semaine réussie sur les 8 dernières », « 5 semaines réussies sur les 8 dernières ».
+    static func pillarText(successes: Int, total: Int) -> String {
+        let done = PulseSpoken.count(successes, singular: String(localized: "semaine réussie", bundle: .module),
+                                     plural: String(localized: "semaines réussies", bundle: .module))
+        return String(localized: "\(done) sur les \(total) dernières", bundle: .module)
+    }
+
+    /// « semaine d'affilée », « semaines d'affilée » : le mot sous le compteur de la série.
+    static func weeksInARow(_ weeks: Int) -> String {
+        weeks <= 1 ? String(localized: "semaine d'affilée", bundle: .module) : String(localized: "semaines d'affilée", bundle: .module)
+    }
+
+    private static func weeksText(_ weeks: Int) -> String {
+        PulseSpoken.count(weeks, singular: String(localized: "semaine", bundle: .module),
+                          plural: String(localized: "semaines", bundle: .module))
     }
 
     /// « 150 battements par minute ».
@@ -91,9 +117,7 @@ enum PlanningText {
                 : String(localized: "\(minutes) min", bundle: .module))
         } else if let km = day.runTargetKm {
             let distance = km.formatted(.number.precision(.fractionLength(0...1)).locale(Locale(identifier: "fr_FR")))
-            parts.append(spoken
-                ? kilometersSpoken(distance, isSingular: km < 2)
-                : String(localized: "\(distance) km", bundle: .module))
+            parts.append(spoken ? PulseSpoken.kilometres(km) : String(localized: "\(distance) km", bundle: .module))
         }
         return parts.joined(separator: spoken ? ", " : " · ")
     }

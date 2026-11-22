@@ -159,7 +159,7 @@ extension LiveSetRow {
             values.append(set.durationSeconds.map { SpokenValue(text: seconds($0)) }
                 ?? SpokenValue(text: String(localized: "durée à saisir", bundle: .module), isMissing: true))
         } else {
-            values.append(set.reps.map { SpokenValue(text: repetitions($0)) }
+            values.append(set.reps.map { SpokenValue(text: PulseSpoken.repetitions($0)) }
                 ?? SpokenValue(text: String(localized: "répétitions à saisir", bundle: .module), isMissing: true))
         }
         return values
@@ -168,11 +168,6 @@ extension LiveSetRow {
     /// « 1 kilo », « 1,5 kilo » : le pluriel commence à 2.
     nonisolated static func kilos(_ value: Double) -> String {
         PulseSpoken.kilos(value)
-    }
-
-    nonisolated static func repetitions(_ count: Int) -> String {
-        PulseSpoken.count(count, singular: String(localized: "répétition", bundle: .module),
-                          plural: String(localized: "répétitions", bundle: .module))
     }
 
     nonisolated static func seconds(_ count: Int) -> String {

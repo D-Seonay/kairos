@@ -21,7 +21,6 @@ import Testing
         #expect(TrainText.sessions(1) == "1 séance" && TrainText.sessions(42) == "42 séances")
         #expect(TrainText.routines(1) == "1 routine" && TrainText.routines(4) == "4 routines")
         #expect(TrainText.records(1) == "1 record" && TrainText.records(2) == "2 records")
-        #expect(TrainText.repetitions(1) == "1 répétition" && TrainText.repetitions(8) == "8 répétitions")
     }
 
     @Test func importTitleAndResultAgreeWithTheCount() {
@@ -31,9 +30,7 @@ import Testing
         #expect(TrainText.importedSessions(42) == "42 séances importées")
     }
 
-    @Test func kilometresAndTonnageAreSaidInFull() {
-        #expect(TrainText.kilometres(1) == "1 kilomètre" && TrainText.kilometres(1.5) == "1,5 kilomètre")
-        #expect(TrainText.kilometres(10) == "10 kilomètres")
+    @Test func tonnageIsSaidInFull() {
         let tonnage = TrainText.tonnage(12_450.4)
         #expect(tonnage.hasSuffix(" kilos") && tonnage.filter(\.isNumber) == "12450")
     }

@@ -36,6 +36,29 @@ struct PlanningSpokenTests {
         #expect(PlanningText.heartRateSpoken(150) == "150 battements par minute")
     }
 
+    @Test func distanceSingularFollowsTheRoundedValue() {
+        #expect(PlanningText.distanceSpoken(meters: 1_960) == "2 kilomètres")
+        #expect(PlanningText.distanceSpoken(meters: 1_940) == "1,9 kilomètre")
+        #expect(PlanningText.distanceSpoken(meters: 12_500) == "12,5 kilomètres")
+    }
+
+    @Test func streakRowAgreesInNumberAndReadsWithoutTheMiddleDot() {
+        #expect(PlanningText.streakRow(weeks: 3, count: 2, target: 5) == "Série de 3 semaines · 2 sur 5 cette semaine")
+        #expect(PlanningText.streakRow(weeks: 1, count: 1, target: 4) == "Série de 1 semaine · 1 sur 4 cette semaine")
+        #expect(PlanningText.streakRow(weeks: 0, count: 0, target: 4) == "Série de 0 semaine · 0 sur 4 cette semaine")
+        #expect(PlanningText.streakRow(weeks: 3, count: 2, target: 5, spoken: true) == "Série de 3 semaines, 2 sur 5 cette semaine")
+        #expect(PlanningText.monthEntrySpoken(weeks: 1, count: 2, target: 5)
+            == "Mois et série, Série de 1 semaine, 2 sur 5 cette semaine")
+    }
+
+    @Test func pillarAndStreakCounterAgreeInNumber() {
+        #expect(PlanningText.pillarText(successes: 1, total: 8) == "1 semaine réussie sur les 8 dernières")
+        #expect(PlanningText.pillarText(successes: 0, total: 8) == "0 semaine réussie sur les 8 dernières")
+        #expect(PlanningText.pillarText(successes: 5, total: 8) == "5 semaines réussies sur les 8 dernières")
+        #expect(PlanningText.weeksInARow(1) == "semaine d'affilée")
+        #expect(PlanningText.weeksInARow(6) == "semaines d'affilée")
+    }
+
     @Test func detailsAreSpokenWithoutAbbreviationsOrMiddleDots() async throws {
         let fixture = PlanningFixture()
         try await fixture.activate()

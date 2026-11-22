@@ -129,7 +129,7 @@ private struct SessionOverview: View {
         layout {
             MuscleMapView(levels: MuscleIntensity.levels(weights: summary.muscleWeights), label: musclesLabel, height: 110)
             VStack(alignment: .leading, spacing: 6) {
-                Text(statsText)
+                Text(summary.statsText)
                     .font(.subheadline.weight(.semibold).monospacedDigit())
                     .foregroundStyle(PulsePalette.text)
                 if !summary.topMuscles.isEmpty {
@@ -148,13 +148,6 @@ private struct SessionOverview: View {
         MuscleMapSummary.text(levels: MuscleIntensity.byMuscle(weights: summary.muscleWeights))
     }
 
-    /// « 19 séries · ~ 55 min · RPE max 8 ».
-    private var statsText: String {
-        let sets = String(localized: "\(summary.setCount) séries", bundle: .module)
-        let duration = String(localized: "~ \(PulseFormat.duration(minutes: summary.estimatedMinutes))", bundle: .module)
-        let rpe = PulseFormat.decimal(summary.maxRPE, maxFractionDigits: 1)
-        return [sets, duration, String(localized: "RPE max \(rpe)", bundle: .module)].joined(separator: " · ")
-    }
 }
 
 #if DEBUG

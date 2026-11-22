@@ -4,6 +4,15 @@ import PulseDesignSystem
 import PulseServices
 
 extension SessionSummary {
+    /// « 19 séries · ~ 55 min · RPE max 8 » : la ligne visible de la carte de séance, « 1 série » au singulier.
+    var statsText: String {
+        let sets = PulseSpoken.count(setCount, singular: String(localized: "série", bundle: .module),
+                                     plural: String(localized: "séries", bundle: .module))
+        let duration = String(localized: "~ \(PulseFormat.duration(minutes: estimatedMinutes))", bundle: .module)
+        let rpe = PulseFormat.decimal(maxRPE, maxFractionDigits: 1)
+        return [sets, duration, String(localized: "RPE max \(rpe)", bundle: .module)].joined(separator: " · ")
+    }
+
     /// « 19 séries, environ 55 minutes, effort perçu maximal 8 sur 10, muscles principaux : pectoraux, triceps, épaules » :
     /// ce que VoiceOver lit de la séance du jour, d'un seul tenant. Ce qu'on ne sait pas (effort, muscles) se tait.
     var spokenText: String {

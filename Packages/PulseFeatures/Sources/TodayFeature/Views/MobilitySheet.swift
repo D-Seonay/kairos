@@ -106,15 +106,11 @@ public struct MobilitySheet: View {
             .buttonStyle(SecondaryButtonStyle())
     }
 
-    /// « Temps restant 18 minutes 55 secondes » : les unités à zéro se taisent, sauf à l'arrêt complet.
+    /// « Temps restant 18 minutes 55 », « Temps restant 1 minute », « Temps restant 45 secondes » : la durée dite par
+    /// `PulseSpoken`, au singulier jusqu'à 1.
     static func spokenText(_ remaining: TimeInterval) -> String {
-        let total = Int(max(0, remaining).rounded(.up))
-        let minutes = total / 60
-        let seconds = total % 60
-        var parts: [String] = []
-        if minutes > 0 { parts.append(String(localized: "\(minutes) minutes", bundle: .module)) }
-        if seconds > 0 || minutes == 0 { parts.append(String(localized: "\(seconds) secondes", bundle: .module)) }
-        return String(localized: "Temps restant \(parts.joined(separator: " "))", bundle: .module)
+        let duration = PulseSpoken.duration(seconds: Int(max(0, remaining).rounded(.up)))
+        return String(localized: "Temps restant \(duration)", bundle: .module)
     }
 
     // MARK: - Consignes

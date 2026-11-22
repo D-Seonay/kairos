@@ -1,6 +1,6 @@
 import Foundation
 import PulseDomain
-import PulseServices
+@testable import PulseServices
 import Testing
 
 struct WidgetPlanningTests {
@@ -26,6 +26,12 @@ struct WidgetPlanningTests {
         #expect(planning.streak == WidgetStreak(weeks: 0, completed: 1, target: 5))
         #expect(planning.loadRatio == 1.2)
         #expect(planning.nextSession?.title == "Endurance" && planning.nextSession?.detail == "Sortie facile · 45 min")
+    }
+
+    @Test func strengthDetailAgreesInNumber() {
+        #expect(WidgetPlanning.strengthDetail(exercises: 5, sets: 16) == "5 exercices · 16 séries")
+        #expect(WidgetPlanning.strengthDetail(exercises: 1, sets: 1) == "1 exercice · 1 série")
+        #expect(WidgetPlanning.strengthDetail(exercises: 1, sets: 3) == "1 exercice · 3 séries")
     }
 
     @Test func theNextSessionCanFallInTheNextWeek() {

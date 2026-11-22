@@ -61,7 +61,7 @@ public struct BestSet: Equatable, Sendable {
 
     /// « 72,5 × 5 », « −15 × 8 » pour une assistance ; « 12 répétitions » sans charge.
     public var text: String {
-        guard weightKg > 0 else { return TrainText.repetitions(reps) }
+        guard weightKg > 0 else { return PulseSpoken.repetitions(reps) }
         return "\(ExerciseHistory.weightText(weightKg, isAssisted: isAssisted)) × \(reps)"
     }
 

@@ -79,8 +79,11 @@ struct PlanningWidgetsContentTests {
         #expect(WidgetPlanningText.spokenDetail("Sortie · 1 km") == "Sortie, 1 kilomètre")
         #expect(WidgetPlanningText.spokenDetail("Sortie · 1,5 km") == "Sortie, 1,5 kilomètre")
         #expect(WidgetPlanningText.spokenDetail("Sortie · 2 km") == "Sortie, 2 kilomètres")
-        #expect(WidgetPlanningText.spokenDetail("Sortie · 1,99 km") == "Sortie, 1,99 kilomètre")
+        #expect(WidgetPlanningText.spokenDetail("Sortie · 1,9 km") == "Sortie, 1,9 kilomètre")
+        // Dit d'après la valeur arrondie à une décimale : « 2 kilomètres », jamais « 2 kilomètre ».
+        #expect(WidgetPlanningText.spokenDetail("Sortie · 1,99 km") == "Sortie, 2 kilomètres")
         #expect(WidgetPlanningText.spokenDetail("5 exercices · 16 séries") == "5 exercices, 16 séries")
+        #expect(WidgetPlanningText.spokenDetail("1 exercice · 1 série") == "1 exercice, 1 série")
     }
 
     @Test func nextWorkoutSpeaksWithoutSeparatorsOrAbbreviations() {

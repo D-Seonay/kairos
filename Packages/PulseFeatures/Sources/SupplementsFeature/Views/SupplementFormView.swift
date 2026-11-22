@@ -102,7 +102,9 @@ struct SupplementFormView: View {
     /// « Dose par prise », le champ et l'unité : trois éléments liés. Le titre est lu par le champ, l'unité est la valeur du sélecteur.
     private var doseRow: some View {
         let title = String(localized: "Dose par prise", bundle: .module)
-        let field = TextField(title, value: $draft.dose, format: .number.locale(Locale(identifier: "fr_FR")))
+        // Le titre est lu par VoiceOver ; l'invite visible reste courte, pour ne pas être coupée dans la rangée.
+        let field = TextField(title, value: $draft.dose, format: .number.locale(Locale(identifier: "fr_FR")),
+                              prompt: Text(String(localized: "Dose", bundle: .module)))
             .pulseNumericKeyboard()
             .accessibilityIdentifier(SupplementsIdentifiers.formDose)
         let unit = Picker(String(localized: "Unité", bundle: .module), selection: $draft.unit) {

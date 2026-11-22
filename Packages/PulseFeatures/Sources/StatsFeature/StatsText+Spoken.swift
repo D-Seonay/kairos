@@ -84,18 +84,18 @@ extension StatsText {
         var parts: [String] = []
         let isReps = line.kind == .repsAtWeight
         if isReps {
-            parts.append(repetitions(Int(line.value.rounded())))
+            parts.append(PulseSpoken.repetitions(Int(line.value.rounded())))
         } else {
             parts.append(PulseSpoken.kilos(rounded(line.value)))
             parts.append(String(localized: "maximum estimé sur une répétition", bundle: .module))
         }
         if let weight = line.weightKg, weight > 0, let reps = line.reps {
-            parts.append(String(localized: "série de \(PulseSpoken.kilos(weight)) pour \(repetitions(reps))", bundle: .module))
+            parts.append(String(localized: "série de \(PulseSpoken.kilos(weight)) pour \(PulseSpoken.repetitions(reps))", bundle: .module))
         }
         let date = spokenDate(line.date, calendar: calendar, today: today)
         parts.append(String(localized: "le \(date)", bundle: .module))
         if let gain = line.gain, gain > 0 {
-            let amount = isReps ? repetitions(Int(gain.rounded())) : PulseSpoken.kilos(rounded(gain))
+            let amount = isReps ? PulseSpoken.repetitions(Int(gain.rounded())) : PulseSpoken.kilos(rounded(gain))
             parts.append(String(localized: "plus \(amount)", bundle: .module))
         } else if line.isNew {
             parts.append(String(localized: "nouveau", bundle: .module))
@@ -126,11 +126,6 @@ extension StatsText {
         case .tenK: String(localized: "10 kilomètres", bundle: .module)
         case .half: String(localized: "Semi-marathon", bundle: .module)
         }
-    }
-
-    private static func repetitions(_ count: Int) -> String {
-        PulseSpoken.count(count, singular: String(localized: "répétition", bundle: .module),
-                          plural: String(localized: "répétitions", bundle: .module))
     }
 
     /// Une décimale au plus : « 96,4 », comme à l'écran.
@@ -275,11 +270,7 @@ extension StatsText {
     /// « 64,3 kilomètres », « 1 kilomètre » : une distance dite en toutes lettres.
     static func kilometersSpoken(meters: Double) -> String {
         guard meters.isFinite, meters >= 0 else { return dash }
-        let km = (meters / 1000 * 10).rounded() / 10
-        let number = PulseFormat.decimal(km, maxFractionDigits: 1)
-        return km < 2
-            ? String(localized: "\(number) kilomètre", bundle: .module)
-            : String(localized: "\(number) kilomètres", bundle: .module)
+        return PulseSpoken.kilometres(meters / 1000)
     }
 
     /// « 1 jour », « 6 jours ».

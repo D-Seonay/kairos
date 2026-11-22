@@ -142,7 +142,7 @@ extension NumericKeypad {
         let size = stepSize(for: field, increment: increment)
         let amount = switch field {
         case .weight: LiveSetRow.kilos(size)
-        case .reps: LiveSetRow.repetitions(Int(size))
+        case .reps: PulseSpoken.repetitions(Int(size))
         case .duration: LiveSetRow.seconds(Int(size))
         }
         return sign < 0 ? String(localized: "Retirer \(amount)", bundle: .module)
@@ -174,7 +174,7 @@ extension NumericKeypad {
         guard let value = Double(text.replacingOccurrences(of: ",", with: ".")) else { return text }
         return switch field {
         case .weight: LiveSetRow.kilos(value)
-        case .reps: LiveSetRow.repetitions(Int(value))
+        case .reps: PulseSpoken.repetitions(Int(value))
         case .duration: LiveSetRow.seconds(Int(value))
         }
     }

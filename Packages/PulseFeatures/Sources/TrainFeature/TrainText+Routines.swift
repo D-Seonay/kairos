@@ -120,7 +120,7 @@ extension TrainText {
 
     /// La valeur d'une borne : « 8 répétitions », « 45 secondes ».
     static func rangeStepperValue(_ value: Int, tracksDuration: Bool) -> String {
-        tracksDuration ? PulseSpoken.duration(seconds: value) : repetitions(value)
+        tracksDuration ? PulseSpoken.duration(seconds: value) : PulseSpoken.repetitions(value)
     }
 
     // MARK: - Correction d'une séance
@@ -170,7 +170,7 @@ extension TrainText {
 
     private static func runTargetSpoken(_ day: RoutineDay) -> String? {
         if let minutes = day.runTargetMinutes { return PulseSpoken.duration(seconds: minutes * 60) }
-        return day.runTargetKm.map(kilometres)
+        return day.runTargetKm.map(PulseSpoken.kilometres)
     }
 
     /// « lundi, jeudi » ; « hors semaine type » pour une routine qu'aucun jour ne planifie.

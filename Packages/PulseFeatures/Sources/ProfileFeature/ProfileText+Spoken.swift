@@ -169,8 +169,7 @@ extension ProfileText {
     static func recordValueSpoken(_ line: StrengthRecordLine) -> String {
         switch line.kind {
         case .repsAtWeight:
-            PulseSpoken.count(Int(line.value.rounded()), singular: String(localized: "répétition", bundle: .module),
-                              plural: String(localized: "répétitions", bundle: .module))
+            PulseSpoken.repetitions(Int(line.value.rounded()))
         default: weightSpoken(line.value)
         }
     }

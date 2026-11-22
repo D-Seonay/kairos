@@ -35,6 +35,29 @@ private let parisCalendar: Calendar = {
     #expect(PulseSpoken.kilos(2) == "2 kilos")
 }
 
+@Test func kilometresAreSpokenInFullWithTheSingularBelowTwo() {
+    #expect(PulseSpoken.kilometres(8.2) == "8,2 kilomètres")
+    #expect(PulseSpoken.kilometres(1) == "1 kilomètre")
+    #expect(PulseSpoken.kilometres(1.5) == "1,5 kilomètre")
+    #expect(PulseSpoken.kilometres(0) == "0 kilomètre")
+    #expect(PulseSpoken.kilometres(2) == "2 kilomètres")
+    #expect(PulseSpoken.kilometres(10) == "10 kilomètres")
+    #expect(PulseSpoken.kilometres(1234.5) == "1\u{202F}234,5 kilomètres")
+}
+
+@Test func kilometresPluralFollowsTheRoundedValue() {
+    // 1,96 s'arrondit à 2 : dit « 2 kilomètres », jamais « 2 kilomètre ».
+    #expect(PulseSpoken.kilometres(1.96) == "2 kilomètres")
+    #expect(PulseSpoken.kilometres(1.94) == "1,9 kilomètre")
+}
+
+@Test func repetitionsAgreeInNumber() {
+    #expect(PulseSpoken.repetitions(0) == "0 répétition")
+    #expect(PulseSpoken.repetitions(1) == "1 répétition")
+    #expect(PulseSpoken.repetitions(8) == "8 répétitions")
+    #expect(PulseSpoken.repetitions(1200) == "1\u{202F}200 répétitions")
+}
+
 @Test func durationsAreSpokenWithoutAbbreviations() {
     #expect(PulseSpoken.duration(seconds: 45) == "45 secondes")
     #expect(PulseSpoken.duration(seconds: 59) == "59 secondes")
