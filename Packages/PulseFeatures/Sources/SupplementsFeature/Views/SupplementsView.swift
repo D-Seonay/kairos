@@ -37,7 +37,7 @@ public struct SupplementsView: View {
             }
             .padding(PulseMetrics.spacing)
         }
-        .refreshable { await model.load() }
+        .refreshable { await model.load(announcesFailure: true) }
         .pulseScreenBackground(aura: 0.5)
         .navigationTitle(String(localized: "Compléments", bundle: .module))
         .pulseInlineTitle()
@@ -55,7 +55,7 @@ public struct SupplementsView: View {
                 SupplementFormView(model: model, editing: editor.supplement)
             }
         }
-        .task { await model.load() }
+        .task { await model.load(announcesFailure: true) }
     }
 
     @ViewBuilder
@@ -101,18 +101,13 @@ public struct SupplementsView: View {
                              detail: "\(SupplementText.dose(of: supplement)) · \(SupplementLabels.days(supplement.days))")
                 }
                 .buttonStyle(PressableButtonStyle())
-                .accessibilityLabel(notDueSpoken(supplement))
+                .accessibilityLabel(SupplementsModel.notDueRowSpoken(supplement, days: SupplementLabels.days(supplement.days)))
                 .accessibilityAction(named: String(localized: "Archiver", bundle: .module)) {
                     Task { await model.archive(supplement) }
                 }
                 .contextMenu { archiveButton(supplement) }
             }
         }
-    }
-
-    private func notDueSpoken(_ supplement: Supplement) -> String {
-        let detail = SupplementsModel.notDueSpoken(supplement, days: SupplementLabels.days(supplement.days))
-        return "\(supplement.name), \(detail)"
     }
 
     private func archiveButton(_ supplement: Supplement) -> some View {
@@ -339,8 +334,7 @@ struct NextIntakeRow: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel(String(localized: "Prochaine prise, \(item.supplement.name), \(SupplementsModel.detailSpoken(item))",
-                                       bundle: .module))
+            .accessibilityLabel(SupplementsModel.nextIntakeSpoken(item))
             Button(action: onTake) {
                 Label(String(localized: "Pris", bundle: .module), systemImage: "checkmark")
             }

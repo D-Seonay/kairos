@@ -42,12 +42,14 @@ public final class SupplementsModel {
     }
 
     /// Relit les compléments du jour. Une lecture qui échoue garde l'affichage précédent et le dit.
-    public func load() async {
+    /// `announcesFailure` dit l'erreur à VoiceOver : seul l'écran Compléments, qui l'affiche, le demande. La carte de l'accueil et les
+    /// relectures qui suivent une écriture restent muettes (l'écriture dit déjà son erreur).
+    public func load(announcesFailure: Bool = false) async {
         do {
             overview = try await environment.service.overview()
             errorMessage = nil
         } catch {
-            fail(String(localized: "Pulse n'a pas pu lire tes compléments.", bundle: .module))
+            fail(String(localized: "Pulse n'a pas pu lire tes compléments.", bundle: .module), announces: announcesFailure)
         }
         hasLoaded = true
     }
@@ -145,9 +147,9 @@ public final class SupplementsModel {
     }
 
     /// Affiche l'erreur et l'annonce, chaque fois : la même erreur deux fois de suite est dite deux fois.
-    private func fail(_ message: String) {
+    private func fail(_ message: String, announces: Bool = true) {
         errorMessage = message
-        announce(message, true)
+        if announces { announce(message, true) }
     }
 
     // MARK: - Textes
@@ -166,6 +168,16 @@ public final class SupplementsModel {
     public static func detailSpoken(_ item: SupplementDueItem) -> String {
         let dose = SupplementLabels.doseSpoken(item.supplement.dose, unit: item.supplement.unit)
         return "\(dose), \(SupplementLabels.plannedSpoken(item))"
+    }
+
+    /// « Vitamine D3, 1 000 unités internationales, Jours d'entraînement » : la ligne d'un complément pas prévu aujourd'hui.
+    static func notDueRowSpoken(_ supplement: Supplement, days: String) -> String {
+        "\(supplement.name), \(notDueSpoken(supplement, days: days))"
+    }
+
+    /// « Prochaine prise, Vitamine D3, 1 000 unités internationales, à 8 heures ».
+    static func nextIntakeSpoken(_ item: SupplementDueItem) -> String {
+        String(localized: "Prochaine prise, \(item.supplement.name), \(detailSpoken(item))", bundle: .module)
     }
 
     /// « 1 000 unités internationales, Jours d'entraînement » : un complément pas prévu aujourd'hui.

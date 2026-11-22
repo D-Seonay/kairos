@@ -101,6 +101,9 @@ struct WeightChartSpokenTests {
         let two = [day(11, 1, 79), day(11, 20, 78)]
         #expect(ProfileText.weightChartSummary(weighed: two, current: nil, calendar: Spoken.calendar, today: Spoken.today)
             == "Poids sur 90 jours, du 1 novembre au 20 novembre : de 78 à 79 kilos, 2 pesées.")
+        let flat = [day(11, 1, 78), day(11, 20, 78)]
+        #expect(ProfileText.weightChartSummary(weighed: flat, current: nil, calendar: Spoken.calendar, today: Spoken.today)
+            == "Poids sur 90 jours, du 1 novembre au 20 novembre : à 78 kilos, 2 pesées.")
         let one = [day(11, 20, 78.2)]
         #expect(ProfileText.weightChartSummary(weighed: one, current: 78.2, calendar: Spoken.calendar, today: Spoken.today)
             == "Poids sur 90 jours, le 20 novembre : tendance 78,2 kilos, 1 pesée.")

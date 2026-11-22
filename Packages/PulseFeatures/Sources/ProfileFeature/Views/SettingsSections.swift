@@ -218,6 +218,11 @@ struct HealthSettingsSection: View {
             }
             .disabled(model.isRefreshingHealth)
             .frame(minHeight: 44)
+            // La relecture se lance d'une touche et finit sans que le focus bouge : début et fin sont annoncés. Posé sur ce seul
+            // bouton, pas sur la section (un modificateur de section se répète par rangée).
+            .onChange(of: model.isRefreshingHealth) { _, isRefreshing in
+                PulseAnnouncement.post(isRefreshing ? ProfileText.healthReadStarted : ProfileText.healthReadFinished)
+            }
             NavigationLink {
                 screens.healthDiagnostics()
             } label: {
@@ -233,10 +238,6 @@ struct HealthSettingsSection: View {
                 bundle: .module))
         }
         .listRowBackground(PulsePalette.surface)
-        // La relecture se lance d'une touche et finit sans que le focus bouge : début et fin sont annoncés.
-        .onChange(of: model.isRefreshingHealth) { _, isRefreshing in
-            PulseAnnouncement.post(isRefreshing ? ProfileText.healthReadStarted : ProfileText.healthReadFinished)
-        }
     }
 
     private func row(_ kind: HealthSampleKind, latest: Date?) -> some View {

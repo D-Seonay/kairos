@@ -65,6 +65,15 @@ struct SupplementsSpokenTests {
             == "\(thousand) unités internationales, Jours d'entraînement")
     }
 
+    @Test func notDueAndNextIntakeRowsAreFullSentences() {
+        let thousand = SupplementText.number(1_000)
+        let vitamin = supplement(dose: 1_000, unit: .iu)
+        #expect(SupplementsModel.notDueRowSpoken(vitamin, days: "Jours d'entraînement")
+            == "Vitamine D3, \(thousand) unités internationales, Jours d'entraînement")
+        #expect(SupplementsModel.nextIntakeSpoken(item(vitamin))
+            == "Prochaine prise, Vitamine D3, \(thousand) unités internationales, à 8 heures")
+    }
+
     @Test func takenAnnouncementSaysTheCount() {
         let taken = item(supplement(dose: 1_000, unit: .iu), taken: true)
         #expect(SupplementsModel.takenAnnouncement(item: taken, taken: 3, due: 5) == "Vitamine D3 pris. 3 sur 5 pris.")
@@ -174,9 +183,15 @@ actor FailingIntakeRepository: SupplementRepository {
     private let base = InMemorySupplementRepository()
     private var failing = false
 
-    func setFailing(_ failing: Bool) { self.failing = failing }
+    private var failingReads = false
 
-    func supplements(includeArchived: Bool) async throws -> [Supplement] { try await base.supplements(includeArchived: includeArchived) }
+    func setFailing(_ failing: Bool) { self.failing = failing }
+    func setFailingReads(_ failing: Bool) { failingReads = failing }
+
+    func supplements(includeArchived: Bool) async throws -> [Supplement] {
+        if failingReads { throw Failure() }
+        return try await base.supplements(includeArchived: includeArchived)
+    }
     func save(_ supplement: Supplement) async throws { try await base.save(supplement) }
     func delete(id: UUID) async throws { try await base.delete(id: id) }
     func intakes(from: Date, to: Date) async throws -> [SupplementIntake] { try await base.intakes(from: from, to: to) }
@@ -187,6 +202,27 @@ actor FailingIntakeRepository: SupplementRepository {
     func delete(intakeID: UUID) async throws {
         if failing { throw Failure() }
         try await base.delete(intakeID: intakeID)
+    }
+}
+
+@MainActor
+extension SupplementsAnnouncementTests {
+    @Test func aFailedReloadAfterAFailedToggleDoesNotAddASecondError() async throws {
+        await save("Créatine")
+        let item = try #require(model.overview.items.first)
+        await repository.setFailing(true)
+        await repository.setFailingReads(true)
+        await model.toggle(item)
+        #expect(log.entries.map(\.text) == ["Pulse n'a pas pu enregistrer ta prise."])
+    }
+
+    @Test func loadFailuresAreSilentUnlessAskedFor() async throws {
+        await repository.setFailingReads(true)
+        await model.load()
+        #expect(log.entries.isEmpty, "La carte de l'accueil n'affiche pas d'erreur : elle reste muette")
+        await model.load(announcesFailure: true)
+        #expect(log.entries.map(\.text) == ["Pulse n'a pas pu lire tes compléments."])
+        #expect(log.entries.allSatisfy { $0.isError })
     }
 }
 

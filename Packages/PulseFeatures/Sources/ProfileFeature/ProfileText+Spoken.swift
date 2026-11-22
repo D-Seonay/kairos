@@ -129,9 +129,14 @@ extension ProfileText {
         var parts: [String] = []
         if let current { parts.append(String(localized: "tendance \(weightSpoken(current))", bundle: .module)) }
         if weighed.count > 1 {
-            let low = PulseFormat.decimal(weights.min() ?? .nan, maxFractionDigits: 1)
-            let high = weightSpoken(weights.max() ?? .nan)
-            parts.append(String(localized: "de \(low) à \(high)", bundle: .module))
+            let (lowest, highest) = (weights.min() ?? .nan, weights.max() ?? .nan)
+            let high = weightSpoken(highest)
+            if (lowest * 10).rounded() == (highest * 10).rounded() {
+                parts.append(String(localized: "à \(high)", bundle: .module))
+            } else {
+                let low = PulseFormat.decimal(lowest, maxFractionDigits: 1)
+                parts.append(String(localized: "de \(low) à \(high)", bundle: .module))
+            }
         }
         parts.append(count)
         let body = parts.joined(separator: ", ")
