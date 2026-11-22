@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Pulse — Assistance</title>
+<meta name="description" content="Questions fréquentes sur Pulse : score absent, calibration, export, suppression, nouvel iPhone.">
+<style>
+  :root { --paper: #F4F1EA; --ink: #141414; --muted: #4A463F; --rule: #CFC9BC; }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font: 1rem/1.6 -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  main { max-width: 40em; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+  header { border-bottom: 2px solid var(--ink); padding-bottom: 1.25rem; margin-bottom: 2rem; }
+  .brand { font-size: .8125rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 .5rem; }
+  h1 { font-size: 2rem; line-height: 1.15; margin: 0; }
+  h2 { font-size: 1.25rem; line-height: 1.3; margin: 2.25rem 0 .5rem; padding-top: 1rem; border-top: 1px solid var(--rule); }
+  p { margin: .5rem 0; }
+  ul { margin: .5rem 0; padding-left: 1.25rem; }
+  li { margin: .35rem 0; }
+  a { color: var(--ink); text-decoration: underline; text-underline-offset: .15em; }
+  a:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+  .lead { font-size: 1.125rem; }
+  .note { color: var(--muted); font-size: .9375rem; }
+  footer { margin-top: 3rem; border-top: 2px solid var(--ink); padding-top: 1rem; }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <p class="brand">Pulse</p>
+  <h1>Assistance</h1>
+</header>
+
+<p class="lead">Les réponses aux questions les plus fréquentes. Si tu ne trouves pas la tienne, le contact est en bas de page.</p>
+
+<section id="score">
+  <h2>Pourquoi je n'ai pas de score ?</h2>
+  <p>Pulse calcule ton score du matin à partir de ta nuit, avec trois mesures lues dans Apple Santé : le sommeil, la variabilité cardiaque (VFC) et la fréquence cardiaque au repos. Il lui en faut au moins deux. Vérifie ces points :</p>
+  <ul>
+    <li><strong>L'accès à Apple Santé.</strong> Ouvre l'app Santé, puis Partage, Apps, Pulse, et vérifie que le sommeil, la VFC et la fréquence cardiaque au repos sont autorisés. Pulse ne peut pas voir lui-même si tu as refusé l'accès.</li>
+    <li><strong>Ta montre.</strong> Porte-la pour dormir, et ouvre l'app Santé le matin pour que la nuit y soit arrivée.</li>
+    <li><strong>Tes premiers jours.</strong> La fréquence cardiaque au repos demande au moins trois valeurs sur les sept derniers jours, et la VFC cinq nuits pour avoir une ligne de base.</li>
+  </ul>
+  <p>Quand il manque trop de mesures, ou si tu n'as pas donné l'accès à Apple Santé, Pulse te pose un check-in de trois questions. Le score qui en découle est présenté comme estimé.</p>
+</section>
+
+<section id="montre">
+  <h2>Ma montre n'est pas une Apple Watch</h2>
+  <p>Pulse ne parle pas à ta montre : il lit ce qu'elle a écrit dans Apple Santé. Si ta montre ou son app y enregistre ton sommeil, ta variabilité cardiaque et ta fréquence cardiaque au repos, Pulse peut les utiliser. Sinon, il n'a rien à lire.</p>
+  <p>Pulse lit la variabilité cardiaque sous sa forme SDNN, celle de l'iPhone et de l'Apple Watch. Une montre qui fournit une autre mesure (rMSSD par exemple) ne donnera pas de facteur VFC. Dans ce cas, le score s'appuie sur le sommeil et la fréquence cardiaque au repos, ou sur le check-in.</p>
+</section>
+
+<section id="calibration">
+  <h2>Combien de temps dure la calibration ?</h2>
+  <p>Pulse construit ta ligne de base de VFC sur tes 14 dernières nuits. Le facteur VFC peut entrer dans ton score dès 5 nuits. La ligne de base est complète à 14 nuits, et l'app affiche « En calibration » jusque-là. Pendant ce temps, Pulse ne te propose pas d'augmenter tes charges.</p>
+</section>
+
+<section id="exporter">
+  <h2>Comment exporter mes données ?</h2>
+  <p>Dans l'app : <strong>Profil, puis Mes données, puis Exporter</strong>. Tu peux tout exporter en JSON, ou en CSV (une archive zip), puis le partager par la feuille de partage d'iOS. Les valeurs lues dans Apple Santé sont dans l'export.</p>
+</section>
+
+<section id="supprimer">
+  <h2>Comment tout supprimer ?</h2>
+  <p>Dans l'app : <strong>Profil, puis Mes données, puis Tout supprimer</strong>. Tu confirmes en tapant le mot demandé. Les données de Pulse sont effacées sur l'iPhone et dans iCloud ; la suppression dans iCloud se termine dès que l'iPhone est en ligne. Une option efface aussi ce que Pulse a écrit dans Apple Santé (tes séances de musculation et leur énergie, et tes prises de compléments). Ce que d'autres apps ou ta montre y ont écrit n'est pas touché.</p>
+  <p>Après une suppression totale, Pulse repart de l'accueil. Pour retirer à Pulse l'accès à Apple Santé, va dans l'app Santé, Partage, Apps, Pulse.</p>
+</section>
+
+<section id="nouvel-iphone">
+  <h2>Mes données sur un nouvel iPhone</h2>
+  <ul>
+    <li><strong>Sauvegarde iCloud de l'iPhone, ou transfert direct d'iPhone à iPhone</strong> : tu retrouves tout, y compris le détail de tes nuits.</li>
+    <li><strong>Désinstallation puis réinstallation</strong> : tes séances, tes compléments, ton programme et tes scores reviennent d'iCloud. Le détail des nuits (VFC, fréquence cardiaque au repos et sommeil jour par jour) ne revient pas, parce que ces valeurs viennent d'Apple Santé et restent sur l'iPhone. Les courses, les sorties à vélo et les pesées d'Apple Santé sont relues depuis Apple Santé sur un an, sans le RPE ni la note que tu avais ajoutés à une course. Les courbes de biométrie des Statistiques repartent du jour de la réinstallation.</li>
+  </ul>
+</section>
+
+<section id="liens">
+  <h2>Politique de confidentialité et contact</h2>
+  <p>Lis la <a href="../confidentialite/">politique de confidentialité</a> pour savoir ce que Pulse lit, écrit et stocke.</p>
+  <p>Pour toute question ou tout problème : <a href="https://github.com/D-Seonay/kairos/issues">github.com/D-Seonay/kairos/issues</a>. Décris ce que tu as vu et la version de l'app (Profil, Paramètres). Ne publie pas de données de santé dans une issue.</p>
+</section>
+
+<footer>
+  <p class="note">Mise à jour le 22 novembre 2026.</p>
+</footer>
+</main>
+</body>
+</html>
