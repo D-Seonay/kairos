@@ -205,14 +205,13 @@ private struct LoadBarsCard: View {
         }
     }
 
-    /// Une entrée par barre non vide : une barre à zéro ne se voit pas et ne se lit pas.
+    /// Toutes les barres, même à zéro : l'axe garde son étendue. Une barre à zéro est tue à VoiceOver.
     private var entries: [Entry] {
         bars.flatMap { bar in
             [Entry(start: bar.start, discipline: Self.strength, value: bar.strength),
              Entry(start: bar.start, discipline: Self.run, value: bar.run),
              Entry(start: bar.start, discipline: Self.ride, value: bar.ride)]
         }
-        .filter { $0.value > 0 }
     }
 
     private var chart: some View {
@@ -224,6 +223,7 @@ private struct LoadBarsCard: View {
             BarMark(x: .value(String(localized: "Début", bundle: .module), entry.start, unit: unit),
                     y: .value(String(localized: "Charge", bundle: .module), entry.value))
                 .foregroundStyle(by: .value(String(localized: "Discipline", bundle: .module), entry.discipline))
+                .accessibilityHidden(entry.value == 0)
                 .accessibilityLabel(spoken.label)
                 .accessibilityValue(spoken.value)
         }
@@ -272,13 +272,14 @@ private struct LoadTotalsCard: View {
                 } else {
                     Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 10) {
                         ForEach(rows, id: \.label) { row in
+                            // Un seul élément par ligne : la cellule de gauche est tue, celle de droite dit l'étiquette et la valeur.
                             GridRow {
-                                Text(row.label).pulseEyebrow()
-                                valueText(row).gridColumnAlignment(.trailing)
+                                Text(row.label).pulseEyebrow().accessibilityHidden(true)
+                                valueText(row)
+                                    .gridColumnAlignment(.trailing)
+                                    .accessibilityLabel(row.label)
+                                    .accessibilityValue(row.spoken)
                             }
-                            .accessibilityElement(children: .ignore)
-                            .accessibilityLabel(row.label)
-                            .accessibilityValue(row.spoken)
                         }
                     }
                 }

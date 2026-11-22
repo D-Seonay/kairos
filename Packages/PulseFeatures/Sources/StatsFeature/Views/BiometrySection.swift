@@ -53,6 +53,7 @@ struct BiometrySection: View {
                              value: biometry.score.map { PulseFormat.integer($0.value, unit: nil) },
                              details: details(biometry.score),
                              emptyReason: String(localized: "aucun score du matin sur la période", bundle: .module),
+                             spokenValue: biometry.score.map { PulseSpoken.outOf(Int($0.value.rounded()), 100) },
                              spokenDetails: spokenDetails(biometry.score))
         ]
     }
@@ -97,7 +98,7 @@ private struct BaselineChartCard: View {
     private var chart: some View {
         let bucket = window.period.chartBucket
         let unit = window.unit(of: bucket)
-        let dateLabel = String(localized: "Nuit", bundle: .module)
+        let dateLabel = StatsText.nightAxisName(bucket)
         let valueLabel = measure.spokenName
         return Chart {
             ForEach(points) { point in
@@ -125,6 +126,15 @@ private struct BaselineChartCard: View {
                         .lineStyle(StrokeStyle(lineWidth: 2, lineJoin: .round))
                         .accessibilityHidden(true)
                 }
+            }
+            // La courbe n'a pas de point par nuit : son dernier point est lu, avec sa date ; le descripteur donne le reste.
+            if style == .line, let last = points.last {
+                let spoken = StatsText.baselinePointSpoken(measure: measure, point: last, bucket: bucket, calendar: window.calendar)
+                PointMark(x: .value(dateLabel, last.date, unit: unit), y: .value(valueLabel, last.value))
+                    .foregroundStyle(StatsInk.full)
+                    .symbolSize(36)
+                    .accessibilityLabel(spoken.label)
+                    .accessibilityValue(spoken.value)
             }
         }
         .statsPinnedDomain(window)
@@ -163,7 +173,7 @@ private struct SleepChartCard: View {
     private var chart: some View {
         let bucket = window.period.chartBucket
         let unit = window.unit(of: bucket)
-        let dateLabel = String(localized: "Nuit", bundle: .module)
+        let dateLabel = StatsText.nightAxisName(bucket)
         let hoursLabel = String(localized: "Heures de sommeil", bundle: .module)
         return Chart(points) { point in
             let deep = min(point.deepMinutes ?? 0, point.asleepMinutes) / 60

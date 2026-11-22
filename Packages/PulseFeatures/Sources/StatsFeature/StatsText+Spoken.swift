@@ -59,6 +59,11 @@ extension StatsText {
         return bucket == .day ? day : String(localized: "Semaine du \(day)", bundle: .module)
     }
 
+    /// « Nuit » par jour, « Semaine » par semaine : le nom de l'axe des dates des courbes de nuits.
+    static func nightAxisName(_ bucket: StatsBucket) -> String {
+        bucket == .day ? String(localized: "Nuit", bundle: .module) : String(localized: "Semaine", bundle: .module)
+    }
+
     /// « Nuit du 12 novembre » par jour, « Semaine du 9 novembre » par semaine.
     static func nightLabel(_ date: Date, bucket: StatsBucket, calendar: Calendar) -> String {
         guard bucket == .day else { return bucketLabel(date, bucket: bucket, calendar: calendar) }

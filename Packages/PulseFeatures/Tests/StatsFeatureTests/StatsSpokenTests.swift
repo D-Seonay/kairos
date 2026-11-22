@@ -202,6 +202,10 @@ struct StatsChartSummaryTests {
         #expect(StatsText.tileSpoken(empty) == "Séances, Pas assez de données, aucune séance")
     }
 
+    @Test func nightAxisFollowsTheBucket() {
+        #expect(StatsText.nightAxisName(.day) == "Nuit" && StatsText.nightAxisName(.week) == "Semaine")
+    }
+
     @Test func comparisonIsSpokenInFull() {
         #expect(StatsText.comparisonSpoken(StatsComparison(value: 106, previous: 100), days: 30)
             == "+6 % par rapport aux 30 jours précédents")

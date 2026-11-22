@@ -41,8 +41,7 @@ enum StatsChartDescriptors {
     static func baseline(measure: BiometricMeasure, points: [BaselinePoint], window: StatsWindow) -> PulseChartDescriptor {
         let all = points.map(\.value) + points.compactMap(\.baseline)
         let (low, high) = (all.min() ?? 0, all.max() ?? 0)
-        let axisTitle = window.period.chartBucket == .day
-            ? String(localized: "Nuit", bundle: .module) : String(localized: "Semaine", bundle: .module)
+        let axisTitle = StatsText.nightAxisName(window.period.chartBucket)
         return PulseChartDescriptor(
             title: measure.spokenName,
             summary: StatsText.baselineSummary(measure: measure, points: points, period: window.period),
@@ -58,7 +57,7 @@ enum StatsChartDescriptors {
 
     static func sleep(points: [SleepPoint], deepShare: Double?, window: StatsWindow) -> PulseChartDescriptor {
         let bucket = window.period.chartBucket
-        let axisTitle = bucket == .day ? String(localized: "Nuit", bundle: .module) : String(localized: "Semaine", bundle: .module)
+        let axisTitle = StatsText.nightAxisName(bucket)
         let top = (points.map(\.asleepMinutes).max() ?? 0) / 60
         return PulseChartDescriptor(
             title: String(localized: "Sommeil", bundle: .module),
