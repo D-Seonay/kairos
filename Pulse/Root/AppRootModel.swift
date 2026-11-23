@@ -53,6 +53,11 @@ final class AppRootModel {
         profile?.theme ?? .amber
     }
 
+    /// La silhouette des cartes musculaires : celle du sexe du profil, de femme sans profil ou pour « Autre ».
+    var muscleMapFigure: MuscleMapFigure {
+        MuscleMapFigure(sex: profile?.sex ?? .unspecified)
+    }
+
     func load() async {
         #if DEBUG
         await dependencies.applyLaunchSeed()

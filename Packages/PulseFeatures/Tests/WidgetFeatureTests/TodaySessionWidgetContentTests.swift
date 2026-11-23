@@ -31,6 +31,14 @@ struct TodaySessionWidgetContentTests {
         #expect(!content.isAdjusted)
     }
 
+    @Test func contentFollowsTheSnapshotFigure() {
+        var snapshot = WidgetSample.snapshot(sessionTitle: "Push", isLightened: false)
+        snapshot.muscleMapFigure = .male
+        #expect(TodaySessionWidgetContent.make(snapshot: snapshot, at: now, calendar: calendar).muscleMapFigure == .male)
+        snapshot.muscleMapFigure = nil
+        #expect(TodaySessionWidgetContent.make(snapshot: snapshot, at: now, calendar: calendar).muscleMapFigure == .female)
+    }
+
     @Test func restDayShowsRestContent() {
         let snapshot = WidgetSample.snapshot(sessionTitle: nil, isLightened: false)
         let content = TodaySessionWidgetContent.make(snapshot: snapshot, at: now, calendar: calendar)

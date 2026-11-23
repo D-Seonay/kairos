@@ -95,10 +95,25 @@ struct DayRefresherTests {
         let push = try #require(refresh.plannedDay.routineDay)
         let detail = "\(push.exercises.count) exercices · \(push.exercises.reduce(0) { $0 + $1.sets }) séries"
         #expect(published == [WidgetSnapshot(day: day, score: Int(scored.score.rounded()), category: .optimal,
-                                             isEstimated: false, sessionTitle: "Push", isLightened: false, sessionDetail: detail)])
+                                             isEstimated: false, sessionTitle: "Push", isLightened: false, sessionDetail: detail,
+                                             muscleMapFigure: .female)])
         #expect(fixture.activity.lastOpenedAt() == fixture.clock.now)
         #expect(await fixture.notifications.cancelCount == 1)
         #expect(await fixture.notifications.scheduled.isEmpty)
+    }
+
+    @Test func publishedSnapshotCarriesTheProfileFigure() async throws {
+        let fixture = RefresherFixture(scenario: .goodNight)
+        try await fixture.adopt()
+        var profile = try #require(try await fixture.profiles.load())
+        profile.sex = .male
+        try await fixture.profiles.save(profile)
+
+        _ = await fixture.refresher.refresh(origin: .foreground)
+
+        let published = await fixture.widgets.published
+        #expect(published.count == 1)
+        #expect(published.last?.muscleMapFigure == .male)
     }
 
     @Test func refreshImportsRunsAndFollowsTheDatedWeek() async throws {

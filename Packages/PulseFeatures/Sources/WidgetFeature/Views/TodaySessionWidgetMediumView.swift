@@ -43,6 +43,7 @@ struct TodaySessionWidgetMediumViewBody: View {
     private var muscleMap: some View {
         if !content.muscleLevels.isEmpty {
             MuscleMapView(levels: content.muscleLevels, label: content.title, height: 98)
+                .environment(\.muscleMapFigure, content.muscleMapFigure)
                 .frame(width: 88)
         } else {
             ZStack {

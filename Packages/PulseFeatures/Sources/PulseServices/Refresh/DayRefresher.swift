@@ -157,7 +157,7 @@ public final class DayRefresher: Sendable {
         let scored: DailyRecovery? = if case .scored(let recovery)? = score { recovery } else { nil }
         let session = TodaySession(plannedDay: plannedDay, recovery: scored, deload: plan.deload)
         if let scored {
-            await widgets.publish(await snapshot(scored, session: session))
+            await widgets.publish(await snapshot(scored, session: session, profile: profile))
             if origin == .background, let profile {
                 await notifyIfDue(scored, session: session, profile: profile, now: now)
             }
@@ -177,12 +177,15 @@ public final class DayRefresher: Sendable {
 
     private func publish(_ scored: DailyRecovery, plan: DayPlan) async {
         let session = TodaySession(plannedDay: plan.display, recovery: scored, deload: plan.deload)
-        await widgets.publish(await snapshot(scored, session: session))
+        await widgets.publish(await snapshot(scored, session: session, profile: await loadProfile().profile))
     }
 
-    /// L'instantané du jour, avec la série, la semaine et la charge quand elles se lisent.
-    private func snapshot(_ scored: DailyRecovery, session: TodaySession) async -> WidgetSnapshot {
-        WidgetSnapshot(recovery: scored, session: session).adding(try? await planning?.widgetPlanning())
+    /// L'instantané du jour, avec la série, la semaine et la charge quand elles se lisent, et la silhouette du profil
+    /// (celle de femme sans profil lisible).
+    private func snapshot(_ scored: DailyRecovery, session: TodaySession, profile: UserProfile?) async -> WidgetSnapshot {
+        var snapshot = WidgetSnapshot(recovery: scored, session: session).adding(try? await planning?.widgetPlanning())
+        snapshot.muscleMapFigure = MuscleMapFigure(sex: profile?.sex ?? .unspecified)
+        return snapshot
     }
 
     /// Le profil enregistré, et si sa lecture a échoué : un profil absent n'est pas un profil illisible.
