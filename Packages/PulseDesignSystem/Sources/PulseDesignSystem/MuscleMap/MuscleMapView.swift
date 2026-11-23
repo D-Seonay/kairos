@@ -1,8 +1,9 @@
 import PulseDomain
 import SwiftUI
 
-/// La carte musculaire : face et dos côte à côte. Corps en `muscleBody`, régions de base éteintes en `muscleOff`,
-/// niveaux 1 à 4 en mélange accent / `muscleOff`. Les régions en surimpression ne sont dessinées que si elles sont allumées.
+/// La carte musculaire : face et dos côte à côte, dans la silhouette de `muscleMapFigure`. Corps en `muscleBody`, régions
+/// de base éteintes en `muscleOff`, niveaux 1 à 4 en mélange accent / `muscleOff`. Les régions en surimpression ne sont
+/// dessinées que si elles sont allumées.
 /// `label` est lu par VoiceOver à la place du dessin : les appelants passent `MuscleMapSummary.text`, qui donne les niveaux.
 public struct MuscleMapView: View {
     private let levels: [MuscleMapRegion: Int]
@@ -11,6 +12,7 @@ public struct MuscleMapView: View {
     private let artwork = MuscleMapArtwork.bundled
 
     @Environment(\.pulseTheme) private var theme
+    @Environment(\.muscleMapFigure) private var figure
 
     public init(levels: [MuscleMapRegion: Int], label: String, height: CGFloat) {
         self.levels = levels
@@ -29,7 +31,7 @@ public struct MuscleMapView: View {
     }
 
     private func silhouette(_ side: MuscleMapSide) -> some View {
-        let box = artwork.viewBox(side)
+        let box = artwork.viewBox(side, figure: figure)
         let accent = PulsePalette.accent(for: theme).accent
         return Canvas { context, size in
             draw(side, accent: accent, in: &context, size: size)
@@ -39,12 +41,12 @@ public struct MuscleMapView: View {
     }
 
     private func draw(_ side: MuscleMapSide, accent: PulseTone, in context: inout GraphicsContext, size: CGSize) {
-        let box = artwork.viewBox(side)
+        let box = artwork.viewBox(side, figure: figure)
         guard box.width > 0, box.height > 0 else { return }
         let scale = min(size.width / box.width, size.height / box.height)
         let transform = CGAffineTransform(translationX: -box.minX, y: -box.minY).scaledBy(x: scale, y: scale)
 
-        for layer in artwork.layers(side) {
+        for layer in artwork.layers(side, figure: figure) {
             guard let color = fill(for: layer.region, accent: accent) else { continue }
             for path in layer.paths {
                 context.fill(path.applying(transform), with: .color(color))
@@ -68,6 +70,17 @@ public struct MuscleMapView: View {
         label: MuscleMapSummary.text(levels: [.chest: .maximum, .triceps: .strong, .frontDelts: .moderate]),
         height: 320
     )
+    .padding()
+    .background(PulsePalette.background)
+}
+
+#Preview("Silhouette d'homme") {
+    MuscleMapView(
+        levels: [.chest: 4, .triceps: 3, .frontDeltoid: 2],
+        label: MuscleMapSummary.text(levels: [.chest: .maximum, .triceps: .strong, .frontDelts: .moderate]),
+        height: 320
+    )
+    .environment(\.muscleMapFigure, .male)
     .padding()
     .background(PulsePalette.background)
 }

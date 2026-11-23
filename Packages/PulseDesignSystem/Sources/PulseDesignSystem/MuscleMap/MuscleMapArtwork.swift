@@ -1,5 +1,6 @@
 import CoreGraphics
 import Foundation
+import PulseDomain
 import SwiftUI
 
 public enum MuscleMapSide: Sendable {
@@ -13,7 +14,7 @@ public struct MuscleMapLayer: Sendable {
     public let paths: [Path]
 }
 
-/// Les silhouettes MuscleMap (MIT, Melih Colpan), lues dans `musclemap.json` et parsées une seule fois.
+/// Les silhouettes MuscleMap de femme et d'homme (MIT, Melih Colpan), lues dans `musclemap.json` et parsées une seule fois.
 public struct MuscleMapArtwork: Sendable {
     fileprivate struct Silhouette: Sendable {
         let viewBox: CGRect
@@ -25,22 +26,28 @@ public struct MuscleMapArtwork: Sendable {
     public static let bundled = load()
 
     public let license: String
-    private let front: Silhouette
-    private let back: Silhouette
+    private let female: (front: Silhouette, back: Silhouette)
+    private let male: (front: Silhouette, back: Silhouette)
 
-    public func body(_ side: MuscleMapSide) -> [Path] { silhouette(side).body }
+    public func body(_ side: MuscleMapSide, figure: MuscleMapFigure) -> [Path] { silhouette(side, figure).body }
 
-    public func regions(_ side: MuscleMapSide) -> [MuscleMapRegion: [Path]] { silhouette(side).regions }
+    public func regions(_ side: MuscleMapSide, figure: MuscleMapFigure) -> [MuscleMapRegion: [Path]] {
+        silhouette(side, figure).regions
+    }
 
     /// Les groupes du SVG dans l'ordre du document : c'est l'ordre dans lequel il faut les dessiner.
-    public func layers(_ side: MuscleMapSide) -> [MuscleMapLayer] { silhouette(side).layers }
+    public func layers(_ side: MuscleMapSide, figure: MuscleMapFigure) -> [MuscleMapLayer] { silhouette(side, figure).layers }
 
-    public func viewBox(_ side: MuscleMapSide) -> CGRect { silhouette(side).viewBox }
+    public func viewBox(_ side: MuscleMapSide, figure: MuscleMapFigure) -> CGRect { silhouette(side, figure).viewBox }
 
-    private func silhouette(_ side: MuscleMapSide) -> Silhouette {
-        switch side {
-        case .front: front
-        case .back: back
+    private func silhouette(_ side: MuscleMapSide, _ figure: MuscleMapFigure) -> Silhouette {
+        let pair = switch figure {
+        case .female: female
+        case .male: male
+        }
+        return switch side {
+        case .front: pair.front
+        case .back: pair.back
         }
     }
 }
@@ -58,10 +65,15 @@ private extension MuscleMapArtwork {
         let paths: [String]
     }
 
-    struct File: Decodable {
-        let license: String
+    struct FigureFile: Decodable {
         let front: SideFile
         let back: SideFile
+    }
+
+    struct File: Decodable {
+        let license: String
+        let female: FigureFile
+        let male: FigureFile
     }
 
     /// Une ressource illisible donne une carte vide plutôt qu'un crash ; les tests de couverture la signalent.
@@ -71,9 +83,13 @@ private extension MuscleMapArtwork {
             let data = try? Data(contentsOf: url),
             let file = try? JSONDecoder().decode(File.self, from: data)
         else {
-            return MuscleMapArtwork(license: "", front: .empty, back: .empty)
+            return MuscleMapArtwork(license: "", female: (.empty, .empty), male: (.empty, .empty))
         }
-        return MuscleMapArtwork(license: file.license, front: Silhouette(file.front), back: Silhouette(file.back))
+        return MuscleMapArtwork(
+            license: file.license,
+            female: (Silhouette(file.female.front), Silhouette(file.female.back)),
+            male: (Silhouette(file.male.front), Silhouette(file.male.back))
+        )
     }
 }
 

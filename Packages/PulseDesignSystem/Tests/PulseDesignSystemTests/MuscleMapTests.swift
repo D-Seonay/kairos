@@ -36,43 +36,81 @@ import Testing
 
 @Test func artworkParsesAndCoversMappedRegions() {
     let art = MuscleMapArtwork.bundled
-    let drawn = Set(art.regions(.front).keys).union(art.regions(.back).keys)
+    let drawn = Set(art.regions(.front, figure: .female).keys).union(art.regions(.back, figure: .female).keys)
     #expect(Set(Muscle.allCases.flatMap(\.mapRegions)).isSubset(of: drawn))
-    #expect(Set(MuscleMapRegion.allCases) == drawn)
-    #expect(!art.body(.front).isEmpty && !art.body(.back).isEmpty)
     #expect(art.license.contains("MIT"))
+}
+
+@Test(arguments: MuscleMapFigure.allCases)
+func eachFigureDrawsEveryRegion(_ figure: MuscleMapFigure) {
+    let art = MuscleMapArtwork.bundled
+    let drawn = Set(art.regions(.front, figure: figure).keys).union(art.regions(.back, figure: figure).keys)
+    #expect(Set(MuscleMapRegion.allCases) == drawn)
+    #expect(!art.body(.front, figure: figure).isEmpty && !art.body(.back, figure: figure).isEmpty)
 }
 
 @Test func viewBoxesKeepTheirOrigin() {
     let art = MuscleMapArtwork.bundled
-    #expect(art.viewBox(.front) == CGRect(x: 0, y: 0, width: 650, height: 1450))
-    #expect(art.viewBox(.back) == CGRect(x: 823, y: 0, width: 650, height: 1450))
+    #expect(art.viewBox(.front, figure: .female) == CGRect(x: 0, y: 0, width: 650, height: 1450))
+    #expect(art.viewBox(.back, figure: .female) == CGRect(x: 823, y: 0, width: 650, height: 1450))
 }
 
-@Test func backPathsLieInsideTheBackViewBox() {
+@Test func maleViewBoxesKeepTheirOrigin() {
     let art = MuscleMapArtwork.bundled
-    let box = art.viewBox(.back).insetBy(dx: -2, dy: -2)
-    for path in art.body(.back) {
+    #expect(art.viewBox(.front, figure: .male) == CGRect(x: 0, y: 95, width: 727, height: 1280))
+    #expect(art.viewBox(.back, figure: .male) == CGRect(x: 718, y: 95, width: 727, height: 1280))
+}
+
+@Test(arguments: MuscleMapFigure.allCases)
+func backPathsLieInsideTheBackViewBox(_ figure: MuscleMapFigure) {
+    let art = MuscleMapArtwork.bundled
+    let box = art.viewBox(.back, figure: figure).insetBy(dx: -2, dy: -2)
+    for path in art.body(.back, figure: figure) {
         #expect(box.contains(path.boundingRect))
     }
 }
 
+/// Un tracé illisible serait avalé par `try?` : on compte ce qui a été lu.
+@Test func everyPathParses() {
+    let art = MuscleMapArtwork.bundled
+    func count(_ side: MuscleMapSide, _ figure: MuscleMapFigure) -> Int {
+        art.layers(side, figure: figure).reduce(0) { $0 + $1.paths.count }
+    }
+    #expect(count(.front, .female) == 124 && count(.back, .female) == 78)
+    #expect(count(.front, .male) == 123 && count(.back, .male) == 78)
+}
+
 @Test func layersKeepTheDocumentDrawOrder() {
-    let front = MuscleMapArtwork.bundled.layers(.front).map(\.region)
+    let front = MuscleMapArtwork.bundled.layers(.front, figure: .female).map(\.region)
     #expect(Array(front.prefix(4)) == [nil, .trapezius, nil, .deltoids])
-    let back = MuscleMapArtwork.bundled.layers(.back).map(\.region)
+    let back = MuscleMapArtwork.bundled.layers(.back, figure: .female).map(\.region)
     #expect(Array(back.prefix(4)) == [nil, nil, .trapezius, .deltoids])
 }
 
 @Test func layerCountMatchesTheSvgGroups() {
     let art = MuscleMapArtwork.bundled
-    #expect(art.layers(.front).count == 29)
-    #expect(art.layers(.back).count == 20)
+    #expect(art.layers(.front, figure: .female).count == 29)
+    #expect(art.layers(.back, figure: .female).count == 20)
+    #expect(art.layers(.front, figure: .male).count == 29)
+    #expect(art.layers(.back, figure: .male).count == 21)
+    for figure in MuscleMapFigure.allCases {
+        for side in [MuscleMapSide.front, .back] {
+            let layers = art.layers(side, figure: figure)
+            let layered = layers.reduce(0) { $0 + $1.paths.count }
+            let flat = art.body(side, figure: figure).count + art.regions(side, figure: figure).values.reduce(0) { $0 + $1.count }
+            #expect(layered == flat)
+            #expect(layers.filter { $0.region == nil }.flatMap(\.paths).count == art.body(side, figure: figure).count)
+        }
+    }
+}
+
+/// Les surimpressions se dessinent par-dessus les régions de base : aucune ne passe avant la dernière région de base.
+@Test(arguments: MuscleMapFigure.allCases)
+func overlaysAreDrawnLast(_ figure: MuscleMapFigure) {
     for side in [MuscleMapSide.front, .back] {
-        let layered = art.layers(side).reduce(0) { $0 + $1.paths.count }
-        let flat = art.body(side).count + art.regions(side).values.reduce(0) { $0 + $1.count }
-        #expect(layered == flat)
-        #expect(art.layers(side).filter { $0.region == nil }.flatMap(\.paths).count == art.body(side).count)
+        let overlays = MuscleMapArtwork.bundled.layers(side, figure: figure).map { $0.region?.isOverlay ?? false }
+        let firstOverlay = overlays.firstIndex(of: true) ?? overlays.count
+        #expect(!overlays[firstOverlay...].contains(false), "\(figure) \(side)")
     }
 }
 
