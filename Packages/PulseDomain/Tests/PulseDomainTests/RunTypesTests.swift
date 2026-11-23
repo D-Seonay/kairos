@@ -42,9 +42,21 @@ struct RunTypesTests {
             ],
             heartRates: [120, 124],
             locationDenied: false,
+            healthKitUUID: UUID(),
             updatedAt: start.addingTimeInterval(10)
         )
         let data = try JSONEncoder().encode(draft)
         #expect(try JSONDecoder().decode(RunDraft.self, from: data) == draft)
+    }
+
+    @Test("un brouillon écrit avant l'identifiant Santé se relit sans lui")
+    func draftWithoutHealthKitUUIDStillDecodes() throws {
+        let draft = RunDraft(sessionID: UUID(), launch: RunLaunch(title: "Footing"), startedAt: Date(timeIntervalSince1970: 1_000),
+                             updatedAt: Date(timeIntervalSince1970: 1_010))
+        var object = try #require(try JSONSerialization.jsonObject(with: JSONEncoder().encode(draft)) as? [String: Any])
+        object["healthKitUUID"] = nil
+        let decoded = try JSONDecoder().decode(RunDraft.self, from: JSONSerialization.data(withJSONObject: object))
+        #expect(decoded == draft)
+        #expect(decoded.healthKitUUID == nil)
     }
 }

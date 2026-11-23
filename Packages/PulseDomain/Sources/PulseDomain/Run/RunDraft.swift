@@ -12,11 +12,14 @@ public struct RunDraft: Sendable, Equatable, Codable {
     public var heartRates: [Double]
     /// Vrai si la localisation a été refusée : la course continue sans tracé.
     public var locationDenied: Bool
+    /// L'entraînement déjà écrit dans Santé par une fin dont l'enregistrement a échoué : la reprise le réutilise au lieu d'en
+    /// écrire un second. Absent des brouillons plus anciens.
+    public var healthKitUUID: UUID?
     public var updatedAt: Date
 
     public init(sessionID: UUID, launch: RunLaunch, startedAt: Date, pauses: [RunPause] = [],
                 points: [RunTrackPoint] = [], heartRates: [Double] = [], locationDenied: Bool = false,
-                updatedAt: Date) {
+                healthKitUUID: UUID? = nil, updatedAt: Date) {
         self.sessionID = sessionID
         self.launch = launch
         self.startedAt = startedAt
@@ -24,6 +27,7 @@ public struct RunDraft: Sendable, Equatable, Codable {
         self.points = points
         self.heartRates = heartRates
         self.locationDenied = locationDenied
+        self.healthKitUUID = healthKitUUID
         self.updatedAt = updatedAt
     }
 }

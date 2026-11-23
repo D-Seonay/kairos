@@ -62,6 +62,26 @@ struct RunSessionFinishTests {
         #expect(try await fixture.drafts.load() == nil)
     }
 
+    @Test func failedSessionSaveDoesNotWriteHealthTwice() async throws {
+        let workouts = CountingWorkoutRepository(failingAtSave: 1)
+        let fixture = RunSessionFixture(workouts: workouts)
+        let snapshot = try await fixture.service.start(.free())
+        await fixture.push(Array(trace(meters: 300)[1...]))
+        await #expect(throws: CountingWorkoutRepository.Failure.interrupted) { try await fixture.service.finish() }
+        let draft = try #require(try await fixture.drafts.load())
+        let healthID = try #require(draft.healthKitUUID)
+
+        let offer = try #require(await fixture.service.recoveryOffer())
+        #expect(!offer.isStillRecording)
+        let recap = try await fixture.service.saveInterrupted()
+        #expect(await fixture.recorder.finished.count == 1)
+        #expect(await fixture.recorder.saved.isEmpty)
+        #expect(recap.session.id == snapshot.sessionID)
+        #expect(recap.session.healthKitUUID == healthID.uuidString)
+        #expect(try await workouts.session(id: snapshot.sessionID)?.healthKitUUID == healthID.uuidString)
+        #expect(try await fixture.drafts.load() == nil)
+    }
+
     @Test func deniedHealthWriteRunsWithoutHealthKit() async throws {
         let fixture = RunSessionFixture(recorder: StubRunWorkoutRecorder(access: .denied))
         _ = try await fixture.service.start(.free())

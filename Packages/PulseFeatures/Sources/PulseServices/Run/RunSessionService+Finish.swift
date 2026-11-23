@@ -24,6 +24,11 @@ extension RunSessionService {
         // Un échec de l'écriture dans Santé n'empêche pas d'enregistrer la course dans Pulse.
         var healthKitID: UUID?
         if active.recordsHealth { healthKitID = try? await recorder.finish(Self.healthEntry(draft, builder: builder, end: end)) }
+        if let healthKitID {
+            // Gardé avant d'enregistrer la séance : si l'enregistrement échoue, la reprise réutilise cet entraînement.
+            draft.healthKitUUID = healthKitID
+            try? await drafts.save(draft)
+        }
         await activity.end()
         await reminders.cancelForgotten()
         let recap = try await persist(draft, builder: builder, end: end, healthKitID: healthKitID)
@@ -32,7 +37,8 @@ extension RunSessionService {
         return recap
     }
 
-    /// Enregistre la course du brouillon, interrompue sans séance HealthKit vivante : elle s'arrête à son dernier point.
+    /// Enregistre la course du brouillon, interrompue sans séance HealthKit vivante : elle s'arrête à son dernier point. L'entraînement
+    /// est écrit dans Santé, sauf s'il l'a déjà été par une fin interrompue.
     public func saveInterrupted() async throws -> RunRecapData {
         guard !isTransitioning else { throw RunSessionError.noRun }
         let stored: RunDraft
@@ -50,8 +56,9 @@ extension RunSessionService {
         var draft = stored
         draft.pauses = Self.pauses(stored.pauses, closedAt: end)
         let builder = RunTrackBuilder.replay(startedAt: draft.startedAt, points: draft.points, pauses: draft.pauses)
-        var healthKitID: UUID?
-        if await recorder.writeAccess() == .authorized {
+        // Une fin dont l'enregistrement a échoué a déjà écrit l'entraînement : il n'est pas écrit une seconde fois.
+        var healthKitID = draft.healthKitUUID
+        if healthKitID == nil, await recorder.writeAccess() == .authorized {
             healthKitID = try? await recorder.save(Self.healthEntry(draft, builder: builder, end: end))
         }
         // La Live Activity du processus interrompu peut encore être affichée.

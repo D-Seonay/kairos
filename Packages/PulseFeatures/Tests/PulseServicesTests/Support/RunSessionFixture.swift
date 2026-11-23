@@ -69,16 +69,18 @@ struct RunSessionFixture {
     let activity = StubRunActivityController()
     let reminders = OrderedRunReminderScheduler()
     let drafts: CountingRunDraftStore
-    let workouts = InMemoryWorkoutRepository()
+    let workouts: any WorkoutRepository
     let tracks = InMemoryRunTrackRepository()
     let profiles = InMemoryProfileRepository()
     let preferences = InMemoryRunPreferencesStore()
     let service: RunSessionService
 
     init(recorder: StubRunWorkoutRecorder = StubRunWorkoutRecorder(),
-         location: StubRunLocationTracker = StubRunLocationTracker(), draft: RunDraft? = nil) {
+         location: StubRunLocationTracker = StubRunLocationTracker(), draft: RunDraft? = nil,
+         workouts: any WorkoutRepository = InMemoryWorkoutRepository()) {
         self.recorder = recorder
         self.location = location
+        self.workouts = workouts
         drafts = CountingRunDraftStore(draft)
         let clock = clock
         service = RunSessionService(
