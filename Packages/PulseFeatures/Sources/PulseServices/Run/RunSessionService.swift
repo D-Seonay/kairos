@@ -29,6 +29,7 @@ public actor RunSessionService {
     let spokenText: @Sendable (RunAnnouncementEvent) -> String
     let now: @Sendable () -> Date
     let calendar: Calendar
+    let keepAliveTicks: @Sendable (TimeInterval) -> AsyncStream<Void>
 
     /// La course en cours dans ce processus.
     var run: ActiveRun?
@@ -36,20 +37,23 @@ public actor RunSessionService {
     var isTransitioning = false
     var pointTask: Task<Void, Never>?
     var heartRateTask: Task<Void, Never>?
+    var keepAliveTask: Task<Void, Never>?
     var previewTask: Task<Void, Never>?
     var previewContinuation: AsyncStream<RunGPSQuality>.Continuation?
     var snapshotContinuation: AsyncStream<RunSnapshot>.Continuation?
 
-    /// Points et FC traités depuis la création, pour que les tests attendent leur traitement sans délai arbitraire.
-    private(set) var handledPointCount = 0
-    private(set) var handledHeartRateCount = 0
-    private var waiters: [HandledWaiter] = []
+    /// Points, FC et tops traités depuis la création, pour que les tests attendent leur traitement sans délai arbitraire.
+    var handledPointCount = 0
+    var handledHeartRateCount = 0
+    var handledTickCount = 0
+    private var waiters: [(waiter: HandledWaiter, continuation: CheckedContinuation<Void, Never>)] = []
 
     public init(recorder: any RunWorkoutRecording, location: any RunLocationTracking, announcer: any RunAnnouncing,
                 activity: any RunActivityControlling, reminders: any RunReminderScheduling, drafts: any RunDraftStore,
                 workouts: any WorkoutRepository, tracks: any RunTrackRepository, profiles: any ProfileRepository,
                 preferences: any RunPreferencesStore, spokenText: @escaping @Sendable (RunAnnouncementEvent) -> String,
-                now: @escaping @Sendable () -> Date, calendar: Calendar) {
+                now: @escaping @Sendable () -> Date, calendar: Calendar,
+                keepAliveTicks: @escaping @Sendable (TimeInterval) -> AsyncStream<Void> = RunSessionService.periodicTicks(every:)) {
         self.recorder = recorder
         self.location = location
         self.announcer = announcer
@@ -63,6 +67,22 @@ public actor RunSessionService {
         self.spokenText = spokenText
         self.now = now
         self.calendar = calendar
+        self.keepAliveTicks = keepAliveTicks
+    }
+
+    /// Un top toutes les `interval` secondes, jusqu'à l'abandon du flux.
+    public static func periodicTicks(every interval: TimeInterval) -> AsyncStream<Void> {
+        AsyncStream { continuation in
+            let task = Task {
+                while !Task.isCancelled {
+                    try? await Task.sleep(for: .seconds(interval))
+                    guard !Task.isCancelled else { break }
+                    continuation.yield()
+                }
+                continuation.finish()
+            }
+            continuation.onTermination = { _ in task.cancel() }
+        }
     }
 
     // MARK: Écran de course
@@ -152,11 +172,12 @@ public actor RunSessionService {
         let date = now()
         active.draft.pauses.append(RunPause(start: date))
         active.builder.breakSegment()
+        active.generation += 1
         active.markDraftWritten(at: date)
         active.lastActivityUpdate = date
         run = active
         if active.recordsHealth { await recorder.pause(at: date) }
-        await apply(RunEffects(savesDraft: true, activity: activityState(of: active, at: date), reminder: .cancel),
+        await apply(RunEffects(generation: active.generation, savesDraft: true, updatesActivity: true, reminder: .cancel),
                     for: active.sessionID)
         publish()
     }
@@ -166,6 +187,7 @@ public actor RunSessionService {
         let date = now()
         active.draft.pauses[last].end = date
         active.builder.breakSegment()
+        active.generation += 1
         // Le déplacement repart de la reprise : l'oubli ne se déclenche jamais juste après.
         active.lastResumeAt = date
         active.reminderReference = date
@@ -174,7 +196,7 @@ public actor RunSessionService {
         run = active
         if active.recordsHealth { await recorder.resume(at: date) }
         let reminder: ReminderChange? = active.draft.locationDenied ? nil : .schedule(date.addingTimeInterval(Self.forgottenAfter))
-        await apply(RunEffects(savesDraft: true, activity: activityState(of: active, at: date), reminder: reminder),
+        await apply(RunEffects(generation: active.generation, savesDraft: true, updatesActivity: true, reminder: reminder),
                     for: active.sessionID)
         publish()
     }
@@ -186,100 +208,6 @@ public actor RunSessionService {
         guard let active = run, !active.isPaused, !active.draft.locationDenied else { return nil }
         let reference = active.movementReference
         return now().timeIntervalSince(reference) >= Self.forgottenAfter ? reference : nil
-    }
-
-    // MARK: Flux
-
-    func consume(points: AsyncStream<RunTrackPoint>?, heartRates: AsyncStream<Double>?) {
-        if let points {
-            pointTask = Task { [weak self] in
-                for await point in points { await self?.handle(point) }
-            }
-        }
-        if let heartRates {
-            heartRateTask = Task { [weak self] in
-                for await bpm in heartRates { await self?.handle(heartRate: bpm) }
-            }
-        }
-    }
-
-    func stopConsuming() {
-        pointTask?.cancel()
-        pointTask = nil
-        heartRateTask?.cancel()
-        heartRateTask = nil
-    }
-
-    private func handle(_ point: RunTrackPoint) async {
-        defer {
-            handledPointCount += 1
-            resumeWaiters()
-        }
-        // La course sort de `run` le temps des calculs : le tableau des points n'est pas recopié à chaque point.
-        guard var active = run else { return }
-        run = nil
-        let date = now()
-        active.draft.points.append(point)
-        active.gps = RunGPSQuality(accuracy: point.horizontalAccuracy)
-        let kilometer = active.builder.add(point, isPaused: active.isPaused)
-        var effects = RunEffects()
-        if !active.isPaused {
-            let events = active.announcementEvents(kilometer: kilometer, at: point.timestamp)
-            if preferences.announcesKilometres { effects.texts = events.map(spokenText) }
-            let reference = active.movementReference
-            if !active.draft.locationDenied, reference.timeIntervalSince(active.reminderReference) > Self.reminderStep {
-                active.reminderReference = reference
-                effects.reminder = .schedule(reference.addingTimeInterval(Self.forgottenAfter))
-            }
-        }
-        if date.timeIntervalSince(active.lastDraftWrite) >= Self.draftInterval {
-            active.markDraftWritten(at: date)
-            effects.savesDraft = true
-        }
-        if kilometer != nil || date.timeIntervalSince(active.lastActivityUpdate) >= Self.activityInterval {
-            active.lastActivityUpdate = date
-            effects.activity = activityState(of: active, at: date)
-        }
-        run = active
-        await apply(effects, for: active.sessionID)
-        publish()
-    }
-
-    private func handle(heartRate bpm: Double) async {
-        defer {
-            handledHeartRateCount += 1
-            resumeWaiters()
-        }
-        guard var active = run else { return }
-        run = nil
-        active.heartRate = bpm
-        active.draft.heartRates.append(bpm)
-        let date = now()
-        let savesDraft = date.timeIntervalSince(active.lastDraftWrite) >= Self.draftInterval
-        if savesDraft { active.markDraftWritten(at: date) }
-        run = active
-        await apply(RunEffects(savesDraft: savesDraft), for: active.sessionID)
-        publish()
-    }
-
-    /// Les effets d'un changement, joués seulement si la course est toujours celle en cours : une fin pendant l'attente ne doit
-    /// pas voir un brouillon réécrit après coup. Le brouillon passe en premier, pour la reprise après un crash ; c'est le plus
-    /// récent qui est écrit, pas celui d'avant une attente pendant laquelle d'autres points sont arrivés.
-    private func apply(_ effects: RunEffects, for sessionID: UUID) async {
-        if effects.savesDraft, let draft = run?.draft, draft.sessionID == sessionID { try? await drafts.save(draft) }
-        if let state = effects.activity, isCurrent(sessionID) { await activity.update(state) }
-        switch effects.reminder {
-        case .schedule(let date)? where isCurrent(sessionID): await reminders.scheduleForgotten(at: date)
-        case .cancel? where isCurrent(sessionID): await reminders.cancelForgotten()
-        default: break
-        }
-        for text in effects.texts where isCurrent(sessionID) {
-            await announcer.announce(text)
-        }
-    }
-
-    private func isCurrent(_ sessionID: UUID) -> Bool {
-        run?.sessionID == sessionID
     }
 }
 
@@ -319,17 +247,22 @@ extension RunSessionService {
 
     // MARK: Tests
 
-    /// Attend que `points` points et `heartRates` FC aient été traités depuis la création du service.
-    func waitUntilHandled(points: Int = 0, heartRates: Int = 0) async {
-        guard handledPointCount < points || handledHeartRateCount < heartRates else { return }
+    /// Attend que `points` points, `heartRates` FC et `ticks` tops aient été traités depuis la création du service.
+    func waitUntilHandled(points: Int = 0, heartRates: Int = 0, ticks: Int = 0) async {
+        let waiter = HandledWaiter(points: points, heartRates: heartRates, ticks: ticks)
+        guard !isReached(waiter) else { return }
         await withCheckedContinuation { continuation in
-            waiters.append(HandledWaiter(points: points, heartRates: heartRates, continuation: continuation))
+            waiters.append((waiter, continuation))
         }
     }
 
-    private func resumeWaiters() {
-        let isReady = { (waiter: HandledWaiter) in
-            self.handledPointCount >= waiter.points && self.handledHeartRateCount >= waiter.heartRates
+    private func isReached(_ waiter: HandledWaiter) -> Bool {
+        handledPointCount >= waiter.points && handledHeartRateCount >= waiter.heartRates && handledTickCount >= waiter.ticks
+    }
+
+    func resumeWaiters() {
+        let isReady = { (entry: (waiter: HandledWaiter, continuation: CheckedContinuation<Void, Never>)) in
+            self.isReached(entry.waiter)
         }
         let ready = waiters.filter(isReady)
         waiters.removeAll(where: isReady)
@@ -340,5 +273,5 @@ extension RunSessionService {
 private struct HandledWaiter {
     var points: Int
     var heartRates: Int
-    var continuation: CheckedContinuation<Void, Never>
+    var ticks: Int
 }

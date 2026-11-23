@@ -1,5 +1,6 @@
 import Foundation
 import PulseDomain
+import Synchronization
 import Testing
 
 @testable import PulseServices
@@ -8,9 +9,16 @@ import Testing
 actor CountingRunDraftStore: RunDraftStore {
     private let inner: InMemoryRunDraftStore
     private(set) var saveCount = 0
+    /// La prochaine écriture attend devant cette porte, avant d'écrire.
+    private var heldAt: Gate?
 
     init(_ draft: RunDraft? = nil) {
         inner = InMemoryRunDraftStore(draft)
+    }
+
+    /// Suspend la prochaine écriture (une seule) jusqu'à `gate.open()`, pour rejouer un entrelacement précis.
+    func holdNextSave(at gate: Gate) {
+        heldAt = gate
     }
 
     func load() async throws -> RunDraft? {
@@ -19,6 +27,10 @@ actor CountingRunDraftStore: RunDraftStore {
 
     func save(_ draft: RunDraft) async throws {
         saveCount += 1
+        if let gate = heldAt {
+            heldAt = nil
+            await gate.pass()
+        }
         try await inner.save(draft)
     }
 
@@ -49,6 +61,22 @@ actor OrderedRunReminderScheduler: RunReminderScheduling {
     }
 }
 
+/// Les tops de la tâche qui garde le brouillon à jour sans point : le test les donne un par un.
+final class RunTickSource: Sendable {
+    private let continuations = Mutex<[AsyncStream<Void>.Continuation]>([])
+
+    func stream(every interval: TimeInterval) -> AsyncStream<Void> {
+        let (stream, continuation) = AsyncStream.makeStream(of: Void.self)
+        continuations.withLock { $0.append(continuation) }
+        return stream
+    }
+
+    /// Un top au dernier flux ouvert.
+    func tick() {
+        _ = continuations.withLock { $0.last }?.yield()
+    }
+}
+
 /// Le service de course et ses doublures, avec une horloge que le test avance point par point.
 struct RunSessionFixture {
     static let start = TestClock.date("2026-11-24T07:00")
@@ -73,6 +101,7 @@ struct RunSessionFixture {
     let tracks = InMemoryRunTrackRepository()
     let profiles = InMemoryProfileRepository()
     let preferences = InMemoryRunPreferencesStore()
+    let ticks = RunTickSource()
     let service: RunSessionService
 
     init(recorder: StubRunWorkoutRecorder = StubRunWorkoutRecorder(),
@@ -82,11 +111,32 @@ struct RunSessionFixture {
         self.location = location
         self.workouts = workouts
         drafts = CountingRunDraftStore(draft)
-        let clock = clock
-        service = RunSessionService(
+        service = Self.makeService(recorder: recorder, location: location, announcer: announcer, activity: activity,
+                                   reminders: reminders, drafts: drafts, workouts: workouts, tracks: tracks, profiles: profiles,
+                                   preferences: preferences, ticks: ticks, clock: clock)
+    }
+
+    // swiftlint:disable:next function_parameter_count
+    private static func makeService(recorder: StubRunWorkoutRecorder, location: StubRunLocationTracker, announcer: StubRunAnnouncer,
+                                    activity: StubRunActivityController, reminders: OrderedRunReminderScheduler,
+                                    drafts: CountingRunDraftStore, workouts: any WorkoutRepository,
+                                    tracks: InMemoryRunTrackRepository, profiles: InMemoryProfileRepository,
+                                    preferences: InMemoryRunPreferencesStore, ticks: RunTickSource,
+                                    clock: MutableClock) -> RunSessionService {
+        RunSessionService(
             recorder: recorder, location: location, announcer: announcer, activity: activity, reminders: reminders,
             drafts: drafts, workouts: workouts, tracks: tracks, profiles: profiles, preferences: preferences,
-            spokenText: Self.spokenText, now: { clock.now }, calendar: TestClock.calendar)
+            spokenText: Self.spokenText, now: { clock.now }, calendar: TestClock.calendar,
+            keepAliveTicks: { ticks.stream(every: $0) })
+    }
+
+    /// Le service d'un nouveau lancement de l'app, sur les mêmes magasins, après la mort du processus : la séance HealthKit
+    /// n'est pas récupérée.
+    func relaunched(recorder: StubRunWorkoutRecorder = StubRunWorkoutRecorder()) -> RunSessionService {
+        Self.makeService(recorder: recorder, location: StubRunLocationTracker(), announcer: StubRunAnnouncer(),
+                         activity: StubRunActivityController(), reminders: OrderedRunReminderScheduler(), drafts: drafts,
+                         workouts: workouts, tracks: tracks, profiles: profiles, preferences: preferences,
+                         ticks: RunTickSource(), clock: clock)
     }
 
     var start: Date { Self.start }
@@ -106,6 +156,14 @@ struct RunSessionFixture {
         let handled = await service.handledHeartRateCount
         await recorder.pushHeartRate(bpm)
         await service.waitUntilHandled(heartRates: handled + 1)
+    }
+
+    /// Avance l'horloge de `seconds`, donne un top à la tâche de maintien et attend son traitement.
+    func tick(after seconds: TimeInterval) async {
+        clock.set(date: clock.now.addingTimeInterval(seconds))
+        let handled = await service.handledTickCount
+        ticks.tick()
+        await service.waitUntilHandled(ticks: handled + 1)
     }
 
     func advance(minutes: Double) {

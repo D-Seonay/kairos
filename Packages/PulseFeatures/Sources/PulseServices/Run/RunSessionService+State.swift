@@ -17,6 +17,8 @@ struct ActiveRun {
     var reminderReference: Date
     /// Progression vers l'objectif au dernier point en mouvement, pour n'annoncer chaque palier qu'une fois.
     var progress: Double?
+    /// Avance à chaque pause et reprise : les effets calculés avant ne s'appliquent plus.
+    var generation = 0
 
     init(draft: RunDraft, builder: RunTrackBuilder? = nil, recordsHealth: Bool, at date: Date) {
         self.draft = draft
@@ -93,9 +95,11 @@ extension RunSessionService {
 
 /// Ce qu'un changement de la course doit faire hors de l'acteur.
 struct RunEffects {
+    /// La génération de pause de la course quand les effets ont été calculés.
+    var generation: Int
     var texts: [String] = []
     var savesDraft = false
-    var activity: RunActivityState?
+    var updatesActivity = false
     var reminder: ReminderChange?
 }
 
