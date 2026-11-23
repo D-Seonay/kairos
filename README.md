@@ -1,5 +1,8 @@
 <p align="center">
-  <img src="assets/icon.svg" width="96" height="96" alt="Pulse Logo">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.png">
+    <img src="assets/logo.png" width="128" height="128" alt="Logo de Pulse : tracé de pouls en trame de points">
+  </picture>
 </p>
 
 <h1 align="center">Pulse</h1>
