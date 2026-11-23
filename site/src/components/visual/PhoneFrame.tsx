@@ -1,4 +1,5 @@
 import Image from "next/image";
+import type { ReactNode } from "react";
 
 /** The raw app captures in public/screens (iPhone 6.7", 1290 × 2796). */
 const SCREEN = { width: 1290, height: 2796 };
@@ -7,9 +8,12 @@ const BEZEL = 3.2;
 /** Outer height over width, once the bezel is added on all four sides. */
 const FRAME_RATIO = ((100 - 2 * BEZEL) * SCREEN.height) / SCREEN.width / 100 + (2 * BEZEL) / 100;
 
-export type PhoneFrameProps = {
-  src: string;
-  alt: string;
+type Screen =
+  | { src: string; alt: string; children?: never }
+  /** Anything drawn in place of a capture (it fills the screen; size it in cqw or em). */
+  | { children: ReactNode; src?: never; alt?: never };
+
+export type PhoneFrameProps = Screen & {
   /** Load eagerly at high priority (the hero's main capture). */
   priority?: boolean;
   /** Width hint for the responsive image. */
@@ -26,6 +30,7 @@ export type PhoneFrameProps = {
 export function PhoneFrame({
   src,
   alt,
+  children,
   priority = false,
   sizes = "(min-width: 1024px) 320px, 50vw",
   className,
@@ -49,16 +54,20 @@ export function PhoneFrame({
 
       {/* Screen. */}
       <div className="absolute overflow-hidden rounded-[13.6cqw] bg-ink" style={{ inset: `${BEZEL}cqw` }}>
-        <Image
-          src={src}
-          alt={alt}
-          width={SCREEN.width}
-          height={SCREEN.height}
-          sizes={sizes}
-          loading={priority ? "eager" : "lazy"}
-          fetchPriority={priority ? "high" : "auto"}
-          className="block h-full w-full object-cover"
-        />
+        {src === undefined ? (
+          children
+        ) : (
+          <Image
+            src={src}
+            alt={alt ?? ""}
+            width={SCREEN.width}
+            height={SCREEN.height}
+            sizes={sizes}
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : "auto"}
+            className="block h-full w-full object-cover"
+          />
+        )}
         {/* Dynamic Island. */}
         <span
           aria-hidden="true"

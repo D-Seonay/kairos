@@ -1,0 +1,69 @@
+import fs from "node:fs";
+import path from "node:path";
+import { describe, expect, it } from "vitest";
+import { FEATURES } from "./features-data";
+
+const PUBLIC = path.resolve(import.meta.dirname, "../../../public");
+
+/** Sentences of a body, split after . ! ? or … */
+const sentences = (text: string) => text.split(/(?<=[.!?…])\s+/);
+
+describe("FEATURES", () => {
+  it("has six entries, indexed 01 to 06, with unique ids", () => {
+    expect(FEATURES).toHaveLength(6);
+    expect(FEATURES.map((feature) => feature.index)).toEqual(["01", "02", "03", "04", "05", "06"]);
+    expect(new Set(FEATURES.map((feature) => feature.id)).size).toBe(6);
+  });
+
+  it("follows the order of the spec: score, session, programme, stats, supplements, widgets", () => {
+    expect(FEATURES.map((feature) => feature.id)).toEqual([
+      "score",
+      "seance",
+      "programme",
+      "stats",
+      "complements",
+      "widgets",
+    ]);
+  });
+
+  it("points every capture at a file that exists in public/", () => {
+    for (const feature of FEATURES) {
+      if (feature.screen === null) continue;
+      expect(feature.screen.startsWith("/"), feature.id).toBe(true);
+      expect(fs.existsSync(path.join(PUBLIC, feature.screen)), feature.screen).toBe(true);
+    }
+  });
+
+  it("draws supplements and widgets instead of showing a capture", () => {
+    const drawn = FEATURES.filter((feature) => feature.screen === null).map((feature) => feature.id);
+    expect(drawn).toEqual(["complements", "widgets"]);
+  });
+
+  it("gives every entry an eyebrow, a title, a body and a description of its visual", () => {
+    for (const feature of FEATURES) {
+      expect(feature.eyebrow.trim(), feature.id).not.toBe("");
+      expect(feature.title.trim(), feature.id).not.toBe("");
+      expect(feature.body.trim(), feature.id).not.toBe("");
+      expect(feature.alt.trim(), feature.id).not.toBe("");
+    }
+  });
+
+  it("never uses an em dash as punctuation", () => {
+    for (const feature of FEATURES) {
+      for (const text of [feature.eyebrow, feature.title, feature.body, feature.alt]) {
+        expect(text, feature.id).not.toContain("—");
+      }
+    }
+  });
+
+  it("only mentions a dose to say Pulse never advises one, in the same sentence", () => {
+    for (const feature of FEATURES) {
+      for (const sentence of sentences(feature.body)) {
+        if (/\bdoses?\b/i.test(sentence)) expect(sentence, feature.id).toMatch(/\bjamais\b/i);
+      }
+    }
+    // The supplements entry says it outright.
+    const supplements = FEATURES.find((feature) => feature.id === "complements");
+    expect(supplements?.body).toMatch(/ne conseille jamais de dose/);
+  });
+});

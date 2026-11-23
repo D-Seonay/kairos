@@ -428,3 +428,533 @@ html {
   -webkit-mask-size: 5px 5px;
   mask-size: 5px 5px;
 }
+
+/* ---------- Features: pinned phone, halftone screen swap ---------- */
+
+/* The radius of the dots in the swap mask, animated (registered so it interpolates). */
+@property --swap-r {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+.feature-step {
+  position: relative;
+  padding-block: 3.5rem;
+  border-top: 1px solid var(--color-rule);
+}
+
+.feature-step:first-child {
+  border-top: 0;
+  padding-top: 1rem;
+}
+
+/* Thin numerals, like the score in the app. */
+.feature-index {
+  position: relative;
+  font-size: clamp(3.5rem, 2.6rem + 3vw, 5.5rem);
+  font-weight: 200;
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+}
+
+.feature-visual {
+  position: relative;
+  display: grid;
+  place-items: center;
+  margin-top: 2.75rem;
+  padding-block: 1.5rem;
+}
+
+.feature-visual-phone {
+  position: relative;
+  width: min(68vw, 280px);
+}
+
+/*
+ * The halftone disc behind a phone: three layers of the same dot grid, each
+ * kept to its own ring, so the dots grow toward the centre like a halftone
+ * gradient (big dots in the middle, fine dots at the edge).
+ */
+.feature-disc,
+.feature-disc::before,
+.feature-disc::after {
+  --cell: 9px;
+  position: absolute;
+  border-radius: 50%;
+  background-size: var(--cell) var(--cell);
+  background-position: center;
+}
+
+.feature-disc {
+  left: 50%;
+  top: 50%;
+  width: min(118vw, 520px);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgb(20 20 20 / 0.55) 1px, transparent 1.5px);
+  -webkit-mask-image: radial-gradient(circle, #000 30%, transparent 70%);
+  mask-image: radial-gradient(circle, #000 30%, transparent 70%);
+}
+
+.feature-disc::before,
+.feature-disc::after {
+  content: "";
+  inset: 0;
+}
+
+.feature-disc::before {
+  background-image: radial-gradient(circle, rgb(20 20 20 / 0.6) 2px, transparent 2.5px);
+  -webkit-mask-image: radial-gradient(circle, #000 18%, transparent 48%);
+  mask-image: radial-gradient(circle, #000 18%, transparent 48%);
+}
+
+.feature-disc::after {
+  background-image: radial-gradient(circle, rgb(20 20 20 / 0.7) 3.1px, transparent 3.6px);
+  -webkit-mask-image: radial-gradient(circle, #000 4%, transparent 30%);
+  mask-image: radial-gradient(circle, #000 4%, transparent 30%);
+}
+
+@media (min-width: 768px) {
+  .feature-step {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
+    align-items: center;
+    gap: 3rem;
+  }
+
+  .feature-visual {
+    margin-top: 0;
+  }
+
+  .feature-disc {
+    width: 460px;
+  }
+}
+
+/* The pinned column only exists from 1024 px, with motion allowed. */
+.features-pin {
+  display: none;
+}
+
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  .features-stage {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    column-gap: 4.5rem;
+  }
+
+  .features-pin {
+    display: block;
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    align-self: start;
+  }
+
+  .features-pin-inner {
+    position: relative;
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-top: 3.5rem;
+  }
+
+  .features-pin-phone {
+    width: min(300px, calc((100svh - 14rem) / 2.17));
+  }
+
+  .features-pin .feature-disc {
+    top: calc(50% - 0.5rem);
+    width: min(560px, 120%);
+  }
+
+  /* The extra room at the end lets the last block reach the middle before the phone lets go. */
+  .features-steps {
+    padding-bottom: 8svh;
+    border-left: 1px solid var(--color-rule);
+  }
+
+  .feature-step {
+    display: flex;
+    min-height: 92svh;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    padding: 4rem 0 4rem 3.5rem;
+    border-top: 0;
+  }
+
+  .feature-step:first-child {
+    padding-top: 4rem;
+  }
+
+  .feature-visual {
+    display: none;
+  }
+
+  /* The rail: a notch on the line for each block, the one on the phone lit in signal. */
+  .feature-index::before {
+    content: "";
+    position: absolute;
+    left: calc(-3.5rem - 5.5px);
+    top: 50%;
+    width: 11px;
+    height: 11px;
+    margin-top: -5.5px;
+    border-radius: 50%;
+    background: var(--color-paper);
+    box-shadow: inset 0 0 0 1px rgb(20 20 20 / 0.35);
+    transition:
+      background-color 0.3s ease-out,
+      box-shadow 0.3s ease-out,
+      transform 0.45s cubic-bezier(0.3, 1.7, 0.5, 1);
+  }
+
+  .feature-index {
+    color: var(--color-rule);
+    transition: color 0.5s ease-out;
+  }
+
+  [data-active="true"] .feature-index {
+    color: var(--color-ink);
+  }
+
+  [data-active="true"] .feature-index::before {
+    background: var(--color-signal);
+    box-shadow: 0 0 0 4px rgb(255 79 46 / 0.18);
+    transform: scale(1.25);
+  }
+}
+
+/*
+ * Halftone dissolve on the pinned phone. The leaving screen breaks into dots
+ * that shrink to nothing over the dark glass; the next one comes up through
+ * dots that grow until they touch (a dot of 0.75 cell covers its cell).
+ */
+.swap-layer[data-state="idle"] {
+  visibility: hidden;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .swap-layer[data-state="in"],
+  .swap-layer[data-state="out"] {
+    -webkit-mask-image: radial-gradient(circle, #000 var(--swap-r), transparent calc(var(--swap-r) + 0.6px));
+    mask-image: radial-gradient(circle, #000 var(--swap-r), transparent calc(var(--swap-r) + 0.6px));
+    -webkit-mask-size: 3.4cqw 3.4cqw;
+    mask-size: 3.4cqw 3.4cqw;
+    -webkit-mask-position: center;
+    mask-position: center;
+  }
+
+  .swap-layer[data-state="in"] {
+    z-index: 2;
+    animation: swap-in 0.8s cubic-bezier(0.5, 0, 0.25, 1) 0.2s both;
+  }
+
+  .swap-layer[data-state="out"] {
+    z-index: 1;
+    animation: swap-out 0.48s cubic-bezier(0.55, 0, 0.8, 0.4) both;
+  }
+}
+
+@keyframes swap-in {
+  from {
+    --swap-r: 0px;
+  }
+  to {
+    --swap-r: 2.6cqw;
+  }
+}
+
+@keyframes swap-out {
+  from {
+    --swap-r: 2.6cqw;
+  }
+  to {
+    --swap-r: 0px;
+  }
+}
+
+/* The frame counter under the pinned phone rolls like a film counter. */
+.film-counter {
+  display: inline-block;
+  height: 1.3em;
+  overflow: hidden;
+  line-height: 1.3em;
+}
+
+.film-counter-reel {
+  display: flex;
+  flex-direction: column;
+  transform: translateY(calc(var(--i) * -1.3em));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .film-counter-reel {
+    transition: transform 0.7s cubic-bezier(0.3, 1.25, 0.5, 1);
+  }
+}
+
+/* ---------- Drawn app screens (DrawnScreens) ---------- */
+
+.drawn-screen {
+  font-size: 3.4cqw;
+  line-height: 1.3;
+  font-family: var(--font-sans);
+}
+
+/* Paper with the app's halftone across the top, fading out under the title. */
+.drawn-paper {
+  isolation: isolate;
+  background: var(--color-paper);
+}
+
+.drawn-paper::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: -1;
+  height: 40%;
+  background: radial-gradient(circle, rgb(20 20 20 / 0.2) 0.09em, transparent 0.13em) 0 0 / 0.55em 0.55em;
+  -webkit-mask-image: linear-gradient(to bottom left, #000, transparent 75%);
+  mask-image: linear-gradient(to bottom left, #000, transparent 75%);
+}
+
+/* A compartment of the pill organiser: halftone ink fills it from the bottom, up to --fill. */
+.pill-box {
+  position: relative;
+  height: 2.6em;
+  overflow: hidden;
+  border-radius: 0.55em;
+  box-shadow: inset 0 0 0 0.09em rgb(20 20 20 / 0.22);
+}
+
+.pill-box::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: calc(var(--fill) * 100%);
+  background: radial-gradient(circle, var(--color-ink) 0.12em, transparent 0.155em) center bottom / 0.4em 0.4em;
+}
+
+/* The pill chip of a checklist row: a capsule in halftone. */
+.pill-chip {
+  flex-shrink: 0;
+  width: 2.1em;
+  height: 2.1em;
+  border-radius: 0.65em;
+  background:
+    radial-gradient(circle, rgb(20 20 20 / 0.7) 0.1em, transparent 0.13em) center / 0.32em 0.32em,
+    rgb(20 20 20 / 0.06);
+  -webkit-mask-image: linear-gradient(135deg, #000, rgb(0 0 0 / 0.55));
+  mask-image: linear-gradient(135deg, #000, rgb(0 0 0 / 0.55));
+}
+
+/* Night: ink with paper dots that thicken toward the bottom, like the dark before the print develops. */
+.drawn-night {
+  isolation: isolate;
+  background:
+    radial-gradient(circle, rgb(239 236 229 / 0.13) 0.08em, transparent 0.12em) 0 0 / 0.6em 0.6em,
+    linear-gradient(to bottom, #0d0d0c, #1d1c1a);
+}
+
+/*
+ * The wallpaper: a sun of paper dots rising behind the Live Activity, the dots growing
+ * toward its centre (two layers of one grid, each kept to its ring).
+ */
+.drawn-night::before,
+.drawn-night::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: 36%;
+  width: 36em;
+  aspect-ratio: 1;
+  translate: -50% 0;
+  border-radius: 50%;
+  background-size: 0.6em 0.6em;
+  background-position: center;
+}
+
+.drawn-night::before {
+  background-image: radial-gradient(circle, rgb(239 236 229 / 0.5) 0.11em, transparent 0.15em);
+  -webkit-mask-image: radial-gradient(circle, #000 25%, transparent 62%);
+  mask-image: radial-gradient(circle, #000 25%, transparent 62%);
+}
+
+.drawn-night::after {
+  background-image: radial-gradient(circle, rgb(239 236 229 / 0.62) 0.22em, transparent 0.26em);
+  -webkit-mask-image: radial-gradient(circle, #000 5%, transparent 38%);
+  mask-image: radial-gradient(circle, #000 5%, transparent 38%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .swap-layer[data-state="in"] .live-ring {
+    animation: live-ring 1.4s cubic-bezier(0.3, 0, 0.2, 1) 0.4s both;
+  }
+}
+
+@keyframes live-ring {
+  from {
+    stroke-dashoffset: 30;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ---------- Contact sheet ---------- */
+
+.contact-scroller {
+  /* Bottom padding comes from the utilities on the element. */
+  padding-top: 2.5rem;
+  padding-inline: 1.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-rule) transparent;
+}
+
+.contact-sheet {
+  --fw: clamp(128px, 14vw, 206px);
+  --film: #1c1b19;
+  margin-block: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .contact-sheet {
+    rotate: -1.1deg;
+  }
+}
+
+.film-strip {
+  padding-inline: 1.75rem;
+  border-radius: 3px;
+  background: var(--film);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.06),
+    0 22px 40px -24px rgb(20 20 20 / 0.7);
+}
+
+/* Sprocket holes, eight to a frame as on 35 mm film. */
+.film-perfs {
+  height: 1.5rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='24'%3E%3Crect x='3' y='6' width='10' height='12' rx='2' fill='%23efece5'/%3E%3C/svg%3E");
+  background-size: calc((var(--fw) + 0.9rem) / 8) 1.5rem;
+  background-repeat: repeat-x;
+}
+
+.film-frames {
+  display: flex;
+  gap: 0.9rem;
+}
+
+.film-cell {
+  width: var(--fw);
+}
+
+.film-edge {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.3rem 0.1rem;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  line-height: 1.2;
+  color: rgb(239 236 229 / 0.62);
+}
+
+.film-edge-mark {
+  font-size: 7px;
+}
+
+.film-frame {
+  position: relative;
+  margin: 0;
+}
+
+.film-frame > img {
+  border-radius: 2px;
+}
+
+/* The pick of the roll, circled with a signal felt-tip. */
+.felt-circle {
+  position: absolute;
+  left: -16%;
+  top: -8%;
+  width: 132%;
+  height: 116%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.felt-circle path {
+  fill: none;
+  stroke: var(--color-signal);
+  /* User units of a 100-wide box: about 3.5 px on a 206 px frame. */
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .felt-circle path {
+    transition: stroke-dashoffset 1.1s cubic-bezier(0.6, 0, 0.3, 1) 0.25s;
+  }
+
+  .felt-circle[data-drawn="false"] path {
+    stroke-dashoffset: 1;
+  }
+}
+
+/* Crop marks at the corners of the strip. */
+.crop-mark {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-top: 1px solid rgb(20 20 20 / 0.5);
+  border-left: 1px solid rgb(20 20 20 / 0.5);
+}
+
+/* The loupe: a lens over the frame under the mouse, magnifying 2.6 times. */
+.loupe {
+  --lens: 9rem;
+  --zoom: 2.6;
+  position: absolute;
+  z-index: 3;
+  left: calc(var(--lx) * 100%);
+  top: calc(var(--ly) * 100%);
+  width: var(--lens);
+  height: var(--lens);
+  translate: -50% -50%;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--color-ink);
+  pointer-events: none;
+  box-shadow:
+    0 0 0 5px var(--film),
+    0 0 0 6px rgb(255 255 255 / 0.22),
+    0 20px 34px -12px rgb(0 0 0 / 0.6);
+}
+
+.loupe-image {
+  position: absolute;
+  max-width: none;
+  width: calc(var(--fw) * var(--zoom));
+  height: auto;
+  left: calc(var(--lens) / 2 - var(--lx) * var(--fw) * var(--zoom));
+  top: calc(var(--lens) / 2 - var(--ly) * var(--fw) * var(--zoom) * 2796 / 1290);
+}
+
+@media (hover: none) {
+  .loupe {
+    display: none;
+  }
+}
