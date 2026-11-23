@@ -1,6 +1,6 @@
 # Pulse — site vitrine (landing page)
 
-Date : 23 novembre 2026. Statut : en attente de validation par Mathéo.
+Date : 23 novembre 2026. Statut : validé par Mathéo le 23 novembre 2026 (« Yes et soit ultra créatif sur le style et les animations »).
 
 Éditeur : Seonay Studio (réponse de Mathéo, 23 novembre 2026).
 
@@ -72,6 +72,24 @@ Reprendre les jetons de `Packages/PulseDesignSystem/Sources/PulseDesignSystem/To
 - Trame halftone (points) en motif de fond et sur les visuels, comme dans l'app et sur les captures marketing.
 - Grands chiffres fins (le score) et petites étiquettes en majuscules monospaces (`pulseEyebrow`), titres en sans-serif très gras serrés, comme sur les captures m01–m05.
 - Référence visuelle : les captures marketing et bannières déjà faites pour App Store Connect (voir §6.5) et l'icône halftone (tracé de pouls).
+
+### 6.2 bis Ambition créative et animations
+
+Mathéo, en validant ce document : « sois ultra créatif sur le style et les animations ». La page doit être mémorable, pas un gabarit de landing page. Fil conducteur proposé (choix de Claude, le constructeur peut aller plus loin dans cet esprit) : **l'argentique, la chambre noire et la nuit qui se révèle au matin**, en écho à « ta nuit décide de ta séance ».
+
+- **Le hero se développe comme un tirage.** À l'arrivée, l'écran est de l'encre (la nuit, la chambre noire). Le tracé de pouls de l'icône se dessine comme un ECG, puis la page « se révèle » : la trame halftone apparaît, s'épaissit et vire au papier clair du matin, et le titre et les captures émergent du révélateur. Durée totale courte (≈ 2 s), sans bloquer la lecture ni le clic.
+- **Une trame vivante.** Un champ de points halftone dessiné en canvas (ou WebGL léger) sert de matière à toute la page : les points grossissent sous le pointeur et au défilement, comme de l'encre qui monte, et la lumière du champ suit le score (plus le score est haut, plus la zone est claire, comme la dalle du score dans l'app).
+- **Le simulateur est l'instrument central.** Un vrai cadran à graduations comme dans l'app : l'aiguille et le chiffre fin suivent les curseurs avec une inertie de ressort, les points de la jauge s'allument un à un, la catégorie change avec une transition de trame, et la séance d'exemple se recompose sous les yeux (séries qui disparaissent, repos qui s'allonge, bascule vers la mobilité en surmenage).
+- **Un téléphone épinglé pendant les fonctionnalités.** L'iPhone reste fixe pendant qu'on fait défiler les six fonctionnalités, et l'écran change avec un fondu en trame (les points se dissolvent puis se recomposent).
+- **Une planche contact.** Les captures sont aussi présentées comme une planche contact de pellicule 35 mm : bords perforés, numéros d'image (« 12A → »), mention « PULSE 400 », repères de coupe, une vue entourée au feutre de la couleur signal.
+- **Des détails d'impression.** Repères de repérage dans les coins des sections, grain de film très léger, eyebrows monospaces comme des légendes de tirage, chiffres du bandeau qui défilent comme un compteur de pellicule.
+
+Garde-fous, non négociables :
+- `prefers-reduced-motion` : aucune animation de défilement, de ressort ni de révélation. Le hero s'affiche directement développé et le champ de points reste fixe. Le contenu est identique.
+- Le texte et les boutons sont utilisables avant la fin de toute animation. Rien n'est caché derrière une animation pour un robot d'indexation ou un lecteur d'écran.
+- Performance : animations sur `transform` et `opacity` ou en canvas, boucle mise en pause hors de l'écran et onglet caché, densité de points réduite sur mobile, objectif de §6.8 maintenu.
+- Les bibliothèques d'animation éventuelles (Motion, GSAP…) sont installées par npm et servies par le site, jamais chargées depuis un CDN. Pas de défilement « lissé » qui détourne la molette ou le geste natif.
+- Le mode « clair uniquement » du §6.1 veut dire : pas de bascule selon le thème du système. Le passage nuit → matin du hero est une animation, pas un thème.
 
 La structure et le rythme s'inspirent d'Abécédate (nav fixe avec bouton d'action, hero centré avec pastille d'état, sections numérotées 01…06, bandeau de chiffres, FAQ dépliable, grand pied de page en colonnes), **pas sa palette rose ni sa typo serif**.
 
