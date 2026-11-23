@@ -48,6 +48,20 @@ describe("FEATURES", () => {
     }
   });
 
+  it("describes the score capture as it is: an estimated 58, with sleep and resting heart rate missing", () => {
+    const score = FEATURES.find((feature) => feature.id === "score")!;
+    expect(score.alt).toMatch(/58 sur 100/);
+    expect(score.alt).toMatch(/estimé/);
+    expect(score.alt).toMatch(/pas de donnée/);
+    expect(score.alt).not.toMatch(/détail sommeil/);
+  });
+
+  it("describes the supplements drawing with what the app shows, regularity over 30 days", () => {
+    const supplements = FEATURES.find((feature) => feature.id === "complements")!;
+    expect(supplements.alt).toMatch(/30 jours/);
+    expect(supplements.alt).not.toMatch(/pilulier|semaine/);
+  });
+
   it("never uses an em dash as punctuation", () => {
     for (const feature of FEATURES) {
       for (const text of [feature.eyebrow, feature.title, feature.body, feature.alt]) {

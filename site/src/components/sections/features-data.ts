@@ -24,7 +24,7 @@ export const FEATURES: Feature[] = [
     title: "Ton score, chaque matin.",
     body: "Pulse lit ton sommeil, ta variabilité cardiaque et ta fréquence cardiaque au repos dans Apple Santé, et les compare à ta propre ligne de base. Tu vois ce qui explique le score, et ce qui manque quand une mesure est absente. Pas de montre ? Un check-in de trois questions prend le relais.",
     screen: "/screens/today.jpg",
-    alt: "L'écran Aujourd'hui de Pulse : un score de récupération de 58 sur 100, en fatigue modérée, avec le détail sommeil, variabilité et FC repos.",
+    alt: "L'écran Aujourd'hui de Pulse : un score de récupération de 58 sur 100, en fatigue modérée, estimé. Sous le score, ce qui manque : pas de donnée de sommeil ni de FC repos cette nuit, et la ligne de base de variabilité en cours.",
   },
   {
     id: "seance",
@@ -60,7 +60,7 @@ export const FEATURES: Feature[] = [
     title: "Coché en une touche.",
     body: "Suis tes prises de vitamine D, de magnésium, de caféine et de protéines, ton stock et ta régularité, avec des rappels. Pulse ne conseille jamais de dose.",
     screen: null,
-    alt: "Dessin de l'écran Compléments : 2 sur 4 pris aujourd'hui, la prochaine prise avec le bouton Pris, et la régularité de la semaine en pilulier.",
+    alt: "Dessin de l'écran Compléments : 2 sur 4 pris aujourd'hui, la prochaine prise avec le bouton Pris, les prises cochées du matin, autour de la séance et du soir, et la régularité sur 30 jours.",
   },
   {
     id: "widgets",

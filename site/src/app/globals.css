@@ -726,36 +726,6 @@ html {
   mask-image: linear-gradient(to bottom left, #000, transparent 75%);
 }
 
-/* A compartment of the pill organiser: halftone ink fills it from the bottom, up to --fill. */
-.pill-box {
-  position: relative;
-  height: 2.6em;
-  overflow: hidden;
-  border-radius: 0.55em;
-  box-shadow: inset 0 0 0 0.09em rgb(20 20 20 / 0.22);
-}
-
-.pill-box::after {
-  content: "";
-  position: absolute;
-  inset: auto 0 0;
-  height: calc(var(--fill) * 100%);
-  background: radial-gradient(circle, var(--color-ink) 0.12em, transparent 0.155em) center bottom / 0.4em 0.4em;
-}
-
-/* The pill chip of a checklist row: a capsule in halftone. */
-.pill-chip {
-  flex-shrink: 0;
-  width: 2.1em;
-  height: 2.1em;
-  border-radius: 0.65em;
-  background:
-    radial-gradient(circle, rgb(20 20 20 / 0.7) 0.1em, transparent 0.13em) center / 0.32em 0.32em,
-    rgb(20 20 20 / 0.06);
-  -webkit-mask-image: linear-gradient(135deg, #000, rgb(0 0 0 / 0.55));
-  mask-image: linear-gradient(135deg, #000, rgb(0 0 0 / 0.55));
-}
-
 /* Night: ink with paper dots that thicken toward the bottom, like the dark before the print develops. */
 .drawn-night {
   isolation: isolate;

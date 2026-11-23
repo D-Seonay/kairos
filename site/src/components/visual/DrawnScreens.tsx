@@ -3,8 +3,9 @@
  * capture. They sit in a PhoneFrame screen and size everything in em from a
  * root of 3.4cqw (the phone's width), so they scale with the frame. They only
  * show what the published build has: the Compléments screen (count of the day,
- * next intake with « Pris », the checklist, regularity) and the lock screen
- * widgets (score, séance du jour) with the session Live Activity.
+ * next intake with « Pris », the moments and their checks, 30-day regularity)
+ * and the lock screen widgets (score, séance du jour) with the session Live
+ * Activity.
  */
 
 type DrawnProps = { label: string; className?: string };
@@ -46,23 +47,68 @@ function Check({ taken }: { taken: boolean }) {
   );
 }
 
-const INTAKES = [
-  { name: "Vitamine D", when: "8:00", taken: true },
-  { name: "Caféine", when: "17:30, avant la séance", taken: true },
-  { name: "Protéines", when: "Après la séance", taken: false },
-  { name: "Magnésium", when: "22:30, au coucher", taken: false },
+/**
+ * Four supplements, grouped by moment as SupplementsView does, each with the
+ * planned part of its row detail (SupplementText.planned). The row detail in
+ * the app also starts with the dose the user typed: left out here, the site
+ * shows no dose at all.
+ */
+type Intake = { name: string; planned: string; taken: boolean };
+type Moment = { title: string; icon: "sunrise" | "dumbbell" | "moon"; items: Intake[] };
+
+const MOMENTS: Moment[] = [
+  { title: "Matin", icon: "sunrise", items: [{ name: "Vitamine D", planned: "8:00", taken: true }] },
+  {
+    title: "Autour de la séance",
+    icon: "dumbbell",
+    items: [
+      { name: "Caféine", planned: "17:30 · 30 min avant la séance", taken: true },
+      { name: "Protéines", planned: "Après la séance", taken: false },
+    ],
+  },
+  { title: "Soir", icon: "moon", items: [{ name: "Magnésium", planned: "22:30 · au coucher", taken: false }] },
 ];
 
-/** Monday to Sunday; Thursday was missed, today (Sunday) is half done. */
-const WEEK = [
-  { day: "L", fill: 1 },
-  { day: "M", fill: 1 },
-  { day: "M", fill: 1 },
-  { day: "J", fill: 0 },
-  { day: "V", fill: 1 },
-  { day: "S", fill: 1 },
-  { day: "D", fill: 0.5 },
+const INTAKES = MOMENTS.flatMap((moment) => moment.items);
+
+/** « Régularité, 30 jours »: days taken over days planned, as a percentage (SupplementsModel.rateText). */
+const REGULARITY = [
+  { name: "Vitamine D", rate: 0.93 },
+  { name: "Caféine", rate: 0.8 },
+  { name: "Protéines", rate: 0.87 },
+  { name: "Magnésium", rate: 0.7 },
 ];
+
+function MomentIcon({ icon }: { icon: Moment["icon"] }) {
+  if (icon === "dumbbell") return <Dumbbell className="h-[0.6em] w-[1.15em]" />;
+  return (
+    <svg viewBox="0 0 16 16" className="size-[0.9em]" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+      {icon === "sunrise" ? (
+        <>
+          <path d="M3.5 11.5a4.5 4.5 0 0 1 9 0M1 11.5h14M8 2.5v2.5M3 5l1.4 1.4M13 5l-1.4 1.4" />
+        </>
+      ) : (
+        <path d="M13 10.2A5.5 5.5 0 0 1 5.8 3a5.5 5.5 0 1 0 7.2 7.2z" />
+      )}
+    </svg>
+  );
+}
+
+/** The IconChip of a row: a capsule glyph on a soft chip. */
+function PillChip() {
+  return (
+    <span className="grid size-[2.1em] shrink-0 place-items-center rounded-full bg-ink/6 text-ink/70">
+      <svg viewBox="0 0 16 16" className="size-[1.1em]">
+        <g transform="rotate(-40 8 8)">
+          <path d="M8 4.6H4.6a3.4 3.4 0 0 0 0 6.8H8z" fill="currentColor" />
+          <rect x="1.2" y="4.6" width="13.6" height="6.8" rx="3.4" fill="none" stroke="currentColor" strokeWidth="1.3" />
+        </g>
+      </svg>
+    </span>
+  );
+}
+
+const card = "rounded-[1.25em] bg-[#fbfaf7] shadow-[0_0.1em_0.6em_rgb(20_20_20/0.06)]";
 
 /** The app's floating tab bar; the Compléments screen opens from Aujourd'hui. */
 function TabBar() {
@@ -94,39 +140,56 @@ function TabBar() {
   );
 }
 
-/** Compléments: today's count, the next intake with « Pris », a pill organiser of the week in halftone, the checklist. */
+/**
+ * The Compléments screen, top to bottom as SupplementsView lays it out: the
+ * summary card (date, « 2 sur 4 pris », the day's segments, the next intake
+ * with « Pris »), the moments with their check rows, and « Régularité, 30
+ * jours ». Every string is the app's own.
+ */
 export function SupplementsScreen({ label, className }: DrawnProps) {
+  const taken = INTAKES.filter((intake) => intake.taken).length;
   return (
     <div
       role="img"
       aria-label={label}
       className={["drawn-screen drawn-paper absolute inset-0 overflow-hidden text-ink", className].filter(Boolean).join(" ")}
-      style={{ fontSize: "3.75cqw" }}
+      style={{ fontSize: "3.55cqw" }}
     >
       <StatusBar />
-      <div className="px-[1.25em] pt-[1.9em]">
-        <Eyebrow className="text-muted">Dimanche 22 novembre</Eyebrow>
-        <p className="mt-[0.15em] text-[1.85em] leading-tight font-semibold tracking-[-0.02em]">Compléments</p>
 
+      {/* Inline navigation title, pushed from Aujourd'hui, with « + » to add a supplement. */}
+      <div className="mt-[0.9em] grid grid-cols-[2.2em_1fr_2.2em] items-center px-[1.1em]">
+        <span className="grid size-[2.2em] place-items-center rounded-full bg-[#fbfaf7] shadow-[0_0.1em_0.5em_rgb(20_20_20/0.08)]">
+          <svg viewBox="0 0 10 16" className="h-[0.85em]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <path d="M8 2L2 8l6 6" />
+          </svg>
+        </span>
+        <p className="text-center text-[1em] font-semibold">Compléments</p>
+        <span className="grid size-[2.2em] place-items-center rounded-full bg-[#fbfaf7] text-[1.2em] leading-none shadow-[0_0.1em_0.5em_rgb(20_20_20/0.08)]">
+          +
+        </span>
+      </div>
+
+      <div className="px-[1.1em] pt-[0.9em]">
         {/* Summary card */}
-        <div className="mt-[0.9em] rounded-[1.25em] bg-[#fbfaf7] p-[1.05em] shadow-[0_0.1em_0.6em_rgb(20_20_20/0.06)]">
-          <Eyebrow className="text-muted">Aujourd&apos;hui</Eyebrow>
+        <div className={`${card} p-[1em]`}>
+          <Eyebrow className="text-muted">dimanche 22 novembre</Eyebrow>
           <p className="mt-[0.2em] flex items-baseline gap-[0.3em]">
-            <span className="text-[2.6em] leading-none font-extralight tracking-[-0.04em]">2</span>
-            <span className="text-[0.9em] text-muted">sur 4 pris</span>
+            <span className="text-[2.5em] leading-none font-extralight tracking-[-0.04em]">{taken}</span>
+            <span className="text-[0.9em] text-muted">sur {INTAKES.length} pris</span>
           </p>
-          <div className="mt-[0.7em] grid grid-cols-4 gap-[0.3em]">
+          <div className="mt-[0.6em] flex gap-[0.25em]">
             {INTAKES.map((intake) => (
-              <span key={intake.name} className={["h-[0.32em] rounded-full", intake.taken ? "bg-ink" : "bg-ink/12"].join(" ")} />
+              <span key={intake.name} className={["h-[0.3em] flex-1 rounded-full", intake.taken ? "bg-ink" : "bg-ink/12"].join(" ")} />
             ))}
           </div>
-          <div className="mt-[0.95em] flex items-center gap-[0.7em] border-t border-ink/10 pt-[0.85em]">
+          <div className="mt-[0.85em] flex items-center gap-[0.7em]">
             <div className="min-w-0 flex-1">
               <Eyebrow className="text-muted">Prochaine prise</Eyebrow>
-              <p className="mt-[0.15em] text-[1.02em] font-semibold">Protéines</p>
+              <p className="mt-[0.1em] text-[1em] font-semibold">Protéines</p>
               <p className="text-[0.78em] text-muted">Après la séance</p>
             </div>
-            <span className="drawn-pris inline-flex items-center gap-[0.35em] rounded-full bg-ink px-[0.95em] py-[0.5em] text-[0.85em] font-semibold text-paper">
+            <span className="inline-flex items-center gap-[0.35em] rounded-full bg-ink px-[0.95em] py-[0.5em] text-[0.85em] font-semibold text-paper">
               <svg viewBox="0 0 12 12" className="size-[0.85em]">
                 <path d="M2 6.4l2.6 2.5L10 3.3" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
@@ -135,37 +198,46 @@ export function SupplementsScreen({ label, className }: DrawnProps) {
           </div>
         </div>
 
-        {/* The week as a pill organiser: a compartment per day, filled with halftone ink when taken. */}
-        <div className="mt-[0.8em] rounded-[1.25em] bg-[#fbfaf7] p-[1.05em] shadow-[0_0.1em_0.6em_rgb(20_20_20/0.06)]">
-          <div className="flex items-baseline justify-between">
-            <Eyebrow className="text-muted">Régularité, 7 jours</Eyebrow>
-            <span className="text-[0.8em] font-medium tabular-nums">6 sur 7</span>
+        {/* Moments and their check rows */}
+        {MOMENTS.map((moment) => (
+          <div key={moment.title} className="mt-[0.75em]">
+            <p className="flex items-center gap-[0.4em] px-[0.2em] text-[0.82em] font-semibold text-muted">
+              <MomentIcon icon={moment.icon} />
+              {moment.title}
+            </p>
+            <ul className={`${card} mt-[0.35em] divide-y divide-ink/8 px-[0.95em]`}>
+              {moment.items.map((intake) => (
+                <li key={intake.name} className="flex items-center gap-[0.7em] py-[0.5em]">
+                  <PillChip />
+                  <span className="min-w-0 flex-1">
+                    <span className={["block text-[0.92em] font-semibold", intake.taken ? "text-muted line-through" : ""].join(" ")}>
+                      {intake.name}
+                    </span>
+                    <span className="block text-[0.72em] text-muted">{intake.planned}</span>
+                  </span>
+                  <Check taken={intake.taken} />
+                </li>
+              ))}
+            </ul>
           </div>
-          <div className="mt-[0.7em] grid grid-cols-7 gap-[0.3em]">
-            {WEEK.map((cell, index) => (
-              <div key={index} className="text-center">
-                <span className="pill-box block" style={{ "--fill": cell.fill } as React.CSSProperties} />
-                <span className="mt-[0.3em] block font-mono text-[0.55em] text-muted">{cell.day}</span>
+        ))}
+
+        {/* Régularité, 30 jours */}
+        <p className="mt-[0.75em] px-[0.2em] text-[0.82em] font-semibold text-muted">Régularité, 30 jours</p>
+        <div className={`${card} mt-[0.35em] p-[0.95em]`}>
+          <div className="flex flex-col gap-[0.55em]">
+            {REGULARITY.map((row) => (
+              <div key={row.name} className="flex items-center gap-[0.6em] text-[0.8em]">
+                <span className="w-[6.2em] shrink-0 truncate">{row.name}</span>
+                <span className="h-[0.45em] flex-1 overflow-hidden rounded-full bg-ink/10">
+                  <span className="block h-full rounded-full bg-ink" style={{ width: `${row.rate * 100}%` }} />
+                </span>
+                <span className="w-[3em] shrink-0 text-right font-semibold tabular-nums">{`${Math.round(row.rate * 100)}\u202f%`}</span>
               </div>
             ))}
           </div>
+          <p className="mt-[0.6em] text-[0.62em] text-muted">Jours pris sur jours prévus, depuis la création du complément.</p>
         </div>
-
-        {/* Checklist */}
-        <ul className="mt-[0.8em] divide-y divide-ink/8 rounded-[1.25em] bg-[#fbfaf7] px-[1.05em] shadow-[0_0.1em_0.6em_rgb(20_20_20/0.06)]">
-          {INTAKES.map((intake) => (
-            <li key={intake.name} className="flex items-center gap-[0.7em] py-[0.62em]">
-              <span className="pill-chip" />
-              <span className="min-w-0 flex-1">
-                <span className={["block text-[0.92em] font-semibold", intake.taken ? "text-muted line-through" : ""].join(" ")}>
-                  {intake.name}
-                </span>
-                <span className="block text-[0.72em] text-muted">{intake.when}</span>
-              </span>
-              <Check taken={intake.taken} />
-            </li>
-          ))}
-        </ul>
       </div>
       <TabBar />
     </div>
