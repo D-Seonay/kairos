@@ -286,3 +286,145 @@ html {
     transform: var(--fan);
   }
 }
+
+/* ---------- Score simulator ---------- */
+
+/* Native range, restyled: a ruler of halftone dots, an ink fill from the origin (start, or « ta normale ») to the thumb. */
+.sim-range {
+  --thumb: 26px;
+  --fa: calc(var(--thumb) / 2 + var(--a) * (100% - var(--thumb)));
+  --fb: calc(var(--thumb) / 2 + var(--b) * (100% - var(--thumb)));
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 34px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  touch-action: pan-y;
+}
+
+.sim-range:focus {
+  outline: none;
+}
+
+.sim-range::-webkit-slider-runnable-track {
+  height: 34px;
+  background:
+    linear-gradient(to right, transparent var(--fa), var(--color-ink) var(--fa) var(--fb), transparent var(--fb)) 0 50% /
+      100% 3px no-repeat,
+    radial-gradient(circle, rgb(20 20 20 / 0.42) 1.1px, transparent 1.6px) 0 50% / 7px 7px repeat-x;
+}
+
+.sim-range::-moz-range-track {
+  height: 34px;
+  background:
+    linear-gradient(to right, transparent var(--fa), var(--color-ink) var(--fa) var(--fb), transparent var(--fb)) 0 50% /
+      100% 3px no-repeat,
+    radial-gradient(circle, rgb(20 20 20 / 0.42) 1.1px, transparent 1.6px) 0 50% / 7px 7px repeat-x;
+}
+
+/* The thumb: an ink knob ringed with paper, a signal pip at its centre. */
+.sim-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: var(--thumb);
+  height: var(--thumb);
+  margin-top: calc((34px - var(--thumb)) / 2);
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--color-signal) 0 3px, var(--color-ink) 3.5px);
+  box-shadow:
+    0 0 0 3px var(--color-paper),
+    0 3px 10px -2px rgb(20 20 20 / 0.45);
+  transition: transform 0.18s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+.sim-range::-moz-range-thumb {
+  width: var(--thumb);
+  height: var(--thumb);
+  border: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--color-signal) 0 3px, var(--color-ink) 3.5px);
+  box-shadow:
+    0 0 0 3px var(--color-paper),
+    0 3px 10px -2px rgb(20 20 20 / 0.45);
+  transition: transform 0.18s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+.sim-range:active::-webkit-slider-thumb {
+  transform: scale(1.15);
+}
+
+.sim-range:active::-moz-range-thumb {
+  transform: scale(1.15);
+}
+
+.sim-range:focus-visible::-webkit-slider-thumb {
+  box-shadow:
+    0 0 0 3px var(--color-paper),
+    0 0 0 5px var(--color-signal);
+}
+
+.sim-range:focus-visible::-moz-range-thumb {
+  box-shadow:
+    0 0 0 3px var(--color-paper),
+    0 0 0 5px var(--color-signal);
+}
+
+/* Inner marks sit under the value they name, on the thumb's travel. */
+.sim-mark {
+  left: calc(13px + var(--at) * (100% - 26px));
+}
+
+.sim-mark::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 5px);
+  width: 1px;
+  height: 9px;
+  background: var(--color-ink);
+  opacity: 0.5;
+}
+
+/*
+ * The field fills the top of the slab and fades out before the category and
+ * the factors; the dial sits on its own paper lens (ScoreDial), so the dots
+ * frame the bezel without ever crossing a tick.
+ */
+.sim-slab-field {
+  -webkit-mask-image: linear-gradient(to bottom, #000 38%, transparent 74%);
+  mask-image: linear-gradient(to bottom, #000 38%, transparent 74%);
+}
+
+/* Each tick and dot of the dial lights on its own as the needle passes it. */
+.dial-dot {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(var(--s));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dial-tick {
+    transition:
+      stroke 0.25s ease-out,
+      stroke-opacity 0.25s ease-out;
+  }
+
+  .dial-dot {
+    transition:
+      transform 0.35s cubic-bezier(0.3, 1.7, 0.5, 1),
+      opacity 0.25s ease-out,
+      fill 0.25s ease-out;
+  }
+}
+
+/* Halftone dissolve: the word is seen through a screen of dots whose radius is --r (4px covers the 5px cell). */
+.sim-trame {
+  --r: 4px;
+  -webkit-mask-image: radial-gradient(circle, #000 var(--r), transparent calc(var(--r) + 0.75px));
+  mask-image: radial-gradient(circle, #000 var(--r), transparent calc(var(--r) + 0.75px));
+  -webkit-mask-size: 5px 5px;
+  mask-size: 5px 5px;
+}

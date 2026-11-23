@@ -1,5 +1,6 @@
 import { Hero } from "@/components/sections/Hero";
 import { Nav } from "@/components/sections/Nav";
+import { ScoreSimulator } from "@/components/sections/ScoreSimulator";
 
 export default function Home() {
   return (
@@ -7,7 +8,8 @@ export default function Home() {
       <Nav />
       <main id="contenu" className="flex-1">
         <Hero />
-        {/* Following sections, in order: #score, #fonctionnalites, #confidentialite, chiffres, #faq, appel final. */}
+        <ScoreSimulator />
+        {/* Following sections, in order: #fonctionnalites, #confidentialite, chiffres, #faq, appel final. */}
       </main>
     </>
   );
