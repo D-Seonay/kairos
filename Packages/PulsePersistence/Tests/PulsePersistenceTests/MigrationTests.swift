@@ -56,6 +56,25 @@ import Testing
     #expect(try context.fetchCount(FetchDescriptor<StoredRecoveryReading>()) == 0)
 }
 
+@Test func v4StoreOpensAsV5KeepingData() async throws {
+    let directory = try makeStoreDirectory()
+    defer { try? FileManager.default.removeItem(at: directory) }
+    let pulseID = try writeV4Store(in: directory)
+
+    let container = try PersistenceStack.makeContainer(directory: directory)
+    let workouts = SwiftDataWorkoutRepository(modelContainer: container)
+    let sessions = try await workouts.sessions(from: .distantPast, to: .distantFuture)
+    #expect(sessions.map(\.source) == [.pulse, .appleHealth])
+    #expect(sessions.first?.id == pulseID && sessions.last?.averageHeartRate == 151)
+    let context = ModelContext(container)
+    #expect(try context.fetchCount(FetchDescriptor<StoredRunTrack>()) == 0)
+    #expect(try context.fetchCount(FetchDescriptor<StoredRunDraft>()) == 0)
+    #expect(try context.fetchCount(FetchDescriptor<StoredRunHealthSummary>()) == 0)
+    let tracks = SwiftDataRunTrackRepository(modelContainer: container)
+    try await tracks.save(Sample.runTrack(sessionID: pulseID))
+    #expect(try await tracks.track(for: pulseID)?.points.count == 4)
+}
+
 private func makeStoreDirectory() throws -> URL {
     let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
     try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
@@ -77,11 +96,11 @@ private let v3LocalModels: [any PersistentModel.Type] = [
 
 /// Ouvre un conteneur sans plan de migration sur `synced.store` et `local.store` de `directory`, pour une version figée.
 private func makeFrozenContainer(_ version: any VersionedSchema.Type, synced: [any PersistentModel.Type],
-                                 in directory: URL) throws -> ModelContainer {
+                                 local: [any PersistentModel.Type] = v3LocalModels, in directory: URL) throws -> ModelContainer {
     let configurations = [
         ModelConfiguration("synced", schema: Schema(synced), url: directory.appending(path: "synced.store"),
                            cloudKitDatabase: .none),
-        ModelConfiguration("local", schema: Schema(v3LocalModels), url: directory.appending(path: "local.store"),
+        ModelConfiguration("local", schema: Schema(local), url: directory.appending(path: "local.store"),
                            cloudKitDatabase: .none)
     ]
     return try ModelContainer(for: Schema(versionedSchema: version), configurations: configurations)
@@ -157,7 +176,7 @@ private func insertV2Session(in context: ModelContext) {
 
 /// Écrit un magasin V3 : une récupération avec un SDNN de 50 et une séance importée d'Apple Health.
 private func writeV3Store(in directory: URL) throws {
-    let container = try makeFrozenContainer(PulseSchemaV3.self, synced: PersistenceStack.syncedModels, in: directory)
+    let container = try makeFrozenContainer(PulseSchemaV3.self, synced: PulseSchemaV4.syncedModels, in: directory)
     let context = ModelContext(container)
     let recovery = StoredDailyRecovery(DailyRecovery(day: Fixed.calendar.startOfDay(for: Fixed.t0), score: 60, category: .normal,
                                                      isEstimated: false, calibration: .ready,
@@ -168,4 +187,17 @@ private func writeV3Store(in directory: URL) throws {
                                                       title: "Course", createdAt: Fixed.t0, updatedAt: Fixed.t0))
     context.insert(session)
     try context.save()
+}
+
+/// Écrit un magasin V4 : une séance Pulse dans le magasin synchronisé et une course importée dans le magasin local.
+/// Renvoie l'identifiant de la séance Pulse.
+private func writeV4Store(in directory: URL) throws -> UUID {
+    let container = try makeFrozenContainer(PulseSchemaV4.self, synced: PulseSchemaV4.syncedModels,
+                                            local: PulseSchemaV4.localModels, in: directory)
+    let context = ModelContext(container)
+    let session = Sample.session(sets: 2)
+    context.insert(StoredWorkoutSession(session))
+    context.insert(StoredImportedWorkout(Sample.importedRun(startedAt: Fixed.t0.addingTimeInterval(86_400))))
+    try context.save()
+    return session.id
 }

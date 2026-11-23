@@ -17,6 +17,17 @@ import Testing
     #expect(back.programs.isEmpty && back.profile == nil && back.contentExercises.isEmpty)
 }
 
+@Test func exportDocumentCarriesRunTracks() throws {
+    let date = Date(timeIntervalSince1970: 1_794_726_753)
+    var doc = ExportDocument.empty(exportedAt: date, appVersion: "1.0 (1)", schemaVersion: 1, contentVersion: "1.0.0", locale: "fr_FR")
+    #expect(doc.runTracks.isEmpty)
+    let point = RunTrackPoint(timestamp: date, latitude: 48.85, longitude: 2.35, altitude: 35, horizontalAccuracy: 5)
+    doc.runTracks = [RunTrack(id: UUID(), points: [point], splits: [RunSplit(kilometer: 1, seconds: 330, distanceMeters: 1_000)],
+                              elevationGainMeters: 12, createdAt: date, updatedAt: date)]
+    let back = try ExportCoding.decoder().decode(ExportDocument.self, from: ExportCoding.encoder().encode(doc))
+    #expect(back == doc)
+}
+
 @Test func exportDecoderAcceptsOtherOffsets() throws {
     let decoder = ExportCoding.decoder()
     let date = try decoder.decode(Date.self, from: Data(#""2026-11-15T07:12:33Z""#.utf8))

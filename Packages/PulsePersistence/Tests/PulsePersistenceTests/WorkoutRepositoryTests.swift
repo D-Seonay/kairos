@@ -199,3 +199,52 @@ private func counts(_ container: ModelContainer) throws -> (synced: Int, local: 
     #expect(try counts(repo.modelContainer).local == 1)
     #expect(try await repo.session(id: run.id)?.distanceMeters == 8_000)
 }
+
+/// Frontière M8 : la FC et le RPE estimé d'une course Pulse vivent dans le résumé local, jamais dans la ligne synchronisée.
+@Test func pulseRunHeartRateStaysLocal() async throws {
+    let repo = SwiftDataWorkoutRepository(modelContainer: try TestContainer.make())
+    let run = Sample.pulseRun()
+    try await repo.save(run)
+    let context = ModelContext(repo.modelContainer)
+    let synced = try #require(try context.fetch(FetchDescriptor<StoredWorkoutSession>()).first)
+    #expect(synced.averageHeartRate == nil && synced.estimatedRPE == nil)
+    let summary = try #require(try context.fetch(FetchDescriptor<StoredRunHealthSummary>()).first)
+    #expect(summary.sessionID == run.id && summary.averageHeartRate == 150 && summary.estimatedRPE == 8)
+    let loaded = try #require(try await repo.session(id: run.id))
+    #expect(loaded.averageHeartRate == 150 && loaded.estimatedRPE == 8)
+    let listed = try await repo.sessions(from: .distantPast, to: .distantFuture)
+    #expect(listed.map(\.averageHeartRate) == [150] && listed.map(\.estimatedRPE) == [8])
+}
+
+@Test func pulseRunSummaryIsUpdatedInPlace() async throws {
+    let repo = SwiftDataWorkoutRepository(modelContainer: try TestContainer.make())
+    var run = Sample.pulseRun()
+    try await repo.save(run)
+    run.averageHeartRate = 155
+    run.estimatedRPE = nil
+    try await repo.save(run)
+    let summaries = try ModelContext(repo.modelContainer).fetch(FetchDescriptor<StoredRunHealthSummary>())
+    #expect(summaries.count == 1 && summaries.first?.averageHeartRate == 155 && summaries.first?.estimatedRPE == nil)
+    let loaded = try #require(try await repo.session(id: run.id))
+    #expect(loaded.averageHeartRate == 155 && loaded.estimatedRPE == nil)
+}
+
+/// Seules les courses Pulse passent par le résumé : une séance de musculation garde ses champs tels quels.
+@Test func strengthSessionWritesNoRunSummary() async throws {
+    let repo = SwiftDataWorkoutRepository(modelContainer: try TestContainer.make())
+    try await repo.save(Sample.session(sets: 1))
+    #expect(try ModelContext(repo.modelContainer).fetchCount(FetchDescriptor<StoredRunHealthSummary>()) == 0)
+}
+
+@Test func deletingAPulseRunRemovesItsSummaryAndTrack() async throws {
+    let container = try TestContainer.make()
+    let repo = SwiftDataWorkoutRepository(modelContainer: container)
+    let tracks = SwiftDataRunTrackRepository(modelContainer: container)
+    let run = Sample.pulseRun()
+    try await repo.save(run)
+    try await tracks.save(Sample.runTrack(sessionID: run.id))
+    try await repo.delete(id: run.id)
+    #expect(try await repo.session(id: run.id) == nil)
+    #expect(try await tracks.track(for: run.id) == nil)
+    #expect(try ModelContext(container).fetchCount(FetchDescriptor<StoredRunHealthSummary>()) == 0)
+}

@@ -139,3 +139,20 @@ private struct EraseFixture {
     #expect(try context.fetchCount(FetchDescriptor<StoredImportedWorkout>()) == 0)
     #expect(try context.fetchCount(FetchDescriptor<StoredImportedBodyMeasurement>()) == 0)
 }
+
+@Test func wipeAllRemovesRunModels() async throws {
+    let container = try TestContainer.make()
+    let run = Sample.pulseRun()
+    try await SwiftDataWorkoutRepository(modelContainer: container).save(run)
+    try await SwiftDataRunTrackRepository(modelContainer: container).save(Sample.runTrack(sessionID: run.id))
+    try await SwiftDataRunDraftStore(modelContainer: container).save(Sample.runDraft())
+    let context = ModelContext(container)
+    #expect(try context.fetchCount(FetchDescriptor<StoredRunTrack>()) == 1)
+    #expect(try context.fetchCount(FetchDescriptor<StoredRunDraft>()) == 1)
+    #expect(try context.fetchCount(FetchDescriptor<StoredRunHealthSummary>()) == 1)
+    try await StoreWiper(modelContainer: container).wipeAll()
+    let check = ModelContext(container)
+    #expect(try check.fetchCount(FetchDescriptor<StoredRunTrack>()) == 0)
+    #expect(try check.fetchCount(FetchDescriptor<StoredRunDraft>()) == 0)
+    #expect(try check.fetchCount(FetchDescriptor<StoredRunHealthSummary>()) == 0)
+}

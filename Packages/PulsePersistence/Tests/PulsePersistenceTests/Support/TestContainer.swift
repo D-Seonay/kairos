@@ -138,6 +138,34 @@ extension Sample {
     }
 }
 
+extension Sample {
+    /// Course enregistrée par Pulse : FC moyenne 150 et RPE estimé 8, lus pendant la course.
+    static func pulseRun(startedAt: Date = Fixed.t0) -> WorkoutSession {
+        WorkoutSession(startedAt: startedAt, endedAt: startedAt.addingTimeInterval(1_800), kind: .run, source: .pulse,
+                       status: .completed, title: "Footing", durationMinutes: 30, distanceMeters: 5_200,
+                       averageHeartRate: 150, estimatedRPE: 8, sets: [], createdAt: Fixed.t1, updatedAt: Fixed.t2)
+    }
+
+    static func runPoint(_ index: Int) -> RunTrackPoint {
+        RunTrackPoint(timestamp: Fixed.t0.addingTimeInterval(Double(index) * 5), latitude: 48.85 + Double(index) * 0.0001,
+                      longitude: 2.35, altitude: index.isMultiple(of: 2) ? 35 : nil, horizontalAccuracy: 5,
+                      verticalAccuracy: index.isMultiple(of: 2) ? 3 : nil)
+    }
+
+    static func runTrack(sessionID: UUID = UUID()) -> RunTrack {
+        RunTrack(id: sessionID, points: (0..<4).map(runPoint),
+                 splits: [RunSplit(kilometer: 1, seconds: 330, distanceMeters: 1_000),
+                          RunSplit(kilometer: 2, seconds: 172.5, distanceMeters: 480)],
+                 elevationGainMeters: 12, createdAt: Fixed.t1, updatedAt: Fixed.t2)
+    }
+
+    static func runDraft(sessionID: UUID = UUID(), updatedAt: Date = Fixed.t1) -> RunDraft {
+        RunDraft(sessionID: sessionID, launch: RunLaunch(title: "Footing", runType: .easy, targetMinutes: 30),
+                 startedAt: Fixed.t0, pauses: [RunPause(start: Fixed.t0.addingTimeInterval(60), end: Fixed.t0.addingTimeInterval(90))],
+                 points: (0..<3).map(runPoint), heartRates: [140, 152], locationDenied: false, updatedAt: updatedAt)
+    }
+}
+
 /// Un conteneur en mémoire prêt à l'emploi.
 struct ModelContainerBox {
     let container: ModelContainer

@@ -41,11 +41,15 @@ private let t2 = Date(timeIntervalSince1970: 2)
     #expect(StoreTable.routineExercises.fileName == "routine_exercises")
     #expect(StoreTable.profile.fileName == "profile")
     #expect(StoreTable.exerciseSettings.fileName == "exercise_settings")
-    #expect(StoreTable.allCases.count == 18)
-    #expect(StoreTable.exported.count == 15)
+    #expect(StoreTable.runTracks.fileName == "run_tracks")
+    #expect(StoreTable.allCases.count == 21)
+    #expect(StoreTable.exported.count == 16)
+    #expect(StoreTable.exported.contains(.runTracks))
     #expect(!StoreTable.exported.contains(.cachedHealthSamples))
     #expect(!StoreTable.exported.contains(.healthQueryAnchors))
     #expect(!StoreTable.exported.contains(.activeSessionSnapshots))
+    #expect(!StoreTable.exported.contains(.runDrafts))
+    #expect(!StoreTable.exported.contains(.runHealthSummaries))
 }
 
 @Test func stubHealthEraserCountsAndThrows() async throws {

@@ -25,6 +25,8 @@ public struct ExportDocument: Sendable, Equatable, Codable {
     public var userExercises: [UserExercise]
     public var exerciseSettings: [ExerciseSettings]
     public var workoutSessions: [WorkoutSession]
+    /// Tracé simplifié, temps par km et dénivelé des courses enregistrées par Pulse.
+    public var runTracks: [RunTrack]
     public var scheduledDays: [ScheduledDay]
     public var dailyRecoveries: [DailyRecovery]
     public var checkIns: [CheckIn]
@@ -37,7 +39,7 @@ public struct ExportDocument: Sendable, Equatable, Codable {
 
     public init(schemaVersion: Int, contentVersion: String, appVersion: String, exportedAt: Date, locale: String,
                 profile: UserProfile?, programs: [Program], userExercises: [UserExercise],
-                exerciseSettings: [ExerciseSettings] = [], workoutSessions: [WorkoutSession],
+                exerciseSettings: [ExerciseSettings] = [], workoutSessions: [WorkoutSession], runTracks: [RunTrack] = [],
                 scheduledDays: [ScheduledDay], dailyRecoveries: [DailyRecovery], checkIns: [CheckIn], supplements: [Supplement],
                 supplementIntakes: [SupplementIntake], bodyMeasurements: [BodyMeasurement], personalRecords: [PersonalRecord],
                 contentExercises: [String: String]) {
@@ -51,6 +53,7 @@ public struct ExportDocument: Sendable, Equatable, Codable {
         self.userExercises = userExercises
         self.exerciseSettings = exerciseSettings
         self.workoutSessions = workoutSessions
+        self.runTracks = runTracks
         self.scheduledDays = scheduledDays
         self.dailyRecoveries = dailyRecoveries
         self.checkIns = checkIns
@@ -66,7 +69,7 @@ public struct ExportDocument: Sendable, Equatable, Codable {
                              locale: String) -> ExportDocument {
         ExportDocument(schemaVersion: schemaVersion, contentVersion: contentVersion, appVersion: appVersion, exportedAt: exportedAt,
                        locale: locale, profile: nil, programs: [], userExercises: [], exerciseSettings: [], workoutSessions: [],
-                       scheduledDays: [], dailyRecoveries: [], checkIns: [], supplements: [], supplementIntakes: [],
+                       runTracks: [], scheduledDays: [], dailyRecoveries: [], checkIns: [], supplements: [], supplementIntakes: [],
                        bodyMeasurements: [], personalRecords: [], contentExercises: [:])
     }
 }

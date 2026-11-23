@@ -24,6 +24,17 @@ import Testing
     #expect(tables[.routineExercises]?.header.prefix(3) == ["id", "routine_day_id", "order"])
 }
 
+@Test func runTracksTableListsSplitsAndPointCount() throws {
+    var doc = ExportDocument.empty(exportedAt: Fixed.t0, appVersion: "1.0 (1)", schemaVersion: 1, contentVersion: "1.0.0", locale: "fr_FR")
+    let track = Sample.runTrack()
+    doc.runTracks = [track]
+    let tables = CSVTables.tables(from: doc, timeZone: TimeZone(identifier: "Europe/Paris") ?? .current)
+    let runTracks = try #require(tables[.runTracks])
+    #expect(runTracks.header == ["session_id", "split_seconds", "elevation_gain_meters", "point_count"])
+    #expect(runTracks.rows == [[track.id.uuidString, "330;172.5", "12", "4"]])
+    #expect(CSVTables.readme(for: doc).contains("run_tracks.csv : "))
+}
+
 @Test func csvTablesFlattenSampleData() throws {
     var session = Sample.session(sets: 2)
     session.sets[1].replacedExercise = .user(id: UUID())

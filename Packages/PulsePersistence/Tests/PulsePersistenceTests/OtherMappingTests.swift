@@ -13,10 +13,10 @@ import Testing
     try context.save()
     #expect(try context.fetchCount(FetchDescriptor<StoredCachedHealthSample>()) == 1)
     #expect(try context.fetchCount(FetchDescriptor<StoredHealthQueryAnchor>()) == 1)
-    #expect(PersistenceStack.localModels.count == 6)
-    #expect(PersistenceStack.syncedModels.count == 15)
+    #expect(PersistenceStack.localModels.count == 8)
+    #expect(PersistenceStack.syncedModels.count == 16)
     #expect(PulseSchemaV1.models.count == 17 && PulseSchemaV2.models.count == 17 && PulseSchemaV3.models.count == 18)
-    #expect(PulseSchemaV4.models.count == 21)
+    #expect(PulseSchemaV4.models.count == 21 && PulseSchemaV5.models.count == 24)
 }
 
 /// Une récupération sans ses six valeurs brutes, qui ne passent plus par le magasin synchronisé.

@@ -54,6 +54,21 @@ private let drift = "Un modèle partagé a changé : figer sa copie dans la vers
     #expect(Set(added) == ["StoredImportedBodyMeasurement", "StoredImportedWorkout", "StoredRecoveryReading"])
 }
 
+@Test func v5SchemaMatchesItsFingerprint() throws {
+    try checkFingerprint(of: Schema(versionedSchema: PulseSchemaV5.self), against: "schema-v5")
+}
+
+@Test func v5OnlyAddsTheThreeRunModels() {
+    let v4 = Set(SchemaFingerprint.lines(Schema(versionedSchema: PulseSchemaV4.self)))
+    let v5 = Set(SchemaFingerprint.lines(Schema(versionedSchema: PulseSchemaV5.self)))
+    #expect(v4.subtracting(v5).isEmpty)
+    let added = v5.subtracting(v4)
+    #expect(Set(added.compactMap { $0.split(separator: ".").first.map(String.init) })
+        == ["StoredRunDraft", "StoredRunHealthSummary", "StoredRunTrack"])
+    #expect(added.contains { $0.hasPrefix("StoredRunTrack.points:") && $0.contains("externalStorage") })
+    #expect(!added.contains { $0.hasPrefix("StoredRunTrack.") && $0.contains("unique") })
+}
+
 @Test func fingerprintNamesTheInverseOfEachRelationship() {
     let lines = SchemaFingerprint.lines(Schema(versionedSchema: PulseSchemaV2.self))
     #expect(lines.contains { $0.hasPrefix("StoredProgram.days -> StoredRoutineDay") && $0.contains("inverse: program") })

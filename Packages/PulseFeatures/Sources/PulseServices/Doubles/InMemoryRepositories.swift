@@ -204,3 +204,43 @@ public actor InMemoryScheduledDayRepository: ScheduledDayRepository {
         stored[id] = nil
     }
 }
+
+/// Les tracés de course en mémoire, un par séance ; `delete` les retire des lectures.
+public actor InMemoryRunTrackRepository: RunTrackRepository {
+    private var stored: [UUID: RunTrack] = [:]
+
+    public init() {}
+
+    public func track(for sessionID: UUID) async throws -> RunTrack? {
+        stored[sessionID]
+    }
+
+    public func save(_ track: RunTrack) async throws {
+        stored[track.id] = track
+    }
+
+    public func delete(sessionID: UUID) async throws {
+        stored[sessionID] = nil
+    }
+}
+
+/// Le brouillon de la course en cours en mémoire : un seul, remplacé à chaque écriture.
+public actor InMemoryRunDraftStore: RunDraftStore {
+    private var draft: RunDraft?
+
+    public init(_ draft: RunDraft? = nil) {
+        self.draft = draft
+    }
+
+    public func load() async throws -> RunDraft? {
+        draft
+    }
+
+    public func save(_ draft: RunDraft) async throws {
+        self.draft = draft
+    }
+
+    public func clear() async throws {
+        draft = nil
+    }
+}

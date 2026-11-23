@@ -33,6 +33,8 @@ struct CSVFormat: @unchecked Sendable {
     func raw<E: RawRepresentable>(_ value: E?) -> String? where E.RawValue == String { value?.rawValue }
     func list<E: RawRepresentable>(_ values: [E]) -> String where E.RawValue == String { values.map(\.rawValue).joined(separator: "|") }
     func doubles(_ values: [Double]) -> String { values.map(Self.plain).joined(separator: "|") }
+    /// Les temps par km, en secondes, joints par « ; ».
+    func splitSeconds(_ splits: [RunSplit]) -> String { splits.map { Self.plain($0.seconds) }.joined(separator: ";") }
 
     private static func plain(_ value: Double) -> String {
         value == value.rounded() && abs(value) < 1e15 ? String(Int(value)) : String(value)
@@ -56,7 +58,7 @@ struct CSVFormat: @unchecked Sendable {
     }
 }
 
-/// Les 15 tables de l'export CSV (spec M2 §6.2).
+/// Les 16 tables de l'export CSV (spec M2 §6.2, plus le tracé des courses en V2a).
 public enum CSVTables {
     public static func tables(from document: ExportDocument, timeZone: TimeZone) -> [StoreTable: CSVTable] {
         let format = CSVFormat(timeZone: timeZone)
@@ -72,6 +74,7 @@ public enum CSVTables {
             .exerciseSettings: table(document.exerciseSettings, CSVColumns.exerciseSettings, format),
             .workoutSessions: table(document.workoutSessions, CSVColumns.workoutSessions, format),
             .workoutSets: table(sets, CSVColumns.workoutSets, format),
+            .runTracks: table(document.runTracks, CSVColumns.runTracks, format),
             .scheduledDays: table(document.scheduledDays, CSVColumns.scheduledDays, format),
             .dailyRecoveries: table(document.dailyRecoveries, CSVColumns.dailyRecoveries, format),
             .checkIns: table(document.checkIns, CSVColumns.checkIns, format),
@@ -104,6 +107,7 @@ public enum CSVTables {
         .routineExercises: "exercices de chaque jour", .userExercises: "exercices créés par l'utilisateur",
         .exerciseSettings: "réglages par exercice (incrément, échauffement)",
         .workoutSessions: "séances (musculation Pulse, courses et vélos importés)", .workoutSets: "séries de chaque séance",
+        .runTracks: "tracé des courses Pulse : temps par km (secondes, joints par ;), dénivelé positif, nombre de points",
         .scheduledDays: "semaine datée : séances placées, déplacées, validées", .dailyRecoveries: "score de récupération par jour",
         .checkIns: "check-ins du matin", .supplements: "compléments", .supplementIntakes: "prises de compléments",
         .bodyMeasurements: "poids et masse grasse", .personalRecords: "records personnels"

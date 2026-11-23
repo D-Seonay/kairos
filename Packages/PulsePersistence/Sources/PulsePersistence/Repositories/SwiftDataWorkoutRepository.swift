@@ -5,9 +5,11 @@ import SwiftData
 @ModelActor
 public actor SwiftDataWorkoutRepository: WorkoutRepository {
     /// Fusionne les séances Pulse (magasin synchronisé) et les séances importées d'Apple Health (magasin local).
+    /// Les courses Pulse retrouvent leur FC et leur RPE estimé dans le résumé local.
     public func sessions(from: Date, to: Date) throws -> [WorkoutSession] {
-        let synced = try modelContext.fetch(FetchDescriptor<StoredWorkoutSession>(
-            predicate: #Predicate { $0.deletedAt == nil && $0.startedAt >= from && $0.startedAt < to })).map { $0.toDomain() }
+        let rows = try modelContext.fetch(FetchDescriptor<StoredWorkoutSession>(
+            predicate: #Predicate { $0.deletedAt == nil && $0.startedAt >= from && $0.startedAt < to }))
+        let synced = try RunHealthSummaryJoin.fill(rows.map { $0.toDomain() }, in: modelContext)
         let imported = try modelContext.fetch(FetchDescriptor<StoredImportedWorkout>(
             predicate: #Predicate { $0.deletedAt == nil && $0.startedAt >= from && $0.startedAt < to })).map { $0.toDomain() }
         return (synced + imported).sorted { ($0.startedAt, $0.createdAt) < ($1.startedAt, $1.createdAt) }
@@ -15,15 +17,16 @@ public actor SwiftDataWorkoutRepository: WorkoutRepository {
 
     public func session(id: UUID) throws -> WorkoutSession? {
         if let synced = try modelContext.first(StoredWorkoutSession.self, where: #Predicate { $0.id == id && $0.deletedAt == nil }) {
-            return synced.toDomain()
+            return try RunHealthSummaryJoin.fill([synced.toDomain()], in: modelContext).first
         }
         return try modelContext.first(StoredImportedWorkout.self, where: #Predicate { $0.id == id && $0.deletedAt == nil })?.toDomain()
     }
 
     /// Une séance importée d'Apple Health (`source == .appleHealth`) va dans le magasin local, les autres dans le magasin synchronisé.
     /// Si la même séance existe dans l'autre magasin (changement de source), elle y est supprimée dans le même `save()`.
+    /// Une course Pulse écrit sa FC et son RPE estimé dans le résumé local et `nil` dans le magasin synchronisé (frontière M8).
     public func save(_ session: WorkoutSession) throws {
-        var stamped = session
+        var stamped = try RunHealthSummaryJoin.store(session, in: modelContext)
         stamped.updatedAt = Date()
         let id = session.id
         if session.source == .appleHealth {
@@ -48,6 +51,7 @@ public actor SwiftDataWorkoutRepository: WorkoutRepository {
         try modelContext.save()
     }
 
+    /// Une séance Pulse emporte son résumé cardio local et son tracé (suppression logique, comme la séance).
     public func delete(id: UUID) throws {
         let now = Date()
         if let stored = try modelContext.first(StoredWorkoutSession.self, where: #Predicate { $0.id == id && $0.deletedAt == nil }) {
@@ -56,6 +60,8 @@ public actor SwiftDataWorkoutRepository: WorkoutRepository {
             for set in stored.sets ?? [] where set.deletedAt == nil {
                 set.deletedAt = now
             }
+            try RunHealthSummaryJoin.remove(sessionID: id, in: modelContext)
+            try modelContext.markRunTracksDeleted(sessionID: id, at: now)
         } else if let imported = try modelContext.first(StoredImportedWorkout.self,
                                                         where: #Predicate { $0.id == id && $0.deletedAt == nil }) {
             imported.deletedAt = now
