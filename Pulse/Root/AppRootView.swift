@@ -22,6 +22,7 @@ struct AppRootView: View {
             .preferredColorScheme(.light)
             .tint(Color(PulsePalette.accent(for: model.theme).accent))
             .environment(\.pulseTheme, model.theme)
+            .environment(\.muscleMapFigure, model.muscleMapFigure)
             .task { await model.load() }
             .onOpenURL { AppLink(url: $0).map(router.open) }
             .onChange(of: scenePhase) { _, phase in

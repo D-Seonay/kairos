@@ -47,6 +47,13 @@ struct PlanningWidgetsContentTests {
         #expect(content.tomorrowText == "Demain : Fractionné")
     }
 
+    @Test func weekFollowsTheSnapshotFigure() {
+        var male = snapshot()
+        male.muscleMapFigure = .male
+        #expect(WeekWidgetContent.make(snapshot: male, at: now, calendar: calendar).muscleMapFigure == .male)
+        #expect(WeekWidgetContent.make(snapshot: snapshot(), at: now, calendar: calendar).muscleMapFigure == .female)
+    }
+
     @Test func weekSpeaksTheDaysWithoutMiddleDot() {
         let content = WeekWidgetContent.make(snapshot: snapshot(), at: now, calendar: calendar)
         #expect(content.accessibilityLabel == "Cette semaine : 1 séance faite sur 4. "

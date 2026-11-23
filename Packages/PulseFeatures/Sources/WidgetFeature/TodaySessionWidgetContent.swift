@@ -27,6 +27,8 @@ public struct TodaySessionWidgetContent: Sendable, Equatable {
     public var accessoryDetail: String
     public var inlineText: String
     public var accessibilityLabel: String
+    /// La silhouette de la carte, celle du profil quand l'instantané la donne.
+    public var muscleMapFigure: MuscleMapFigure
 
     public init(
         title: String,
@@ -40,7 +42,8 @@ public struct TodaySessionWidgetContent: Sendable, Equatable {
         accessorySubtitle: String,
         accessoryDetail: String,
         inlineText: String,
-        accessibilityLabel: String
+        accessibilityLabel: String,
+        muscleMapFigure: MuscleMapFigure = .female
     ) {
         self.title = title
         self.isAdjusted = isAdjusted
@@ -54,6 +57,7 @@ public struct TodaySessionWidgetContent: Sendable, Equatable {
         self.accessoryDetail = accessoryDetail
         self.inlineText = inlineText
         self.accessibilityLabel = accessibilityLabel
+        self.muscleMapFigure = muscleMapFigure
     }
 
     public static func make(snapshot: WidgetSnapshot?, at date: Date, calendar: Calendar) -> TodaySessionWidgetContent {
@@ -61,6 +65,7 @@ public struct TodaySessionWidgetContent: Sendable, Equatable {
             return sample(at: date, calendar: calendar)
         }
 
+        let figure = snapshot.muscleMapFigure ?? .female
         guard let sessionTitle = snapshot.sessionTitle, !sessionTitle.isEmpty else {
             let restTitle = String(localized: "Jour de repos", bundle: .module)
             let restMeta = String(localized: "Récupération active", bundle: .module)
@@ -77,7 +82,8 @@ public struct TodaySessionWidgetContent: Sendable, Equatable {
                 accessorySubtitle: restMeta,
                 accessoryDetail: String(localized: "Aucune séance", bundle: .module),
                 inlineText: restTitle,
-                accessibilityLabel: spoken
+                accessibilityLabel: spoken,
+                muscleMapFigure: figure
             )
         }
 
@@ -101,7 +107,8 @@ public struct TodaySessionWidgetContent: Sendable, Equatable {
             accessorySubtitle: meta,
             accessoryDetail: isAdjusted ? String(localized: "Ajustée à ta forme", bundle: .module) : "",
             inlineText: inline,
-            accessibilityLabel: spoken
+            accessibilityLabel: spoken,
+            muscleMapFigure: figure
         )
     }
 

@@ -107,6 +107,7 @@ struct WeekWidgetLargeViewBody: View {
     private var todayBlock: some View {
         HStack(spacing: 12) {
             MuscleMapView(levels: content.todayMuscleLevels, label: content.todayTitle, height: 74)
+                .environment(\.muscleMapFigure, content.muscleMapFigure)
                 .frame(width: 72)
             VStack(alignment: .leading, spacing: 2) {
                 Text(String(localized: "Aujourd'hui", bundle: .module))

@@ -17,10 +17,12 @@ public struct WidgetSnapshot: Sendable, Equatable, Codable {
     public var nextSession: WidgetNextSession?
     /// Le ratio de charge aiguë / chronique, quand l'historique couvre 28 jours.
     public var loadRatio: Double?
+    /// La silhouette des cartes musculaires des widgets ; nulle dans un instantané d'avant ce choix (silhouette de femme).
+    public var muscleMapFigure: MuscleMapFigure?
 
     public init(day: Date, score: Int, category: RecoveryCategory, isEstimated: Bool, sessionTitle: String?, isLightened: Bool,
                 sessionDetail: String? = nil, streak: WidgetStreak? = nil, week: [WidgetDay]? = nil, nextSession: WidgetNextSession? = nil,
-                loadRatio: Double? = nil) {
+                loadRatio: Double? = nil, muscleMapFigure: MuscleMapFigure? = nil) {
         self.day = day
         self.score = score
         self.category = category
@@ -32,6 +34,7 @@ public struct WidgetSnapshot: Sendable, Equatable, Codable {
         self.week = week
         self.nextSession = nextSession
         self.loadRatio = loadRatio
+        self.muscleMapFigure = muscleMapFigure
     }
 }
 

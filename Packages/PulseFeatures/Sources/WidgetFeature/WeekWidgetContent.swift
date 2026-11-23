@@ -38,6 +38,8 @@ public struct WeekWidgetContent: Sendable, Equatable {
     public var acwrZoneText: String
     public var tomorrowText: String
     public var accessibilityLabel: String
+    /// La silhouette de la carte, celle du profil quand l'instantané la donne.
+    public var muscleMapFigure: MuscleMapFigure
 
     public init(
         badgeText: String,
@@ -48,7 +50,8 @@ public struct WeekWidgetContent: Sendable, Equatable {
         acwrRatio: Double,
         acwrZoneText: String,
         tomorrowText: String,
-        accessibilityLabel: String
+        accessibilityLabel: String,
+        muscleMapFigure: MuscleMapFigure = .female
     ) {
         self.badgeText = badgeText
         self.days = days
@@ -59,6 +62,7 @@ public struct WeekWidgetContent: Sendable, Equatable {
         self.acwrZoneText = acwrZoneText
         self.tomorrowText = tomorrowText
         self.accessibilityLabel = accessibilityLabel
+        self.muscleMapFigure = muscleMapFigure
     }
 
     /// « Cette semaine : 3 séances faites sur 5. Lundi fait, … Aujourd'hui : Push. Charge 1,12, zone optimale. Demain, Fractionné » :
@@ -112,7 +116,8 @@ public struct WeekWidgetContent: Sendable, Equatable {
         return WeekWidgetContent(
             badgeText: String(localized: "\(completed) sur \(target)", bundle: .module), days: days, todayTitle: title,
             todayMeta: meta, todayMuscleLevels: snapshot.sessionTitle.map(TodaySessionWidgetContent.defaultMuscleLevels(for:)) ?? [:],
-            acwrRatio: snapshot.loadRatio ?? 1, acwrZoneText: load, tomorrowText: next, accessibilityLabel: spoken)
+            acwrRatio: snapshot.loadRatio ?? 1, acwrZoneText: load, tomorrowText: next, accessibilityLabel: spoken,
+            muscleMapFigure: snapshot.muscleMapFigure ?? .female)
     }
 
     public static func sample(at date: Date, calendar: Calendar) -> WeekWidgetContent {
