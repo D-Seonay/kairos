@@ -928,3 +928,493 @@ html {
     display: none;
   }
 }
+
+/* ---------- Privacy: the negative ---------- */
+
+/* Paper dots on ink, thickest toward the top right and gone before the text, like a print's own negative. */
+.privacy-field,
+.privacy-field::before {
+  --cell: 11px;
+  position: absolute;
+  pointer-events: none;
+  background-size: var(--cell) var(--cell);
+}
+
+.privacy-field {
+  inset: 0 0 auto auto;
+  z-index: -1;
+  width: min(120vw, 760px);
+  aspect-ratio: 1;
+  translate: 38% -36%;
+  border-radius: 50%;
+  background-image: radial-gradient(circle, rgb(239 236 229 / 0.2) 1.1px, transparent 1.6px);
+  -webkit-mask-image: radial-gradient(circle, #000 20%, transparent 68%);
+  mask-image: radial-gradient(circle, #000 20%, transparent 68%);
+}
+
+.privacy-field::before {
+  content: "";
+  inset: 0;
+  border-radius: 50%;
+  background-image: radial-gradient(circle, rgb(239 236 229 / 0.34) 2.6px, transparent 3.1px);
+  -webkit-mask-image: radial-gradient(circle, #000 4%, transparent 36%);
+  mask-image: radial-gradient(circle, #000 4%, transparent 36%);
+}
+
+.privacy-route {
+  position: relative;
+  display: grid;
+  gap: 2.75rem;
+  padding-left: 2.25rem;
+}
+
+/* The line the data follows: a rail of dots, like the trace flanks of the hero. */
+.privacy-route::before {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 0.5rem;
+  bottom: 0.5rem;
+  width: 2px;
+  background: radial-gradient(circle, rgb(239 236 229 / 0.45) 1px, transparent 1.4px) 50% 0 / 2px 8px repeat-y;
+}
+
+.privacy-stop {
+  position: relative;
+}
+
+.privacy-stop::before {
+  content: "";
+  position: absolute;
+  left: -2.25rem;
+  top: 0.2rem;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-paper);
+  box-shadow: 0 0 0 4px var(--color-ink);
+}
+
+/* The stop where nothing arrives: an empty ring in signal. */
+.privacy-stop[data-none="true"]::before {
+  background: var(--color-ink);
+  box-shadow:
+    inset 0 0 0 2px var(--color-signal),
+    0 0 0 4px var(--color-ink);
+}
+
+.privacy-strike {
+  position: relative;
+  display: inline-block;
+}
+
+.privacy-strike::after {
+  content: "";
+  position: absolute;
+  left: -2%;
+  right: -2%;
+  top: 54%;
+  height: 0.09em;
+  border-radius: 1em;
+  background: var(--color-signal);
+  transform-origin: left center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .privacy-strike::after {
+      animation: strike-draw linear both;
+      animation-timeline: view();
+      animation-range: entry 30% entry 90%;
+    }
+  }
+}
+
+@keyframes strike-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* ---------- Numbers: a film counter ---------- */
+
+.counter-band {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 3.5rem;
+  border-top: 2px solid var(--color-ink);
+}
+
+.counter-cell {
+  position: relative;
+  padding: 2.25rem 1rem 1.75rem 0;
+  border-bottom: 1px solid var(--color-rule);
+}
+
+/* The last of five sits across the two columns, like a title card. */
+.counter-cell:last-child {
+  grid-column: 1 / -1;
+}
+
+/* A scale of fine ticks along the top, and the index pip in signal: the reading window of the counter. */
+.counter-cell::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 7px;
+  background: repeating-linear-gradient(to right, rgb(20 20 20 / 0.45) 0 1px, transparent 1px 8px);
+}
+
+.counter-cell::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: -2px;
+  width: 2px;
+  height: 17px;
+  background: var(--color-signal);
+}
+
+.counter-cell:nth-child(2n) {
+  padding-left: 1.25rem;
+  border-left: 1px solid var(--color-rule);
+}
+
+.counter-cell:nth-child(2n)::after {
+  left: -1px;
+}
+
+.counter-value {
+  font-size: clamp(4.75rem, 3rem + 7vw, 8.5rem);
+  font-weight: 200;
+  letter-spacing: -0.05em;
+  line-height: 1.2em;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+}
+
+.counter-digits {
+  display: inline-flex;
+  height: 1.2em;
+  padding-left: 0.04em;
+}
+
+/* One digit: a window of one line with soft edges, so neighbours of the reel glide through it. */
+.counter-digit {
+  display: block;
+  width: 0.58em;
+  height: 1.2em;
+  overflow: hidden;
+  text-align: center;
+  line-height: 1.2em;
+}
+
+.counter-digits:has(.counter-reel) .counter-digit {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 2%, #000 16%, #000 86%, transparent 99%);
+  mask-image: linear-gradient(to bottom, transparent 2%, #000 16%, #000 86%, transparent 99%);
+}
+
+.counter-reel {
+  display: flex;
+  flex-direction: column;
+  transform: translateY(calc(var(--i, 0) * -1.2em));
+}
+
+/* Parked at 0 until the band is seen; then each reel spins, the rightmost digit first, and clicks into place. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-roll="on"] .counter-reel {
+    transition: transform calc(1.5s + var(--k, 0) * 0.5s) cubic-bezier(0.25, 0.9, 0.3, 1.04) calc(0.05s + var(--k, 0) * 0.12s);
+  }
+}
+
+.counter-label {
+  margin-top: 0.9rem;
+  max-width: 18ch;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  line-height: 1.5;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+@media (min-width: 1024px) {
+  .counter-band {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .counter-cell:last-child {
+    grid-column: auto;
+  }
+
+  .counter-cell,
+  .counter-cell:nth-child(2n) {
+    padding-left: 1.5rem;
+    padding-right: 1rem;
+    border-left: 1px solid var(--color-rule);
+    border-bottom: 0;
+  }
+
+  .counter-cell:first-child {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .counter-cell::after,
+  .counter-cell:nth-child(2n)::after {
+    left: -1px;
+  }
+
+  .counter-cell:first-child::after {
+    left: 0;
+  }
+
+  .counter-value {
+    font-size: clamp(4.75rem, 2rem + 6.2vw, 8.25rem);
+  }
+}
+
+/* ---------- FAQ ---------- */
+
+:root {
+  /* Lets the answer panel animate its height to and from auto. */
+  interpolate-size: allow-keywords;
+}
+
+.faq-list {
+  border-top: 2px solid var(--color-ink);
+}
+
+.faq-item {
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.faq-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding-block: 1.5rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.faq-summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-summary:focus-visible {
+  outline: 2px solid var(--color-signal);
+  outline-offset: 2px;
+}
+
+.faq-question {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 1rem + 1vw, 1.7rem);
+  font-weight: 900;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+  color: var(--color-ink);
+}
+
+.faq-answer {
+  max-width: 58ch;
+  padding-bottom: 1.75rem;
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--color-muted);
+}
+
+/* The icon: five halftone dots forming a plus. Open, the vertical pair shrinks away and the core lights in signal. */
+.faq-plus {
+  display: grid;
+  flex: none;
+  grid-template: repeat(3, 6px) / repeat(3, 6px);
+  gap: 3px;
+}
+
+.faq-dot {
+  display: block;
+  border-radius: 50%;
+  background: var(--color-ink);
+}
+
+.faq-item[open] .faq-dot-v {
+  transform: scale(0);
+}
+
+.faq-item[open] .faq-dot-core {
+  background: var(--color-signal);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .faq-dot {
+    transition:
+      transform 0.35s cubic-bezier(0.3, 1.6, 0.5, 1),
+      background-color 0.25s ease-out;
+  }
+
+  .faq-summary:hover .faq-dot {
+    transform: scale(1.25);
+  }
+
+  .faq-item[open] .faq-summary:hover .faq-dot-v {
+    transform: scale(0);
+  }
+
+  /* Only once hydration has folded the panels (FaqCollapse): folding them must not animate. */
+  .faq-list[data-ready="true"] .faq-item::details-content {
+    block-size: 0;
+    overflow-y: clip;
+    opacity: 0;
+    transition:
+      block-size 0.45s cubic-bezier(0.3, 0.9, 0.3, 1),
+      opacity 0.35s ease-out,
+      content-visibility 0.45s allow-discrete;
+  }
+
+  .faq-list[data-ready="true"] .faq-item[open]::details-content {
+    block-size: auto;
+    opacity: 1;
+  }
+}
+
+/* ---------- Final call and footer ---------- */
+
+.final-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(86vw, 420px);
+  aspect-ratio: 1;
+}
+
+.final-icon {
+  position: relative;
+  z-index: 1;
+  width: 176px;
+  height: 176px;
+  border-radius: 22.37%;
+  box-shadow:
+    0 0 0 1px rgb(239 236 229 / 0.2),
+    0 30px 60px -20px rgb(0 0 0 / 0.8),
+    0 0 90px -20px rgb(255 79 46 / 0.35);
+}
+
+@media (min-width: 640px) {
+  .final-icon {
+    width: 208px;
+    height: 208px;
+  }
+}
+
+/* The sun: three rings of one dot grid, the dots growing toward the centre. */
+.final-sun,
+.final-sun::before,
+.final-sun::after {
+  --cell: 11px;
+  position: absolute;
+  border-radius: 50%;
+  background-size: var(--cell) var(--cell);
+  background-position: center;
+}
+
+.final-sun {
+  inset: -22%;
+  background-image: radial-gradient(circle, rgb(239 236 229 / 0.3) 1.1px, transparent 1.6px);
+  -webkit-mask-image: radial-gradient(circle, #000 34%, transparent 70%);
+  mask-image: radial-gradient(circle, #000 34%, transparent 70%);
+}
+
+.final-sun::before,
+.final-sun::after {
+  content: "";
+  inset: 0;
+}
+
+.final-sun::before {
+  background-image: radial-gradient(circle, rgb(239 236 229 / 0.42) 2.4px, transparent 2.9px);
+  -webkit-mask-image: radial-gradient(circle, #000 20%, transparent 46%);
+  mask-image: radial-gradient(circle, #000 20%, transparent 46%);
+}
+
+.final-sun::after {
+  background-image: radial-gradient(circle, rgb(239 236 229 / 0.55) 3.6px, transparent 4.1px);
+  -webkit-mask-image: radial-gradient(circle, #000 8%, transparent 28%);
+  mask-image: radial-gradient(circle, #000 8%, transparent 28%);
+}
+
+.final-glow {
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(255 79 46 / 0.3), rgb(255 79 46 / 0.08) 45%, transparent 70%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .final-sun,
+    .final-glow {
+      animation: sun-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 100%;
+    }
+
+    .final-icon {
+      animation: icon-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 20% entry 100%;
+    }
+  }
+}
+
+@keyframes sun-rise {
+  from {
+    opacity: 0;
+    transform: translateY(34%) scale(0.55);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes icon-rise {
+  from {
+    opacity: 0.2;
+    transform: translateY(18%);
+    filter: blur(6px) contrast(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+/* The end title: the name in halftone dots, fading toward the bottom edge and cropped by it. */
+.footer-wordmark {
+  margin-top: 1rem;
+  margin-bottom: -0.1em;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: min(27rem, 34vw);
+  font-weight: 900;
+  line-height: 0.82;
+  letter-spacing: -0.06em;
+  user-select: none;
+  background-image: radial-gradient(circle, var(--color-paper) 0 2.4px, transparent 2.9px);
+  background-size: 9px 9px;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  -webkit-mask-image: linear-gradient(to bottom, #000 25%, rgb(0 0 0 / 0.25));
+  mask-image: linear-gradient(to bottom, #000 25%, rgb(0 0 0 / 0.25));
+}
