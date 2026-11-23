@@ -28,6 +28,8 @@ import Testing
     #expect(try await repo.track(for: track.id) == nil)
     let rows = try ModelContext(repo.modelContainer).fetch(FetchDescriptor<StoredRunTrack>())
     #expect(rows.count == 1 && rows.first?.deletedAt != nil)
+    // Seule la marque de suppression reste : jamais les coordonnées.
+    #expect(rows.first?.points == nil && rows.first?.splits == nil && rows.first?.elevationGainMeters == nil)
     try await repo.delete(sessionID: UUID())   // sans effet
 
     // Réenregistrer un tracé supprimé le fait revenir, sur la même ligne.

@@ -28,6 +28,15 @@ public final class StoredRunTrack {
         updatedAt = track.updatedAt
     }
 
+    /// Suppression logique : ne garde que la marque, jamais le tracé (donnée de localisation).
+    public func markDeleted(at date: Date) {
+        points = nil
+        splits = nil
+        elevationGainMeters = nil
+        deletedAt = date
+        updatedAt = date
+    }
+
     public func toDomain() -> RunTrack {
         RunTrack(id: id, points: CodableColumn.decode([RunTrackPoint].self, from: points, default: []),
                  splits: CodableColumn.decode([RunSplit].self, from: splits, default: []),

@@ -29,7 +29,7 @@ public actor SwiftDataRunTrackRepository: RunTrackRepository {
         try modelContext.save()
     }
 
-    /// Suppression logique, comme les séances : le miroir CloudKit propage la marque.
+    /// Suppression logique, comme les séances : le miroir CloudKit propage la marque, sans les coordonnées.
     public func delete(sessionID: UUID) throws {
         guard try modelContext.markRunTracksDeleted(sessionID: sessionID, at: Date()) else { return }
         try modelContext.save()
@@ -38,12 +38,12 @@ public actor SwiftDataRunTrackRepository: RunTrackRepository {
 
 extension ModelContext {
     /// Marque supprimées les lignes vivantes du tracé de la séance, sans enregistrer ; vrai si au moins une l'a été.
+    /// Seule la marque part dans iCloud : les coordonnées, les temps par km et le dénivelé sont effacés.
     @discardableResult
     func markRunTracksDeleted(sessionID: UUID, at date: Date) throws -> Bool {
         let rows = try fetch(FetchDescriptor<StoredRunTrack>(predicate: #Predicate { $0.id == sessionID && $0.deletedAt == nil }))
         for row in rows {
-            row.deletedAt = date
-            row.updatedAt = date
+            row.markDeleted(at: date)
         }
         return !rows.isEmpty
     }

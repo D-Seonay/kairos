@@ -31,8 +31,8 @@ import Testing
     let tables = CSVTables.tables(from: doc, timeZone: TimeZone(identifier: "Europe/Paris") ?? .current)
     let runTracks = try #require(tables[.runTracks])
     #expect(runTracks.header == ["session_id", "split_seconds", "elevation_gain_meters", "point_count"])
-    #expect(runTracks.rows == [[track.id.uuidString, "330;172.5", "12", "4"]])
-    #expect(CSVTables.readme(for: doc).contains("run_tracks.csv : "))
+    #expect(runTracks.rows == [[track.id.uuidString, "330|172.5", "12", "4"]])
+    #expect(CSVTables.readme(for: doc).contains("run_tracks.csv : tracé des courses Pulse : temps par km (secondes, joints par |)"))
 }
 
 @Test func csvTablesFlattenSampleData() throws {

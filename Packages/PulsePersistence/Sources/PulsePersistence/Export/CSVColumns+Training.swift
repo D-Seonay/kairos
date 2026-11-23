@@ -106,7 +106,7 @@ enum CSVColumns {
     /// Le tracé lui-même n'est pas mis à plat : seuls son nombre de points, les temps par km et le dénivelé y figurent.
     static let runTracks: [CSVColumn<RunTrack>] = [
         .init(name: "session_id") { $1.uuid($0.id) },
-        .init(name: "split_seconds") { $1.splitSeconds($0.splits) },
+        .init(name: "split_seconds") { $1.doubles($0.splits.map(\.seconds)) },
         .init(name: "elevation_gain_meters") { $1.num($0.elevationGainMeters) },
         .init(name: "point_count") { $1.int($0.points.count) }
     ]

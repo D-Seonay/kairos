@@ -33,8 +33,6 @@ struct CSVFormat: @unchecked Sendable {
     func raw<E: RawRepresentable>(_ value: E?) -> String? where E.RawValue == String { value?.rawValue }
     func list<E: RawRepresentable>(_ values: [E]) -> String where E.RawValue == String { values.map(\.rawValue).joined(separator: "|") }
     func doubles(_ values: [Double]) -> String { values.map(Self.plain).joined(separator: "|") }
-    /// Les temps par km, en secondes, joints par « ; ».
-    func splitSeconds(_ splits: [RunSplit]) -> String { splits.map { Self.plain($0.seconds) }.joined(separator: ";") }
 
     private static func plain(_ value: Double) -> String {
         value == value.rounded() && abs(value) < 1e15 ? String(Int(value)) : String(value)
@@ -107,7 +105,7 @@ public enum CSVTables {
         .routineExercises: "exercices de chaque jour", .userExercises: "exercices créés par l'utilisateur",
         .exerciseSettings: "réglages par exercice (incrément, échauffement)",
         .workoutSessions: "séances (musculation Pulse, courses et vélos importés)", .workoutSets: "séries de chaque séance",
-        .runTracks: "tracé des courses Pulse : temps par km (secondes, joints par ;), dénivelé positif, nombre de points",
+        .runTracks: "tracé des courses Pulse : temps par km (secondes, joints par |), dénivelé positif, nombre de points",
         .scheduledDays: "semaine datée : séances placées, déplacées, validées", .dailyRecoveries: "score de récupération par jour",
         .checkIns: "check-ins du matin", .supplements: "compléments", .supplementIntakes: "prises de compléments",
         .bodyMeasurements: "poids et masse grasse", .personalRecords: "records personnels"

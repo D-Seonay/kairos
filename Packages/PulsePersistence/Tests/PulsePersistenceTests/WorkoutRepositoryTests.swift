@@ -247,4 +247,6 @@ private func counts(_ container: ModelContainer) throws -> (synced: Int, local: 
     #expect(try await repo.session(id: run.id) == nil)
     #expect(try await tracks.track(for: run.id) == nil)
     #expect(try ModelContext(container).fetchCount(FetchDescriptor<StoredRunHealthSummary>()) == 0)
+    let tombstone = try #require(try ModelContext(container).fetch(FetchDescriptor<StoredRunTrack>()).first)
+    #expect(tombstone.deletedAt != nil && tombstone.points == nil && tombstone.splits == nil && tombstone.elevationGainMeters == nil)
 }
