@@ -95,6 +95,8 @@ public protocol RunWorkoutRecording: Sendable {
     func finish(_ entry: RunWorkoutEntry) async throws -> UUID?
     /// Écrit un entraînement sans séance vivante (course interrompue).
     func save(_ entry: RunWorkoutEntry) async throws -> UUID
+    /// Supprime l'entraînement écrit par Pulse et son tracé ; sans effet s'il n'existe plus.
+    func deleteWorkout(id: UUID) async throws
     func discard() async
     /// Rattache une séance que le système a gardée après un crash ; vrai si elle tourne encore.
     func recoverActiveSession() async -> Bool
@@ -110,6 +112,7 @@ public actor StubRunWorkoutRecorder: RunWorkoutRecording {
     public private(set) var resumeDates: [Date] = []
     public private(set) var finished: [RunWorkoutEntry] = []
     public private(set) var saved: [UUID: RunWorkoutEntry] = [:]
+    public private(set) var deletedWorkouts: [UUID] = []
     public private(set) var discardCount = 0
     /// Vrai entre `start` et `finish` / `discard`, ou après une reprise réussie.
     public private(set) var hasLiveSession: Bool
@@ -174,6 +177,11 @@ public actor StubRunWorkoutRecorder: RunWorkoutRecording {
         let id = UUID()
         saved[id] = entry
         return id
+    }
+
+    public func deleteWorkout(id: UUID) async throws {
+        saved[id] = nil
+        deletedWorkouts.append(id)
     }
 
     public func discard() async {
