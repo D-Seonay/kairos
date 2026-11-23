@@ -49,6 +49,11 @@ struct WorkoutHistoryTests {
                        calendar: TestClock.calendar)
     }
 
+    private var historyIgnoringPulse: WorkoutHistory {
+        WorkoutHistory(source: source, cache: cache, workouts: workouts, profiles: profiles, windows: windows,
+                       calendar: TestClock.calendar, ownBundleIdentifier: "fr.seonay.pulse")
+    }
+
     private func run(_ uuid: String, at text: String, heartRate: Double? = 150) -> CachedHealthSample {
         let start = TestClock.date(text)
         return CachedHealthSample(kind: .run, start: start, end: start.addingTimeInterval(45 * 60), distanceMeters: 8_200,
@@ -57,6 +62,29 @@ struct WorkoutHistoryTests {
 
     private func imported() async throws -> [WorkoutSession] {
         try await workouts.sessions(from: .distantPast, to: .distantFuture)
+    }
+
+    @Test func ownWorkoutsAreNotImported() async throws {
+        var own = run("own", at: "2026-11-17T07:30")
+        own.sourceBundleID = "fr.seonay.pulse"
+        let watch = run("watch", at: "2026-11-18T07:30")
+        await source.set(runs: [own, watch])
+
+        // Sans filtre, les deux sont importées : l'entraînement écrit par Pulse devient une séance de plus.
+        await history.refresh(now: now)
+        #expect(try await imported().count == 2)
+
+        // Avec le filtre, la séance déjà importée de cette source est supprimée comme « disparue ».
+        #expect(await historyIgnoringPulse.refresh(now: now))
+        #expect(try await imported().compactMap(\.healthKitUUID) == ["watch"])
+    }
+
+    @Test func ownWorkoutsAreNotImportedOnAFreshInstall() async throws {
+        var own = run("own", at: "2026-11-17T07:30")
+        own.sourceBundleID = "fr.seonay.pulse"
+        await source.set(runs: [own])
+        await historyIgnoringPulse.refresh(now: now)
+        #expect(try await imported().isEmpty)
     }
 
     @Test func newRunsBecomeAppleHealthSessions() async throws {

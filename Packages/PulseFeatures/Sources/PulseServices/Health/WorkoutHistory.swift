@@ -13,15 +13,19 @@ public struct WorkoutHistory: Sendable {
     private let profiles: any ProfileRepository
     private let windows: any HealthReadWindowStore
     private let calendar: Calendar
+    /// L'identifiant de l'app : ses propres entraînements, écrits dans Apple Santé, ne sont pas réimportés (spec V2a §5.3).
+    private let ownBundleIdentifier: String?
 
     public init(source: any HealthWorkoutSource, cache: any HealthSampleCache, workouts: any WorkoutRepository,
-                profiles: any ProfileRepository, windows: any HealthReadWindowStore, calendar: Calendar) {
+                profiles: any ProfileRepository, windows: any HealthReadWindowStore, calendar: Calendar,
+                ownBundleIdentifier: String? = nil) {
         self.source = source
         self.cache = cache
         self.workouts = workouts
         self.profiles = profiles
         self.windows = windows
         self.calendar = calendar
+        self.ownBundleIdentifier = ownBundleIdentifier
     }
 
     /// Un type à la fois : un type dont la lecture ou l'écriture du cache échoue garde ses séances telles quelles. Rend vrai si
@@ -72,8 +76,10 @@ public struct WorkoutHistory: Sendable {
 
     /// Ajoute, met à jour ou supprime les séances du type commencées dans la fenêtre pour qu'elles suivent le cache.
     private func align(_ signal: WorkoutSignal, from start: Date, to end: Date, now: Date, birthDate: Date?) async -> Bool {
-        guard let samples = try? await cache.samples(kind: signal.kind, from: start, to: end),
+        guard let cached = try? await cache.samples(kind: signal.kind, from: start, to: end),
               let sessions = try? await workouts.sessions(from: start, to: end) else { return false }
+        // Un entraînement écrit par Pulse n'est pas importé, et une séance déjà importée de cette source part comme « disparue ».
+        let samples = cached.filter { ownBundleIdentifier == nil || $0.sourceBundleID != ownBundleIdentifier }
         let imported = sessions.filter { $0.source == .appleHealth && $0.kind == signal.sessionKind }
         // Deux appareils qui importent le même entraînement avant de se synchroniser en font deux séances : celle qui porte un RPE
         // ou une note saisis dans Pulse est gardée, sinon la plus ancienne.
