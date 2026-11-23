@@ -5,7 +5,7 @@ export const APP_STORE_URL = `https://apps.apple.com/fr/app/id${APP_STORE_ID}`;
 export const APP_STORE_LIVE = false;
 
 // À renseigner avant la mise en production : le build Vercel de production échoue tant que c'est null.
-export const CONTACT_EMAIL: string | null = null;
+export const CONTACT_EMAIL: string | null = "contact@seonay.com";
 
 export const PRIVACY_URL = "https://d-seonay.github.io/kairos/confidentialite/";
 export const SUPPORT_URL = "https://d-seonay.github.io/kairos/support/";
