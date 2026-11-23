@@ -185,3 +185,23 @@ func overlaysAreDrawnLast(_ figure: MuscleMapFigure) {
 @Test func accentSharesRaiseTheLowLevels() {
     #expect(MuscleIntensity.accentShares == [0.5, 0.7, 0.85, 1])
 }
+
+/// Le dessin ramène la `viewBox` de chaque silhouette sur la toile : le dos (x = 823 ou 718) et le corps d'homme (y = 95)
+/// doivent tomber dans le cadre, pas à côté.
+@Test(arguments: MuscleMapFigure.allCases)
+func drawingFitsEverySilhouetteInItsCanvas(_ figure: MuscleMapFigure) {
+    let art = MuscleMapArtwork.bundled
+    for side in [MuscleMapSide.front, .back] {
+        let box = art.viewBox(side, figure: figure)
+        let size = CGSize(width: box.width / 10, height: box.height / 10)
+        let transform = MuscleMapView.transform(for: box, in: size)
+        let origin = CGPoint(x: box.minX, y: box.minY).applying(transform)
+        let corner = CGPoint(x: box.maxX, y: box.maxY).applying(transform)
+        #expect(abs(origin.x) < 1e-9 && abs(origin.y) < 1e-9, "\(figure) \(side)")
+        #expect(abs(corner.x - size.width) < 1e-9 && abs(corner.y - size.height) < 1e-9, "\(figure) \(side)")
+        let canvas = CGRect(origin: .zero, size: size).insetBy(dx: -0.5, dy: -0.5)
+        for path in art.layers(side, figure: figure).flatMap(\.paths) {
+            #expect(canvas.contains(path.applying(transform).boundingRect), "\(figure) \(side)")
+        }
+    }
+}

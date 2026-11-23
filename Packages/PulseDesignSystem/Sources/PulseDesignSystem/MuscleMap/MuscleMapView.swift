@@ -43,8 +43,7 @@ public struct MuscleMapView: View {
     private func draw(_ side: MuscleMapSide, accent: PulseTone, in context: inout GraphicsContext, size: CGSize) {
         let box = artwork.viewBox(side, figure: figure)
         guard box.width > 0, box.height > 0 else { return }
-        let scale = min(size.width / box.width, size.height / box.height)
-        let transform = CGAffineTransform(translationX: -box.minX, y: -box.minY).scaledBy(x: scale, y: scale)
+        let transform = Self.transform(for: box, in: size)
 
         for layer in artwork.layers(side, figure: figure) {
             guard let color = fill(for: layer.region, accent: accent) else { continue }
@@ -52,6 +51,13 @@ public struct MuscleMapView: View {
                 context.fill(path.applying(transform), with: .color(color))
             }
         }
+    }
+
+    /// Ramène la `viewBox` sur la toile : d'abord le décalage de son origine, puis l'échelle.
+    static func transform(for box: CGRect, in size: CGSize) -> CGAffineTransform {
+        let scale = min(size.width / box.width, size.height / box.height)
+        // `translatedBy` s'applique avant l'échelle : le point devient `(p − origine) × échelle`.
+        return CGAffineTransform(scaleX: scale, y: scale).translatedBy(x: -box.minX, y: -box.minY)
     }
 
     /// Le corps en `muscleBody`, une région allumée à son niveau, une région de base éteinte en `muscleOff`,
