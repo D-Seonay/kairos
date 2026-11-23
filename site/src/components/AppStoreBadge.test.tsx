@@ -1,5 +1,6 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
+import { APP_STORE_LIVE } from "@/lib/config";
 import { AppStoreBadge } from "./AppStoreBadge";
 
 describe("AppStoreBadge", () => {
@@ -18,9 +19,14 @@ describe("AppStoreBadge", () => {
     expect(screen.getByText("Bientôt sur l'App Store")).toBeVisible();
   });
 
-  it("follows APP_STORE_LIVE by default, which is false before release", () => {
+  it("follows APP_STORE_LIVE by default", () => {
     render(<AppStoreBadge />);
-    expect(screen.queryByRole("link")).not.toBeInTheDocument();
-    expect(screen.getByText("Bientôt sur l'App Store")).toBeVisible();
+    if (APP_STORE_LIVE) {
+      expect(screen.getByRole("link", { name: "Télécharger Pulse dans l'App Store" })).toBeInTheDocument();
+      expect(screen.queryByText("Bientôt sur l'App Store")).not.toBeInTheDocument();
+    } else {
+      expect(screen.queryByRole("link")).not.toBeInTheDocument();
+      expect(screen.getByText("Bientôt sur l'App Store")).toBeVisible();
+    }
   });
 });

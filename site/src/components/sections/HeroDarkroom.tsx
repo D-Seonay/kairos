@@ -28,21 +28,29 @@ export function fieldAt(t: number): { ink: number; light: number } {
  * fades out from first paint, see `.dev-night` in globals.css) and the living
  * halftone field. The CSS animation is the clock, so the page develops on time
  * even if hydration is late, and this component only syncs the canvas to it.
- * Under reduced motion there is no animation, and the field starts final.
+ * Under reduced motion there is no animation and no frame loop: the field is
+ * final from the first client render.
+ *
+ * Until the canvas has dots to draw (server HTML, JavaScript off, late
+ * hydration), a static CSS halftone stands in for it, so the developed print
+ * never depends on the canvas.
  */
 export function HeroDarkroom() {
   const nightRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
-  const [field, setField] = useState({ ink: 0, light: 0 });
+  const [developing, setDeveloping] = useState({ ink: 0, light: 0 });
+  const field = reduced ? FINAL : developing;
+  const live = field.ink > 0;
 
   useEffect(() => {
+    if (reduced) return;
     const night = nightRef.current;
     const animation =
-      !reduced && night && typeof night.getAnimations === "function" ? night.getAnimations()[0] : undefined;
+      night && typeof night.getAnimations === "function" ? night.getAnimations()[0] : undefined;
 
     if (!animation) {
-      // Reduced motion, or no clock to follow: show the finished print.
-      const id = requestAnimationFrame(() => setField(FINAL));
+      // No clock to follow: show the finished print.
+      const id = requestAnimationFrame(() => setDeveloping(FINAL));
       return () => cancelAnimationFrame(id);
     }
 
@@ -50,10 +58,10 @@ export function HeroDarkroom() {
     const tick = () => {
       const t = Number(animation.currentTime ?? 0) / 1000;
       if (t >= SETTLED_AT || animation.playState === "finished") {
-        setField(FINAL);
+        setDeveloping(FINAL);
         return;
       }
-      setField(fieldAt(t));
+      setDeveloping(fieldAt(t));
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
@@ -63,7 +71,8 @@ export function HeroDarkroom() {
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-0">
       <div ref={nightRef} className="dev-night absolute inset-0 bg-ink" />
-      <div className="hero-field-mask absolute inset-0">
+      <div className="hero-field-mask absolute inset-0" data-canvas={live ? "live" : "fallback"}>
+        <div className="hero-field-fallback absolute inset-0" />
         <HalftoneField ink={field.ink} light={field.light} interactive />
       </div>
     </div>

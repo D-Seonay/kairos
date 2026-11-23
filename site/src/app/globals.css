@@ -77,6 +77,35 @@ html {
   mask-composite: intersect;
 }
 
+/*
+ * Static stand-in for the canvas field (no JavaScript, or before hydration):
+ * small staggered dots, about the size the field settles on at light 0.8.
+ * Hidden as soon as the canvas draws.
+ */
+.hero-field-fallback {
+  --cell: 14px;
+  --dot: radial-gradient(circle, rgb(20 20 20 / 0.5) 0.85px, transparent 1.35px);
+  background-image: var(--dot), var(--dot);
+  /* Rows one cell apart, every other row shifted by half a cell, like the canvas grid. */
+  background-size: var(--cell) calc(var(--cell) * 2);
+  background-position:
+    calc(var(--cell) / -2) calc(var(--cell) * -1),
+    0 0;
+  /* Uniform dots would crowd the text, where the canvas keeps its dots tiny: stay below it. */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 44%, #000 62%);
+  mask-image: linear-gradient(to bottom, transparent 44%, #000 62%);
+}
+
+@media (min-width: 640px) {
+  .hero-field-fallback {
+    --cell: 10px;
+  }
+}
+
+[data-canvas="live"] > .hero-field-fallback {
+  display: none;
+}
+
 .hero-trace {
   height: var(--trace-h);
   /* Stroke and dot pitch of the motif, scaled to its rendered height (viewBox is 600 tall). */
