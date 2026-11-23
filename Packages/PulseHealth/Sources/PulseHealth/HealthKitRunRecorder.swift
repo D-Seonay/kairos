@@ -81,7 +81,7 @@ public final class HealthKitRunRecorder: NSObject, RunWorkoutRecording, @uncheck
     public func finish(_ entry: RunWorkoutEntry) async throws -> UUID? {
         guard let (session, builder) = takeLiveSession() else { return nil }
         do {
-            if let distance = Self.distanceSample(entry) { try await builder.addSamples([distance]) }
+            if let distance = distanceSample(entry) { try await builder.addSamples([distance]) }
             try await builder.addMetadata([HKMetadataKeyExternalUUID: entry.sessionID.uuidString])
             session.end()
             try await builder.endCollection(at: entry.end)
@@ -104,7 +104,7 @@ public final class HealthKitRunRecorder: NSObject, RunWorkoutRecording, @uncheck
         try await builder.beginCollection(at: entry.start)
         let events = Self.pauseEvents(entry)
         if !events.isEmpty { try await builder.addWorkoutEvents(events) }
-        if let distance = Self.distanceSample(entry) { try await builder.addSamples([distance]) }
+        if let distance = distanceSample(entry) { try await builder.addSamples([distance]) }
         try await builder.addMetadata([HKMetadataKeyExternalUUID: entry.sessionID.uuidString])
         try await builder.endCollection(at: entry.end)
         guard let workout = try await builder.finishWorkout() else { throw WriteError.notSaved }
@@ -209,9 +209,11 @@ public final class HealthKitRunRecorder: NSObject, RunWorkoutRecording, @uncheck
         session.state == .running || session.state == .paused
     }
 
-    /// Un seul échantillon du début à la fin : la distance GPS filtrée, et elle seule.
-    static func distanceSample(_ entry: RunWorkoutEntry) -> HKQuantitySample? {
-        guard let meters = entry.distanceMeters, meters > 0, entry.end > entry.start else { return nil }
+    /// Un seul échantillon du début à la fin : la distance GPS filtrée, et elle seule. Sans accès en écriture à la distance,
+    /// l'entraînement part sans elle plutôt que d'échouer.
+    private func distanceSample(_ entry: RunWorkoutEntry) -> HKQuantitySample? {
+        guard store.authorizationStatus(for: HKQuantityType(.distanceWalkingRunning)) == .sharingAuthorized,
+              let meters = entry.distanceMeters, meters > 0, entry.end > entry.start else { return nil }
         return HKQuantitySample(type: HKQuantityType(.distanceWalkingRunning),
                                 quantity: HKQuantity(unit: .meter(), doubleValue: meters), start: entry.start, end: entry.end)
     }
