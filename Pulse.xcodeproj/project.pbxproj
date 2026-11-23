@@ -573,7 +573,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = fr.seonay.pulse.widgets;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -593,7 +593,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = fr.seonay.pulse.widgets;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -613,7 +613,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = fr.seonay.pulse;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -650,7 +650,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = fr.seonay.pulse;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
