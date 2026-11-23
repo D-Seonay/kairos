@@ -148,8 +148,14 @@ describe("Footer", () => {
     expect(footer).toHaveTextContent("© 2026 Pulse par Seonay Studio");
   });
 
-  it("has no contact item, and no mailto link, while CONTACT_EMAIL is empty", () => {
-    render(<Footer />);
+  it("has no contact item, and no mailto link, while CONTACT_EMAIL is empty", async () => {
+    vi.resetModules();
+    vi.doMock("@/lib/config", async (importOriginal) => ({
+      ...(await importOriginal<typeof import("@/lib/config")>()),
+      CONTACT_EMAIL: null,
+    }));
+    const { Footer: UnconfiguredFooter } = await import("./Footer");
+    render(<UnconfiguredFooter />);
     expect(screen.queryByText("Contact")).not.toBeInTheDocument();
     expect(document.querySelector('a[href^="mailto:"]')).toBeNull();
   });
