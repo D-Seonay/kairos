@@ -8,8 +8,6 @@ export const TRACE_PATH =
   "M250 575H292C312 575 322 505 346 505C372 505 384 650 404 650L500 252L590 770L652 590C658 577 664 575 676 575H730";
 /** Share of the path length at which the line reaches the R peak. */
 export const TRACE_PEAK = 0.47;
-/** Where the baseline sits, as a share of the viewBox height (for flanking lines). */
-export const TRACE_BASELINE = (575 - 200) / 600;
 
 const VIEW_BOX = "250 200 480 600";
 const PEAK = { x: 500, y: 252 };
