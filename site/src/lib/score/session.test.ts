@@ -35,13 +35,16 @@ describe("adjustSession", () => {
   });
 
   it("never drops below one set", () => {
-    const day = [
-      { name: "A", sets: 1, reps: 5, rpe: 7, restSeconds: 60 },
-      { name: "B", sets: 1, reps: 5, rpe: 7, restSeconds: 60 },
-    ];
+    const day = [1, 1, 1, 1, 1, 3].map((sets, i) => ({
+      name: `E${i}`,
+      sets,
+      reps: 5,
+      rpe: 7,
+      restSeconds: 60,
+    }));
     const result = adjustSession(day, "moderateFatigue");
-    expect(result.exercises.map((e) => e.sets)).toEqual([1, 1]);
-    expect(result.reasons).toEqual(["Repos rallongés de 45 secondes"]);
+    expect(result.exercises.map((e) => e.sets)).toEqual([1, 1, 1, 1, 1, 1]);
+    expect(result.reasons[0]).toBe("Volume réduit de 8 à 6 séries");
   });
 
   it("replaces the session with mobility when overreached", () => {

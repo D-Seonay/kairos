@@ -108,6 +108,14 @@ describe("simulate", () => {
     expect(Number.isFinite(result.displayScore)).toBe(true);
   });
 
+  it("falls back to a finite score when the HRV percent makes the log undefined", () => {
+    const result = simulate({ sleepHours: 8, hrvPercent: -150, rhrDeltaBpm: 0 });
+    expect(Number.isFinite(result.score)).toBe(true);
+    expect(result.score).toBeGreaterThanOrEqual(0);
+    expect(result.score).toBeLessThanOrEqual(100);
+    expect(Number.isFinite(result.displayScore)).toBe(true);
+  });
+
   it("categorises the unrounded score: displays 90 yet stays normal", () => {
     const result = simulate({ sleepHours: 8, hrvPercent: 1, rhrDeltaBpm: 2 });
     expect(result.score).toBeGreaterThanOrEqual(89.5);
