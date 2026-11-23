@@ -12,7 +12,7 @@ const LINKS = [
 ];
 
 const focusRing =
-  "rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-signal";
+  "focus-ring rounded-sm";
 
 /**
  * Fixed nav. Transparent over the top of the hero, then translucent paper with
@@ -53,7 +53,6 @@ export function Nav({ anchorBase = "" }: { anchorBase?: string } = {}) {
       desktop.removeEventListener("change", onWide);
     };
   }, [open]);
-
 
   return (
     <header
@@ -125,7 +124,11 @@ export function Nav({ anchorBase = "" }: { anchorBase?: string } = {}) {
         </button>
       </nav>
 
-      <div id={menuId} hidden={!open} className="border-t border-rule/70 px-4 pb-6 pt-2 md:hidden">
+      <div
+        id={menuId}
+        hidden={!open}
+        className="max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain border-t border-rule/70 px-4 pb-6 pt-2 md:hidden"
+      >
         <ul>
           {LINKS.map((link) => (
             <li key={link.href} className="border-b border-rule/70">

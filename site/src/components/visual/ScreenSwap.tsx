@@ -123,8 +123,9 @@ export function FeaturesStage({
 export function FeatureStep({ index, children, className }: { index: number; children: ReactNode; className?: string }) {
   const { active, select } = useContext(StageContext);
   const ref = useRef<HTMLElement>(null);
-  // A one-pixel band across the middle of the viewport: only one block can be in it at a time.
-  const centred = useInView(ref, "-50% 0px -50% 0px");
+  // A thin band (1 % of the viewport) across the middle: only one block can be in it at a time.
+  // A zero-height band never intersects in some Safari versions, hence the 0.5 % of slack.
+  const centred = useInView(ref, "-49.5% 0px -49.5% 0px");
 
   useEffect(() => {
     if (centred) select(index);

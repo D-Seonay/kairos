@@ -191,6 +191,19 @@ test("simulator: the Sommeil slider changes the score from the keyboard", async 
   await expect.poll(read, { timeout: 10_000 }).toBeGreaterThan(low);
 });
 
+test("mobile menu: on a short landscape screen the panel scrolls, so its badge stays reachable", async ({ page }) => {
+  await page.setViewportSize({ width: 740, height: 340 });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Menu" }).click();
+  const panel = page.locator("header div[id][class*='max-h']");
+  await expect(panel).toBeVisible();
+  const box = (await panel.boundingBox())!;
+  expect(box.y + box.height).toBeLessThanOrEqual(340);
+  await panel.evaluate((element) => element.scrollTo(0, element.scrollHeight));
+  const last = (await panel.locator("img").last().boundingBox())!;
+  expect(last.y + last.height).toBeLessThanOrEqual(340);
+});
+
 test("performance: Chrome reports a largest contentful paint on the home page", async ({ page }) => {
   // An element first painted at opacity 0 never counts as an LCP candidate. If
   // the hero reveal starts from 0 again, Lighthouse has no LCP and scores 0.

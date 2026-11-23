@@ -51,7 +51,7 @@ export function Privacy() {
     <section
       id="confidentialite"
       aria-labelledby="privacy-title"
-      className="relative isolate overflow-clip bg-ink text-paper"
+      className="focus-on-ink relative isolate overflow-clip bg-ink text-paper"
     >
       <div aria-hidden="true" className="privacy-field" />
       <RegistrationMarks className="text-paper/35!" />
@@ -69,14 +69,13 @@ export function Privacy() {
             Ta nuit reste sur ton iPhone.
           </h2>
           <p className="mt-6 max-w-[44ch] text-[17px] leading-relaxed text-paper/75">
-            Pas de compte, pas de serveur, pas de publicité, aucune analytics. Pulse n&apos;a rien à te demander, et
-            personne à qui envoyer quoi que ce soit.
+            Pas de compte à créer, aucun serveur Pulse où envoyer tes données, pas de publicité, aucune analytics.
           </p>
           <a
             href={PRIVACY_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-8 inline-block rounded-sm text-[15px] font-medium text-paper underline decoration-paper/30 decoration-2 underline-offset-[6px] transition-colors hover:decoration-paper focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-signal"
+            className="focus-ring mt-8 inline-block rounded-sm text-[15px] font-medium text-paper underline decoration-paper/30 decoration-2 underline-offset-[6px] transition-colors hover:decoration-paper"
           >
             Lire la politique de confidentialité ↗
           </a>

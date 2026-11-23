@@ -52,6 +52,12 @@ describe("Privacy", () => {
     expect(container.querySelector("section#confidentialite")).not.toBeNull();
     expect(screen.getByRole("link", { name: /politique de confidentialité/i })).toHaveAttribute("href", PRIVACY_URL);
   });
+
+  it("does not claim that Pulse asks for nothing: it asks for Health access and a profile", () => {
+    const { container } = render(<Privacy />);
+    expect(container).not.toHaveTextContent("rien à te demander");
+    expect(container).toHaveTextContent("Pas de compte à créer, aucun serveur Pulse où envoyer tes données");
+  });
 });
 
 describe("Faq", () => {
@@ -128,8 +134,12 @@ describe("Footer", () => {
     expect(screen.getByRole("link", { name: /Pulse par Seonay Studio/ })).toHaveAttribute("href", STUDIO_URL);
     const footer = screen.getByRole("contentinfo");
     expect(within(footer).getByRole("link", { name: "Mentions légales" })).toHaveAttribute("href", "/mentions-legales");
-    const privacy = within(footer).getAllByRole("link", { name: "Confidentialité" });
-    expect(privacy.map((link) => link.getAttribute("href"))).toEqual(["#confidentialite", PRIVACY_URL]);
+    // Two different destinations, two different names.
+    expect(within(footer).getByRole("link", { name: "Confidentialité" })).toHaveAttribute("href", "#confidentialite");
+    expect(within(footer).getByRole("link", { name: "Politique de confidentialité ↗" })).toHaveAttribute(
+      "href",
+      PRIVACY_URL,
+    );
     expect(within(footer).getByRole("link", { name: "Assistance" })).toHaveAttribute("href", SUPPORT_URL);
     expect(footer).toHaveTextContent(MEDICAL_DISCLAIMER);
     expect(MEDICAL_DISCLAIMER).toBe(

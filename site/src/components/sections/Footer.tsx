@@ -5,7 +5,7 @@ export const MEDICAL_DISCLAIMER =
   "Pulse n'est pas un dispositif médical. Le score et les ajustements sont des repères d'entraînement, pas un avis médical.";
 
 const linkClass =
-  "rounded-sm text-[15px] text-paper/80 underline decoration-transparent decoration-2 underline-offset-[6px] transition-colors hover:text-paper hover:decoration-paper/60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-signal";
+  "focus-ring rounded-sm text-[15px] text-paper/80 underline decoration-transparent decoration-2 underline-offset-[6px] transition-colors hover:text-paper hover:decoration-paper/60";
 
 const PRODUCT = [
   { href: "#score", label: "Le score" },
@@ -32,7 +32,7 @@ function Column({ title, children }: { title: string; children: React.ReactNode 
  */
 export function Footer({ anchorBase = "" }: { anchorBase?: string } = {}) {
   return (
-    <footer className="relative isolate overflow-clip border-t border-paper/15 bg-ink text-paper">
+    <footer className="focus-on-ink relative isolate overflow-clip border-t border-paper/15 bg-ink text-paper">
       <div className="relative mx-auto max-w-6xl px-4 pt-16 sm:px-6 sm:pt-20">
         <div className="grid gap-14 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-20">
           <div>
@@ -40,7 +40,7 @@ export function Footer({ anchorBase = "" }: { anchorBase?: string } = {}) {
               href={STUDIO_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block rounded-sm font-display text-[clamp(1.6rem,1.2rem+1.6vw,2.4rem)] leading-[1] font-black tracking-[-0.04em] text-balance underline decoration-paper/25 decoration-2 underline-offset-[8px] transition-colors hover:decoration-paper focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-signal"
+              className="focus-ring inline-block rounded-sm font-display text-[clamp(1.6rem,1.2rem+1.6vw,2.4rem)] leading-[1] font-black tracking-[-0.04em] text-balance underline decoration-paper/25 decoration-2 underline-offset-[8px] transition-colors hover:decoration-paper"
             >
               Pulse par Seonay Studio ↗
             </a>
@@ -68,7 +68,7 @@ export function Footer({ anchorBase = "" }: { anchorBase?: string } = {}) {
               </li>
               <li>
                 <a href={PRIVACY_URL} target="_blank" rel="noopener noreferrer" className={linkClass}>
-                  Confidentialité
+                  Politique de confidentialité ↗
                 </a>
               </li>
               <li>

@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import { AppStoreBadge } from "@/components/AppStoreBadge";
+import { TODAY_SCREEN_ALT } from "./features-data";
 import { Grain } from "@/components/visual/Grain";
 import { PhoneFrame } from "@/components/visual/PhoneFrame";
 import { PulseTrace } from "@/components/visual/PulseTrace";
@@ -58,7 +59,7 @@ function PhoneFan() {
       />
       <PhoneFrame
         src="/screens/today.jpg"
-        alt="L'écran Aujourd'hui de Pulse : un score de récupération de 58 sur 100, en fatigue modérée, et la séance du jour."
+        alt={TODAY_SCREEN_ALT}
         priority
         sizes="(min-width: 1024px) 320px, 55vw"
         className="fan-center dev-fan"
@@ -118,7 +119,7 @@ export function Hero() {
           <AppStoreBadge height={48} />
           <a
             href="#score"
-            className="rounded-sm text-[15px] font-medium text-ink underline decoration-rule decoration-2 underline-offset-[6px] transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-signal"
+            className="focus-ring rounded-sm text-[15px] font-medium text-ink underline decoration-rule decoration-2 underline-offset-[6px] transition-colors hover:decoration-ink"
           >
             Voir comment marche le score ↓
           </a>

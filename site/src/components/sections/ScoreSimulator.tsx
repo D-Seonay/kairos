@@ -452,14 +452,14 @@ export function ScoreSimulator() {
           </div>
 
           {/* The slab: dial, category, factors */}
-          <div className="sim-slab relative isolate overflow-hidden rounded-[30px] border border-rule bg-[#fbfaf7] px-5 pt-8 pb-6 sm:px-10 sm:pt-10">
+          <div className="sim-slab relative isolate overflow-hidden rounded-[30px] border border-rule bg-card px-5 pt-8 pb-6 sm:px-10 sm:pt-10">
             <div aria-hidden="true" className="sim-slab-field pointer-events-none absolute inset-0 -z-10">
               <HalftoneField light={light} ink={1} interactive />
             </div>
 
             <p
               aria-hidden="true"
-              className="inline-flex items-center rounded-full border border-ink/10 bg-[#fbfaf7] px-3 py-1.5 font-mono text-[11px] tracking-[0.18em] text-muted uppercase"
+              className="inline-flex items-center rounded-full border border-ink/10 bg-card px-3 py-1.5 font-mono text-[11px] tracking-[0.18em] text-muted uppercase"
             >
               Récupération
             </p>
@@ -496,7 +496,7 @@ export function ScoreSimulator() {
         {/* The sample session, rebuilt for the category */}
         <div className="mt-12 grid gap-10 border-t-2 border-ink pt-8 lg:mt-16 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-14">
           <div>
-            <h3 id="sim-session" className="flex items-baseline justify-between gap-4">
+            <h3 className="flex items-baseline justify-between gap-4">
               <span className="font-display text-[26px] leading-none font-black tracking-[-0.035em] text-ink">
                 Séance d&apos;exemple : Push
               </span>

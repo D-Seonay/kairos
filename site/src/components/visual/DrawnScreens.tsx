@@ -108,7 +108,7 @@ function PillChip() {
   );
 }
 
-const card = "rounded-[1.25em] bg-[#fbfaf7] shadow-[0_0.1em_0.6em_rgb(20_20_20/0.06)]";
+const card = "rounded-[1.25em] bg-card shadow-[0_0.1em_0.6em_rgb(20_20_20/0.06)]";
 
 /** The app's floating tab bar; the Compléments screen opens from Aujourd'hui. */
 function TabBar() {
@@ -120,7 +120,7 @@ function TabBar() {
     { label: "Profil", icon: <path d="M12 4a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-7.5 16c.6-3.6 3.6-6 7.5-6s6.9 2.4 7.5 6z" /> },
   ];
   return (
-    <div className="absolute inset-x-[0.9em] bottom-[1.1em] grid grid-cols-5 rounded-full bg-[#fbfaf7]/95 p-[0.3em] shadow-[0_0.3em_1.2em_rgb(20_20_20/0.12)]">
+    <div className="absolute inset-x-[0.9em] bottom-[1.1em] grid grid-cols-5 rounded-full bg-card/95 p-[0.3em] shadow-[0_0.3em_1.2em_rgb(20_20_20/0.12)]">
       {tabs.map((tab, index) => (
         <span
           key={tab.label}
@@ -159,13 +159,13 @@ export function SupplementsScreen({ label, className }: DrawnProps) {
 
       {/* Inline navigation title, pushed from Aujourd'hui, with « + » to add a supplement. */}
       <div className="mt-[0.9em] grid grid-cols-[2.2em_1fr_2.2em] items-center px-[1.1em]">
-        <span className="grid size-[2.2em] place-items-center rounded-full bg-[#fbfaf7] shadow-[0_0.1em_0.5em_rgb(20_20_20/0.08)]">
+        <span className="grid size-[2.2em] place-items-center rounded-full bg-card shadow-[0_0.1em_0.5em_rgb(20_20_20/0.08)]">
           <svg viewBox="0 0 10 16" className="h-[0.85em]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <path d="M8 2L2 8l6 6" />
           </svg>
         </span>
         <p className="text-center text-[1em] font-semibold">Compléments</p>
-        <span className="grid size-[2.2em] place-items-center rounded-full bg-[#fbfaf7] text-[1.2em] leading-none shadow-[0_0.1em_0.5em_rgb(20_20_20/0.08)]">
+        <span className="grid size-[2.2em] place-items-center rounded-full bg-card text-[1.2em] leading-none shadow-[0_0.1em_0.5em_rgb(20_20_20/0.08)]">
           +
         </span>
       </div>

@@ -1,7 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { FEATURES } from "./features-data";
+import { renderToStaticMarkup } from "react-dom/server";
+import { CONTACT_FRAMES } from "@/components/visual/ContactSheet";
+import { FEATURES, TODAY_SCREEN_ALT } from "./features-data";
+import { Hero } from "./Hero";
 
 const PUBLIC = path.resolve(import.meta.dirname, "../../../public");
 
@@ -54,6 +57,14 @@ describe("FEATURES", () => {
     expect(score.alt).toMatch(/estimé/);
     expect(score.alt).toMatch(/pas de donnée/);
     expect(score.alt).not.toMatch(/détail sommeil/);
+  });
+
+  it("gives today.jpg one alternative text everywhere, the accurate one", () => {
+    const score = FEATURES.find((feature) => feature.id === "score")!;
+    expect(score.alt).toBe(TODAY_SCREEN_ALT);
+    expect(CONTACT_FRAMES.find((frame) => frame.src === "/screens/today.jpg")?.alt).toBe(TODAY_SCREEN_ALT);
+    const hero = new DOMParser().parseFromString(renderToStaticMarkup(<Hero />), "text/html");
+    expect(hero.querySelector('img[src*="today"]')?.getAttribute("alt")).toBe(TODAY_SCREEN_ALT);
   });
 
   it("describes the supplements drawing with what the app shows, regularity over 30 days", () => {

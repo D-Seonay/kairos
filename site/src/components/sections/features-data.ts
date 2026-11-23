@@ -16,6 +16,14 @@ export type Feature = {
   alt: string;
 };
 
+/**
+ * The one alternative text of public/screens/today.jpg, shared by the hero, the
+ * contact sheet and the feature list: the score is an estimate, and the screen
+ * names what is missing.
+ */
+export const TODAY_SCREEN_ALT =
+  "L'écran Aujourd'hui de Pulse : un score de récupération de 58 sur 100, en fatigue modérée, estimé. Sous le score, ce qui manque : pas de donnée de sommeil ni de FC repos cette nuit, et la ligne de base de variabilité en cours.";
+
 export const FEATURES: Feature[] = [
   {
     id: "score",
@@ -24,7 +32,7 @@ export const FEATURES: Feature[] = [
     title: "Ton score, chaque matin.",
     body: "Pulse lit ton sommeil, ta variabilité cardiaque et ta fréquence cardiaque au repos dans Apple Santé, et les compare à ta propre ligne de base. Tu vois ce qui explique le score, et ce qui manque quand une mesure est absente. Pas de montre ? Un check-in de trois questions prend le relais.",
     screen: "/screens/today.jpg",
-    alt: "L'écran Aujourd'hui de Pulse : un score de récupération de 58 sur 100, en fatigue modérée, estimé. Sous le score, ce qui manque : pas de donnée de sommeil ni de FC repos cette nuit, et la ligne de base de variabilité en cours.",
+    alt: TODAY_SCREEN_ALT,
   },
   {
     id: "seance",

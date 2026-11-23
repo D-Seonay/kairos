@@ -79,7 +79,7 @@ export type ScoreDialProps = {
  * dial is hidden from assistive tech. The number is the rounded value, as
  * RecoveryGauge.roundedScore.
  */
-export function ScoreDial({ value, category, cardColor = "#fbfaf7", className }: ScoreDialProps) {
+export function ScoreDial({ value, category, cardColor = "var(--color-card)", className }: ScoreDialProps) {
   const score = clampScore(value);
   const fraction = score / 100;
   const tone = TONE[category];

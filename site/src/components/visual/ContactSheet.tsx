@@ -4,12 +4,13 @@ import Image from "next/image";
 import { useRef, useState, type PointerEvent } from "react";
 import { useInView } from "@/components/motion/useInView";
 import { useReducedMotion } from "@/components/motion/useReducedMotion";
+import { TODAY_SCREEN_ALT } from "@/components/sections/features-data";
 
 /** The five raw captures, in the order of the roll. */
 export const CONTACT_FRAMES = [
   {
     src: "/screens/today.jpg",
-    alt: "Aujourd'hui : le score de récupération du matin, 58 sur 100, en fatigue modérée.",
+    alt: TODAY_SCREEN_ALT,
   },
   {
     src: "/screens/workout.jpg",
@@ -74,7 +75,7 @@ export function ContactSheet({ className }: { className?: string }) {
       aria-label="Planche contact : cinq écrans de Pulse"
       tabIndex={0}
       className={[
-        "contact-scroller overflow-x-auto overscroll-x-contain rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-signal",
+        "contact-scroller focus-ring overflow-x-auto overscroll-x-contain rounded-sm",
         className,
       ]
         .filter(Boolean)
