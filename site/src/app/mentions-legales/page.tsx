@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 };
 
 const link =
-  "rounded-sm underline decoration-rule decoration-2 underline-offset-[5px] transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-signal";
+  "focus-ring rounded-sm underline decoration-rule decoration-2 underline-offset-[5px] transition-colors hover:decoration-ink";
 
 function ExternalLink({ href, children }: { href: string; children: ReactNode }) {
   return (

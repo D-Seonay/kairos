@@ -6,6 +6,8 @@
   --color-muted: #68655f;
   --color-rule: #cfc9bc;
   --color-signal: #ff4f2e;
+  /* The lifted card of the app: a hair lighter than the paper. */
+  --color-card: #fbfaf7;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
@@ -14,6 +16,21 @@
 
 :root {
   color-scheme: light;
+}
+
+/*
+ * One focus style for the whole site. Signal on paper is only about 2.8:1
+ * (WCAG 1.4.11 asks for 3:1), so the ring is ink there; on the ink sections
+ * (.focus-on-ink) it is the signal, about 5:1. The offset is overridable per
+ * element with --focus-offset.
+ */
+.focus-ring:focus-visible {
+  outline: 2px solid var(--focus-color, var(--color-ink));
+  outline-offset: var(--focus-offset, 4px);
+}
+
+.focus-on-ink {
+  --focus-color: var(--color-signal);
 }
 
 body {
@@ -369,13 +386,13 @@ html {
 .sim-range:focus-visible::-webkit-slider-thumb {
   box-shadow:
     0 0 0 3px var(--color-paper),
-    0 0 0 5px var(--color-signal);
+    0 0 0 5px var(--color-ink);
 }
 
 .sim-range:focus-visible::-moz-range-thumb {
   box-shadow:
     0 0 0 3px var(--color-paper),
-    0 0 0 5px var(--color-signal);
+    0 0 0 5px var(--color-ink);
 }
 
 /* Inner marks sit under the value they name, on the thumb's travel. */
@@ -1331,7 +1348,7 @@ html {
 }
 
 .faq-summary:focus-visible {
-  outline: 2px solid var(--color-signal);
+  outline: 2px solid var(--color-ink);
   outline-offset: 2px;
 }
 

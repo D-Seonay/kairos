@@ -46,7 +46,7 @@ export function AppStoreBadge({
         href={APP_STORE_URL}
         aria-label="Télécharger Pulse dans l'App Store"
         className={[
-          "inline-flex shrink-0 rounded-[12px] focus-visible:outline-2 focus-visible:outline-offset-[-6px] focus-visible:outline-signal",
+          "focus-ring inline-flex shrink-0 rounded-[12px] [--focus-offset:-6px]",
           className,
         ]
           .filter(Boolean)

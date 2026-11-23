@@ -37,7 +37,7 @@ export default function NotFound() {
           </p>
           <Link
             href="/"
-            className="mt-8 inline-flex h-12 items-center rounded-full bg-ink px-6 text-[15px] font-medium text-paper transition-colors hover:bg-ink/85 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-signal"
+            className="focus-ring mt-8 inline-flex h-12 items-center rounded-full bg-ink px-6 text-[15px] font-medium text-paper transition-colors hover:bg-ink/85"
           >
             Retour à l&apos;accueil
           </Link>

@@ -12,7 +12,7 @@ export function FinalCta() {
   return (
     <section
       aria-labelledby="final-title"
-      className="relative isolate overflow-clip bg-ink text-paper"
+      className="focus-on-ink relative isolate overflow-clip bg-ink text-paper"
     >
       <RegistrationMarks className="text-paper/35!" />
 

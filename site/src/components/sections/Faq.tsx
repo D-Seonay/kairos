@@ -41,7 +41,7 @@ export function Faq() {
             href={SUPPORT_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-7 inline-block rounded-sm text-[15px] font-medium text-ink underline decoration-rule decoration-2 underline-offset-[6px] transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-signal"
+            className="focus-ring mt-7 inline-block rounded-sm text-[15px] font-medium text-ink underline decoration-rule decoration-2 underline-offset-[6px] transition-colors hover:decoration-ink"
           >
             Toute l&apos;assistance ↗
           </a>
