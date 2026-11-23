@@ -18,8 +18,12 @@ const focusRing =
  * Fixed nav. Transparent over the top of the hero, then translucent paper with
  * a blur once the page scrolls. Under 768 px the links fold into a disclosure
  * menu (button with aria-expanded, Escape closes it and returns focus).
+ * `anchorBase="/"` is for the other pages (legal notice, 404): the links lead
+ * back to the home sections, and the nav is there at once, no hero sequence.
  */
-export function Nav() {
+export function Nav({ anchorBase = "" }: { anchorBase?: string } = {}) {
+  // On other pages than the home, section links and the logo go back to the home page.
+  const onHome = anchorBase === "";
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const menuId = useId();
@@ -72,10 +76,10 @@ export function Nav() {
 
       <nav
         aria-label="Navigation principale"
-        className="dev-emerge mx-auto flex h-16 max-w-6xl items-center justify-between gap-6 px-4 sm:px-6 md:h-[4.5rem]"
-        style={{ "--d": "0.95s" } as React.CSSProperties}
+        className={`${onHome ? "dev-emerge " : ""}mx-auto flex h-16 max-w-6xl items-center justify-between gap-6 px-4 sm:px-6 md:h-[4.5rem]`}
+        style={onHome ? ({ "--d": "0.95s" } as React.CSSProperties) : undefined}
       >
-        <a href="#top" className={`flex items-center gap-2.5 ${focusRing}`}>
+        <a href={`${anchorBase}#top`} className={`flex items-center gap-2.5 ${focusRing}`}>
           <Image
             src="/icon/light-1024.png"
             alt=""
@@ -89,7 +93,7 @@ export function Nav() {
         <ul className="hidden items-center gap-7 text-[14px] md:flex">
           {LINKS.map((link) => (
             <li key={link.href}>
-              <a href={link.href} className={`text-ink/80 transition-colors hover:text-ink ${focusRing}`}>
+              <a href={`${anchorBase}${link.href}`} className={`text-ink/80 transition-colors hover:text-ink ${focusRing}`}>
                 {link.label}
               </a>
             </li>
@@ -125,7 +129,7 @@ export function Nav() {
           {LINKS.map((link) => (
             <li key={link.href} className="border-b border-rule/70">
               <a
-                href={link.href}
+                href={`${anchorBase}${link.href}`}
                 onClick={() => setOpen(false)}
                 className={`block py-3.5 font-display text-2xl font-black tracking-[-0.03em] ${focusRing}`}
               >

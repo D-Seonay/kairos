@@ -1418,3 +1418,28 @@ html {
   -webkit-mask-image: linear-gradient(to bottom, #000 25%, rgb(0 0 0 / 0.25));
   mask-image: linear-gradient(to bottom, #000 25%, rgb(0 0 0 / 0.25));
 }
+
+/* ---------- Annex pages: legal notice, 404 ---------- */
+
+/* A strip of halftone dots that thins out to the right, like the edge of a screen print. */
+.legal-dots {
+  background-image: radial-gradient(circle, var(--color-ink) 0 1.6px, transparent 2px);
+  background-size: 8px 8px;
+  -webkit-mask-image: linear-gradient(to right, #000, transparent 85%);
+  mask-image: linear-gradient(to right, #000, transparent 85%);
+}
+
+/* A numeral drawn in ink dots, the way the end title of the footer is drawn in paper dots. */
+.dot-numeral {
+  font-family: var(--font-display);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.06em;
+  user-select: none;
+  background-image: radial-gradient(circle, var(--color-ink) 0 2.6px, transparent 3.1px);
+  background-size: 9px 9px;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}

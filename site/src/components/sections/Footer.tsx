@@ -28,8 +28,9 @@ function Column({ title, children }: { title: string; children: React.ReactNode 
  * signature, three columns (the contact one only exists when CONTACT_EMAIL is
  * set, never a made-up address), the medical notice, and the name of the app
  * as an end title in halftone dots, cropped by the edge of the page.
+ * `anchorBase="/"` makes the section links work from the other pages.
  */
-export function Footer() {
+export function Footer({ anchorBase = "" }: { anchorBase?: string } = {}) {
   return (
     <footer className="relative isolate overflow-clip border-t border-paper/15 bg-ink text-paper">
       <div className="relative mx-auto max-w-6xl px-4 pt-16 sm:px-6 sm:pt-20">
@@ -53,7 +54,7 @@ export function Footer() {
             <Column title="Produit">
               {PRODUCT.map((link) => (
                 <li key={link.href}>
-                  <a href={link.href} className={linkClass}>
+                  <a href={`${anchorBase}${link.href}`} className={linkClass}>
                     {link.label}
                   </a>
                 </li>
