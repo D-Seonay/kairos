@@ -55,26 +55,25 @@ test.describe("reduced motion", () => {
     ).first();
     const firstScreen = page.getByRole("img", { name: /Aujourd'hui de Pulse/ }).first();
 
-    await expect(h1).toBeInViewport({ timeout: 500 });
-    await expect(h1).toBeVisible({ timeout: 500 });
-    await expect(page.getByText(/(Bientôt|Disponible) sur iPhone/)).toBeVisible({ timeout: 500 });
-    await expect(badge).toBeVisible({ timeout: 500 });
-    await expect(firstScreen).toBeVisible({ timeout: 500 });
+    const pill = page.getByText(/(Bientôt|Disponible) sur iPhone/);
 
-    // The h1 and every ancestor that could hide it, or the words inside it.
-    const opacities = await h1.evaluate((node) => {
-      const chain: number[] = [];
-      for (let el: Element | null = node; el; el = el.parentElement) {
-        chain.push(Number(getComputedStyle(el).opacity));
-      }
-      for (const child of node.querySelectorAll("*")) chain.push(Number(getComputedStyle(child).opacity));
-      return chain;
-    });
-    expect(opacities.length).toBeGreaterThan(1);
-    expect(opacities.every((opacity) => opacity === 1)).toBe(true);
-    expect(
-      await h1.evaluate((node) => Number(getComputedStyle(node).opacity)),
-    ).toBe(1);
+    await expect(h1).toBeInViewport({ timeout: 500 });
+    for (const target of [h1, pill, badge, firstScreen]) await expect(target).toBeVisible({ timeout: 500 });
+
+    // `toBeVisible` ignores opacity: read the computed opacity of each element,
+    // of every ancestor that could hide it, and of what is inside it.
+    for (const [name, target] of Object.entries({ h1, pill, badge, firstScreen })) {
+      const opacities = await target.evaluate((node) => {
+        const chain: number[] = [];
+        for (let el: Element | null = node; el; el = el.parentElement) {
+          chain.push(Number(getComputedStyle(el).opacity));
+        }
+        for (const child of node.querySelectorAll("*")) chain.push(Number(getComputedStyle(child).opacity));
+        return chain;
+      });
+      expect(opacities.length, name).toBeGreaterThan(1);
+      expect(opacities.filter((opacity) => opacity !== 1), `${name}: opacities in its chain`).toEqual([]);
+    }
   });
 
   test("the hero screen and the badge have no running animation", async ({ page }) => {
