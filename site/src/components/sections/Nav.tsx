@@ -83,6 +83,7 @@ export function Nav({ anchorBase = "" }: { anchorBase?: string } = {}) {
           <Image
             src="/icon/light-1024.png"
             alt=""
+            aria-hidden="true"
             width={64}
             height={64}
             className="size-8 rounded-[9px] shadow-[0_0_0_1px_rgb(20_20_20/0.08)]"

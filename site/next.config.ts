@@ -6,6 +6,10 @@ assertPublishable(process.env, CONTACT_EMAIL);
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  images: {
+    // AVIF first: the raw captures are big, and the hero loads three of them.
+    formats: ["image/avif", "image/webp"],
+  },
   partialPrefetching: true,
   turbopack: {
     rules: {

@@ -262,10 +262,16 @@ html {
   }
 }
 
-/* Out of the developer: soft and pale, then sharp and dense. */
+/*
+ * Out of the developer: soft and pale, then sharp and dense. It starts at 1 %
+ * rather than 0: Chrome never reports an element that is first painted at
+ * opacity 0 as a Largest Contentful Paint candidate, so a title that fades in
+ * from nothing leaves the page without any LCP at all. At 1 % (and blurred, under
+ * the darkroom) it is invisible, but it exists from the first paint.
+ */
 @keyframes dev-emerge {
   from {
-    opacity: 0;
+    opacity: 0.01;
     filter: blur(12px) contrast(0.4) brightness(1.3);
   }
   to {
