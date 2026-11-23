@@ -435,6 +435,122 @@ html {
   mask-size: 5px 5px;
 }
 
+/* The dot radius of the dissolve, registered so the keyframes can interpolate it. */
+@property --r {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 4px;
+}
+
+/*
+ * The simulator's entrances and exits (usePresence marks the phase). The final
+ * state is the default, so reduced motion, which never sets a phase, just shows it.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .sim-trame[data-phase="enter"] {
+    animation: sim-dissolve-in 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+
+  .sim-trame[data-phase="exit"] {
+    animation: sim-dissolve-out 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .sim-set[data-phase="enter"] {
+    animation: sim-set-in 0.4s cubic-bezier(0.3, 1.7, 0.5, 1) calc(var(--i, 0) * 0.04s) both;
+  }
+
+  .sim-set[data-phase="exit"] {
+    animation: sim-set-out 0.2s ease-in forwards;
+  }
+
+  .sim-cross[data-phase="enter"] path {
+    stroke-dasharray: 1 1;
+    animation: sim-pen 0.42s cubic-bezier(0.6, 0, 0.3, 1) calc(0.1s + var(--i, 0) * 0.3s) both;
+  }
+
+  .sim-cross[data-phase="exit"] {
+    animation: sim-fade-out 0.3s linear forwards;
+  }
+
+  .sim-reason[data-phase="enter"] {
+    animation: sim-reason-in 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  .sim-reason[data-phase="exit"] {
+    position: absolute;
+    inset-inline: 0;
+    pointer-events: none;
+    animation: sim-reason-out 0.18s linear forwards;
+  }
+}
+
+@keyframes sim-dissolve-in {
+  from {
+    --r: 0px;
+  }
+  to {
+    --r: 4px;
+  }
+}
+
+@keyframes sim-dissolve-out {
+  from {
+    --r: 4px;
+  }
+  to {
+    --r: 0px;
+  }
+}
+
+@keyframes sim-set-in {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes sim-set-out {
+  to {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+
+@keyframes sim-pen {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes sim-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes sim-reason-in {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes sim-reason-out {
+  to {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+}
+
 /* ---------- Features: pinned phone, halftone screen swap ---------- */
 
 /* The radius of the dots in the swap mask, animated (registered so it interpolates). */

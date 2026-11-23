@@ -1,7 +1,7 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useId, useMemo, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type CSSProperties, type RefObject } from "react";
+import { usePresence } from "@/components/motion/usePresence";
 import { useReducedMotion } from "@/components/motion/useReducedMotion";
 import { useSpringNumber, type SpringConfig } from "@/components/motion/useSpringNumber";
 import { Grain } from "@/components/visual/Grain";
@@ -64,16 +64,6 @@ function announcement(displayScore: number, category: Category, reasons: string[
 }
 
 // ---------- Motion helpers ----------
-
-/** AnimatePresence, or nothing at all under reduced motion: no exit animation, removed nodes go at once. */
-function Presence({ reduced, children, mode }: { reduced: boolean; children: ReactNode; mode?: "sync" | "popLayout" }) {
-  if (reduced) return <>{children}</>;
-  return (
-    <AnimatePresence initial={false} mode={mode}>
-      {children}
-    </AnimatePresence>
-  );
-}
 
 /** A number that rolls to its new value, like a film counter. */
 function Counter({ value, reduced, format }: { value: number; reduced: boolean; format: (value: number) => string }) {
@@ -180,47 +170,48 @@ const FACTORS = [
 
 /** The category name, changing through a halftone dissolve: the old word breaks into dots as the new one fills in. */
 function CategoryWord({ category, reduced }: { category: Category; reduced: boolean }) {
+  const words = usePresence([category], (value) => value, reduced, 500);
   return (
     <div aria-hidden="true" className="grid justify-items-center">
-      <Presence reduced={reduced}>
-        <motion.p
-          key={category}
+      {words.map(({ key, item, phase }) => (
+        <p
+          key={key}
+          data-phase={phase}
           className="sim-trame col-start-1 row-start-1 font-display text-[clamp(2rem,1.2rem+3vw,3.1rem)] leading-none font-black tracking-[-0.045em] whitespace-nowrap text-ink"
-          initial={reduced ? false : ({ "--r": "0px" } as never)}
-          animate={{ "--r": "4px" } as never}
-          exit={{ "--r": "0px" } as never}
-          transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
         >
-          {category === "overreached" && (
+          {item === "overreached" && (
             <span className="mr-[0.22em] mb-[0.1em] inline-block size-[0.24em] rounded-full bg-signal align-middle" />
           )}
-          {CATEGORY_LABEL[category]}
-        </motion.p>
-      </Presence>
+          {CATEGORY_LABEL[item]}
+        </p>
+      ))}
     </div>
   );
 }
 
 // ---------- Session ----------
 
+function SetDot({ index, filled, reduced }: { index: number; filled: boolean; reduced: boolean }) {
+  const marks = usePresence(filled ? ["set"] : [], (value) => value, reduced, 200);
+  return (
+    <span className="relative grid size-3 place-items-center rounded-full border border-ink/30">
+      {marks.map(({ key, phase }) => (
+        <span
+          key={key}
+          data-phase={phase}
+          className="sim-set absolute inset-[-1px] rounded-full bg-ink"
+          style={{ "--i": index } as CSSProperties}
+        />
+      ))}
+    </span>
+  );
+}
+
 function SetDots({ planned, kept, reduced }: { planned: number; kept: number; reduced: boolean }) {
   return (
     <span aria-hidden="true" className="flex gap-1.5">
       {Array.from({ length: planned }, (_, index) => (
-        <span key={index} className="relative grid size-3 place-items-center rounded-full border border-ink/30">
-          <Presence reduced={reduced}>
-            {index < kept && (
-              <motion.span
-                key="set"
-                className="absolute inset-[-1px] rounded-full bg-ink"
-                initial={reduced ? false : { scale: 0 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0, opacity: 0 }}
-                transition={{ type: "spring", stiffness: 420, damping: 22, delay: reduced ? 0 : index * 0.04 }}
-              />
-            )}
-          </Presence>
-        </span>
+        <SetDot key={index} index={index} filled={index < kept} reduced={reduced} />
       ))}
     </span>
   );
@@ -276,7 +267,7 @@ function useBoxSize(ref: RefObject<Element | null>) {
  * strokes are drawn in the list's own pixels (no stretched view box), so the
  * pen keeps an even width at any aspect ratio.
  */
-function FeltCross({ reduced }: { reduced: boolean }) {
+function FeltCross({ phase }: { phase: "static" | "enter" | "exit" }) {
   const ref = useRef<SVGSVGElement>(null);
   const { width: w, height: h } = useBoxSize(ref);
   const strokes =
@@ -287,22 +278,63 @@ function FeltCross({ reduced }: { reduced: boolean }) {
         ]
       : [];
   return (
-    <svg ref={ref} aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full overflow-visible">
+    <svg
+      ref={ref}
+      aria-hidden="true"
+      data-phase={phase}
+      className="sim-cross pointer-events-none absolute inset-0 h-full w-full overflow-visible"
+    >
       {strokes.map((d, index) => (
-        <motion.path
+        <path
           key={index}
           d={d}
+          pathLength={1}
           fill="none"
           stroke="#ff4f2e"
           strokeWidth={4.5}
           strokeLinecap="round"
-          initial={reduced ? false : { pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.42, delay: reduced ? 0 : 0.1 + index * 0.3, ease: [0.6, 0, 0.3, 1] }}
+          style={{ "--i": index } as CSSProperties}
         />
       ))}
     </svg>
+  );
+}
+
+/**
+ * The reasons Pulse adjusted the session. A reason that leaves fades out
+ * where it stood (out of the flow, like popLayout) while the new ones enter.
+ */
+function Reasons({ reasons, reduced }: { reasons: string[]; reduced: boolean }) {
+  const list = useRef<HTMLUListElement>(null);
+  const tops = useRef(new Map<string, number>());
+  const entries = usePresence(reasons, (reason) => reason, reduced, 180);
+
+  // Remember where each reason stands, so one that leaves can stay put.
+  useEffect(() => {
+    for (const child of list.current?.children ?? []) {
+      const key = child.getAttribute("data-key");
+      if (key && child.getAttribute("data-phase") !== "exit") tops.current.set(key, (child as HTMLElement).offsetTop);
+    }
+  });
+
+  return (
+    <ul ref={list} className="relative mt-4 flex flex-col gap-3">
+      {entries.map(({ key, item, phase }) => (
+        <li
+          key={key}
+          data-key={key}
+          data-phase={phase}
+          ref={(element) => {
+            const top = tops.current.get(key);
+            if (element && phase === "exit" && top !== undefined) element.style.top = `${top}px`;
+          }}
+          className="sim-reason flex gap-3 text-[17px] leading-snug text-ink"
+        >
+          <span aria-hidden="true" className="mt-[0.6em] h-[2px] w-3 shrink-0 bg-ink" />
+          <span>{item}</span>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -320,6 +352,8 @@ export function ScoreSimulator() {
   const [input, setInput] = useState<SimulatorInput>(INITIAL);
   const result = useMemo(() => simulate(input), [input]);
   const session = useMemo(() => adjustSession(SAMPLE_PUSH, result.category), [result.category]);
+
+  const cross = usePresence(session.mobility ? ["cross"] : [], (value) => value, reduced, 300);
 
   const shown = useSpringNumber(result.score, reduced, NEEDLE_SPRING);
   const light = clampScore(shown) / 100;
@@ -482,32 +516,18 @@ export function ScoreSimulator() {
                   <SessionRow key={exercise.name} planned={SAMPLE_PUSH[index]} exercise={exercise} reduced={reduced} />
                 ))}
               </ul>
-              <Presence reduced={reduced}>{session.mobility && <FeltCross key="cross" reduced={reduced} />}</Presence>
+              {cross.map(({ key, phase }) => (
+                <FeltCross key={key} phase={phase} />
+              ))}
             </div>
           </div>
 
           <div>
             <h3 className="font-mono text-[11px] tracking-[0.18em] text-muted uppercase">Ce que Pulse change</h3>
-            <ul className="relative mt-4 flex flex-col gap-3">
-              <Presence reduced={reduced} mode="popLayout">
-                {(session.reasons.length > 0 ? session.reasons : ["Rien : la séance reste telle que prévue."]).map(
-                  (reason) => (
-                    <motion.li
-                      key={reason}
-                      layout={!reduced}
-                      className="flex gap-3 text-[17px] leading-snug text-ink"
-                      initial={reduced ? false : { opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 10, transition: { duration: 0.18 } }}
-                      transition={{ duration: 0.35, ease: [0.2, 0.7, 0.2, 1] }}
-                    >
-                      <span aria-hidden="true" className="mt-[0.6em] h-[2px] w-3 shrink-0 bg-ink" />
-                      <span>{reason}</span>
-                    </motion.li>
-                  ),
-                )}
-              </Presence>
-            </ul>
+            <Reasons
+              reasons={session.reasons.length > 0 ? session.reasons : ["Rien : la séance reste telle que prévue."]}
+              reduced={reduced}
+            />
           </div>
         </div>
       </div>
