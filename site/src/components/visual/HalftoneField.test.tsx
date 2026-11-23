@@ -129,6 +129,32 @@ describe("HalftoneField", () => {
     expect(ctx.fill.mock.calls.length).toBeGreaterThan(painted);
   });
 
+  it("parks the loop while nothing is developed and resumes when ink rises", () => {
+    const { rerender } = render(<HalftoneField light={0.5} ink={0} />);
+    act(() => intersect(true));
+    act(() => flushFrame());
+    act(() => flushFrame());
+    const cleared = ctx.clearRect.mock.calls.length;
+    act(() => flushFrame());
+    act(() => flushFrame());
+    expect(ctx.clearRect.mock.calls.length).toBe(cleared);
+    expect(ctx.fill).not.toHaveBeenCalled();
+
+    rerender(<HalftoneField light={0.5} ink={1} />);
+    act(() => flushFrame());
+    act(() => flushFrame());
+    expect(ctx.fill).toHaveBeenCalled();
+  });
+
+  it("does not paint on prop changes while the loop is running", () => {
+    const { rerender } = render(<HalftoneField light={0.5} ink={1} />);
+    act(() => intersect(true));
+    act(() => flushFrame());
+    const painted = ctx.fill.mock.calls.length;
+    rerender(<HalftoneField light={0.3} ink={1} />);
+    expect(ctx.fill.mock.calls.length).toBe(painted);
+  });
+
   it("draws one static frame and never loops under reduced motion", () => {
     reducedMotion = true;
     render(<HalftoneField light={0.5} ink={1} interactive />);

@@ -51,7 +51,7 @@ function paint(ctx: CanvasRenderingContext2D, s: FieldState, t: number) {
   const reach = cell * POINTER_REACH_IN_CELLS;
   // Exposure swings most at mid light and stays gentle at the extremes.
   const swing = 0.2 + 2.8 * light * (1 - light);
-  const hasPointer = s.target !== null && s.presence > 0.001;
+  const hasPointer = s.presence > 0.001;
 
   ctx.fillStyle = INK;
   ctx.beginPath();
@@ -110,6 +110,10 @@ export function HalftoneField({ light, ink, interactive = false, className }: Ha
     presence: 0,
   });
   const timeRef = useRef(0);
+  /** True while a rAF loop is scheduled, so one-off paints can be skipped. */
+  const loopingRef = useRef(false);
+  /** Set by the loop effect: restarts the loop if it parked itself. */
+  const wakeRef = useRef<(() => void) | null>(null);
   const inView = useInView(canvasRef, "100px");
   const reduced = useReducedMotion();
 
@@ -128,6 +132,8 @@ export function HalftoneField({ light, ink, interactive = false, className }: Ha
       canvas.height = Math.round(s.height * s.dpr);
     };
 
+    // Resizing clears the canvas, so this repaint is not a duplicate of the
+    // loop's next frame: without it one blank frame would reach the screen.
     const redraw = () => {
       resize();
       const ctx = canvas.getContext("2d");
@@ -149,6 +155,8 @@ export function HalftoneField({ light, ink, interactive = false, className }: Ha
     const s = stateRef.current;
     s.light = light;
     s.ink = ink;
+    if (ink > 0) wakeRef.current?.();
+    if (loopingRef.current) return;
     const ctx = canvasRef.current?.getContext("2d");
     if (ctx) paint(ctx, s, timeRef.current);
   }, [light, ink, reduced]);
@@ -164,7 +172,8 @@ export function HalftoneField({ light, ink, interactive = false, className }: Ha
       const rect = canvas.getBoundingClientRect();
       const x = event.clientX - rect.left;
       const y = event.clientY - rect.top;
-      if (s.target === null) s.eased = { x, y };
+      // Snap only when the swell is gone; mid fade-out it glides from where it was.
+      if (s.target === null && s.presence < 0.05) s.eased = { x, y };
       s.target = { x, y };
     };
     const onLeave = () => {
@@ -207,18 +216,27 @@ export function HalftoneField({ light, ink, interactive = false, className }: Ha
       s.presence += ((s.target ? 1 : 0) - s.presence) * (1 - Math.exp(-dt * 6));
 
       paint(ctx, s, timeRef.current);
+      if (s.ink <= 0) {
+        // Nothing to draw (the paint above cleared the canvas): park the loop
+        // until `ink` rises again.
+        frame = 0;
+        loopingRef.current = false;
+        return;
+      }
       frame = requestAnimationFrame(tick);
     };
 
     const start = () => {
-      if (frame === 0 && document.visibilityState === "visible") {
+      if (frame === 0 && document.visibilityState === "visible" && stateRef.current.ink > 0) {
         last = 0;
+        loopingRef.current = true;
         frame = requestAnimationFrame(tick);
       }
     };
     const stop = () => {
       if (frame !== 0) cancelAnimationFrame(frame);
       frame = 0;
+      loopingRef.current = false;
     };
     const onVisibility = () => {
       if (document.visibilityState === "visible") start();
@@ -226,9 +244,11 @@ export function HalftoneField({ light, ink, interactive = false, className }: Ha
     };
 
     document.addEventListener("visibilitychange", onVisibility);
+    wakeRef.current = start;
     start();
     return () => {
       document.removeEventListener("visibilitychange", onVisibility);
+      wakeRef.current = null;
       stop();
     };
   }, [reduced, inView]);
