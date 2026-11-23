@@ -11,6 +11,9 @@ public struct RunTrackBuilder: Sendable, Equatable {
     /// Précision à partir de laquelle le GPS est « Prêt » (m).
     public static let readyAccuracy = 20.0
 
+    /// Sous ce pas depuis le dernier point retenu, le point est du bruit à l'arrêt : il est ignoré (m).
+    public static let minimumStep = 5.0
+
     private static let earthRadius = 6_371_000.0
     private static let kilometer = 1_000.0
     private static let shortKilometer = 100.0
@@ -53,9 +56,11 @@ public struct RunTrackBuilder: Sendable, Equatable {
         let elapsed = point.timestamp.timeIntervalSince(last.timestamp)
         // Vitesse implicite contre le dernier point retenu : un point aberrant isolé n'écarte pas les suivants.
         guard elapsed > 0, step / elapsed <= Self.maxSpeed else { return nil }
+        // Le bruit à l'arrêt ne devient pas le point de référence : le suivant se mesure toujours au dernier point retenu.
+        guard step >= Self.minimumStep else { return nil }
         let before = distanceMeters
         retain(point, distance: step)
-        if step > 0 { lastMovementAt = point.timestamp }
+        lastMovementAt = point.timestamp
         return recordCrossings(from: last.timestamp, elapsed: elapsed, before: before, step: step)
     }
 
@@ -82,6 +87,8 @@ public struct RunTrackBuilder: Sendable, Equatable {
     // MARK: Temps par km
 
     /// Un temps par km passé, pauses retirées ; le dernier km partiel va jusqu'à `end`.
+    /// Un reste de moins de 10 m après le dernier km n'est pas un km partiel (bruit GPS), sauf dans le premier km,
+    /// où la course en cours rend toujours un seul temps partiel.
     public func splits(pauses: [RunPause], end: Date) -> [RunSplit] {
         var splits: [RunSplit] = []
         var previous = 0.0

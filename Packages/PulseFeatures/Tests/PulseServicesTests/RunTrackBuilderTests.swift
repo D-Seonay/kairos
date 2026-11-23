@@ -38,19 +38,25 @@ struct RunTrackBuilderTests {
         #expect(splits.map(\.kilometer) == [1, 2, 3, 4, 5])
     }
 
-    @Test func noisyTraceIsWithinThreePercent() {
+    @Test func noisyTraceIsWithinThreePercent() throws {
         let points = RunTraceFactory.tunnel(meters: 5_000, speed: 3, start: start)
         let builder = live(points)
         #expect(abs(builder.distanceMeters - 5_000) / 5_000 < 0.03)
-        // 20 points imprécis et 1 saut écartés ; les points qui suivent le saut sont de nouveau retenus.
-        #expect(builder.accepted.count == points.count - 21)
+        // Ni les 20 points imprécis ni le saut ne sont retenus, mais les points qui suivent le saut le sont de nouveau.
+        let jump = points[points.count / 2]
+        #expect(!builder.accepted.contains(jump))
+        #expect(builder.accepted.allSatisfy { $0.horizontalAccuracy <= RunTrackBuilder.maxHorizontalAccuracy })
+        let afterJump = builder.accepted.filter { $0.timestamp > jump.timestamp }
+        #expect(afterJump.count > 100)
+        let lastAccepted = try #require(afterJump.last)
+        #expect(end(of: points).timeIntervalSince(lastAccepted.timestamp) < 10)
     }
 
     @Test func pausedPointsAddNoDistance() {
         let trace = RunTraceFactory.withPause(start: start)
         let builder = live(trace.points, pauses: [trace.pause])
         #expect(abs(builder.distanceMeters - 3_000) / 3_000 < 0.01)
-        #expect(builder.accepted.count == trace.points.count - 1_200)
+        #expect(!builder.accepted.contains { isPaused($0, in: [trace.pause]) })
     }
 
     @Test func splitsExcludePausedTime() {
@@ -134,12 +140,32 @@ struct RunTrackBuilderTests {
         var builder = RunTrackBuilder(startedAt: start)
         let altitudes = [0.0, 2, 0, 2, 1, 2.5, 0, 5, 1.5, 6]
         for (second, altitude) in altitudes.enumerated() {
-            var point = RunTraceFactory.point(northMeters: Double(second) * 3, second: second, start: start)
+            var point = RunTraceFactory.point(northMeters: Double(second) * 6, second: second, start: start)
             point.altitude = altitude
             _ = builder.add(point, isPaused: false)
         }
         // Creux à 0 → pic à 5 (+5), creux à 1,5 → 6 (+4,5).
         #expect(builder.elevationGainMeters() == 9.5)
+    }
+
+    @Test func standingJitterAddsNoDistance() throws {
+        var points = RunTraceFactory.clean(meters: 500, speed: 3, start: start)
+        let spot = try #require(points.last)
+        var builder = live(points)
+        let distanceBefore = builder.distanceMeters
+        let movedAt = try #require(builder.lastMovementAt)
+        let metersPerDegree = RunTraceFactory.metersPerDegree
+        for step in 1...1_800 {
+            var still = spot
+            still.timestamp = spot.timestamp.addingTimeInterval(Double(step))
+            still.latitude += 3 * sin(Double(step)) / metersPerDegree
+            still.longitude += 3 * cos(Double(step) * 0.7) / (metersPerDegree * cos(spot.latitude * .pi / 180))
+            points.append(still)
+            builder.add(still, isPaused: false)
+        }
+        #expect(builder.distanceMeters - distanceBefore < 10)
+        #expect(builder.lastMovementAt == movedAt)
+        #expect(builder.accepted.count == live(Array(points.prefix(points.count - 1_800))).accepted.count)
     }
 
     @Test func replayMatchesLiveBuilding() {
