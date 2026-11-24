@@ -100,7 +100,7 @@ public struct TodayView: View {
                 }
                 PulseSectionHeader(String(localized: "Tendances", bundle: .module))
                 LoadCard(content: model.load)
-                TrendTilesView(tiles: model.trends, onOpenSleep: model.canOpenNight ? openNight : nil)
+                TrendTilesView(tiles: model.trends, onOpenSleep: openNightAction)
             }
             .padding(PulseMetrics.spacing)
         }
@@ -108,6 +108,13 @@ public struct TodayView: View {
             await model.refresh()
             await supplements?.load()
         }
+    }
+
+    /// L'action de la tuile Sommeil, seulement quand elle montre une nuit. Propriété typée plutôt qu'un ternaire sur une
+    /// référence de méthode : le compilateur Release échoue sur ce dernier (voir PlanningView, 969406b).
+    private var openNightAction: (() -> Void)? {
+        guard model.canOpenNight else { return nil }
+        return { openNight() }
     }
 
     /// Pousse l'écran Nuit sur la nuit qui s'est terminée ce matin (ou la plus récente).
