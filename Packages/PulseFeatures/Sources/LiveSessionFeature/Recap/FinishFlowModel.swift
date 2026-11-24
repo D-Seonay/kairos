@@ -125,10 +125,17 @@ public final class FinishFlowModel {
         onMinimize()
     }
 
-    /// « Enregistrer » ou « Plus tard » du récap, une fois la séance écrite.
+    /// « Enregistrer » ou « Enregistrer sans noter » du récap, une fois la séance écrite.
     public func recapSaved() {
         recap = nil
         onFinished()
+    }
+
+    /// « Revenir à la séance » du récap : rien n'est encore écrit, la séance reprend telle quelle et « Terminer » ouvrira un
+    /// récap neuf. Sans effet pendant un enregistrement.
+    public func resumeFromRecap() {
+        guard let recap, !recap.isSaving else { return }
+        self.recap = nil
     }
 
     public func dismissError() {

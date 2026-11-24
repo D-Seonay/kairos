@@ -185,6 +185,24 @@ private func savedSessions(_ fixture: LiveFixture) async throws -> [WorkoutSessi
     #expect(flow.recap?.recap?.workingSets == 2)
 }
 
+@MainActor @Test func resumingFromTheRecapWritesNothingAndLetsTheSessionGoOn() async throws {
+    let fixture = LiveFixture()
+    let live = try await fixture.startedModel(LiveFixture.plankLaunch)
+    for set in live.session.exercises[0].sets { await live.tap(set: set.id) }
+    var finished = 0
+    let flow = FinishFlowModel(live: live, onFinished: { finished += 1 })
+    await flow.finishTapped()
+    #expect(flow.recap != nil)
+    flow.resumeFromRecap()
+    #expect(flow.recap == nil)
+    #expect(finished == 0)
+    #expect(try await savedSessions(fixture).isEmpty)
+    #expect(await fixture.service.current() != nil)
+    // « Terminer » rouvre un récap neuf.
+    await flow.finishTapped()
+    #expect(flow.recap != nil)
+}
+
 @MainActor @Test func abandoningAsksFirstThenKeepsTheValidatedSetsAtTheSuggestedEnd() async throws {
     let fixture = LiveFixture()
     try await fixture.seedBenchHistory()

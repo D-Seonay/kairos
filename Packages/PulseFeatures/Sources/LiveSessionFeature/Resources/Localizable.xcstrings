@@ -137,12 +137,42 @@
         }
       }
     },
+    "Enregistrer sans noter" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrer sans noter"
+          }
+        }
+      }
+    },
     "La séance continue en arrière-plan" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "La séance continue en arrière-plan"
+          }
+        }
+      }
+    },
+    "Revenir à la séance" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Revenir à la séance"
+          }
+        }
+      }
+    },
+    "Rien n'est encore enregistré" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien n'est encore enregistré"
           }
         }
       }
@@ -783,16 +813,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Passer le repos"
-          }
-        }
-      }
-    },
-    "Plus tard" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plus tard"
           }
         }
       }
