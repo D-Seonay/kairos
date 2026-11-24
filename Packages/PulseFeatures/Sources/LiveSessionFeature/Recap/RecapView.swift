@@ -246,7 +246,7 @@ public struct RecapView: View {
                 Button(action: onResume) {
                     Text(String(localized: "Revenir à la séance", bundle: .module))
                 }
-                .buttonStyle(LinkButtonStyle())
+                .buttonStyle(PulseDesignSystem.LinkButtonStyle())
                 .accessibilityHint(String(localized: "Rien n'est encore enregistré", bundle: .module))
                 .accessibilityIdentifier(LiveSessionIdentifiers.recapResume)
             }
