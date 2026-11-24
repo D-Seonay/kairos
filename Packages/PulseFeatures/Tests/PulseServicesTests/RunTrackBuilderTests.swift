@@ -52,6 +52,16 @@ struct RunTrackBuilderTests {
         #expect(end(of: points).timeIntervalSince(lastAccepted.timestamp) < 10)
     }
 
+    /// Le premier point livré peut dater d'avant le départ (position en cache, 200 m plus loin) : il n'ouvre pas la course.
+    @Test func pointsBeforeStartAreIgnored() throws {
+        let cached = RunTraceFactory.point(northMeters: -200, second: -5, start: start)
+        let points = RunTraceFactory.clean(meters: 1_000, speed: 3, start: start)
+        let builder = live([cached] + points)
+        #expect(abs(builder.distanceMeters - 1_000) / 1_000 < 0.01)
+        #expect(!builder.accepted.contains(cached))
+        #expect(try #require(builder.accepted.first).timestamp == start)
+    }
+
     @Test func pausedPointsAddNoDistance() {
         let trace = RunTraceFactory.withPause(start: start)
         let builder = live(trace.points, pauses: [trace.pause])

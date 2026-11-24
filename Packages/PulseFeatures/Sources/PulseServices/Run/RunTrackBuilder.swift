@@ -40,10 +40,11 @@ public struct RunTrackBuilder: Sendable, Equatable {
         self.startedAt = startedAt
     }
 
-    /// Ajoute un point. Rend le numéro du km passé, s'il y en a un.
+    /// Ajoute un point. Rend le numéro du km passé, s'il y en a un. Un point d'avant le départ (position en cache) est ignoré.
     @discardableResult
     public mutating func add(_ point: RunTrackPoint, isPaused: Bool) -> Int? {
-        guard !isPaused, point.horizontalAccuracy >= 0, point.horizontalAccuracy <= Self.maxHorizontalAccuracy else { return nil }
+        guard !isPaused, point.timestamp >= startedAt, point.horizontalAccuracy >= 0,
+              point.horizontalAccuracy <= Self.maxHorizontalAccuracy else { return nil }
         guard let last = accepted.last else {
             retain(point, distance: 0)
             return nil

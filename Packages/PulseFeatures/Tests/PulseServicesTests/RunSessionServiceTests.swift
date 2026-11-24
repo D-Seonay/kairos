@@ -10,16 +10,6 @@ struct RunSessionServiceTests {
         RunTraceFactory.clean(meters: meters, speed: 3, start: RunSessionFixture.start)
     }
 
-    /// `count` points à l'arrêt, un toutes les `every` secondes après `after`, qui ne bougent que de quelques mètres.
-    private func standing(after point: RunTrackPoint, count: Int, every seconds: Double) -> [RunTrackPoint] {
-        (1...count).map { step in
-            var still = point
-            still.timestamp = point.timestamp.addingTimeInterval(Double(step) * seconds)
-            still.longitude += sin(Double(step)) * 0.000_02
-            return still
-        }
-    }
-
     // MARK: Départ
 
     @Test func startWritesADraftAndStartsEverything() async throws {
@@ -85,6 +75,29 @@ struct RunSessionServiceTests {
         var iterator = await fixture.service.gpsPreview().makeAsyncIterator()
         #expect(await iterator.next() == nil)
         #expect(await fixture.location.startCount == 0)
+    }
+
+    /// Une course partie pendant que l'aperçu attendait l'autorisation : l'aperçu se termine sans relancer la localisation, et le
+    /// flux de points de la course reste le sien.
+    @Test func previewDoesNotReplaceARunStartedMeanwhile() async throws {
+        let tracker = GatedRunLocationTracker()
+        let service = RunSessionService(
+            recorder: StubRunWorkoutRecorder(), location: tracker, announcer: StubRunAnnouncer(),
+            activity: StubRunActivityController(), reminders: StubRunReminderScheduler(), drafts: InMemoryRunDraftStore(),
+            workouts: InMemoryWorkoutRepository(), tracks: InMemoryRunTrackRepository(), profiles: InMemoryProfileRepository(),
+            preferences: InMemoryRunPreferencesStore(), spokenText: RunSessionFixture.spokenText,
+            now: { RunSessionFixture.start }, calendar: TestClock.calendar, keepAliveTicks: { _ in AsyncStream { $0.finish() } })
+        let preview = Task { await service.gpsPreview() }
+        await tracker.gate.waitForArrival()
+        _ = try await service.start(.free())
+        await tracker.gate.open()
+
+        var iterator = await preview.value.makeAsyncIterator()
+        try #require(await iterator.next() == nil)
+        #expect(await tracker.inner.startCount == 1)
+        await tracker.inner.push(RunTraceFactory.point(northMeters: 0, second: 1, start: RunSessionFixture.start))
+        await service.waitUntilHandled(points: 1)
+        #expect(await service.current()?.gps == .ready)
     }
 
     // MARK: Annonces, brouillon et Live Activity
@@ -193,7 +206,7 @@ struct RunSessionServiceTests {
         await fixture.push(Array(points[1...]))
         await fixture.service.pause()
         let last = try #require(points.last)
-        await fixture.push(standing(after: last, count: 240, every: 10))
+        await fixture.push(RunTraceFactory.standing(after: last, count: 240, every: 10))
         #expect(await fixture.reminders.calls.last == .cancel)
         #expect(await fixture.service.forgottenEnd() == nil)
     }
@@ -206,7 +219,7 @@ struct RunSessionServiceTests {
         let lastMovement = try #require(RunTrackBuilder.replay(startedAt: fixture.start, points: points, pauses: []).lastMovementAt)
         #expect(await fixture.service.forgottenEnd() == nil)
         let last = try #require(points.last)
-        await fixture.push(standing(after: last, count: 186, every: 10))
+        await fixture.push(RunTraceFactory.standing(after: last, count: 186, every: 10))
         let end = try #require(await fixture.service.forgottenEnd())
         #expect(end == lastMovement)
         let scheduled = try #require(await fixture.reminders.scheduled.last)
@@ -231,5 +244,32 @@ struct RunSessionServiceTests {
         #expect(await fixture.reminders.calls.last == .schedule(fixture.clock.now.addingTimeInterval(RunSessionService.forgottenAfter)))
         fixture.advance(minutes: 31)
         #expect(await fixture.service.forgottenEnd() == fixture.clock.now.addingTimeInterval(-31 * 60))
+    }
+}
+
+/// Une localisation dont la première lecture de l'autorisation attend devant une porte, pour rejouer un départ pendant l'aperçu.
+private actor GatedRunLocationTracker: RunLocationTracking {
+    let inner = StubRunLocationTracker()
+    let gate = Gate()
+    private var isHolding = true
+
+    func authorization() async -> RunLocationAuthorization {
+        if isHolding {
+            isHolding = false
+            await gate.pass()
+        }
+        return await inner.authorization()
+    }
+
+    func requestAuthorization() async -> RunLocationAuthorization {
+        await inner.requestAuthorization()
+    }
+
+    func start() async -> AsyncStream<RunTrackPoint> {
+        await inner.start()
+    }
+
+    func stop() async {
+        await inner.stop()
     }
 }

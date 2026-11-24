@@ -6,11 +6,11 @@ extension RunSessionService {
     /// rattachée au passage si le système l'a gardée.
     public func recoveryOffer() async -> RunRecoveryOffer? {
         guard run == nil, !isTransitioning, let draft = try? await drafts.load() else { return nil }
+        guard await !clearIfAlreadySaved(draft) else { return nil }
         let isStillRecording = await recorder.recoverActiveSession()
-        let distance = draft.locationDenied
-            ? nil : RunTrackBuilder.replay(startedAt: draft.startedAt, points: draft.points, pauses: draft.pauses).distanceMeters
+        let (end, builder) = Self.interruptedEnd(of: draft)
         return RunRecoveryOffer(
-            sessionID: draft.sessionID, distanceMeters: distance, lastPointAt: draft.points.last?.timestamp ?? draft.updatedAt,
+            sessionID: draft.sessionID, distanceMeters: draft.locationDenied ? nil : builder.distanceMeters, lastPointAt: end,
             isStillRecording: isStillRecording)
     }
 
@@ -36,5 +36,27 @@ extension RunSessionService {
         }
         publish()
         return current() ?? snapshot(of: active, at: date)
+    }
+
+    // MARK: Internes
+
+    /// La fin d'une course interrompue, même règle que l'oubli : son dernier déplacement, sa dernière reprise ou son départ, s'il
+    /// précède le dernier point, car les points à l'arrêt ne prolongent pas la course. Sans point (localisation refusée, pas de
+    /// signal), la dernière écriture du brouillon. Rend aussi la course rejouée avec tous ses points.
+    static func interruptedEnd(of draft: RunDraft) -> (end: Date, builder: RunTrackBuilder) {
+        let builder = RunTrackBuilder.replay(startedAt: draft.startedAt, points: draft.points, pauses: draft.pauses)
+        guard let last = draft.points.last?.timestamp else { return (draft.updatedAt, builder) }
+        let lastResume = draft.pauses.compactMap(\.end).max() ?? draft.startedAt
+        let movement = max(builder.lastMovementAt ?? draft.startedAt, lastResume, draft.startedAt)
+        return (min(movement, max(last, draft.startedAt)), builder)
+    }
+
+    /// Un brouillon dont la course est déjà enregistrée (revenu après coup) est vidé : rien n'est proposé ni écrit une seconde fois,
+    /// et une séance HealthKit rattachée pour lui est terminée. Appelé sans course en cours.
+    func clearIfAlreadySaved(_ draft: RunDraft) async -> Bool {
+        guard (try? await workouts.session(id: draft.sessionID)) != nil else { return false }
+        try? await drafts.clear()
+        await recorder.discard()
+        return true
     }
 }

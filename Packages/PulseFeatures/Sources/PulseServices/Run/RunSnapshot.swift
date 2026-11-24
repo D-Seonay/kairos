@@ -55,6 +55,7 @@ public struct RunRecoveryOffer: Sendable, Equatable {
     public var sessionID: UUID
     /// Distance rejouée depuis le brouillon ; `nil` si la localisation était refusée.
     public var distanceMeters: Double?
+    /// L'heure où la course s'arrêtera si elle est enregistrée : son dernier déplacement, pas un point à l'arrêt.
     public var lastPointAt: Date
     public var isStillRecording: Bool
 

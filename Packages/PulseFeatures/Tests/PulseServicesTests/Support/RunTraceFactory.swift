@@ -39,6 +39,16 @@ enum RunTraceFactory {
         return points
     }
 
+    /// `count` points à l'arrêt, un toutes les `every` secondes après `after`, qui ne bougent que de quelques mètres.
+    static func standing(after point: RunTrackPoint, count: Int, every seconds: Double) -> [RunTrackPoint] {
+        (1...count).map { step in
+            var still = point
+            still.timestamp = point.timestamp.addingTimeInterval(Double(step) * seconds)
+            still.longitude += sin(Double(step)) * 0.000_02
+            return still
+        }
+    }
+
     /// La trace propre, avec 20 points consécutifs à 65 m de précision (et très décalés) puis un point isolé
     /// déplacé de 300 m vers l'avant au milieu ; la trace reprend ensuite son chemin normal.
     static func tunnel(meters: Double, speed: Double, start: Date) -> [RunTrackPoint] {

@@ -40,6 +40,8 @@ public actor RunSessionService {
     var keepAliveTask: Task<Void, Never>?
     var previewTask: Task<Void, Never>?
     var previewContinuation: AsyncStream<RunGPSQuality>.Continuation?
+    /// Avance à chaque arrêt de l'aperçu : un aperçu qui attendait le démarrage de la localisation sait qu'il a été arrêté.
+    var previewGeneration = 0
     var snapshotContinuation: AsyncStream<RunSnapshot>.Continuation?
 
     /// Points, FC et tops traités depuis la création, pour que les tests attendent leur traitement sans délai arbitraire.
@@ -105,6 +107,8 @@ public actor RunSessionService {
 
     /// Écran de départ : démarre la localisation et rend la qualité du signal (`ready` à ≤ 20 m) ; arrêtée par `start` ou
     /// `cancelPreview()`. Avec la localisation refusée, le flux se termine aussitôt.
+    ///
+    /// Un départ ou un rattachement pendant les attentes garde la localisation pour sa course : l'aperçu se termine sans la toucher.
     public func gpsPreview() async -> AsyncStream<RunGPSQuality> {
         let (stream, continuation) = AsyncStream.makeStream(of: RunGPSQuality.self)
         guard run == nil, await authorizeLocation() == .authorized else {
@@ -112,9 +116,21 @@ public actor RunSessionService {
             return stream
         }
         await stopPreview()
+        guard run == nil, !isTransitioning else {
+            continuation.finish()
+            return stream
+        }
         continuation.yield(.searching)
         previewContinuation = continuation
+        let generation = previewGeneration
         let points = await location.start()
+        // Arrêté pendant l'attente (départ, annulation, autre aperçu) : celui qui l'a arrêté a aussi arrêté la localisation.
+        // Une course rattachée entre-temps a relancé la sienne, qui ne doit pas être arrêtée.
+        guard generation == previewGeneration, run == nil else {
+            if generation == previewGeneration { previewContinuation = nil }
+            continuation.finish()
+            return stream
+        }
         previewTask = Task {
             var last = RunGPSQuality.searching
             for await point in points {
@@ -238,6 +254,7 @@ extension RunSessionService {
 
     func stopPreview() async {
         guard previewTask != nil || previewContinuation != nil else { return }
+        previewGeneration += 1
         previewTask?.cancel()
         previewTask = nil
         previewContinuation?.finish()

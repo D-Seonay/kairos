@@ -119,19 +119,21 @@ public actor StubRunWorkoutRecorder: RunWorkoutRecording {
     private let recoverable: Bool
     private let failsOnStart: Bool
     private let failsOnWrite: Bool
+    private let failsOnFinish: Bool
     private var heartRates: AsyncStream<Double>.Continuation?
 
     public struct Failure: Error {}
 
     public init(access: HealthWriteAccess = .authorized, grantedOnRequest: HealthWriteAccess = .authorized,
                 hasLiveSession: Bool = false, recoverable: Bool = false, failsOnStart: Bool = false,
-                failsOnWrite: Bool = false) {
+                failsOnWrite: Bool = false, failsOnFinish: Bool = false) {
         self.access = access
         self.grantedOnRequest = grantedOnRequest
         self.hasLiveSession = hasLiveSession
         self.recoverable = recoverable
         self.failsOnStart = failsOnStart
         self.failsOnWrite = failsOnWrite
+        self.failsOnFinish = failsOnFinish
     }
 
     public func writeAccess() async -> HealthWriteAccess {
@@ -164,7 +166,7 @@ public actor StubRunWorkoutRecorder: RunWorkoutRecording {
 
     public func finish(_ entry: RunWorkoutEntry) async throws -> UUID? {
         guard hasLiveSession else { return nil }
-        if failsOnWrite { throw Failure() }
+        if failsOnWrite || failsOnFinish { throw Failure() }
         hasLiveSession = false
         heartRates?.finish()
         heartRates = nil
@@ -194,6 +196,11 @@ public actor StubRunWorkoutRecorder: RunWorkoutRecording {
     public func recoverActiveSession() async -> Bool {
         if recoverable { hasLiveSession = true }
         return hasLiveSession
+    }
+
+    /// La séance vivante s'arrête hors de Pulse (le système l'a terminée) : `finish` ne la trouve plus.
+    public func loseLiveSession() {
+        hasLiveSession = false
     }
 
     /// Livre une fréquence cardiaque au flux ouvert ; sans effet sans séance vivante.

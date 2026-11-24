@@ -22,8 +22,11 @@ extension RunSessionService {
             ? RunTrackBuilder.replay(startedAt: draft.startedAt, points: draft.points.filter { $0.timestamp <= end }, pauses: draft.pauses)
             : active.builder
         // Un échec de l'écriture dans Santé n'empêche pas d'enregistrer la course dans Pulse.
+        let entry = Self.healthEntry(draft, builder: builder, end: end)
         var healthKitID: UUID?
-        if active.recordsHealth { healthKitID = try? await recorder.finish(Self.healthEntry(draft, builder: builder, end: end)) }
+        if active.recordsHealth { healthKitID = try? await recorder.finish(entry) }
+        // Sans séance vivante à terminer (arrêtée par le système, en échec ou jamais partie), l'entraînement est écrit sans elle.
+        if healthKitID == nil, await recorder.writeAccess() == .authorized { healthKitID = try? await recorder.save(entry) }
         if let healthKitID {
             // Gardé avant d'enregistrer la séance : si l'enregistrement échoue, la reprise réutilise cet entraînement.
             draft.healthKitUUID = healthKitID
@@ -37,8 +40,8 @@ extension RunSessionService {
         return recap
     }
 
-    /// Enregistre la course du brouillon, interrompue sans séance HealthKit vivante : elle s'arrête à son dernier point. L'entraînement
-    /// est écrit dans Santé, sauf s'il l'a déjà été par une fin interrompue.
+    /// Enregistre la course du brouillon, interrompue sans séance HealthKit vivante : elle s'arrête à son dernier déplacement.
+    /// L'entraînement est écrit dans Santé, sauf s'il l'a déjà été par une fin interrompue.
     public func saveInterrupted() async throws -> RunRecapData {
         guard !isTransitioning else { throw RunSessionError.noRun }
         let stored: RunDraft
@@ -49,13 +52,16 @@ extension RunSessionService {
             if !active.draft.locationDenied { await location.stop() }
             stored = active.draft
         } else {
-            guard let loaded = try await drafts.load() else { throw RunSessionError.noRun }
+            guard let loaded = try await drafts.load(), await !clearIfAlreadySaved(loaded) else { throw RunSessionError.noRun }
+            // Une séance HealthKit rattachée au lancement, sans course pour la mener, est terminée avant d'écrire l'entraînement.
+            await recorder.discard()
             stored = loaded
         }
-        let end = stored.points.last?.timestamp ?? stored.updatedAt
+        let end = Self.interruptedEnd(of: stored).end
         var draft = stored
         draft.pauses = Self.pauses(stored.pauses, closedAt: end)
-        let builder = RunTrackBuilder.replay(startedAt: draft.startedAt, points: draft.points, pauses: draft.pauses)
+        let builder = RunTrackBuilder.replay(
+            startedAt: draft.startedAt, points: draft.points.filter { $0.timestamp <= end }, pauses: draft.pauses)
         // Une fin dont l'enregistrement a échoué a déjà écrit l'entraînement : il n'est pas écrit une seconde fois.
         var healthKitID = draft.healthKitUUID
         if healthKitID == nil, await recorder.writeAccess() == .authorized {
