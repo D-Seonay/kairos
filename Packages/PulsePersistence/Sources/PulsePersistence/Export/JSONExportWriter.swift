@@ -47,6 +47,21 @@ public enum JSONExportWriter {
 }
 
 enum ExportNaming {
+    /// Le chemin libre d'une photo : `photoPath`, puis avec 4 caractères de son identifiant (8, 12… en cas de nouvelle collision).
+    static func uniquePhotoPath(_ photo: SessionPhoto, timeZone: TimeZone, taken: Set<String>) -> String {
+        let base = photoPath(photo, timeZone: timeZone)
+        guard taken.contains(base) else { return base }
+        let id = photo.id.uuidString.lowercased().replacingOccurrences(of: "-", with: "")
+        let stem = base.dropLast(".jpg".count)
+        var length = 4
+        while length < id.count {
+            let candidate = "\(stem)-\(id.prefix(length)).jpg"
+            if !taken.contains(candidate) { return candidate }
+            length += 4
+        }
+        return "\(stem)-\(id).jpg"
+    }
+
     /// `photos/AAAA-MM-JJ-<8 premiers caractères de la séance>-<rang + 1>.jpg`, le jour étant celui de la prise de vue.
     static func photoPath(_ photo: SessionPhoto, timeZone: TimeZone) -> String {
         let session = photo.sessionID.uuidString.prefix(8).lowercased()

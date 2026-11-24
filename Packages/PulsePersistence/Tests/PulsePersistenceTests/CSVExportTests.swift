@@ -147,3 +147,31 @@ private func photoArchive() async throws -> PhotoArchive {
     let folder = try #require(exporter.lastCSVDirectory(in: directory))
     #expect(!FileManager.default.fileExists(atPath: folder.appendingPathComponent("photos").path))
 }
+
+/// Deux appareils peuvent donner le même rang à deux photos de la même séance le même jour : deux fichiers, chacun nommé dans sa ligne.
+@Test func csvArchiveKeepsBothPhotosWhenNamesCollide() async throws {
+    let box = try ModelContainerBox()
+    let repo = SwiftDataSessionPhotoRepository(modelContainer: box.container)
+    let sessionID = try #require(UUID(uuidString: "ABCDEF12-0000-0000-0000-000000000001"))
+    let first = Sample.sessionPhoto(sessionID: sessionID, order: 0, createdAt: Fixed.t0)
+    let second = Sample.sessionPhoto(sessionID: sessionID, order: 0, createdAt: Fixed.t1)
+    try await repo.add(first, image: Sample.photoImage(seed: 1))
+    try await repo.add(second, image: Sample.photoImage(seed: 2))
+    let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    let exporter = SwiftDataExporter(container: box.container, appVersion: "1.0 (1)", contentVersion: "1.0.0",
+                                     exerciseNames: { _ in nil }, directory: directory, timeZone: Fixed.calendar.timeZone)
+    _ = try await exporter.exportCSVArchive()
+    let folder = try #require(exporter.lastCSVDirectory(in: directory))
+    let names = try FileManager.default.contentsOfDirectory(atPath: folder.appendingPathComponent("photos").path)
+    #expect(names.count == 2 && Set(names).count == 2)
+    let table = try String(contentsOf: folder.appendingPathComponent("session_photos.csv"), encoding: .utf8)
+    let rows = table.split(separator: "\n").dropFirst().map { $0.split(separator: ",").map(String.init) }
+    #expect(rows.count == 2)
+    for (photo, seed) in [(first, UInt8(1)), (second, UInt8(2))] {
+        let row = try #require(rows.first { $0[0] == photo.id.uuidString })
+        let bytes = try Data(contentsOf: folder.appendingPathComponent(try #require(row.last)))
+        #expect(bytes == Sample.photoImage(seed: seed).image)
+    }
+    let suffix = second.id.uuidString.lowercased().prefix(4)
+    #expect(try #require(rows.first { $0[0] == second.id.uuidString }).last == "photos/2026-11-15-abcdef12-1-\(suffix).jpg")
+}

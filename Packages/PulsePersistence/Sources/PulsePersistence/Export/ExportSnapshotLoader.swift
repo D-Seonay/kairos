@@ -54,7 +54,8 @@ public actor ExportSnapshotLoader {
                                  [SortDescriptor(\.startedAt), SortDescriptor(\.createdAt)]).map { $0.toDomain() }
         snapshot.workoutSessions = (synced + imported).sorted { ($0.startedAt, $0.createdAt) < ($1.startedAt, $1.createdAt) }
         snapshot.runTracks = try runTracks()
-        snapshot.sessionPhotos = try fetch(StoredSessionPhoto.self, #Predicate { $0.deletedAt == nil },
+        // Une photo sans séance (ligne CloudKit incomplète) n'est pas exportée : `toDomain` y inventerait un identifiant.
+        snapshot.sessionPhotos = try fetch(StoredSessionPhoto.self, #Predicate { $0.deletedAt == nil && $0.sessionID != nil },
                                            [SortDescriptor(\.createdAt), SortDescriptor(\.order), SortDescriptor(\.id)])
             .map { $0.toDomain() }
         snapshot.scheduledDays = try fetch(StoredScheduledDay.self, #Predicate { $0.deletedAt == nil },

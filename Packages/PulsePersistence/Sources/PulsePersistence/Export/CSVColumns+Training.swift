@@ -111,13 +111,13 @@ enum CSVColumns {
         .init(name: "point_count") { $1.int($0.points.count) }
     ]
 
-    /// Les octets ne sont pas dans la table : `file` est le chemin relatif du `.jpg` de l'archive.
-    /// Le fuseau du nom de fichier est celui de l'export, comme les dates des autres colonnes.
-    static func sessionPhotos(timeZone: TimeZone) -> [CSVColumn<SessionPhoto>] {
+    /// Les octets ne sont pas dans la table : `file` est le chemin relatif du `.jpg` réellement écrit dans l'archive (`files`),
+    /// ou, sans archive, le nom que donnerait l'export dans son fuseau, comme les dates des autres colonnes.
+    static func sessionPhotos(timeZone: TimeZone, files: [UUID: String]) -> [CSVColumn<SessionPhoto>] {
         [
             .init(name: "id") { $1.uuid($0.id) }, .init(name: "session_id") { $1.uuid($0.sessionID) },
             .init(name: "order") { $1.int($0.order) }, .init(name: "created_at") { $1.date($0.createdAt) },
-            .init(name: "file") { photo, _ in ExportNaming.photoPath(photo, timeZone: timeZone) }
+            .init(name: "file") { photo, _ in files[photo.id] ?? ExportNaming.photoPath(photo, timeZone: timeZone) }
         ]
     }
 }

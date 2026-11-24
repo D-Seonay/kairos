@@ -1,6 +1,7 @@
 import Foundation
 import PulseDomain
 @testable import PulsePersistence
+import SwiftData
 import Testing
 
 private func makeExporter(_ container: ModelContainerBox, directory: URL? = nil) -> SwiftDataExporter {
@@ -139,4 +140,20 @@ private func makeExporter(_ container: ModelContainerBox, directory: URL? = nil)
     #expect(json.contains("\"sessionPhotos\""))
     let base64Run = try Regex("[A-Za-z0-9+/=]{1000,}")
     #expect(json.firstMatch(of: base64Run) == nil)
+}
+
+/// Une photo sans séance n'est pas exportée : aucun identifiant de séance inventé.
+@Test func exportSkipsPhotosWithoutASession() async throws {
+    let box = try ModelContainerBox()
+    let photos = SwiftDataSessionPhotoRepository(modelContainer: box.container)
+    let kept = Sample.sessionPhoto(sessionID: UUID(), order: 0)
+    let orphan = Sample.sessionPhoto(sessionID: UUID(), order: 0)
+    try await photos.add(kept, image: Sample.photoImage(seed: 1))
+    try await photos.add(orphan, image: Sample.photoImage(seed: 2))
+    let context = ModelContext(box.container)
+    let orphanID = orphan.id
+    try #require(try context.fetch(FetchDescriptor<StoredSessionPhoto>(predicate: #Predicate { $0.id == orphanID })).first).sessionID = nil
+    try context.save()
+    let snapshot = try await ExportSnapshotLoader(modelContainer: box.container).snapshot()
+    #expect(snapshot.sessionPhotos.map(\.id) == [kept.id])
 }

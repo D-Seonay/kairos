@@ -49,8 +49,9 @@ public struct SwiftDataExporter: DataExporter {
         let folder = directory.appendingPathComponent(stem, isDirectory: true)
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         // Seules les photos dont l'image est là ont une ligne : la colonne `file` désigne toujours un fichier de l'archive.
-        document.sessionPhotos = try await writePhotos(document.sessionPhotos, to: folder)
-        for (table, csv) in CSVTables.tables(from: document, timeZone: timeZone) {
+        let photoFiles = try await writePhotos(document.sessionPhotos, to: folder)
+        document.sessionPhotos = document.sessionPhotos.filter { photoFiles[$0.id] != nil }
+        for (table, csv) in CSVTables.tables(from: document, timeZone: timeZone, photoFiles: photoFiles) {
             try CSVWriter.file(header: csv.header, rows: csv.rows)
                 .write(to: folder.appendingPathComponent(table.fileName + ".csv"), atomically: true, encoding: .utf8)
         }
@@ -60,18 +61,23 @@ public struct SwiftDataExporter: DataExporter {
         return zip
     }
 
-    /// Copie chaque image vivante, octet pour octet, dans `photos/` ; rend les photos écrites. Le dossier n'existe que s'il y en a.
-    private func writePhotos(_ photos: [SessionPhoto], to folder: URL) async throws -> [SessionPhoto] {
+    /// Copie chaque image vivante, octet pour octet, dans `photos/` ; rend le chemin écrit de chaque photo (identifiant -> chemin
+    /// relatif). Deux photos d'une séance peuvent avoir le même rang le même jour (deux appareils) : la seconde reçoit les
+    /// premiers caractères de son identifiant avant `.jpg`, jamais d'écrasement. Le dossier n'existe que s'il y a une image.
+    private func writePhotos(_ photos: [SessionPhoto], to folder: URL) async throws -> [UUID: String] {
         let loader = ExportSnapshotLoader(modelContainer: container)
         let photosFolder = folder.appendingPathComponent("photos", isDirectory: true)
-        var written: [SessionPhoto] = []
+        var files: [UUID: String] = [:]
+        var taken = Set<String>()
         for photo in photos {
             guard let data = try await loader.imageData(ofPhoto: photo.id) else { continue }
+            let path = ExportNaming.uniquePhotoPath(photo, timeZone: timeZone, taken: taken)
+            taken.insert(path)
             try FileManager.default.createDirectory(at: photosFolder, withIntermediateDirectories: true)
-            try data.write(to: folder.appendingPathComponent(ExportNaming.photoPath(photo, timeZone: timeZone)), options: .atomic)
-            written.append(photo)
+            try data.write(to: folder.appendingPathComponent(path), options: .atomic)
+            files[photo.id] = path
         }
-        return written
+        return files
     }
 
     /// Le dossier CSV du dernier export, s'il existe encore (tests et inspection).

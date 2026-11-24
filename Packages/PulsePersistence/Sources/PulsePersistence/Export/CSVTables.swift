@@ -58,7 +58,9 @@ struct CSVFormat: @unchecked Sendable {
 
 /// Les 17 tables de l'export CSV (spec M2 §6.2, plus le tracé des courses en V2a et les photos de séance en V2b).
 public enum CSVTables {
-    public static func tables(from document: ExportDocument, timeZone: TimeZone) -> [StoreTable: CSVTable] {
+    /// `photoFiles` : le chemin écrit de chaque photo dans l'archive ; sans lui, le nom calculé à partir de la photo.
+    public static func tables(from document: ExportDocument, timeZone: TimeZone,
+                              photoFiles: [UUID: String] = [:]) -> [StoreTable: CSVTable] {
         let format = CSVFormat(timeZone: timeZone)
         let days = document.programs.flatMap { program in program.days.map { (program.id, $0) } }
         let exercises = days.flatMap { _, day in day.exercises.map { (day.id, $0) } }
@@ -73,7 +75,7 @@ public enum CSVTables {
             .workoutSessions: table(document.workoutSessions, CSVColumns.workoutSessions, format),
             .workoutSets: table(sets, CSVColumns.workoutSets, format),
             .runTracks: table(document.runTracks, CSVColumns.runTracks, format),
-            .sessionPhotos: table(document.sessionPhotos, CSVColumns.sessionPhotos(timeZone: timeZone), format),
+            .sessionPhotos: table(document.sessionPhotos, CSVColumns.sessionPhotos(timeZone: timeZone, files: photoFiles), format),
             .scheduledDays: table(document.scheduledDays, CSVColumns.scheduledDays, format),
             .dailyRecoveries: table(document.dailyRecoveries, CSVColumns.dailyRecoveries, format),
             .checkIns: table(document.checkIns, CSVColumns.checkIns, format),
