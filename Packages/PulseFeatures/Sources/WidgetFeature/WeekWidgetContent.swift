@@ -79,11 +79,11 @@ public struct WeekWidgetContent: Sendable, Equatable {
         return days.isEmpty ? summary : "\(summary) \(days)."
     }
 
-    /// La semaine, la séance du jour, la charge et la prochaine séance de l'instantané du jour ; l'exemple sans instantané du
-    /// jour ou sans semaine.
+    /// La semaine, la séance du jour, la charge et la prochaine séance de l'instantané du jour. Sans instantané du jour ou sans
+    /// semaine, le widget le dit au lieu d'inventer une semaine.
     public static func make(snapshot: WidgetSnapshot?, at date: Date, calendar: Calendar) -> WeekWidgetContent {
         guard let planning = WidgetPlanningText.planning(snapshot, at: date, calendar: calendar) else {
-            return sample(at: date, calendar: calendar)
+            return notReady(at: date, calendar: calendar)
         }
         let snapshot = planning.snapshot
         let days = planning.week.map { day in
@@ -120,6 +120,23 @@ public struct WeekWidgetContent: Sendable, Equatable {
             muscleMapFigure: snapshot.muscleMapFigure ?? .female)
     }
 
+    /// Pas encore d'instantané du jour : les sept jours de la vraie semaine, vides, aujourd'hui marqué, et une invitation à ouvrir
+    /// l'app ; ni séance, ni charge, ni série inventées.
+    static func notReady(at date: Date, calendar: Calendar) -> WeekWidgetContent {
+        let days = WidgetPlanningText.weekDates(containing: date, calendar: calendar).map { day in
+            let isToday = calendar.isDate(day, inSameDayAs: date)
+            let widgetDay = WidgetDay(date: day, kind: .rest, state: .rest, isToday: isToday)
+            return DayItem(letter: WidgetPlanningText.letter(of: widgetDay, calendar: calendar), iconName: "minus", isRest: false,
+                           state: isToday ? .today : .upcoming)
+        }
+        let spoken = String(localized: "Cette semaine : pas encore prête. Ouvre Pulse pour la mettre à jour", bundle: .module)
+        return WeekWidgetContent(
+            badgeText: PulseFormat.dash, days: days, todayTitle: String(localized: "Pas encore prête", bundle: .module),
+            todayMeta: String(localized: "Ouvre Pulse pour la mettre à jour", bundle: .module), todayMuscleLevels: [:],
+            acwrRatio: 1, acwrZoneText: PulseFormat.dash, tomorrowText: PulseFormat.dash, accessibilityLabel: spoken)
+    }
+
+    /// Un exemple, pour la galerie de widgets et le gabarit avant le premier chargement.
     public static func sample(at date: Date, calendar: Calendar) -> WeekWidgetContent {
         let dayItems: [DayItem] = [
             DayItem(letter: "L", iconName: "dumbbell.fill", isRest: false, state: .completed),

@@ -51,9 +51,6 @@
         }
       }
     },
-    "%lld" : {
-
-    },
     "%lld · %@" : {
       "localizations" : {
         "fr" : {
@@ -130,6 +127,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cette semaine : %@ sur %lld."
+          }
+        }
+      }
+    },
+    "Cette semaine : pas encore prête. Ouvre Pulse pour la mettre à jour" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette semaine : pas encore prête. Ouvre Pulse pour la mettre à jour"
+          }
+        }
+      }
+    },
+    "Charge d'entraînement pas encore prête. Ouvre Pulse pour la mettre à jour" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Charge d'entraînement pas encore prête. Ouvre Pulse pour la mettre à jour"
           }
         }
       }
@@ -224,6 +241,56 @@
         }
       }
     },
+    "Ouvre Pulse" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvre Pulse"
+          }
+        }
+      }
+    },
+    "Ouvre Pulse pour la charger" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvre Pulse pour la charger"
+          }
+        }
+      }
+    },
+    "Ouvre Pulse pour la mettre à jour" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvre Pulse pour la mettre à jour"
+          }
+        }
+      }
+    },
+    "Ouvrir Pulse" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvrir Pulse"
+          }
+        }
+      }
+    },
+    "Pas encore prête" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas encore prête"
+          }
+        }
+      }
+    },
     "Pause" : {
       "localizations" : {
         "fr" : {
@@ -250,6 +317,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Prochaine séance : %@"
+          }
+        }
+      }
+    },
+    "Prochaine séance pas encore prête" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prochaine séance pas encore prête"
+          }
+        }
+      }
+    },
+    "Prochaine séance pas encore prête. Ouvre Pulse pour la charger" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prochaine séance pas encore prête. Ouvre Pulse pour la charger"
           }
         }
       }
@@ -304,12 +391,32 @@
         }
       }
     },
+    "Séance du jour pas encore prête. Ouvre Pulse pour la charger" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance du jour pas encore prête. Ouvre Pulse pour la charger"
+          }
+        }
+      }
+    },
     "séance faite" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "séance faite"
+          }
+        }
+      }
+    },
+    "Séance pas encore prête" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance pas encore prête"
           }
         }
       }
@@ -340,6 +447,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Série de %@, %@ sur %lld cette semaine"
+          }
+        }
+      }
+    },
+    "Série pas encore prête" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Série pas encore prête"
+          }
+        }
+      }
+    },
+    "Série pas encore prête. Ouvre Pulse pour la mettre à jour" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Série pas encore prête. Ouvre Pulse pour la mettre à jour"
           }
         }
       }

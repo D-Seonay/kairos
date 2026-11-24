@@ -33,11 +33,17 @@ private struct TodaySessionWidgetEntryView: View {
         case .accessoryRectangular:
             TodaySessionWidgetRectangularView(content: entry.content)
         case .accessoryInline:
-            Label(entry.content.inlineText, systemImage: entry.content.isRest ? "bed.double.fill" : "dumbbell.fill")
+            Label(entry.content.inlineText, systemImage: inlineIcon)
                 .accessibilityLabel(entry.content.accessibilityLabel)
         default:
             TodaySessionWidgetMediumView(content: entry.content)
         }
+    }
+
+    /// Une flèche de rechargement tant que la séance n'est pas chargée, puis le lit ou l'haltère.
+    private var inlineIcon: String {
+        guard entry.content.isReady else { return "arrow.clockwise" }
+        return entry.content.isRest ? "bed.double.fill" : "dumbbell.fill"
     }
 
     @ViewBuilder

@@ -50,6 +50,20 @@ struct TodaySessionWidgetContentTests {
         #expect(content.inlineText == "Jour de repos")
     }
 
+    /// Sans instantané du jour, le widget ne montre pas la séance d'exemple comme si elle était prévue.
+    @Test func missingOrStaleSnapshotIsNotReady() {
+        let stale = WidgetSample.snapshot(sessionTitle: "Push", isLightened: true)
+        let yesterday = TodaySessionWidgetContent.make(snapshot: stale, at: WidgetClock.date("2026-11-03T09:00"), calendar: calendar)
+        let missing = TodaySessionWidgetContent.make(snapshot: nil, at: now, calendar: calendar)
+        #expect(yesterday == missing)
+        #expect(missing != .sample(at: now, calendar: calendar))
+        #expect(!missing.isReady && !missing.isAdjusted && !missing.isRest)
+        #expect(missing.title == "Séance pas encore prête")
+        #expect(missing.muscleLevels.isEmpty)
+        #expect(missing.accessibilityLabel == "Séance du jour pas encore prête. Ouvre Pulse pour la charger")
+        #expect(TodaySessionWidgetContent.make(snapshot: stale, at: now, calendar: calendar).isReady)
+    }
+
     @Test func galleryLabels() {
         #expect(TodaySessionWidgetContent.kind == "TodaySessionWidget")
         #expect(TodaySessionWidgetContent.displayName == "Séance du jour")
