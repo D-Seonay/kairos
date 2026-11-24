@@ -6,11 +6,13 @@ import TrainFeature
 
 /// L'écran Paramètres (spec M7 §15), poussé depuis la page Profil : une liste stylée comme l'écran Poids et l'éditeur de
 /// programme. Chaque réglage s'écrit dès qu'il change (les champs de texte à la validation ou quand ils perdent le focus) ; un
-/// réglage refusé affiche son message en tête et l'écran revient à la valeur stockée.
+/// réglage refusé affiche son message en tête, la liste y remonte pour qu'il se voie, et l'écran revient à la valeur stockée.
 struct SettingsScreen: View {
     @State private var model: SettingsModel
     let screens: ProfileAppScreens
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    private static let errorID = "settings.error"
 
     /// `onProfileSaved` part après chaque écriture : l'app reprend le thème et le prénom, la page Profil se recharge.
     init(environment: ProfileEnvironment, screens: ProfileAppScreens, onProfileSaved: @escaping @MainActor (UserProfile) -> Void) {
@@ -19,6 +21,27 @@ struct SettingsScreen: View {
     }
 
     var body: some View {
+        ScrollViewReader { proxy in
+            list
+                .scrollContentBackground(.hidden)
+                .scrollDismissesKeyboard(.interactively)
+                // Un réglage refusé se règle souvent loin en bas : la liste remonte jusqu'à son message.
+                .onChange(of: model.failureCount) {
+                    PulseMotion.perform(.default, reduceMotion: reduceMotion) { proxy.scrollTo(Self.errorID, anchor: .top) }
+                }
+        }
+        .pulseAnnounceOnce(model.errorMessage, id: model.failureCount, isError: true)
+        .pulseScreenBackground(aura: 0.5)
+        .navigationTitle(String(localized: "Paramètres", bundle: .module))
+        .pulseInlineTitle()
+        .task { await model.load() }
+        .onChange(of: scenePhase) { _, phase in
+            // Au retour des réglages d'iOS, le message sur les notifications suit.
+            if phase == .active { Task { await model.refreshNotificationStatus() } }
+        }
+    }
+
+    private var list: some View {
         List {
             if let message = model.errorMessage {
                 Section {
@@ -27,6 +50,7 @@ struct SettingsScreen: View {
                         .foregroundStyle(PulsePalette.bad)
                         .fixedSize(horizontal: false, vertical: true)
                 }
+                .id(Self.errorID)
                 .listRowBackground(PulsePalette.surface)
             }
             if let profile = model.profile {
@@ -47,17 +71,6 @@ struct SettingsScreen: View {
                     .listRowBackground(Color.clear)
             }
             AboutSettingsSection(appVersion: model.environment.appVersion)
-        }
-        .scrollContentBackground(.hidden)
-        .scrollDismissesKeyboard(.interactively)
-        .pulseAnnounceOnce(model.errorMessage, id: model.failureCount, isError: true)
-        .pulseScreenBackground(aura: 0.5)
-        .navigationTitle(String(localized: "Paramètres", bundle: .module))
-        .pulseInlineTitle()
-        .task { await model.load() }
-        .onChange(of: scenePhase) { _, phase in
-            // Au retour des réglages d'iOS, le message sur les notifications suit.
-            if phase == .active { Task { await model.refreshNotificationStatus() } }
         }
     }
 }

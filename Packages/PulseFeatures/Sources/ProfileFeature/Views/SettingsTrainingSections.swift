@@ -66,7 +66,7 @@ struct SessionSettingsSection: View {
                            isOn: model.binding(profile.autoWarmupEnabled) { $0.autoWarmupEnabled = $1 })
             let restTitle = String(localized: "Repos par défaut", bundle: .module)
             pills(restTitle, spoken: restTitle) { group in
-                ChoicePills(options: SettingsService.restChoices.map { ($0, String(localized: "\($0) s", bundle: .module)) },
+                ChoicePills(options: SettingsService.restChoices.map { ($0, PulseFormat.restDuration(seconds: $0)) },
                             selection: model.selection(profile.defaultRestSeconds) { $0.defaultRestSeconds = $1 },
                             groupLabel: group, spokenLabel: { ProfileText.restSpoken($0) })
                 // Le moteur ne prend ce repos que pour un exercice sans repos au catalogue ; les lignes de routine gardent le leur.
