@@ -14,6 +14,9 @@ public actor SessionPhotoService {
     private let repository: any SessionPhotoRepository
     private let timeZone: TimeZone
     private let now: @Sendable () -> Date
+    /// Les ajouts passent l'un après l'autre : sans elle, deux ajouts concurrents liraient le même nombre de photos (l'acteur se
+    /// libère à chaque `await`) et dépasseraient la limite ou partageraient un rang.
+    private let queue = SerialTaskQueue()
 
     public init(repository: any SessionPhotoRepository, timeZone: TimeZone = .current, now: @escaping @Sendable () -> Date) {
         self.repository = repository
@@ -39,6 +42,10 @@ public actor SessionPhotoService {
     /// Traite l'image hors de l'acteur principal, puis l'ajoute en dernier (`order` = plus grand + 1). Refuse une septième
     /// photo avec `.full`, des données illisibles avec `.unreadable` ; un échec de réencodage remonte tel quel.
     public func add(_ data: Data, to sessionID: UUID) async throws -> SessionPhoto {
+        try await queue.run { try await self.append(data, to: sessionID) }
+    }
+
+    private func append(_ data: Data, to sessionID: UUID) async throws -> SessionPhoto {
         let existing = try await repository.photos(for: sessionID)
         guard SessionPhotoRules.remainingSlots(current: existing.count) > 0 else { throw SessionPhotoError.full }
         let processed: ProcessedPhoto

@@ -60,4 +60,24 @@ struct SessionPhotoServiceTests {
         #expect(replacement.order == 6)
         #expect(try await service.photos(for: sessionID).count == 6)
     }
+
+    @Test func concurrentAddsKeepTheLimitAndDistinctOrders() async throws {
+        let service = makeService()
+        let sessionID = sessionID
+        let outcomes = await withTaskGroup(of: Result<SessionPhoto, SessionPhotoError>.self) { group in
+            for _ in 0..<7 {
+                group.addTask {
+                    do { return .success(try await service.add(TestImages.jpeg(), to: sessionID)) } catch {
+                        return .failure(error as? SessionPhotoError ?? .unreadable)
+                    }
+                }
+            }
+            return await group.reduce(into: []) { $0.append($1) }
+        }
+        let added = outcomes.compactMap { try? $0.get() }
+        #expect(added.count == 6)
+        #expect(outcomes.filter { if case .failure(.full) = $0 { true } else { false } }.count == 1)
+        #expect(Set(added.map(\.order)) == Set(0..<6))
+        #expect(try await repository.photos(for: sessionID).count == 6)
+    }
 }
