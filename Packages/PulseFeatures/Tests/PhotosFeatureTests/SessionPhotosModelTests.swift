@@ -141,4 +141,85 @@ struct SessionPhotosModelTests {
         #expect(model.spokenLabel(of: model.photos[1]) == "Photo 2 sur 4, ajoutée à 18 h 42")
         #expect(model.spokenLabel(of: model.photos[3]) == "Photo 4 sur 4, ajoutée à 18 h 42")
     }
+
+    @Test func isAddingIsTrueWhileALoaderIsSuspended() async throws {
+        let model = makeModel()
+        let gate = LoaderGate()
+        let task = Task { await model.add(loading: [{ await gate.wait(); return TestImages.jpeg() }]) }
+        while !(await gate.isWaiting) { await Task.yield() }
+        #expect(model.isAdding)
+        #expect(model.photos.isEmpty)
+        await gate.open()
+        await task.value
+        #expect(!model.isAdding)
+        #expect(model.photos.count == 1)
+        #expect(model.announcement == "Photo ajoutée")
+    }
+
+    @Test func loadersBeyondTheLimitAreNeverCalled() async throws {
+        try await seed(5)
+        let model = makeModel()
+        await model.load()
+        let calls = CallCounter()
+        let loader: @Sendable () async -> Data? = { await calls.increment(); return TestImages.jpeg() }
+        await model.add(loading: [loader, loader, loader])
+        #expect(await calls.count == 1)
+        #expect(model.photos.count == 6)
+        #expect(model.errorMessage == "6 photos au maximum par séance : 2 n'ont pas été ajoutées.")
+    }
+
+    @Test func aLoaderThatReturnsNothingCountsAsUnreadable() async throws {
+        let model = makeModel()
+        await model.add(loading: [{ nil }, { TestImages.jpeg() }])
+        #expect(model.photos.count == 1)
+        #expect(model.errorMessage == "Une image n'a pas pu être lue.")
+        #expect(!model.isAdding)
+    }
+
+    @Test func unreadableFullImageReportsAnErrorAndReturnsNil() async throws {
+        let repository = ImageFailingRepository()
+        let failing = SessionPhotosModel(
+            service: SessionPhotoService(repository: repository, timeZone: .gmt, now: { .now }), sessionID: sessionID,
+            calendar: calendar)
+        #expect(await failing.image(of: UUID()) == nil)
+        #expect(failing.errorMessage == "La photo n'a pas pu être ouverte.")
+    }
+}
+
+/// Un chargeur suspendu jusqu'à ce que le test l'ouvre.
+private actor LoaderGate {
+    private var isOpen = false
+    private var waiter: CheckedContinuation<Void, Never>?
+    private(set) var isWaiting = false
+
+    func wait() async {
+        guard !isOpen else { return }
+        isWaiting = true
+        await withCheckedContinuation { waiter = $0 }
+    }
+
+    func open() {
+        isOpen = true
+        waiter?.resume()
+        waiter = nil
+    }
+}
+
+private actor CallCounter {
+    private(set) var count = 0
+
+    func increment() {
+        count += 1
+    }
+}
+
+/// Un dépôt dont la lecture d'une image échoue.
+private struct ImageFailingRepository: SessionPhotoRepository {
+    struct Failure: Error {}
+
+    func photos(for sessionID: UUID) async throws -> [SessionPhoto] { [] }
+    func image(of photoID: UUID) async throws -> PhotoImage? { throw Failure() }
+    func add(_ photo: SessionPhoto, image: PhotoImage) async throws {}
+    func delete(photoID: UUID) async throws {}
+    func deleteAll(sessionID: UUID) async throws {}
 }

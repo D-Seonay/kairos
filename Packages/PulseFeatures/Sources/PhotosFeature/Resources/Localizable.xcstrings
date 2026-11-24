@@ -241,6 +241,16 @@
         }
       }
     },
+    "La photo n'a pas pu être ouverte." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La photo n'a pas pu être ouverte."
+          }
+        }
+      }
+    },
     "La photo n'a pas pu être supprimée." : {
       "localizations" : {
         "fr" : {

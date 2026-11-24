@@ -40,3 +40,23 @@ public struct LiveCameraButton: View {
         }
     }
 }
+
+#if DEBUG
+#Preview("Bouton photo, 0 photo") {
+    PhotosPreviewHost(count: 0) { LiveCameraButton(model: $0).padding() }
+}
+
+#Preview("Bouton photo, 6 photos") {
+    PhotosPreviewHost(count: 6) { LiveCameraButton(model: $0).padding() }
+}
+
+#Preview("Bouton photo, 0 photo, accessibilité 3") {
+    PhotosPreviewHost(count: 0) { LiveCameraButton(model: $0).padding() }
+        .dynamicTypeSize(.accessibility3)
+}
+
+#Preview("Bouton photo, 6 photos, accessibilité 3") {
+    PhotosPreviewHost(count: 6) { LiveCameraButton(model: $0).padding() }
+        .dynamicTypeSize(.accessibility3)
+}
+#endif

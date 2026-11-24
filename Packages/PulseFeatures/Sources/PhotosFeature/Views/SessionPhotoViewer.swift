@@ -8,6 +8,8 @@ struct SessionPhotoViewer: View {
     let model: SessionPhotosModel
     @State private var currentID: UUID
     @State private var loaded: [UUID: LoadedPhoto] = [:]
+    /// Les photos dont l'image ne se lit pas : un fond neutre à la place du cercle de chargement.
+    @State private var failed: Set<UUID> = []
     @State private var confirmsDelete = false
     @Environment(\.dismiss) private var dismiss
 
@@ -54,6 +56,8 @@ struct SessionPhotoViewer: View {
         Group {
             if let image = loaded[photo.id]?.image {
                 image.resizable().scaledToFit()
+            } else if failed.contains(photo.id) {
+                PhotoSquare(data: nil).padding(PulseMetrics.spacing)
             } else {
                 ProgressView()
             }
@@ -83,7 +87,12 @@ struct SessionPhotoViewer: View {
     }
 
     private func load(_ photoID: UUID) async {
-        guard loaded[photoID] == nil, let data = await model.image(of: photoID), let image = Image(photoData: data) else { return }
+        guard loaded[photoID] == nil else { return }
+        failed.remove(photoID)
+        guard let data = await model.image(of: photoID), let image = Image(photoData: data) else {
+            failed.insert(photoID)
+            return
+        }
         loaded[photoID] = LoadedPhoto(image: image, shared: SharedPhoto(data: data))
     }
 
@@ -115,3 +124,34 @@ struct SharedPhoto: Transferable, Sendable {
         DataRepresentation(exportedContentType: .jpeg) { $0.data }
     }
 }
+
+#if DEBUG
+/// La visionneuse sur trois photos : le modèle se garnit avant que la vue s'ouvre.
+private struct ViewerPreview: View {
+    @State private var model = PhotosPreviewSupport.emptyModel()
+    @State private var firstID: UUID?
+
+    var body: some View {
+        Group {
+            if let firstID {
+                SessionPhotoViewer(model: model, startingAt: firstID)
+            } else {
+                ProgressView()
+            }
+        }
+        .task {
+            await PhotosPreviewSupport.seed(model, count: 3)
+            firstID = model.photos.first?.id
+        }
+    }
+}
+
+#Preview("Visionneuse") {
+    ViewerPreview()
+}
+
+#Preview("Visionneuse, accessibilité 3") {
+    ViewerPreview()
+        .dynamicTypeSize(.accessibility3)
+}
+#endif

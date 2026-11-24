@@ -51,8 +51,8 @@ public enum PhotoText {
 
     // MARK: Écarts et dates
 
-    /// « 13 semaines d'écart », « 1 semaine d'écart » ; sous 2 semaines, en jours : « 9 jours d'écart », « 1 jour d'écart ».
-    /// Pile une semaine se dit « 1 semaine ». L'écart se compte en jours de calendrier, sans égard au sens ni à l'heure.
+    /// « 13 semaines d'écart » ; sous 2 semaines, en jours : « 9 jours d'écart », « 7 jours d'écart », « 1 jour d'écart ».
+    /// L'écart se compte en jours de calendrier, sans égard au sens ni à l'heure.
     static func weeksApart(from: Date, to: Date, calendar: Calendar) -> String {
         let days = dayCount(from: from, to: to, calendar: calendar)
         return String(localized: "\(duration(days: days)) d'écart", bundle: .module)
@@ -78,7 +78,7 @@ public enum PhotoText {
     }
 
     private static func duration(days: Int) -> String {
-        days == 7 || days >= 14 ? weeksText(days / 7) : daysText(days)
+        days >= 14 ? weeksText(days / 7) : daysText(days)
     }
 
     private static func daysText(_ count: Int) -> String {
@@ -148,6 +148,7 @@ public enum PhotoText {
     static var unreadableImages: String { String(localized: "Des images n'ont pas pu être lues.", bundle: .module) }
     static var addFailed: String { String(localized: "La photo n'a pas pu être ajoutée.", bundle: .module) }
     static var loadFailed: String { String(localized: "Les photos n'ont pas pu être chargées.", bundle: .module) }
+    static var imageUnavailable: String { String(localized: "La photo n'a pas pu être ouverte.", bundle: .module) }
     static var deleteFailed: String { String(localized: "La photo n'a pas pu être supprimée.", bundle: .module) }
 
     // MARK: Visionneuse

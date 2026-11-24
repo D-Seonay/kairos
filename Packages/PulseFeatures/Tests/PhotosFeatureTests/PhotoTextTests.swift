@@ -33,7 +33,7 @@ struct PhotoTextTests {
         #expect(BodyPose.allCases.map(PhotoText.poseName) == ["Face", "Profil", "Dos"])
     }
 
-    @Test func weeksApartIsPluralSingularAndFallsBackToDays() {
+    @Test func weeksApartCountsWeeksFromTwoWeeksAndDaysBelow() {
         let start = PhotosTestClock.date("2026-08-01T09:00")
         func apart(_ days: Int) -> String {
             let end = calendar.date(byAdding: .day, value: days, to: start) ?? start
@@ -41,7 +41,8 @@ struct PhotoTextTests {
         }
         #expect(apart(91) == "13 semaines d'écart")
         #expect(apart(14) == "2 semaines d'écart")
-        #expect(apart(7) == "1 semaine d'écart")
+        #expect(apart(13) == "13 jours d'écart")
+        #expect(apart(7) == "7 jours d'écart")
         #expect(apart(9) == "9 jours d'écart")
         #expect(apart(1) == "1 jour d'écart")
     }

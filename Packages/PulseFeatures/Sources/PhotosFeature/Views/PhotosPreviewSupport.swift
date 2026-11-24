@@ -10,14 +10,21 @@ import UniformTypeIdentifiers
 /// Des photos de séance pour les aperçus : un dépôt en mémoire garni d'images unies fabriquées à la volée.
 @MainActor
 enum PhotosPreviewSupport {
-    static func model(count: Int) -> SessionPhotosModel {
-        let sessionID = UUID()
+    /// Un modèle vide, sur un dépôt en mémoire.
+    static func emptyModel() -> SessionPhotosModel {
         let service = SessionPhotoService(repository: InMemorySessionPhotoRepository(), timeZone: .current, now: { Date() })
-        let model = SessionPhotosModel(service: service, sessionID: sessionID, calendar: .current)
-        Task {
-            await model.add((0..<count).map { jpeg(hue: Double($0) / 6) })
-        }
+        return SessionPhotosModel(service: service, sessionID: UUID(), calendar: .current)
+    }
+
+    /// Un modèle qui se garnit de `count` photos dès qu'il existe.
+    static func model(count: Int) -> SessionPhotosModel {
+        let model = emptyModel()
+        Task { await seed(model, count: count) }
         return model
+    }
+
+    static func seed(_ model: SessionPhotosModel, count: Int) async {
+        await model.add((0..<count).map { jpeg(hue: Double($0) / 6) })
     }
 
     /// Un JPEG uni de 120 × 90 pixels.

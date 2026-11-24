@@ -27,7 +27,7 @@ struct AddPhotoMenu<Label: View>: View {
         .photosPicker(isPresented: $showsPicker, selection: $selection, maxSelectionCount: max(1, model.remainingSlots),
                       matching: .images)
         .onChange(of: selection) { _, items in importItems(items) }
-        .cameraCover(isPresented: $showsCamera) { data in Task { await model.add([data]) } }
+        .cameraCover(isPresented: $showsCamera) { loader in Task { await model.add(loading: [loader]) } }
     }
 
     @ViewBuilder
@@ -48,18 +48,16 @@ struct AddPhotoMenu<Label: View>: View {
         #endif
     }
 
-    /// Charge les images choisies puis les passe au modèle, qui garde les premières dans la limite. Une image qui ne se charge pas
-    /// part vide : le modèle la signale comme illisible.
+    /// Passe les images choisies au modèle sous forme de chargeurs : l'état « en cours » commence tout de suite, et les originaux se
+    /// lisent un par un (un original iCloud peut mettre des secondes). Une image qui ne se charge pas rend `nil` : le modèle la
+    /// signale comme illisible.
     private func importItems(_ items: [PhotosPickerItem]) {
         guard !items.isEmpty else { return }
         selection = []
-        Task {
-            var images: [Data] = []
-            for item in items {
-                images.append((try? await item.loadTransferable(type: Data.self)) ?? Data())
-            }
-            await model.add(images)
+        let loaders: [@Sendable () async -> Data?] = items.map { item in
+            { try? await item.loadTransferable(type: Data.self) }
         }
+        Task { await model.add(loading: loaders) }
     }
 }
 

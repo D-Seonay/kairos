@@ -45,16 +45,24 @@ public final class SessionPhotosModel {
 
     /// Garde les premières données dans la limite ; au-delà, `errorMessage` le dit. Une image illisible est sautée et signalée.
     public func add(_ items: [Data]) async {
+        await add(loading: items.map { data in { data } })
+    }
+
+    /// Comme `add(_:)`, mais l'état « en cours » commence avant que les images soient lues : un original iCloud ou l'encodage
+    /// d'une photo prise peut durer des secondes. Les chargeurs au-delà de la limite ne sont pas appelés, et un seul original
+    /// est en mémoire à la fois. Un chargeur qui rend `nil` compte comme une image illisible.
+    public func add(loading loaders: [@Sendable () async -> Data?]) async {
         errorMessage = nil
-        let kept = items.prefix(remainingSlots)
-        var dropped = items.count - kept.count
+        let kept = loaders.prefix(remainingSlots)
+        var dropped = loaders.count - kept.count
         var unreadable = 0
         var failed = false
         var added = 0
         addsInFlight += 1
         isAdding = true
-        for data in kept {
+        for loader in kept {
             do {
+                let data = await loader() ?? Data()
                 let photo = try await service.add(data, to: sessionID)
                 append(photo)
                 await fetchMissingThumbnails()
@@ -86,9 +94,15 @@ public final class SessionPhotosModel {
         }
     }
 
-    /// L'image entière (JPEG) de la photo, pour la visionneuse et le partage ; `nil` si elle n'existe plus.
+    /// L'image entière (JPEG) de la photo, pour la visionneuse et le partage ; `nil` si elle n'existe plus ou ne se lit pas (dans
+    /// ce cas, `errorMessage` le dit).
     public func image(of photoID: UUID) async -> Data? {
-        try? await service.image(of: photoID)
+        do {
+            return try await service.image(of: photoID)
+        } catch {
+            errorMessage = PhotoText.imageUnavailable
+            return nil
+        }
     }
 
     /// « Photo 2 sur 4, ajoutée à 18 h 42 ».
