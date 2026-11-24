@@ -98,22 +98,47 @@ struct SessionCardStateTests {
         #expect(card.startButton == "Démarrer quand même")
     }
 
+    private func run(_ state: SessionCardState) -> RunCard? {
+        if case .run(let card) = state { return card }
+        Issue.record("Une carte de course était attendue, obtenu \(state)")
+        return nil
+    }
+
     @Test func intervalsUnderFatigueSuggestAnEasyRun() throws {
-        let state = try card("runner-strength", on: "2026-11-05T08:00", score: 50)
-        #expect(state == .run(RunCard(
-            title: "Fractionné", target: "30 min",
-            suggestion: "Fatigue modérée : remplace le fractionné par une sortie facile de même durée.")))
+        let card = try #require(run(try card("runner-strength", on: "2026-11-05T08:00", score: 50)))
+        #expect(card.title == "Fractionné" && card.target == "30 min")
+        #expect(card.suggestion == "Fatigue modérée : remplace le fractionné par une sortie facile de même durée.")
     }
 
     @Test func overreachedRunSuggestsRest() throws {
-        let state = try card("runner-strength", on: "2026-11-05T08:00", score: 30)
-        #expect(state == .run(RunCard(
-            title: "Fractionné", target: "30 min", suggestion: "Surmenage : repos conseillé aujourd'hui, la course peut attendre.")))
+        let card = try #require(run(try card("runner-strength", on: "2026-11-05T08:00", score: 30)))
+        #expect(card.title == "Fractionné" && card.target == "30 min")
+        #expect(card.suggestion == "Surmenage : repos conseillé aujourd'hui, la course peut attendre.")
     }
 
     @Test func easyRunUnderFatigueKeepsTheRun() throws {
-        let state = try card("runner-strength", on: "2026-11-02T08:00", score: 50)
-        #expect(state == .run(RunCard(title: "Sortie facile", target: "40 min", suggestion: nil)))
+        let card = try #require(run(try card("runner-strength", on: "2026-11-02T08:00", score: 50)))
+        #expect(card.title == "Sortie facile" && card.target == "40 min" && card.suggestion == nil)
+    }
+
+    /// Le bouton « Démarrer la course » lance la course telle que la carte la montre : fractionné échangé contre une sortie facile.
+    @Test func runCardCarriesAdjustedLaunch() throws {
+        let programID = UUID()
+        let scored = recovery(50)
+        let session = TodaySession(plannedDay: try plan("runner-strength", on: "2026-11-05T08:00"), recovery: scored)
+        let state = SessionCardState.make(session: session, score: .scored(scored), directory: directory, programID: programID)
+        let card = try #require(run(state))
+        #expect(card.launch.runType == .easy)
+        #expect(card.launch.programID == programID)
+        #expect(card.launch.targetMinutes == 30)
+        #expect(card.launch.adjustmentNote == "au lieu du fractionné")
+    }
+
+    /// « Séance d'origine » rétablie : la course part telle que prévue, sans l'échange.
+    @Test func restoredRunCardLaunchesThePlannedRun() throws {
+        let card = try #require(run(try card("runner-strength", on: "2026-11-05T08:00", score: 50, originalChosen: true)))
+        #expect(card.launch.runType == .intervals)
+        #expect(card.launch.adjustmentNote == nil)
     }
 
     @Test func restDaySuggestsMobilityUnder65() throws {

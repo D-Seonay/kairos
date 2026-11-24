@@ -145,6 +145,13 @@ public final class TrainModel {
         return SessionLaunch.free(policy: policy)
     }
 
+    /// La course que « Courir » lance : celle du jour, ajustée comme sur l'accueil, quand le programme en place une aujourd'hui ;
+    /// sinon une course libre. La prochaine course d'un autre jour ne se lance pas : « Courir » ne la devance pas.
+    public func runLaunch() -> RunLaunch {
+        guard let today, case .run(let day) = today.plannedDay else { return .free() }
+        return .planned(day, programID: program?.id, adjusted: today.status == .adjusted ? today.adjusted : nil)
+    }
+
     // MARK: - Interne
 
     /// Les exercices de l'utilisateur, archivés compris : une routine peut encore les nommer. Si la lecture échoue,

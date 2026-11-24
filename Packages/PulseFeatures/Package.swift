@@ -57,7 +57,7 @@ let package = Package(
         ),
         .target(
             name: "PlanningFeature",
-            dependencies: ["PulseServices", "TrainFeature", designSystem, domain, content],
+            dependencies: ["PulseServices", "TrainFeature", "RunFeature", designSystem, domain, content],
             resources: [.process("Resources")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),

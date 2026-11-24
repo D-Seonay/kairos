@@ -17,6 +17,8 @@ public final class SettingsModel {
     public private(set) var failureCount = 0
     public private(set) var isRefreshingHealth = false
     public private(set) var hasLoaded = false
+    /// Les annonces vocales à chaque kilomètre de la course ; un réglage par appareil, hors du profil.
+    public private(set) var announcesKilometres = true
 
     @ObservationIgnored let environment: ProfileEnvironment
     @ObservationIgnored private let onProfileSaved: @MainActor (UserProfile) -> Void
@@ -28,6 +30,7 @@ public final class SettingsModel {
 
     /// Relit le profil, l'état d'Apple Santé et celui des notifications.
     public func load() async {
+        announcesKilometres = environment.runPreferences.announcesKilometres
         do {
             profile = try await environment.settings.load()
             errorMessage = nil
@@ -39,6 +42,12 @@ public final class SettingsModel {
         await readHealth()
         await refreshNotificationStatus()
         hasLoaded = true
+    }
+
+    /// Écrit le réglage des annonces vocales de la course ; il vaut dès la prochaine course.
+    public func setAnnouncesKilometres(_ on: Bool) {
+        environment.runPreferences.setAnnouncesKilometres(on)
+        announcesKilometres = on
     }
 
     /// Applique un réglage : l'écran le montre tout de suite, puis prend le profil enregistré. Une erreur affiche son message et

@@ -23,11 +23,13 @@ struct StrengthCard: Equatable {
     var startButton: String
 }
 
-/// La carte d'une course : type, cible et, sous un score bas, la consigne du jour. Pas de bouton Démarrer.
+/// La carte d'une course : type, cible et, sous un score bas, la consigne du jour. « Démarrer la course » lance `launch`, la
+/// course telle que la carte la montre (fractionné échangé contre une sortie facile sous une fatigue modérée).
 struct RunCard: Equatable {
     var title: String
     var target: String?
     var suggestion: String?
+    var launch: RunLaunch
 }
 
 /// Ce que la carte « Séance du jour » montre, d'après la séance du jour et le score.
@@ -47,13 +49,13 @@ enum SessionCardState: Equatable {
     static let mobilityThreshold = 65.0
 
     /// Une séance en cours prime sur tout le reste. Le bilan de la séance faite ne remplace que la carte de musculation : un jour de
-    /// repos, de course ou de mobilité garde la sienne.
+    /// repos, de course ou de mobilité garde la sienne. `programID` est le programme actif, que la course lancée rappelle.
     static func make(session: TodaySession, score: TodayScore?, directory: ExerciseDirectory, done: DoneCard? = nil,
-                     inProgressTitle: String? = nil) -> SessionCardState {
+                     inProgressTitle: String? = nil, programID: UUID? = nil) -> SessionCardState {
         if let inProgressTitle {
             return .inProgress(title: inProgressTitle)
         }
-        let state = planned(session: session, score: score, directory: directory)
+        let state = planned(session: session, score: score, directory: directory, programID: programID)
         if case .strength = state, let done {
             return .done(done)
         }
@@ -62,7 +64,8 @@ enum SessionCardState: Equatable {
 
     /// Sans score du jour (avant 4 h, check-in à faire), la séance reste planifiée : aucun ajustement n'est proposé,
     /// et « Séance d'origine » serait refusée faute de score à modifier.
-    private static func planned(session: TodaySession, score: TodayScore?, directory: ExerciseDirectory) -> SessionCardState {
+    private static func planned(session: TodaySession, score: TodayScore?, directory: ExerciseDirectory,
+                                programID: UUID?) -> SessionCardState {
         let today: DailyRecovery? = if case .scored(let recovery)? = score { recovery } else { nil }
         let status = today == nil ? .planned : session.status
         switch session.plannedDay {
@@ -74,7 +77,10 @@ enum SessionCardState: Equatable {
             return .rest(next: next, suggestsMobility: suggestsMobility)
         case .run(let day):
             let suggestion = status == .adjusted ? session.adjusted.flatMap(runSuggestion) : nil
-            return .run(RunCard(title: day.runType?.localizedName ?? day.name, target: runTarget(day), suggestion: suggestion))
+            // L'ajustement ne part avec la course que tant qu'il tient : « Séance d'origine » rétablie, la course reste telle que prévue.
+            let launch = RunLaunch.planned(day, programID: programID, adjusted: status == .adjusted ? session.adjusted : nil)
+            return .run(RunCard(title: day.runType?.localizedName ?? day.name, target: runTarget(day), suggestion: suggestion,
+                                launch: launch))
         case .strength(let day):
             return strength(day, session: session, status: status, directory: directory)
         }

@@ -124,6 +124,26 @@ struct SessionSettingsSection: View {
     }
 }
 
+// MARK: - Course
+
+/// Les annonces vocales de la course : une phrase à chaque kilomètre, sur le haut-parleur ou le casque. Le réglage est celui de
+/// l'appareil, il ne suit pas le profil.
+struct RunSettingsSection: View {
+    let model: SettingsModel
+
+    var body: some View {
+        Section {
+            SettingsToggle(title: String(localized: "Annonces vocales pendant la course", bundle: .module),
+                           isOn: Binding(get: { model.announcesKilometres }, set: { model.setAnnouncesKilometres($0) }))
+        } header: {
+            Text(String(localized: "Course", bundle: .module))
+        } footer: {
+            Text(String(localized: "Une phrase dite à chaque kilomètre : la distance, le temps et l'allure.", bundle: .module))
+        }
+        .listRowBackground(PulsePalette.surface)
+    }
+}
+
 // MARK: - Notifications
 
 /// Le score du matin et son heure plafond, les rappels de compléments, la fin de repos ; un lien vers les réglages d'iOS quand les

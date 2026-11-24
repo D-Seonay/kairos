@@ -12,7 +12,8 @@ struct SettingsModelTests {
     /// L'environnement de l'écran ; `refreshHealth`, l'autorisation des notifications et la réponse d'iOS au choix du test.
     private func environment(notifications: NotificationAuthorizationStatus = .authorized,
                              permission: StubNotificationAuthorizer = StubNotificationAuthorizer(granted: true),
-                             refreshHealth: @escaping @Sendable () async -> Void = {}) -> ProfileEnvironment {
+                             refreshHealth: @escaping @Sendable () async -> Void = {},
+                             runPreferences: any RunPreferencesStore = InMemoryRunPreferencesStore()) -> ProfileEnvironment {
         let calendar = ProfileTestClock.calendar
         let clock: @Sendable () -> Date = { ProfileTestClock.now }
         let service = ProfileService(profiles: profiles, programs: InMemoryProgramRepository(), workouts: InMemoryWorkoutRepository(),
@@ -26,7 +27,7 @@ struct SettingsModelTests {
             inspector: SilentInspector(), exporter: SilentExporter(), eraser: SilentEraser(),
             notificationStatus: { notifications }, requestNotificationAuthorization: { await permission.requestAuthorization() },
             refreshHealth: refreshHealth, appVersion: "1.0.2 (14)",
-            privacyPolicyURL: nil, calendar: calendar, now: clock)
+            privacyPolicyURL: nil, calendar: calendar, now: clock, runPreferences: runPreferences)
     }
 
     private func storeProfile() async throws -> UserProfile {
@@ -38,6 +39,21 @@ struct SettingsModelTests {
 
     private func sample(_ kind: HealthSampleKind, start: Date, end: Date, fetchedAt: Date) -> CachedHealthSample {
         CachedHealthSample(kind: kind, start: start, end: end, value: 1, fetchedAt: fetchedAt)
+    }
+
+    @Test func announcementsToggleWritesThePreference() async throws {
+        _ = try await storeProfile()
+        let store = InMemoryRunPreferencesStore(announcesKilometres: false)
+        let model = SettingsModel(environment: environment(runPreferences: store)) { _ in }
+        #expect(model.announcesKilometres)
+
+        await model.load()
+        #expect(!model.announcesKilometres)
+
+        model.setAnnouncesKilometres(true)
+        #expect(model.announcesKilometres && store.announcesKilometres)
+        model.setAnnouncesKilometres(false)
+        #expect(!model.announcesKilometres && !store.announcesKilometres)
     }
 
     @Test func loadReadsProfileHealthAndNotifications() async throws {

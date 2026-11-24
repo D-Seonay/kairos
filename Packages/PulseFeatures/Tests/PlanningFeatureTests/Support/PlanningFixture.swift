@@ -33,6 +33,7 @@ struct PlanningFixture {
     let programs = InMemoryProgramRepository()
     let workouts = InMemoryWorkoutRepository()
     let scheduled = InMemoryScheduledDayRepository()
+    let tracks = InMemoryRunTrackRepository()
     let environment: PlanningEnvironment
     let now: Date
     let program: Program
@@ -59,7 +60,7 @@ struct PlanningFixture {
             importer: importer, library: library, activeSession: activeSession, calendar: calendar, now: clock)
         let service = PlanningService(profiles: profiles, programs: programs, workouts: workouts, scheduledDays: scheduled,
                                       calendar: calendar, now: clock)
-        environment = PlanningEnvironment(service: service, train: train, calendar: calendar, now: clock)
+        environment = PlanningEnvironment(service: service, train: train, calendar: calendar, now: clock, tracks: tracks)
         let created = PlanningClock.date(day: 1)
         program = Program(name: "PPL + course", sessionsPerWeek: 5,
                           weekLayout: [Self.push.id, Self.pull.id, Self.legs.id, Self.run.id, Self.push.id, nil, nil],

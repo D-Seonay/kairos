@@ -1,5 +1,6 @@
 import CheckInFeature
 import PulseDesignSystem
+import PulseDomain
 import PulseServices
 import SupplementsFeature
 import SwiftUI
@@ -8,26 +9,29 @@ import SwiftUI
 /// avec sa feuille de mobilité et l'écran « Pourquoi », poussé dans sa pile de navigation. Un jour de musculation, « Démarrer »
 /// est ancré en bas de l'écran : l'action du jour reste sous le pouce, quelle que soit la position du défilement.
 /// « Démarrer » rend la séance à lancer à l'app, qui ouvre l'écran en direct ; « Reprendre la séance » lui demande de rouvrir
-/// celle en cours. La carte Compléments, sous la séance, ouvre l'écran Compléments dans la même pile.
+/// celle en cours ; « Démarrer la course », sur la carte d'une course, rend la course à lancer. La carte Compléments, sous la séance,
+/// ouvre l'écran Compléments dans la même pile.
 public struct TodayView: View {
     private let model: TodayModel
     private let supplements: SupplementsModel?
     private let onOpenProfile: () -> Void
     private let onStartSession: (SessionLaunch) -> Void
     private let onResumeSession: () -> Void
+    private let onStartRun: (RunLaunch) -> Void
     /// L'écran Compléments poussé ; l'app le tient pour qu'un rappel touché l'ouvre. Sans lui, l'accueil garde le sien.
     private let showsSupplements: Binding<Bool>?
     @State private var localShowsSupplements = false
 
     public init(model: TodayModel, supplements: SupplementsModel? = nil, showsSupplements: Binding<Bool>? = nil,
                 onOpenProfile: @escaping () -> Void, onStartSession: @escaping (SessionLaunch) -> Void,
-                onResumeSession: @escaping () -> Void) {
+                onResumeSession: @escaping () -> Void, onStartRun: @escaping (RunLaunch) -> Void = { _ in }) {
         self.model = model
         self.supplements = supplements
         self.showsSupplements = showsSupplements
         self.onOpenProfile = onOpenProfile
         self.onStartSession = onStartSession
         self.onResumeSession = onResumeSession
+        self.onStartRun = onStartRun
     }
 
     public var body: some View {
@@ -74,7 +78,7 @@ public struct TodayView: View {
             VStack(spacing: PulseMetrics.spacing) {
                 TodayHeader(model: model, onOpenProfile: onOpenProfile)
                 recoveryOrCheckIn
-                SessionCard(model: model, onWhy: model.showWhy, onResume: onResumeSession)
+                SessionCard(model: model, onWhy: model.showWhy, onResume: onResumeSession, onStartRun: onStartRun)
                 if let offer = model.deloadOffer {
                     DeloadOfferCard(offer: offer) { accepted in Task { await model.decideDeload(accepted) } }
                 }

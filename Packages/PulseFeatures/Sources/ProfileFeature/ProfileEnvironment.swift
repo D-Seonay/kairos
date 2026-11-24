@@ -5,7 +5,7 @@ import SwiftUI
 
 /// Tout ce dont l'onglet Profil a besoin du dehors : le résumé, les pesées, les réglages, l'état d'Apple Santé, les données
 /// stockées (inspection, export, suppression), ce que seule l'app sait (autorisation des notifications, passage du jour,
-/// version, politique de confidentialité) et l'horloge.
+/// version, politique de confidentialité), les réglages de la course et l'horloge.
 public struct ProfileEnvironment: Sendable {
     public var profile: ProfileService
     public var body: BodyService
@@ -26,13 +26,16 @@ public struct ProfileEnvironment: Sendable {
     public var privacyPolicyURL: URL?
     public var calendar: Calendar
     public var now: @Sendable () -> Date
+    /// Les réglages de la course, par appareil : pour l'instant les annonces vocales à chaque kilomètre.
+    public var runPreferences: any RunPreferencesStore
 
     public init(profile: ProfileService, body: BodyService, settings: SettingsService, healthCache: any HealthSampleCache,
                 inspector: any StoreInspector, exporter: any DataExporter, eraser: any DataEraser,
                 notificationStatus: @escaping @Sendable () async -> NotificationAuthorizationStatus,
                 requestNotificationAuthorization: @escaping @Sendable () async -> Bool,
                 refreshHealth: @escaping @Sendable () async -> Void,
-                appVersion: String, privacyPolicyURL: URL?, calendar: Calendar, now: @escaping @Sendable () -> Date) {
+                appVersion: String, privacyPolicyURL: URL?, calendar: Calendar, now: @escaping @Sendable () -> Date,
+                runPreferences: any RunPreferencesStore = InMemoryRunPreferencesStore()) {
         self.profile = profile
         self.body = body
         self.settings = settings
@@ -47,6 +50,7 @@ public struct ProfileEnvironment: Sendable {
         self.privacyPolicyURL = privacyPolicyURL
         self.calendar = calendar
         self.now = now
+        self.runPreferences = runPreferences
     }
 }
 

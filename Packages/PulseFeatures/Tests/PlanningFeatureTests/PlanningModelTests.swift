@@ -91,6 +91,59 @@ struct PlanningModelTests {
         #expect(saved.overallRPE == 8 && saved.note == "Vent de face" && !model.hasChanges)
     }
 
+    private func track(for session: WorkoutSession, points: Int = 3, splits: Int = 1) -> RunTrack {
+        let start = session.startedAt
+        return RunTrack(
+            id: session.id,
+            points: (0..<points).map {
+                RunTrackPoint(timestamp: start.addingTimeInterval(Double($0) * 10), latitude: 48.85 + Double($0) * 0.0001,
+                              longitude: 2.35, horizontalAccuracy: 5)
+            },
+            splits: (0..<splits).map { RunSplit(kilometer: $0 + 1, seconds: 330, distanceMeters: 1_000) },
+            createdAt: start, updatedAt: start)
+    }
+
+    @Test func pulseRunDetailLoadsItsTrack() async throws {
+        let fixture = PlanningFixture()
+        try await fixture.activate()
+        let run = try await fixture.log(day: 17, hour: 7, kind: .run, meters: 4_400, source: .pulse)
+        let saved = track(for: run)
+        try await fixture.tracks.save(saved)
+        let model = PlanningModel(environment: fixture.environment).activityDetailModel(sessionID: run.id)
+        await model.load()
+        #expect(model.routeTrack == saved)
+    }
+
+    @Test func runDetailHasNoRouteWithoutAUsableTrack() async throws {
+        let fixture = PlanningFixture()
+        try await fixture.activate()
+        // Une course lue d'Apple Santé n'a pas de tracé Pulse, même si un tracé existait sous le même identifiant.
+        let health = try await fixture.log(day: 16, hour: 7, kind: .run, meters: 8_200, source: .appleHealth)
+        try await fixture.tracks.save(track(for: health))
+        // Une course Pulse sans tracé, et une dont le tracé est vide.
+        let bare = try await fixture.log(day: 17, hour: 7, kind: .run, meters: 4_400, source: .pulse)
+        let empty = try await fixture.log(day: 15, hour: 7, kind: .run, meters: 4_400, source: .pulse)
+        try await fixture.tracks.save(track(for: empty, points: 0, splits: 0))
+        // Une course Pulse dont seuls les kilomètres sont gardés montre quand même son tracé.
+        let splitsOnly = try await fixture.log(day: 14, hour: 7, kind: .run, meters: 4_400, source: .pulse)
+        try await fixture.tracks.save(track(for: splitsOnly, points: 0, splits: 2))
+        let planning = PlanningModel(environment: fixture.environment)
+        var routes: [Bool] = []
+        for session in [health, bare, empty, splitsOnly] {
+            let model = planning.activityDetailModel(sessionID: session.id)
+            await model.load()
+            routes.append(model.routeTrack != nil)
+        }
+        #expect(routes == [false, false, false, true])
+
+        // Sans dépôt de tracés, le détail reste celui d'avant.
+        var environment = fixture.environment
+        environment.tracks = nil
+        let model = PlanningModel(environment: environment).activityDetailModel(sessionID: splitsOnly.id)
+        await model.load()
+        #expect(model.routeTrack == nil && model.session != nil)
+    }
+
     @Test func ruleMovesShowTheirReasonAndCanBeRefused() async throws {
         let fixture = PlanningFixture()
         try await fixture.activate()

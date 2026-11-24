@@ -17,15 +17,16 @@ enum TrainDestination: Hashable {
 
 /// L'onglet « Séance » : « Reprendre la séance » pendant une séance, la tuile Musculation (« Démarrer »), la tuile Course,
 /// « Mes routines » (« Lancer », « Mon programme » et « + Nouvelle »), puis la bibliothèque d'exercices, l'historique,
-/// « Séance libre », « Saisir une séance passée » et l'import Hevy. Lancer une séance la rend à l'app, qui ouvre l'écran en
-/// direct ; s'il y en a déjà une en cours, l'onglet propose de la reprendre. Une séance passée se saisit à côté de celle en
-/// cours.
+/// « Séance libre », « Courir », « Saisir une séance passée » et l'import Hevy. Lancer une séance la rend à l'app, qui ouvre
+/// l'écran en direct (« Courir », sur la tuile Course ou dans l'entrée, rend de même la course à lancer) ; s'il y a déjà une
+/// séance en cours, l'onglet propose de la reprendre. Une séance passée se saisit à côté de celle en cours.
 public struct TrainView: View {
     private let model: TrainModel
     private let onOpenToday: () -> Void
     private let onStartSession: (SessionLaunch) -> Void
     private let onResumeSession: () -> Void
     private let onEnterPastSession: (SessionLaunch) -> Void
+    private let onStartRun: (RunLaunch) -> Void
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var path: [TrainDestination] = []
     @State private var creationFailed = false
@@ -36,14 +37,16 @@ public struct TrainView: View {
     @State private var pendingPastLaunch: SessionLaunch?
 
     /// `onOpenToday` affiche l'accueil ; `onStartSession` démarre la séance rendue ; `onResumeSession` rouvre celle en cours ;
-    /// `onEnterPastSession` ouvre la saisie de la séance passée rendue.
+    /// `onEnterPastSession` ouvre la saisie de la séance passée rendue ; `onStartRun` démarre la course rendue.
     public init(model: TrainModel, onOpenToday: @escaping () -> Void, onStartSession: @escaping (SessionLaunch) -> Void,
-                onResumeSession: @escaping () -> Void, onEnterPastSession: @escaping (SessionLaunch) -> Void) {
+                onResumeSession: @escaping () -> Void, onEnterPastSession: @escaping (SessionLaunch) -> Void,
+                onStartRun: @escaping (RunLaunch) -> Void = { _ in }) {
         self.model = model
         self.onOpenToday = onOpenToday
         self.onStartSession = onStartSession
         self.onResumeSession = onResumeSession
         self.onEnterPastSession = onEnterPastSession
+        self.onStartRun = onStartRun
     }
 
     public var body: some View {
@@ -89,6 +92,15 @@ public struct TrainView: View {
         }
     }
 
+    /// Lance la course du jour ou une course libre ; avec une séance de musculation en cours, propose de la reprendre à la place.
+    private func startRun() {
+        if model.activeSessionTitle == nil {
+            onStartRun(model.runLaunch())
+        } else {
+            offersResume = true
+        }
+    }
+
     private var content: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: PulseMetrics.spacing) {
@@ -102,7 +114,8 @@ public struct TrainView: View {
                         .foregroundStyle(PulsePalette.bad)
                 }
                 TrainTiles(model: model, onOpenToday: onOpenToday,
-                           onStart: model.launchToday() == nil ? nil : { start(model.launchToday()) })
+                           onStart: model.launchToday() == nil ? nil : { start(model.launchToday()) },
+                           onStartRun: startRun)
                 routines
                 entries
             }
@@ -192,6 +205,10 @@ public struct TrainView: View {
                         title: String(localized: "Séance libre", bundle: .module),
                         detail: String(localized: "Sans routine : tu ajoutes les exercices au fil de la séance", bundle: .module),
                         identifier: TrainIdentifiers.freeSession) { start(model.freeLaunch()) }
+            EntryButton(systemImage: "figure.run",
+                        title: String(localized: "Courir", bundle: .module),
+                        detail: String(localized: "Ta course du jour, ou une course libre avec le GPS", bundle: .module),
+                        identifier: TrainIdentifiers.freeRun, action: startRun)
             EntryButton(systemImage: "calendar.badge.clock",
                         title: String(localized: "Saisir une séance passée", bundle: .module),
                         detail: String(localized: "Une séance faite sans Pulse, avec sa date et sa durée", bundle: .module),

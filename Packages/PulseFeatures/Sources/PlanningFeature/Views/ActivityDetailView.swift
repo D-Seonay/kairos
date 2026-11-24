@@ -1,14 +1,34 @@
 import PulseDesignSystem
 import PulseDomain
+import RunFeature
 import SwiftUI
 
-/// Le détail d'une course ou d'un vélo lu d'Apple Santé (spec M6 §7) : mesures, RPE et note modifiables.
+/// Le détail d'une course ou d'un vélo lu d'Apple Santé (spec M6 §7) : mesures, RPE et note modifiables. Une course Pulse
+/// ajoute la section « Tracé » : la carte du parcours et les temps par kilomètre.
 struct ActivityDetailView: View {
     @State private var model: ActivityDetailModel
     private static let rpeValues: [Double] = stride(from: 1.0, through: 10.0, by: 0.5).map { $0 }
 
     init(model: ActivityDetailModel) {
         _model = State(initialValue: model)
+    }
+
+    /// La carte du tracé, puis les temps par kilomètre ; chacun n'apparaît que s'il y a de quoi le montrer.
+    private func routeSection(_ track: RunTrack) -> some View {
+        Section {
+            if !track.points.isEmpty {
+                RunRouteMap(points: track.points, distanceMeters: model.session?.distanceMeters)
+                    .frame(height: 240)
+                    .clipShape(RoundedRectangle(cornerRadius: PulseMetrics.radius, style: .continuous))
+                    .listRowInsets(EdgeInsets())
+            }
+            if !track.splits.isEmpty {
+                RunSplitsList(splits: track.splits)
+            }
+        } header: {
+            Text(String(localized: "Tracé", bundle: .module))
+        }
+        .listRowBackground(PulsePalette.surface)
     }
 
     var body: some View {
@@ -34,6 +54,9 @@ struct ActivityDetailView: View {
                     }
                 }
                 .listRowBackground(PulsePalette.surface)
+                if let track = model.routeTrack {
+                    routeSection(track)
+                }
                 Section {
                     Picker(String(localized: "RPE ressenti", bundle: .module), selection: $model.rpe) {
                         Text(String(localized: "—", bundle: .module))
@@ -54,8 +77,10 @@ struct ActivityDetailView: View {
                 Section {
                     EmptyView()
                 } footer: {
-                    Text(String(localized: "Cet entraînement vient d'Apple Santé. Pour le supprimer, supprime-le dans l'app Santé.",
-                                bundle: .module))
+                    Text(model.session?.source == .pulse
+                        ? String(localized: "Cette course a été enregistrée avec Pulse.", bundle: .module)
+                        : String(localized: "Cet entraînement vient d'Apple Santé. Pour le supprimer, supprime-le dans l'app Santé.",
+                                 bundle: .module))
                 }
             } else if model.hasLoaded {
                 Text(String(localized: "Cet entraînement est introuvable. Il a peut-être été supprimé d'Apple Santé.", bundle: .module))

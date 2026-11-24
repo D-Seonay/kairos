@@ -105,3 +105,37 @@ import Testing
     await model.refresh()
     #expect(model.activeSessionTitle == "Séance libre")
 }
+
+@MainActor @Test func trainRunLaunchIsTodayPlannedRunOrFree() async throws {
+    // Samedi : le footing du programme est la course du jour, et sous une fatigue modérée le fractionné devient une sortie facile.
+    let saturday = TrainFixture(now: TrainClock.date(day: 7, hour: 9))
+    let program = pplProgram(withRun: true)
+    try await saturday.activate(program)
+    let planned = TrainModel(environment: saturday.environment)
+    await planned.refresh()
+    let footing = try #require(program.days.first { $0.kind == .run })
+    let launch = planned.runLaunch()
+    #expect(launch.title == "Sortie facile" && launch.programID == program.id && launch.routineDayID == footing.id)
+    #expect(launch.targetMinutes == 40 && launch.adjustmentNote == nil)
+
+    let intervals = RoutineDay(order: 3, name: "Fractionné", kind: .run, runType: .intervals, runTargetMinutes: 30)
+    var tough = pplProgram(withRun: true)
+    tough.days = tough.days.filter { $0.kind == .strength } + [intervals]
+    tough.weekLayout[5] = intervals.id
+    let tired = TrainFixture(now: TrainClock.date(day: 7, hour: 9))
+    try await tired.activate(tough)
+    try await tired.scoreToday(.moderateFatigue)
+    let adjustedModel = TrainModel(environment: tired.environment)
+    await adjustedModel.refresh()
+    #expect(adjustedModel.runLaunch().runType == .easy)
+    #expect(adjustedModel.runLaunch().adjustmentNote == "au lieu du fractionné")
+
+    // Un autre jour que celui de la course, ou sans programme : une course libre.
+    let monday = TrainFixture()
+    try await monday.activate(program)
+    let other = TrainModel(environment: monday.environment)
+    await other.refresh()
+    #expect(other.nextRun != nil)
+    #expect(other.runLaunch() == RunLaunch.free())
+    #expect(TrainModel(environment: monday.environment).runLaunch() == RunLaunch.free())
+}

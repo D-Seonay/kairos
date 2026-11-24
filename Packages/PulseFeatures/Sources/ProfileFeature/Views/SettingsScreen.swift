@@ -37,6 +37,7 @@ struct SettingsScreen: View {
                     Task { await model.update { $0.setRule(rule, enabled: enabled) } }
                 }
                 SessionSettingsSection(model: model, profile: profile)
+                RunSettingsSection(model: model)
                 DisplaySettingsSection(model: model, profile: profile)
                 NotificationSettingsSection(model: model, profile: profile)
             } else if !model.hasLoaded {
