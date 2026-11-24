@@ -209,6 +209,81 @@ public final class SessionDetailModel {
         return parts.joined(separator: spoken ? ", " : " · ")
     }
 
+    // MARK: - Partage
+
+    /// La carte de partage de la séance : pour la musculation, durée, tonnage, séries et records avec la carte musculaire ; pour
+    /// une course ou une sortie, distance, durée et allure. `nil` tant que la séance n'est pas lue.
+    public var shareContent: ShareCardContent? {
+        guard let session else { return nil }
+        let day = environment.text(of: session.startedAt) { $0.weekday(.wide).day().month(.wide) }
+        if session.kind != .strength {
+            return Self.enduranceShareContent(of: session, day: day)
+        }
+        let working = session.sets.filter { $0.setType != .warmup }
+        var metrics: [ShareCardMetric] = []
+        if let minutes = HistoryModel.durationMinutes(of: session), minutes > 0 {
+            let text = PulseFormat.duration(minutes: minutes)
+            metrics.append(ShareCardMetric(value: text, label: String(localized: "Durée", bundle: .module), caption: text))
+        }
+        let tonnage = SessionTonnage.kilograms(of: session.sets, loadKind: directory.loadKind(of:))
+        if tonnage > 0 {
+            metrics.append(ShareCardMetric(value: PulseFormat.grouped(tonnage, maxFractionDigits: 0),
+                                           label: String(localized: "kg soulevés", bundle: .module), caption: HistoryRow.tonnage(tonnage)))
+        }
+        metrics.append(ShareCardMetric(value: "\(working.count)", label: String(localized: "Séries", bundle: .module),
+                                       caption: TrainText.sets(working.count)))
+        let records = working.filter(\.isPersonalRecord).count
+        if records > 0 {
+            metrics.append(ShareCardMetric(value: "\(records)", label: String(localized: "Records", bundle: .module),
+                                           caption: TrainText.records(records)))
+        }
+        let highlights = blocks.compactMap { block in
+            block.sets.first(where: \.isRecord).map { "\(block.name) : \($0.text)" }
+        }
+        return ShareCardContent(
+            eyebrow: String(localized: "Séance", bundle: .module),
+            title: session.title.isEmpty ? String(localized: "Séance", bundle: .module) : session.title,
+            subtitle: day, metrics: metrics, highlights: highlights, visual: muscleLevels.isEmpty ? .none : .muscles(muscleLevels))
+    }
+
+    /// Une course ou une sortie vélo : la distance, la durée et l'allure (au km pour la course, en km/h pour le vélo).
+    static func enduranceShareContent(of session: WorkoutSession, day: String) -> ShareCardContent {
+        var metrics: [ShareCardMetric] = []
+        let distance = session.distanceMeters.flatMap { $0 > 0 ? $0 : nil }
+        if let distance {
+            let text = String(localized: "\(PulseFormat.decimal(distance / 1_000, maxFractionDigits: 2)) km", bundle: .module)
+            metrics.append(ShareCardMetric(value: text, label: String(localized: "Distance", bundle: .module), caption: text))
+        }
+        let minutes = HistoryModel.durationMinutes(of: session) ?? 0
+        if minutes > 0 {
+            let text = PulseFormat.duration(minutes: minutes)
+            metrics.append(ShareCardMetric(value: text, label: String(localized: "Durée", bundle: .module), caption: text))
+        }
+        if let distance, distance >= 100, minutes > 0, let speed = speedText(of: session, meters: distance, minutes: minutes) {
+            metrics.append(ShareCardMetric(value: speed, label: String(localized: "Allure", bundle: .module), caption: speed))
+        }
+        if let bpm = session.averageHeartRate {
+            let text = PulseFormat.integer(bpm, unit: "bpm")
+            metrics.append(ShareCardMetric(value: text, label: String(localized: "FC moyenne", bundle: .module), caption: text))
+        }
+        let isRide = session.kind == .ride
+        let kind = isRide ? String(localized: "Vélo", bundle: .module) : String(localized: "Course", bundle: .module)
+        return ShareCardContent(eyebrow: kind, title: session.title.isEmpty ? kind : session.title, subtitle: day, metrics: metrics)
+    }
+
+    /// « 5'29"/km » pour une course, « 24,5 km/h » pour une sortie vélo.
+    nonisolated static func speedText(of session: WorkoutSession, meters: Double, minutes: Int) -> String? {
+        let kilometres = meters / 1_000
+        if session.kind == .ride {
+            let speed = kilometres / (Double(minutes) / 60)
+            return String(localized: "\(PulseFormat.decimal(speed, maxFractionDigits: 1)) km/h", bundle: .module)
+        }
+        let secondsPerKm = Int((Double(minutes * 60) / kilometres).rounded())
+        guard secondsPerKm > 0 else { return nil }
+        let rest = secondsPerKm % 60
+        return "\(secondsPerKm / 60)'\(rest < 10 ? "0" : "")\(rest)\"/km"
+    }
+
     // MARK: - Interne
 
     /// Le modèle de la section Photos de `session`, gardé s'il existe déjà ; `nil` sans service ou pour une séance qui n'accepte

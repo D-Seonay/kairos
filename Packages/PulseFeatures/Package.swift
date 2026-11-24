@@ -132,7 +132,8 @@ let package = Package(
         ),
         .testTarget(
             name: "LiveSessionFeatureTests",
-            dependencies: ["LiveSessionFeature", "TrainFeature", "PhotosFeature", "PulseServices", domain, recoveryEngine, content],
+            dependencies: ["LiveSessionFeature", "TrainFeature", "PhotosFeature", "PulseServices", designSystem, domain, recoveryEngine,
+                           content],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(

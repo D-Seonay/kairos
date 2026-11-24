@@ -46,6 +46,11 @@ struct RunRecapView: View {
         .scrollDismissesKeyboard(.interactively)
         .navigationTitle(String(localized: "Récap", bundle: .module))
         .pulseInlineTitle()
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                ShareCardButton(content: model.shareContent(calendar: calendar))
+            }
+        }
         .pulseScreenBackground(aura: 0.5)
         .pulseAnnounceError(model.errorMessage)
         .safeAreaInset(edge: .bottom, spacing: 0) { actions }

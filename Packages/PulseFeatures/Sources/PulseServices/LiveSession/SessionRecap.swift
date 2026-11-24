@@ -17,6 +17,15 @@ public struct BeatenRecord: Sendable, Equatable {
         self.text = text
         self.spokenText = spokenText ?? text
     }
+
+    /// Le texte sans la fin « , nouveau record… » : « Développé couché à la barre : 72,5 kg », pour une ligne déjà marquée d'un
+    /// trophée (la carte de partage).
+    public var headline: String {
+        guard let range = text.range(of: String(localized: ", nouveau record", bundle: .module), options: .backwards) else {
+            return text
+        }
+        return String(text[..<range.lowerBound])
+    }
 }
 
 /// Le bilan de fin de séance (spec M4 §17) : durée, tonnage, séries de travail, records battus, muscles travaillés et RPE
