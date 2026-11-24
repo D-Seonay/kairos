@@ -148,12 +148,31 @@ struct StatsChartSummaryTests {
         let points = [SleepPoint(date: Spoken.date(11, 3), asleepMinutes: 330, deepMinutes: 60),
                       SleepPoint(date: Spoken.date(11, 4), asleepMinutes: 432, deepMinutes: 90),
                       SleepPoint(date: Spoken.date(11, 5), asleepMinutes: 540, deepMinutes: nil)]
-        #expect(StatsText.sleepSummary(points: points, deepShare: 0.19, period: .month, bucket: .day, calendar: Spoken.calendar)
+        #expect(StatsText.sleepSummary(points: points, deepShare: 0.19, stageShares: nil, period: .month,
+                                       calendar: Spoken.calendar)
             == "Sommeil, 30 jours : 7 heures 14 minutes en moyenne, profond 19 %, nuit la plus courte 5 heures 30 minutes le 3 novembre, "
             + "nuit la plus longue 9 heures le 5 novembre.")
-        #expect(StatsText.sleepSummary(points: points, deepShare: nil, period: .year, bucket: .week, calendar: Spoken.calendar)
+        #expect(StatsText.sleepSummary(points: points, deepShare: nil, stageShares: nil, period: .year,
+                                       calendar: Spoken.calendar)
             == "Sommeil, 1 an : 7 heures 14 minutes en moyenne, semaine la plus courte 5 heures 30 minutes la semaine du 3 novembre, "
             + "semaine la plus longue 9 heures la semaine du 5 novembre.")
+    }
+
+    @Test func sleepSummaryNamesEveryStageShare() {
+        let points = [SleepPoint(date: Spoken.date(11, 3), asleepMinutes: 420, deepMinutes: 80, coreMinutes: 245, remMinutes: 95,
+                                 unspecifiedMinutes: 0)]
+        let shares = StageShares(deep: 0.19, core: 0.58, rem: 0.23, unspecified: 0)
+        #expect(StatsText.sleepSummary(points: points, deepShare: 0.19, stageShares: shares, period: .week,
+                                       calendar: Spoken.calendar)
+            == "Sommeil, 7 jours : 7 heures en moyenne, profond 19 %, léger 58 %, paradoxal 23 %.")
+    }
+
+    @Test func sleepSharesAddTheUnstagedRestOnlyWhenPresent() {
+        let shares = StageShares(deep: 0.18, core: 0.55, rem: 0.22, unspecified: 0.05)
+        #expect(StatsText.sleepSharesSpoken(deepShare: 0.18, stageShares: shares)
+            == "profond 18 %, léger 55 %, paradoxal 22 %, sans phase 5 %")
+        #expect(StatsText.sleepSharesSpoken(deepShare: 0.2, stageShares: nil) == "profond 20 %")
+        #expect(StatsText.sleepSharesSpoken(deepShare: nil, stageShares: nil) == nil)
     }
 
     @Test func categoriesSummarySpeaksDays() {
@@ -330,7 +349,8 @@ struct StatsChartDescriptorTests {
     @Test func sleepDescriptorSpeaksHoursAsDurations() {
         let points = [SleepPoint(date: Spoken.date(11, 3), asleepMinutes: 450, deepMinutes: 90),
                       SleepPoint(date: Spoken.date(11, 4), asleepMinutes: 420, deepMinutes: nil)]
-        let built = StatsChartDescriptors.sleep(points: points, deepShare: 0.2, window: window).makeChartDescriptor()
+        let built = StatsChartDescriptors.sleep(points: points, deepShare: 0.2, stageShares: nil, window: window)
+            .makeChartDescriptor()
         #expect(built.series.map(\.name) == ["Sommeil total", "Sommeil profond"])
         #expect(built.series[0].dataPoints.count == 2 && built.series[1].dataPoints.count == 1)
         #expect(built.yAxis?.valueDescriptionProvider(7.5) == "7 heures 30 minutes")

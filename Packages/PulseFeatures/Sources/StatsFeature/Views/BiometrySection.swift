@@ -20,7 +20,8 @@ struct BiometrySection: View {
                               measure: .hrv, points: biometry.hrvPoints, style: .points, window: window)
             BaselineChartCard(title: String(localized: "FC au repos", bundle: .module), unit: "bpm",
                               measure: .restingHeartRate, points: biometry.restingPoints, style: .line, window: window)
-            SleepChartCard(points: biometry.sleepPoints, deepShare: biometry.deepShare, window: window, onOpenNights: onOpenNights)
+            SleepChartCard(points: biometry.sleepPoints, deepShare: biometry.deepShare, stageShares: biometry.stageShares,
+                           window: window, onOpenNights: onOpenNights)
             CategoriesCard(categories: biometry.categories, window: window)
         }
     }
@@ -166,6 +167,7 @@ private struct BaselineChartCard: View {
 private struct SleepChartCard: View {
     let points: [SleepPoint]
     let deepShare: Double?
+    let stageShares: StageShares?
     let window: StatsWindow
     var onOpenNights: (() -> Void)?
     @ScaledMetric(relativeTo: .body) private var chartHeight: CGFloat = 160
@@ -219,9 +221,10 @@ private struct SleepChartCard: View {
         .statsAxes(calendar: window.calendar, yUnit: "h")
         .frame(height: chartHeight)
         .accessibilityElement(children: .contain)
-        .accessibilityLabel(StatsText.sleepSummary(points: points, deepShare: deepShare, period: window.period, bucket: bucket,
-                                                   calendar: window.calendar))
-        .accessibilityChartDescriptor(StatsChartDescriptors.sleep(points: points, deepShare: deepShare, window: window))
+        .accessibilityLabel(StatsText.sleepSummary(points: points, deepShare: deepShare, stageShares: stageShares,
+                                                   period: window.period, calendar: window.calendar))
+        .accessibilityChartDescriptor(StatsChartDescriptors.sleep(points: points, deepShare: deepShare, stageShares: stageShares,
+                                                                  window: window))
     }
 }
 
