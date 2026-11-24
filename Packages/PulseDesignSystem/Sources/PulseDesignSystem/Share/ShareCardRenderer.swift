@@ -27,9 +27,9 @@ public struct ShareCardImage: Transferable, Sendable {
 /// sont passés à la main, l'environnement de l'écran ne la suit pas.
 @MainActor
 public enum ShareCardRenderer {
-    public static func cgImage(content: ShareCardContent, format: ShareCardFormat, theme: Theme = .amber,
+    public static func cgImage(content: ShareCardContent, format: ShareCardFormat, photo: CGImage? = nil, theme: Theme = .amber,
                                figure: MuscleMapFigure = .female) -> CGImage? {
-        let card = ShareCardView(content: content, format: format)
+        let card = ShareCardView(content: content, format: format, photo: photo)
             .environment(\.pulseTheme, theme)
             .environment(\.muscleMapFigure, figure)
         let renderer = ImageRenderer(content: card)
@@ -39,8 +39,18 @@ public enum ShareCardRenderer {
         return renderer.cgImage
     }
 
+    /// La photo d'un fond de carte, lue depuis son JPEG, redressée selon son orientation et ramenée à `maxPixelSize` pixels sur
+    /// son grand côté (assez pour 1 920 pixels de haut) ; `nil` si les données ne sont pas une image.
+    nonisolated public static func photo(from data: Data, maxPixelSize: Int = 2_048) -> CGImage? {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil) else { return nil }
+        let options: [CFString: Any] = [kCGImageSourceCreateThumbnailFromImageAlways: true,
+                                        kCGImageSourceCreateThumbnailWithTransform: true,
+                                        kCGImageSourceThumbnailMaxPixelSize: maxPixelSize]
+        return CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary)
+    }
+
     /// Le PNG de `image` ; `nil` si ImageIO ne sait pas l'écrire.
-    public static func png(_ image: CGImage) -> Data? {
+    nonisolated public static func png(_ image: CGImage) -> Data? {
         let data = NSMutableData()
         guard let destination = CGImageDestinationCreateWithData(data, UTType.png.identifier as CFString, 1, nil) else {
             return nil

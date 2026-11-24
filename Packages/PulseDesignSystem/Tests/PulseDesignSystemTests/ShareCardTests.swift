@@ -94,3 +94,43 @@ private func content(title: String = "Push", metrics: [ShareCardMetric] = [], vi
     #expect(ShareCardText.moreRecords(1) == "+ 1 autre record")
     #expect(ShareCardText.moreRecords(3) == "+ 3 autres records")
 }
+
+@Test func captionPutsARecordValueAfterTheTitle() {
+    let card = ShareCardContent(eyebrow: "Record", title: "Squat", subtitle: "",
+                                metrics: [ShareCardMetric(value: "+5 kg", label: "x", caption: "+5 kg")],
+                                visual: .hero(value: "140 kg", label: "1RM estimé"))
+    #expect(card.caption.hasPrefix("Squat · 140 kg · +5 kg\n"))
+}
+
+@Test func hypnogramBarsAreClippedToTheNightAndDropUnknownRows() {
+    let start = Date(timeIntervalSince1970: 0), end = start.addingTimeInterval(1_000)
+    let bars = ShareCardHypnogram.bars(
+        of: [.init(row: 1, start: start.addingTimeInterval(-100), end: start.addingTimeInterval(250)),
+             .init(row: nil, start: start.addingTimeInterval(250), end: start.addingTimeInterval(500)),
+             .init(row: 7, start: start.addingTimeInterval(500), end: start.addingTimeInterval(600)),
+             .init(row: 2, start: start.addingTimeInterval(900), end: end.addingTimeInterval(100)),
+             .init(row: 0, start: end, end: end.addingTimeInterval(60))],
+        from: start, to: end, rowCount: 4)
+    #expect(bars == [.init(row: 1, start: 0, end: 0.25), .init(row: 2, start: 0.9, end: 1)])
+    #expect(ShareCardHypnogram.bars(of: [.init(row: 0, start: start, end: end)], from: end, to: start, rowCount: 4).isEmpty)
+}
+
+@Test func deeperHypnogramRowsAreInkedMore() {
+    #expect(ShareHypnogramView.opacity(row: 0, of: 4) < ShareHypnogramView.opacity(row: 3, of: 4))
+    #expect(ShareHypnogramView.opacity(row: 3, of: 4) == 1)
+}
+
+@MainActor
+@Test func photoIsDecodedScaledAndDrawnBehindTheCard() throws {
+    let context = try #require(CGContext(data: nil, width: 400, height: 300, bitsPerComponent: 8, bytesPerRow: 0,
+                                         space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
+    context.setFillColor(CGColor(red: 1, green: 0, blue: 0, alpha: 1))
+    context.fill(CGRect(x: 0, y: 0, width: 400, height: 300))
+    let source = try #require(context.makeImage())
+    let png = try #require(ShareCardRenderer.png(source))
+    let photo = try #require(ShareCardRenderer.photo(from: png, maxPixelSize: 200))
+    #expect(max(photo.width, photo.height) == 200)
+    #expect(ShareCardRenderer.photo(from: Data("pas une image".utf8)) == nil)
+    let image = try #require(ShareCardRenderer.cgImage(content: content(), format: .story, photo: photo))
+    #expect(image.width == 1_080)
+}
