@@ -1,0 +1,476 @@
+{
+  "sourceLanguage" : "fr",
+  "strings" : {
+    "%@ d'écart" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ d'écart"
+          }
+        }
+      }
+    },
+    "%lld photos ajoutées" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld photos ajoutées"
+          }
+        }
+      }
+    },
+    "%lld photos au maximum par séance : %lld n'a pas été ajoutée." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld photos au maximum par séance : %2$lld n'a pas été ajoutée."
+          }
+        }
+      }
+    },
+    "%lld photos au maximum par séance : %lld n'ont pas été ajoutées." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld photos au maximum par séance : %2$lld n'ont pas été ajoutées."
+          }
+        }
+      }
+    },
+    "Ajout de la photo en cours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajout de la photo en cours"
+          }
+        }
+      }
+    },
+    "Ajouter" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter"
+          }
+        }
+      }
+    },
+    "Ajouter une photo" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter une photo"
+          }
+        }
+      }
+    },
+    "Ajouter une photo de dos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter une photo de dos"
+          }
+        }
+      }
+    },
+    "Ajouter une photo de face" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter une photo de face"
+          }
+        }
+      }
+    },
+    "Ajouter une photo de profil" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter une photo de profil"
+          }
+        }
+      }
+    },
+    "Ajouter une photo, %@ dans la séance" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter une photo, %@ dans la séance"
+          }
+        }
+      }
+    },
+    "Annuler" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annuler"
+          }
+        }
+      }
+    },
+    "Autoriser l'appareil photo dans Réglages" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autoriser l'appareil photo dans Réglages"
+          }
+        }
+      }
+    },
+    "Choisir dans Photos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir dans Photos"
+          }
+        }
+      }
+    },
+    "Dernière prise aujourd'hui" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dernière prise aujourd'hui"
+          }
+        }
+      }
+    },
+    "Dernière prise hier" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dernière prise hier"
+          }
+        }
+      }
+    },
+    "Dernière prise il y a %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dernière prise il y a %@"
+          }
+        }
+      }
+    },
+    "Des images n'ont pas pu être lues." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Des images n'ont pas pu être lues."
+          }
+        }
+      }
+    },
+    "Dos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dos"
+          }
+        }
+      }
+    },
+    "Face" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Face"
+          }
+        }
+      }
+    },
+    "Fermer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fermer"
+          }
+        }
+      }
+    },
+    "L'appareil photo est refusé. Autorise-le dans Réglages ; l'import depuis Photos reste possible." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'appareil photo est refusé. Autorise-le dans Réglages ; l'import depuis Photos reste possible."
+          }
+        }
+      }
+    },
+    "La photo est supprimée de Pulse. L'original dans Photos, s'il existe, reste en place." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La photo est supprimée de Pulse. L'original dans Photos, s'il existe, reste en place."
+          }
+        }
+      }
+    },
+    "La photo n'a pas pu être ajoutée." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La photo n'a pas pu être ajoutée."
+          }
+        }
+      }
+    },
+    "La photo n'a pas pu être supprimée." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La photo n'a pas pu être supprimée."
+          }
+        }
+      }
+    },
+    "Les photos n'ont pas pu être chargées." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les photos n'ont pas pu être chargées."
+          }
+        }
+      }
+    },
+    "Ouvre la photo en plein écran" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvre la photo en plein écran"
+          }
+        }
+      }
+    },
+    "Partager" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partager"
+          }
+        }
+      }
+    },
+    "Photo %lld sur %lld, ajoutée à %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photo %1$lld sur %2$lld, ajoutée à %3$@"
+          }
+        }
+      }
+    },
+    "Photo ajoutée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photo ajoutée"
+          }
+        }
+      }
+    },
+    "Photo de dos, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photo de dos, %@"
+          }
+        }
+      }
+    },
+    "Photo de face, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photo de face, %@"
+          }
+        }
+      }
+    },
+    "Photo de profil, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photo de profil, %@"
+          }
+        }
+      }
+    },
+    "Photo supprimée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photo supprimée"
+          }
+        }
+      }
+    },
+    "Photos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photos"
+          }
+        }
+      }
+    },
+    "Prendre une photo" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prendre une photo"
+          }
+        }
+      }
+    },
+    "Profil" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profil"
+          }
+        }
+      }
+    },
+    "Supprimer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer"
+          }
+        }
+      }
+    },
+    "Supprimer cette photo ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer cette photo ?"
+          }
+        }
+      }
+    },
+    "Une image n'a pas pu être lue." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une image n'a pas pu être lue."
+          }
+        }
+      }
+    },
+    "jour" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "jour"
+          }
+        }
+      }
+    },
+    "jours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "jours"
+          }
+        }
+      }
+    },
+    "photo" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "photo"
+          }
+        }
+      }
+    },
+    "photos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "photos"
+          }
+        }
+      }
+    },
+    "privées · %lld au maximum" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "privées · %lld au maximum"
+          }
+        }
+      }
+    },
+    "semaine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "semaine"
+          }
+        }
+      }
+    },
+    "semaines" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "semaines"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

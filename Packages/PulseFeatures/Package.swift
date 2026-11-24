@@ -15,6 +15,7 @@ let package = Package(
         .library(name: "CheckInFeature", targets: ["CheckInFeature"]),
         .library(name: "LiveSessionFeature", targets: ["LiveSessionFeature"]),
         .library(name: "OnboardingFeature", targets: ["OnboardingFeature"]),
+        .library(name: "PhotosFeature", targets: ["PhotosFeature"]),
         .library(name: "PlanningFeature", targets: ["PlanningFeature"]),
         .library(name: "ProfileFeature", targets: ["ProfileFeature"]),
         .library(name: "RunFeature", targets: ["RunFeature"]),
@@ -45,7 +46,8 @@ let package = Package(
         ),
         .target(
             name: "LiveSessionFeature",
-            dependencies: ["PulseServices", "TrainFeature", "SupplementsFeature", domain, recoveryEngine, content, designSystem],
+            dependencies: ["PulseServices", "TrainFeature", "SupplementsFeature", "PhotosFeature", domain, recoveryEngine, content,
+                           designSystem],
             resources: [.process("Resources")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
@@ -56,21 +58,27 @@ let package = Package(
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .target(
+            name: "PhotosFeature",
+            dependencies: ["PulseServices", designSystem, domain],
+            resources: [.process("Resources")],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .target(
             name: "PlanningFeature",
-            dependencies: ["PulseServices", "TrainFeature", "RunFeature", designSystem, domain, content],
+            dependencies: ["PulseServices", "TrainFeature", "RunFeature", "PhotosFeature", designSystem, domain, content],
             resources: [.process("Resources")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .target(
             name: "ProfileFeature",
-            dependencies: ["PulseServices", "StatsFeature", "SupplementsFeature", "TrainFeature", designSystem, domain, recoveryEngine,
-                           content],
+            dependencies: ["PulseServices", "StatsFeature", "SupplementsFeature", "TrainFeature", "PhotosFeature", designSystem, domain,
+                           recoveryEngine, content],
             resources: [.process("Resources")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .target(
             name: "RunFeature",
-            dependencies: ["PulseServices", designSystem, domain],
+            dependencies: ["PulseServices", "PhotosFeature", designSystem, domain],
             resources: [.process("Resources")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
@@ -94,7 +102,7 @@ let package = Package(
         ),
         .target(
             name: "TrainFeature",
-            dependencies: ["PulseServices", domain, recoveryEngine, content, designSystem],
+            dependencies: ["PulseServices", "PhotosFeature", domain, recoveryEngine, content, designSystem],
             resources: [.process("Resources")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
@@ -122,6 +130,11 @@ let package = Package(
         .testTarget(
             name: "OnboardingFeatureTests",
             dependencies: ["OnboardingFeature", "PulseServices", "CheckInFeature", domain, content],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .testTarget(
+            name: "PhotosFeatureTests",
+            dependencies: ["PhotosFeature", "PulseServices", domain],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(
