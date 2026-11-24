@@ -141,6 +141,20 @@ struct SessionCardStateTests {
         #expect(card.launch.adjustmentNote == nil)
     }
 
+    /// La course du jour faite, la carte reste celle de la course mais sans « Démarrer la course » ni consigne.
+    @Test func aDoneRunHidesTheStartButton() throws {
+        let scored = recovery(50)
+        let session = TodaySession(plannedDay: try plan("runner-strength", on: "2026-11-05T08:00"), recovery: scored)
+        let done = try #require(run(SessionCardState.make(session: session, score: .scored(scored), directory: directory,
+                                                          runDone: true)))
+        #expect(done.isDone)
+        #expect(done.suggestion == nil)
+        #expect(done.title == "Fractionné")
+        let toDo = try #require(run(SessionCardState.make(session: session, score: .scored(scored), directory: directory)))
+        #expect(!toDo.isDone)
+        #expect(toDo.suggestion != nil)
+    }
+
     @Test func restDaySuggestsMobilityUnder65() throws {
         let rest = try plan("ppl-3", on: "2026-11-03T08:00")
         guard case .rest(let next) = rest else {

@@ -68,11 +68,15 @@ struct SessionCard: View {
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(PulsePalette.text)
         }
-        Button { onStartRun(card.launch) } label: {
-            Label(String(localized: "Démarrer la course", bundle: .module), systemImage: "figure.run")
+        if card.isDone {
+            detail(String(localized: "Course faite aujourd'hui.", bundle: .module))
+        } else {
+            Button { onStartRun(card.launch) } label: {
+                Label(String(localized: "Démarrer la course", bundle: .module), systemImage: "figure.run")
+            }
+            .buttonStyle(PrimaryButtonStyle())
+            .accessibilityIdentifier(TodayIdentifiers.runStart)
         }
-        .buttonStyle(PrimaryButtonStyle())
-        .accessibilityIdentifier(TodayIdentifiers.runStart)
     }
 
     // MARK: - Repos

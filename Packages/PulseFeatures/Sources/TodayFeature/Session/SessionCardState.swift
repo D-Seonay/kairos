@@ -30,6 +30,8 @@ struct RunCard: Equatable {
     var target: String?
     var suggestion: String?
     var launch: RunLaunch
+    /// Une course est déjà terminée aujourd'hui : ni consigne ni « Démarrer la course ».
+    var isDone = false
 }
 
 /// Ce que la carte « Séance du jour » montre, d'après la séance du jour et le score.
@@ -49,15 +51,21 @@ enum SessionCardState: Equatable {
     static let mobilityThreshold = 65.0
 
     /// Une séance en cours prime sur tout le reste. Le bilan de la séance faite ne remplace que la carte de musculation : un jour de
-    /// repos, de course ou de mobilité garde la sienne. `programID` est le programme actif, que la course lancée rappelle.
+    /// repos, de course ou de mobilité garde la sienne. Une course faite aujourd'hui (`runDone`) retire le départ de la carte de
+    /// course. `programID` est le programme actif, que la course lancée rappelle.
     static func make(session: TodaySession, score: TodayScore?, directory: ExerciseDirectory, done: DoneCard? = nil,
-                     inProgressTitle: String? = nil, programID: UUID? = nil) -> SessionCardState {
+                     runDone: Bool = false, inProgressTitle: String? = nil, programID: UUID? = nil) -> SessionCardState {
         if let inProgressTitle {
             return .inProgress(title: inProgressTitle)
         }
         let state = planned(session: session, score: score, directory: directory, programID: programID)
         if case .strength = state, let done {
             return .done(done)
+        }
+        if case .run(var card) = state, runDone {
+            card.isDone = true
+            card.suggestion = nil
+            return .run(card)
         }
         return state
     }

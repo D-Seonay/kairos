@@ -174,7 +174,8 @@ public final class TodayModel {
     private func show(_ session: TodaySession) {
         self.session = session
         card = SessionCardState.make(session: session, score: score, directory: directory, done: live.done,
-                                     inProgressTitle: live.inProgressTitle, programID: profile?.activeProgramID)
+                                     runDone: live.runDone, inProgressTitle: live.inProgressTitle,
+                                     programID: profile?.activeProgramID)
         updateWhy()
     }
 
