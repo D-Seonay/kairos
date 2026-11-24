@@ -31,16 +31,13 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         return true
     }
 
-    /// Après un crash pendant une course, le système relance l'app pour qu'elle reprenne la séance HealthKit encore active :
-    /// elle est remise à la séance de course, que la racine rattache au brouillon (spec V2a §5.4). La scène reste celle de
-    /// SwiftUI.
+    /// Après un crash pendant une course, le système relance l'app pour qu'elle reprenne la séance HealthKit encore active : la
+    /// séance de course la reprend, par le même chemin que l'offre de reprise de la racine, qui la rattache ensuite au brouillon
+    /// (spec V2a §5.4). La scène reste celle de SwiftUI.
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession,
                      options: UIScene.ConnectionOptions) -> UISceneConfiguration {
         if options.shouldHandleActiveWorkoutRecovery, let runHealthSession = dependencies.run.healthSession {
-            HKHealthStore().recoverActiveWorkoutSession { session, _ in
-                guard let session else { return }
-                runHealthSession.adopt(recoveredSession: session)
-            }
+            Task { _ = await runHealthSession.recoverActiveSession() }
         }
         return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
     }

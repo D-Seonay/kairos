@@ -43,8 +43,8 @@ extension AppDependencies {
         let tracks: any RunTrackRepository
         /// Les annonces vocales, dans la suite de préférences que la suppression totale vide.
         let preferences: any RunPreferencesStore
-        /// La séance HealthKit de la course, à qui `AppDelegate` remet celle que le système a gardée après un crash ; `nil` sans
-        /// Apple Santé, avec un scénario de lancement, en mode mémoire et dans les tests.
+        /// La séance HealthKit de la course, que `AppDelegate` charge de reprendre celle que le système a gardée après un crash ;
+        /// `nil` sans Apple Santé, avec un scénario de lancement, en mode mémoire et dans les tests.
         let healthSession: HealthKitRunRecorder?
 
         /// `workouts` masque les doublons de la montre : une course Pulse enregistrée garde en magasin la FC du direct.

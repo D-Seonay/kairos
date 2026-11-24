@@ -15,9 +15,14 @@ final class SpeechRunAnnouncer: RunAnnouncing {
 @MainActor
 private final class RunSpeaker: NSObject, AVSpeechSynthesizerDelegate {
     static let shared = RunSpeaker()
+    /// Attente avant de retenter de rendre la session audio, si le système l'a refusé.
+    private static let releaseRetryDelay = Duration.milliseconds(300)
 
     private let synthesizer = AVSpeechSynthesizer()
     private let voice = AVSpeechSynthesisVoice(language: "fr-FR")
+    /// Les annonces en file ou en cours : la session audio n'est rendue qu'à zéro. `isSpeaking` ne suffit pas, il peut encore
+    /// valoir vrai quand le délégué annonce la fin de la dernière phrase.
+    private var pending = 0
 
     override private init() {
         super.init()
@@ -31,20 +36,35 @@ private final class RunSpeaker: NSObject, AVSpeechSynthesizerDelegate {
         try? session.setActive(true)
         let utterance = AVSpeechUtterance(string: text)
         utterance.voice = voice
+        pending += 1
         synthesizer.speak(utterance)
     }
 
     nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
-        Task { @MainActor in self.releaseAudioIfIdle() }
+        Task { @MainActor in self.utteranceEnded() }
     }
 
     nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
-        Task { @MainActor in self.releaseAudioIfIdle() }
+        Task { @MainActor in self.utteranceEnded() }
     }
 
-    /// Une annonce encore en file garde la session : la musique ne remonte qu'après la dernière.
-    private func releaseAudioIfIdle() {
-        guard !synthesizer.isSpeaking else { return }
-        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+    private func utteranceEnded() {
+        pending = max(0, pending - 1)
+        releaseAudioIfIdle(retrying: true)
+    }
+
+    /// Une annonce encore en file garde la session : la musique ne remonte qu'après la dernière. Un refus du système (session
+    /// encore occupée) est retenté une fois, un peu plus tard, si aucune annonce n'est arrivée entre-temps.
+    private func releaseAudioIfIdle(retrying: Bool) {
+        guard pending == 0 else { return }
+        do {
+            try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        } catch {
+            guard retrying else { return }
+            Task { @MainActor in
+                try? await Task.sleep(for: Self.releaseRetryDelay)
+                self.releaseAudioIfIdle(retrying: false)
+            }
+        }
     }
 }

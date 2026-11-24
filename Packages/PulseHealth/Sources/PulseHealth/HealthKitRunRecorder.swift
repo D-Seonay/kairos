@@ -1,6 +1,7 @@
 import CoreLocation
 import Foundation
 import HealthKit
+import os
 import PulseDomain
 
 /// La séance HealthKit d'une course (spec V2a) : une `HKWorkoutSession` de course en extérieur et son builder en direct, qui
@@ -8,13 +9,15 @@ import PulseDomain
 /// le tracé. `HKHealthStore`, la séance et les builders sont thread-safe ; l'état mutable est gardé par un verrou, d'où
 /// `@unchecked Sendable`.
 public final class HealthKitRunRecorder: NSObject, RunWorkoutRecording, @unchecked Sendable {
+    private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "fr.seonay.pulse", category: "run")
+
     let store: HKHealthStore
     private let lock = NSLock()
     private var session: HKWorkoutSession?
     private var builder: HKLiveWorkoutBuilder?
     private var heartRates: AsyncStream<Double>.Continuation?
-    /// La séance remise par `AppDelegate` après un crash, pas encore rattachée.
-    private var adopted: HKWorkoutSession?
+    /// La reprise en cours après un crash : `AppDelegate` et l'offre de reprise la partagent, pour un seul appel à HealthKit.
+    private var recovery: Task<Bool, Never>?
 
     public init(store: HKHealthStore = HKHealthStore()) {
         self.store = store
@@ -134,12 +137,13 @@ public final class HealthKitRunRecorder: NSObject, RunWorkoutRecording, @uncheck
         }
     }
 
+    /// Une reprise en cours est attendue d'abord : la séance qu'elle rattache est terminée avec le reste.
     public func discard() async {
+        if let pending = lock.withLock({ recovery }) { _ = await pending.value }
         let (session, builder) = lock.withLock {
-            let taken = (self.session ?? adopted, self.builder)
+            let taken = (self.session, self.builder)
             self.session = nil
             self.builder = nil
-            adopted = nil
             heartRates?.finish()
             heartRates = nil
             return taken
@@ -150,34 +154,43 @@ public final class HealthKitRunRecorder: NSObject, RunWorkoutRecording, @uncheck
 
     // MARK: - Reprise après un crash
 
-    /// La séance que `HKHealthStore.recoverActiveWorkoutSession` a rendue au lancement ; `recoverActiveSession()` la rattache.
-    public func adopt(recoveredSession: HKWorkoutSession) {
-        lock.withLock {
-            if session == nil { adopted = recoveredSession }
+    /// Rattache la séance que HealthKit garde encore après un crash : le builder est restauré par le système, mais la source de
+    /// données est à recréer. La FC n'est plus livrée : son flux est perdu avec le processus. Les appels simultanés (relance par
+    /// le système depuis `AppDelegate`, offre de reprise) partagent la même reprise.
+    public func recoverActiveSession() async -> Bool {
+        let task = lock.withLock {
+            if let recovery { return recovery }
+            let task = Task { await self.performRecovery() }
+            recovery = task
+            return task
         }
+        let isRecording = await task.value
+        lock.withLock { if recovery == task { recovery = nil } }
+        return isRecording
     }
 
-    /// Rattache la séance remise par `adopt(recoveredSession:)`, ou à défaut celle que HealthKit garde encore : le builder est
-    /// restauré par le système, mais la source de données est à recréer. La FC n'est plus livrée : son flux est perdu avec le
-    /// processus.
-    public func recoverActiveSession() async -> Bool {
+    private func performRecovery() async -> Bool {
         if let live = lock.withLock({ session }) { return Self.isAlive(live) }
-        var recovered = lock.withLock {
-            let taken = adopted
-            adopted = nil
-            return taken
+        let recovered: HKWorkoutSession?
+        do {
+            recovered = try await store.recoverActiveWorkoutSession()
+        } catch {
+            Self.logger.error("Reprise de la séance de course impossible : \(error.localizedDescription, privacy: .public)")
+            return false
         }
-        if recovered == nil { recovered = try? await store.recoverActiveWorkoutSession() }
         guard let recovered, Self.isAlive(recovered) else { return false }
         let builder = recovered.associatedWorkoutBuilder()
         attach(recovered, builder: builder)
-        return lock.withLock {
+        let isAttached = lock.withLock {
             // Une course démarrée pendant l'attente garde sa propre séance.
             guard session == nil else { return false }
             session = recovered
             self.builder = builder
             return true
         }
+        // La séance rendue sans course pour la mener est terminée : elle ne tourne jamais seule.
+        if !isAttached { recovered.end() }
+        return isAttached
     }
 
     // MARK: - Interne
@@ -252,10 +265,29 @@ public final class HealthKitRunRecorder: NSObject, RunWorkoutRecording, @uncheck
 // MARK: - Délégués
 
 extension HealthKitRunRecorder: HKWorkoutSessionDelegate, HKLiveWorkoutBuilderDelegate {
+    /// La séance de la course terminée hors de Pulse (par le système) : le flux de FC se termine. La fin de la course écrit
+    /// alors l'entraînement sans séance vivante si la séance ne peut plus être terminée.
     public func workoutSession(_ workoutSession: HKWorkoutSession, didChangeTo toState: HKWorkoutSessionState,
-                               from fromState: HKWorkoutSessionState, date: Date) {}
+                               from fromState: HKWorkoutSessionState, date: Date) {
+        guard toState == .ended else { return }
+        endHeartRates(of: workoutSession)
+    }
 
-    public func workoutSession(_ workoutSession: HKWorkoutSession, didFailWithError error: any Error) {}
+    public func workoutSession(_ workoutSession: HKWorkoutSession, didFailWithError error: any Error) {
+        Self.logger.error("Séance de course en échec : \(error.localizedDescription, privacy: .public)")
+        endHeartRates(of: workoutSession)
+    }
+
+    /// Le flux de FC de la course en cours, si `workoutSession` est bien sa séance ; une séance passée est ignorée.
+    private func endHeartRates(of workoutSession: HKWorkoutSession) {
+        let continuation = lock.withLock { () -> AsyncStream<Double>.Continuation? in
+            guard session === workoutSession else { return nil }
+            let taken = heartRates
+            heartRates = nil
+            return taken
+        }
+        continuation?.finish()
+    }
 
     /// La dernière FC collectée, livrée au flux de la course en cours ; un builder d'une séance passée est ignoré.
     public func workoutBuilder(_ workoutBuilder: HKLiveWorkoutBuilder, didCollectDataOf collectedTypes: Set<HKSampleType>) {

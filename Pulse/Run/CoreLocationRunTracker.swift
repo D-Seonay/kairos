@@ -14,8 +14,11 @@ actor CoreLocationRunTracker: RunLocationTracking {
         await LocationPermission.shared.state()
     }
 
+    /// Service de localisation coupé dans les réglages : la demande n'aurait jamais de réponse, la course part sans position. La
+    /// lecture se fait ici, hors du fil principal, qu'elle peut bloquer.
     func requestAuthorization() async -> RunLocationAuthorization {
-        await LocationPermission.shared.request()
+        guard CLLocationManager.locationServicesEnabled() else { return .denied }
+        return await LocationPermission.shared.request()
     }
 
     /// Remplace un suivi déjà démarré : le flux précédent se termine.
