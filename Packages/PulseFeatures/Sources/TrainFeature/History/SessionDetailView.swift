@@ -189,13 +189,13 @@ public struct SessionDetailView: View {
         }
     }
 
+    /// Un échec reste dans la feuille de correction, qui l'affiche et reste ouverte : rien ne s'écrit derrière elle.
     private func save(_ correction: SessionCorrection) async -> Bool {
         do {
             try await model.save(correction)
             errorMessage = nil
             return true
         } catch {
-            errorMessage = String(localized: "Pulse n'a pas pu enregistrer tes corrections.", bundle: .module)
             return false
         }
     }

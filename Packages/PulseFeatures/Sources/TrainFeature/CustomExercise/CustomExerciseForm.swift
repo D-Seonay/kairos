@@ -4,7 +4,8 @@ import PulseDomain
 import SwiftUI
 
 /// Le formulaire d'un exercice perso (spec M4 §10.3). À présenter dans une `NavigationStack` (feuille ou pile) : il fournit
-/// « Annuler » et « Enregistrer », se ferme seul, puis prévient `onSaved` ou `onArchived`.
+/// « Annuler » et « Enregistrer », se ferme seul, puis prévient `onSaved` ou `onArchived`. Modifié, il demande confirmation avant
+/// d'être fermé sans enregistrer, et un balayage ne le ferme plus.
 public struct CustomExerciseForm: View {
     @State private var model: CustomExerciseModel
     private let onSaved: (UserExercise) -> Void
@@ -12,6 +13,7 @@ public struct CustomExerciseForm: View {
     @State private var errorMessage: String?
     @State private var isWorking = false
     @State private var confirmsArchive = false
+    @State private var confirmsDiscard = false
     @Environment(\.dismiss) private var dismiss
 
     /// Le modèle est gardé par l'écran : le premier reçu l'emporte, comme le veut `@State`.
@@ -47,12 +49,19 @@ public struct CustomExerciseForm: View {
         .pulseInlineTitle()
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                Button(String(localized: "Annuler", bundle: .module)) { dismiss() }
+                Button(String(localized: "Annuler", bundle: .module), action: cancel)
             }
             ToolbarItem(placement: .confirmationAction) {
                 Button(String(localized: "Enregistrer", bundle: .module)) { Task { await save() } }
                     .disabled(!model.canSave || isWorking)
             }
+        }
+        // Un balayage vers le bas ne jette pas un formulaire modifié : « Annuler » demande d'abord.
+        .interactiveDismissDisabled(model.hasChanges || isWorking)
+        .confirmationDialog(String(localized: "Abandonner les modifications ?", bundle: .module), isPresented: $confirmsDiscard,
+                            titleVisibility: .visible) {
+            Button(String(localized: "Abandonner", bundle: .module), role: .destructive) { dismiss() }
+            Button(String(localized: "Continuer à modifier", bundle: .module), role: .cancel) {}
         }
         .pulseAnnounceError(errorMessage)
         .confirmationDialog(String(localized: "Archiver cet exercice ?", bundle: .module), isPresented: $confirmsArchive,
@@ -135,6 +144,14 @@ public struct CustomExerciseForm: View {
     }
 
     // MARK: - Actions
+
+    private func cancel() {
+        if model.hasChanges {
+            confirmsDiscard = true
+        } else {
+            dismiss()
+        }
+    }
 
     private func save() async {
         isWorking = true

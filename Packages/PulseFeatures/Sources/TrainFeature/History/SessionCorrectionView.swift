@@ -4,22 +4,43 @@ import PulseServices
 import SwiftUI
 
 /// La feuille « Modifier » du détail d'une séance (spec M6 §8) : RPE global et note, puis pour chaque exercice ses séries hors
-/// échauffement (charge, répétitions ou durée tenue, RPE). Un balayage retire une série.
+/// échauffement (charge, répétitions ou durée tenue, RPE). Un balayage retire une série. Un enregistrement raté s'affiche dans
+/// la feuille, qui reste ouverte ; avec des modifications, la fermer (« Annuler » ou balayage) demande confirmation.
 struct SessionCorrectionView: View {
     let blocks: [(name: String, setIDs: [UUID])]
     let onSave: (SessionCorrection) async -> Bool
+    private let original: SessionCorrection
     @State private var correction: SessionCorrection
     @State private var isSaving = false
+    @State private var saveFailed = false
+    @State private var confirmsDiscard = false
     @Environment(\.dismiss) private var dismiss
 
     init(correction: SessionCorrection, blocks: [(name: String, setIDs: [UUID])], onSave: @escaping (SessionCorrection) async -> Bool) {
+        original = correction
         _correction = State(initialValue: correction)
         self.blocks = blocks
         self.onSave = onSave
     }
 
+    private var hasChanges: Bool {
+        correction != original
+    }
+
+    private var errorMessage: String? {
+        saveFailed ? String(localized: "Pulse n'a pas pu enregistrer tes corrections.", bundle: .module) : nil
+    }
+
     var body: some View {
         Form {
+            if let errorMessage {
+                Section {
+                    Text(errorMessage)
+                        .font(.footnote)
+                        .foregroundStyle(PulsePalette.bad)
+                }
+                .listRowBackground(PulsePalette.surface)
+            }
             Section {
                 RPEPicker(title: String(localized: "RPE de la séance", bundle: .module), values: RPEPicker.sessionValues,
                           value: $correction.overallRPE)
@@ -56,19 +77,41 @@ struct SessionCorrectionView: View {
         .pulseInlineTitle()
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                Button(String(localized: "Annuler", bundle: .module)) { dismiss() }
+                Button(String(localized: "Annuler", bundle: .module), action: cancel)
             }
             ToolbarItem(placement: .confirmationAction) {
-                Button(String(localized: "Enregistrer", bundle: .module)) {
-                    Task {
-                        isSaving = true
-                        if await onSave(correction) { dismiss() }
-                        isSaving = false
-                    }
-                }
-                .disabled(isSaving)
-                .accessibilityIdentifier(TrainIdentifiers.sessionCorrectionSave)
+                Button(String(localized: "Enregistrer", bundle: .module)) { Task { await save() } }
+                    .disabled(isSaving)
+                    .accessibilityIdentifier(TrainIdentifiers.sessionCorrectionSave)
             }
+        }
+        // Un balayage vers le bas ne jette pas les corrections en cours : « Annuler » demande d'abord.
+        .interactiveDismissDisabled(hasChanges || isSaving)
+        .confirmationDialog(String(localized: "Abandonner les modifications ?", bundle: .module), isPresented: $confirmsDiscard,
+                            titleVisibility: .visible) {
+            Button(String(localized: "Abandonner", bundle: .module), role: .destructive) { dismiss() }
+            Button(String(localized: "Continuer à modifier", bundle: .module), role: .cancel) {}
+        }
+        .pulseAnnounceError(errorMessage)
+    }
+
+    private func cancel() {
+        if hasChanges {
+            confirmsDiscard = true
+        } else {
+            dismiss()
+        }
+    }
+
+    private func save() async {
+        isSaving = true
+        defer { isSaving = false }
+        // Remis à zéro avant chaque essai : un échec répété change de nouveau l'état et est annoncé.
+        saveFailed = false
+        if await onSave(correction) {
+            dismiss()
+        } else {
+            saveFailed = true
         }
     }
 
