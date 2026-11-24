@@ -5,9 +5,12 @@ import RunFeature
 import SwiftUI
 
 /// Le détail d'une course ou d'un vélo lu d'Apple Santé (spec M6 §7) : mesures, RPE et note modifiables. Une course Pulse
-/// ajoute la section « Tracé » : la carte du parcours et les temps par kilomètre.
+/// ajoute la section « Tracé » : la carte du parcours et les temps par kilomètre. Tant qu'une correction n'est pas enregistrée,
+/// le retour cède la place à « Annuler », qui demande confirmation avant d'abandonner.
 struct ActivityDetailView: View {
     @State private var model: ActivityDetailModel
+    @State private var confirmsDiscard = false
+    @Environment(\.dismiss) private var dismiss
     private static let rpeValues: [Double] = stride(from: 1.0, through: 10.0, by: 0.5).map { $0 }
 
     init(model: ActivityDetailModel) {
@@ -102,12 +105,22 @@ struct ActivityDetailView: View {
         .navigationTitle(model.session?.title ?? String(localized: "Course", bundle: .module))
         .pulseInlineTitle()
         .pulseAnnounceError(model.errorMessage)
+        // Le retour, et son geste, abandonneraient le RPE et la note sans rien dire.
+        .navigationBarBackButtonHidden(model.hasChanges)
         .toolbar {
             if model.hasChanges {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(String(localized: "Annuler", bundle: .module)) { confirmsDiscard = true }
+                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(String(localized: "Enregistrer", bundle: .module)) { Task { await model.save() } }
                 }
             }
+        }
+        .confirmationDialog(String(localized: "Abandonner les modifications ?", bundle: .module), isPresented: $confirmsDiscard,
+                            titleVisibility: .visible) {
+            Button(String(localized: "Abandonner", bundle: .module), role: .destructive) { dismiss() }
+            Button(String(localized: "Continuer à modifier", bundle: .module), role: .cancel) {}
         }
         .task { await model.load() }
     }
