@@ -99,20 +99,29 @@ public struct PlanningView: View {
     @ViewBuilder
     private func loaded(proxy: ScrollViewProxy) -> some View {
         // Sept colonnes ne tiennent pas au-delà de `xxxLarge`, et la liste « Cette semaine » donne les mêmes jours en grand.
-        WeekStrip(model: model) { day in
-            if let destination = model.destination(for: day) {
-                path.append(destination)
-            } else {
-                PulseMotion.perform(.default, reduceMotion: reduceMotion) { proxy.scrollTo(day.id, anchor: .center) }
-            }
-        }
+        WeekStrip(model: model) { day in select(day, proxy: proxy) }
         .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         if let today = model.today {
             TodayPlanCard(model: model, train: train, day: today, onStart: start, onResume: onResumeSession,
-                          onStartRun: onStartRun == nil ? nil : startRun)
+                          onStartRun: startRunAction)
         }
         week
         monthEntry
+    }
+
+    /// Un jour de la bande ouvre son détail s'il en a un ; sinon la liste « Cette semaine » défile jusqu'à lui.
+    private func select(_ day: PlanningDay, proxy: ScrollViewProxy) {
+        if let destination = model.destination(for: day) {
+            path.append(destination)
+        } else {
+            PulseMotion.perform(.default, reduceMotion: reduceMotion) { proxy.scrollTo(day.id, anchor: .center) }
+        }
+    }
+
+    /// Le bouton « Courir » de la carte du jour, seulement quand l'app sait lancer une course.
+    private var startRunAction: (() -> Void)? {
+        guard onStartRun != nil else { return nil }
+        return { startRun() }
     }
 
     private var header: some View {
