@@ -1,6 +1,7 @@
 import Foundation
 
-/// Ce que la Live Activity de séance affiche. Ne contient que le titre, des durées et la prochaine série prévue.
+/// Ce que la Live Activity de séance affiche. Ne contient que le titre, des durées, la prochaine série prévue et le compte des
+/// séries de travail.
 public struct SessionActivityState: Sendable, Equatable, Codable {
     public var sessionID: UUID
     public var title: String
@@ -8,6 +9,10 @@ public struct SessionActivityState: Sendable, Equatable, Codable {
     public var restStartedAt: Date?
     public var restEndsAt: Date?
     public var nextSet: String?
+    /// Les séries de travail validées, échauffement exclu, comme « Séries » en haut de l'écran de séance.
+    public var doneSets: Int
+    /// Les séries de travail prévues ; 0 pour une séance sans série, qui n'affiche pas de progression.
+    public var plannedSets: Int
 
     public init(
         sessionID: UUID,
@@ -15,7 +20,9 @@ public struct SessionActivityState: Sendable, Equatable, Codable {
         startedAt: Date,
         restStartedAt: Date? = nil,
         restEndsAt: Date? = nil,
-        nextSet: String? = nil
+        nextSet: String? = nil,
+        doneSets: Int = 0,
+        plannedSets: Int = 0
     ) {
         self.sessionID = sessionID
         self.title = title
@@ -23,6 +30,8 @@ public struct SessionActivityState: Sendable, Equatable, Codable {
         self.restStartedAt = restStartedAt
         self.restEndsAt = restEndsAt
         self.nextSet = nextSet
+        self.doneSets = doneSets
+        self.plannedSets = plannedSets
     }
 }
 
