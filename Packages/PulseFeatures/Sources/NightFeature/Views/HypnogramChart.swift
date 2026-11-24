@@ -43,6 +43,25 @@ struct HypnogramChart: View {
     }
 
     var body: some View {
+        // Les noms des rangées sont une colonne à part, centrée sur chaque bande : l'axe Y de Swift Charts les posait sur
+        // la limite haute de la bande et par-dessus les blocs.
+        HStack(alignment: .top, spacing: 8) {
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(rows, id: \.self) { stage in
+                    Text(stage.displayName)
+                        .font(.caption)
+                        .foregroundStyle(PulsePalette.text2)
+                        .lineLimit(1)
+                        .frame(height: rowHeight)
+                }
+            }
+            .fixedSize(horizontal: true, vertical: false)
+            .accessibilityHidden(true)
+            chart
+        }
+    }
+
+    private var chart: some View {
         let stageLabel = String(localized: "Phase", bundle: .module)
         let timeLabel = String(localized: "Heure", bundle: .module)
         let segments = night.segments
@@ -60,15 +79,12 @@ struct HypnogramChart: View {
                 AxisValueLabel(format: .dateTime.hour().minute()).foregroundStyle(PulsePalette.muted)
             }
         }
-        .chartYAxis {
-            AxisMarks(position: .leading) { _ in
-                AxisValueLabel().foregroundStyle(PulsePalette.text2)
-            }
-        }
+        .chartYAxis(.hidden)
+        // La zone de tracé fait exactement une rangée par phase, pour tomber en face de la colonne des noms.
+        .chartPlotStyle { plot in plot.frame(height: CGFloat(rows.count) * rowHeight) }
         .environment(\.locale, Locale(identifier: "fr_FR"))
         .environment(\.calendar, calendar)
         .environment(\.timeZone, calendar.timeZone)
-        .frame(height: CGFloat(rows.count) * rowHeight)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(NightText.spokenSummary(night, calendar: calendar))
         .accessibilityChartDescriptor(NightChartDescriptor.hypnogram(night, calendar: calendar))
