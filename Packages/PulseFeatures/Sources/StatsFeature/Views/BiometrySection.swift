@@ -99,13 +99,13 @@ private struct BaselineChartCard: View {
 
     private var chart: some View {
         let bucket = window.period.chartBucket
-        let unit = window.unit(of: bucket)
+        let dateUnit = window.unit(of: bucket)
         let dateLabel = StatsText.nightAxisName(bucket)
         let valueLabel = measure.spokenName
         return Chart {
             ForEach(points) { point in
                 if let baseline = point.baseline {
-                    LineMark(x: .value(dateLabel, point.date, unit: unit), y: .value(valueLabel, baseline),
+                    LineMark(x: .value(dateLabel, point.date, unit: dateUnit), y: .value(valueLabel, baseline),
                              series: .value(String(localized: "Série", bundle: .module), "baseline"))
                         .foregroundStyle(StatsInk.medium)
                         .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [4, 4]))
@@ -115,14 +115,14 @@ private struct BaselineChartCard: View {
                 case .points:
                     let spoken = StatsText.baselinePointSpoken(measure: measure, point: point, bucket: bucket,
                                                                calendar: window.calendar)
-                    PointMark(x: .value(dateLabel, point.date, unit: unit), y: .value(valueLabel, point.value))
+                    PointMark(x: .value(dateLabel, point.date, unit: dateUnit), y: .value(valueLabel, point.value))
                         .foregroundStyle(StatsInk.full)
                         .symbolSize(28)
                         .accessibilityLabel(spoken.label)
                         .accessibilityValue(spoken.value)
                 case .line:
                     // La FC au repos est une courbe : seule la ligne se dessine, le descripteur donne chaque valeur.
-                    LineMark(x: .value(dateLabel, point.date, unit: unit), y: .value(valueLabel, point.value),
+                    LineMark(x: .value(dateLabel, point.date, unit: dateUnit), y: .value(valueLabel, point.value),
                              series: .value(String(localized: "Série", bundle: .module), "value"))
                         .foregroundStyle(StatsInk.full)
                         .lineStyle(StrokeStyle(lineWidth: 2, lineJoin: .round))
@@ -132,7 +132,7 @@ private struct BaselineChartCard: View {
             // La courbe n'a pas de point par nuit : son dernier point est lu, avec sa date ; le descripteur donne le reste.
             if style == .line, let last = points.last {
                 let spoken = StatsText.baselinePointSpoken(measure: measure, point: last, bucket: bucket, calendar: window.calendar)
-                PointMark(x: .value(dateLabel, last.date, unit: unit), y: .value(valueLabel, last.value))
+                PointMark(x: .value(dateLabel, last.date, unit: dateUnit), y: .value(valueLabel, last.value))
                     .foregroundStyle(StatsInk.full)
                     .symbolSize(36)
                     .accessibilityLabel(spoken.label)
