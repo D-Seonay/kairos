@@ -162,10 +162,14 @@ private func indexEntries(in directory: URL) throws -> [BodyPhoto] {
         defer { try? FileManager.default.removeItem(at: output) }
         #expect(archive.deletingLastPathComponent().standardizedFileURL == output.standardizedFileURL)
         #expect(archive.lastPathComponent.hasPrefix("Pulse-photos-de-corps-") && archive.pathExtension == "zip")
+        #expect(try !Data(contentsOf: archive).isEmpty)
+        #if os(macOS)
+        // `Process` n'existe pas sur iOS : le contenu de l'archive se vérifie avec `swift test`, sur le Mac.
         let names = try unzippedFileNames(archive)
         #expect(names.contains("2026-08-01-face.jpg") && names.contains("2026-10-28-dos.jpg"))
         #expect(names.contains("2026-10-28-profil.jpg") && names.contains("2026-10-28-dos-2.jpg"))
         #expect(names.count == 4)
+        #endif
     }
 
     @Test func exportArchiveLeavesNoStagingFolder() async throws {
@@ -195,6 +199,7 @@ private func indexEntries(in directory: URL) throws -> [BodyPhoto] {
         #expect(second == archive && files(in: output).count == 2)
     }
 
+    #if os(macOS)
     /// Dézippe avec `ditto` et rend les noms des fichiers de l'archive.
     private func unzippedFileNames(_ archive: URL) throws -> [String] {
         let target = temporaryDirectory()
@@ -210,6 +215,7 @@ private func indexEntries(in directory: URL) throws -> [BodyPhoto] {
             .filter { (try? $0.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile) == true }
             .map(\.lastPathComponent)
     }
+    #endif
 }
 
 /// Test de frontière (spec §8) : rien d'une photo de corps ne passe dans l'export général.
