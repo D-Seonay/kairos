@@ -137,6 +137,26 @@
         }
       }
     },
+    "La séance continue en arrière-plan" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La séance continue en arrière-plan"
+          }
+        }
+      }
+    },
+    "Réduire la séance" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réduire la séance"
+          }
+        }
+      }
+    },
     "−30 s" : {
       "localizations" : {
         "fr" : {

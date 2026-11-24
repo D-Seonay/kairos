@@ -20,7 +20,7 @@ public struct FinishFlow: View {
 
     public var body: some View {
         LiveSessionView(model: model, showsPhotoButton: flow.recap == nil, onFinish: { Task { await flow.finishTapped() } },
-                        onAbandon: { flow.abandonTapped() })
+                        onAbandon: { flow.abandonTapped() }, onMinimize: minimizeAction)
             .confirmationDialog(confirmationTitle, isPresented: isShowingConfirmation, titleVisibility: .visible) {
                 confirmationActions
             } message: {
@@ -42,6 +42,12 @@ public struct FinishFlow: View {
                 RecapView(model: recap, calendar: flow.calendar) { flow.recapSaved() }
                     .interactiveDismissDisabled()
             }
+    }
+
+    /// Le chevron qui réduit l'écran ; aucun pour une saisie après coup, qui n'a pas de bandeau pour revenir.
+    private var minimizeAction: (() -> Void)? {
+        guard flow.canMinimize else { return nil }
+        return { flow.minimize() }
     }
 
     // MARK: Confirmation

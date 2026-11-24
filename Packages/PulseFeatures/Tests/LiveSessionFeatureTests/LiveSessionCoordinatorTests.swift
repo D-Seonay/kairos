@@ -53,6 +53,33 @@ import Testing
     #expect(coordinator.model().session == stored)
 }
 
+@MainActor @Test func minimizingClosesTheScreenAndKeepsTheSessionForTheBanner() async throws {
+    let fixture = LiveFixture()
+    let coordinator = fixture.coordinator()
+    await coordinator.start(LiveFixture.pushLaunch)
+    let model = coordinator.model()
+    let flow = coordinator.finishFlow()
+    #expect(flow.canMinimize)
+    flow.minimize()
+    #expect(!coordinator.isPresented)
+    #expect(coordinator.current != nil)
+    #expect(await fixture.service.current() != nil)
+    await coordinator.resume()
+    #expect(coordinator.isPresented)
+    #expect(coordinator.model() === model)
+    // Pendant une confirmation, le chevron ne ferme rien.
+    flow.abandonTapped()
+    flow.minimize()
+    #expect(coordinator.isPresented)
+}
+
+@MainActor @Test func aFlowWithoutMinimizeCannotBeReduced() async throws {
+    let fixture = LiveFixture()
+    let live = try await fixture.startedModel()
+    let flow = FinishFlowModel(live: live, onFinished: {})
+    #expect(!flow.canMinimize)
+}
+
 @MainActor @Test func refreshWithoutASessionClearsTheBanner() async throws {
     let fixture = LiveFixture()
     let coordinator = fixture.coordinator()

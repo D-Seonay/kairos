@@ -40,13 +40,21 @@ public final class FinishFlowModel {
     /// question n'est pas reposée.
     @ObservationIgnored private var continuedAfter: Date?
     @ObservationIgnored private let onFinished: @MainActor () -> Void
+    @ObservationIgnored private let onMinimize: (@MainActor () -> Void)?
 
-    public init(live: LiveSessionModel, onFinished: @escaping @MainActor () -> Void) {
+    /// `onMinimize` ferme l'écran sans finir la séance (`LiveSessionCoordinator.minimize`) ; `nil` sans bandeau pour la
+    /// reprendre, comme une saisie après coup.
+    public init(live: LiveSessionModel, onFinished: @escaping @MainActor () -> Void,
+                onMinimize: (@MainActor () -> Void)? = nil) {
         self.live = live
         self.onFinished = onFinished
+        self.onMinimize = onMinimize
     }
 
     var calendar: Calendar { live.environment.calendar }
+
+    /// Vrai quand l'écran peut se réduire : la séance continue et son bandeau « Reprendre » la rouvre.
+    public var canMinimize: Bool { onMinimize != nil }
 
     // MARK: Gestes de l'écran
 
@@ -108,6 +116,13 @@ public final class FinishFlowModel {
     public func cancelForgotten() {
         if forgotten?.isOnResume == true { continuedAfter = live.session.lastActionAt }
         forgotten = nil
+    }
+
+    /// Le chevron de l'en-tête : l'écran se ferme, la séance continue et son bandeau « Reprendre » apparaît. Sans effet pendant
+    /// une étape de la suite (confirmation, alerte, récap).
+    public func minimize() {
+        guard isIdle, let onMinimize else { return }
+        onMinimize()
     }
 
     /// « Enregistrer » ou « Plus tard » du récap, une fois la séance écrite.

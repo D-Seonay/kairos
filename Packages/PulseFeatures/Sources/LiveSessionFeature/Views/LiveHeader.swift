@@ -4,9 +4,9 @@ import PulseDomain
 import PulseServices
 import SwiftUI
 
-/// L'en-tête de la séance (spec M4 §14.2) : le titre, « Terminer », le menu « Abandonner », puis la durée écoulée, le tonnage et
-/// les séries de travail faites sur prévues. Une séance passée (§19.4) montre sa date, sa durée saisie, et « Annuler la
-/// saisie » à la place d'« Abandonner ». Avec `photos`, le bouton appareil photo précède le menu. Les confirmations sont celles
+/// L'en-tête de la séance (spec M4 §14.2) : le chevron qui réduit l'écran (séance en direct seulement), le titre, « Terminer »,
+/// le menu « Abandonner », puis la durée écoulée, le tonnage et les séries de travail faites sur prévues. Une séance passée
+/// (§19.4) montre sa date, sa durée saisie, et « Annuler la saisie » à la place d'« Abandonner ». Avec `photos`, le bouton appareil photo précède le menu. Les confirmations sont celles
 /// de l'appelant. Aux tailles d'accessibilité, les boutons passent sous le titre et les statistiques en colonne.
 struct LiveHeader: View {
     let session: LiveSession
@@ -15,6 +15,8 @@ struct LiveHeader: View {
     var calendar: Calendar = .current
     /// Les photos de la séance ; `nil` sans bouton photo (pas de service, saisie après coup, ou récap ouvert par-dessus).
     var photos: SessionPhotosModel?
+    /// Réduit l'écran, la séance continue ; `nil` sans chevron (saisie après coup).
+    var onMinimize: (() -> Void)?
     @Environment(\.pulseTheme) private var theme
     @Environment(\.dynamicTypeSize) private var typeSize
 
@@ -24,12 +26,15 @@ struct LiveHeader: View {
         let statsRow = isLarge ? AnyLayout(VStackLayout(alignment: .leading, spacing: 6)) : AnyLayout(HStackLayout())
         VStack(spacing: 4) {
             titleRow {
-                Text(Self.titleText(session.title))
-                    .font(PulseFont.title(.title3))
-                    .foregroundStyle(PulsePalette.text)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .accessibilityAddTraits(.isHeader)
+                HStack(spacing: 4) {
+                    if let onMinimize { minimizeButton(onMinimize) }
+                    Text(Self.titleText(session.title))
+                        .font(PulseFont.title(.title3))
+                        .foregroundStyle(PulsePalette.text)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .accessibilityAddTraits(.isHeader)
+                }
                 HStack(spacing: 8) {
                     if let photos { LiveCameraButton(model: photos) }
                     menu
@@ -90,6 +95,21 @@ struct LiveHeader: View {
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier(LiveSessionIdentifiers.finishButton)
+    }
+
+    /// Le chevron qui réduit l'écran, comme celui de la course : la séance continue et le bandeau « Reprendre » la rouvre.
+    private func minimizeButton(_ action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: "chevron.down")
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(PulsePalette.text2)
+                .frame(width: LiveSetRow.targetHeight, height: LiveSetRow.targetHeight)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(String(localized: "Réduire la séance", bundle: .module))
+        .accessibilityHint(String(localized: "La séance continue en arrière-plan", bundle: .module))
+        .accessibilityIdentifier(LiveSessionIdentifiers.minimizeButton)
     }
 
     private var menu: some View {
