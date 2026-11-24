@@ -14,6 +14,9 @@ public struct LibraryView: View {
     @State private var isCreating = false
     /// Le nom donné au formulaire de création : la recherche restée sans résultat, ou rien.
     @State private var creationName = ""
+    /// Un exercice créé en choix unique, à rendre une fois le formulaire refermé : deux fermetures de feuille en même temps se
+    /// perdent.
+    @State private var picksAfterCreation = false
 
     /// Le modèle est gardé par l'écran : le premier reçu l'emporte, comme le veut `@State`.
     public init(model: LibraryModel, onPick: @escaping ([ExerciseReference]) -> Void = { _ in }) {
@@ -45,7 +48,7 @@ public struct LibraryView: View {
         .navigationDestination(item: $opened) { reference in
             ExerciseSheetView(model: model.sheet(for: reference))
         }
-        .sheet(isPresented: $isCreating) {
+        .sheet(isPresented: $isCreating, onDismiss: pickCreated) {
             NavigationStack {
                 CustomExerciseForm(model: model.creator(name: creationName), onSaved: { saved in Task { await didCreate(saved) } })
             }
@@ -136,9 +139,18 @@ public struct LibraryView: View {
         isCreating = true
     }
 
-    /// Un exercice créé est choisi en mode choix ; en choix unique, il est rendu tout de suite.
+    /// Un exercice créé est choisi en mode choix ; en choix unique, il est rendu dès que le formulaire est refermé.
     private func didCreate(_ exercise: UserExercise) async {
-        if await model.didCreate(exercise) { onPick(model.confirm()) }
+        guard await model.didCreate(exercise) else { return }
+        picksAfterCreation = true
+        if !isCreating { pickCreated() }
+    }
+
+    /// Rend l'exercice créé en choix unique, une seule fois, quel que soit l'ordre entre la fermeture et l'enregistrement.
+    private func pickCreated() {
+        guard picksAfterCreation else { return }
+        picksAfterCreation = false
+        onPick(model.confirm())
     }
 
     private func touch(_ reference: ExerciseReference) {

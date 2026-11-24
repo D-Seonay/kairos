@@ -8,7 +8,8 @@ import SwiftUI
 public struct PastSessionForm: View {
     private let model: TrainModel
     private let onStart: (SessionLaunch) -> Void
-    private let initialDraft: PastSessionDraft
+    /// Gardé comme `draft` : une vue recréée plus tard (l'heure ronde a changé) ne doit pas croire le formulaire modifié.
+    @State private var initialDraft: PastSessionDraft
     @State private var draft: PastSessionDraft
     @State private var confirmsDiscard = false
     @Environment(\.dismiss) private var dismiss
@@ -17,7 +18,7 @@ public struct PastSessionForm: View {
         self.model = model
         self.onStart = onStart
         let initial = model.initialPastDraft()
-        initialDraft = initial
+        _initialDraft = State(initialValue: initial)
         _draft = State(initialValue: initial)
     }
 

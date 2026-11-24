@@ -9,7 +9,7 @@ import SwiftUI
 struct SessionCorrectionView: View {
     let blocks: [(name: String, setIDs: [UUID])]
     let onSave: (SessionCorrection) async -> Bool
-    private let original: SessionCorrection
+    @State private var original: SessionCorrection
     @State private var correction: SessionCorrection
     @State private var isSaving = false
     @State private var saveFailed = false
@@ -17,7 +17,7 @@ struct SessionCorrectionView: View {
     @Environment(\.dismiss) private var dismiss
 
     init(correction: SessionCorrection, blocks: [(name: String, setIDs: [UUID])], onSave: @escaping (SessionCorrection) async -> Bool) {
-        original = correction
+        _original = State(initialValue: correction)
         _correction = State(initialValue: correction)
         self.blocks = blocks
         self.onSave = onSave
