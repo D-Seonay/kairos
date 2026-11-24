@@ -45,7 +45,7 @@ public struct BodyPhotosScreen: View {
         .toolbar {
             if !model.showsCover {
                 ToolbarItem(placement: .primaryAction) {
-                    Button { adding = BodyPhotoAddRequest(pose: .front, day: nil) } label: {
+                    Button { adding = BodyPhotoAddRequest(pose: .front) } label: {
                         Label(PhotoText.addPhoto, systemImage: "plus")
                     }
                 }
@@ -129,7 +129,7 @@ public struct BodyPhotosScreen: View {
             ForEach(model.days) { day in
                 BodyPhotoDayRow(model: model, day: day, columns: typeSize.isAccessibilitySize ? 2 : 3,
                                 onOpen: { viewed = ViewedPhoto(id: $0.id) },
-                                onAdd: { adding = BodyPhotoAddRequest(pose: $0, day: day.day) })
+                                onAdd: { adding = BodyPhotoAddRequest(pose: $0) })
             }
             if model.canCompare {
                 Button(PhotoText.compare, action: openCompare)
@@ -153,7 +153,7 @@ public struct BodyPhotosScreen: View {
                     .font(.footnote)
                     .foregroundStyle(PulsePalette.text2)
                     .fixedSize(horizontal: false, vertical: true)
-                Button(PhotoText.addPhoto) { adding = BodyPhotoAddRequest(pose: .front, day: nil) }
+                Button(PhotoText.addPhoto) { adding = BodyPhotoAddRequest(pose: .front) }
                     .buttonStyle(PillButtonStyle(prominent: true))
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -223,11 +223,16 @@ public struct BodyPhotosScreen: View {
         showsCompare = true
     }
 
+    /// Le sélecteur ne s'ouvre que si la section est toujours déverrouillée et à découvert ; sinon l'archive est abandonnée.
     private func startExport() {
         Task {
             guard let url = await model.exportArchive() else { return }
             exportDocument = BodyPhotoArchive(url: url)
-            showsExporter = true
+            if model.lockState == .locked || model.isCovered {
+                finishExport(failed: false)
+            } else {
+                showsExporter = true
+            }
         }
     }
 
@@ -250,7 +255,7 @@ public struct BodyPhotosScreen: View {
 }
 
 /// Une rangée de jour : la date, le nombre de photos et les cases face, profil, dos. Une case pleine ouvre la visionneuse ; une
-/// case vide ajoute une photo de cette pose à ce jour.
+/// case vide ajoute une photo de cette pose.
 private struct BodyPhotoDayRow: View {
     let model: BodyPhotosModel
     let day: BodyPhotoDay
@@ -317,15 +322,14 @@ private struct BodyPhotoDayRow: View {
     }
 }
 
-/// Une demande d'ajout : la pose proposée et, depuis une case vide, le jour à compléter.
+/// Une demande d'ajout : la pose proposée (celle de la case vide touchée, face depuis « + »).
 struct BodyPhotoAddRequest: Identifiable {
     let id = UUID()
     let pose: BodyPose
-    let day: Date?
 }
 
 /// L'archive d'export des photos de corps, pour le sélecteur d'emplacement de Fichiers (jamais la feuille de partage). Elle ne
-/// se lit pas : Pulse ne fait que l'écrire.
+/// se lit pas : Pulse ne fait que l'écrire. Le zip est lu d'un coup, avant que `exportFinished` ne supprime le fichier.
 struct BodyPhotoArchive: FileDocument {
     static let readableContentTypes: [UTType] = [.zip]
 
@@ -340,7 +344,7 @@ struct BodyPhotoArchive: FileDocument {
     }
 
     func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
-        try FileWrapper(url: url, options: [])
+        try FileWrapper(url: url, options: .immediate)
     }
 }
 

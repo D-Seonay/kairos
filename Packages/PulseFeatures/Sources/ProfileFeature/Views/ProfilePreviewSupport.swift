@@ -58,7 +58,8 @@ enum ProfilePreviewSupport {
             inspector: PreviewInspector(), exporter: PreviewExporter(), eraser: PreviewEraser(),
             notificationStatus: { .authorized }, requestNotificationAuthorization: { true }, refreshHealth: {},
             appVersion: "1.0.2 (14)", privacyPolicyURL: nil, calendar: calendar, now: clock,
-            bodyPhotos: BodyPhotoService(store: InMemoryBodyPhotoStore(), measurements: measurements, calendar: calendar, now: clock))
+            bodyPhotos: BodyPhotoService(store: InMemoryBodyPhotoStore(), measurements: measurements, calendar: calendar, now: clock),
+            ownerAuthentication: PreviewOwnerAuthentication())
     }
 
     /// Le jour `offset` (0 = aujourd'hui, négatif = passé) à l'heure donnée.
@@ -145,6 +146,12 @@ private struct PreviewInspector: StoreInspector {
 private struct PreviewExporter: DataExporter {
     func exportJSON() async throws -> URL { URL(fileURLWithPath: NSTemporaryDirectory()) }
     func exportCSVArchive() async throws -> URL { URL(fileURLWithPath: NSTemporaryDirectory()) }
+}
+
+/// Face ID des aperçus : un code existe et l'authentification réussit toujours.
+private struct PreviewOwnerAuthentication: DeviceOwnerAuthenticating {
+    func isAvailable() async -> Bool { true }
+    func authenticate(reason: String) async -> Bool { true }
 }
 
 private struct PreviewEraser: DataEraser {

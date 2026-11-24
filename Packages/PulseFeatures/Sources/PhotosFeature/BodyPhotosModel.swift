@@ -14,7 +14,7 @@ public enum BodyPhotosLockState: Equatable, Sendable {
 /// Une photo prête à enregistrer : l'image déjà redressée, réduite et nettoyée, et la date proposée.
 public struct BodyPhotoDraft: Equatable, Sendable {
     public var processed: ProcessedPhoto
-    /// La date de prise de vue des métadonnées, sinon le jour de la case à compléter, sinon maintenant ; jamais dans le futur.
+    /// La date de prise de vue des métadonnées, sinon maintenant ; jamais dans le futur.
     public var takenAt: Date
 }
 
@@ -28,7 +28,8 @@ public final class BodyPhotosModel {
     public private(set) var isCovered = false
     public private(set) var days: [BodyPhotoDay] = []
     public private(set) var thumbnails: [UUID: Data] = [:]
-    /// Vrai tant que l'apparition n'a pas dit le contraire : sans code, ni verrou ni chiffrement.
+    /// Vrai tant que l'apparition n'a pas dit le contraire : sans code, ni verrou ni chiffrement. Sans authentificateur, il reste
+    /// vrai : la section reste verrouillée plutôt que de s'ouvrir.
     public private(set) var hasPasscode = true
     /// Vrai pendant une demande d'authentification : l'interrupteur et « Déverrouiller » attendent.
     public private(set) var isAuthenticating = false
@@ -104,9 +105,15 @@ public final class BodyPhotosModel {
 
     /// À l'apparition de la section : relit la présence d'un code, authentifie si le verrou est actif, puis charge. Revenir sur
     /// l'écran déjà déverrouillé (retour de la comparaison) recharge sans redemander.
+    /// Sans authentificateur (un branchement oublié), la section reste verrouillée et ne se déverrouille jamais.
     public func appear() async {
         isInSection = true
-        hasPasscode = await authentication?.isAvailable() ?? false
+        guard let authentication else {
+            hasPasscode = true
+            if lockState != .locked { relock() }
+            return
+        }
+        hasPasscode = await authentication.isAvailable()
         if !hasPasscode {
             lockState = .unavailable
         } else if !lockSetting {
@@ -277,14 +284,14 @@ public final class BodyPhotosModel {
 // MARK: - Ajout, suppression et réglages
 
 extension BodyPhotosModel {
-    /// Traite l'image reçue (appareil photo ou Photos). La date proposée est celle des métadonnées, sinon `day` (la case vide d'un
-    /// jour à compléter), sinon maintenant ; jamais dans le futur. `nil` si l'image ne se lit pas (`errorMessage` le dit).
-    public func prepare(_ data: Data?, day: Date?) async -> BodyPhotoDraft? {
+    /// Traite l'image reçue (appareil photo ou Photos). La date proposée est celle des métadonnées, sinon maintenant (une photo
+    /// prise n'en a pas), jamais dans le futur ; elle reste modifiable. `nil` si l'image ne se lit pas (`errorMessage` le dit).
+    public func prepare(_ data: Data?) async -> BodyPhotoDraft? {
         guard canReadFiles else { return nil }
         errorMessage = nil
         do {
             let processed = try await service.process(data ?? Data())
-            let proposed = processed.capturedAt ?? day ?? now()
+            let proposed = processed.capturedAt ?? now()
             return BodyPhotoDraft(processed: processed, takenAt: min(proposed, now()))
         } catch {
             errorMessage = PhotoText.unreadableImage
@@ -338,8 +345,9 @@ extension BodyPhotosModel {
         lockSetting = on
     }
 
-    /// Écrit l'archive d'export, après une authentification si le verrou est actif ; `nil` en cas d'échec. La vue la propose au
-    /// sélecteur de Fichiers, puis appelle `exportFinished`.
+    /// Écrit l'archive d'export, après une authentification si le verrou est actif ; `nil` en cas d'échec, ou si la section s'est
+    /// reverrouillée (ou a été quittée) pendant l'écriture : l'archive est alors supprimée. La vue la propose au sélecteur de
+    /// Fichiers, puis appelle `exportFinished`.
     public func exportArchive() async -> URL? {
         guard canReadFiles, !isExporting else { return nil }
         if isLockEnabled {
@@ -350,6 +358,10 @@ extension BodyPhotosModel {
         defer { isExporting = false }
         do {
             let url = try await service.exportArchive()
+            guard canReadFiles, isInSection else {
+                await service.discardExport()
+                return nil
+            }
             pendingExport = url
             return url
         } catch {

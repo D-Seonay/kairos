@@ -30,10 +30,16 @@ public struct ProfileEnvironment: Sendable {
     public var runPreferences: any RunPreferencesStore
     /// Les photos de corps ; `nil` : la ligne « Photos de corps » n'apparaît pas.
     public var bodyPhotos: BodyPhotoService?
-    /// Face ID ou le code de l'iPhone, qui verrouille les photos de corps ; `nil` compte comme un iPhone sans code.
+    /// Face ID ou le code de l'iPhone, qui verrouille les photos de corps. Sans lui, la ligne « Photos de corps » n'apparaît pas
+    /// et l'écran, s'il était ouvert quand même, resterait verrouillé.
     public var ownerAuthentication: (any DeviceOwnerAuthenticating)?
     /// Le réglage « Verrouiller avec Face ID », par appareil.
     public var bodyPhotoLock: any BodyPhotoLockStore
+
+    /// Les photos de corps ne s'offrent qu'avec leur service et leur authentificateur : jamais d'écran ouvert sans verrou.
+    public var offersBodyPhotos: Bool {
+        bodyPhotos != nil && ownerAuthentication != nil
+    }
 
     public init(profile: ProfileService, body: BodyService, settings: SettingsService, healthCache: any HealthSampleCache,
                 inspector: any StoreInspector, exporter: any DataExporter, eraser: any DataEraser,

@@ -62,7 +62,7 @@ public struct ProfileScreen: View {
                 if let summary = model.summary {
                     ProfileTiles(summary: summary, trend: model.body?.trend, calendar: calendar, today: today)
                     WeightCard(trend: model.body?.trend, calendar: calendar, today: today)
-                    if model.environment.bodyPhotos != nil {
+                    if model.environment.offersBodyPhotos {
                         BodyPhotosLink()
                     }
                     RecordsWall(lifts: summary.mainLifts, runs: summary.runs, calendar: calendar, today: today,
@@ -90,8 +90,8 @@ public struct ProfileScreen: View {
             // Chaque pesée enregistrée ou supprimée relit la page : tuile et carte Poids suivent.
             WeightScreen(environment: model.environment) { [model] in await model.load() }
         case .bodyPhotos:
-            if let service = model.environment.bodyPhotos {
-                BodyPhotosScreen(service: service, authentication: model.environment.ownerAuthentication,
+            if let service = model.environment.bodyPhotos, let authentication = model.environment.ownerAuthentication {
+                BodyPhotosScreen(service: service, authentication: authentication,
                                  lock: model.environment.bodyPhotoLock, calendar: model.environment.calendar,
                                  now: model.environment.now)
             }

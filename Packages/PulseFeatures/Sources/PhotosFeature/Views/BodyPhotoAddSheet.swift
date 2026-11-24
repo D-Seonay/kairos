@@ -167,7 +167,7 @@ struct BodyPhotoAddSheet: View {
         isProcessing = true
         draft = nil
         let data = await loader()
-        let prepared = await model.prepare(data, day: request.day)
+        let prepared = await model.prepare(data)
         isProcessing = false
         draft = prepared
         if let prepared { takenAt = prepared.takenAt }
@@ -204,7 +204,7 @@ private struct AddSheetPreview: View {
     var body: some View {
         Group {
             if let model {
-                BodyPhotoAddSheet(model: model, request: BodyPhotoAddRequest(pose: .side, day: nil))
+                BodyPhotoAddSheet(model: model, request: BodyPhotoAddRequest(pose: .side))
             } else {
                 ProgressView()
             }

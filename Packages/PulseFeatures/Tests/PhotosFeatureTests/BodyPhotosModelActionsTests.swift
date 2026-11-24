@@ -57,6 +57,26 @@ struct BodyPhotosModelActionsTests: BodyPhotosModelTesting {
         #expect(model.errorMessage == "L'export n'a pas pu être enregistré.")
     }
 
+    @Test func relockWhileTheArchiveIsWrittenDiscardsIt() async throws {
+        let store = GatedExportBodyPhotoStore()
+        let service = BodyPhotoService(store: store, measurements: InMemoryBodyMeasurementRepository(),
+                                       calendar: PhotosTestClock.calendar, timeZone: PhotosTestClock.calendar.timeZone,
+                                       now: { PhotosTestClock.date("2026-11-20T12:00") })
+        _ = try await service.save(service.process(TestImages.jpeg()), pose: .front,
+                                   takenAt: PhotosTestClock.date("2026-11-01T08:00"))
+        let model = BodyPhotosModel(service: service, authentication: StubOwnerAuthentication(), lock: InMemoryBodyPhotoLockStore(),
+                                    calendar: PhotosTestClock.calendar, now: { PhotosTestClock.date("2026-11-20T12:00") })
+        await model.appear()
+        let export = Task { await model.exportArchive() }
+        while await !store.isExporting { await Task.yield() }
+        model.scenePhaseChanged(.background)
+        await store.open()
+        #expect(await export.value == nil)
+        let archive = try #require(await store.archive)
+        #expect(!FileManager.default.fileExists(atPath: archive.path))
+        #expect(model.lockState == .locked)
+    }
+
     @Test func deleteAllEmptiesTheList() async throws {
         try await seed(.front, "2026-11-01T08:00")
         try await seed(.back, "2026-10-01T08:00")
@@ -70,25 +90,22 @@ struct BodyPhotosModelActionsTests: BodyPhotosModelTesting {
 
     // MARK: Ajout et suppression
 
-    @Test func draftWithoutCaptureDateTakesTheSlotDayOrToday() async throws {
+    @Test func draftWithoutCaptureDateTakesToday() async throws {
         let model = await unlockedModel(StubOwnerAuthentication())
-        let today = try #require(await model.prepare(TestImages.jpeg(), day: nil))
-        #expect(today.takenAt == PhotosTestClock.date("2026-11-20T12:00"))
-        let slot = PhotosTestClock.date("2026-09-30T00:00")
-        let completing = try #require(await model.prepare(TestImages.jpeg(), day: slot))
-        #expect(completing.takenAt == slot)
+        let draft = try #require(await model.prepare(TestImages.jpeg()))
+        #expect(draft.takenAt == PhotosTestClock.date("2026-11-20T12:00"))
     }
 
     @Test func unreadableImageGivesNoDraft() async {
         let model = await unlockedModel(StubOwnerAuthentication())
-        #expect(await model.prepare(Data([1, 2, 3]), day: nil) == nil)
+        #expect(await model.prepare(Data([1, 2, 3])) == nil)
         #expect(model.errorMessage == "Une image n'a pas pu être lue.")
-        #expect(await model.prepare(nil, day: nil) == nil)
+        #expect(await model.prepare(nil) == nil)
     }
 
     @Test func saveAddsAnnouncesAndReloads() async throws {
         let model = await unlockedModel(StubOwnerAuthentication())
-        let draft = try #require(await model.prepare(TestImages.jpeg(), day: nil))
+        let draft = try #require(await model.prepare(TestImages.jpeg()))
         #expect(await model.save(draft, pose: .side, takenAt: PhotosTestClock.date("2026-11-02T09:00")))
         #expect(model.announcement == "Photo ajoutée")
         let photo = try #require(model.days.first?.photos[.side])
@@ -98,7 +115,7 @@ struct BodyPhotosModelActionsTests: BodyPhotosModelTesting {
 
     @Test func futureDateIsBroughtBackToNow() async throws {
         let model = await unlockedModel(StubOwnerAuthentication())
-        let draft = try #require(await model.prepare(TestImages.jpeg(), day: nil))
+        let draft = try #require(await model.prepare(TestImages.jpeg()))
         #expect(await model.save(draft, pose: .front, takenAt: PhotosTestClock.date("2026-12-25T09:00")))
         #expect(model.days.first?.photos[.front]?.takenAt == PhotosTestClock.date("2026-11-20T12:00"))
     }

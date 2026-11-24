@@ -78,11 +78,19 @@ struct BodyPhotosModelTests: BodyPhotosModelTesting {
         #expect(authentication.reasons.isEmpty)
     }
 
-    @Test func missingAuthenticatorCountsAsNoPasscode() async {
-        let model = makeModel(nil)
+    @Test func missingAuthenticatorStaysLocked() async throws {
+        let photo = try await seed(.front, "2026-11-01T08:00")
+        let model = makeModel(nil, lock: InMemoryBodyPhotoLockStore(isLockEnabled: false))
         await model.appear()
-        #expect(model.lockState == .unavailable)
-        #expect(!model.hasPasscode)
+        #expect(model.lockState == .locked)
+        #expect(model.hasPasscode)
+        #expect(model.showsCover)
+        #expect(!model.headerLines.contains(BodyPhotosTestText.noPasscode))
+        await model.unlock()
+        #expect(model.lockState == .locked)
+        #expect(model.days.isEmpty)
+        #expect(await model.image(of: photo.id) == nil)
+        #expect(await model.exportArchive() == nil)
     }
 
     @Test func headerGivesTheNoticeAndTheLastShot() async throws {
