@@ -17,13 +17,13 @@ const ROUTE: Stop[] = [
     id: "iphone",
     where: "Sur ton iPhone",
     title: "Apple Santé",
-    body: "Ton sommeil, ta variabilité cardiaque et ta fréquence cardiaque au repos sont lus sur ton iPhone. Pulse ne les écrit jamais dans iCloud.",
+    body: "Ton sommeil, ta variabilité cardiaque et ta fréquence cardiaque au repos sont lus sur ton iPhone. Pulse ne les écrit jamais dans iCloud. Tes photos de corps restent aussi sur ton iPhone, hors sauvegarde, derrière Face ID.",
   },
   {
     id: "icloud",
     where: "Dans ton iCloud privé",
     title: "Ce que tu saisis",
-    body: "Tes séances, tes compléments et les scores que Pulse calcule se synchronisent dans ton iCloud privé, auquel personne d'autre n'a accès.",
+    body: "Tes séances et leurs photos, tes courses et leur tracé, tes compléments et les scores que Pulse calcule se synchronisent dans ton iCloud privé, auquel personne d'autre n'a accès.",
   },
   {
     id: "serveur",

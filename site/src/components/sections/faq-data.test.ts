@@ -2,17 +2,19 @@ import { describe, expect, it } from "vitest";
 import { FAQ } from "./faq-data";
 
 describe("FAQ", () => {
-  it("has six or seven entries with unique ids", () => {
+  it("has six to nine entries with unique ids", () => {
     expect(FAQ.length).toBeGreaterThanOrEqual(6);
-    expect(FAQ.length).toBeLessThanOrEqual(7);
+    expect(FAQ.length).toBeLessThanOrEqual(9);
     expect(new Set(FAQ.map((entry) => entry.id)).size).toBe(FAQ.length);
   });
 
-  it("covers the questions of the spec", () => {
+  it("covers the questions of the spec, then the run and the photos of version 1.0.3", () => {
     expect(FAQ.map((entry) => entry.id)).toEqual([
       "pas-de-score",
       "autre-montre",
       "calibration",
+      "course",
+      "photos",
       "android",
       "prix",
       "medical",
@@ -38,5 +40,17 @@ describe("FAQ", () => {
   it("says Pulse is not a medical device, in the words of the store sheet", () => {
     const medical = FAQ.find((entry) => entry.id === "medical")!;
     expect(medical.answer).toContain("repères d'entraînement, pas un avis médical");
+  });
+
+  it("says the position is only used during a run, and what happens without it", () => {
+    const run = FAQ.find((entry) => entry.id === "course")!;
+    expect(run.answer).toContain("que pendant une course que tu as lancée");
+    expect(run.answer).toContain("seul le temps est enregistré");
+  });
+
+  it("keeps body photos on the iPhone, out of iCloud and the backup", () => {
+    const photos = FAQ.find((entry) => entry.id === "photos")!;
+    expect(photos.answer).toMatch(/ne quittent jamais ton iPhone/);
+    expect(photos.answer).toMatch(/ni dans iCloud, ni dans la sauvegarde/);
   });
 });

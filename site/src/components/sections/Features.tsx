@@ -1,7 +1,7 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { ContactSheet } from "@/components/visual/ContactSheet";
-import { SupplementsScreen, WidgetsScreen } from "@/components/visual/DrawnScreens";
+import { NightScreen, RunScreen, SupplementsScreen, WidgetsScreen } from "@/components/visual/DrawnScreens";
 import { Grain } from "@/components/visual/Grain";
 import { PhoneFrame } from "@/components/visual/PhoneFrame";
 import { RegistrationMarks } from "@/components/visual/RegistrationMarks";
@@ -9,6 +9,8 @@ import { FeatureStep, FeaturesStage, type SwapLayer } from "@/components/visual/
 import { FEATURES, type Feature } from "./features-data";
 
 const DRAWN: Record<string, (props: { label: string }) => ReactNode> = {
+  nuit: NightScreen,
+  course: RunScreen,
   complements: SupplementsScreen,
   widgets: WidgetsScreen,
 };
@@ -46,8 +48,8 @@ const LAYERS: SwapLayer[] = FEATURES.map((feature) => ({
 }));
 
 /**
- * Fonctionnalités, 01 to 06. From 1024 px (motion allowed) an iPhone stays
- * pinned on the left while the six blocks scroll by, and its screen changes
+ * Fonctionnalités, 01 to 08. From 1024 px (motion allowed) an iPhone stays
+ * pinned on the left while the eight blocks scroll by, and its screen changes
  * through a halftone dissolve; a film counter under it rolls to the frame in
  * view. Elsewhere each block carries its own phone. Then the contact sheet:
  * the five captures on a strip of 35 mm film. Every title and body is in the
@@ -78,8 +80,8 @@ export function Features() {
             </h2>
           </div>
           <p className="max-w-[54ch] text-[17px] leading-relaxed text-muted lg:pb-2">
-            Le score du matin décide, le reste suit : ta séance, ton programme, tes statistiques, tes compléments et tes
-            widgets.
+            Le score du matin décide, le reste suit : ta nuit en détail, ta séance, ta course, ton programme, tes
+            statistiques, tes compléments et tes widgets.
           </p>
         </header>
 

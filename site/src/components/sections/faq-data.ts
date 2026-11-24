@@ -29,6 +29,18 @@ export const FAQ: FaqEntry[] = [
       "Pulse construit ta ligne de base de VFC sur tes 14 dernières nuits. Le facteur VFC peut entrer dans ton score dès 5 nuits, la ligne de base est complète à 14. Jusque-là, l'app affiche « En calibration » et ne te propose pas d'augmenter tes charges.",
   },
   {
+    id: "course",
+    question: "Faut-il une montre pour courir avec Pulse ?",
+    answer:
+      "Non. La course se mesure avec le GPS de ton iPhone, même écran verrouillé. Pulse n'utilise ta position que pendant une course que tu as lancée, et le tracé reste sur ton iPhone, dans ton iCloud privé et dans Apple Santé. Si tu refuses la localisation, seul le temps est enregistré.",
+  },
+  {
+    id: "photos",
+    question: "Qui voit mes photos ?",
+    answer:
+      "Toi seul. Les photos de séance se synchronisent dans ton iCloud privé. Les photos de corps ne quittent jamais ton iPhone : elles ne vont ni dans iCloud, ni dans la sauvegarde, ni dans l'export général, et Face ID les protège.",
+  },
+  {
     id: "android",
     question: "Pulse existe-t-il sur Android ?",
     answer:
