@@ -175,7 +175,7 @@ private struct SessionLineRow: View {
     }
 
     private var tonnageText: String {
-        line.tonnageKg.formatted(.number.precision(.fractionLength(0)).locale(Locale(identifier: "fr_FR")))
+        PulseFormat.grouped(line.tonnageKg, maxFractionDigits: 0)
     }
 
     /// « 70 × 5 · 5 · RPE 8,5 ».

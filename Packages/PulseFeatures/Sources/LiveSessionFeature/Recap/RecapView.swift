@@ -115,7 +115,7 @@ public struct RecapView: View {
         return LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: columns), spacing: 8) {
             stat(PulseFormat.duration(minutes: recap.durationMinutes), String(localized: "Durée", bundle: .module),
                  spoken: Self.statSpoken(.duration(minutes: recap.durationMinutes)))
-            stat(PulseFormat.decimal(recap.tonnageKg, maxFractionDigits: 1), String(localized: "kg soulevés", bundle: .module),
+            stat(PulseFormat.grouped(recap.tonnageKg, maxFractionDigits: 1), String(localized: "kg soulevés", bundle: .module),
                  spoken: Self.statSpoken(.tonnage(kg: recap.tonnageKg)))
             stat("\(recap.workingSets)", String(localized: "Séries", bundle: .module),
                  spoken: Self.statSpoken(.sets(recap.workingSets)))

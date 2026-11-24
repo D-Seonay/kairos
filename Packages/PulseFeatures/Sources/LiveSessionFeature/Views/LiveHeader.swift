@@ -55,12 +55,13 @@ struct LiveHeader: View {
                         Text(PulseFormat.duration(minutes: minutes))
                     }
                 } else {
-                    // Le chrono visible se met à jour seul ; VoiceOver dit la durée à la minute près.
+                    // Le chrono visible se met à jour seul, avec les heures comme la Live Activity (« 1:15:12 ») ; VoiceOver
+                    // dit la durée à la minute près.
                     TimelineView(.periodic(from: session.startedAt, by: 60)) { context in
                         stat(String(localized: "Durée", bundle: .module),
                              spoken: Self.elapsedSpokenText(from: session.startedAt, to: context.date), updatesFrequently: true) {
                             Text(timerInterval: session.startedAt...Date.distantFuture, pauseTime: nil, countsDown: false,
-                                 showsHours: false)
+                                 showsHours: true)
                         }
                     }
                 }
@@ -200,9 +201,9 @@ extension LiveHeader {
         Int((max(0, end.timeIntervalSince(start)) / 60).rounded())
     }
 
-    /// « 1240 kg », « 62,5 kg ».
+    /// « 1 240 kg », « 62,5 kg ».
     nonisolated static func tonnageText(kg: Double) -> String {
-        String(localized: "\(PulseFormat.decimal(kg, maxFractionDigits: 1)) kg", bundle: .module)
+        String(localized: "\(PulseFormat.grouped(kg, maxFractionDigits: 1)) kg", bundle: .module)
     }
 
     /// « 1 240 kilos ».
