@@ -210,6 +210,23 @@ struct StatsChartSummaryTests {
         #expect(StatsText.comparisonSpoken(StatsComparison(value: 106, previous: 100), days: 30)
             == "+6 % par rapport aux 30 jours précédents")
         #expect(StatsText.comparisonSpoken(nil, days: 30) == nil)
+        #expect(StatsText.comparisonSpoken(StatsComparison(value: 106, previous: 100), days: 365)
+            == "+6 % par rapport à l'année précédente")
+    }
+
+    @Test func tileComparisonIsWrittenAsItIsSpoken() {
+        let comparison = StatsComparison(value: 106, previous: 100)
+        #expect(StatsWindow(period: .month, now: Spoken.today, calendar: Spoken.calendar).comparisonText(comparison)
+            == "+6 % par rapport aux 30 jours précédents")
+        #expect(StatsWindow(period: .year, now: Spoken.today, calendar: Spoken.calendar).comparisonText(comparison)
+            == "+6 % par rapport à l'année précédente")
+    }
+
+    @Test func ratioWaitingTextSaysHistory() {
+        #expect(LoadSection.ratioWaitingText(days: 1)
+            == "Le ratio aigu / chronique s'affiche après 28 jours d'historique (encore 1 jour)")
+        #expect(LoadSection.ratioWaitingText(days: 12)
+            == "Le ratio aigu / chronique s'affiche après 28 jours d'historique (encore 12 jours)")
     }
 }
 

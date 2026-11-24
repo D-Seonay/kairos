@@ -178,9 +178,14 @@ extension StatsText {
         return ([title, content.spokenValue ?? value] + (content.spokenDetails ?? content.details)).joined(separator: ", ")
     }
 
-    /// « +6 % par rapport aux 30 jours précédents » ; `nil` sans période précédente.
+    /// « +6 % par rapport aux 30 jours précédents », « +6 % par rapport à l'année précédente » sur un an ; `nil` sans période
+    /// précédente. Écrit et dit de la même façon.
     static func comparisonSpoken(_ comparison: StatsComparison?, days: Int) -> String? {
-        change(comparison).map { String(localized: "\($0) par rapport aux \(days) jours précédents", bundle: .module) }
+        change(comparison).map { change in
+            days == StatsPeriod.year.days
+                ? String(localized: "\(change) par rapport à l'année précédente", bundle: .module)
+                : String(localized: "\(change) par rapport aux \(days) jours précédents", bundle: .module)
+        }
     }
 
     // MARK: Résumés de graphique
