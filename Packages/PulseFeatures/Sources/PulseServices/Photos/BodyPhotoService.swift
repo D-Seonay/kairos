@@ -10,7 +10,7 @@ public actor BodyPhotoService {
     private let calendar: Calendar
     private let timeZone: TimeZone
     private let now: @Sendable () -> Date
-    /// Les enregistrements passent l'un après l'autre : « supprimer la photo du jour, puis enregistrer » se libère à chaque
+    /// Les enregistrements passent l'un après l'autre : « enregistrer, puis supprimer la photo du jour » se libère à chaque
     /// `await`, et deux enregistrements concurrents laisseraient deux photos de même pose et de même jour.
     private let queue = SerialTaskQueue()
 
@@ -57,18 +57,22 @@ public actor BodyPhotoService {
         BodyPhotoTimeline.existing(pose: pose, on: date, in: try await store.photos(), calendar: calendar)
     }
 
-    /// Enregistre la photo. Celle de même pose et de même jour est supprimée d'abord : l'appelant a confirmé le remplacement.
+    /// Enregistre la photo, puis supprime celle de même pose et de même jour : l'appelant a confirmé le remplacement.
     public func save(_ processed: ProcessedPhoto, pose: BodyPose, takenAt: Date) async throws -> BodyPhoto {
         try await queue.run { try await self.replacingSave(processed, pose: pose, takenAt: takenAt) }
     }
 
+    /// La nouvelle photo d'abord : les photos de corps n'ont aucune autre copie, et une écriture qui échoue (disque plein,
+    /// protection des fichiers) ne doit pas emporter l'ancienne. Les deux partagent brièvement le créneau, et la liste montre la
+    /// plus récente (`BodyPhotoTimeline`). Une ancienne qui ne se supprime pas reste en trop, sans faire échouer l'ajout déjà
+    /// écrit : le remplacement suivant de ce créneau la retire.
     private func replacingSave(_ processed: ProcessedPhoto, pose: BodyPose, takenAt: Date) async throws -> BodyPhoto {
         let sameSlot = try await store.photos().filter { $0.pose == pose && calendar.isDate($0.takenAt, inSameDayAs: takenAt) }
-        for old in sameSlot {
-            try await store.delete(photoID: old.id)
-        }
         let photo = BodyPhoto(id: UUID(), pose: pose, takenAt: takenAt, createdAt: now())
         try await store.save(photo, image: processed.image)
+        for old in sameSlot {
+            try? await store.delete(photoID: old.id)
+        }
         return photo
     }
 

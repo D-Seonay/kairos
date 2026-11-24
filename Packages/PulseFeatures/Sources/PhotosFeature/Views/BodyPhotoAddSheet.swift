@@ -76,8 +76,15 @@ struct BodyPhotoAddSheet: View {
         .trackingCameraState($cameraState)
         .photosPicker(isPresented: $showsPicker, selection: $selection, matching: .images)
         .onChange(of: selection) { _, item in importItem(item) }
-        .cameraCover(isPresented: $showsCamera) { loader in Task { await prepare(loader) } }
-        .onAppear { model.clearError() }
+        // La feuille et l'appareil photo comptent parmi les écrans de la section, comme la visionneuse : si iOS fait disparaître
+        // la liste sous eux, la section ne se reverrouille pas en pleine prise de vue.
+        .cameraCover(isPresented: $showsCamera, onAppear: { model.screenAppeared() }, onDisappear: { model.screenDisappeared() },
+                     onCapture: { loader in Task { await prepare(loader) } })
+        .onAppear {
+            model.screenAppeared()
+            model.clearError()
+        }
+        .onDisappear { model.screenDisappeared() }
     }
 
     // MARK: Sections

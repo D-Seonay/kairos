@@ -200,6 +200,21 @@ struct BodyPhotosModelTests: BodyPhotosModelTesting {
         #expect(model.days.count == 1)
     }
 
+    /// L'appareil photo s'ouvre en plein écran par-dessus la feuille d'ajout : iOS peut faire disparaître la liste et la feuille
+    /// en dessous. La feuille et l'appareil photo comptent parmi les écrans de la section, donc rien ne se reverrouille.
+    @Test func theCameraOverTheAddSheetKeepsTheUnlock() async throws {
+        try await seed(.front, "2026-11-01T08:00")
+        let model = await unlockedModel(StubOwnerAuthentication())
+        model.screenAppeared()                              // la liste
+        model.screenAppeared()                              // la feuille d'ajout
+        model.screenAppeared()                              // l'appareil photo
+        model.screenDisappeared(grace: .milliseconds(1))    // la liste, sous le plein écran
+        model.screenDisappeared(grace: .milliseconds(1))    // la feuille, sous le plein écran
+        await model.pendingLeave?.value
+        #expect(model.lockState == .unlocked)
+        #expect(model.days.count == 1)
+    }
+
     @Test func appearingAgainWhileUnlockedDoesNotAskAgain() async throws {
         try await seed(.front, "2026-11-01T08:00")
         let authentication = StubOwnerAuthentication()

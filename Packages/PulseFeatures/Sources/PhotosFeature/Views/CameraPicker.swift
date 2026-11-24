@@ -54,9 +54,12 @@ enum CameraEncoding {
 
 extension View {
     /// Présente l'appareil photo en plein écran. `onCapture` reçoit un chargeur qui encode la photo prise hors de l'acteur
-    /// principal (pour `SessionPhotosModel.add(loading:)`). Sur Mac (les tests), l'appareil photo n'existe pas : rien ne s'affiche.
+    /// principal (pour `SessionPhotosModel.add(loading:)`). `onAppear` et `onDisappear` suivent l'appareil photo à l'écran : la
+    /// section Photos de corps le compte parmi ses écrans, sinon le plein écran, qui fait disparaître la liste en dessous, la
+    /// reverrouillerait. Sur Mac (les tests), l'appareil photo n'existe pas : rien ne s'affiche.
     @ViewBuilder
-    func cameraCover(isPresented: Binding<Bool>, onCapture: @escaping (@escaping @Sendable () async -> Data?) -> Void) -> some View {
+    func cameraCover(isPresented: Binding<Bool>, onAppear: @escaping () -> Void = {}, onDisappear: @escaping () -> Void = {},
+                     onCapture: @escaping (@escaping @Sendable () async -> Data?) -> Void) -> some View {
         #if canImport(UIKit)
         fullScreenCover(isPresented: isPresented) {
             CameraPicker { image in
@@ -64,6 +67,8 @@ extension View {
                 if let image { onCapture { await CameraEncoding.jpeg(image) } }
             }
             .ignoresSafeArea()
+            .onAppear(perform: onAppear)
+            .onDisappear(perform: onDisappear)
         }
         #else
         self

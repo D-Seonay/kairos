@@ -61,6 +61,35 @@ struct BodyPhotoServiceTests {
         #expect(try await service.photos().count == 1)
     }
 
+    /// Les photos de corps n'ont aucune autre copie : un remplacement dont l'écriture échoue garde l'ancienne photo.
+    @Test func aFailedReplaceKeepsTheOldPhoto() async throws {
+        let failing = FailingBodyPhotoStore()
+        let service = BodyPhotoService(store: failing, measurements: measurements, calendar: TestClock.calendar, timeZone: .gmt,
+                                       now: { TestClock.date("2026-11-20T12:00") })
+        let old = try await service.save(processed(), pose: .front, takenAt: TestClock.date("2026-11-01T08:00"))
+        await failing.setFailsSave(true)
+        await #expect(throws: FailingBodyPhotoStore.Failure.self) {
+            _ = try await service.save(processed(), pose: .front, takenAt: TestClock.date("2026-11-01T20:00"))
+        }
+        #expect(try await service.photos().map(\.id) == [old.id])
+        #expect(try await service.image(of: old.id) != nil)
+    }
+
+    /// La nouvelle photo est écrite : un échec de suppression de l'ancienne ne fait pas échouer l'ajout, et le remplacement
+    /// suivant la retire.
+    @Test func aFailedDeleteOfTheOldPhotoStillSavesTheNewOne() async throws {
+        let failing = FailingBodyPhotoStore()
+        let service = BodyPhotoService(store: failing, measurements: measurements, calendar: TestClock.calendar, timeZone: .gmt,
+                                       now: { TestClock.date("2026-11-20T12:00") })
+        let old = try await service.save(processed(), pose: .front, takenAt: TestClock.date("2026-11-01T08:00"))
+        await failing.setFailsDelete(true)
+        let new = try await service.save(processed(), pose: .front, takenAt: TestClock.date("2026-11-01T20:00"))
+        #expect(Set(try await service.photos().map(\.id)) == [old.id, new.id])
+        await failing.setFailsDelete(false)
+        let third = try await service.save(processed(), pose: .front, takenAt: TestClock.date("2026-11-01T21:00"))
+        #expect(try await service.photos().map(\.id) == [third.id])
+    }
+
     @Test func existingFindsSamePoseSameDay() async throws {
         let service = makeService()
         let saved = try await service.save(processed(), pose: .side, takenAt: TestClock.date("2026-11-01T08:00"))
@@ -156,4 +185,32 @@ struct BodyPhotoServiceTests {
         #expect(!lock.isLockEnabled)
         #expect(!InMemoryBodyPhotoLockStore(isLockEnabled: false).isLockEnabled)
     }
+}
+
+/// Des photos de corps en mémoire dont l'écriture ou la suppression échoue sur demande (disque plein, protection des fichiers).
+private actor FailingBodyPhotoStore: BodyPhotoStore {
+    struct Failure: Error {}
+
+    private let inner = InMemoryBodyPhotoStore()
+    private var failsSave = false
+    private var failsDelete = false
+
+    func setFailsSave(_ fails: Bool) { failsSave = fails }
+    func setFailsDelete(_ fails: Bool) { failsDelete = fails }
+
+    func photos() async throws -> [BodyPhoto] { try await inner.photos() }
+    func image(of photoID: UUID) async throws -> PhotoImage? { try await inner.image(of: photoID) }
+
+    func save(_ photo: BodyPhoto, image: PhotoImage) async throws {
+        if failsSave { throw Failure() }
+        try await inner.save(photo, image: image)
+    }
+
+    func delete(photoID: UUID) async throws {
+        if failsDelete { throw Failure() }
+        try await inner.delete(photoID: photoID)
+    }
+
+    func deleteAll() async throws { try await inner.deleteAll() }
+    func exportArchive(to directory: URL) async throws -> URL { try await inner.exportArchive(to: directory) }
 }
