@@ -6,7 +6,8 @@ import WidgetFeature
 import WidgetKit
 
 /// La Live Activity de la séance (spec M4 §15.3) : le repos et la série suivante sur l'écran verrouillé et dans la Dynamic Island,
-/// le titre et la durée écoulée hors repos. Elle n'affiche rien d'autre que `ContentState` (spec M4 §15.4).
+/// le titre et la durée écoulée hors repos, et la progression des séries de travail tout du long. Elle n'affiche rien d'autre que
+/// `ContentState` (spec M4 §15.4).
 struct SessionLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: PulseSessionAttributes.self) { context in
@@ -25,9 +26,7 @@ struct SessionLiveActivity: Widget {
                     SessionIslandBottom(state: context.model)
                 }
             } compactLeading: {
-                Image(systemName: "dumbbell.fill")
-                    .foregroundStyle(SessionActivityStyle.accent)
-                    .accessibilityHidden(true)
+                SessionCompactLeading(state: context.model)
             } compactTrailing: {
                 SessionCompactTime(state: context.model)
             } minimal: {
@@ -54,12 +53,16 @@ extension PulseSessionAttributes.ContentState {
     fileprivate static var resting: Self {
         Self(title: "Pectoraux et triceps", startedAt: .now.addingTimeInterval(-1_500),
              restStartedAt: .now.addingTimeInterval(-8), restEndsAt: .now.addingTimeInterval(112),
-             nextSet: "Développé couché à la barre · série 2 · 70 kg × 5")
+             nextSet: "Développé couché à la barre · série 2 · 70 kg × 5", doneSets: 4, plannedSets: 15)
     }
 
     fileprivate static var working: Self {
         Self(title: "Pectoraux et triceps", startedAt: .now.addingTimeInterval(-1_500),
-             nextSet: "Développé couché à la barre · série 2 · 70 kg × 5")
+             nextSet: "Développé couché à la barre · série 2 · 70 kg × 5", doneSets: 4, plannedSets: 15)
+    }
+
+    fileprivate static var free: Self {
+        Self(title: "Séance libre", startedAt: .now.addingTimeInterval(-300))
     }
 }
 
@@ -80,6 +83,7 @@ extension PulseSessionAttributes.ContentState {
 } contentStates: {
     PulseSessionAttributes.ContentState.resting
     PulseSessionAttributes.ContentState.working
+    PulseSessionAttributes.ContentState.free
 }
 
 #Preview("Compact", as: .dynamicIsland(.compact), using: PulseSessionAttributes.preview) {
@@ -87,6 +91,7 @@ extension PulseSessionAttributes.ContentState {
 } contentStates: {
     PulseSessionAttributes.ContentState.resting
     PulseSessionAttributes.ContentState.working
+    PulseSessionAttributes.ContentState.free
 }
 
 #Preview("Étendue", as: .dynamicIsland(.expanded), using: PulseSessionAttributes.preview) {
@@ -94,6 +99,7 @@ extension PulseSessionAttributes.ContentState {
 } contentStates: {
     PulseSessionAttributes.ContentState.resting
     PulseSessionAttributes.ContentState.working
+    PulseSessionAttributes.ContentState.free
 }
 
 #Preview("Minimale", as: .dynamicIsland(.minimal), using: PulseSessionAttributes.preview) {
@@ -101,5 +107,6 @@ extension PulseSessionAttributes.ContentState {
 } contentStates: {
     PulseSessionAttributes.ContentState.resting
     PulseSessionAttributes.ContentState.working
+    PulseSessionAttributes.ContentState.free
 }
 #endif

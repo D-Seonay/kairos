@@ -57,4 +57,25 @@ struct SessionActivityTextTests {
         #expect(SessionActivityText.spokenNextSet("Pompes · série 1 · à fond") == "Pompes, série 1, à fond")
         #expect(SessionActivityText.spokenNextSet("Pompes") == "Pompes")
     }
+
+    @Test func progressTexts() {
+        #expect(SessionActivityText.progressText(done: 4, planned: 15) == "4 / 15")
+        #expect(SessionActivityText.progressCaption(done: 4, planned: 15) == "4 / 15 séries")
+        #expect(SessionActivityText.progressCaption(done: 0, planned: 1) == "0 / 1 série")
+        #expect(SessionActivityText.progressSpoken(done: 4, planned: 15) == "4 séries faites sur 15")
+        #expect(SessionActivityText.progressSpoken(done: 1, planned: 15) == "1 série faite sur 15")
+    }
+
+    @Test func theProgressIsReadAfterTheTitle() {
+        let label = SessionActivityText.accessibilityLabel(title: "Push", isResting: true, nextSet: nextSet, doneSets: 3,
+                                                           plannedSets: 14)
+        #expect(label == "Repos, 3 séries faites sur 14, série suivante : Développé couché à la barre, série 2, 70 kilos, "
+            + "5 répétitions")
+    }
+
+    @Test func aSessionWithoutPlannedSetsReadsNoProgress() {
+        let label = SessionActivityText.accessibilityLabel(title: "Push", isResting: false, nextSet: nil, doneSets: 0,
+                                                           plannedSets: 0)
+        #expect(label == "Séance Push")
+    }
 }

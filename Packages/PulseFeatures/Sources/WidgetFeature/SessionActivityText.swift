@@ -1,8 +1,8 @@
 import Foundation
 import PulseDesignSystem
 
-/// Les textes de la Live Activity de la séance (spec M4 §15.3), sans ActivityKit : ils ne viennent que du titre, des dates et de la
-/// série suivante déjà présents dans l'état de l'activité (spec M4 §15.4).
+/// Les textes de la Live Activity de la séance (spec M4 §15.3), sans ActivityKit : ils ne viennent que du titre, des dates, de la
+/// série suivante et du compte des séries déjà présents dans l'état de l'activité (spec M4 §15.4).
 public enum SessionActivityText {
     public static var restTitle: String { String(localized: "Repos", bundle: .module) }
     public static var nextSetTitle: String { String(localized: "Série suivante", bundle: .module) }
@@ -15,10 +15,31 @@ public enum SessionActivityText {
     public static var plus30Label: String { String(localized: "Ajouter 30 secondes de repos", bundle: .module) }
     public static var skipLabel: String { String(localized: "Passer le repos", bundle: .module) }
 
-    /// Ce que VoiceOver lit pour le titre et la série suivante de l'activité. Le temps n'y est pas : le minuteur système le porte, et
-    /// il reste juste pendant que l'activité est affichée.
-    public static func accessibilityLabel(title: String, isResting: Bool, nextSet: String?) -> String {
+    /// « 4 / 15 », comme « Séries » en haut de l'écran de séance.
+    public static func progressText(done: Int, planned: Int) -> String {
+        "\(done) / \(planned)"
+    }
+
+    /// « 4 / 15 séries », sous la barre de progression de l'écran verrouillé et de la Dynamic Island étendue.
+    public static func progressCaption(done: Int, planned: Int) -> String {
+        planned == 1 ? String(localized: "\(done) / 1 série", bundle: .module)
+            : String(localized: "\(done) / \(planned) séries", bundle: .module)
+    }
+
+    /// « 4 séries faites sur 15 ».
+    public static func progressSpoken(done: Int, planned: Int) -> String {
+        done == 1 ? String(localized: "1 série faite sur \(planned)", bundle: .module)
+            : String(localized: "\(done) séries faites sur \(planned)", bundle: .module)
+    }
+
+    /// Ce que VoiceOver lit pour le titre, la progression et la série suivante de l'activité. Le temps n'y est pas : le minuteur
+    /// système le porte, et il reste juste pendant que l'activité est affichée. Sans série prévue, la progression n'est pas dite.
+    public static func accessibilityLabel(title: String, isResting: Bool, nextSet: String?, doneSets: Int = 0,
+                                          plannedSets: Int = 0) -> String {
         var parts = [isResting ? restTitle : String(localized: "Séance \(title)", bundle: .module)]
+        if plannedSets > 0 {
+            parts.append(progressSpoken(done: doneSets, planned: plannedSets))
+        }
         if let nextSet {
             parts.append(String(localized: "série suivante : \(spokenNextSet(nextSet))", bundle: .module))
         }

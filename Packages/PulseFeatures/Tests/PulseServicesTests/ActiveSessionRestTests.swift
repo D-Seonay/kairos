@@ -187,4 +187,24 @@ struct ActiveSessionRestTests {
         // Sans historique, la série validée devient la proposition des suivantes.
         #expect(await fixture.notifier.scheduled.last?.message.body == "Tractions, série 2 : +10 kg × 8")
     }
+
+    @Test func theActivityCountsTheWorkingSets() async throws {
+        let (service, session) = try await fixture.startPush()
+        let planned = session.plannedWorkingSets
+        #expect(planned > 0)
+        let started = try #require(await fixture.activity.states.last)
+        #expect(started.doneSets == 0 && started.plannedSets == planned)
+        // Une série de travail validée avance le compte, même sans changer la série suivante affichée.
+        let bench = session.exercises[0]
+        let validated = try await validate(service, bench, 0)
+        #expect(validated.doneWorkingSets == 1)
+        #expect(await fixture.activity.states.last?.doneSets == 1)
+        #expect(await fixture.activity.states.last?.plannedSets == planned)
+        // La dévalider le fait reculer.
+        _ = try await service.apply(.unvalidate(exercise: bench.id, set: bench.sets[0].id))
+        #expect(await fixture.activity.states.last?.doneSets == 0)
+        // Un échauffement n'est pas une série de travail : il sort du compte prévu.
+        _ = try await service.apply(.setType(exercise: bench.id, set: bench.sets[0].id, .warmup))
+        #expect(await fixture.activity.states.last?.plannedSets == planned - 1)
+    }
 }
