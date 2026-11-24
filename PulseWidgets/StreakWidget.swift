@@ -26,7 +26,8 @@ private struct StreakWidgetEntryView: View {
         content
             // La série et les pastilles de la semaine se retrouvent dans l'onglet Planning.
             .widgetURL(AppLink.planning.url)
-            .containerBackground(for: .widget) { background }
+            .containerBackground(for: .widget) { background.pulsePaperAppearance(for: family) }
+            .pulsePaperAppearance(for: family)
     }
 
     @ViewBuilder

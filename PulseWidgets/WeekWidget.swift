@@ -25,7 +25,10 @@ private struct WeekWidgetEntryView: View {
             .widgetURL(AppLink.planning.url)
             .containerBackground(for: .widget) {
                 PulsePalette.surface
+                    .pulsePaperAppearance(for: .systemLarge)
             }
+            // Le seul format est le grand widget de l'écran d'accueil : toujours sur papier, comme l'app.
+            .pulsePaperAppearance(for: .systemLarge)
     }
 }
 
