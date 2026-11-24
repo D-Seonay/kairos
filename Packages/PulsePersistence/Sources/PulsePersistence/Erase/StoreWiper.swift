@@ -21,6 +21,7 @@ actor StoreWiper {
         try modelContext.delete(model: StoredBodyMeasurement.self)
         try modelContext.delete(model: StoredPersonalRecord.self)
         try modelContext.delete(model: StoredRunTrack.self)
+        try modelContext.delete(model: StoredSessionPhoto.self)
         try modelContext.delete(model: StoredRecoveryReading.self)
         try modelContext.delete(model: StoredImportedWorkout.self)
         try modelContext.delete(model: StoredImportedBodyMeasurement.self)

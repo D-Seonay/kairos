@@ -64,3 +64,12 @@ import Testing
     #expect(local.contains("StoredRunDraft") && !synced.contains("StoredRunDraft"))
     #expect(local.contains("StoredRunHealthSummary") && !synced.contains("StoredRunHealthSummary"))
 }
+
+/// Les photos de séance suivent les séances dans iCloud ; rien d'elles n'entre dans le magasin local.
+@Test func sessionPhotosLiveInTheSyncedStore() throws {
+    let container = try TestContainer.make()
+    func entities(_ name: String) -> Set<String> {
+        Set(container.configurations.first { $0.name == name }?.schema?.entities.map(\.name) ?? [])
+    }
+    #expect(entities("synced").contains("StoredSessionPhoto") && !entities("local").contains("StoredSessionPhoto"))
+}

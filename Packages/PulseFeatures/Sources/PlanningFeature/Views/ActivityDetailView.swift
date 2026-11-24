@@ -1,3 +1,4 @@
+import PhotosFeature
 import PulseDesignSystem
 import PulseDomain
 import RunFeature
@@ -74,6 +75,13 @@ struct ActivityDetailView: View {
                     Text(String(localized: "Le RPE ressenti remplace le RPE estimé dans ta charge d'entraînement.", bundle: .module))
                 }
                 .listRowBackground(PulsePalette.surface)
+                if let photos = model.photos {
+                    Section {
+                        SessionPhotosSection(model: photos)
+                            .listRowInsets(EdgeInsets())
+                            .listRowBackground(Color.clear)
+                    }
+                }
                 Section {
                     EmptyView()
                 } footer: {

@@ -10,6 +10,7 @@ public struct ExportSnapshot: Sendable {
     public var exerciseSettings: [ExerciseSettings] = []
     public var workoutSessions: [WorkoutSession] = []
     public var runTracks: [RunTrack] = []
+    public var sessionPhotos: [SessionPhoto] = []
     public var scheduledDays: [ScheduledDay] = []
     public var dailyRecoveries: [DailyRecovery] = []
     public var checkIns: [CheckIn] = []
@@ -53,6 +54,13 @@ public actor ExportSnapshotLoader {
                                  [SortDescriptor(\.startedAt), SortDescriptor(\.createdAt)]).map { $0.toDomain() }
         snapshot.workoutSessions = (synced + imported).sorted { ($0.startedAt, $0.createdAt) < ($1.startedAt, $1.createdAt) }
         snapshot.runTracks = try runTracks()
+        // Une photo sans séance (ligne CloudKit incomplète) n'est pas exportée : `toDomain` y inventerait un identifiant. Une photo
+        // dont la séance n'existe pas (séance abandonnée ou supprimée) n'apparaît nulle part (spec §5.1) : ni JSON, ni CSV, ni photos/.
+        let liveSessionIDs = Set(snapshot.workoutSessions.map(\.id))
+        snapshot.sessionPhotos = try fetch(StoredSessionPhoto.self, #Predicate { $0.deletedAt == nil && $0.sessionID != nil },
+                                           [SortDescriptor(\.createdAt), SortDescriptor(\.order), SortDescriptor(\.id)])
+            .map { $0.toDomain() }
+            .filter { liveSessionIDs.contains($0.sessionID) }
         snapshot.scheduledDays = try fetch(StoredScheduledDay.self, #Predicate { $0.deletedAt == nil },
                                            [SortDescriptor(\.date), SortDescriptor(\.createdAt)]).map { $0.toDomain() }
         // Les valeurs brutes d'Apple Health viennent du magasin local, recollées sur chaque score.
@@ -82,6 +90,15 @@ public actor ExportSnapshotLoader {
         var seen = Set<UUID>()
         return rows.filter { seen.insert($0.id).inserted }.map { $0.toDomain() }
             .sorted { $0.createdAt != $1.createdAt ? $0.createdAt < $1.createdAt : $0.id.uuidString < $1.id.uuidString }
+    }
+
+    /// Les octets de l'image d'une photo vivante, lus un par un pour ne jamais tenir toutes les photos en mémoire.
+    /// Nil si la photo est supprimée ou si son image n'est pas encore descendue d'iCloud.
+    public func imageData(ofPhoto photoID: UUID) throws -> Data? {
+        var descriptor = FetchDescriptor<StoredSessionPhoto>(predicate: #Predicate { $0.id == photoID && $0.deletedAt == nil },
+                                                             sortBy: [SortDescriptor(\.updatedAt, order: .reverse)])
+        descriptor.fetchLimit = 1
+        return try modelContext.fetch(descriptor).first?.imageData
     }
 
     private func fetch<T: PersistentModel>(_ type: T.Type, _ predicate: Predicate<T>, _ sort: [SortDescriptor<T>]) throws -> [T] {

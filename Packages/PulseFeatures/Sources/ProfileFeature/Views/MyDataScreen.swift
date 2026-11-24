@@ -107,6 +107,9 @@ struct MyDataScreen: View {
             }
         } header: {
             Text(String(localized: "Exporter", bundle: .module))
+        } footer: {
+            Text(ProfileText.photosExportNote)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .disabled(model.isBusy)
         .listRowBackground(PulsePalette.surface)

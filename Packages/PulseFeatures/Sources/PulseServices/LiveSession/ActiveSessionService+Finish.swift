@@ -67,7 +67,8 @@ extension ActiveSessionService {
 
     /// Enregistre la séance abandonnée avec ses séries validées, sans RPE, puis fait le même ménage que `finish`. Sans série
     /// validée, rien n'est enregistré. Un snapshot illisible est effacé de même : la séance rendue n'a alors aucune série.
-    /// Abandonner une séance passée annule la saisie : rien n'est enregistré **(choix du constructeur)**.
+    /// Abandonner une séance passée annule la saisie : rien n'est enregistré **(choix du constructeur)**. Quand rien n'est
+    /// enregistré, les photos prises sous l'identifiant de la séance sont effacées.
     public func abandon(endedAt: Date) async throws -> WorkoutSession {
         try await queue.run {
             guard let snapshot = try await self.store.load() else { throw ActiveSessionError.noSession }
@@ -75,12 +76,17 @@ extension ActiveSessionService {
                 try await self.store.clear()
                 await self.activity.endAll(except: nil)
                 await self.restNotifier.cancelRestEnd()
+                await self.discardPhotos(of: snapshot.id)
                 return WorkoutSession(id: snapshot.id, startedAt: snapshot.startedAt, endedAt: endedAt, kind: .strength,
                                       source: .pulse, status: .abandoned, title: "", createdAt: self.now(), updatedAt: self.now())
             }
             var abandoned = session.workoutSession(status: .abandoned, endedAt: endedAt, overallRPE: nil, note: nil,
                                                    savedAt: self.now())
-            if !abandoned.sets.isEmpty, !session.isPastEntry { abandoned = try await self.write(abandoned) }
+            if !abandoned.sets.isEmpty, !session.isPastEntry {
+                abandoned = try await self.write(abandoned)
+            } else {
+                await self.discardPhotos(of: session.id)
+            }
             try await self.clearSession()
             return abandoned
         }
@@ -102,6 +108,12 @@ extension ActiveSessionService {
         // Un recalcul raté ne retient pas la séance : le prochain recalcul (import, suppression, séance) posera les marques.
         _ = try? await records.recomputeAll()
         return (try? await workouts.session(id: session.id)) ?? session
+    }
+
+    /// Efface les photos d'une séance qui n'est pas enregistrée. Un échec est ignoré : sans séance, ces photos sont des
+    /// orphelines que personne ne lit, et il ne doit pas empêcher d'abandonner.
+    private func discardPhotos(of sessionID: UUID) async {
+        try? await sessionPhotos?.deleteAll(sessionID: sessionID)
     }
 
     /// Efface le snapshot, termine la Live Activity et annule la notification de repos. Le service des séances passées n'en

@@ -1,3 +1,4 @@
+import PhotosFeature
 import PulseDesignSystem
 import PulseServices
 import SupplementsFeature
@@ -6,13 +7,14 @@ import SwiftUI
 /// Les écrans poussés depuis la page Profil.
 enum ProfileDestination: Hashable {
     case weight
+    case bodyPhotos
     case supplements
     case settings
     case myData
 }
 
-/// L'onglet Profil (spec M7 §13) : l'en-tête, les trois tuiles, le poids, le mur des records, la vitrine des badges, puis les
-/// liens vers Statistiques, Compléments, Paramètres et Mes données.
+/// L'onglet Profil (spec M7 §13) : l'en-tête, les trois tuiles, le poids (et les photos de corps), le mur des records, la vitrine
+/// des badges, puis les liens vers Statistiques, Compléments, Paramètres et Mes données.
 public struct ProfileScreen: View {
     private let model: ProfileModel
     private let supplements: SupplementsModel
@@ -60,6 +62,9 @@ public struct ProfileScreen: View {
                 if let summary = model.summary {
                     ProfileTiles(summary: summary, trend: model.body?.trend, calendar: calendar, today: today)
                     WeightCard(trend: model.body?.trend, calendar: calendar, today: today)
+                    if model.environment.offersBodyPhotos {
+                        BodyPhotosLink()
+                    }
                     RecordsWall(lifts: summary.mainLifts, runs: summary.runs, calendar: calendar, today: today,
                                 onOpenRecords: onOpenRecords)
                     BadgeShelfSection(shelf: summary.badges, calendar: calendar, today: today)
@@ -84,6 +89,12 @@ public struct ProfileScreen: View {
         case .weight:
             // Chaque pesée enregistrée ou supprimée relit la page : tuile et carte Poids suivent.
             WeightScreen(environment: model.environment) { [model] in await model.load() }
+        case .bodyPhotos:
+            if let service = model.environment.bodyPhotos, let authentication = model.environment.ownerAuthentication {
+                BodyPhotosScreen(service: service, authentication: authentication,
+                                 lock: model.environment.bodyPhotoLock, calendar: model.environment.calendar,
+                                 now: model.environment.now)
+            }
         case .settings:
             // Un réglage enregistré part vers l'app (thème, prénom) ; la page ne se relit que pour un prénom changé.
             SettingsScreen(environment: model.environment, screens: screens) { [model] profile in
@@ -92,6 +103,17 @@ public struct ProfileScreen: View {
         case .myData:
             MyDataScreen(environment: model.environment, screens: screens, onErased: onErased)
         }
+    }
+}
+
+/// La ligne « Photos de corps », juste sous la carte Poids : un cadenas, l'écran verrouillé s'ouvre au toucher.
+struct BodyPhotosLink: View {
+    var body: some View {
+        NavigationLink(value: ProfileDestination.bodyPhotos) {
+            PulseRow(systemImage: "lock.fill", title: String(localized: "Photos de corps", bundle: .module),
+                     detail: String(localized: "Privées, sur cet iPhone seulement", bundle: .module))
+        }
+        .buttonStyle(PressableButtonStyle())
     }
 }
 

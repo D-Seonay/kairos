@@ -33,12 +33,18 @@
 	<string>3</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSCameraUsageDescription</key>
+	<string>Pulse utilise l'appareil photo quand vous ajoutez une photo à une séance ou une photo de corps. Les photos prises ne sont pas enregistrées dans Photos.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Pulse utilise Face ID pour protéger vos photos de corps.</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>Pulse lit votre sommeil, votre variabilité cardiaque et votre fréquence cardiaque au repos pour calculer votre score de récupération du matin, ainsi que vos entraînements, votre poids et votre masse grasse pour suivre votre progression. Ces données restent sur votre iPhone : elles ne sont ni synchronisées ni partagées.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>Pulse enregistre vos séances de musculation, vos courses avec leur tracé et vos prises de compléments dans Apple Santé.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Pulse utilise votre position pendant une course que vous lancez, pour mesurer la distance et tracer votre parcours. Elle reste sur votre iPhone, dans votre iCloud et dans Apple Santé.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Pulse enregistre dans Photos seulement l'image de séance que vous choisissez d'enregistrer.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>PulsePrivacyPolicyURL</key>

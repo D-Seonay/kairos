@@ -19,6 +19,8 @@ public struct TrainEnvironment: Sendable {
     public var activeSession: ActiveSessionService
     /// La semaine datée : ses déplacements changent la séance du jour (spec M6 §4) ; `nil` : la semaine type seule.
     public var scheduledDays: (any ScheduledDayRepository)?
+    /// Les photos des séances ; `nil` : aucune section Photos (aperçus, tests, séances sans photos).
+    public var sessionPhotos: SessionPhotoService?
     public var calendar: Calendar
     public var now: @Sendable () -> Date
 
@@ -27,7 +29,7 @@ public struct TrainEnvironment: Sendable {
                 exerciseSettings: any ExerciseSettingsRepository, personalRecords: any PersonalRecordRepository,
                 records: RecordsService, importer: HevyImporter, library: ContentLibrary,
                 activeSession: ActiveSessionService, scheduledDays: (any ScheduledDayRepository)? = nil, calendar: Calendar,
-                now: @escaping @Sendable () -> Date) {
+                now: @escaping @Sendable () -> Date, sessionPhotos: SessionPhotoService? = nil) {
         self.profiles = profiles
         self.programs = programs
         self.recovery = recovery
@@ -40,6 +42,7 @@ public struct TrainEnvironment: Sendable {
         self.library = library
         self.activeSession = activeSession
         self.scheduledDays = scheduledDays
+        self.sessionPhotos = sessionPhotos
         self.calendar = calendar
         self.now = now
     }

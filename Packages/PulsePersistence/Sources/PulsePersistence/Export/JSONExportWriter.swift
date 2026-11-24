@@ -30,6 +30,7 @@ public enum JSONExportWriter {
                               programs: snapshot.programs, userExercises: snapshot.userExercises,
                               exerciseSettings: snapshot.exerciseSettings,
                               workoutSessions: snapshot.workoutSessions, runTracks: snapshot.runTracks,
+                              sessionPhotos: snapshot.sessionPhotos,
                               scheduledDays: snapshot.scheduledDays,
                               dailyRecoveries: snapshot.dailyRecoveries, checkIns: snapshot.checkIns,
                               supplements: snapshot.supplements, supplementIntakes: snapshot.supplementIntakes,
@@ -46,6 +47,27 @@ public enum JSONExportWriter {
 }
 
 enum ExportNaming {
+    /// Le chemin libre d'une photo : `photoPath`, puis avec 4 caractères de son identifiant (8, 12… en cas de nouvelle collision).
+    static func uniquePhotoPath(_ photo: SessionPhoto, timeZone: TimeZone, taken: Set<String>) -> String {
+        let base = photoPath(photo, timeZone: timeZone)
+        guard taken.contains(base) else { return base }
+        let id = photo.id.uuidString.lowercased().replacingOccurrences(of: "-", with: "")
+        let stem = base.dropLast(".jpg".count)
+        var length = 4
+        while length < id.count {
+            let candidate = "\(stem)-\(id.prefix(length)).jpg"
+            if !taken.contains(candidate) { return candidate }
+            length += 4
+        }
+        return "\(stem)-\(id).jpg"
+    }
+
+    /// `photos/AAAA-MM-JJ-<8 premiers caractères de la séance>-<rang + 1>.jpg`, le jour étant celui de la prise de vue.
+    static func photoPath(_ photo: SessionPhoto, timeZone: TimeZone) -> String {
+        let session = photo.sessionID.uuidString.prefix(8).lowercased()
+        return "photos/\(dayStamp(photo.createdAt, timeZone: timeZone))-\(session)-\(photo.order + 1).jpg"
+    }
+
     /// `AAAA-MM-JJ` dans le fuseau donné.
     static func dayStamp(_ date: Date, timeZone: TimeZone) -> String {
         var calendar = Calendar(identifier: .gregorian)

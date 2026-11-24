@@ -51,7 +51,7 @@ public actor SwiftDataWorkoutRepository: WorkoutRepository {
         try modelContext.save()
     }
 
-    /// Une séance Pulse emporte son résumé cardio local et son tracé (suppression logique, comme la séance).
+    /// Une séance Pulse emporte son résumé cardio local, son tracé et ses photos (suppression logique, comme la séance).
     public func delete(id: UUID) throws {
         let now = Date()
         if let stored = try modelContext.first(StoredWorkoutSession.self, where: #Predicate { $0.id == id && $0.deletedAt == nil }) {
@@ -62,6 +62,7 @@ public actor SwiftDataWorkoutRepository: WorkoutRepository {
             }
             try RunHealthSummaryJoin.remove(sessionID: id, in: modelContext)
             try modelContext.markRunTracksDeleted(sessionID: id, at: now)
+            try modelContext.markSessionPhotosDeleted(sessionID: id, at: now)
         } else if let imported = try modelContext.first(StoredImportedWorkout.self,
                                                         where: #Predicate { $0.id == id && $0.deletedAt == nil }) {
             imported.deletedAt = now

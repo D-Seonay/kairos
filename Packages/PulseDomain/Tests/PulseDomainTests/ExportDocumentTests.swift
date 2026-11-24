@@ -28,6 +28,15 @@ import Testing
     #expect(back == doc)
 }
 
+@Test func exportDocumentCarriesSessionPhotos() throws {
+    let date = Date(timeIntervalSince1970: 1_794_726_753)
+    var doc = ExportDocument.empty(exportedAt: date, appVersion: "1.0 (1)", schemaVersion: 1, contentVersion: "1.0.0", locale: "fr_FR")
+    #expect(doc.sessionPhotos.isEmpty)
+    doc.sessionPhotos = [SessionPhoto(id: UUID(), sessionID: UUID(), order: 1, createdAt: date, updatedAt: date)]
+    let back = try ExportCoding.decoder().decode(ExportDocument.self, from: ExportCoding.encoder().encode(doc))
+    #expect(back == doc)
+}
+
 @Test func exportDecoderAcceptsOtherOffsets() throws {
     let decoder = ExportCoding.decoder()
     let date = try decoder.decode(Date.self, from: Data(#""2026-11-15T07:12:33Z""#.utf8))

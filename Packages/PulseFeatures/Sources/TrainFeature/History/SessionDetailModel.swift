@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import PhotosFeature
 import PulseDesignSystem
 import PulseDomain
 import PulseRecoveryEngine
@@ -64,6 +65,9 @@ public final class SessionDetailModel {
     public private(set) var hasLoaded = false
     public private(set) var isMissing = false
     public private(set) var errorMessage: String?
+    /// La section Photos ; `nil` sans service des photos, ou pour une séance qui n'en accepte pas (Apple Santé). Créée une fois la
+    /// séance lue, et gardée : relire la séance (après une correction) ne vide pas la section.
+    public private(set) var photos: SessionPhotosModel?
 
     @ObservationIgnored private let environment: TrainEnvironment
     @ObservationIgnored private let sessionID: UUID
@@ -82,6 +86,7 @@ public final class SessionDetailModel {
             directory = ExerciseDirectory(library: environment.library, userExercises: userExercises)
             session = try await environment.workouts.session(id: sessionID)
             isMissing = session == nil
+            photos = makePhotos(for: session)
             blocks = session.map(makeBlocks(of:)) ?? []
             muscleLevels = session.map { MuscleIntensity.levels(weights: muscleWeights(of: $0)) } ?? [:]
             musclesSpokenText = session.map { Self.musclesSpokenText(weights: muscleWeights(of: $0)) } ?? ""
@@ -158,6 +163,7 @@ public final class SessionDetailModel {
         blocks = []
         muscleLevels = [:]
         musclesSpokenText = ""
+        photos = nil
     }
 
     /// « lundi 12 octobre 2026 à 18:00 », dans le calendrier de l'environnement.
@@ -204,6 +210,13 @@ public final class SessionDetailModel {
     }
 
     // MARK: - Interne
+
+    /// Le modèle de la section Photos de `session`, gardé s'il existe déjà ; `nil` sans service ou pour une séance qui n'accepte
+    /// pas de photos.
+    private func makePhotos(for session: WorkoutSession?) -> SessionPhotosModel? {
+        guard let session, SessionPhotoRules.acceptsPhotos(session), let service = environment.sessionPhotos else { return nil }
+        return photos ?? SessionPhotosModel(service: service, sessionID: session.id, calendar: environment.calendar)
+    }
 
     private func activeProgram(of profile: UserProfile) async throws -> Program? {
         guard let id = profile.activeProgramID, let program = try await environment.programs.program(id: id) else { return nil }

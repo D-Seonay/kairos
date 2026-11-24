@@ -75,6 +75,25 @@ import Testing
     #expect(try await tracks.track(for: pulseID)?.points.count == 4)
 }
 
+@Test func v5StoreOpensAsV6KeepingData() async throws {
+    let directory = try makeStoreDirectory()
+    defer { try? FileManager.default.removeItem(at: directory) }
+    let pulseID = try writeV5Store(in: directory)
+
+    let container = try PersistenceStack.makeContainer(directory: directory)
+    let workouts = SwiftDataWorkoutRepository(modelContainer: container)
+    let sessions = try await workouts.sessions(from: .distantPast, to: .distantFuture)
+    #expect(sessions.map(\.id) == [pulseID])
+    let tracks = SwiftDataRunTrackRepository(modelContainer: container)
+    #expect(try await tracks.track(for: pulseID)?.points.count == 4)
+    #expect(try ModelContext(container).fetchCount(FetchDescriptor<StoredSessionPhoto>()) == 0)
+    let photos = SwiftDataSessionPhotoRepository(modelContainer: container)
+    let photo = Sample.sessionPhoto(sessionID: pulseID, order: 0)
+    try await photos.add(photo, image: Sample.photoImage(seed: 7))
+    #expect(try await photos.photos(for: pulseID).map(\.id) == [photo.id])
+    #expect(try await photos.image(of: photo.id) == Sample.photoImage(seed: 7))
+}
+
 private func makeStoreDirectory() throws -> URL {
     let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
     try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
@@ -200,4 +219,16 @@ private func writeV4Store(in directory: URL) throws -> UUID {
     context.insert(StoredImportedWorkout(Sample.importedRun(startedAt: Fixed.t0.addingTimeInterval(86_400))))
     try context.save()
     return session.id
+}
+
+/// Écrit un magasin V5 : une séance Pulse et son tracé de course.
+private func writeV5Store(in directory: URL) throws -> UUID {
+    let container = try makeFrozenContainer(PulseSchemaV5.self, synced: PulseSchemaV5.syncedModels,
+                                            local: PulseSchemaV5.localModels, in: directory)
+    let context = ModelContext(container)
+    let run = Sample.pulseRun()
+    context.insert(StoredWorkoutSession(run))
+    context.insert(StoredRunTrack(Sample.runTrack(sessionID: run.id)))
+    try context.save()
+    return run.id
 }

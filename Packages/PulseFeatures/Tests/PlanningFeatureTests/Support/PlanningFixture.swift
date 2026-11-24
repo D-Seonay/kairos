@@ -35,14 +35,18 @@ struct PlanningFixture {
     let scheduled = InMemoryScheduledDayRepository()
     let tracks = InMemoryRunTrackRepository()
     let environment: PlanningEnvironment
+    /// Le service des photos, sur un dépôt en mémoire ; l'environnement ne le reçoit qu'avec `withPhotos`.
+    let photos: SessionPhotoService
     let now: Date
     let program: Program
 
-    init(now: Date = PlanningClock.date(day: 18, hour: 12)) {
+    init(now: Date = PlanningClock.date(day: 18, hour: 12), withPhotos: Bool = false) {
         self.now = now
         let calendar = PlanningClock.calendar
         let library = ContentLibrary.bundled
         let clock: @Sendable () -> Date = { now }
+        let photos = SessionPhotoService(repository: InMemorySessionPhotoRepository(), timeZone: .gmt, now: clock)
+        self.photos = photos
         let userExercises = InMemoryUserExerciseRepository()
         let personalRecords = InMemoryPersonalRecordRepository()
         let settings = InMemoryExerciseSettingsRepository()
@@ -57,7 +61,8 @@ struct PlanningFixture {
         let train = TrainEnvironment(
             profiles: profiles, programs: programs, recovery: InMemoryRecoveryRepository(calendar: calendar), workouts: workouts,
             userExercises: userExercises, exerciseSettings: settings, personalRecords: personalRecords, records: records,
-            importer: importer, library: library, activeSession: activeSession, calendar: calendar, now: clock)
+            importer: importer, library: library, activeSession: activeSession, calendar: calendar, now: clock,
+            sessionPhotos: withPhotos ? photos : nil)
         let service = PlanningService(profiles: profiles, programs: programs, workouts: workouts, scheduledDays: scheduled,
                                       calendar: calendar, now: clock)
         environment = PlanningEnvironment(service: service, train: train, calendar: calendar, now: clock, tracks: tracks)

@@ -1,4 +1,5 @@
 import Foundation
+import PhotosFeature
 import PulseDesignSystem
 import PulseDomain
 import PulseServices
@@ -207,4 +208,45 @@ private func hevyPush(_ fixture: TrainFixture, status: SessionStatus = .complete
     let model = SessionDetailModel(environment: fixture.environment, sessionID: session.id)
     await model.load()
     #expect(model.summaryText.contains("1 série ·") && model.summarySpokenText.contains("1 série,"))
+}
+
+// MARK: - Photos
+
+@MainActor @Test func sessionDetailOffersPhotosForPulseAndHevy() async throws {
+    let fixture = TrainFixture(withPhotos: true)
+    let date = TrainClock.date(month: 10, day: 12, hour: 18)
+    let pulse = try await fixture.log(on: date, sets: [LoggedSet(weightKg: 60, reps: 5)], source: .pulse)
+    let hevy = try await fixture.log(on: date.addingTimeInterval(86_400), sets: [LoggedSet(weightKg: 60, reps: 5)], source: .hevy)
+    for session in [pulse, hevy] {
+        let model = SessionDetailModel(environment: fixture.environment, sessionID: session.id)
+        #expect(model.photos == nil)
+        // Une photo déjà prise sous l'identifiant de la séance se relit par le modèle de la section.
+        _ = try await fixture.photos.add(TestImages.jpeg(), to: session.id)
+        await model.load()
+        let photos = try #require(model.photos)
+        await photos.load()
+        #expect(photos.photos.count == 1)
+    }
+
+    let withoutService = TrainFixture()
+    let bare = try await withoutService.log(on: date, sets: [LoggedSet(weightKg: 60, reps: 5)])
+    let model = SessionDetailModel(environment: withoutService.environment, sessionID: bare.id)
+    await model.load()
+    #expect(model.session != nil)
+    #expect(model.photos == nil)
+}
+
+@MainActor @Test func sessionDetailHidesPhotosForAppleHealthAndMissingSessions() async throws {
+    let fixture = TrainFixture(withPhotos: true)
+    let health = try await fixture.log(on: TrainClock.date(day: 1, hour: 18), sets: [LoggedSet(weightKg: 60, reps: 5)],
+                                       source: .appleHealth)
+    let model = SessionDetailModel(environment: fixture.environment, sessionID: health.id)
+    await model.load()
+    #expect(model.session != nil)
+    #expect(model.photos == nil)
+
+    let missing = SessionDetailModel(environment: fixture.environment, sessionID: UUID())
+    await missing.load()
+    #expect(missing.isMissing)
+    #expect(missing.photos == nil)
 }

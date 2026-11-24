@@ -250,3 +250,23 @@ private func counts(_ container: ModelContainer) throws -> (synced: Int, local: 
     let tombstone = try #require(try ModelContext(container).fetch(FetchDescriptor<StoredRunTrack>()).first)
     #expect(tombstone.deletedAt != nil && tombstone.points == nil && tombstone.splits == nil && tombstone.elevationGainMeters == nil)
 }
+
+@Test func deletingASessionDeletesItsPhotos() async throws {
+    let container = try TestContainer.make()
+    let repo = SwiftDataWorkoutRepository(modelContainer: container)
+    let photos = SwiftDataSessionPhotoRepository(modelContainer: container)
+    let session = Sample.session(sets: 1)
+    let other = Sample.session(startedAt: Fixed.t1, sets: 1)
+    try await repo.save(session)
+    try await repo.save(other)
+    try await photos.add(Sample.sessionPhoto(sessionID: session.id, order: 0), image: Sample.photoImage(seed: 1))
+    try await photos.add(Sample.sessionPhoto(sessionID: session.id, order: 1), image: Sample.photoImage(seed: 2))
+    try await photos.add(Sample.sessionPhoto(sessionID: other.id, order: 0), image: Sample.photoImage(seed: 3))
+    try await repo.delete(id: session.id)
+    #expect(try await photos.photos(for: session.id).isEmpty)
+    #expect(try await photos.photos(for: other.id).count == 1)
+    let rows = try ModelContext(container).fetch(FetchDescriptor<StoredSessionPhoto>())
+    let cleared = rows.filter { $0.sessionID == session.id }
+    #expect(cleared.count == 2 && cleared.allSatisfy { $0.deletedAt != nil && $0.imageData == nil && $0.thumbnailData == nil })
+    #expect(rows.filter { $0.sessionID == other.id }.allSatisfy { $0.deletedAt == nil && $0.imageData != nil })
+}

@@ -37,17 +37,21 @@ public struct SwiftDataExporter: DataExporter {
         return try JSONExportWriter.write(document, to: directory, date: now, timeZone: timeZone)
     }
 
-    /// Dossier `Pulse-AAAA-MM-JJ-csv/` avec un CSV par table et `README.txt`, zippé à côté.
+    /// Dossier `Pulse-AAAA-MM-JJ-csv/` avec un CSV par table, `README.txt` et les photos de séance dans `photos/`, zippé à côté.
+    /// Le JSON ne contient aucune image : seule cette archive les porte.
     public func exportCSVArchive() async throws -> URL {
         let snapshot = try await ExportSnapshotLoader(modelContainer: container).snapshot()
         let now = Date()
         let metadata = ExportMetadata(appVersion: appVersion, contentVersion: contentVersion, locale: locale, exportedAt: now)
-        let document = JSONExportWriter.document(from: snapshot, metadata: metadata, exerciseNames: exerciseNames)
+        var document = JSONExportWriter.document(from: snapshot, metadata: metadata, exerciseNames: exerciseNames)
         try resetDirectory()
         let stem = "Pulse-\(ExportNaming.dayStamp(now, timeZone: timeZone))-csv"
         let folder = directory.appendingPathComponent(stem, isDirectory: true)
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-        for (table, csv) in CSVTables.tables(from: document, timeZone: timeZone) {
+        // Seules les photos dont l'image est là ont une ligne : la colonne `file` désigne toujours un fichier de l'archive.
+        let photoFiles = try await writePhotos(document.sessionPhotos, to: folder)
+        document.sessionPhotos = document.sessionPhotos.filter { photoFiles[$0.id] != nil }
+        for (table, csv) in CSVTables.tables(from: document, timeZone: timeZone, photoFiles: photoFiles) {
             try CSVWriter.file(header: csv.header, rows: csv.rows)
                 .write(to: folder.appendingPathComponent(table.fileName + ".csv"), atomically: true, encoding: .utf8)
         }
@@ -55,6 +59,25 @@ public struct SwiftDataExporter: DataExporter {
         let zip = directory.appendingPathComponent(stem + ".zip")
         try ZipArchiver.zip(directory: folder, to: zip)
         return zip
+    }
+
+    /// Copie chaque image vivante, octet pour octet, dans `photos/` ; rend le chemin écrit de chaque photo (identifiant -> chemin
+    /// relatif). Deux photos d'une séance peuvent avoir le même rang le même jour (deux appareils) : la seconde reçoit les
+    /// premiers caractères de son identifiant avant `.jpg`, jamais d'écrasement. Le dossier n'existe que s'il y a une image.
+    private func writePhotos(_ photos: [SessionPhoto], to folder: URL) async throws -> [UUID: String] {
+        let loader = ExportSnapshotLoader(modelContainer: container)
+        let photosFolder = folder.appendingPathComponent("photos", isDirectory: true)
+        var files: [UUID: String] = [:]
+        var taken = Set<String>()
+        for photo in photos {
+            guard let data = try await loader.imageData(ofPhoto: photo.id) else { continue }
+            let path = ExportNaming.uniquePhotoPath(photo, timeZone: timeZone, taken: taken)
+            taken.insert(path)
+            try FileManager.default.createDirectory(at: photosFolder, withIntermediateDirectories: true)
+            try data.write(to: folder.appendingPathComponent(path), options: .atomic)
+            files[photo.id] = path
+        }
+        return files
     }
 
     /// Le dossier CSV du dernier export, s'il existe encore (tests et inspection).

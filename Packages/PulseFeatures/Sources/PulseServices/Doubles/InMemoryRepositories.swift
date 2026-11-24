@@ -224,6 +224,69 @@ public actor InMemoryRunTrackRepository: RunTrackRepository {
     }
 }
 
+/// Les photos de séance en mémoire : `delete` et `deleteAll` retirent la photo et son image, comme la suppression logique.
+public actor InMemorySessionPhotoRepository: SessionPhotoRepository {
+    private var stored: [UUID: (photo: SessionPhoto, image: PhotoImage)] = [:]
+
+    public init() {}
+
+    public func photos(for sessionID: UUID) async throws -> [SessionPhoto] {
+        stored.values.map(\.photo).filter { $0.sessionID == sessionID }
+            .sorted { $0.order != $1.order ? $0.order < $1.order : $0.createdAt < $1.createdAt }
+    }
+
+    public func image(of photoID: UUID) async throws -> PhotoImage? {
+        stored[photoID]?.image
+    }
+
+    public func add(_ photo: SessionPhoto, image: PhotoImage) async throws {
+        stored[photo.id] = (photo, image)
+    }
+
+    public func delete(photoID: UUID) async throws {
+        stored[photoID] = nil
+    }
+
+    public func deleteAll(sessionID: UUID) async throws {
+        stored = stored.filter { $0.value.photo.sessionID != sessionID }
+    }
+}
+
+/// Les photos de corps en mémoire : `save` remplace la photo de même identifiant, `deleteAll` vide tout.
+public actor InMemoryBodyPhotoStore: BodyPhotoStore {
+    private var stored: [UUID: (photo: BodyPhoto, image: PhotoImage)] = [:]
+
+    public init() {}
+
+    public func photos() async throws -> [BodyPhoto] {
+        stored.values.map(\.photo)
+    }
+
+    public func image(of photoID: UUID) async throws -> PhotoImage? {
+        stored[photoID]?.image
+    }
+
+    public func save(_ photo: BodyPhoto, image: PhotoImage) async throws {
+        stored[photo.id] = (photo, image)
+    }
+
+    public func delete(photoID: UUID) async throws {
+        stored[photoID] = nil
+    }
+
+    public func deleteAll() async throws {
+        stored = [:]
+    }
+
+    /// Un vrai zip n'a pas de sens en mémoire : un fichier vide à la place, pour les tests de l'écran d'export.
+    public func exportArchive(to directory: URL) async throws -> URL {
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let url = directory.appendingPathComponent("Pulse-photos-de-corps.zip")
+        try Data().write(to: url)
+        return url
+    }
+}
+
 /// Le brouillon de la course en cours en mémoire : un seul, remplacé à chaque écriture.
 public actor InMemoryRunDraftStore: RunDraftStore {
     private var draft: RunDraft?

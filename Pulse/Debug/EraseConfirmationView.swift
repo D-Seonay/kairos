@@ -18,6 +18,7 @@ struct EraseConfirmationView: View {
             Form {
                 Section {
                     Text(String(localized: "Toutes les données de Pulse seront effacées sur cet iPhone et dans iCloud."))
+                    Text(String(localized: "Cela comprend les photos de séance, iCloud compris, et les photos de corps de cet iPhone."))
                     Text(String(localized: "La suppression dans iCloud se termine dès que l'iPhone est en ligne."))
                 }
                 Section {

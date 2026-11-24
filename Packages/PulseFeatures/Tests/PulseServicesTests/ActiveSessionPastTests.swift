@@ -84,6 +84,19 @@ struct ActiveSessionPastTests {
         #expect(try await fixture.store.load() == nil)
     }
 
+    @Test func abandoningAPastSessionDeletesItsPhotos() async throws {
+        try await seedHistoryAroundTheDate()
+        let service = fixture.makeService()
+        let session = try await service.start(pastLaunch)
+        let exercise = session.exercises[0]
+        _ = try await service.apply(.validate(exercise: exercise.id, set: exercise.sets[0].id))
+        try await fixture.sessionPhotos.add(
+            SessionPhoto(id: UUID(), sessionID: session.id, order: 0, createdAt: interval.end, updatedAt: interval.end),
+            image: PhotoImage(image: Data([1]), thumbnail: Data([2])))
+        _ = try await service.abandon(endedAt: interval.end)
+        #expect(try await fixture.sessionPhotos.photos(for: session.id).isEmpty)
+    }
+
     @Test func thePastSessionsServiceLeavesTheLiveSnapshotAlone() async throws {
         let (_, live) = try await fixture.startPush()
         let records = RecordsService(workouts: fixture.workouts, records: InMemoryPersonalRecordRepository(),

@@ -33,6 +33,13 @@ enum ProfileText {
         weeks < 2 ? String(localized: "semaine", bundle: .module) : String(localized: "semaines", bundle: .module)
     }
 
+    /// La ligne sous les exports de Mes données : les photos de séance y sont, les photos de corps jamais.
+    static var photosExportNote: String {
+        String(localized:
+            "Les photos de séance sont dans l'export CSV. Les photos de corps n'y sont jamais : exporte-les depuis leur écran.",
+            bundle: .module)
+    }
+
     /// « 78,4 kg ».
     static func weight(_ kilograms: Double) -> String {
         guard kilograms.isFinite else { return dash }

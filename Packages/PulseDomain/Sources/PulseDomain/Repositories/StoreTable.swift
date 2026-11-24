@@ -9,6 +9,7 @@ public enum StoreTable: String, Sendable, CaseIterable {
     case workoutSessions
     case workoutSets
     case runTracks
+    case sessionPhotos
     case scheduledDays
     case dailyRecoveries
     case checkIns

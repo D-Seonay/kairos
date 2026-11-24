@@ -7,8 +7,9 @@ import Testing
     let container = try TestContainer.make()
     try await SampleDataSeeder(container: container, calendar: Fixed.calendar).seed(now: Fixed.t0)
     let counts = try await SwiftDataStoreInspector(container: container, cloudEnabled: false).counts()
-    // Le jeu d'exemple n'a pas de course enregistrée par Pulse : ni tracé, ni brouillon, ni résumé cardio.
-    let empty: Set<StoreTable> = [.healthQueryAnchors, .activeSessionSnapshots, .runTracks, .runDrafts, .runHealthSummaries]
+    // Le jeu d'exemple n'a ni course enregistrée par Pulse (tracé, brouillon, résumé cardio) ni photo de séance.
+    let empty: Set<StoreTable> = [.healthQueryAnchors, .activeSessionSnapshots, .runTracks, .runDrafts, .runHealthSummaries,
+                                  .sessionPhotos]
     for table in StoreTable.allCases where !empty.contains(table) {
         #expect((counts[table] ?? 0) > 0, Comment(rawValue: table.rawValue))
     }

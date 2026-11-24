@@ -19,7 +19,8 @@ public struct FinishFlow: View {
     }
 
     public var body: some View {
-        LiveSessionView(model: model, onFinish: { Task { await flow.finishTapped() } }, onAbandon: { flow.abandonTapped() })
+        LiveSessionView(model: model, showsPhotoButton: flow.recap == nil, onFinish: { Task { await flow.finishTapped() } },
+                        onAbandon: { flow.abandonTapped() })
             .confirmationDialog(confirmationTitle, isPresented: isShowingConfirmation, titleVisibility: .visible) {
                 confirmationActions
             } message: {

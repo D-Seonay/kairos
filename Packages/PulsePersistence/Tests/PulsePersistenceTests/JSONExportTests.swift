@@ -1,6 +1,7 @@
 import Foundation
 import PulseDomain
 @testable import PulsePersistence
+import SwiftData
 import Testing
 
 private func makeExporter(_ container: ModelContainerBox, directory: URL? = nil) -> SwiftDataExporter {
@@ -118,4 +119,68 @@ private func makeExporter(_ container: ModelContainerBox, directory: URL? = nil)
     #expect(doc.runTracks.map(\.id) == [run.id])
     #expect(doc.runTracks.first?.points.count == 4 && doc.runTracks.first?.splits.count == 2)
     #expect(doc.workoutSessions.map(\.averageHeartRate) == [150] && doc.workoutSessions.map(\.estimatedRPE) == [8])
+}
+
+/// Le JSON liste les photos vivantes, jamais leurs octets.
+@Test func jsonExportListsPhotosWithoutImages() async throws {
+    let box = try ModelContainerBox()
+    let photos = SwiftDataSessionPhotoRepository(modelContainer: box.container)
+    let sessionID = try await Sample.savedSession(in: box)
+    let kept = Sample.sessionPhoto(sessionID: sessionID, order: 0)
+    let removed = Sample.sessionPhoto(sessionID: sessionID, order: 1)
+    try await photos.add(kept, image: Sample.photoImage(seed: 5))
+    try await photos.add(removed, image: Sample.photoImage(seed: 6))
+    try await photos.delete(photoID: removed.id)
+    let url = try await makeExporter(box).exportJSON()
+    let data = try Data(contentsOf: url)
+    let doc = try ExportCoding.decoder().decode(ExportDocument.self, from: data)
+    #expect(doc.sessionPhotos.map(\.id) == [kept.id])
+    #expect(doc.sessionPhotos.first?.sessionID == sessionID && doc.sessionPhotos.first?.order == 0)
+    let json = try #require(String(data: data, encoding: .utf8))
+    #expect(json.contains("\"sessionPhotos\""))
+    let base64Run = try Regex("[A-Za-z0-9+/=]{1000,}")
+    #expect(json.firstMatch(of: base64Run) == nil)
+}
+
+/// Une photo sans séance n'est pas exportée : aucun identifiant de séance inventé.
+@Test func exportSkipsPhotosWithoutASession() async throws {
+    let box = try ModelContainerBox()
+    let photos = SwiftDataSessionPhotoRepository(modelContainer: box.container)
+    let sessionID = try await Sample.savedSession(in: box)
+    let kept = Sample.sessionPhoto(sessionID: sessionID, order: 0)
+    let orphan = Sample.sessionPhoto(sessionID: sessionID, order: 1)
+    try await photos.add(kept, image: Sample.photoImage(seed: 1))
+    try await photos.add(orphan, image: Sample.photoImage(seed: 2))
+    let context = ModelContext(box.container)
+    let orphanID = orphan.id
+    try #require(try context.fetch(FetchDescriptor<StoredSessionPhoto>(predicate: #Predicate { $0.id == orphanID })).first).sessionID = nil
+    try context.save()
+    let snapshot = try await ExportSnapshotLoader(modelContainer: box.container).snapshot()
+    #expect(snapshot.sessionPhotos.map(\.id) == [kept.id])
+}
+
+/// Une photo dont la séance n'existe pas (séance abandonnée, supprimée) n'apparaît nulle part (spec §5.1) : ni dans le JSON, ni dans
+/// le CSV, ni dans le dossier photos/ de l'archive.
+@Test func exportSkipsPhotosOfAMissingSession() async throws {
+    let box = try ModelContainerBox()
+    let photos = SwiftDataSessionPhotoRepository(modelContainer: box.container)
+    let kept = Sample.sessionPhoto(sessionID: try await Sample.savedSession(in: box), order: 0)
+    let stray = Sample.sessionPhoto(sessionID: UUID(), order: 0)
+    try await photos.add(kept, image: Sample.photoImage(seed: 1))
+    try await photos.add(stray, image: Sample.photoImage(seed: 2))
+    let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    defer { try? FileManager.default.removeItem(at: directory) }
+    let exporter = makeExporter(box, directory: directory)
+
+    let doc = try ExportCoding.decoder().decode(ExportDocument.self, from: Data(contentsOf: try await exporter.exportJSON()))
+    #expect(doc.sessionPhotos.map(\.id) == [kept.id])
+
+    _ = try await exporter.exportCSVArchive()
+    let folder = try #require(exporter.lastCSVDirectory(in: directory))
+    let table = try String(contentsOf: folder.appendingPathComponent("session_photos.csv"), encoding: .utf8)
+    #expect(table.contains(kept.id.uuidString) && !table.contains(stray.id.uuidString))
+    let files = try FileManager.default.contentsOfDirectory(atPath: folder.appendingPathComponent("photos").path)
+    #expect(files.count == 1)
+    let bytes = try Data(contentsOf: folder.appendingPathComponent("photos").appendingPathComponent(try #require(files.first)))
+    #expect(bytes == Sample.photoImage(seed: 1).image)
 }

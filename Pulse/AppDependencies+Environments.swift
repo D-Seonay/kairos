@@ -33,7 +33,7 @@ extension AppDependencies {
         TrainEnvironment(profiles: profiles, programs: programs, recovery: recovery, workouts: workouts, userExercises: userExercises,
                          exerciseSettings: exerciseSettings, personalRecords: personalRecords, records: records,
                          importer: hevyImporter, library: content, activeSession: liveSession, scheduledDays: scheduledDays,
-                         calendar: calendar, now: now)
+                         calendar: calendar, now: now, sessionPhotos: photos.sessions)
     }
 
     func planningEnvironment() -> PlanningEnvironment {
@@ -49,7 +49,8 @@ extension AppDependencies {
     }
 
     /// L'onglet Profil : le résumé et les pesées relisent les dépôts à chaque lecture, les réglages passent par le service partagé,
-    /// et « Relire maintenant » lance le passage du jour comme un retour au premier plan.
+    /// et « Relire maintenant » lance le passage du jour comme un retour au premier plan. Les photos de corps arrivent avec leur
+    /// authentification : sans elle, la ligne n'est pas proposée.
     func profileEnvironment() -> ProfileEnvironment {
         let profile = ProfileService(profiles: profiles, programs: programs, workouts: workouts, recoveries: recovery,
                                      records: personalRecords, userExercises: userExercises, library: content, calendar: calendar,
@@ -63,7 +64,8 @@ extension AppDependencies {
             requestNotificationAuthorization: { await notifications.requestAuthorization() },
             refreshHealth: { _ = await refresher.refresh(origin: .foreground) },
             appVersion: Self.appVersion, privacyPolicyURL: Self.privacyPolicyURL, calendar: calendar, now: now,
-            runPreferences: run.preferences)
+            runPreferences: run.preferences, bodyPhotos: photos.body, ownerAuthentication: photos.ownerAuthentication,
+            bodyPhotoLock: photos.bodyLock)
     }
 
     /// La politique de confidentialité, lue dans l'Info.plist (`PulsePrivacyPolicyURL`) ; `nil` tant que la clé est vide ou
@@ -87,7 +89,8 @@ extension AppDependencies {
     /// racine lit dans la séance des onglets.
     func runEnvironment(isStrengthSessionActive: @escaping @MainActor () -> Bool) -> RunEnvironment {
         RunEnvironment(service: run.service, tracks: run.tracks, preferences: run.preferences,
-                       isStrengthSessionActive: isStrengthSessionActive, now: now, calendar: calendar)
+                       isStrengthSessionActive: isStrengthSessionActive, now: now, calendar: calendar,
+                       sessionPhotos: photos.sessions)
     }
 
     /// Les compléments demandent l'autorisation des notifications comme l'écran en direct : par l'autorisateur de l'app (une
