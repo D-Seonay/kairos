@@ -71,8 +71,23 @@ enum StatsChartDescriptors {
                      .init(name: String(localized: "Sommeil profond", bundle: .module),
                            points: points.compactMap { point in
                                point.deepMinutes.map { .init(date: point.date, y: min($0, point.asleepMinutes) / 60) }
-                           })],
+                           })] + stageSeries(points),
             calendar: window.calendar)
+    }
+
+    /// Une série par autre phase présente sur la période (léger, paradoxal, sans phase), seulement pour les barres à phases.
+    private static func stageSeries(_ points: [SleepPoint]) -> [PulseChartDescriptor.Series] {
+        let stages: [(String, KeyPath<SleepPoint, Double?>)] = [
+            (String(localized: "Sommeil léger", bundle: .module), \.coreMinutes),
+            (String(localized: "Sommeil paradoxal", bundle: .module), \.remMinutes),
+            (String(localized: "Sommeil sans phase", bundle: .module), \.unspecifiedMinutes)
+        ]
+        return stages.compactMap { name, keyPath in
+            let series = points.compactMap { point in
+                point[keyPath: keyPath].map { PulseChartDescriptor.Point(date: point.date, y: $0 / 60) }
+            }
+            return series.contains { $0.y > 0 } ? PulseChartDescriptor.Series(name: name, points: series) : nil
+        }
     }
 
     static func categories(_ categories: [CategoryCount], window: StatsWindow) -> PulseChartDescriptor {

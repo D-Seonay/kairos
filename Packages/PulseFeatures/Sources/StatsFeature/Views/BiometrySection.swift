@@ -10,6 +10,8 @@ import SwiftUI
 struct BiometrySection: View {
     let biometry: BiometryStats
     let window: StatsWindow
+    /// Ouvre l'écran Nuit ; sans lui, la carte Sommeil n'a pas de lien.
+    var onOpenNights: (() -> Void)?
 
     var body: some View {
         VStack(alignment: .leading, spacing: PulseMetrics.spacing) {
@@ -18,7 +20,7 @@ struct BiometrySection: View {
                               measure: .hrv, points: biometry.hrvPoints, style: .points, window: window)
             BaselineChartCard(title: String(localized: "FC au repos", bundle: .module), unit: "bpm",
                               measure: .restingHeartRate, points: biometry.restingPoints, style: .line, window: window)
-            SleepChartCard(points: biometry.sleepPoints, deepShare: biometry.deepShare, window: window)
+            SleepChartCard(points: biometry.sleepPoints, deepShare: biometry.deepShare, window: window, onOpenNights: onOpenNights)
             CategoriesCard(categories: biometry.categories, window: window)
         }
     }
@@ -27,7 +29,15 @@ struct BiometrySection: View {
         let noNight = String(localized: "aucune nuit mesurée sur la période", bundle: .module)
         var sleepDetails = details(biometry.sleepMinutes)
         var sleepSpoken = spokenDetails(biometry.sleepMinutes)
-        if let deep = biometry.deepShare {
+        if let shares = biometry.stageShares {
+            // « profond 18 % · paradoxal 22 % · léger 60 % » : les nuits qui ont leurs phases.
+            let deep = PulseFormat.integer(shares.deep * 100, unit: "%")
+            let rem = PulseFormat.integer(shares.rem * 100, unit: "%")
+            let core = PulseFormat.integer(shares.core * 100, unit: "%")
+            let share = String(localized: "profond \(deep) · paradoxal \(rem) · léger \(core)", bundle: .module)
+            sleepDetails.insert(share, at: 0)
+            sleepSpoken.insert(share.replacingOccurrences(of: " · ", with: ", "), at: 0)
+        } else if let deep = biometry.deepShare {
             let share = String(localized: "profond \(PulseFormat.integer(deep * 100, unit: "%"))", bundle: .module)
             sleepDetails.insert(share, at: 0)
             sleepSpoken.insert(share, at: 0)
@@ -151,11 +161,21 @@ private struct BaselineChartCard: View {
 
 // MARK: - Sommeil
 
-/// Les heures dormies par nuit, la part profonde en encre pleine en bas de chaque barre.
+/// Une tranche d'une barre de sommeil : sa phase (ou l'encre de l'ancien découpage), ses bornes en heures et sa couleur.
+private struct SleepLayer: Identifiable {
+    let id: String
+    let start: Double
+    let end: Double
+    let style: Color
+}
+
+/// Les heures dormies par nuit. Une barre à phases s'empile de bas en haut : profond, léger, paradoxal, sans phase, chacun de
+/// sa couleur. Une barre d'avant les phases garde l'ancien découpage à l'encre : le profond en bas, le reste au-dessus.
 private struct SleepChartCard: View {
     let points: [SleepPoint]
     let deepShare: Double?
     let window: StatsWindow
+    var onOpenNights: (() -> Void)?
     @ScaledMetric(relativeTo: .body) private var chartHeight: CGFloat = 160
 
     static var emptyReason: String { String(localized: "aucune nuit de sommeil mesurée sur la période", bundle: .module) }
@@ -166,9 +186,56 @@ private struct SleepChartCard: View {
                 StatsEmptyNote(reason: Self.emptyReason)
             } else {
                 chart
-                StatsLegend(items: [(String(localized: "Profond", bundle: .module), StatsInk.full),
-                                    (String(localized: "Autres phases", bundle: .module), StatsInk.light)])
+                StatsLegend(items: legend)
             }
+            if let onOpenNights {
+                Button(action: onOpenNights) {
+                    Label(String(localized: "Voir les nuits", bundle: .module), systemImage: "moon.zzz")
+                        .font(.subheadline.weight(.semibold))
+                        .frame(minHeight: 44)
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(PulsePalette.text)
+            }
+        }
+    }
+
+    /// Les phases présentes sur la période, puis l'ancien découpage s'il reste des barres sans phases.
+    private var legend: [(label: String, style: Color)] {
+        var items: [(label: String, style: Color)] = []
+        let staged = points.filter(\.hasStages)
+        if !staged.isEmpty {
+            items += [(SleepStage.deep.displayName, SleepStage.deep.color), (SleepStage.core.displayName, SleepStage.core.color),
+                      (SleepStage.rem.displayName, SleepStage.rem.color)]
+            if staged.contains(where: { ($0.unspecifiedMinutes ?? 0) > 0 }) {
+                items.append((String(localized: "Sans phase", bundle: .module), SleepStage.asleepUnspecified.color))
+            }
+        }
+        if points.contains(where: { !$0.hasStages }) {
+            items += [(staged.isEmpty ? String(localized: "Profond", bundle: .module)
+                                      : String(localized: "Profond, sans détail", bundle: .module), StatsInk.full),
+                      (String(localized: "Autres phases", bundle: .module), StatsInk.light)]
+        }
+        return items
+    }
+
+    /// Les tranches d'une barre, de bas en haut, en heures.
+    private static func layers(of point: SleepPoint) -> [SleepLayer] {
+        let total = point.asleepMinutes / 60
+        guard point.hasStages else {
+            let deep = min(point.deepMinutes ?? 0, point.asleepMinutes) / 60
+            var layers = [SleepLayer(id: "other", start: deep, end: total, style: StatsInk.light)]
+            if deep > 0 { layers.append(SleepLayer(id: "deep-ink", start: 0, end: deep, style: StatsInk.full)) }
+            return layers
+        }
+        let stages: [(SleepStage, Double?)] = [(.deep, point.deepMinutes), (.core, point.coreMinutes), (.rem, point.remMinutes),
+                                               (.asleepUnspecified, point.unspecifiedMinutes)]
+        var bottom = 0.0
+        return stages.compactMap { stage, minutes in
+            guard let minutes, minutes > 0 else { return nil }
+            let top = min(bottom + minutes / 60, total)
+            defer { bottom = top }
+            return SleepLayer(id: stage.rawValue, start: bottom, end: top, style: stage.color)
         }
     }
 
@@ -178,19 +245,16 @@ private struct SleepChartCard: View {
         let dateLabel = StatsText.nightAxisName(bucket)
         let hoursLabel = String(localized: "Heures de sommeil", bundle: .module)
         return Chart(points) { point in
-            let deep = min(point.deepMinutes ?? 0, point.asleepMinutes) / 60
             let spoken = StatsText.sleepPointSpoken(point: point, bucket: bucket, calendar: window.calendar)
-            // La barre entière est lue une fois, avec le total et la part profonde ; la part profonde, dessinée par-dessus, est tue.
-            BarMark(x: .value(dateLabel, point.date, unit: unit), yStart: .value(hoursLabel, deep),
-                    yEnd: .value(hoursLabel, point.asleepMinutes / 60))
-                .foregroundStyle(StatsInk.light)
-                .accessibilityLabel(spoken.label)
-                .accessibilityValue(spoken.value)
-            if deep > 0 {
-                BarMark(x: .value(dateLabel, point.date, unit: unit), yStart: .value(hoursLabel, 0),
-                        yEnd: .value(hoursLabel, deep))
-                    .foregroundStyle(StatsInk.full)
-                    .accessibilityHidden(true)
+            let layers = Self.layers(of: point)
+            // La barre entière est lue une fois, sur sa première tranche, avec le total et les phases ; les autres sont tues.
+            ForEach(layers) { layer in
+                BarMark(x: .value(dateLabel, point.date, unit: unit), yStart: .value(hoursLabel, layer.start),
+                        yEnd: .value(hoursLabel, layer.end))
+                    .foregroundStyle(layer.style)
+                    .accessibilityLabel(spoken.label)
+                    .accessibilityValue(spoken.value)
+                    .accessibilityHidden(layer.id != layers.first?.id)
             }
         }
         .statsPinnedDomain(window)
