@@ -233,8 +233,8 @@ public enum RunText {
                       bundle: .module)
     }
 
-    /// « 7 h 52 », « 7 h 05 ».
-    static func clock(_ date: Date, calendar: Calendar) -> String {
+    /// « 7 h 52 », « 7 h 05 » : aussi le bouton « Terminer à … » de l'alerte d'oubli, dans l'app.
+    public static func clock(_ date: Date, calendar: Calendar) -> String {
         let parts = calendar.dateComponents([.hour, .minute], from: date)
         return String(localized: "\(parts.hour ?? 0) h \(padded(parts.minute ?? 0))", bundle: .module)
     }

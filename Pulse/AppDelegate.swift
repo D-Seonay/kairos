@@ -1,3 +1,5 @@
+import HealthKit
+import HealthKitUI
 import PulseServices
 import UIKit
 import UserNotifications
@@ -8,7 +10,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     let dependencies = AppDependencies.live()
     let router = AppRouter()
     /// Les boutons de la Live Activity, branchés avant toute scène : un bouton peut réveiller l'app en arrière-plan.
-    private(set) lazy var sessionIntents = SessionIntentWiring(service: dependencies.liveSession)
+    private(set) lazy var sessionIntents = SessionIntentWiring(service: dependencies.liveSession,
+                                                               runService: dependencies.run.service)
     /// Le centre de notifications ne retient pas son délégué : c'est l'app qui le garde.
     private var notificationRouter: NotificationRouter?
 
@@ -26,6 +29,20 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
             _ = await refresher.refresh(origin: .background)
         }
         return true
+    }
+
+    /// Après un crash pendant une course, le système relance l'app pour qu'elle reprenne la séance HealthKit encore active :
+    /// elle est remise à la séance de course, que la racine rattache au brouillon (spec V2a §5.4). La scène reste celle de
+    /// SwiftUI.
+    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession,
+                     options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        if options.shouldHandleActiveWorkoutRecovery, let runHealthSession = dependencies.run.healthSession {
+            HKHealthStore().recoverActiveWorkoutSession { session, _ in
+                guard let session else { return }
+                runHealthSession.adopt(recoveredSession: session)
+            }
+        }
+        return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
     }
 
     /// Une livraison reçue iPhone verrouillé n'a rien pu lire : la lecture est refaite au déverrouillage.

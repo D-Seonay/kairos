@@ -4,6 +4,7 @@ import OnboardingFeature
 import PlanningFeature
 import ProfileFeature
 import PulseServices
+import RunFeature
 import StatsFeature
 import SupplementsFeature
 import TodayFeature
@@ -36,7 +37,7 @@ extension AppDependencies {
     }
 
     func planningEnvironment() -> PlanningEnvironment {
-        PlanningEnvironment(service: planning, train: trainEnvironment(), calendar: calendar, now: now)
+        PlanningEnvironment(service: planning, train: trainEnvironment(), calendar: calendar, now: now, tracks: run.tracks)
     }
 
     /// Le service des statistiques ne garde rien (il relit les dépôts à chaque lecture) : on le construit ici, avec les dépôts de l'app.
@@ -61,7 +62,8 @@ extension AppDependencies {
             notificationStatus: notificationStatus,
             requestNotificationAuthorization: { await notifications.requestAuthorization() },
             refreshHealth: { _ = await refresher.refresh(origin: .foreground) },
-            appVersion: Self.appVersion, privacyPolicyURL: Self.privacyPolicyURL, calendar: calendar, now: now)
+            appVersion: Self.appVersion, privacyPolicyURL: Self.privacyPolicyURL, calendar: calendar, now: now,
+            runPreferences: run.preferences)
     }
 
     /// La politique de confidentialité, lue dans l'Info.plist (`PulsePrivacyPolicyURL`) ; `nil` tant que la clé est vide ou
@@ -79,6 +81,13 @@ extension AppDependencies {
     func liveSessionEnvironment() -> LiveSessionEnvironment {
         LiveSessionEnvironment(service: liveSession, train: trainEnvironment(), notifications: liveSessionNotifications,
                                supplements: supplementsEnvironment(), calendar: calendar, now: now)
+    }
+
+    /// La course passe par le seul service de course de l'app. Elle ne démarre pas pendant une séance de musculation, que la
+    /// racine lit dans la séance des onglets.
+    func runEnvironment(isStrengthSessionActive: @escaping @MainActor () -> Bool) -> RunEnvironment {
+        RunEnvironment(service: run.service, tracks: run.tracks, preferences: run.preferences,
+                       isStrengthSessionActive: isStrengthSessionActive, now: now, calendar: calendar)
     }
 
     /// Les compléments demandent l'autorisation des notifications comme l'écran en direct : par l'autorisateur de l'app (une

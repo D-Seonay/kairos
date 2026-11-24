@@ -51,9 +51,9 @@ struct AppRootView: View {
         case .main:
             if let today = model.today, let train = model.train, let planning = model.planning, let stats = model.stats,
                let profile = model.profileModel, let liveSession = model.liveSession, let pastSession = model.pastSession,
-               let supplements = model.supplements {
+               let supplements = model.supplements, let run = model.run {
                 MainTabView(dependencies: model.dependencies, router: router, today: today, train: train, planning: planning,
-                            stats: stats, profile: profile, liveSession: liveSession, pastSession: pastSession,
+                            stats: stats, profile: profile, liveSession: liveSession, run: run, pastSession: pastSession,
                             supplements: supplements) {
                     await model.dataErased()
                 }

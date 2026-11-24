@@ -6,6 +6,7 @@ import PlanningFeature
 import ProfileFeature
 import PulseDomain
 import PulseServices
+import RunFeature
 import StatsFeature
 import SupplementsFeature
 import TodayFeature
@@ -35,6 +36,9 @@ final class AppRootModel {
     private(set) var profileModel: ProfileModel?
     /// La séance en direct des onglets : le bandeau « Reprendre la séance » et l'écran en plein écran.
     private(set) var liveSession: LiveSessionCoordinator?
+    /// La course des onglets : l'écran de course en plein écran, le bandeau « Reprendre la course » et les alertes de reprise et
+    /// d'oubli.
+    private(set) var run: RunCoordinator?
     /// La saisie d'une séance passée, à côté de la séance en direct.
     private(set) var pastSession: PastSessionCoordinator?
     /// Les compléments du jour, partagés par la carte de l'accueil et l'écran Compléments (accueil et profil).
@@ -64,6 +68,7 @@ final class AppRootModel {
         #endif
         await resolve()
         await refreshLiveSession()
+        await run?.refresh()
         await refreshSupplementReminders()
     }
 
@@ -78,6 +83,8 @@ final class AppRootModel {
         let stats = stats
         let profileModel = profileModel
         await refreshLiveSession()
+        // Une course interrompue à proposer, ou une course rattachée dont l'écran se rouvre.
+        await run?.refresh()
         await today.refresh()
         await train?.refresh()
         // « Aujourd'hui » vient de lire les courses d'Apple Santé : la semaine et la série en tiennent compte.
@@ -115,10 +122,12 @@ final class AppRootModel {
         Task { await reloadProfile() }
     }
 
-    /// Après une suppression totale réussie, plus aucun profil : retour à l'onboarding, sans séance, sans Live Activity ni
-    /// notification de repos (spec M4 §16).
+    /// Après une suppression totale réussie, plus aucun profil : retour à l'onboarding, sans séance ni course, sans Live Activity
+    /// ni notification de repos ou d'oubli (spec M4 §16).
     func dataErased() async {
         await dependencies.liveSession.discardAfterErase()
+        // Une course en cours est abandonnée de même : son brouillon vient d'être effacé.
+        await dependencies.run.service.discard()
         await resolve()
     }
 
@@ -150,9 +159,14 @@ final class AppRootModel {
                 profileModel = ProfileModel(environment: dependencies.profileEnvironment()) { [weak self] in self?.profile = $0 }
                 let liveSession = LiveSessionCoordinator(environment: dependencies.liveSessionEnvironment())
                 self.liveSession = liveSession
+                let run = RunCoordinator(environment: dependencies.runEnvironment { [weak liveSession] in
+                    liveSession?.current != nil
+                })
+                self.run = run
                 pastSession = PastSessionCoordinator(environment: dependencies.pastSessionEnvironment())
                 supplements = SupplementsModel(environment: dependencies.supplementsEnvironment())
                 sessionIntents?.coordinator = liveSession
+                sessionIntents?.runCoordinator = run
             }
         }
         destination = next
@@ -165,8 +179,10 @@ final class AppRootModel {
         stats = nil
         profileModel = nil
         liveSession = nil
+        run = nil
         pastSession = nil
         supplements = nil
         sessionIntents?.coordinator = nil
+        sessionIntents?.runCoordinator = nil
     }
 }

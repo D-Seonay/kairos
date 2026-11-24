@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
 <title>Pulse — Politique de confidentialité</title>
-<meta name="description" content="Ce que Pulse lit dans Apple Santé, ce qu'il y écrit, et où vivent tes données.">
+<meta name="description" content="Ce que Pulse lit dans Apple Santé, ce qu'il y écrit, comment il utilise ta position pendant une course, et où vivent tes données.">
 <style>
   :root { --paper: #F4F1EA; --ink: #141414; --muted: #4A463F; --rule: #CFC9BC; }
   * { box-sizing: border-box; }
@@ -48,7 +48,7 @@
     <li><strong>Sommeil</strong> (durée et phases) : pour le facteur sommeil de ton score de récupération du matin.</li>
     <li><strong>Variabilité cardiaque (VFC, mesure SDNN)</strong> : pour construire ta ligne de base et situer ta nuit par rapport à elle.</li>
     <li><strong>Fréquence cardiaque au repos</strong> : pour comparer ta nuit à tes jours précédents.</li>
-    <li><strong>Fréquence cardiaque</strong> : pour en tirer la fréquence moyenne de tes courses et sorties à vélo.</li>
+    <li><strong>Fréquence cardiaque</strong> : pour en tirer la fréquence moyenne de tes courses et sorties à vélo, y compris celle que mesure la séance d'entraînement d'une course lancée avec Pulse.</li>
     <li><strong>Entraînements de course et de vélo</strong> : pour compter ces séances dans ta charge d'entraînement des 28 derniers jours.</li>
     <li><strong>Poids et masse grasse</strong> : pour suivre ta progression.</li>
     <li><strong>Taille, date de naissance et sexe</strong> : pour te proposer ces valeurs dans ton profil à la première ouverture. Tu les vérifies et tu peux les modifier avant de les valider.</li>
@@ -61,20 +61,32 @@
   <p>Seulement si tu l'autorises :</p>
   <ul>
     <li>Tes <strong>séances de musculation</strong> enregistrées dans Pulse, avec leur énergie active estimée.</li>
+    <li>Tes <strong>courses lancées avec Pulse</strong>, avec leur distance mesurée par le GPS et leur tracé.</li>
     <li>Tes <strong>prises de compléments</strong> : vitamine D, magnésium, caféine et protéines.</li>
   </ul>
   <p>Tu peux refuser l'une ou l'autre dans la fenêtre d'autorisation d'Apple Santé. Pulse ne propose aucune dose de complément : les quantités sont celles que tu saisis.</p>
 </section>
 
+<section id="localisation">
+  <h2>Ta position pendant une course</h2>
+  <p>Pulse utilise ta position seulement pendant une course que tu lances, pour mesurer la distance, ton allure et tracer ton parcours. iOS te demande l'autorisation au premier départ ; tu peux la refuser, la course enregistre alors seulement le temps.</p>
+  <ul>
+    <li>Pulse suit ta position en arrière-plan, écran verrouillé, uniquement entre le départ et la fin de cette course. Il ne la suit jamais en dehors d'une course, ni pour autre chose.</li>
+    <li>Pendant la course, les points de ton parcours sont gardés sur ton iPhone, pour reprendre la course si l'app se ferme. Ils sont effacés une fois la course enregistrée.</li>
+    <li>La course enregistrée garde un tracé simplifié, qui se synchronise par ton iCloud privé et s'écrit dans Apple Santé si tu l'autorises.</li>
+    <li>Ta position ne quitte jamais ton iPhone, ton iCloud et Apple Santé : elle n'est envoyée ni au développeur ni à un tiers.</li>
+  </ul>
+  <p>Tu peux retirer l'accès à tout moment dans les réglages d'iOS (Confidentialité et sécurité, Service de localisation, Pulse).</p>
+</section>
 <section id="stockage">
   <h2>Où vivent tes données</h2>
   <ul>
     <li><strong>Sur ton iPhone</strong> : toutes les données de Pulse.</li>
-    <li><strong>Dans ton iCloud privé</strong> : ce que tu saisis et ce que Pulse calcule, c'est-à-dire tes séances et leurs séries, tes pesées saisies, tes compléments et leurs prises, ton programme et ton planning, tes check-ins, tes réglages, et tes scores de récupération calculés avec leurs sous-scores. Cet espace est le tien : il n'est pas lisible par le développeur de Pulse. Sans compte iCloud, rien ne se synchronise.</li>
-    <li><strong>Ce que Pulse n'écrit jamais dans iCloud</strong> : les valeurs lues dans Apple Santé (sommeil, VFC, fréquence cardiaque, courses, vélos, poids et masse grasse venus d'Apple Santé). Elles restent dans un espace de l'iPhone qui ne se synchronise pas. Comme toutes les données locales de l'app, elles font partie de la sauvegarde de ton iPhone si tu l'as activée (sauvegarde iCloud ou sur ordinateur), et des exports que tu fais toi-même.</li>
+    <li><strong>Dans ton iCloud privé</strong> : ce que tu saisis et ce que Pulse calcule, c'est-à-dire tes séances et leurs séries, tes pesées saisies, tes compléments et leurs prises, tes courses lancées avec Pulse (distance, temps par kilomètre, dénivelé et tracé simplifié), ton programme et ton planning, tes check-ins, tes réglages, et tes scores de récupération calculés avec leurs sous-scores. Cet espace est le tien : il n'est pas lisible par le développeur de Pulse. Sans compte iCloud, rien ne se synchronise.</li>
+    <li><strong>Ce que Pulse n'écrit jamais dans iCloud</strong> : les valeurs lues dans Apple Santé (sommeil, VFC, fréquence cardiaque, y compris celle mesurée pendant une course lancée avec Pulse, courses, vélos, poids et masse grasse venus d'Apple Santé), ni les points de la course en cours. Elles restent dans un espace de l'iPhone qui ne se synchronise pas. Comme toutes les données locales de l'app, elles font partie de la sauvegarde de ton iPhone si tu l'as activée (sauvegarde iCloud ou sur ordinateur), et des exports que tu fais toi-même.</li>
   </ul>
   <p class="note">Une exception à connaître : les valeurs proposées depuis Apple Santé à la création de ton profil (taille, poids, date de naissance, sexe) ne sont enregistrées, et synchronisées, qu'une fois l'étape du profil validée. Elles deviennent alors une saisie de ton profil Pulse, qui se synchronise comme le reste. Le RPE et la note que tu ajoutes à une course venue d'Apple Santé restent aussi sur l'iPhone.</p>
-  <p>Les widgets et la Live Activity de séance lisent un résumé enregistré sur ton iPhone (score du jour, séance prévue, titre et durées de la séance en cours). Les rappels sont des notifications locales, programmées par l'iPhone.</p>
+  <p>Les widgets et la Live Activity de séance lisent un résumé enregistré sur ton iPhone (score du jour, séance prévue, titre et durées de la séance en cours). La Live Activity de course affiche le titre, le temps, la distance et l'allure de la course en cours. Les rappels sont des notifications locales, programmées par l'iPhone. Les annonces vocales de la course sont dites par l'iPhone lui-même.</p>
 </section>
 
 <section id="ne-fait-pas">
@@ -115,7 +127,7 @@
 </section>
 
 <footer>
-  <p class="note">Mise à jour le 22 novembre 2026.</p>
+  <p class="note">Mise à jour le 24 novembre 2026.</p>
 </footer>
 </main>
 </body>

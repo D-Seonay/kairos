@@ -36,7 +36,9 @@
 	<key>NSHealthShareUsageDescription</key>
 	<string>Pulse lit votre sommeil, votre variabilité cardiaque et votre fréquence cardiaque au repos pour calculer votre score de récupération du matin, ainsi que vos entraînements, votre poids et votre masse grasse pour suivre votre progression. Ces données restent sur votre iPhone : elles ne sont ni synchronisées ni partagées.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>Pulse enregistre vos séances de musculation et vos prises de compléments dans Apple Santé.</string>
+	<string>Pulse enregistre vos séances de musculation, vos courses avec leur tracé et vos prises de compléments dans Apple Santé.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Pulse utilise ta position pendant une course que tu lances, pour mesurer la distance et tracer ton parcours. Elle reste sur ton iPhone, dans ton iCloud et dans Apple Santé.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>PulsePrivacyPolicyURL</key>
@@ -44,6 +46,9 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
+		<string>location</string>
+		<string>workout-processing</string>
+		<string>audio</string>
 	</array>
 	<key>UILaunchScreen</key>
 	<dict/>
