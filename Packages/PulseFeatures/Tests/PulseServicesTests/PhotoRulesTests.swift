@@ -62,6 +62,25 @@ struct PhotoRulesTests {
                                            calendar: calendar) == nil)
     }
 
+    @Test func laterCreationWinsEvenWithEarlierTakenDate() {
+        // La photo ajoutée en dernier remplace l'autre, même si sa date de prise est plus ancienne.
+        let addedFirst = photo(.front, "2026-11-01T20:00", createdAt: "2026-11-02T09:00")
+        let addedLast = photo(.front, "2026-11-01T08:00", createdAt: "2026-11-03T09:00")
+        let day = TestClock.date("2026-11-01T12:00")
+        #expect(BodyPhotoTimeline.days([addedFirst, addedLast], calendar: calendar)[0].photos == [.front: addedLast])
+        #expect(BodyPhotoTimeline.days([addedLast, addedFirst], calendar: calendar)[0].photos == [.front: addedLast])
+        #expect(BodyPhotoTimeline.existing(pose: .front, on: day, in: [addedFirst, addedLast], calendar: calendar) == addedLast)
+    }
+
+    @Test func takenDateBreaksACreationTie() {
+        let morning = photo(.front, "2026-11-01T08:00", createdAt: "2026-11-05T09:00")
+        let evening = photo(.front, "2026-11-01T20:00", createdAt: "2026-11-05T09:00")
+        let day = TestClock.date("2026-11-01T12:00")
+        #expect(BodyPhotoTimeline.days([morning, evening], calendar: calendar)[0].photos == [.front: evening])
+        #expect(BodyPhotoTimeline.days([evening, morning], calendar: calendar)[0].photos == [.front: evening])
+        #expect(BodyPhotoTimeline.existing(pose: .front, on: day, in: [morning, evening], calendar: calendar) == evening)
+    }
+
     @Test func comparablePosesNeedTwoDays() {
         let photos = [photo(.front, "2026-11-01T08:00"), photo(.front, "2026-11-08T08:00"), photo(.back, "2026-11-01T08:00"),
                       photo(.back, "2026-11-01T21:00")]
@@ -84,6 +103,14 @@ struct PhotoRulesTests {
         let change = BodyPhotoTimeline.weightChange(trend: weight, from: TestClock.date("2026-08-04T10:00"),
                                                     to: TestClock.date("2026-10-30T10:00"), calendar: calendar)
         #expect(try abs(#require(change) - -1.4) < 0.01)
+    }
+
+    @Test func weightChangeAveragesTheWeighingsOfTheWindow() throws {
+        // Le 27 et le 28 octobre : 70 puis 69. La tendance du 28 est leur moyenne (69,5), pas la pesée brute (69).
+        let weight = trend([weighing("2026-08-01T07:00", 70), weighing("2026-10-27T07:00", 70), weighing("2026-10-28T07:00", 69)])
+        let change = BodyPhotoTimeline.weightChange(trend: weight, from: TestClock.date("2026-08-04T10:00"),
+                                                    to: TestClock.date("2026-10-30T10:00"), calendar: calendar)
+        #expect(try abs(#require(change) - -0.5) < 0.01)
     }
 
     @Test func weightChangeIsNilWithoutRecentTrend() {
