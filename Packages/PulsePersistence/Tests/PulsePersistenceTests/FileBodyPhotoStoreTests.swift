@@ -87,6 +87,17 @@ private func indexEntries(in directory: URL) throws -> [BodyPhoto] {
         #expect(try directory.resourceValues(forKeys: [.isExcludedFromBackupKey]).isExcludedFromBackup == true)
     }
 
+    /// Un dossier créé par un autre chemin (restauration, ancienne version) reçoit l'exclusion au premier enregistrement.
+    @Test func existingDirectoryIsExcludedFromBackupOnSave() async throws {
+        let directory = temporaryDirectory()
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        #expect(try directory.resourceValues(forKeys: [.isExcludedFromBackupKey]).isExcludedFromBackup == false)
+        try await FileBodyPhotoStore(directory: directory).save(bodyPhoto(), image: Sample.photoImage(seed: 1))
+        var fresh = directory
+        fresh.removeAllCachedResourceValues()
+        #expect(try fresh.resourceValues(forKeys: [.isExcludedFromBackupKey]).isExcludedFromBackup == true)
+    }
+
     @Test func missingFileDropsItsIndexEntry() async throws {
         let directory = temporaryDirectory()
         let store = FileBodyPhotoStore(directory: directory)
@@ -124,28 +135,40 @@ private func indexEntries(in directory: URL) throws -> [BodyPhoto] {
         #expect(files(in: directory) == expected.sorted())
     }
 
-    @Test func orphansFromAnUnreadableIndexAreSweptOnceItIsRewritten() async throws {
+    @Test func unreadableIndexRefusesWritesAndKeepsEveryPhoto() async throws {
         let directory = temporaryDirectory()
         let store = FileBodyPhotoStore(directory: directory)
         let old = bodyPhoto(.front)
         try await store.save(old, image: Sample.photoImage(seed: 1))
-        try "x".write(to: directory.appendingPathComponent("index.json"), atomically: true, encoding: .utf8)
+        let indexURL = directory.appendingPathComponent("index.json")
+        let goodIndex = try Data(contentsOf: indexURL)
+        try "x".write(to: indexURL, atomically: true, encoding: .utf8)
         // Index illisible : rien n'est balayé, les fichiers restent là.
         #expect(try await store.photos().isEmpty)
         #expect(files(in: directory).contains("\(old.id.uuidString).jpg"))
-        // Un `save` réécrit l'index ; les fichiers de l'ancienne photo deviennent des orphelins balayés.
+        // Un `save` ou un `delete` réécrirait l'index sans l'ancienne photo, que le balayage suivant effacerait : ils échouent.
         let fresh = bodyPhoto(.back)
-        try await store.save(fresh, image: Sample.photoImage(seed: 2))
-        #expect(try await store.photos() == [fresh])
-        #expect(!files(in: directory).contains("\(old.id.uuidString).jpg"))
+        await #expect(throws: (any Error).self) { try await store.save(fresh, image: Sample.photoImage(seed: 2)) }
+        await #expect(throws: (any Error).self) { try await store.delete(photoID: old.id) }
+        #expect(try await store.photos().isEmpty)
+        let remaining = files(in: directory)
+        #expect(remaining.contains("\(old.id.uuidString).jpg") && remaining.contains("\(old.id.uuidString)-thumb.jpg"))
+        #expect(!remaining.contains { $0.hasPrefix(fresh.id.uuidString) })
+        // L'index redevenu lisible (iPhone déverrouillé), l'ancienne photo revient intacte.
+        try goodIndex.write(to: indexURL)
+        #expect(try await store.photos() == [old])
+        #expect(try await store.image(of: old.id) == Sample.photoImage(seed: 1))
     }
 
-    @Test func unreadableIndexStartsEmpty() async throws {
+    @Test func unreadableIndexWithoutPhotosStillRefusesASave() async throws {
         let directory = temporaryDirectory()
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         try "x".write(to: directory.appendingPathComponent("index.json"), atomically: true, encoding: .utf8)
         let store = FileBodyPhotoStore(directory: directory)
         #expect(try await store.photos().isEmpty)
+        await #expect(throws: (any Error).self) { try await store.save(bodyPhoto(), image: Sample.photoImage(seed: 3)) }
+        // « Tout supprimer » reste possible : le dossier repart de zéro.
+        try await store.deleteAll()
         let photo = bodyPhoto()
         try await store.save(photo, image: Sample.photoImage(seed: 3))
         #expect(try await store.photos() == [photo])
@@ -182,6 +205,25 @@ private func indexEntries(in directory: URL) throws -> [BodyPhoto] {
         #expect(files(in: output).count == 1)
         #expect(!files(in: directory).contains { $0.hasPrefix(".export-") })
         #expect(try await store.photos().count == 1)   // le balayage ne touche pas aux dossiers de travail
+    }
+
+    /// L'archive est la seule copie des photos de corps : une image illisible fait échouer l'export plutôt qu'en sortir une partielle.
+    @Test func exportArchiveFailsOnAnUnreadableImage() async throws {
+        let directory = temporaryDirectory()
+        let store = FileBodyPhotoStore(directory: directory)
+        let readable = bodyPhoto(.front)
+        let broken = bodyPhoto(.back)
+        try await store.save(readable, image: Sample.photoImage(seed: 1))
+        try await store.save(broken, image: Sample.photoImage(seed: 2))
+        // Un dossier à la place de l'image : le fichier « existe » (l'entrée reste dans l'index) mais ne se lit pas.
+        let brokenURL = directory.appendingPathComponent("\(broken.id.uuidString).jpg")
+        try FileManager.default.removeItem(at: brokenURL)
+        try FileManager.default.createDirectory(at: brokenURL, withIntermediateDirectories: false)
+        let output = temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: output) }
+        await #expect(throws: (any Error).self) { _ = try await store.exportArchive(to: output) }
+        #expect(!files(in: output).contains { $0.hasSuffix(".zip") })
+        #expect(!files(in: directory).contains { $0.hasPrefix(".export-") })
     }
 
     @Test func exportArchiveReplacesAnEarlierArchive() async throws {
@@ -228,7 +270,7 @@ private func indexEntries(in directory: URL) throws -> [BodyPhoto] {
     let box = try ModelContainerBox()
     try await SampleDataSeeder(container: box.container, calendar: Fixed.calendar).seed(now: Fixed.t0)
     try await SwiftDataSessionPhotoRepository(modelContainer: box.container)
-        .add(Sample.sessionPhoto(sessionID: UUID(), order: 0), image: Sample.photoImage(seed: 1))
+        .add(Sample.sessionPhoto(sessionID: try await Sample.savedSession(in: box), order: 0), image: Sample.photoImage(seed: 1))
     // Un dossier par export : chaque export vide le sien avant d'écrire.
     let jsonOutput = temporaryDirectory()
     let csvOutput = temporaryDirectory()

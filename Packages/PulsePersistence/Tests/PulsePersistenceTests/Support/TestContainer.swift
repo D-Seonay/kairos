@@ -172,6 +172,14 @@ extension Sample {
         SessionPhoto(id: UUID(), sessionID: sessionID, order: order, createdAt: createdAt, updatedAt: createdAt)
     }
 
+    /// Enregistre une séance Pulse et rend son identifiant : l'export ne garde que les photos d'une séance existante.
+    static func savedSession(in box: ModelContainerBox, id: UUID = UUID()) async throws -> UUID {
+        var session = session()
+        session.id = id
+        try await SwiftDataWorkoutRepository(modelContainer: box.container).save(session)
+        return id
+    }
+
     static func photoImage(seed: UInt8) -> PhotoImage {
         PhotoImage(image: Data(repeating: seed, count: 4_096) + Data([0xFF, 0xD9]), thumbnail: Data(repeating: seed &+ 100, count: 256))
     }

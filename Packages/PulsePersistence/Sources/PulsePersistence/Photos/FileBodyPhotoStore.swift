@@ -7,6 +7,10 @@ import PulseDomain
 /// `<id>.jpg` et `<id>-thumb.jpg`. L'index évite de lire les dates des fichiers (pas de raison `C617.1` à déclarer).
 /// À n'appeler qu'au premier plan : un fichier protégé ne se lit pas en arrière-plan, iPhone verrouillé.
 public actor FileBodyPhotoStore: BodyPhotoStore {
+    /// L'index existe mais ne se lit pas (iPhone verrouillé, fichier abîmé) : aucune écriture, sinon l'index réécrit sans les
+    /// photos existantes les ferait balayer comme orphelines. « Tout supprimer » reste possible.
+    public struct UnreadableIndexError: Error {}
+
     /// Préfixe des dossiers de travail de l'export ; ce ne sont jamais des photos, le balayage les ignore.
     private static let stagingPrefix = ".export-"
     private static let writeOptions: Data.WritingOptions = [.atomic, .completeFileProtection]
@@ -43,8 +47,8 @@ public actor FileBodyPhotoStore: BodyPhotoStore {
     }
 
     public func save(_ photo: BodyPhoto, image: PhotoImage) async throws {
+        var entries = try writableEntries()
         try prepareDirectory()
-        var entries = readIndex().entries
         let isNew = !entries.contains { $0.id == photo.id }
         do {
             try image.image.write(to: imageURL(photo.id), options: Self.writeOptions)
@@ -64,7 +68,7 @@ public actor FileBodyPhotoStore: BodyPhotoStore {
 
     public func delete(photoID: UUID) async throws {
         // L'index d'abord : si une suppression de fichier échoue, il reste un fichier sans entrée, que `photos()` balaie.
-        let entries = readIndex().entries
+        let entries = try writableEntries()
         let remaining = entries.filter { $0.id != photoID }
         if remaining.count != entries.count {
             try writeIndex(remaining)
@@ -95,7 +99,8 @@ public actor FileBodyPhotoStore: BodyPhotoStore {
 
         var taken = Set<String>()
         for photo in ordered {
-            guard let data = try? Data(contentsOf: imageURL(photo.id)) else { continue }
+            // L'archive est la seule copie des photos de corps : une image illisible fait échouer l'export, jamais une archive partielle.
+            let data = try Data(contentsOf: imageURL(photo.id))
             let name = Self.uniqueName(for: photo, taken: taken)
             taken.insert(name)
             try data.write(to: folder.appendingPathComponent(name), options: Self.writeOptions)
@@ -143,11 +148,13 @@ public actor FileBodyPhotoStore: BodyPhotoStore {
     private func imageURL(_ id: UUID) -> URL { directory.appendingPathComponent("\(id.uuidString).jpg") }
     private func thumbnailURL(_ id: UUID) -> URL { directory.appendingPathComponent("\(id.uuidString)-thumb.jpg") }
 
-    /// Crée le dossier protégé s'il manque ; l'exclusion des sauvegardes est posée à chaque création.
+    /// Crée le dossier protégé s'il manque, et pose l'exclusion des sauvegardes à chaque appel : un dossier créé par un autre
+    /// chemin (restauration, ancienne version) la reçoit aussi.
     private func prepareDirectory() throws {
-        guard !FileManager.default.fileExists(atPath: directory.path) else { return }
-        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true,
-                                                attributes: [.protectionKey: FileProtectionType.complete])
+        if !FileManager.default.fileExists(atPath: directory.path) {
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true,
+                                                    attributes: [.protectionKey: FileProtectionType.complete])
+        }
         var values = URLResourceValues()
         values.isExcludedFromBackup = true
         var url = directory
@@ -159,10 +166,17 @@ public actor FileBodyPhotoStore: BodyPhotoStore {
         case decoded([BodyPhoto])
         case unreadable
 
-        /// Un index absent ou illisible n'a aucune entrée : au pire les photos se réajoutent.
+        /// Un index absent ou illisible n'a aucune entrée ; les écritures refusent l'index illisible (`writableEntries`).
         var entries: [BodyPhoto] {
             if case .decoded(let entries) = self { entries } else { [] }
         }
+    }
+
+    /// Les entrées de l'index avant une écriture ; jette `UnreadableIndexError` si l'index existe sans se lire.
+    private func writableEntries() throws -> [BodyPhoto] {
+        let state = readIndex()
+        if case .unreadable = state { throw UnreadableIndexError() }
+        return state.entries
     }
 
     private func readIndex() -> IndexState {

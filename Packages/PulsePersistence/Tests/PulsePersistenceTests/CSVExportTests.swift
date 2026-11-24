@@ -97,7 +97,7 @@ private struct PhotoArchive {
 private func photoArchive() async throws -> PhotoArchive {
     let box = try ModelContainerBox()
     let repo = SwiftDataSessionPhotoRepository(modelContainer: box.container)
-    let sessionID = try #require(UUID(uuidString: "ABCDEF12-0000-0000-0000-000000000001"))
+    let sessionID = try await Sample.savedSession(in: box, id: try #require(UUID(uuidString: "ABCDEF12-0000-0000-0000-000000000001")))
     var photos: [(photo: SessionPhoto, image: PhotoImage)] = []
     for order in 0..<2 {
         let photo = Sample.sessionPhoto(sessionID: sessionID, order: order, createdAt: Fixed.t0)
@@ -152,7 +152,7 @@ private func photoArchive() async throws -> PhotoArchive {
 @Test func csvArchiveKeepsBothPhotosWhenNamesCollide() async throws {
     let box = try ModelContainerBox()
     let repo = SwiftDataSessionPhotoRepository(modelContainer: box.container)
-    let sessionID = try #require(UUID(uuidString: "ABCDEF12-0000-0000-0000-000000000001"))
+    let sessionID = try await Sample.savedSession(in: box, id: try #require(UUID(uuidString: "ABCDEF12-0000-0000-0000-000000000001")))
     let first = Sample.sessionPhoto(sessionID: sessionID, order: 0, createdAt: Fixed.t0)
     let second = Sample.sessionPhoto(sessionID: sessionID, order: 0, createdAt: Fixed.t1)
     try await repo.add(first, image: Sample.photoImage(seed: 1))

@@ -54,10 +54,13 @@ public actor ExportSnapshotLoader {
                                  [SortDescriptor(\.startedAt), SortDescriptor(\.createdAt)]).map { $0.toDomain() }
         snapshot.workoutSessions = (synced + imported).sorted { ($0.startedAt, $0.createdAt) < ($1.startedAt, $1.createdAt) }
         snapshot.runTracks = try runTracks()
-        // Une photo sans séance (ligne CloudKit incomplète) n'est pas exportée : `toDomain` y inventerait un identifiant.
+        // Une photo sans séance (ligne CloudKit incomplète) n'est pas exportée : `toDomain` y inventerait un identifiant. Une photo
+        // dont la séance n'existe pas (séance abandonnée ou supprimée) n'apparaît nulle part (spec §5.1) : ni JSON, ni CSV, ni photos/.
+        let liveSessionIDs = Set(snapshot.workoutSessions.map(\.id))
         snapshot.sessionPhotos = try fetch(StoredSessionPhoto.self, #Predicate { $0.deletedAt == nil && $0.sessionID != nil },
                                            [SortDescriptor(\.createdAt), SortDescriptor(\.order), SortDescriptor(\.id)])
             .map { $0.toDomain() }
+            .filter { liveSessionIDs.contains($0.sessionID) }
         snapshot.scheduledDays = try fetch(StoredScheduledDay.self, #Predicate { $0.deletedAt == nil },
                                            [SortDescriptor(\.date), SortDescriptor(\.createdAt)]).map { $0.toDomain() }
         // Les valeurs brutes d'Apple Health viennent du magasin local, recollées sur chaque score.
