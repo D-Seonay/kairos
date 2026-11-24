@@ -57,6 +57,14 @@ struct RoutineRulesTests {
         #expect(RoutineRules.issues(in: exercise(rest: -15), tracksDuration: false) == [.rest])
     }
 
+    @Test func routineRestRoundsToTheStepAndStaysInBounds() {
+        #expect(RoutineRules.routineRest(90) == 90)
+        #expect(RoutineRules.routineRest(100) == 105)
+        #expect(RoutineRules.routineRest(600) == 300)
+        #expect(RoutineRules.routineRest(-20) == 0)
+        #expect(RoutineRules.issues(in: exercise(rest: RoutineRules.routineRest(415)), tracksDuration: false).isEmpty)
+    }
+
     @Test func setTargetsMustMatchTheSetCount() {
         let three = Array(repeating: SetTarget(repsMin: 8, repsMax: 12), count: 3)
         #expect(RoutineRules.issues(in: exercise(setTargets: three), tracksDuration: false).isEmpty)

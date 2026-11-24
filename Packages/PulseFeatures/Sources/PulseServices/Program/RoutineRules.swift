@@ -42,6 +42,13 @@ public enum RoutineRules {
         return issues
     }
 
+    /// `seconds` arrondi au pas de `restStep` et ramené dans `rest` : le repos par défaut d'un exercice (jusqu'à 600 s pour un
+    /// exercice perso) devient un repos de routine qui s'enregistre tel quel.
+    public static func routineRest(_ seconds: Int) -> Int {
+        let stepped = Int((Double(seconds) / Double(restStep)).rounded()) * restStep
+        return min(max(stepped, rest.lowerBound), rest.upperBound)
+    }
+
     private static func isMultiple(_ value: Double, of step: Double) -> Bool {
         let steps = value / step
         return abs(steps - steps.rounded()) < 1e-9

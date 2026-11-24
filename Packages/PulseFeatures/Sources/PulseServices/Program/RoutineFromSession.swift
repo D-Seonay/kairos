@@ -24,7 +24,8 @@ public enum RoutineFromSession {
         return RoutineEditor.normalized(day)
     }
 
-    /// Les séries, répétitions et secondes sont ramenées dans les bornes de `RoutineRules` : la routine s'enregistre telle quelle.
+    /// Les séries, répétitions, secondes et le repos sont ramenés dans les bornes de `RoutineRules` : la routine s'enregistre
+    /// telle quelle.
     /// Un exercice tenu garde une seule fourchette : des écarts de quelques secondes ne font pas une progression par série.
     private static func exercise(at position: Int, reference: ExerciseReference, sets: [WorkoutSet],
                                  directory: ExerciseDirectory) -> RoutineExercise {
@@ -36,7 +37,7 @@ public enum RoutineFromSession {
         let values = performed.prefix(count).map { min(max($0, bounds.lowerBound), bounds.upperBound) }
         var exercise = RoutineExercise(
             order: position, exercise: reference, sets: count, repsMin: held ? 30 : 8, repsMax: held ? 60 : 12,
-            targetRPE: 8, restSeconds: info?.defaultRestSeconds ?? RoutineEditor.fallbackRestSeconds)
+            targetRPE: 8, restSeconds: RoutineRules.routineRest(info?.defaultRestSeconds ?? RoutineEditor.fallbackRestSeconds))
         guard let low = values.min(), let high = values.max() else { return exercise }
         if !held, high - low > perSetSpread, performed.count == sets.count {
             exercise.setTargets = values.map(perSetRange)
