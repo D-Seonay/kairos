@@ -81,6 +81,26 @@
         }
       }
     },
+    "Abandonner" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abandonner"
+          }
+        }
+      }
+    },
+    "Abandonner cette photo ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abandonner cette photo ?"
+          }
+        }
+      }
+    },
     "Ajout de la photo en cours" : {
       "localizations" : {
         "fr" : {
@@ -407,6 +427,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fermer"
+          }
+        }
+      }
+    },
+    "Garder la photo" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Garder la photo"
           }
         }
       }

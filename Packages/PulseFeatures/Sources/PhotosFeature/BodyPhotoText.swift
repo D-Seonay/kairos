@@ -47,6 +47,9 @@ extension PhotoText {
     static var replaceMessage: String {
         String(localized: "Une seule photo par pose et par jour : l'ancienne est supprimée.", bundle: .module)
     }
+    static var discardPhotoTitle: String { String(localized: "Abandonner cette photo ?", bundle: .module) }
+    static var discardPhoto: String { String(localized: "Abandonner", bundle: .module) }
+    static var keepPhoto: String { String(localized: "Garder la photo", bundle: .module) }
 
     /// « Remplacer la photo de face du 28 octobre ? ».
     static func replaceTitle(pose: BodyPose, day: Date, calendar: Calendar) -> String {
