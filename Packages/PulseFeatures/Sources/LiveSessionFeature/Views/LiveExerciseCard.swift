@@ -37,14 +37,7 @@ struct LiveExerciseCard: View {
                 LiveSetRow(model: model, exercise: exercise, exerciseIndex: index, set: set, index: position,
                            isUpcoming: set.id == upcomingSetID, rpeSet: $rpeSet)
                     .listRowBackground(Self.background())
-                    // Une série validée ne part pas d'un balayage complet : sa suppression ne se défait pas.
-                    .swipeActions(edge: .trailing, allowsFullSwipe: set.completedAt == nil) {
-                        Button(role: .destructive) {
-                            Task { await model.deleteSet(set.id) }
-                        } label: {
-                            Label(String(localized: "Supprimer la série", bundle: .module), systemImage: "trash")
-                        }
-                    }
+                    .setSwipeActions(model: model, set: set)
             }
             addSetButton
                 .listRowBackground(Self.background(bottom: true))
@@ -331,5 +324,34 @@ private struct LiveColumnsHeader: View {
         .padding(.horizontal, LiveSetRow.horizontalPadding)
         .padding(.vertical, 2)
         .accessibilityHidden(true)
+    }
+}
+
+private extension View {
+    /// Les balayages d'une série. De gauche à droite : valide la série (ou la dévalide), comme la coche ; un balayage complet
+    /// suffit. De droite à gauche : supprime, poubelle rouge sur fond sombre. Une série validée ne part pas d'un balayage
+    /// complet : sa suppression ne se défait pas.
+    func setSwipeActions(model: LiveSessionModel, set: LiveSet) -> some View {
+        let isDone = set.completedAt != nil
+        return swipeActions(edge: .leading, allowsFullSwipe: true) {
+            Button {
+                Task { await model.tap(set: set.id) }
+            } label: {
+                LiveSwipeIcon(isDone ? "arrow.uturn.backward" : "checkmark",
+                              title: isDone ? String(localized: "Annuler la validation", bundle: .module)
+                                  : String(localized: "Valider la série", bundle: .module),
+                              color: isDone ? PulsePalette.text : PulsePalette.liveBackground)
+            }
+            .tint(isDone ? PulsePalette.surface2 : PulsePalette.ok)
+        }
+        .swipeActions(edge: .trailing, allowsFullSwipe: !isDone) {
+            Button(role: .destructive) {
+                Task { await model.deleteSet(set.id) }
+            } label: {
+                LiveSwipeIcon("trash", title: String(localized: "Supprimer la série", bundle: .module),
+                              color: PulsePalette.signal)
+            }
+            .tint(PulsePalette.surface2)
+        }
     }
 }

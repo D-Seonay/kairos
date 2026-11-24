@@ -1,5 +1,8 @@
 import PulseDesignSystem
 import SwiftUI
+#if os(iOS)
+import UIKit
+#endif
 
 // MARK: - Toucher
 
@@ -190,4 +193,53 @@ struct ExerciseProgressRing: View {
         .pulseAnimation(.spring(response: 0.4, dampingFraction: 0.55), value: done)
         .pulseAnimation(.spring(response: 0.4, dampingFraction: 0.55), value: isComplete)
     }
+}
+
+// MARK: - Icône de balayage
+
+/// L'icône d'une action de balayage, dans sa propre couleur. iOS peint en blanc les icônes des actions de balayage et ignore
+/// `foregroundStyle` : l'image est rendue d'avance en couleur d'origine (`alwaysOriginal`), résolue en sombre comme l'écran de
+/// séance. VoiceOver lit `title`.
+struct LiveSwipeIcon: View {
+    let systemName: String
+    let title: String
+    let color: Color
+
+    init(_ systemName: String, title: String, color: Color) {
+        self.systemName = systemName
+        self.title = title
+        self.color = color
+    }
+
+    var body: some View {
+        Label {
+            Text(title)
+        } icon: {
+            icon
+        }
+        .labelStyle(.iconOnly)
+        .accessibilityLabel(title)
+    }
+
+    @ViewBuilder
+    private var icon: some View {
+        #if os(iOS)
+        if let image = Self.coloredSymbol(systemName, color: color) {
+            Image(uiImage: image)
+        } else {
+            Image(systemName: systemName)
+        }
+        #else
+        Image(systemName: systemName).foregroundStyle(color)
+        #endif
+    }
+
+    #if os(iOS)
+    private static func coloredSymbol(_ name: String, color: Color) -> UIImage? {
+        let configuration = UIImage.SymbolConfiguration(pointSize: 22, weight: .bold)
+        let resolved = UIColor(color).resolvedColor(with: UITraitCollection(userInterfaceStyle: .dark))
+        return UIImage(systemName: name, withConfiguration: configuration)?
+            .withTintColor(resolved, renderingMode: .alwaysOriginal)
+    }
+    #endif
 }
