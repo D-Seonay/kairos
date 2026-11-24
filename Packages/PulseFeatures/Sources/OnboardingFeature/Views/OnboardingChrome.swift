@@ -190,25 +190,42 @@ struct OnboardingScreen<Content: View, Footer: View>: View {
     }
 }
 
-/// Un bouton dont l'action est asynchrone : une seconde touche pendant l'action est ignorée.
+/// Un bouton dont l'action est asynchrone : pendant l'action, il montre un indicateur et passe inactif, une seconde touche est
+/// ignorée.
 struct OnboardingButton<Style: ButtonStyle>: View {
     let title: String
     let identifier: String
     let style: Style
     let action: @MainActor () async -> Void
     @State private var isRunning = false
+    @Environment(\.pulseTheme) private var theme
 
     var body: some View {
-        Button(title) {
+        Button {
             guard !isRunning else { return }
             isRunning = true
             Task {
                 await action()
                 isRunning = false
             }
+        } label: {
+            HStack(spacing: 8) {
+                if isRunning {
+                    ProgressView()
+                        .tint(spinnerColor)
+                        .accessibilityHidden(true)
+                }
+                Text(title)
+            }
         }
         .buttonStyle(style)
+        .disabled(isRunning)
         .accessibilityIdentifier(identifier)
+    }
+
+    /// L'encre du bouton : celle de l'accent sur le bouton principal, le texte ailleurs.
+    private var spinnerColor: Color {
+        style is PrimaryButtonStyle ? Color(PulsePalette.accent(for: theme).accentInk) : PulsePalette.text
     }
 }
 
