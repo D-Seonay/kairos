@@ -57,9 +57,10 @@ public struct LiveSessionView: View {
         ScrollViewReader { proxy in
             List {
                 let exercises = model.session.exercises
+                let upcoming = model.session.upcomingSetID
                 ForEach(Array(exercises.enumerated()), id: \.element.id) { index, exercise in
                     LiveExerciseCard(model: model, exercise: exercise, index: index, isLast: index == exercises.count - 1,
-                                     rpeSet: $rpeSet)
+                                     upcomingSetID: upcoming, rpeSet: $rpeSet)
                 }
                 Section {
                     addExerciseButton
@@ -72,6 +73,8 @@ public struct LiveSessionView: View {
             .scrollContentBackground(.hidden)
             .liveSectionSpacing()
             .contentMargins(.horizontal, 12, for: .scrollContent)
+            // Une série ajoutée ou supprimée, un exercice déplacé : les lignes glissent au lieu de sauter.
+            .pulseAnimation(.snappy(duration: 0.3), value: layoutSignature)
             .onChange(of: model.focus) { _, focus in
                 if let focus { proxy.scrollTo(focus.set, anchor: .center) }
             }
@@ -79,6 +82,11 @@ public struct LiveSessionView: View {
                 if let set { proxy.scrollTo(set, anchor: .center) }
             }
         }
+    }
+
+    /// Ce qui change la forme de la liste : l'ordre des exercices et de leurs séries.
+    private var layoutSignature: [UUID] {
+        model.session.exercises.flatMap { [$0.id] + $0.sets.map(\.id) }
     }
 
     private var addExerciseButton: some View {
@@ -92,7 +100,7 @@ public struct LiveSessionView: View {
                 .background(PulsePalette.surface, in: RoundedRectangle(cornerRadius: PulseMetrics.radiusSmall, style: .continuous))
                 .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(LivePressStyle(pressedScale: 0.97))
         .accessibilityLabel(Self.addExerciseSpokenText)
         .accessibilityIdentifier(LiveSessionIdentifiers.addExercise)
     }
@@ -126,6 +134,7 @@ public struct LiveSessionView: View {
         VStack(spacing: 0) {
             if let rest = model.session.rest {
                 RestBanner(model: model, rest: rest)
+                    .pulseTransition(.move(edge: .bottom).combined(with: .opacity))
             }
             // Le clavier et les pilules restent utilisables : leur texte s'arrête à `accessibility1`.
             if let target = rpeTarget {
@@ -145,8 +154,31 @@ public struct LiveSessionView: View {
                     field: focus.kind, increment: target.exercise.incrementKg,
                     onKey: { key in Task { await press(key, field: focus.kind) } }, onClose: { model.focus(nil) })
                 .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+            } else if model.session.isDone {
+                finishDock
+                    .pulseTransition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
+        .pulseAnimation(.spring(response: 0.4, dampingFraction: 0.82), value: model.session.rest?.startedAt)
+        .pulseAnimation(.spring(response: 0.4, dampingFraction: 0.82), value: model.session.isDone)
+    }
+
+    /// Toutes les séries sont validées : « Terminer la séance » vient sous le pouce, sous le repos qui court encore, en plus du
+    /// bouton de l'en-tête.
+    private var finishDock: some View {
+        let palette = PulsePalette.accent(for: theme)
+        return Button(action: onFinish) {
+            Label(String(localized: "Terminer la séance", bundle: .module), systemImage: "flag.checkered")
+                .font(.headline)
+                .foregroundStyle(Color(palette.accentInk))
+                .frame(maxWidth: .infinity, minHeight: LiveSetRow.targetHeight)
+                .background(Color(palette.accent), in: Capsule())
+                .contentShape(Capsule())
+        }
+        .buttonStyle(LivePressStyle(pressedScale: 0.96))
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .accessibilityIdentifier(LiveSessionIdentifiers.finishDock)
     }
 
     /// Une touche du clavier ; la nouvelle valeur du champ est dite à VoiceOver dès la saisie, avant l'enregistrement, en

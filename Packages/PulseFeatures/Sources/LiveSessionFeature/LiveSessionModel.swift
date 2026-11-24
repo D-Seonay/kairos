@@ -29,6 +29,13 @@ public final class LiveSessionModel {
     /// Le début du repos dont la fin a déjà fait vibrer : +30 s ne la fait pas vibrer deux fois. L'écran s'en sert aussi pour
     /// annoncer la fin du repos à VoiceOver.
     private(set) var reachedRestEnd: Date?
+    /// La dernière seconde du compte à rebours qui a fait vibrer : la `TimelineView` peut redessiner deux fois la même seconde.
+    @ObservationIgnored private var lastCountdown: RestCountdownMark?
+
+    private struct RestCountdownMark: Equatable {
+        var restStartedAt: Date
+        var second: Int
+    }
 
     init(session: LiveSession, environment: LiveSessionEnvironment, haptics: LiveSessionHaptics = .system) {
         self.session = session
@@ -58,12 +65,22 @@ public final class LiveSessionModel {
         guard let exercise = session.exercises.first(where: { $0.sets.contains { $0.id == id } }),
               let set = exercise.sets.first(where: { $0.id == id }) else { return }
         if set.completedAt != nil {
-            await perform(.unvalidate(exercise: exercise.id, set: id))
+            if await perform(.unvalidate(exercise: exercise.id, set: id)) { haptics.soft() }
         } else if let missing = Self.missingField(of: set, in: exercise) {
             focus(KeypadField(exercise: exercise.id, set: id, kind: missing))
         } else if await perform(.validate(exercise: exercise.id, set: id)) {
             haptics.validation()
+            celebrateCompletion(of: exercise.id)
             if let focus, focus.set == id { moveFocus(afterValidating: focus) }
+        }
+    }
+
+    /// Une validation qui termine la séance la fête (`sessionDone`) ; une qui termine seulement l'exercice, `exerciseDone`.
+    private func celebrateCompletion(of exercise: UUID) {
+        if session.isDone {
+            haptics.sessionDone()
+        } else if session.exercises.first(where: { $0.id == exercise })?.isDone == true {
+            haptics.exerciseDone()
         }
     }
 
@@ -111,17 +128,17 @@ public final class LiveSessionModel {
 
     public func setType(_ type: SetType, set: UUID) async {
         guard let exercise = exerciseID(containing: set) else { return }
-        await perform(.setType(exercise: exercise, set: set, type))
+        if await perform(.setType(exercise: exercise, set: set, type)) { haptics.tick() }
     }
 
     public func addSet(exercise: UUID) async {
-        await perform(.addSet(exercise: exercise))
+        if await perform(.addSet(exercise: exercise)) { haptics.tick() }
     }
 
     public func deleteSet(_ set: UUID) async {
         guard let exercise = exerciseID(containing: set) else { return }
         if focus?.set == set { focus = nil }
-        await perform(.deleteSet(exercise: exercise, set: set))
+        if await perform(.deleteSet(exercise: exercise, set: set)) { haptics.soft() }
     }
 
     // MARK: Exercices
@@ -142,7 +159,7 @@ public final class LiveSessionModel {
 
     public func removeExercise(_ exercise: UUID) async {
         if focus?.exercise == exercise { focus = nil }
-        await perform(.removeExercise(exercise))
+        if await perform(.removeExercise(exercise)) { haptics.soft() }
     }
 
     public func moveExercise(_ exercise: UUID, by offset: Int) async {
@@ -223,6 +240,19 @@ public final class LiveSessionModel {
         guard let rest = session.rest, rest.endsAt > now else { return nil }
         return rest.endsAt.timeIntervalSince(now)
     }
+
+    /// L'écran appelle cette méthode à chaque seconde du repos : un tic sec pour chacune des trois dernières (3, 2, 1), une seule
+    /// fois par seconde et par repos, pour lever la tête du téléphone avant la vibration longue.
+    public func restCountdown(secondsLeft: Int) {
+        guard let rest = session.rest, (1...Self.countdownSeconds).contains(secondsLeft),
+              reachedRestEnd != rest.startedAt else { return }
+        let mark = RestCountdownMark(restStartedAt: rest.startedAt, second: secondsLeft)
+        guard lastCountdown != mark else { return }
+        lastCountdown = mark
+        haptics.tick()
+    }
+
+    static let countdownSeconds = 3
 
     /// L'écran appelle cette méthode quand le repos arrive à sa fin : une vibration longue, une seule fois par repos.
     public func didReachRestEnd() {

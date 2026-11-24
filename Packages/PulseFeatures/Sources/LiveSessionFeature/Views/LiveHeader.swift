@@ -32,15 +32,19 @@ struct LiveHeader: View {
                     Text(Self.titleText(session.title))
                         .font(PulseFont.title(.title3))
                         .foregroundStyle(PulsePalette.text)
+                        .lineLimit(isLarge ? nil : 2)
+                        .minimumScaleFactor(0.85)
                         .fixedSize(horizontal: false, vertical: true)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .accessibilityAddTraits(.isHeader)
                 }
+                // Les boutons gardent leur largeur : c'est le titre qui passe à la ligne, jamais « Terminer ».
                 HStack(spacing: 8) {
                     if let photos { LiveCameraButton(model: photos) }
                     menu
                     finishButton
                 }
+                .fixedSize()
             }
             if let pastEndedAt = session.pastEndedAt {
                 Text(Self.pastDateText(start: session.startedAt, end: pastEndedAt, calendar: calendar))
@@ -76,26 +80,43 @@ struct LiveHeader: View {
                     Text(Self.progressText(done: session.doneWorkingSets, planned: session.plannedWorkingSets))
                 }
             }
+            SessionProgressBar(done: session.doneWorkingSets, planned: session.plannedWorkingSets)
+                .padding(.top, 6)
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 4)
+        .padding(.top, 4)
+        .padding(.bottom, 8)
         // Une série validée fait rouler le tonnage et le compte des séries.
         .pulseAnimation(.snappy, value: session.tonnageKg)
         .pulseAnimation(.snappy, value: session.doneWorkingSets)
     }
 
+    /// « Terminer », sur une ligne. Quand toutes les séries sont validées, une coche le précède et il respire doucement : c'est
+    /// la seule chose qui reste à faire.
     private var finishButton: some View {
         let palette = PulsePalette.accent(for: theme)
+        let isDone = session.isDone
         return Button(action: onFinish) {
-            Text(String(localized: "Terminer", bundle: .module))
-                .font(PulseFont.title(.subheadline))
-                .foregroundStyle(Color(palette.accentInk))
-                .padding(.horizontal, 18)
-                .frame(minHeight: LiveSetRow.targetHeight)
-                .background(Color(palette.accent), in: Capsule())
-                .contentShape(Capsule())
+            HStack(spacing: 6) {
+                if isDone {
+                    Image(systemName: "checkmark")
+                        .font(.subheadline.weight(.black))
+                        .pulseTransition(.scale.combined(with: .opacity))
+                        .accessibilityHidden(true)
+                }
+                Text(String(localized: "Terminer", bundle: .module))
+                    .font(PulseFont.title(.subheadline))
+                    .lineLimit(1)
+            }
+            .foregroundStyle(Color(palette.accentInk))
+            .padding(.horizontal, 18)
+            .frame(minHeight: 44)
+            .background(Color(palette.accent), in: Capsule())
+            .breathing(isDone, glow: Color(palette.accent))
+            .contentShape(Capsule())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(LivePressStyle())
+        .pulseAnimation(.spring(response: 0.35, dampingFraction: 0.6), value: isDone)
         .accessibilityIdentifier(LiveSessionIdentifiers.finishButton)
     }
 
@@ -105,10 +126,10 @@ struct LiveHeader: View {
             Image(systemName: "chevron.down")
                 .font(.title3.weight(.semibold))
                 .foregroundStyle(PulsePalette.text2)
-                .frame(width: LiveSetRow.targetHeight, height: LiveSetRow.targetHeight)
+                .frame(width: 44, height: 44)
                 .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(LivePressStyle())
         .accessibilityLabel(String(localized: "Réduire la séance", bundle: .module))
         .accessibilityHint(String(localized: "La séance continue en arrière-plan", bundle: .module))
         .accessibilityIdentifier(LiveSessionIdentifiers.minimizeButton)
@@ -122,11 +143,9 @@ struct LiveHeader: View {
             }
             .accessibilityIdentifier(LiveSessionIdentifiers.abandonButton)
         } label: {
-            Image(systemName: "ellipsis.circle")
-                .font(.title2)
-                .foregroundStyle(PulsePalette.text2)
-                .frame(width: LiveSetRow.targetHeight, height: LiveSetRow.targetHeight)
-                .contentShape(Rectangle())
+            // Le même rond que l'appareil photo à côté.
+            IconChip(systemName: "ellipsis", size: 44)
+                .contentShape(Circle())
         }
         .accessibilityLabel(String(localized: "Menu de la séance", bundle: .module))
         .accessibilityIdentifier(LiveSessionIdentifiers.menuButton)

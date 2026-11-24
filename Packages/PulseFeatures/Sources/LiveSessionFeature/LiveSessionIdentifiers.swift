@@ -4,6 +4,7 @@ public enum LiveSessionIdentifiers {
     public static let resumeButton = "live.resume"
     public static let abandonBannerButton = "live.abandonBanner"
     public static let finishButton = "live.finish"
+    public static let finishDock = "live.finishDock"
     public static let menuButton = "live.menu"
     public static let minimizeButton = "live.minimize"
     public static let abandonButton = "live.abandon"

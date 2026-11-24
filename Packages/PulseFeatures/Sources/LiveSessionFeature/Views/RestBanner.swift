@@ -13,10 +13,12 @@ struct RestBanner: View {
     @ScaledMetric(relativeTo: .headline) private var ringSize = LiveSetRow.targetHeight
     @Environment(\.pulseTheme) private var theme
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         TimelineView(.periodic(from: rest.startedAt, by: 1)) { context in
             let isOver = context.date >= rest.endsAt
+            let secondsLeft = Self.secondsLeft(of: rest, at: context.date)
             ZStack {
                 if !isOver { banner(at: context.date) }
                 // Hors du `if` : la vue qui voit passer la fin du repos ne disparaît pas avec le bandeau.
@@ -25,6 +27,10 @@ struct RestBanner: View {
                     .accessibilityHidden(true)
                     .onChange(of: isOver) { _, over in
                         if over { model.didReachRestEnd() }
+                    }
+                    // 3, 2, 1 : un tic par seconde avant la vibration longue.
+                    .onChange(of: secondsLeft) { _, seconds in
+                        model.restCountdown(secondsLeft: seconds)
                     }
             }
         }
@@ -51,35 +57,66 @@ struct RestBanner: View {
                 }
             }
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 6)
+        .padding(.horizontal, 10)
+        .padding(.top, 10)
+        .padding(.bottom, 6)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(PulsePalette.surface2)
+        .background {
+            let shape = UnevenRoundedRectangle(topLeadingRadius: PulseMetrics.radiusSmall,
+                                               topTrailingRadius: PulseMetrics.radiusSmall, style: .continuous)
+            shape.fill(PulsePalette.surface2)
+                .overlay(alignment: .top) { elapsedLine(at: now) }
+                .clipShape(shape)
+                .ignoresSafeArea(edges: .bottom)
+        }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(LiveSessionIdentifiers.restBar)
+    }
+
+    /// Le filet du haut du bandeau, qui se vide avec le repos : on voit d'un coup d'œil ce qui reste, même de loin.
+    private func elapsedLine(at now: Date) -> some View {
+        let fraction = Self.remainingFraction(of: rest, at: now)
+        let isEnding = Self.isEnding(rest, at: now)
+        return GeometryReader { proxy in
+            Rectangle()
+                .fill(isEnding ? PulsePalette.signal : PulsePalette.text.opacity(0.7))
+                .frame(width: proxy.size.width * fraction, height: 2)
+                .pulseAnimation(.linear(duration: 1), value: fraction)
+        }
+        .frame(height: 2)
+        .accessibilityHidden(true)
     }
 
     private func ring(at now: Date) -> some View {
         let palette = PulsePalette.accent(for: theme)
         let fraction = Self.remainingFraction(of: rest, at: now)
+        // Les dernières secondes passent au signal, la seule couleur de l'app, et l'anneau bat à chaque seconde.
+        let isEnding = Self.isEnding(rest, at: now)
+        let stroke = isEnding ? AnyShapeStyle(PulsePalette.signal)
+            : AnyShapeStyle(AngularGradient(colors: [Color(palette.accent), Color(palette.accent2)], center: .center))
         return ZStack {
             Circle().stroke(PulsePalette.line, lineWidth: 4).accessibilityHidden(true)
             Circle()
                 .trim(from: 0, to: fraction)
-                .stroke(AngularGradient(colors: [Color(palette.accent), Color(palette.accent2)], center: .center),
-                        style: StrokeStyle(lineWidth: 4, lineCap: .round))
-                .shadow(color: Color(palette.accent2).opacity(0.6), radius: 4)
+                .stroke(stroke, style: StrokeStyle(lineWidth: 4, lineCap: .round))
+                .shadow(color: (isEnding ? PulsePalette.signal : Color(palette.accent2)).opacity(0.6), radius: 4)
                 .rotationEffect(.degrees(-90))
                 .pulseAnimation(.linear(duration: 1), value: fraction)
                 .accessibilityHidden(true)
             Text(timerInterval: rest.startedAt...rest.endsAt, pauseTime: nil, countsDown: true, showsHours: false)
                 .font(PulseFont.value(.headline))
-                .foregroundStyle(PulsePalette.text)
+                .foregroundStyle(isEnding ? PulsePalette.signal : PulsePalette.text)
                 .minimumScaleFactor(0.5)
                 .lineLimit(1)
                 .padding(6)
         }
         .frame(width: ringSize, height: ringSize)
+        .phaseAnimator([false, true], trigger: isEnding ? Self.secondsLeft(of: rest, at: now) : 0) { view, phase in
+            view.scaleEffect(phase && isEnding && !reduceMotion ? 1.08 : 1)
+        } animation: { phase in
+            phase ? .spring(response: 0.18, dampingFraction: 0.5) : .easeOut(duration: 0.35)
+        }
+        .pulseAnimation(.easeInOut(duration: 0.3), value: isEnding)
         // Le temps restant dit en mots, une fois par seconde : « 1 minute 30 ».
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(String(localized: "Repos restant", bundle: .module))
@@ -121,7 +158,7 @@ struct RestBanner: View {
                 .background(isProminent ? AnyShapeStyle(Color(palette.accent)) : AnyShapeStyle(PulsePalette.surface), in: Capsule())
                 .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(LivePressStyle(pressedScale: 0.95))
         .accessibilityLabel(spoken)
         .accessibilityIdentifier(identifier)
     }
@@ -217,6 +254,17 @@ extension RestBanner {
             return title
         }
         return String(localized: "\(title) : \(planned)", bundle: .module)
+    }
+
+    /// Les secondes qui restent, arrondies au-dessus comme le chrono affiché.
+    nonisolated static func secondsLeft(of rest: LiveRest, at now: Date) -> Int {
+        Int(max(0, rest.endsAt.timeIntervalSince(now)).rounded(.up))
+    }
+
+    /// Vrai dans les 5 dernières secondes du repos.
+    nonisolated static func isEnding(_ rest: LiveRest, at now: Date) -> Bool {
+        let seconds = secondsLeft(of: rest, at: now)
+        return seconds > 0 && seconds <= 5
     }
 
     /// La part du repos qui reste, de 1 à 0. +30 s allonge la durée de référence, la fin seule bougeant.
