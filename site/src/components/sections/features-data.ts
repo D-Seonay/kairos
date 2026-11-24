@@ -47,7 +47,7 @@ export const FEATURES: Feature[] = [
   {
     id: "seance",
     index: "03",
-    eyebrow: "Séance live",
+    eyebrow: "Musculation",
     title: "Chaque série compte.",
     body: "Chrono de repos, séries, records et récap : la séance se suit en direct. Ajoute jusqu'à six photos à une séance. Tu peux aussi faire une séance libre, saisir une séance passée ou importer ton historique depuis Hevy.",
     screen: "/screens/workout.jpg",
