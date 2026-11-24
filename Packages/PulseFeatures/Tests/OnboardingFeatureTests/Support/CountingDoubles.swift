@@ -84,6 +84,10 @@ struct CountingRecoveryRepository: RecoveryRepository {
         checkInSaves.increment()
         try await inner.save(checkIn)
     }
+
+    func backfillSleepStages(_ nights: [NightSample]) async throws {
+        try await inner.backfillSleepStages(nights)
+    }
 }
 
 /// Un dépôt de programmes dont la suppression et la lecture échouent à la demande.

@@ -104,4 +104,8 @@ actor CountingRecoveryRepository: RecoveryRepository {
         if let gate = checkInSaveGate { await gate.pass() }
         try await inner.save(checkIn)
     }
+
+    func backfillSleepStages(_ nights: [NightSample]) async throws {
+        try await inner.backfillSleepStages(nights)
+    }
 }

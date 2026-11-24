@@ -147,6 +147,8 @@ public final class DayRefresher: Sendable {
         // iCloud peut redescendre d'anciennes lignes à tout moment : on les déplace avant de lire. Un échec ne retient pas le passage.
         _ = try? await relocation?.relocate()
         let history = await nightHistory.refresh(now: now)
+        // Les nuits enregistrées avant les phases les reçoivent si leur total n'a pas bougé ; un échec ne retient pas le passage.
+        try? await recovery.backfillSleepStages(history.nights)
         await workoutHistory?.refresh(now: now)
         await bodyHistory?.refresh(now: now)
         // Une semaine illisible reste telle quelle : la séance du jour suit les lignes déjà écrites.

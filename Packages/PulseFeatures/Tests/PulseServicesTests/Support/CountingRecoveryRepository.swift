@@ -40,4 +40,9 @@ actor CountingRecoveryRepository: RecoveryRepository {
         calls += 1
         try await inner.save(checkIn)
     }
+
+    func backfillSleepStages(_ nights: [NightSample]) async throws {
+        calls += 1
+        try await inner.backfillSleepStages(nights)
+    }
 }

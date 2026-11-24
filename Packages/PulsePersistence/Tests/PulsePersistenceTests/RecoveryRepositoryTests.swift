@@ -39,6 +39,58 @@ import Testing
     #expect(reading.coreMinutes == 300 && reading.awakeMinutes == 10)
 }
 
+/// Une nuit avec phases rattachée à `day`, de 420 min par défaut comme `Sample.recovery`.
+private func stagedNight(day: Date, asleep: Int = 420) -> NightSample {
+    NightSample(day: day, sdnnMs: nil, restingHeartRate: nil,
+                sleep: SleepSummary(asleepMinutes: asleep, deepMinutes: 80, coreMinutes: 250, remMinutes: 90,
+                                    unspecifiedMinutes: 0, awakeMinutes: 12))
+}
+
+@Test func backfillFillsAReadingWithoutStagesWhenTotalsMatch() async throws {
+    let repo = SwiftDataRecoveryRepository(modelContainer: try TestContainer.make(), calendar: Fixed.calendar)
+    let today = Fixed.calendar.startOfDay(for: Fixed.t0)
+    try await repo.save(Sample.recovery(day: today))   // 420 min, sans phases
+    try await repo.backfillSleepStages([stagedNight(day: today)])
+    let read = try await repo.dailyRecoveries(from: today, to: Fixed.calendar.date(byAdding: .day, value: 1, to: today)!)
+    #expect(read.count == 1)
+    #expect(read[0].coreMinutes == 250 && read[0].remMinutes == 90 && read[0].unspecifiedMinutes == 0 && read[0].awakeMinutes == 12)
+    #expect(read[0].asleepMinutes == 420 && read[0].deepMinutes == 80)
+}
+
+@Test func backfillSkipsAReadingWhoseTotalNoLongerMatches() async throws {
+    let repo = SwiftDataRecoveryRepository(modelContainer: try TestContainer.make(), calendar: Fixed.calendar)
+    let today = Fixed.calendar.startOfDay(for: Fixed.t0)
+    try await repo.save(Sample.recovery(day: today))   // 420 min enregistrées
+    try await repo.backfillSleepStages([stagedNight(day: today, asleep: 450)])
+    let read = try await repo.dailyRecoveries(from: today, to: Fixed.calendar.date(byAdding: .day, value: 1, to: today)!)
+    #expect(read[0].coreMinutes == nil && read[0].awakeMinutes == nil)
+}
+
+@Test func backfillNeverOverwritesStoredStages() async throws {
+    let repo = SwiftDataRecoveryRepository(modelContainer: try TestContainer.make(), calendar: Fixed.calendar)
+    let today = Fixed.calendar.startOfDay(for: Fixed.t0)
+    var recovery = Sample.recovery(day: today)
+    recovery.coreMinutes = 200
+    recovery.remMinutes = 140
+    recovery.unspecifiedMinutes = 0
+    recovery.awakeMinutes = 5
+    try await repo.save(recovery)
+    try await repo.backfillSleepStages([stagedNight(day: today)])
+    let read = try await repo.dailyRecoveries(from: today, to: Fixed.calendar.date(byAdding: .day, value: 1, to: today)!)
+    #expect(read[0].coreMinutes == 200 && read[0].remMinutes == 140 && read[0].awakeMinutes == 5)
+}
+
+@Test func backfillLeavesTheSyncedRowUntouched() async throws {
+    let repo = SwiftDataRecoveryRepository(modelContainer: try TestContainer.make(), calendar: Fixed.calendar)
+    let today = Fixed.calendar.startOfDay(for: Fixed.t0)
+    try await repo.save(Sample.recovery(day: today))
+    let context = ModelContext(repo.modelContainer)
+    let before = try #require(try context.fetch(FetchDescriptor<StoredDailyRecovery>()).first?.updatedAt)
+    try await repo.backfillSleepStages([stagedNight(day: today)])
+    let after = try #require(try ModelContext(repo.modelContainer).fetch(FetchDescriptor<StoredDailyRecovery>()).first?.updatedAt)
+    #expect(after == before)
+}
+
 @Test func recoveriesSortedByDayWithinRange() async throws {
     let repo = SwiftDataRecoveryRepository(modelContainer: try TestContainer.make(), calendar: Fixed.calendar)
     let cal = Fixed.calendar
