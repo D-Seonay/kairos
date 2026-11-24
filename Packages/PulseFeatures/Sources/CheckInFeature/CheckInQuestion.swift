@@ -14,7 +14,8 @@ public enum CheckInQuestion: CaseIterable, Sendable, Hashable {
         }
     }
 
-    /// Les réponses dans l'ordre affiché, avec la valeur que lit le moteur de score.
+    /// Les réponses dans l'ordre affiché, avec la valeur que lit le moteur de score. Les trois échelles vont de la pire à la
+    /// meilleure pour la récupération : la valeur monte de gauche à droite, douleurs comprises.
     public var options: [(label: String, value: Int)] {
         switch self {
         case .sleep:
@@ -27,11 +28,11 @@ public enum CheckInQuestion: CaseIterable, Sendable, Hashable {
             ]
         case .pain:
             [
-                (String(localized: "Aucune", bundle: .module), 4),
-                (String(localized: "Légères", bundle: .module), 3),
-                (String(localized: "Modérées", bundle: .module), 2),
+                (String(localized: "Douleur aiguë", bundle: .module), 0),
                 (String(localized: "Marquées", bundle: .module), 1),
-                (String(localized: "Douleur aiguë", bundle: .module), 0)
+                (String(localized: "Modérées", bundle: .module), 2),
+                (String(localized: "Légères", bundle: .module), 3),
+                (String(localized: "Aucune", bundle: .module), 4)
             ]
         case .motivation:
             [

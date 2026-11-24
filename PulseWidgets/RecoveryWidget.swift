@@ -25,7 +25,8 @@ private struct RecoveryWidgetEntryView: View {
     var body: some View {
         content
             .widgetURL(AppLink.today.url)
-            .containerBackground(for: .widget) { background }
+            .containerBackground(for: .widget) { background.pulsePaperAppearance(for: family) }
+            .pulsePaperAppearance(for: family)
     }
 
     @ViewBuilder private var content: some View {

@@ -29,6 +29,8 @@ public struct TodaySessionWidgetContent: Sendable, Equatable {
     public var accessibilityLabel: String
     /// La silhouette de la carte, celle du profil quand l'instantané la donne.
     public var muscleMapFigure: MuscleMapFigure
+    /// Faux sans instantané du jour : le widget invite à ouvrir l'app au lieu de montrer une séance.
+    public var isReady: Bool
 
     public init(
         title: String,
@@ -43,7 +45,8 @@ public struct TodaySessionWidgetContent: Sendable, Equatable {
         accessoryDetail: String,
         inlineText: String,
         accessibilityLabel: String,
-        muscleMapFigure: MuscleMapFigure = .female
+        muscleMapFigure: MuscleMapFigure = .female,
+        isReady: Bool = true
     ) {
         self.title = title
         self.isAdjusted = isAdjusted
@@ -58,12 +61,12 @@ public struct TodaySessionWidgetContent: Sendable, Equatable {
         self.inlineText = inlineText
         self.accessibilityLabel = accessibilityLabel
         self.muscleMapFigure = muscleMapFigure
+        self.isReady = isReady
     }
 
+    /// La séance de l'instantané du jour. Sans instantané du jour, le widget le dit au lieu d'inventer une séance.
     public static func make(snapshot: WidgetSnapshot?, at date: Date, calendar: Calendar) -> TodaySessionWidgetContent {
-        guard let snapshot, calendar.isDate(snapshot.day, inSameDayAs: date) else {
-            return sample(at: date, calendar: calendar)
-        }
+        guard let snapshot, calendar.isDate(snapshot.day, inSameDayAs: date) else { return notReady }
 
         let figure = snapshot.muscleMapFigure ?? .female
         guard let sessionTitle = snapshot.sessionTitle, !sessionTitle.isEmpty else {
@@ -112,6 +115,7 @@ public struct TodaySessionWidgetContent: Sendable, Equatable {
         )
     }
 
+    /// Un exemple, pour la galerie de widgets et le gabarit avant le premier chargement.
     public static func sample(at date: Date, calendar: Calendar) -> TodaySessionWidgetContent {
         let title = String(localized: "Pectoraux et triceps", bundle: .module)
         let meta = String(localized: "14 séries · 55 min · RPE 7,5", bundle: .module)
@@ -136,6 +140,18 @@ public struct TodaySessionWidgetContent: Sendable, Equatable {
             inlineText: inline,
             accessibilityLabel: spoken
         )
+    }
+
+    /// Pas encore d'instantané du jour : l'app ne s'est pas ouverte aujourd'hui, ou n'a pas encore écrit la séance.
+    static var notReady: TodaySessionWidgetContent {
+        let title = String(localized: "Séance pas encore prête", bundle: .module)
+        let hint = String(localized: "Ouvre Pulse pour la charger", bundle: .module)
+        return TodaySessionWidgetContent(
+            title: title, isAdjusted: false, isLightened: false, isRest: false, metaText: hint,
+            buttonText: String(localized: "Ouvrir Pulse", bundle: .module), muscleLevels: [:],
+            accessoryTitle: displayName, accessorySubtitle: title, accessoryDetail: hint, inlineText: title,
+            accessibilityLabel: String(localized: "Séance du jour pas encore prête. Ouvre Pulse pour la charger", bundle: .module),
+            isReady: false)
     }
 
     static func defaultMuscleLevels(for sessionTitle: String) -> [MuscleMapRegion: Int] {

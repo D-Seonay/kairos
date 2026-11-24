@@ -46,13 +46,19 @@ struct TodaySessionWidgetRectangularViewBody: View {
 
     private var titleRow: some View {
         HStack(spacing: 5) {
-            Image(systemName: content.isRest ? "bed.double.fill" : "dumbbell.fill")
+            Image(systemName: iconName)
                 .font(.system(size: iconSize))
             Text(content.accessoryTitle)
                 .font(.system(size: titleSize, weight: .bold))
                 .lineLimit(1)
                 .minimumScaleFactor(0.75)
         }
+    }
+
+    /// Sans séance chargée, une flèche de rechargement plutôt qu'une haltère ou un lit.
+    private var iconName: String {
+        guard content.isReady else { return "arrow.clockwise" }
+        return content.isRest ? "bed.double.fill" : "dumbbell.fill"
     }
 }
 

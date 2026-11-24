@@ -116,12 +116,112 @@
         }
       }
     },
+    "Aucune séance prévue" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune séance prévue"
+          }
+        }
+      }
+    },
+    "Crée une routine dans l'onglet Séance : tu pourras la lancer d'ici." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crée une routine dans l'onglet Séance : tu pourras la lancer d'ici."
+          }
+        }
+      }
+    },
+    "Créer une routine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer une routine"
+          }
+        }
+      }
+    },
     "Exercice inconnu" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Exercice inconnu"
+          }
+        }
+      }
+    },
+    "hier" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hier"
+          }
+        }
+      }
+    },
+    "La séance prévue reste disponible avec « Rétablir la séance d'origine »." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La séance prévue reste disponible avec « Rétablir la séance d'origine »."
+          }
+        }
+      }
+    },
+    "Lecture d'Apple Santé…" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lecture d'Apple Santé…"
+          }
+        }
+      }
+    },
+    "Lecture en cours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lecture en cours"
+          }
+        }
+      }
+    },
+    "Ouvre l'onglet Séance" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvre l'onglet Séance"
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu calculer ton score. Tire l'écran vers le bas pour réessayer." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu calculer ton score. Tire l'écran vers le bas pour réessayer."
+          }
+        }
+      }
+    },
+    "Synchro, %@, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchro, %@, %@"
           }
         }
       }
@@ -202,16 +302,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucune autre séance prévue cette semaine."
-          }
-        }
-      }
-    },
-    "Aucune séance prévue." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucune séance prévue."
           }
         }
       }
@@ -528,32 +618,12 @@
         }
       }
     },
-    "L'éditeur de routines arrive avec la séance en direct." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "L'éditeur de routines arrive avec la séance en direct."
-          }
-        }
-      }
-    },
     "La jauge de charge apparaîtra après 28 jours d'entraînement : elle compare ta dernière semaine à ton mois." : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "La jauge de charge apparaîtra après 28 jours d'entraînement : elle compare ta dernière semaine à ton mois."
-          }
-        }
-      }
-    },
-    "La séance prévue reste disponible avec « Séance d'origine »." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La séance prévue reste disponible avec « Séance d'origine »."
           }
         }
       }
@@ -784,16 +854,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pourquoi ce score ?"
-          }
-        }
-      }
-    },
-    "Pourquoi cette adaptation" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pourquoi cette adaptation"
           }
         }
       }
@@ -1038,16 +1098,6 @@
         }
       }
     },
-    "Séance d'origine" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Séance d'origine"
-          }
-        }
-      }
-    },
     "Séance du jour" : {
       "localizations" : {
         "fr" : {
@@ -1074,16 +1124,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Séance en cours"
-          }
-        }
-      }
-    },
-    "Séance terminée" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Séance terminée"
           }
         }
       }

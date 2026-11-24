@@ -18,13 +18,16 @@ public struct TodayView: View {
     private let onStartSession: (SessionLaunch) -> Void
     private let onResumeSession: () -> Void
     private let onStartRun: (RunLaunch) -> Void
+    /// Sans programme, « Créer une routine » : l'app ouvre l'onglet Séance.
+    private let onCreateRoutine: () -> Void
     /// L'écran Compléments poussé ; l'app le tient pour qu'un rappel touché l'ouvre. Sans lui, l'accueil garde le sien.
     private let showsSupplements: Binding<Bool>?
     @State private var localShowsSupplements = false
 
     public init(model: TodayModel, supplements: SupplementsModel? = nil, showsSupplements: Binding<Bool>? = nil,
                 onOpenProfile: @escaping () -> Void, onStartSession: @escaping (SessionLaunch) -> Void,
-                onResumeSession: @escaping () -> Void, onStartRun: @escaping (RunLaunch) -> Void = { _ in }) {
+                onResumeSession: @escaping () -> Void, onStartRun: @escaping (RunLaunch) -> Void = { _ in },
+                onCreateRoutine: @escaping () -> Void = {}) {
         self.model = model
         self.supplements = supplements
         self.showsSupplements = showsSupplements
@@ -32,6 +35,7 @@ public struct TodayView: View {
         self.onStartSession = onStartSession
         self.onResumeSession = onResumeSession
         self.onStartRun = onStartRun
+        self.onCreateRoutine = onCreateRoutine
     }
 
     public var body: some View {
@@ -49,7 +53,7 @@ public struct TodayView: View {
                 .pulseAnimation(.snappy, value: startTitle)
                 .hidingNavigationBar()
                 .navigationDestination(isPresented: $model.isShowingWhy) {
-                    WhyView(model: model, onStart: startSession, onResume: onResumeSession)
+                    WhyView(model: model, onStart: startSessionFromWhy, onResume: resumeSessionFromWhy)
                 }
                 .navigationDestination(isPresented: isShowingSupplements) {
                     if let supplements { SupplementsView(model: supplements) }
@@ -78,9 +82,12 @@ public struct TodayView: View {
             VStack(spacing: PulseMetrics.spacing) {
                 TodayHeader(model: model, onOpenProfile: onOpenProfile)
                 recoveryOrCheckIn
-                SessionCard(model: model, onWhy: model.showWhy, onResume: onResumeSession, onStartRun: onStartRun)
+                SessionCard(model: model, onWhy: model.showWhy, onResume: onResumeSession, onStartRun: onStartRun,
+                            onCreateRoutine: onCreateRoutine)
                 if let offer = model.deloadOffer {
-                    DeloadOfferCard(offer: offer) { accepted in Task { await model.decideDeload(accepted) } }
+                    DeloadOfferCard(offer: offer, errorMessage: model.deloadErrorMessage) { accepted in
+                        Task { await model.decideDeload(accepted) }
+                    }
                 }
                 if let supplements {
                     SupplementsCard(model: supplements) { isShowingSupplements.wrappedValue = true }
@@ -101,8 +108,10 @@ public struct TodayView: View {
         showsSupplements ?? $localShowsSupplements
     }
 
-    /// Le libellé du bouton ancré, `nil` quand la séance du jour n'est pas une musculation à lancer.
+    /// Le libellé du bouton ancré, `nil` quand la séance du jour n'est pas une musculation à lancer, ou tant que le check-in
+    /// attend ses réponses : « Démarrer » ne se superpose pas au formulaire et à son propre bouton.
     private var startTitle: String? {
+        if case .needsCheckIn = model.score { return nil }
         guard case .strength(let card) = model.card else { return nil }
         return card.startButton
     }
@@ -113,18 +122,26 @@ public struct TodayView: View {
         }
     }
 
-    /// Les données ne suffisent pas : le check-in prend la place de la carte de récupération, la séance reste dessous.
+    /// Depuis l'écran « Pourquoi » : la séance s'ouvre en plein écran et l'écran se referme derrière elle, l'accueil revient
+    /// à la fin de la séance.
+    private func startSessionFromWhy() {
+        model.closeWhy()
+        startSession()
+    }
+
+    private func resumeSessionFromWhy() {
+        model.closeWhy()
+        onResumeSession()
+    }
+
+    /// Les données ne suffisent pas : le check-in prend la place de la carte de récupération, la séance reste dessous. L'erreur
+    /// d'enregistrement s'affiche juste au-dessus du bouton du check-in.
     @ViewBuilder
     private var recoveryOrCheckIn: some View {
         if case .needsCheckIn = model.score {
             VStack(spacing: 12) {
-                if let message = model.errorMessage {
-                    Text(message)
-                        .font(.footnote)
-                        .foregroundStyle(PulsePalette.bad)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                CheckInView(form: model.checkIn, scrollable: false) { _ in
+                CheckInView(form: model.checkIn, scrollable: false, errorMessage: model.errorMessage,
+                            isSubmitting: model.isSubmittingCheckIn) { _ in
                     Task { await model.submitCheckIn() }
                 }
             }
@@ -132,7 +149,7 @@ public struct TodayView: View {
             .pulseAnnounceError(model.errorMessage)
         } else {
             RecoveryCard(score: model.score, factors: model.factors, marker: model.marker, spokenMarker: model.spokenMarker,
-                         onWhy: model.showWhy)
+                         onWhy: model.showWhy, isLoading: model.isLoading, scoreFailed: model.scoreFailed)
         }
     }
 }
@@ -175,9 +192,16 @@ private struct TodayHeader: View {
             Task { await model.refresh() }
         } label: {
             HStack(spacing: 8) {
-                Circle()
-                    .fill(model.lastSyncText == nil ? PulsePalette.muted : PulsePalette.text)
-                    .frame(width: 6, height: 6)
+                // Pendant la lecture, un indicateur à la place du point : la touche a bien été prise en compte.
+                if model.isLoading {
+                    ProgressView()
+                        .controlSize(.mini)
+                        .frame(width: 12, height: 12)
+                } else {
+                    Circle()
+                        .fill(model.lastSyncText == nil ? PulsePalette.muted : PulsePalette.text)
+                        .frame(width: 6, height: 6)
+                }
                 Text(syncText)
                     .pulseEyebrow(PulsePalette.text2)
             }
@@ -192,6 +216,7 @@ private struct TodayHeader: View {
         .buttonStyle(PressableButtonStyle())
         .disabled(model.isLoading)
         .accessibilityLabel(model.syncAccessibilityText)
+        .accessibilityValue(model.isLoading ? String(localized: "Lecture en cours", bundle: .module) : "")
         .accessibilityHint(String(localized: "Relit tes données Apple Santé", bundle: .module))
     }
 

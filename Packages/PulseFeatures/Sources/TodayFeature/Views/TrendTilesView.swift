@@ -2,22 +2,32 @@ import PulseDesignSystem
 import PulseDomain
 import SwiftUI
 
-/// Les trois tuiles de tendance sur 14 jours, sur deux colonnes ; une seule colonne dès les grandes tailles de texte (xxxLarge).
+/// Les trois tuiles de tendance sur 14 jours, par rangées de deux ; une tuile seule sur sa rangée (la troisième) prend toute la
+/// largeur, sans trou à côté. Une seule colonne dès les grandes tailles de texte (xxxLarge).
 struct TrendTilesView: View {
     let tiles: [TrendTile]
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        LazyVGrid(columns: columns, spacing: 10) {
-            ForEach(tiles, id: \.factor) { tile in
-                TrendTileView(tile: tile)
+        VStack(spacing: 10) {
+            ForEach(rowStarts, id: \.self) { start in
+                HStack(alignment: .top, spacing: 10) {
+                    ForEach(Array(tiles[start..<min(start + columnCount, tiles.count)]), id: \.factor) { tile in
+                        TrendTileView(tile: tile)
+                            .frame(maxWidth: .infinity)
+                    }
+                }
             }
         }
     }
 
-    private var columns: [GridItem] {
-        let count = dynamicTypeSize >= .xxxLarge ? 1 : 2
-        return Array(repeating: GridItem(.flexible(), spacing: 10, alignment: .top), count: count)
+    private var columnCount: Int {
+        dynamicTypeSize >= .xxxLarge ? 1 : 2
+    }
+
+    /// L'indice de la première tuile de chaque rangée.
+    private var rowStarts: [Int] {
+        Array(stride(from: 0, to: tiles.count, by: columnCount))
     }
 }
 

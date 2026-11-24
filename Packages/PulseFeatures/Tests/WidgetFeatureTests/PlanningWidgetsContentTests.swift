@@ -31,10 +31,26 @@ struct PlanningWidgetsContentTests {
             + "Lundi fait, mardi repos, aujourd'hui mercredi, à venir, jeudi à venir, vendredi à venir, samedi repos, dimanche repos")
     }
 
-    @Test func aSnapshotOfAnotherDayFallsBackToTheSample() {
+    /// Un instantané d'un autre jour, ou aucun : les widgets disent qu'ils ne sont pas prêts, jamais l'exemple de la galerie.
+    @Test func aSnapshotOfAnotherDayIsNotShownAsReal() {
         let stale = snapshot(day: "2026-11-03T00:00")
-        #expect(StreakWidgetContent.make(snapshot: stale, at: now, calendar: calendar) == .sample(at: now, calendar: calendar))
-        #expect(WeekWidgetContent.make(snapshot: nil, at: now, calendar: calendar) == .sample(at: now, calendar: calendar))
+        let streak = StreakWidgetContent.make(snapshot: stale, at: now, calendar: calendar)
+        #expect(streak == .notReady && streak != .sample(at: now, calendar: calendar))
+        #expect(!streak.isReady && streak.weeksText == "—" && streak.weekDays.isEmpty)
+        #expect(streak.accessibilityLabel == "Série pas encore prête. Ouvre Pulse pour la mettre à jour")
+
+        let week = WeekWidgetContent.make(snapshot: nil, at: now, calendar: calendar)
+        #expect(week != .sample(at: now, calendar: calendar))
+        #expect(week.days.map(\.letter) == ["L", "M", "M", "J", "V", "S", "D"])
+        #expect(week.days.map(\.state) == [.upcoming, .upcoming, .today, .upcoming, .upcoming, .upcoming, .upcoming])
+        #expect(week.badgeText == "—" && week.todayTitle == "Pas encore prête" && week.todayMuscleLevels.isEmpty)
+        #expect(week.accessibilityLabel == "Cette semaine : pas encore prête. Ouvre Pulse pour la mettre à jour")
+
+        let next = NextWorkoutWidgetContent.make(snapshot: stale, at: now, calendar: calendar)
+        #expect(next == .notReady && next.title == "Pas encore prête" && next.activeZone == 0)
+
+        let load = LoadWidgetContent.make(snapshot: nil, at: now, calendar: calendar)
+        #expect(load == .notReady && load.ratioText == "—" && load.zoneText == "Ouvre Pulse" && !load.isOptimal)
     }
 
     @Test func weekShowsTodayTheLoadAndTomorrow() {
@@ -119,6 +135,6 @@ struct PlanningWidgetsContentTests {
         let ready = LoadWidgetContent.make(snapshot: snapshot(loadRatio: 1.1), at: now, calendar: calendar)
         #expect(ready.ratioText == "1,1" && ready.zoneText == "Zone optimale" && ready.isOptimal)
         let early = LoadWidgetContent.make(snapshot: snapshot(loadRatio: nil), at: now, calendar: calendar)
-        #expect(early.ratioText == "–" && early.zoneText == "Après 28 jours" && !early.isOptimal)
+        #expect(early.ratioText == "—" && early.zoneText == "Après 28 jours" && !early.isOptimal)
     }
 }

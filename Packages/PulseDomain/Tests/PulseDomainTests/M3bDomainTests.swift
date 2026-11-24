@@ -13,3 +13,12 @@ import Testing
     let other = try #require(URL(string: "https://x"))
     #expect(AppLink(url: other) == nil)
 }
+
+@Test func appLinksOfTheWidgetsAndControlsRoundTrip() throws {
+    #expect(AppLink.planning.url?.absoluteString == "fr.seonay.pulse://planning")
+    #expect(AppLink.startSession.url?.absoluteString == "fr.seonay.pulse://start-session")
+    for link in [AppLink.today, .supplements, .planning, .startSession] {
+        let url = try #require(link.url)
+        #expect(AppLink(url: url) == link)
+    }
+}

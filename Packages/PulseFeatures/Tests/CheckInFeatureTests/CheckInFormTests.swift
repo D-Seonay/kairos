@@ -4,8 +4,16 @@ import Testing
 
 @Test func optionsMapToEngineValues() {
     #expect(CheckInQuestion.sleep.options.map(\.value) == [0, 1, 2, 3, 4])
-    #expect(CheckInQuestion.pain.options.map(\.value) == [4, 3, 2, 1, 0])
+    #expect(CheckInQuestion.pain.options.map(\.value) == [0, 1, 2, 3, 4])
     #expect(CheckInQuestion.motivation.options.map(\.value) == [0, 1, 2, 3, 4])
+}
+
+/// Les douleurs s'affichent de la pire à la meilleure, comme le sommeil et la motivation ; chaque libellé garde sa valeur.
+@Test func painScaleReadsWorstToBestWithUnchangedValues() {
+    let pain = CheckInQuestion.pain.options
+    #expect(pain.first?.label == "Douleur aiguë" && pain.first?.value == 0)
+    #expect(pain.last?.label == "Aucune" && pain.last?.value == 4)
+    #expect(pain.map(\.label) == ["Douleur aiguë", "Marquées", "Modérées", "Légères", "Aucune"])
 }
 
 @Test @MainActor func incompleteFormHasNoScore() {

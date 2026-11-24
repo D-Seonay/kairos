@@ -23,7 +23,7 @@ struct TodayModelSessionTests {
         #expect(card.badge == .adjusted)
         #expect(card.title == "Push, volume allégé")
         #expect(card.summary.setCount == 15)
-        #expect(card.originButton == "Séance d'origine")
+        #expect(card.originButton == "Rétablir la séance d'origine")
         #expect(model.session?.status == .adjusted)
     }
 

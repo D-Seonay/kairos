@@ -1,6 +1,10 @@
 import PulseDesignSystem
 import SwiftUI
 
+#if os(iOS)
+import UIKit
+#endif
+
 /// La feuille « 20 min de mobilité » : un minuteur pausable, cinq consignes, et la précision que rien n'est enregistré.
 ///
 /// Le minuteur lit l'horloge murale (`Date.now` au toucher, la date du `TimelineView`) : une horloge fixée par `-PulseNow`
@@ -35,6 +39,24 @@ public struct MobilitySheet: View {
                 .padding(PulseMetrics.spacing)
             }
         }
+        // Un glissement ne ferme pas la feuille pendant le décompte : seul « Fermer » le fait. L'écran reste allumé tant qu'il tourne.
+        .interactiveDismissDisabled(timer.isRunning)
+        .onChange(of: timer.isRunning) { _, running in Self.keepScreenAwake(running) }
+        .onDisappear { Self.keepScreenAwake(false) }
+    }
+
+    /// Empêche (ou rend) la mise en veille de l'écran. Sans effet hors iOS.
+    private static func keepScreenAwake(_ awake: Bool) {
+        #if os(iOS)
+        UIApplication.shared.isIdleTimerDisabled = awake
+        #endif
+    }
+
+    /// Le minuteur est arrivé au bout (ou « Terminer ») : il passe à terminé, ce qui rend la veille et le glissement, et le
+    /// téléphone vibre.
+    private func timerDidEnd() {
+        timer.finish()
+        PulseHaptics.restEnded()
     }
 
     private static var notRecordedNote: String {
@@ -58,7 +80,7 @@ public struct MobilitySheet: View {
                         // Le décompte change chaque seconde : VoiceOver ne le relit pas de lui-même.
                         .accessibilityAddTraits(.updatesFrequently)
                     if isOver {
-                        Text(String(localized: "Séance terminée", bundle: .module))
+                        Text(String(localized: "Mobilité terminée", bundle: .module))
                             .font(.headline)
                             .foregroundStyle(PulsePalette.text2)
                     } else {
@@ -69,6 +91,9 @@ public struct MobilitySheet: View {
             }
             // Le minuteur arrive à zéro (ou « Terminer ») sous le focus : on le dit.
             .pulseAnnounce(Self.finishedAnnouncement(isOver: isOver))
+            .onChange(of: isOver) { _, over in
+                if over { timerDidEnd() }
+            }
         }
     }
 

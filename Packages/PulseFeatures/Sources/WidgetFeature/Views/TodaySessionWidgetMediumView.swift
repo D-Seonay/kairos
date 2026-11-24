@@ -50,7 +50,8 @@ struct TodaySessionWidgetMediumViewBody: View {
                 Circle()
                     .fill(PulsePalette.surface2)
                     .frame(width: 64, height: 64)
-                Image(systemName: "bed.double.fill")
+                // Sans séance chargée, une flèche de rechargement plutôt que le lit du jour de repos.
+                Image(systemName: content.isReady ? "bed.double.fill" : "arrow.clockwise")
                     .font(.system(size: restIconSize))
                     .foregroundStyle(PulsePalette.muted)
             }
@@ -106,7 +107,7 @@ struct TodaySessionWidgetMediumViewBody: View {
 
     private var actionButton: some View {
         HStack(spacing: 6) {
-            Image(systemName: "play.fill")
+            Image(systemName: content.isReady ? "play.fill" : "arrow.up.forward.app")
                 .font(.system(size: buttonIconSize, weight: .bold))
             Text(content.buttonText)
                 .font(.system(size: buttonSize, weight: .bold))

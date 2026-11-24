@@ -332,6 +332,46 @@
         }
       }
     },
+    "OK" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        }
+      }
+    },
+    "Pas de programme pour l'instant : tu crées tes propres routines dans l'onglet Séance." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas de programme pour l'instant : tu crées tes propres routines dans l'onglet Séance."
+          }
+        }
+      }
+    },
+    "Plus de séances que de jours libres" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plus de séances que de jours libres"
+          }
+        }
+      }
+    },
+    "Plus de séances que de jours libres : retire une séance ou un jour de repos." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plus de séances que de jours libres : retire une séance ou un jour de repos."
+          }
+        }
+      }
+    },
     "Épaules" : {
       "localizations" : {
         "fr" : {
@@ -741,16 +781,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pas de période d'apprentissage : Pulse compare chaque nuit à tes 14 dernières, et la ligne de base se précise au fil des semaines."
-          }
-        }
-      }
-    },
-    "Pas de programme pour l'instant : tu créeras tes propres routines dès que l'éditeur sera disponible." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pas de programme pour l'instant : tu créeras tes propres routines dès que l'éditeur sera disponible."
           }
         }
       }
