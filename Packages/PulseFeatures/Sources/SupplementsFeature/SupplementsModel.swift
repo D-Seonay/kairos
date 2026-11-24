@@ -17,6 +17,8 @@ public final class SupplementsModel {
 
     public private(set) var overview: SupplementOverview
     public private(set) var errorMessage: String?
+    /// L'erreur du formulaire ouvert (un enregistrement raté), affichée dans le formulaire plutôt que derrière lui.
+    public private(set) var editorError: String?
     public private(set) var isSaving = false
     /// Vrai après la première lecture : avant, la carte de l'accueil ne montre pas d'état vide.
     public private(set) var hasLoaded = false
@@ -100,15 +102,17 @@ public final class SupplementsModel {
     // MARK: - Formulaire
 
     public func startNew() {
+        editorError = nil
         editor = Editor(supplement: nil)
     }
 
     public func edit(_ supplement: Supplement) {
+        editorError = nil
         editor = Editor(supplement: supplement)
     }
 
     /// Enregistre le formulaire. La première fois, demande l'autorisation des notifications pour un rappel, et l'accès à Apple
-    /// Santé pour un type. Vrai quand le complément est enregistré.
+    /// Santé pour un type. Vrai quand le complément est enregistré ; un échec garde le formulaire ouvert avec `editorError`.
     public func save(_ draft: SupplementDraft, editing existing: Supplement?) async -> Bool {
         guard draft.problem == nil, !isSaving else { return false }
         isSaving = true
@@ -125,9 +129,12 @@ public final class SupplementsModel {
             try await environment.service.save(supplement)
             errorMessage = nil
         } catch {
-            fail(String(localized: "Pulse n'a pas pu enregistrer le complément.", bundle: .module))
+            let message = String(localized: "Pulse n'a pas pu enregistrer le complément.", bundle: .module)
+            editorError = message
+            announce(message, true)
             return false
         }
+        editorError = nil
         editor = nil
         await load()
         return true

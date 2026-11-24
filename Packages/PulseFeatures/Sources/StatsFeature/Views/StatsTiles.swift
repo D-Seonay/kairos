@@ -27,9 +27,9 @@ struct StatsWindow {
         bucket == .day ? .day : .weekOfYear
     }
 
-    /// « +6 % vs 30 j précédents » ; `nil` sans période précédente.
+    /// « +6 % par rapport aux 30 jours précédents », « … à l'année précédente » sur un an ; `nil` sans période précédente.
     func comparisonText(_ comparison: StatsComparison?) -> String? {
-        StatsText.change(comparison).map { String(localized: "\($0) vs \(period.days) j précédents", bundle: .module) }
+        StatsText.comparisonSpoken(comparison, days: period.days)
     }
 }
 
@@ -210,6 +210,28 @@ extension View {
             AxisMarks(position: .leading) { _ in
                 AxisGridLine(stroke: StrokeStyle(lineWidth: 1, dash: [2, 4])).foregroundStyle(PulsePalette.line)
                 AxisValueLabel().foregroundStyle(PulsePalette.muted)
+            }
+        }
+        .environment(\.locale, Locale(identifier: "fr_FR"))
+        .environment(\.calendar, calendar)
+        .environment(\.timeZone, calendar.timeZone)
+    }
+
+    /// Les mêmes axes, avec l'unité des valeurs sur l'axe vertical (« 60 ms », « 7 h »).
+    func statsAxes(calendar: Calendar, yUnit: String) -> some View {
+        chartXAxis {
+            AxisMarks(values: .automatic(desiredCount: 4)) { _ in
+                AxisGridLine(stroke: StrokeStyle(lineWidth: 1, dash: [2, 4])).foregroundStyle(PulsePalette.line)
+                AxisValueLabel(format: .dateTime.day().month(.abbreviated)).foregroundStyle(PulsePalette.muted)
+            }
+        }
+        .chartYAxis {
+            AxisMarks(position: .leading) { value in
+                AxisGridLine(stroke: StrokeStyle(lineWidth: 1, dash: [2, 4])).foregroundStyle(PulsePalette.line)
+                AxisValueLabel {
+                    Text(value.as(Double.self).map { "\(PulseFormat.decimal($0, maxFractionDigits: 1)) \(yUnit)" } ?? "")
+                }
+                .foregroundStyle(PulsePalette.muted)
             }
         }
         .environment(\.locale, Locale(identifier: "fr_FR"))

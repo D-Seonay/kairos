@@ -7,6 +7,7 @@ import SwiftUI
 struct MyDataScreen: View {
     @State private var model: MyDataModel
     @State private var showsErase = false
+    @State private var exporting: ExportFormat?
     let environment: ProfileEnvironment
     let screens: ProfileAppScreens
     /// Part une fois tout supprimé : l'app revient à l'onboarding.
@@ -86,17 +87,26 @@ struct MyDataScreen: View {
 
     // MARK: Exporter
 
+    /// Le format de l'export lancé : seul son bouton tourne. ShareLink ne se déclenche pas tout seul : « Partager l'export »
+    /// apparaît sous les boutons une fois le fichier prêt.
+    private enum ExportFormat {
+        case json
+        case csv
+    }
+
     private var exportSection: some View {
         Section {
             Button {
+                exporting = .json
                 Task { await model.exportJSON() }
             } label: {
-                exportLabel(String(localized: "Tout en JSON", bundle: .module))
+                exportLabel(String(localized: "Tout en JSON", bundle: .module), format: .json)
             }
             Button {
+                exporting = .csv
                 Task { await model.exportCSV() }
             } label: {
-                exportLabel(String(localized: "Tout en CSV (zip)", bundle: .module))
+                exportLabel(String(localized: "Tout en CSV (zip)", bundle: .module), format: .csv)
             }
             if let url = model.shareURL {
                 ShareLink(item: url) {
@@ -115,12 +125,12 @@ struct MyDataScreen: View {
         .listRowBackground(PulsePalette.surface)
     }
 
-    private func exportLabel(_ title: String) -> some View {
+    private func exportLabel(_ title: String, format: ExportFormat) -> some View {
         HStack {
             Text(title)
                 .foregroundStyle(PulsePalette.text)
             Spacer(minLength: 8)
-            if model.isBusy {
+            if model.isBusy && exporting == format {
                 ProgressView()
                     .accessibilityLabel(ProfileText.exportStarted)
             }

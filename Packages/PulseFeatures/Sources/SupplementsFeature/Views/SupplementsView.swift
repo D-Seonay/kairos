@@ -7,7 +7,11 @@ import SwiftUI
 /// coches, les conseils, le stock et la régularité. À pousser dans une `NavigationStack` (accueil, profil).
 public struct SupplementsView: View {
     private let model: SupplementsModel
+    /// Le complément dont on confirme l'archivage (menu contextuel, action VoiceOver), comme dans le formulaire.
+    @State private var archiving: Supplement?
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    /// La colonne des noms des barres suit Dynamic Type ; un nom trop long passe à la ligne au lieu d'être coupé.
+    @ScaledMetric(relativeTo: .subheadline) private var barTitleWidth: CGFloat = 110
 
     public init(model: SupplementsModel) {
         self.model = model
@@ -23,7 +27,11 @@ public struct SupplementsView: View {
                         .foregroundStyle(PulsePalette.bad)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                if model.hasLoaded && model.overview.supplements.isEmpty {
+                if !model.hasLoaded {
+                    ProgressView()
+                        .accessibilityLabel(String(localized: "Chargement des compléments", bundle: .module))
+                        .frame(maxWidth: .infinity, minHeight: 200)
+                } else if model.overview.supplements.isEmpty {
                     emptyState
                 } else {
                     content
@@ -55,6 +63,9 @@ public struct SupplementsView: View {
                 SupplementFormView(model: model, editing: editor.supplement)
             }
         }
+        .supplementArchiveConfirmation($archiving) { supplement in
+            Task { await model.archive(supplement) }
+        }
         .task { await model.load(announcesFailure: true) }
     }
 
@@ -84,7 +95,7 @@ public struct SupplementsView: View {
                     ForEach(items) { item in
                         SupplementCheckRow(item: item, onToggle: { Task { await model.toggle(item) } },
                                            onOpen: { model.edit(item.supplement) },
-                                           onArchive: { Task { await model.archive(item.supplement) } })
+                                           onArchive: { archiving = item.supplement })
                             .contextMenu { archiveButton(item.supplement) }
                     }
                 }
@@ -102,9 +113,7 @@ public struct SupplementsView: View {
                 }
                 .buttonStyle(PressableButtonStyle())
                 .accessibilityLabel(SupplementsModel.notDueRowSpoken(supplement, days: SupplementLabels.days(supplement.days)))
-                .accessibilityAction(named: String(localized: "Archiver", bundle: .module)) {
-                    Task { await model.archive(supplement) }
-                }
+                .accessibilityAction(named: String(localized: "Archiver", bundle: .module)) { archiving = supplement }
                 .contextMenu { archiveButton(supplement) }
             }
         }
@@ -112,7 +121,7 @@ public struct SupplementsView: View {
 
     private func archiveButton(_ supplement: Supplement) -> some View {
         Button(role: .destructive) {
-            Task { await model.archive(supplement) }
+            archiving = supplement
         } label: {
             Label(String(localized: "Archiver", bundle: .module), systemImage: "archivebox")
         }
@@ -196,7 +205,7 @@ public struct SupplementsView: View {
                 }
             } else {
                 HStack(spacing: 10) {
-                    barTitle(title).frame(width: 110, alignment: .leading)
+                    barTitle(title).frame(width: barTitleWidth, alignment: .leading)
                     track(fraction: fraction, tint: tint)
                     barValue(value).frame(minWidth: 56, alignment: .trailing)
                 }
@@ -211,7 +220,8 @@ public struct SupplementsView: View {
         Text(title)
             .font(.subheadline)
             .foregroundStyle(PulsePalette.text)
-            .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
+            .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 2)
+            .fixedSize(horizontal: false, vertical: true)
     }
 
     private func barValue(_ value: String) -> some View {
@@ -263,6 +273,9 @@ public struct SupplementsView: View {
 /// « 2 sur 5 pris », les segments du jour et la prochaine prise avec « Pris ».
 struct SupplementSummaryCard: View {
     let model: SupplementsModel
+    /// Compte les prises réussies depuis « Pris » : chacune joue le retour de succès de la coche d'une ligne. La rangée de la
+    /// prochaine prise change de complément après la touche, elle ne peut pas suivre son propre état.
+    @State private var takes = 0
 
     var body: some View {
         ObsidianCard {
@@ -286,7 +299,7 @@ struct SupplementSummaryCard: View {
                     .accessibilityIdentifier(SupplementsIdentifiers.summary)
                     segments
                     if let next = model.overview.next {
-                        NextIntakeRow(item: next) { Task { await model.toggle(next) } }
+                        NextIntakeRow(item: next) { take(next) }
                     } else {
                         Label(String(localized: "Tout est pris pour aujourd'hui.", bundle: .module), systemImage: "checkmark")
                             .font(.subheadline)
@@ -294,6 +307,15 @@ struct SupplementSummaryCard: View {
                     }
                 }
             }
+        }
+        .sensoryFeedback(.success, trigger: takes)
+    }
+
+    /// « Pris » : coche la prochaine prise ; le retour de succès ne part qu'une fois la prise enregistrée.
+    private func take(_ item: SupplementDueItem) {
+        Task {
+            await model.toggle(item)
+            if model.item(for: item.supplement.id)?.isTaken == true { takes += 1 }
         }
     }
 

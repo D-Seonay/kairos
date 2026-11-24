@@ -7,8 +7,9 @@ import UIKit
 #endif
 
 /// La feuille d'ajout d'une photo de corps : le conseil, la pose, puis « Prendre une photo » ou « Choisir dans Photos ». Une fois
-/// l'image traitée, son aperçu et sa date, modifiable mais jamais après aujourd'hui. Si la pose a déjà une photo ce jour-là,
-/// « Enregistrer » propose de la remplacer, avec confirmation.
+/// l'image traitée, son aperçu et sa date (le jour de la case vide touchée, sinon celle de la photo), modifiable mais jamais après
+/// aujourd'hui. Si la pose a déjà une photo ce jour-là, « Enregistrer » propose de la remplacer, avec confirmation. Une image
+/// traitée ne s'abandonne qu'après confirmation.
 struct BodyPhotoAddSheet: View {
     let model: BodyPhotosModel
     let request: BodyPhotoAddRequest
@@ -18,6 +19,7 @@ struct BodyPhotoAddSheet: View {
     @State private var isProcessing = false
     @State private var isSaving = false
     @State private var replaced: BodyPhoto?
+    @State private var confirmsDiscard = false
     @State private var showsCamera = false
     @State private var showsPicker = false
     @State private var selection: PhotosPickerItem?
@@ -71,7 +73,13 @@ struct BodyPhotoAddSheet: View {
             } message: {
                 Text(PhotoText.replaceMessage)
             }
+            .confirmationDialog(PhotoText.discardPhotoTitle, isPresented: $confirmsDiscard, titleVisibility: .visible) {
+                Button(PhotoText.discardPhoto, role: .destructive) { dismiss() }
+                Button(PhotoText.keepPhoto, role: .cancel) {}
+            }
         }
+        // Une image traitée ne se perd pas d'un glissé : « Annuler » demande confirmation.
+        .interactiveDismissDisabled(draft != nil)
         .bodyPhotoPrivacy(model)
         .trackingCameraState($cameraState)
         .photosPicker(isPresented: $showsPicker, selection: $selection, matching: .images)
@@ -144,7 +152,9 @@ struct BodyPhotoAddSheet: View {
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
         ToolbarItem(placement: .cancellationAction) {
-            Button(PhotoText.cancel) { dismiss() }
+            Button(PhotoText.cancel) {
+                if draft == nil { dismiss() } else { confirmsDiscard = true }
+            }
         }
         ToolbarItem(placement: .confirmationAction) {
             Button(PhotoText.save) { Task { await confirmOrSave() } }
@@ -177,7 +187,7 @@ struct BodyPhotoAddSheet: View {
         let prepared = await model.prepare(data)
         isProcessing = false
         draft = prepared
-        if let prepared { takenAt = prepared.takenAt }
+        if let prepared { takenAt = request.takenAt(proposed: prepared.takenAt, calendar: model.calendar) }
     }
 
     /// Si la pose a déjà une photo ce jour-là, demande d'abord la confirmation du remplacement.

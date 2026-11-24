@@ -45,7 +45,7 @@ public struct BodyPhotosScreen: View {
         .toolbar {
             if !model.showsCover {
                 ToolbarItem(placement: .primaryAction) {
-                    Button { adding = BodyPhotoAddRequest(pose: .front) } label: {
+                    Button(action: addNext) {
                         Label(PhotoText.addPhoto, systemImage: "plus")
                     }
                 }
@@ -129,7 +129,7 @@ public struct BodyPhotosScreen: View {
             ForEach(model.days) { day in
                 BodyPhotoDayRow(model: model, day: day, columns: typeSize.isAccessibilitySize ? 2 : 3,
                                 onOpen: { viewed = ViewedPhoto(id: $0.id) },
-                                onAdd: { adding = BodyPhotoAddRequest(pose: $0) })
+                                onAdd: { adding = BodyPhotoAddRequest(pose: $0, day: day.day) })
             }
             if model.canCompare {
                 Button(PhotoText.compare, action: openCompare)
@@ -153,8 +153,8 @@ public struct BodyPhotosScreen: View {
                     .font(.footnote)
                     .foregroundStyle(PulsePalette.text2)
                     .fixedSize(horizontal: false, vertical: true)
-                Button(PhotoText.addPhoto) { adding = BodyPhotoAddRequest(pose: .front) }
-                    .buttonStyle(PillButtonStyle(prominent: true))
+                Button(PhotoText.addPhoto, action: addNext)
+                    .buttonStyle(PrimaryButtonStyle())
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -217,6 +217,11 @@ public struct BodyPhotosScreen: View {
     }
 
     // MARK: Actions
+
+    /// « + » et l'état vide : la première pose qui manque aujourd'hui.
+    private func addNext() {
+        adding = BodyPhotoAddRequest.next(in: model.days, today: model.today, calendar: model.calendar)
+    }
 
     private func openCompare() {
         compareModel = model.makeCompareModel()
@@ -320,12 +325,6 @@ private struct BodyPhotoDayRow: View {
             .overlay { shape.strokeBorder(PulsePalette.ink.opacity(0.25), style: StrokeStyle(lineWidth: 1, dash: [4, 4])) }
             .contentShape(shape)
     }
-}
-
-/// Une demande d'ajout : la pose proposée (celle de la case vide touchée, face depuis « + »).
-struct BodyPhotoAddRequest: Identifiable {
-    let id = UUID()
-    let pose: BodyPose
 }
 
 /// L'archive d'export des photos de corps, pour le sélecteur d'emplacement de Fichiers (jamais la feuille de partage). Elle ne

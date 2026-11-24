@@ -51,13 +51,16 @@ struct WeekStrip: View {
     }
 }
 
-/// La carte du jour : la séance et son lancement, « Séance faite » une fois validée, « Reprendre » pendant une séance.
+/// La carte du jour : la séance et son lancement (« Courir » un jour de course), « Séance faite » une fois validée, « Reprendre »
+/// pendant une séance.
 struct TodayPlanCard: View {
     let model: PlanningModel
     let train: TrainModel
     let day: PlanningDay
     let onStart: () -> Void
     let onResume: () -> Void
+    /// Lance la course du jour ; `nil`, la carte d'un jour de course n'a pas de bouton.
+    let onStartRun: (() -> Void)?
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
@@ -132,6 +135,11 @@ struct TodayPlanCard: View {
             Button(String(localized: "Lancer la séance", bundle: .module), action: onStart)
                 .buttonStyle(PrimaryButtonStyle())
                 .accessibilityIdentifier(PlanningIdentifiers.start)
+        } else if day.routine?.kind == .run, let onStartRun {
+            Button(String(localized: "Courir", bundle: .module), action: onStartRun)
+                .buttonStyle(PrimaryButtonStyle())
+                .accessibilityLabel(String(localized: "Courir : \(model.title(of: day))", bundle: .module))
+                .accessibilityIdentifier(PlanningIdentifiers.startRun)
         }
     }
 }
@@ -142,6 +150,8 @@ struct WeekDayRow: View {
     let day: PlanningDay
     /// Ouvre la séance faite ; `nil` sans séance faite.
     let onOpen: (() -> Void)?
+    /// « Garder le jour prévu » : l'appelant rend le jour à la semaine type et relit la séance du jour.
+    let onKeepPlanned: () -> Void
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @ScaledMetric(relativeTo: .title3) private var dateWidth: CGFloat = 40
 
@@ -161,7 +171,7 @@ struct WeekDayRow: View {
                 }
             }
             if model.canKeepPlanned(day) {
-                Button { Task { await model.keepPlanned(day) } } label: {
+                Button(action: onKeepPlanned) {
                     Label(String(localized: "Garder le jour prévu", bundle: .module), systemImage: "arrow.uturn.backward")
                 }
             }
@@ -172,7 +182,7 @@ struct WeekDayRow: View {
             if !model.targets(for: day).isEmpty { model.moving = day }
         }
         .accessibilityAction(named: String(localized: "Garder le jour prévu", bundle: .module)) {
-            if model.canKeepPlanned(day) { Task { await model.keepPlanned(day) } }
+            if model.canKeepPlanned(day) { onKeepPlanned() }
         }
         .accessibilityIdentifier(PlanningIdentifiers.dayPrefix + model.dayNumber(day))
     }

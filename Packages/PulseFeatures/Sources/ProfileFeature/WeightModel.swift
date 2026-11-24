@@ -71,10 +71,12 @@ public final class WeightModel {
         hasLoaded = true
     }
 
-    /// Ouvre la feuille sur une pesée vide, datée de maintenant.
+    /// Ouvre la feuille sur une pesée datée de maintenant, préremplie du dernier poids mesuré : le poids bouge peu d'une pesée à
+    /// l'autre. Vide sans pesée.
     public func startNew() {
         editorError = nil
-        editor = WeighInDraft(date: environment.now())
+        let last = overview?.measurements.lazy.compactMap(\.weightKg).first
+        editor = WeighInDraft(weightText: last.map { PulseFormat.decimal($0, maxFractionDigits: 2) } ?? "", date: environment.now())
     }
 
     /// Ouvre la feuille sur une saisie manuelle ; une mesure Apple Santé ne se modifie pas.
