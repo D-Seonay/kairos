@@ -270,47 +270,64 @@ private struct SleepChartCard: View {
 // MARK: - Journées par état de forme
 
 /// Le nombre de jours par catégorie de forme, en barres horizontales d'encre : le nom est toujours écrit.
+///
+/// Des rangées SwiftUI plutôt qu'un `Chart` : l'axe Y de Swift Charts posait chaque nom sur la limite haute de sa bande,
+/// sous la barre de la rangée précédente. Ici le nom et le nombre de jours tiennent une ligne, la barre est en dessous.
 private struct CategoriesCard: View {
     let categories: [CategoryCount]
     let window: StatsWindow
-    @ScaledMetric(relativeTo: .body) private var rowHeight: CGFloat = 34
+    @ScaledMetric(relativeTo: .body) private var barHeight: CGFloat = 10
+    @ScaledMetric(relativeTo: .body) private var rowSpacing: CGFloat = 14
 
     var body: some View {
         StatsChartCard(title: String(localized: "Journées par état de forme", bundle: .module)) {
             if categories.allSatisfy({ $0.days == 0 }) {
                 StatsEmptyNote(reason: String(localized: "aucun score du matin sur la période", bundle: .module))
             } else {
-                chart
+                rows
             }
         }
     }
 
-    private var chart: some View {
-        let daysLabel = String(localized: "Jours", bundle: .module)
-        let stateLabel = String(localized: "État", bundle: .module)
-        return Chart(categories) { count in
-            let spoken = StatsText.categorySpoken(count)
-            BarMark(x: .value(daysLabel, count.days), y: .value(stateLabel, count.category.localizedName))
-                .foregroundStyle(StatsInk.full)
-                .annotation(position: .trailing, spacing: 6) {
-                    Text("\(count.days)")
-                        .font(PulseFont.value(.caption, weight: .semibold))
-                        .foregroundStyle(PulsePalette.text2)
-                        .accessibilityHidden(true)
-                }
-                .accessibilityLabel(spoken.label)
-                .accessibilityValue(spoken.value)
-        }
-        .chartXAxis(.hidden)
-        .chartYAxis {
-            AxisMarks { _ in
-                AxisValueLabel().foregroundStyle(PulsePalette.text2)
+    private var rows: some View {
+        let maxDays = max(categories.map(\.days).max() ?? 0, 1)
+        return VStack(alignment: .leading, spacing: rowSpacing) {
+            ForEach(categories) { count in
+                row(count, fraction: CGFloat(count.days) / CGFloat(maxDays))
             }
         }
-        .frame(height: CGFloat(categories.count) * rowHeight)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(StatsText.categoriesSummary(categories, period: window.period))
         .accessibilityChartDescriptor(StatsChartDescriptors.categories(categories, window: window))
+    }
+
+    private func row(_ count: CategoryCount, fraction: CGFloat) -> some View {
+        let spoken = StatsText.categorySpoken(count)
+        return VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text(count.category.localizedName)
+                    .font(.subheadline)
+                    .foregroundStyle(PulsePalette.text2)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 8)
+                Text("\(count.days)")
+                    .font(PulseFont.value(.subheadline, weight: .semibold))
+                    .monospacedDigit()
+                    .foregroundStyle(PulsePalette.text)
+            }
+            // Le fond reste visible à zéro jour : la catégorie existe, elle est simplement vide sur la période.
+            GeometryReader { proxy in
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 2).fill(StatsInk.zone)
+                    RoundedRectangle(cornerRadius: 2).fill(StatsInk.full)
+                        .frame(width: proxy.size.width * fraction)
+                }
+            }
+            .frame(height: barHeight)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(spoken.label)
+        .accessibilityValue(spoken.value)
     }
 }
 
