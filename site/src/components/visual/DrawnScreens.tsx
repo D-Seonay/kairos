@@ -1,11 +1,11 @@
 /**
- * Two app screens drawn in HTML and CSS, for the features that have no raw
+ * App screens drawn in HTML and CSS, for the features that have no raw
  * capture. They sit in a PhoneFrame screen and size everything in em from a
  * root of 3.4cqw (the phone's width), so they scale with the frame. They only
  * show what the published build has: the Compléments screen (count of the day,
  * next intake with « Pris », the moments and their checks, 30-day regularity)
- * and the lock screen widgets (score, séance du jour) with the session Live
- * Activity.
+ * the lock screen widgets (score, séance du jour) with the session Live
+ * Activity, a run in progress and the Nuit screen.
  */
 
 type DrawnProps = { label: string; className?: string };
@@ -354,6 +354,252 @@ export function WidgetsScreen({ label, className }: DrawnProps) {
       <span className="absolute bottom-[2em] left-[2.2em] size-[2.6em] rounded-full bg-paper/14 backdrop-blur-sm" />
       <span className="absolute right-[2.2em] bottom-[2em] size-[2.6em] rounded-full bg-paper/14 backdrop-blur-sm" />
       <span className="absolute bottom-[0.55em] left-1/2 h-[0.3em] w-[8.5em] -translate-x-1/2 rounded-full bg-paper/80" />
+    </div>
+  );
+}
+
+/** The inline navigation bar of a pushed or presented screen: a round button on the left, the title in the middle. */
+function NavBar({ title, glyph }: { title: string; glyph: "back" | "down" }) {
+  return (
+    <div className="mt-[0.9em] grid grid-cols-[2.2em_1fr_2.2em] items-center px-[1.1em]">
+      <span className="grid size-[2.2em] place-items-center rounded-full bg-card shadow-[0_0.1em_0.5em_rgb(20_20_20/0.08)]">
+        <svg viewBox="0 0 16 16" className="h-[0.85em]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          {glyph === "back" ? <path d="M11 2L5 8l6 6" /> : <path d="M2.5 5.5L8 11l5.5-5.5" />}
+        </svg>
+      </span>
+      <p className="text-center text-[1em] font-semibold">{title}</p>
+      <span />
+    </div>
+  );
+}
+
+/**
+ * A run in progress, as RunView lays it out: the goal line (RunText.goalLine),
+ * the moving time in big, the distance at two decimals, the pace of the
+ * current kilometre and the average, the goal's progress, the « Annonces
+ * vocales » switch, then « Pause » and « Terminer ». No live map: the app has
+ * none. No heart rate either: it only shows when the workout session gives one.
+ * The figures agree: 4,38 km in 24:13 is 5'32"/km, and 24:13 of 30 min is 81 %.
+ */
+export function RunScreen({ label, className }: DrawnProps) {
+  return (
+    <div
+      role="img"
+      aria-label={label}
+      className={["drawn-screen drawn-paper absolute inset-0 overflow-hidden text-ink", className].filter(Boolean).join(" ")}
+      style={{ fontSize: "3.55cqw" }}
+    >
+      <StatusBar />
+      <NavBar title="Course" glyph="down" />
+
+      <div className="flex flex-col items-center px-[1.1em] pt-[1.3em] text-center">
+        <p className="text-[1.02em] font-semibold">Footing facile · obj. 30 min</p>
+        <p className="mt-[0.9em] text-[5.6em] leading-[1] font-extralight tracking-[-0.05em] tabular-nums">24:13</p>
+        <p className="text-[2.6em] leading-[1.05] font-light tracking-[-0.04em] text-ink/70 tabular-nums">4,38 km</p>
+
+        <div className="mt-[1em] grid w-full grid-cols-2 gap-[0.7em]">
+          {[
+            { value: "5'31\"/km", name: "allure km" },
+            { value: "5'32\"/km", name: "moyenne" },
+          ].map((pace) => (
+            <div key={pace.name}>
+              <p className="text-[1.45em] font-semibold tracking-[-0.02em] tabular-nums">{pace.value}</p>
+              <Eyebrow className="mt-[0.15em] text-muted">{pace.name}</Eyebrow>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-[1.1em] flex w-full items-center gap-[0.7em]">
+          <span className="h-[0.45em] flex-1 overflow-hidden rounded-full bg-ink/12">
+            <span className="block h-full rounded-full bg-ink/70" style={{ width: "81%" }} />
+          </span>
+          <span className="text-[0.95em] font-semibold tabular-nums">81&nbsp;%</span>
+        </div>
+
+        <div className={`${card} mt-[1.2em] flex w-full items-center gap-[0.8em] p-[0.95em] text-left`}>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[0.95em] font-semibold">Annonces vocales</span>
+            <span className="mt-[0.1em] block text-[0.72em] text-muted">Distance, temps et allure à chaque kilomètre</span>
+          </span>
+          <span className="relative h-[1.55em] w-[2.6em] shrink-0 rounded-full bg-ink/70">
+            <span className="absolute top-[0.15em] right-[0.15em] size-[1.25em] rounded-full bg-card" />
+          </span>
+        </div>
+      </div>
+
+      <div className="absolute inset-x-[1.1em] bottom-[1.6em] grid grid-cols-2 gap-[0.6em] text-center text-[0.95em] font-semibold">
+        <span className="rounded-full bg-card py-[0.85em] shadow-[0_0.1em_0.5em_rgb(20_20_20/0.08)]">Pause</span>
+        <span className="rounded-full bg-ink py-[0.85em] text-paper">Terminer</span>
+      </div>
+    </div>
+  );
+}
+
+/** The four rows of the hypnogram, top to bottom (SleepStage.chartOrder), with their ink on the print. */
+const STAGE_ROWS = [
+  { stage: "awake", name: "Éveil", tone: "bg-signal" },
+  { stage: "rem", name: "Paradoxal", tone: "bg-ink/45" },
+  { stage: "core", name: "Léger", tone: "bg-ink/70" },
+  { stage: "deep", name: "Profond", tone: "bg-ink" },
+] as const;
+
+type Stage = (typeof STAGE_ROWS)[number]["stage"];
+
+/**
+ * One night, 23:10 to 06:50 (460 minutes), cycle by cycle. The segments add up
+ * to the breakdown below: 85 min of deep, 242 of light, 105 of REM, 28 awake,
+ * and two awakenings before the last one.
+ */
+export const NIGHT_SEGMENTS: { stage: Stage; minutes: number }[] = [
+  { stage: "core", minutes: 15 },
+  { stage: "deep", minutes: 35 },
+  { stage: "core", minutes: 35 },
+  { stage: "rem", minutes: 15 },
+  { stage: "awake", minutes: 6 },
+  { stage: "core", minutes: 40 },
+  { stage: "deep", minutes: 30 },
+  { stage: "core", minutes: 30 },
+  { stage: "rem", minutes: 25 },
+  { stage: "core", minutes: 45 },
+  { stage: "deep", minutes: 20 },
+  { stage: "rem", minutes: 30 },
+  { stage: "awake", minutes: 10 },
+  { stage: "core", minutes: 50 },
+  { stage: "rem", minutes: 35 },
+  { stage: "core", minutes: 27 },
+  { stage: "awake", minutes: 12 },
+];
+
+const NIGHT_MINUTES = NIGHT_SEGMENTS.reduce((sum, segment) => sum + segment.minutes, 0);
+
+/** Where each segment starts, in minutes after 23:10. */
+const NIGHT_STARTS = NIGHT_SEGMENTS.map((_, index) =>
+  NIGHT_SEGMENTS.slice(0, index).reduce((sum, segment) => sum + segment.minutes, 0),
+);
+
+/** The hour marks of the axis, in minutes after 23:10. */
+const NIGHT_TICKS = [
+  { label: "00:00", minute: 50 },
+  { label: "02:00", minute: 170 },
+  { label: "04:00", minute: 290 },
+  { label: "06:00", minute: 410 },
+];
+
+/** « 1 h 25 », « 28 min » (PulseFormat.duration). */
+const duration = (minutes: number) => {
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  if (hours === 0) return `${rest} min`;
+  if (rest === 0) return `${hours} h`;
+  return `${hours} h ${String(rest).padStart(2, "0")}`;
+};
+
+/** The breakdown, in the order of NightText.breakdownRows: deep, light, REM, awake. */
+export const NIGHT_BREAKDOWN = (["deep", "core", "rem", "awake"] as const).map((stage) => {
+  const minutes = NIGHT_SEGMENTS.filter((segment) => segment.stage === stage).reduce((sum, segment) => sum + segment.minutes, 0);
+  const row = STAGE_ROWS.find((entry) => entry.stage === stage)!;
+  return { stage, name: row.name, tone: row.tone, minutes, share: Math.round((minutes / NIGHT_MINUTES) * 100) };
+});
+
+/**
+ * The Nuit screen, top to bottom as NightScreen lays it out: « Nuit du 23 au
+ * 24 nov. » between ‹ and ›, « Temps endormi » with the times and awakenings
+ * (NightText.times), « Phases de la nuit » with the hypnogram, then
+ * « Répartition ». The app colours each stage; the print keeps to ink, with
+ * the signal for the awake minutes.
+ */
+export function NightScreen({ label, className }: DrawnProps) {
+  const asleep = NIGHT_BREAKDOWN.filter((row) => row.stage !== "awake").reduce((sum, row) => sum + row.minutes, 0);
+  return (
+    <div
+      role="img"
+      aria-label={label}
+      className={["drawn-screen drawn-paper absolute inset-0 overflow-hidden text-ink", className].filter(Boolean).join(" ")}
+      style={{ fontSize: "3.55cqw" }}
+    >
+      <StatusBar />
+      <NavBar title="Nuit" glyph="back" />
+
+      <div className="px-[1.1em] pt-[0.7em]">
+        <div className="flex items-center justify-between px-[0.3em] text-[1.25em] font-semibold">
+          <span aria-hidden="true" className="text-[0.8em]">‹</span>
+          <span>Nuit du 23 au 24 nov.</span>
+          <span aria-hidden="true" className="text-[0.8em] text-ink/30">›</span>
+        </div>
+
+        <div className={`${card} mt-[0.7em] p-[1em]`}>
+          <Eyebrow className="text-muted">Temps endormi</Eyebrow>
+          <p className="mt-[0.15em] text-[2.3em] leading-none font-light tracking-[-0.04em]">{duration(asleep)}</p>
+          <p className="mt-[0.4em] text-[0.74em] text-muted">Endormi à 23:10 · Réveillé à 06:50 · 2 réveils</p>
+        </div>
+
+        <div className={`${card} mt-[0.7em] p-[1em]`}>
+          <Eyebrow className="text-muted">Phases de la nuit</Eyebrow>
+          {/* Rows of 1.3em: the stage name on the left, the plot on the right with one block per segment. */}
+          <div className="relative mt-[0.6em] h-[5.2em]">
+            {STAGE_ROWS.map((row, index) => (
+              <span
+                key={row.stage}
+                className="absolute left-0 flex items-center text-[0.68em] text-muted"
+                style={{ top: `${(index * 1.3) / 0.68}em`, height: `${1.3 / 0.68}em` }}
+              >
+                {row.name}
+              </span>
+            ))}
+            <div className="absolute inset-y-0 right-0 left-[4.4em]">
+              {STAGE_ROWS.map((row, index) => (
+                <span
+                  key={row.stage}
+                  className="absolute inset-x-0 border-b border-dashed border-ink/10"
+                  style={{ top: `${index * 1.3}em`, height: "1.3em" }}
+                />
+              ))}
+              {NIGHT_SEGMENTS.map((segment, index) => {
+                const row = STAGE_ROWS.findIndex((entry) => entry.stage === segment.stage);
+                const left = (NIGHT_STARTS[index] / NIGHT_MINUTES) * 100;
+                return (
+                  <span
+                    key={index}
+                    className={`absolute h-[0.95em] rounded-[0.15em] ${STAGE_ROWS[row].tone}`}
+                    style={{ left: `${left}%`, width: `${(segment.minutes / NIGHT_MINUTES) * 100}%`, top: `${row * 1.3 + 0.17}em` }}
+                  />
+                );
+              })}
+            </div>
+          </div>
+          {/* Hour marks where they fall: 23:10 is minute 0, so 00:00 is minute 50, 02:00 is 170 and so on. */}
+          <div className="relative mt-[0.35em] ml-[4.4em] h-[0.7em]">
+            {NIGHT_TICKS.map((tick) => (
+              <span
+                key={tick.label}
+                className="absolute -translate-x-1/2 text-[0.58em] text-muted tabular-nums"
+                style={{ left: `${(tick.minute / NIGHT_MINUTES) * 100}%` }}
+              >
+                {tick.label}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className={`${card} mt-[0.7em] p-[1em]`}>
+          <Eyebrow className="text-muted">Répartition</Eyebrow>
+          <div className="mt-[0.5em] flex flex-col gap-[0.6em]">
+            {NIGHT_BREAKDOWN.map((row) => (
+              <div key={row.stage}>
+                <p className="flex items-baseline gap-[0.45em] text-[0.8em]">
+                  <span className="font-semibold">{row.name}</span>
+                  <span className="tabular-nums">{duration(row.minutes)}</span>
+                  <span className="text-muted tabular-nums">{row.share}&nbsp;%</span>
+                </p>
+                <span className="mt-[0.25em] block h-[0.4em] overflow-hidden rounded-full bg-ink/10">
+                  <span className={`block h-full rounded-full ${row.tone}`} style={{ width: `${row.share}%` }} />
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <TabBar />
     </div>
   );
 }

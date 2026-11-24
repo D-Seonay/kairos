@@ -1,6 +1,6 @@
 # Pulse — fiche App Store Connect
 
-Document à recopier dans App Store Connect. Version de l'app : 1.0.2 (le numéro de build est attribué à l'envoi). Dernière relecture contre le code : 24 novembre 2026, branche `v2b-photos` (photos de séance et photos de corps).
+Document à recopier dans App Store Connect. Version de l'app : 1.0.3 (le numéro de build est attribué à l'envoi ; 1.0.3 (3) soumise le 24 novembre 2026). Dernière relecture contre le code : 24 novembre 2026, branche `v2b-photos` (photos de séance et photos de corps).
 
 Si le code change (nouveau service, nouvelle donnée envoyée hors de l'iPhone, nouvelle analytics), reprends ce document et la politique de confidentialité avant de soumettre : chaque phrase doit rester vraie pour le build envoyé.
 
@@ -157,7 +157,7 @@ Un score de récupération chaque matin, des séances de muscu guidées et tes c
 Pulse t'aide à décider comment t'entraîner aujourd'hui, à partir de ta nuit.
 
 SCORE DE RÉCUPÉRATION
-Chaque matin, Pulse lit ton sommeil, ta variabilité cardiaque (VFC) et ta fréquence cardiaque au repos dans Apple Santé, et les compare à ta propre ligne de base. Tu vois un score, ce qui l'explique, et ce qui manque quand une mesure est absente. Pas de montre ? Un check-in de trois questions prend le relais.
+Chaque matin, Pulse lit ton sommeil, ta variabilité cardiaque (VFC) et ta fréquence cardiaque au repos dans Apple Santé, et les compare à ta propre ligne de base. Tu vois un score, ce qui l'explique, et ce qui manque quand une mesure est absente. Pas de montre ? Un check-in de trois questions prend le relais. L'écran Nuit détaille tes phases de sommeil : profond, paradoxal, léger et éveil.
 
 SÉANCES DE MUSCULATION
 Un programme adapté à ton niveau, ton matériel et tes douleurs ou limitations, une séance live avec chrono de repos, séries, records et récap. Pulse ajuste la séance du jour selon ta récupération, et n'augmente les charges que lorsque ta ligne de base le permet. Tu peux aussi faire une séance libre, saisir une séance passée ou importer ton historique depuis Hevy.
@@ -184,6 +184,18 @@ Pulse n'est pas un dispositif médical. Le score et les ajustements sont des rep
 ```
 
 Points à contrôler avant de coller : chaque fonction citée existe dans le build soumis (widgets, écran verrouillé, Live Activity, import Hevy, rappels de compléments, course GPS, photos de séance et photos de corps).
+
+### Nouveautés de la version 1.0.3
+
+```
+Nouveautés de la 1.0.3
+
+• Course GPS : lance ta course depuis Pulse. Temps, distance et allure en direct, une annonce vocale à chaque kilomètre, la course sur l'écran verrouillé en Live Activity, puis un récap avec ton tracé et tes temps au kilomètre. La course part dans Apple Santé avec son parcours et compte dans ta charge.
+• Photos : ajoute jusqu'à six photos à une séance. Tes photos de corps (face, profil, dos) restent sur ton iPhone, protégées par Face ID.
+• Sommeil : un nouvel écran Nuit montre tes phases (profond, paradoxal, léger, éveil) et ton hypnogramme. Les stats empilent tes nuits par phase.
+• Carte des muscles en version homme ou femme.
+• De nombreuses corrections et améliorations d'interface.
+```
 
 ### Mots-clés (100 caractères max, séparés par des virgules, sans espace)
 

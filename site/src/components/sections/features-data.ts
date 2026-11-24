@@ -1,5 +1,6 @@
 /**
- * The six features, in the order of the spec (§6.3, point 4). Every sentence
+ * The eight features: the six of the spec (§6.3, point 4), with the Nuit
+ * screen after the score and the GPS run after the session (version 1.0.3). Every sentence
  * is a short rewrite of the App Store description (docs/app-store/fiche.md,
  * §5): nothing here may promise more than the published build does.
  */
@@ -35,17 +36,35 @@ export const FEATURES: Feature[] = [
     alt: TODAY_SCREEN_ALT,
   },
   {
-    id: "seance",
+    id: "nuit",
     index: "02",
+    eyebrow: "Sommeil",
+    title: "Ta nuit, phase par phase.",
+    body: "L'écran Nuit montre ton hypnogramme et ta répartition entre sommeil profond, paradoxal, léger et éveil, à côté de ta moyenne. Tu passes d'une nuit à l'autre, et tes statistiques empilent chaque nuit par phase.",
+    screen: null,
+    alt: "Dessin de l'écran Nuit : la nuit du 23 au 24 novembre, 7 h 12 endormi, de 23:10 à 06:50 avec 2 réveils. L'hypnogramme alterne les phases, puis la répartition : profond 1 h 25, léger 4 h 02, paradoxal 1 h 45, éveil 28 min.",
+  },
+  {
+    id: "seance",
+    index: "03",
     eyebrow: "Séance live",
     title: "Chaque série compte.",
-    body: "Chrono de repos, séries, records et récap : la séance se suit en direct. Tu peux aussi faire une séance libre, saisir une séance passée ou importer ton historique depuis Hevy.",
+    body: "Chrono de repos, séries, records et récap : la séance se suit en direct. Ajoute jusqu'à six photos à une séance. Tu peux aussi faire une séance libre, saisir une séance passée ou importer ton historique depuis Hevy.",
     screen: "/screens/workout.jpg",
     alt: "Le récap d'une séance Push dans Pulse : 1 h 15, 13 séries, 6 280 kg, un record, et les muscles sollicités sur la silhouette.",
   },
   {
+    id: "course",
+    index: "04",
+    eyebrow: "Course GPS",
+    title: "Cours, téléphone en poche.",
+    body: "Lance ta course depuis Pulse : temps, distance et allure en direct, une annonce vocale à chaque kilomètre, et la course sur l'écran verrouillé. Le récap montre ton tracé et tes temps au kilomètre. La course part dans Apple Santé avec son parcours et compte dans ta charge.",
+    screen: null,
+    alt: "Dessin de l'écran Course : footing facile avec un objectif de 30 minutes, 24:13 de course, 4,38 km, une allure de 5'31\" au kilomètre en cours et 5'32\" en moyenne, l'objectif atteint à 81 %, les annonces vocales activées, et les boutons Pause et Terminer.",
+  },
+  {
     id: "programme",
-    index: "03",
+    index: "05",
     eyebrow: "Programme",
     title: "Un programme à ta mesure.",
     body: "Adapté à ton niveau, ton matériel et tes douleurs ou limitations. Pulse ajuste la séance du jour selon ta récupération, et n'augmente les charges que lorsque ta ligne de base le permet.",
@@ -54,7 +73,7 @@ export const FEATURES: Feature[] = [
   },
   {
     id: "stats",
-    index: "04",
+    index: "06",
     eyebrow: "Planning et statistiques",
     title: "Tes tendances, sans bruit.",
     body: "Ta charge d'entraînement sur 28 jours, tes courbes de variabilité et de fréquence cardiaque, tes muscles travaillés, ton assiduité et tes records. Tes courses et sorties à vélo d'Apple Santé comptent dans ta charge.",
@@ -63,7 +82,7 @@ export const FEATURES: Feature[] = [
   },
   {
     id: "complements",
-    index: "05",
+    index: "07",
     eyebrow: "Compléments",
     title: "Coché en une touche.",
     body: "Suis tes prises de vitamine D, de magnésium, de caféine et de protéines, ton stock et ta régularité, avec des rappels. Pulse ne conseille jamais de dose.",
@@ -72,10 +91,10 @@ export const FEATURES: Feature[] = [
   },
   {
     id: "widgets",
-    index: "06",
+    index: "08",
     eyebrow: "Widgets et Live Activity",
     title: "Sans ouvrir l'app.",
-    body: "Ton score et ta séance du jour sur l'écran d'accueil et l'écran verrouillé, et ta séance en cours en Live Activity.",
+    body: "Ton score et ta séance du jour sur l'écran d'accueil et l'écran verrouillé, et ta séance ou ta course en cours en Live Activity.",
     screen: null,
     alt: "Dessin d'un écran verrouillé : le widget du score de récupération, celui de la séance du jour, et la Live Activity d'une séance en cours pendant un repos.",
   },

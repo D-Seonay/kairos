@@ -12,16 +12,18 @@ const PUBLIC = path.resolve(import.meta.dirname, "../../../public");
 const sentences = (text: string) => text.split(/(?<=[.!?…])\s+/);
 
 describe("FEATURES", () => {
-  it("has six entries, indexed 01 to 06, with unique ids", () => {
-    expect(FEATURES).toHaveLength(6);
-    expect(FEATURES.map((feature) => feature.index)).toEqual(["01", "02", "03", "04", "05", "06"]);
-    expect(new Set(FEATURES.map((feature) => feature.id)).size).toBe(6);
+  it("has eight entries, indexed 01 to 08, with unique ids", () => {
+    expect(FEATURES).toHaveLength(8);
+    expect(FEATURES.map((feature) => feature.index)).toEqual(["01", "02", "03", "04", "05", "06", "07", "08"]);
+    expect(new Set(FEATURES.map((feature) => feature.id)).size).toBe(8);
   });
 
-  it("follows the order of the spec: score, session, programme, stats, supplements, widgets", () => {
+  it("follows the order of the spec, with the night after the score and the run after the session", () => {
     expect(FEATURES.map((feature) => feature.id)).toEqual([
       "score",
+      "nuit",
       "seance",
+      "course",
       "programme",
       "stats",
       "complements",
@@ -37,9 +39,9 @@ describe("FEATURES", () => {
     }
   });
 
-  it("draws supplements and widgets instead of showing a capture", () => {
+  it("draws the night, the run, supplements and widgets instead of showing a capture", () => {
     const drawn = FEATURES.filter((feature) => feature.screen === null).map((feature) => feature.id);
-    expect(drawn).toEqual(["complements", "widgets"]);
+    expect(drawn).toEqual(["nuit", "course", "complements", "widgets"]);
   });
 
   it("gives every entry an eyebrow, a title, a body and a description of its visual", () => {
