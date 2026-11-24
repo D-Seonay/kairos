@@ -38,6 +38,8 @@ struct LoggedSet {
 struct TrainFixture {
     let profiles: any ProfileRepository
     let programs = InMemoryProgramRepository()
+    /// Les lignes de la semaine datée : un jour déplacé ou retiré s'y écrit.
+    let scheduled = InMemoryScheduledDayRepository()
     let recovery = InMemoryRecoveryRepository(calendar: TrainClock.calendar)
     let environment: TrainEnvironment
     let activeSession: ActiveSessionService
@@ -69,7 +71,8 @@ struct TrainFixture {
         environment = TrainEnvironment(
             profiles: profiles, programs: programs, recovery: recovery, workouts: workouts, userExercises: userExercises,
             exerciseSettings: exerciseSettings, personalRecords: personalRecords, records: records,
-            importer: importer, library: library, activeSession: activeSession, calendar: calendar, now: clock)
+            importer: importer, library: library, activeSession: activeSession, scheduledDays: scheduled, calendar: calendar,
+            now: clock)
     }
 
     /// Enregistre `program` et le rend actif.

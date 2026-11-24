@@ -21,7 +21,8 @@ struct TrainTiles: View {
         layout {
             StrengthTile(subtitle: model.strengthSubtitle, spokenSubtitle: model.strengthSubtitleSpoken,
                          onOpenToday: onOpenToday, onStart: onStart)
-            RunTile(nextRun: model.nextRun, daysUntil: model.nextRun.flatMap { model.daysUntil($0.weekday) }, onStart: onStartRun)
+            RunTile(nextRun: model.nextRun, daysUntil: model.nextRun.flatMap { model.daysUntil($0.weekday) },
+                     startLabel: model.runStartLabel, onStart: onStartRun)
         }
     }
 }
@@ -72,6 +73,8 @@ private struct RunTile: View {
     let nextRun: NextSession?
     /// Les jours d'ici la prochaine course : 0 aujourd'hui, 1 demain.
     let daysUntil: Int?
+    /// Ce que le bouton lance, dit à VoiceOver.
+    let startLabel: String
     let onStart: () -> Void
 
     var body: some View {
@@ -96,13 +99,6 @@ private struct RunTile: View {
                     .accessibilityIdentifier(TrainIdentifiers.runStart)
             }
         }
-    }
-
-    /// « Courir » dit ce qu'il lance : la course du jour, ou une course libre.
-    private var startLabel: String {
-        daysUntil == 0
-            ? String(localized: "Lancer la course du jour", bundle: .module)
-            : String(localized: "Lancer une course libre", bundle: .module)
     }
 
     /// « Sortie facile · aujourd'hui », « Fractionné · prévue demain », « Sortie longue · prévue samedi ».

@@ -139,3 +139,47 @@ import Testing
     #expect(other.runLaunch() == RunLaunch.free())
     #expect(TrainModel(environment: monday.environment).runLaunch() == RunLaunch.free())
 }
+
+/// Une ligne de la semaine datée d'aujourd'hui (samedi 7 novembre) : `routineDayID` nul pour un jour de repos.
+private func override(_ routineDay: RoutineDay?, for program: Program) -> ScheduledDay {
+    let date = TrainClock.date(day: 7, hour: 0)
+    return ScheduledDay(date: date, programID: program.id, routineDayID: routineDay?.id, title: routineDay?.name ?? "Repos",
+                        kind: routineDay?.kind == .run ? .run : routineDay == nil ? .rest : .strength, status: .planned,
+                        createdAt: date, updatedAt: date)
+}
+
+/// Le bouton « Courir » dit ce qu'il lance, d'après la semaine datée et non la semaine type.
+@MainActor @Test func runStartLabelFollowsTheDatedWeek() async throws {
+    let program = pplProgram(withRun: true)
+
+    // La semaine type place le footing aujourd'hui, mais il a été déplacé : course libre, et le libellé le dit.
+    let moved = TrainFixture(now: TrainClock.date(day: 7, hour: 9))
+    try await moved.activate(program)
+    try await moved.scheduled.save(override(nil, for: program))
+    let movedModel = TrainModel(environment: moved.environment)
+    await movedModel.refresh()
+    #expect(movedModel.nextRun?.weekday == .saturday && movedModel.daysUntil(.saturday) == 0)
+    #expect(movedModel.runLaunch() == RunLaunch.free() && !movedModel.runLaunchIsPlanned)
+    #expect(movedModel.runStartLabel == "Lancer une course libre")
+
+    // L'inverse : un lundi sans course dans la semaine type, mais la semaine datée y place le footing.
+    let monday = TrainFixture()
+    try await monday.activate(program)
+    let footing = try #require(program.days.first { $0.kind == .run })
+    let date = TrainClock.date(day: 2, hour: 0)
+    try await monday.scheduled.save(ScheduledDay(
+        date: date, programID: program.id, routineDayID: footing.id, title: footing.name, kind: .run, status: .planned,
+        createdAt: date, updatedAt: date))
+    let placed = TrainModel(environment: monday.environment)
+    await placed.refresh()
+    #expect(placed.daysUntil(.saturday) == 5)
+    #expect(placed.runLaunch().routineDayID == footing.id && placed.runLaunchIsPlanned)
+    #expect(placed.runStartLabel == "Lancer la course du jour")
+
+    // Sans override, la course du jour de la semaine type : le libellé reste « la course du jour ».
+    let plain = TrainFixture(now: TrainClock.date(day: 7, hour: 9))
+    try await plain.activate(program)
+    let plainModel = TrainModel(environment: plain.environment)
+    await plainModel.refresh()
+    #expect(plainModel.runStartLabel == "Lancer la course du jour")
+}

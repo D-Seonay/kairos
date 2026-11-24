@@ -148,8 +148,20 @@ public final class TrainModel {
     /// La course que « Courir » lance : celle du jour, ajustée comme sur l'accueil, quand le programme en place une aujourd'hui ;
     /// sinon une course libre. La prochaine course d'un autre jour ne se lance pas : « Courir » ne la devance pas.
     public func runLaunch() -> RunLaunch {
-        guard let today, case .run(let day) = today.plannedDay else { return .free() }
-        return .planned(day, programID: program?.id, adjusted: today.status == .adjusted ? today.adjusted : nil)
+        guard let day = todaysRun else { return .free() }
+        return .planned(day, programID: program?.id, adjusted: today?.status == .adjusted ? today?.adjusted : nil)
+    }
+
+    /// Vrai quand `runLaunch()` rend la course du jour plutôt qu'une course libre ; le libellé du bouton en dépend, pour dire ce
+    /// que le bouton lance même quand la semaine datée a déplacé la course.
+    var runLaunchIsPlanned: Bool {
+        todaysRun != nil
+    }
+
+    /// La course de la semaine datée d'aujourd'hui, déplacements compris ; `nil` sans course aujourd'hui.
+    private var todaysRun: RoutineDay? {
+        guard case .run(let day)? = today?.plannedDay else { return nil }
+        return day
     }
 
     // MARK: - Interne
