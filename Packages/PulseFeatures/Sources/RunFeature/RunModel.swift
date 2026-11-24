@@ -165,7 +165,8 @@ public final class RunModel {
     }
 
     func showRecap(_ data: RunRecapData) {
-        let recap = RunRecapModel(data: data, service: environment.service, startedWithoutSignal: startedWithoutSignal)
+        let recap = RunRecapModel(data: data, service: environment.service, startedWithoutSignal: startedWithoutSignal,
+                                  sessionPhotos: environment.sessionPhotos, calendar: environment.calendar)
         recap.onClose = { [weak coordinator] in coordinator?.close() }
         phase = .recap(recap)
     }

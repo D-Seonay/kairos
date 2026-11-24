@@ -1,4 +1,5 @@
 import Foundation
+import PhotosFeature
 import PulseDomain
 import PulseServices
 @testable import RunFeature
@@ -133,5 +134,36 @@ struct RunModelTests {
         await coordinator.model().cancel()
         #expect(!coordinator.isPresented)
         #expect(await fixture.service.current() == nil)
+    }
+}
+
+@MainActor
+@Suite(.timeLimit(.minutes(1)))
+struct RunRecapPhotosTests {
+    @Test func runRecapPhotosUseTheRunSessionID() async throws {
+        let fixture = RunFeatureFixture(withPhotos: true)
+        let coordinator = fixture.coordinator()
+        coordinator.prepare(.free())
+        let model = coordinator.model()
+        await model.start()
+        await model.finish()
+        let recap = try #require(model.recap)
+        let photos = try #require(recap.photos)
+
+        await photos.add([TestImages.jpeg()])
+
+        let stored = try await fixture.photos.photos(for: recap.data.session.id)
+        #expect(stored.count == 1)
+        #expect(photos.photos.map(\.id) == stored.map(\.id))
+    }
+
+    @Test func runRecapHasNoPhotosWithoutService() async throws {
+        let fixture = RunFeatureFixture()
+        let coordinator = fixture.coordinator()
+        coordinator.prepare(.free())
+        let model = coordinator.model()
+        await model.start()
+        await model.finish()
+        #expect(try #require(model.recap).photos == nil)
     }
 }

@@ -1,3 +1,4 @@
+import PhotosFeature
 import PulseDesignSystem
 import PulseDomain
 import PulseServices
@@ -5,13 +6,15 @@ import SwiftUI
 
 /// L'en-tête de la séance (spec M4 §14.2) : le titre, « Terminer », le menu « Abandonner », puis la durée écoulée, le tonnage et
 /// les séries de travail faites sur prévues. Une séance passée (§19.4) montre sa date, sa durée saisie, et « Annuler la
-/// saisie » à la place d'« Abandonner ». Les confirmations sont celles de l'appelant. Aux tailles d'accessibilité, les boutons
-/// passent sous le titre et les statistiques en colonne.
+/// saisie » à la place d'« Abandonner ». Avec `photos`, le bouton appareil photo précède le menu. Les confirmations sont celles
+/// de l'appelant. Aux tailles d'accessibilité, les boutons passent sous le titre et les statistiques en colonne.
 struct LiveHeader: View {
     let session: LiveSession
     let onFinish: () -> Void
     let onAbandon: () -> Void
     var calendar: Calendar = .current
+    /// Les photos de la séance ; `nil` sans bouton photo (pas de service, saisie après coup, ou récap ouvert par-dessus).
+    var photos: SessionPhotosModel?
     @Environment(\.pulseTheme) private var theme
     @Environment(\.dynamicTypeSize) private var typeSize
 
@@ -28,6 +31,7 @@ struct LiveHeader: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .accessibilityAddTraits(.isHeader)
                 HStack(spacing: 8) {
+                    if let photos { LiveCameraButton(model: photos) }
                     menu
                     finishButton
                 }

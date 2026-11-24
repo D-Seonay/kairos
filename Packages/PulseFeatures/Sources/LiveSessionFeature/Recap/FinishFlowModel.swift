@@ -152,7 +152,9 @@ public final class FinishFlowModel {
         case .finish:
             // Les compléments de la séance ne concernent qu'une séance faite aujourd'hui, pas une saisie après coup.
             let supplements = live.session.isPastEntry ? nil : live.environment.supplements.map(SupplementsModel.init)
-            let model = RecapModel(service: live.environment.service, endedAt: endedAt, supplements: supplements)
+            // Les photos prises pendant la séance sont dans le modèle de la séance live : le récap le reprend.
+            let model = RecapModel(service: live.environment.service, endedAt: endedAt, supplements: supplements,
+                                   photos: live.photos)
             recap = model
             await model.load()
         case .abandon:

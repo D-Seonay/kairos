@@ -55,14 +55,20 @@ struct RunFeatureFixture {
     let preferences = InMemoryRunPreferencesStore()
     let service: RunSessionService
     let strengthActive: Bool
+    /// Le service des photos, sur un dépôt en mémoire ; l'environnement ne le reçoit qu'avec `withPhotos`.
+    let photos: SessionPhotoService
+    let withPhotos: Bool
 
     init(recorder: StubRunWorkoutRecorder = StubRunWorkoutRecorder(),
-         location: StubRunLocationTracker = StubRunLocationTracker(), draft: RunDraft? = nil, strengthActive: Bool = false) {
+         location: StubRunLocationTracker = StubRunLocationTracker(), draft: RunDraft? = nil, strengthActive: Bool = false,
+         withPhotos: Bool = false) {
+        self.withPhotos = withPhotos
         self.recorder = recorder
         self.location = location
         self.strengthActive = strengthActive
         drafts = InMemoryRunDraftStore(draft)
         let clock = clock
+        photos = SessionPhotoService(repository: InMemorySessionPhotoRepository(), timeZone: .gmt, now: { clock.now })
         service = RunSessionService(
             recorder: recorder, location: location, announcer: StubRunAnnouncer(), activity: StubRunActivityController(),
             reminders: StubRunReminderScheduler(), drafts: drafts, workouts: workouts, tracks: tracks,
@@ -76,7 +82,7 @@ struct RunFeatureFixture {
         let clock = clock
         return RunEnvironment(
             service: service, tracks: tracks, preferences: preferences, isStrengthSessionActive: { strengthActive },
-            now: { clock.now }, calendar: RunTestClock.calendar)
+            now: { clock.now }, calendar: RunTestClock.calendar, sessionPhotos: withPhotos ? photos : nil)
     }
 
     func coordinator() -> RunCoordinator {

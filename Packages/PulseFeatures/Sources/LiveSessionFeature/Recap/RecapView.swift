@@ -1,3 +1,4 @@
+import PhotosFeature
 import PulseContent
 import PulseDesignSystem
 import PulseDomain
@@ -37,6 +38,7 @@ public struct RecapView: View {
                     }
                     effort()
                     noteField
+                    if let photos = model.photos { SessionPhotosSection(model: photos) }
                     if model.healthAccess == .denied { healthDeniedNote }
                 } else if model.errorMessage == nil {
                     ProgressView()

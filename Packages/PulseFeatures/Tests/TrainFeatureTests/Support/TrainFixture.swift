@@ -43,12 +43,14 @@ struct TrainFixture {
     let recovery = InMemoryRecoveryRepository(calendar: TrainClock.calendar)
     let environment: TrainEnvironment
     let activeSession: ActiveSessionService
+    /// Le service des photos, sur un dépôt en mémoire ; l'environnement ne le reçoit qu'avec `withPhotos`.
+    let photos: SessionPhotoService
     let now: Date
 
     /// `healthWriter` branche l'écriture dans Apple Santé sur la séance active ; sans lui, elle est indisponible.
     init(profiles: any ProfileRepository = InMemoryProfileRepository(), now: Date = TrainClock.date(day: 2, hour: 9),
          exerciseSettings: any ExerciseSettingsRepository = InMemoryExerciseSettingsRepository(),
-         healthWriter: StubWorkoutHealthWriter? = nil) {
+         healthWriter: StubWorkoutHealthWriter? = nil, withPhotos: Bool = false) {
         self.profiles = profiles
         self.now = now
         let library = ContentLibrary.bundled
@@ -57,6 +59,8 @@ struct TrainFixture {
         let userExercises = InMemoryUserExerciseRepository()
         let personalRecords = InMemoryPersonalRecordRepository()
         let clock: @Sendable () -> Date = { now }
+        let photos = SessionPhotoService(repository: InMemorySessionPhotoRepository(), timeZone: .gmt, now: clock)
+        self.photos = photos
         let records = RecordsService(workouts: workouts, records: personalRecords, userExercises: userExercises,
                                      library: library, now: clock)
         let importer = HevyImporter(workouts: workouts, userExercises: userExercises, records: records,
@@ -72,7 +76,7 @@ struct TrainFixture {
             profiles: profiles, programs: programs, recovery: recovery, workouts: workouts, userExercises: userExercises,
             exerciseSettings: exerciseSettings, personalRecords: personalRecords, records: records,
             importer: importer, library: library, activeSession: activeSession, scheduledDays: scheduled, calendar: calendar,
-            now: clock)
+            now: clock, sessionPhotos: withPhotos ? photos : nil)
     }
 
     /// Enregistre `program` et le rend actif.

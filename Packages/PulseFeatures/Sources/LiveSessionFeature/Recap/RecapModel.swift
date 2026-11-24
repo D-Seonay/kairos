@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import PhotosFeature
 import PulseDomain
 import PulseServices
 import SupplementsFeature
@@ -22,6 +23,9 @@ public final class RecapModel {
     public private(set) var isExplainingHealth = false
     /// Les compléments « autour de la séance » à cocher (spec M5 §10) ; `nil` pour une séance saisie après coup.
     public let supplements: SupplementsModel?
+    /// La section Photos : le modèle de la séance live, pour que les photos prises pendant la séance y soient ; `nil` sans service
+    /// des photos et pour une saisie après coup.
+    public let photos: SessionPhotosModel?
 
     public static let rpeRange = 1...10
     /// Le RPE avant que le bilan, qui le suggère, soit lu.
@@ -33,10 +37,12 @@ public final class RecapModel {
     /// Le RPE à enregistrer une fois l'écran d'explication passé.
     @ObservationIgnored private var pendingRPE: Int?
 
-    public init(service: ActiveSessionService, endedAt: Date, supplements: SupplementsModel? = nil) {
+    public init(service: ActiveSessionService, endedAt: Date, supplements: SupplementsModel? = nil,
+                photos: SessionPhotosModel? = nil) {
         self.service = service
         self.endedAt = endedAt
         self.supplements = supplements
+        self.photos = photos
         rpe = Self.initialRPE
     }
 

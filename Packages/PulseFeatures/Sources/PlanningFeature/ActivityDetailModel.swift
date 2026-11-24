@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import PhotosFeature
 import PulseDesignSystem
 import PulseDomain
 import PulseServices
@@ -15,6 +16,8 @@ public final class ActivityDetailModel {
     /// Le tracé d'une course Pulse, quand il a des points ou des kilomètres à montrer ; `nil` sinon.
     public private(set) var routeTrack: RunTrack?
     public private(set) var errorMessage: String?
+    /// La section Photos ; `nil` sans service des photos, ou pour un entraînement d'Apple Santé, qui n'en accepte pas.
+    public private(set) var photos: SessionPhotosModel?
     public var rpe: Double?
     public var note = ""
 
@@ -32,6 +35,7 @@ public final class ActivityDetailModel {
             rpe = session?.overallRPE
             note = session?.note ?? ""
             routeTrack = await track(of: session)
+            photos = makePhotos(for: session)
             errorMessage = nil
         } catch {
             errorMessage = String(localized: "Pulse n'a pas pu lire cette séance.", bundle: .module)
@@ -45,6 +49,15 @@ public final class ActivityDetailModel {
         guard let session, session.source == .pulse, session.kind == .run, let tracks = environment.tracks,
               let track = try? await tracks.track(for: session.id), !track.points.isEmpty || !track.splits.isEmpty else { return nil }
         return track
+    }
+
+    /// Le modèle de la section Photos de `session`, gardé s'il existe déjà ; `nil` sans service ou pour une séance qui n'accepte
+    /// pas de photos.
+    private func makePhotos(for session: WorkoutSession?) -> SessionPhotosModel? {
+        guard let session, SessionPhotoRules.acceptsPhotos(session), let service = environment.train.sessionPhotos else {
+            return nil
+        }
+        return photos ?? SessionPhotosModel(service: service, sessionID: session.id, calendar: environment.calendar)
     }
 
     /// Vrai quand le RPE ou la note diffère de ce qui est enregistré.

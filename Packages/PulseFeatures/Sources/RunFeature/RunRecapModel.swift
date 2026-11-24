@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import PhotosFeature
 import PulseDomain
 import PulseServices
 
@@ -19,15 +20,20 @@ public final class RunRecapModel {
     public private(set) var errorMessage: String?
     /// Parti avant « Prêt » : la distance ne compte qu'à partir des premiers points précis.
     public let startedWithoutSignal: Bool
+    /// La section Photos de la course ; `nil` sans service des photos ou si la séance n'en accepte pas.
+    public let photos: SessionPhotosModel?
 
     @ObservationIgnored private let service: RunSessionService
     /// Ferme la course une fois le récap enregistré ou la course supprimée.
     @ObservationIgnored var onClose: @MainActor () -> Void = {}
 
-    init(data: RunRecapData, service: RunSessionService, startedWithoutSignal: Bool) {
+    init(data: RunRecapData, service: RunSessionService, startedWithoutSignal: Bool, sessionPhotos: SessionPhotoService?,
+         calendar: Calendar) {
         self.data = data
         self.service = service
         self.startedWithoutSignal = startedWithoutSignal
+        photos = SessionPhotoRules.acceptsPhotos(data.session)
+            ? sessionPhotos.map { SessionPhotosModel(service: $0, sessionID: data.session.id, calendar: calendar) } : nil
     }
 
     // MARK: Bilan

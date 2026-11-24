@@ -124,7 +124,7 @@ let package = Package(
         ),
         .testTarget(
             name: "LiveSessionFeatureTests",
-            dependencies: ["LiveSessionFeature", "TrainFeature", "PulseServices", domain, recoveryEngine, content],
+            dependencies: ["LiveSessionFeature", "TrainFeature", "PhotosFeature", "PulseServices", domain, recoveryEngine, content],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(
@@ -139,7 +139,7 @@ let package = Package(
         ),
         .testTarget(
             name: "PlanningFeatureTests",
-            dependencies: ["PlanningFeature", "TrainFeature", "PulseServices", domain, content],
+            dependencies: ["PlanningFeature", "TrainFeature", "PhotosFeature", "PulseServices", domain, content],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(
@@ -149,7 +149,7 @@ let package = Package(
         ),
         .testTarget(
             name: "RunFeatureTests",
-            dependencies: ["RunFeature", "PulseServices", designSystem, domain],
+            dependencies: ["RunFeature", "PhotosFeature", "PulseServices", designSystem, domain],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(
@@ -169,7 +169,7 @@ let package = Package(
         ),
         .testTarget(
             name: "TrainFeatureTests",
-            dependencies: ["TrainFeature", "PulseServices", domain, content, designSystem],
+            dependencies: ["TrainFeature", "PhotosFeature", "PulseServices", domain, content, designSystem],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(

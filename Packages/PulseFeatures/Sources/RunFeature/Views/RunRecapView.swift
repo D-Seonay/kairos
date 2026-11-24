@@ -1,3 +1,4 @@
+import PhotosFeature
 import PulseDesignSystem
 import PulseDomain
 import SwiftUI
@@ -32,6 +33,7 @@ struct RunRecapView: View {
                 }
                 ObsidianCard { RunEffortPicker(selection: $model.rpe) }
                 noteField
+                if let photos = model.photos { SessionPhotosSection(model: photos) }
                 if let message = model.errorMessage {
                     Text(message)
                         .font(.footnote)

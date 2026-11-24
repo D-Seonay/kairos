@@ -12,15 +12,18 @@ public struct RunEnvironment {
     public var isStrengthSessionActive: @MainActor () -> Bool
     public var now: @Sendable () -> Date
     public var calendar: Calendar
+    /// Les photos des séances, pour la section Photos du récap ; `nil` : pas de section (aperçus, tests).
+    public var sessionPhotos: SessionPhotoService?
 
     public init(service: RunSessionService, tracks: any RunTrackRepository, preferences: any RunPreferencesStore,
                 isStrengthSessionActive: @escaping @MainActor () -> Bool, now: @escaping @Sendable () -> Date,
-                calendar: Calendar) {
+                calendar: Calendar, sessionPhotos: SessionPhotoService? = nil) {
         self.service = service
         self.tracks = tracks
         self.preferences = preferences
         self.isStrengthSessionActive = isStrengthSessionActive
         self.now = now
         self.calendar = calendar
+        self.sessionPhotos = sessionPhotos
     }
 }

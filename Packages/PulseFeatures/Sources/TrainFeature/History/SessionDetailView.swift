@@ -1,3 +1,4 @@
+import PhotosFeature
 import PulseDesignSystem
 import PulseDomain
 import PulseServices
@@ -96,6 +97,9 @@ public struct SessionDetailView: View {
                 }
                 .listRowBackground(PulsePalette.surface)
             }
+            if let photos = model.photos {
+                photosSection(photos)
+            }
             ForEach(model.blocks) { block in
                 SessionBlockSection(block: block)
             }
@@ -129,6 +133,15 @@ public struct SessionDetailView: View {
             .accessibilityLabel(model.headerSpokenText)
         }
         .listRowBackground(PulsePalette.surface)
+    }
+
+    /// La section Photos, après la note : sa propre carte, sans le fond d'une ligne de liste.
+    private func photosSection(_ photos: SessionPhotosModel) -> some View {
+        Section {
+            SessionPhotosSection(model: photos)
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
+        }
     }
 
     private var muscles: some View {

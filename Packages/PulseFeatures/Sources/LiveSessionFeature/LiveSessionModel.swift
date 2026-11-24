@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import PhotosFeature
 import PulseDomain
 import PulseServices
 import TrainFeature
@@ -16,6 +17,11 @@ public final class LiveSessionModel {
     public private(set) var keypad = KeypadInput(field: .weight, increment: 2.5)
     public private(set) var errorMessage: String?
     public var isSaving: Bool { pendingChanges > 0 }
+    /// Les photos de la séance, prises sous l'identifiant de la séance enregistrée (`ActiveSessionService.finish` le garde). Le
+    /// récap reprend ce modèle. `nil` sans service des photos et pour une saisie après coup : la fabrique des séances passées ne
+    /// reçoit pas le dépôt des photos, qui ne serait pas nettoyé si la saisie était annulée. Les photos s'ajoutent alors depuis
+    /// le détail de la séance enregistrée.
+    public let photos: SessionPhotosModel?
 
     @ObservationIgnored let environment: LiveSessionEnvironment
     @ObservationIgnored private let haptics: LiveSessionHaptics
@@ -28,6 +34,9 @@ public final class LiveSessionModel {
         self.session = session
         self.environment = environment
         self.haptics = haptics
+        photos = session.isPastEntry ? nil : environment.train.sessionPhotos.map {
+            SessionPhotosModel(service: $0, sessionID: session.id, calendar: environment.calendar)
+        }
     }
 
     /// L'environnement de l'onglet Séance, pour la bibliothèque en mode choix et la fiche d'un exercice.

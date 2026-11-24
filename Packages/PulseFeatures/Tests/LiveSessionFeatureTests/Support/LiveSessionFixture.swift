@@ -71,10 +71,12 @@ struct LiveFixture {
     let service: ActiveSessionService
     let environment: LiveSessionEnvironment
     let haptics = HapticLog()
+    /// Le service des photos, sur un dépôt en mémoire ; l'environnement ne le reçoit qu'avec `withPhotos`.
+    let photos: SessionPhotoService
 
     /// `healthWriter` branche l'écriture dans Apple Santé ; sans lui, elle est indisponible.
     init(notificationsGranted: Bool = true, store: any ActiveSessionStore = InMemoryActiveSessionStore(),
-         healthWriter: StubWorkoutHealthWriter? = nil) {
+         healthWriter: StubWorkoutHealthWriter? = nil, withPhotos: Bool = false) {
         let clock = clock
         let now: @Sendable () -> Date = { clock.now }
         let library = ContentLibrary.bundled
@@ -85,6 +87,8 @@ struct LiveFixture {
         let records = RecordsService(workouts: workouts, records: personalRecords, userExercises: userExercises,
                                      library: library, now: now)
         let workouts = workouts
+        let photos = SessionPhotoService(repository: InMemorySessionPhotoRepository(), timeZone: .gmt, now: now)
+        self.photos = photos
         let health = healthWriter.map { HealthWorkoutExporter(
             writer: $0, workouts: workouts, profiles: profiles, measurements: InMemoryBodyMeasurementRepository(),
             calendar: calendar) }
@@ -98,7 +102,8 @@ struct LiveFixture {
             profiles: profiles, programs: InMemoryProgramRepository(), recovery: InMemoryRecoveryRepository(calendar: calendar),
             workouts: workouts, userExercises: userExercises, exerciseSettings: InMemoryExerciseSettingsRepository(),
             personalRecords: personalRecords, records: records, importer: importer, library: library,
-            activeSession: service, calendar: calendar, now: now)
+            activeSession: service, calendar: calendar, now: now,
+            sessionPhotos: withPhotos ? photos : nil)
         authorizer = StubNotificationAuthorizer(granted: notificationsGranted)
         environment = LiveSessionEnvironment(service: service, train: train, notifications: authorizer, calendar: calendar,
                                              now: now)
