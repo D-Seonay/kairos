@@ -7,6 +7,8 @@ import PulseDomain
 /// `<id>.jpg` et `<id>-thumb.jpg`. L'index évite de lire les dates des fichiers (pas de raison `C617.1` à déclarer).
 /// À n'appeler qu'au premier plan : un fichier protégé ne se lit pas en arrière-plan, iPhone verrouillé.
 public actor FileBodyPhotoStore: BodyPhotoStore {
+    /// Préfixe des dossiers de travail de l'export ; ce ne sont jamais des photos, le balayage les ignore.
+    private static let stagingPrefix = ".export-"
     private static let writeOptions: Data.WritingOptions = [.atomic, .completeFileProtection]
 
     private let directory: URL
@@ -16,12 +18,21 @@ public actor FileBodyPhotoStore: BodyPhotoStore {
     }
 
     public func photos() async throws -> [BodyPhoto] {
-        let entries = readIndex()
+        let state = readIndex()
+        // Index illisible (iPhone verrouillé, fichier abîmé) : rien n'est ni rendu ni nettoyé, sinon un échec de lecture
+        // passager viderait le dossier.
+        if case .unreadable = state { return [] }
+        let entries = state.entries
         let present = entries.filter { FileManager.default.fileExists(atPath: imageURL($0.id).path) }
         // Un fichier disparu (effacé à la main, restauration partielle) emporte son entrée : l'index reste le miroir du dossier.
         if present.count != entries.count {
             try writeIndex(present)
+            let kept = Set(present.map(\.id))
+            for gone in entries where !kept.contains(gone.id) {
+                try? removeIfPresent(thumbnailURL(gone.id))
+            }
         }
+        sweepOrphans(keeping: Set(present.map(\.id)))
         return present
     }
 
@@ -33,50 +44,75 @@ public actor FileBodyPhotoStore: BodyPhotoStore {
 
     public func save(_ photo: BodyPhoto, image: PhotoImage) async throws {
         try prepareDirectory()
-        try image.image.write(to: imageURL(photo.id), options: Self.writeOptions)
-        try image.thumbnail.write(to: thumbnailURL(photo.id), options: Self.writeOptions)
-        var entries = readIndex().filter { $0.id != photo.id }
-        entries.append(photo)
-        try writeIndex(entries)
+        var entries = readIndex().entries
+        let isNew = !entries.contains { $0.id == photo.id }
+        do {
+            try image.image.write(to: imageURL(photo.id), options: Self.writeOptions)
+            try image.thumbnail.write(to: thumbnailURL(photo.id), options: Self.writeOptions)
+            entries.removeAll { $0.id == photo.id }
+            entries.append(photo)
+            try writeIndex(entries)
+        } catch {
+            // Une photo neuve qui n'a pas pu entrer dans l'index ne laisse pas de fichiers sans entrée.
+            if isNew {
+                try? removeIfPresent(imageURL(photo.id))
+                try? removeIfPresent(thumbnailURL(photo.id))
+            }
+            throw error
+        }
     }
 
     public func delete(photoID: UUID) async throws {
-        try removeIfPresent(imageURL(photoID))
-        try removeIfPresent(thumbnailURL(photoID))
-        let entries = readIndex()
+        // L'index d'abord : si une suppression de fichier échoue, il reste un fichier sans entrée, que `photos()` balaie.
+        let entries = readIndex().entries
         let remaining = entries.filter { $0.id != photoID }
         if remaining.count != entries.count {
             try writeIndex(remaining)
         }
+        let imageError = Result { try removeIfPresent(imageURL(photoID)) }
+        let thumbnailError = Result { try removeIfPresent(thumbnailURL(photoID)) }
+        try imageError.get()
+        try thumbnailError.get()
     }
 
     public func deleteAll() async throws {
         try removeIfPresent(directory)
     }
 
-    /// `Pulse-photos-de-corps-AAAA-MM-JJ.zip` dans `directory` : les images nommées `AAAA-MM-JJ-face|profil|dos.jpg`
-    /// (jour de prise de vue, fuseau de l'appareil), zippées depuis un dossier de travail supprimé ensuite.
-    public func exportArchive(to directory: URL) async throws -> URL {
+    /// `Pulse-photos-de-corps-AAAA-MM-JJ.zip` dans `destination` : les images nommées `AAAA-MM-JJ-face|profil|dos.jpg`
+    /// (jour de prise de vue, fuseau de l'appareil). Le dossier de travail est dans le dossier protégé, supprimé ensuite ;
+    /// l'archive reçoit la protection complète, et une archive d'un export précédent est supprimée avant d'écrire.
+    public func exportArchive(to destination: URL) async throws -> URL {
+        let ordered = try await photos().sorted {
+            ($0.takenAt, $0.createdAt, $0.id.uuidString) < ($1.takenAt, $1.createdAt, $1.id.uuidString)
+        }
+        try prepareDirectory()
         let stem = "Pulse-photos-de-corps"
-        let staging = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        let staging = directory.appendingPathComponent("\(Self.stagingPrefix)\(UUID().uuidString)", isDirectory: true)
         let folder = staging.appendingPathComponent(stem, isDirectory: true)
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: staging) }
 
         var taken = Set<String>()
-        let ordered = try await photos().sorted {
-            ($0.takenAt, $0.createdAt, $0.id.uuidString) < ($1.takenAt, $1.createdAt, $1.id.uuidString)
-        }
         for photo in ordered {
             guard let data = try? Data(contentsOf: imageURL(photo.id)) else { continue }
             let name = Self.uniqueName(for: photo, taken: taken)
             taken.insert(name)
             try data.write(to: folder.appendingPathComponent(name), options: Self.writeOptions)
         }
-        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        let archive = directory.appendingPathComponent("\(stem)-\(ExportNaming.dayStamp(Date(), timeZone: .current)).zip")
+        try FileManager.default.createDirectory(at: destination, withIntermediateDirectories: true)
+        removePreviousArchives(in: destination, stem: stem)
+        let archive = destination.appendingPathComponent("\(stem)-\(ExportNaming.dayStamp(Date(), timeZone: .current)).zip")
         try ZipArchiver.zip(directory: folder, to: archive)
+        try FileManager.default.setAttributes([.protectionKey: FileProtectionType.complete], ofItemAtPath: archive.path)
         return archive
+    }
+
+    private func removePreviousArchives(in destination: URL, stem: String) {
+        let names = (try? FileManager.default.contentsOfDirectory(atPath: destination.path)) ?? []
+        for name in names where name.hasPrefix("\(stem)-") && name.hasSuffix(".zip") {
+            try? FileManager.default.removeItem(at: destination.appendingPathComponent(name))
+        }
     }
 
     // MARK: - Noms d'export
@@ -118,10 +154,34 @@ public actor FileBodyPhotoStore: BodyPhotoStore {
         try url.setResourceValues(values)
     }
 
-    /// Un index absent ou illisible vaut un index vide : les photos restent récupérables au pire en les réajoutant.
-    private func readIndex() -> [BodyPhoto] {
-        guard let data = try? Data(contentsOf: indexURL) else { return [] }
-        return (try? Self.decoder.decode([BodyPhoto].self, from: data)) ?? []
+    private enum IndexState {
+        case absent
+        case decoded([BodyPhoto])
+        case unreadable
+
+        /// Un index absent ou illisible n'a aucune entrée : au pire les photos se réajoutent.
+        var entries: [BodyPhoto] {
+            if case .decoded(let entries) = self { entries } else { [] }
+        }
+    }
+
+    private func readIndex() -> IndexState {
+        guard FileManager.default.fileExists(atPath: indexURL.path) else { return .absent }
+        guard let data = try? Data(contentsOf: indexURL),
+              let entries = try? Self.decoder.decode([BodyPhoto].self, from: data) else { return .unreadable }
+        return .decoded(entries)
+    }
+
+    /// Supprime les `<id>.jpg` et `<id>-thumb.jpg` dont l'identifiant n'est pas dans l'index. Seulement quand l'index a été
+    /// lu (ou n'existe pas) : jamais après un échec de lecture. Les dossiers de travail et les autres fichiers sont laissés.
+    private func sweepOrphans(keeping kept: Set<UUID>) {
+        let names = (try? FileManager.default.contentsOfDirectory(atPath: directory.path)) ?? []
+        for name in names where name.hasSuffix(".jpg") {
+            var stem = String(name.dropLast(".jpg".count))
+            if stem.hasSuffix("-thumb") { stem = String(stem.dropLast("-thumb".count)) }
+            guard let id = UUID(uuidString: stem), !kept.contains(id) else { continue }
+            try? FileManager.default.removeItem(at: directory.appendingPathComponent(name))
+        }
     }
 
     private func writeIndex(_ entries: [BodyPhoto]) throws {

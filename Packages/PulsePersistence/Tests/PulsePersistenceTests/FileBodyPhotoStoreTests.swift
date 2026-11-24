@@ -99,6 +99,47 @@ private func indexEntries(in directory: URL) throws -> [BodyPhoto] {
         #expect(try indexEntries(in: directory) == [kept])
     }
 
+    @Test func pruningAnEntryAlsoRemovesItsThumbnail() async throws {
+        let directory = temporaryDirectory()
+        let store = FileBodyPhotoStore(directory: directory)
+        let lost = bodyPhoto(.side)
+        try await store.save(lost, image: Sample.photoImage(seed: 2))
+        try FileManager.default.removeItem(at: directory.appendingPathComponent("\(lost.id.uuidString).jpg"))
+        #expect(try await store.photos().isEmpty)
+        #expect(!files(in: directory).contains("\(lost.id.uuidString)-thumb.jpg"))
+    }
+
+    @Test func orphanFilesAreRemoved() async throws {
+        let directory = temporaryDirectory()
+        let store = FileBodyPhotoStore(directory: directory)
+        let kept = bodyPhoto(.front)
+        try await store.save(kept, image: Sample.photoImage(seed: 1))
+        // Des fichiers sans entrée d'index (échec d'écriture, suppression interrompue) et un fichier étranger.
+        let orphan = UUID()
+        try Data([1]).write(to: directory.appendingPathComponent("\(orphan.uuidString).jpg"))
+        try Data([2]).write(to: directory.appendingPathComponent("\(orphan.uuidString)-thumb.jpg"))
+        try Data([3]).write(to: directory.appendingPathComponent("notes.txt"))
+        #expect(try await store.photos() == [kept])
+        let expected = ["\(kept.id.uuidString)-thumb.jpg", "\(kept.id.uuidString).jpg", "index.json", "notes.txt"]
+        #expect(files(in: directory) == expected.sorted())
+    }
+
+    @Test func orphansFromAnUnreadableIndexAreSweptOnceItIsRewritten() async throws {
+        let directory = temporaryDirectory()
+        let store = FileBodyPhotoStore(directory: directory)
+        let old = bodyPhoto(.front)
+        try await store.save(old, image: Sample.photoImage(seed: 1))
+        try "x".write(to: directory.appendingPathComponent("index.json"), atomically: true, encoding: .utf8)
+        // Index illisible : rien n'est balayé, les fichiers restent là.
+        #expect(try await store.photos().isEmpty)
+        #expect(files(in: directory).contains("\(old.id.uuidString).jpg"))
+        // Un `save` réécrit l'index ; les fichiers de l'ancienne photo deviennent des orphelins balayés.
+        let fresh = bodyPhoto(.back)
+        try await store.save(fresh, image: Sample.photoImage(seed: 2))
+        #expect(try await store.photos() == [fresh])
+        #expect(!files(in: directory).contains("\(old.id.uuidString).jpg"))
+    }
+
     @Test func unreadableIndexStartsEmpty() async throws {
         let directory = temporaryDirectory()
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
@@ -128,12 +169,30 @@ private func indexEntries(in directory: URL) throws -> [BodyPhoto] {
     }
 
     @Test func exportArchiveLeavesNoStagingFolder() async throws {
-        let store = FileBodyPhotoStore(directory: temporaryDirectory())
+        let directory = temporaryDirectory()
+        let store = FileBodyPhotoStore(directory: directory)
         try await store.save(bodyPhoto(), image: Sample.photoImage(seed: 1))
         let output = temporaryDirectory()
         defer { try? FileManager.default.removeItem(at: output) }
         _ = try await store.exportArchive(to: output)
         #expect(files(in: output).count == 1)
+        #expect(!files(in: directory).contains { $0.hasPrefix(".export-") })
+        #expect(try await store.photos().count == 1)   // le balayage ne touche pas aux dossiers de travail
+    }
+
+    @Test func exportArchiveReplacesAnEarlierArchive() async throws {
+        let store = FileBodyPhotoStore(directory: temporaryDirectory())
+        try await store.save(bodyPhoto(), image: Sample.photoImage(seed: 1))
+        let output = temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: output) }
+        try FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
+        // Une archive d'un autre jour, et un fichier sans rapport.
+        try Data([1]).write(to: output.appendingPathComponent("Pulse-photos-de-corps-2026-01-01.zip"))
+        try Data([2]).write(to: output.appendingPathComponent("Pulse-2026-01-01.json"))
+        let archive = try await store.exportArchive(to: output)
+        #expect(files(in: output).sorted() == ["Pulse-2026-01-01.json", archive.lastPathComponent].sorted())
+        let second = try await store.exportArchive(to: output)
+        #expect(second == archive && files(in: output).count == 2)
     }
 
     /// Dézippe avec `ditto` et rend les noms des fichiers de l'archive.
