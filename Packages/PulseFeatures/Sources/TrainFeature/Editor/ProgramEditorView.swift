@@ -10,6 +10,8 @@ public struct ProgramEditorView: View {
     @State private var promptText = ""
     @State private var removal: RoutineDay?
     @State private var adoption: ProgramTemplateChoice?
+    @State private var activation: ProgramChoice?
+    @State private var archival: ProgramChoice?
     @State private var isArchiving = false
     @State private var errorMessage: String?
 
@@ -61,6 +63,18 @@ public struct ProgramEditorView: View {
             Button(String(localized: "Annuler", bundle: .module), role: .cancel) {}
         } message: { _ in
             Text(String(localized: "Le modèle devient ton programme actif ; l'actuel reste dans tes programmes.", bundle: .module))
+        }
+        .confirmationDialog(activationTitle, isPresented: isActivating, titleVisibility: .visible, presenting: activation) { choice in
+            Button(String(localized: "Activer", bundle: .module)) { perform { try await model.activate(choice.id) } }
+            Button(String(localized: "Annuler", bundle: .module), role: .cancel) {}
+        } message: { _ in
+            Text(String(localized: "Il devient ton programme actif ; l'actuel reste dans tes programmes.", bundle: .module))
+        }
+        .confirmationDialog(archivalTitle, isPresented: isArchivingOther, titleVisibility: .visible, presenting: archival) { choice in
+            Button(String(localized: "Archiver", bundle: .module), role: .destructive) { perform { try await model.archive(choice.id) } }
+            Button(String(localized: "Annuler", bundle: .module), role: .cancel) {}
+        } message: { _ in
+            Text(String(localized: "Il ne sera plus proposé, mais tes séances le gardent.", bundle: .module))
         }
         .confirmationDialog(String(localized: "Archiver ce programme ?", bundle: .module), isPresented: $isArchiving,
                             titleVisibility: .visible) {
@@ -160,14 +174,15 @@ public struct ProgramEditorView: View {
     private var otherPrograms: some View {
         Section {
             ForEach(model.otherPrograms) { other in
-                Button { perform { try await model.activate(other.id) } } label: {
+                Button { activation = ProgramChoice(id: other.id, name: other.name) } label: {
                     LabeledRow(title: other.name, detail: summary(of: other), systemImage: "arrow.triangle.swap")
                 }
                 .accessibilityLabel(TrainText.rowSpoken(title: other.name, detail: spokenSummary(of: other)))
                 .accessibilityHint(String(localized: "Rend ce programme actif", bundle: .module))
-                .swipeActions(edge: .trailing) {
+                // Pas de balayage complet : l'archivage passe par sa confirmation.
+                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                     Button(String(localized: "Archiver", bundle: .module), role: .destructive) {
-                        perform { try await model.archive(other.id) }
+                        archival = ProgramChoice(id: other.id, name: other.name)
                     }
                 }
             }
@@ -261,6 +276,24 @@ public struct ProgramEditorView: View {
         let name = adoption?.name ?? ""
         return String(localized: "Adopter « \(name) » ?", bundle: .module)
     }
+
+    private var isActivating: Binding<Bool> {
+        Binding(get: { activation != nil }, set: { if !$0 { activation = nil } })
+    }
+
+    private var isArchivingOther: Binding<Bool> {
+        Binding(get: { archival != nil }, set: { if !$0 { archival = nil } })
+    }
+
+    private var activationTitle: String {
+        let name = activation?.name ?? ""
+        return String(localized: "Activer « \(name) » ?", bundle: .module)
+    }
+
+    private var archivalTitle: String {
+        let name = archival?.name ?? ""
+        return String(localized: "Archiver « \(name) » ?", bundle: .module)
+    }
 }
 
 /// La question posée par la boîte de saisie d'un nom.
@@ -294,6 +327,12 @@ private enum NamePrompt {
 
 private struct ProgramTemplateChoice: Identifiable {
     let id: String
+    let name: String
+}
+
+/// Un autre programme à rendre actif ou à archiver, le temps de sa confirmation.
+private struct ProgramChoice {
+    let id: UUID
     let name: String
 }
 

@@ -293,6 +293,26 @@
         }
       }
     },
+    "Activer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activer"
+          }
+        }
+      }
+    },
+    "Activer « %@ » ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activer « %@ » ?"
+          }
+        }
+      }
+    },
     "Adopte ce modèle comme programme actif" : {
       "localizations" : {
         "fr" : {
@@ -449,6 +469,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Archiver cet exercice ?"
+          }
+        }
+      }
+    },
+    "Archiver « %@ » ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archiver « %@ » ?"
           }
         }
       }
@@ -879,6 +909,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Date"
+          }
+        }
+      }
+    },
+    "Il devient ton programme actif ; l'actuel reste dans tes programmes." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il devient ton programme actif ; l'actuel reste dans tes programmes."
+          }
+        }
+      }
+    },
+    "Il ne sera plus proposé, mais tes séances le gardent." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il ne sera plus proposé, mais tes séances le gardent."
           }
         }
       }
