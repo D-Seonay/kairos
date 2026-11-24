@@ -1,4 +1,6 @@
 import AppIntents
+import Foundation
+import PulseDomain
 import SwiftUI
 import WidgetKit
 
@@ -14,18 +16,18 @@ struct LaunchSessionControlWidget: ControlWidget {
             }
         }
         .displayName("Séance du jour")
-        .description("Ouvre immédiatement la séance du jour dans Pulse.")
+        .description("Lance la séance du jour dans Pulse, ou rouvre celle en cours.")
     }
 }
 
-/// Intention d'ouverture immédiate de la séance du jour.
+/// Ouvre Pulse sur le lien `start-session` : l'accueil lance la séance du jour, ou rouvre celle en cours. Un jour sans
+/// musculation à lancer, l'accueil reste affiché.
 struct LaunchTodaySessionIntent: AppIntent {
     static let title: LocalizedStringResource = "Démarrer la séance"
-    static let description = IntentDescription("Ouvre Pulse directement sur la séance du jour.")
-    static let openAppWhenRun: Bool = true
+    static let description = IntentDescription("Ouvre Pulse et lance la séance du jour.")
 
-    @MainActor
-    func perform() async throws -> some IntentResult {
-        .result()
+    func perform() async throws -> some IntentResult & OpensIntent {
+        guard let url = AppLink.startSession.url else { throw URLError(.badURL) }
+        return .result(opensIntent: OpenURLIntent(url))
     }
 }

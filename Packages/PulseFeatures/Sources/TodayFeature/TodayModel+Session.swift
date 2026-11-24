@@ -23,8 +23,9 @@ extension TodayModel {
                                      originalChosen: startsOriginal, profile: profile, deload: deloadStatus)
     }
 
-    /// La séance telle que la carte la montre : l'originale si elle a été rétablie, l'ajustée sinon.
-    func shownSessionLaunch() -> SessionLaunch? {
+    /// La séance telle que la carte la montre : l'originale si elle a été rétablie, l'ajustée sinon. L'app la lance aussi depuis le
+    /// contrôle « Séance du jour ».
+    public func shownSessionLaunch() -> SessionLaunch? {
         sessionLaunch(startsOriginal: session?.status == .restored)
     }
 

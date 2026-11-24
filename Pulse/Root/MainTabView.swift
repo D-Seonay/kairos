@@ -90,6 +90,10 @@ struct MainTabView: View {
         .onChange(of: liveSession.current?.id) { refreshTabs() }
         // L'action « Pris » d'un rappel a enregistré une prise pendant que l'app tournait.
         .onChange(of: router.supplementsVersion) { Task { await supplements.load() } }
+        // Un lien du widget ou du contrôle vers l'accueil referme l'écran « Pourquoi » poussé.
+        .onChange(of: router.todayRootVersion) { today.closeWhy() }
+        // Le contrôle « Séance du jour » : traité dès que les onglets sont là, au lancement à froid compris.
+        .task(id: router.sessionStartRequests) { await startPendingSession() }
         .alert(liveSession.errorMessage ?? "", isPresented: isShowingError) {
             Button(String(localized: "OK")) { liveSession.dismissError() }
         }
@@ -136,6 +140,28 @@ struct MainTabView: View {
             return
         }
         Task { await liveSession.start(launch) }
+    }
+
+    /// Le contrôle « Séance du jour » : rouvre la séance en cours, sinon relit l'accueil et lance la séance du jour telle que la
+    /// carte la montre. Un jour sans musculation à lancer (repos, course, séance faite), l'accueil reste simplement affiché.
+    private func startPendingSession() async {
+        guard router.pendingSessionStart else { return }
+        router.pendingSessionStart = false
+        if liveSession.current == nil {
+            // Une lecture déjà en cours (lancement à froid, retour au premier plan) fait revenir `refresh()` tout de suite : on
+            // l'attend, quelques secondes au plus.
+            await today.refresh()
+            var waits = 0
+            while today.isLoading, waits < 50 {
+                try? await Task.sleep(for: .milliseconds(100))
+                waits += 1
+            }
+        }
+        if liveSession.current != nil {
+            resume()
+        } else if let launch = today.shownSessionLaunch() {
+            start(launch)
+        }
     }
 
     /// Ouvre l'écran de départ de la course, ou celui de la course déjà en cours.

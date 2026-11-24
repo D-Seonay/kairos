@@ -1,4 +1,6 @@
 import AppIntents
+import Foundation
+import PulseDomain
 import SwiftUI
 import WidgetKit
 
@@ -18,14 +20,13 @@ struct RecoveryScoreControlWidget: ControlWidget {
     }
 }
 
-/// Intention d'ouverture immédiate du tableau de bord de récupération.
+/// Ouvre Pulse sur le lien `today` : l'accueil, son score et sa carte de récupération, quel que soit l'écran laissé ouvert.
 struct OpenRecoveryScoreIntent: AppIntent {
     static let title: LocalizedStringResource = "Consulter la récupération"
     static let description = IntentDescription("Ouvre Pulse sur le tableau de bord de récupération.")
-    static let openAppWhenRun: Bool = true
 
-    @MainActor
-    func perform() async throws -> some IntentResult {
-        .result()
+    func perform() async throws -> some IntentResult & OpensIntent {
+        guard let url = AppLink.today.url else { throw URLError(.badURL) }
+        return .result(opensIntent: OpenURLIntent(url))
     }
 }

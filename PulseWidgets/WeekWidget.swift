@@ -21,7 +21,8 @@ private struct WeekWidgetEntryView: View {
 
     var body: some View {
         WeekWidgetLargeView(content: entry.content)
-            .widgetURL(AppLink.today.url)
+            // Le planning de la semaine s'ouvre sur l'onglet Planning.
+            .widgetURL(AppLink.planning.url)
             .containerBackground(for: .widget) {
                 PulsePalette.surface
             }

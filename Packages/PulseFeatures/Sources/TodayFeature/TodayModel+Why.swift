@@ -5,6 +5,11 @@ extension TodayModel {
         isShowingWhy = true
     }
 
+    /// Referme l'écran « Pourquoi » : un lien du widget ou du contrôle ramène à l'accueil lui-même.
+    public func closeWhy() {
+        isShowingWhy = false
+    }
+
     /// « Rétablir la séance d'origine » quand la séance ajustée est celle du jour, « Revenir à l'ajustée » sinon ; puis revient
     /// à l'accueil, qui montre la séance choisie.
     func toggleOriginalSessionFromWhy() async {
