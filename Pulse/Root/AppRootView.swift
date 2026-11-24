@@ -43,7 +43,9 @@ struct AppRootView: View {
                     .id(ObjectIdentifier(onboarding))
                     .onChange(of: onboarding.isFinished, initial: true) { _, finished in
                         guard finished else { return }
-                        // Après une suppression totale, les onglets repartent d'« Aujourd'hui ».
+                        // Après une suppression totale, les onglets repartent d'« Aujourd'hui ». Une demande « Séance du jour »
+                        // faite pendant l'onboarding est oubliée : elle ne lance rien des minutes plus tard.
+                        router.pendingSessionStart = false
                         router.open(.today)
                         model.onboardingFinished()
                     }

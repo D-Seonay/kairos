@@ -4,17 +4,26 @@ import SwiftUI
 
 /// Le formulaire de « Saisir une séance passée » (spec M4 §19.4) : date, heure de début, durée, routine ou séance vide. À
 /// présenter dans une `NavigationStack` : il fournit « Annuler » et « Saisir les séries », rend la séance à saisir à `onStart`,
-/// puis se ferme.
+/// puis se ferme. Modifié, il demande confirmation avant d'être fermé sans saisir, et un balayage ne le ferme plus.
 public struct PastSessionForm: View {
     private let model: TrainModel
     private let onStart: (SessionLaunch) -> Void
+    /// Gardé comme `draft` : une vue recréée plus tard (l'heure ronde a changé) ne doit pas croire le formulaire modifié.
+    @State private var initialDraft: PastSessionDraft
     @State private var draft: PastSessionDraft
+    @State private var confirmsDiscard = false
     @Environment(\.dismiss) private var dismiss
 
     public init(model: TrainModel, onStart: @escaping (SessionLaunch) -> Void) {
         self.model = model
         self.onStart = onStart
-        _draft = State(initialValue: model.initialPastDraft())
+        let initial = model.initialPastDraft()
+        _initialDraft = State(initialValue: initial)
+        _draft = State(initialValue: initial)
+    }
+
+    private var hasChanges: Bool {
+        draft != initialDraft
     }
 
     public var body: some View {
@@ -67,13 +76,27 @@ public struct PastSessionForm: View {
         .pulseInlineTitle()
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                Button(String(localized: "Annuler", bundle: .module)) { dismiss() }
+                Button(String(localized: "Annuler", bundle: .module), action: cancel)
             }
             ToolbarItem(placement: .confirmationAction) {
                 Button(String(localized: "Saisir les séries", bundle: .module), action: start)
                     .disabled(problem != nil)
                     .accessibilityIdentifier(TrainIdentifiers.pastSessionStart)
             }
+        }
+        .interactiveDismissDisabled(hasChanges)
+        .confirmationDialog(String(localized: "Abandonner les modifications ?", bundle: .module), isPresented: $confirmsDiscard,
+                            titleVisibility: .visible) {
+            Button(String(localized: "Abandonner", bundle: .module), role: .destructive) { dismiss() }
+            Button(String(localized: "Continuer à modifier", bundle: .module), role: .cancel) {}
+        }
+    }
+
+    private func cancel() {
+        if hasChanges {
+            confirmsDiscard = true
+        } else {
+            dismiss()
         }
     }
 

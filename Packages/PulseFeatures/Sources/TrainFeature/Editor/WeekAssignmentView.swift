@@ -3,7 +3,7 @@ import PulseDomain
 import SwiftUI
 
 /// La semaine type de lundi à dimanche : sur chaque ligne, un menu « routine ou Repos ». Une journée de course d'un modèle
-/// adopté s'affiche mais ne se change pas avant M6.
+/// adopté s'affiche avec son type et son objectif, mais ne se change pas ici.
 struct WeekAssignmentView: View {
     let program: Program
     let onAssign: (UUID?, Weekday) -> Void
@@ -94,7 +94,7 @@ private struct WeekdayRow: View {
                 Text(assignedName)
                     .font(.body.weight(.semibold))
                     .foregroundStyle(PulsePalette.text)
-                Text(String(localized: "Course · modifiable plus tard", bundle: .module))
+                Text(assigned.map(TrainText.runSummary) ?? String(localized: "Course", bundle: .module))
                     .font(.footnote)
                     .foregroundStyle(PulsePalette.text2)
             }

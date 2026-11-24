@@ -4,10 +4,11 @@ import PulseDomain
 import PulseServices
 import SwiftUI
 
-/// L'en-tête de la séance (spec M4 §14.2) : le titre, « Terminer », le menu « Abandonner », puis la durée écoulée, le tonnage et
-/// les séries de travail faites sur prévues. Une séance passée (§19.4) montre sa date, sa durée saisie, et « Annuler la
-/// saisie » à la place d'« Abandonner ». Avec `photos`, le bouton appareil photo précède le menu. Les confirmations sont celles
-/// de l'appelant. Aux tailles d'accessibilité, les boutons passent sous le titre et les statistiques en colonne.
+/// L'en-tête de la séance (spec M4 §14.2) : le chevron qui réduit l'écran (séance en direct seulement), le titre, « Terminer »,
+/// le menu « Abandonner », puis la durée écoulée, le tonnage et les séries de travail faites sur prévues. Une séance passée
+/// (§19.4) montre sa date, sa durée saisie, et « Annuler la saisie » à la place d'« Abandonner ». Avec `photos`, le bouton
+/// appareil photo précède le menu. Les confirmations sont celles de l'appelant. Aux tailles d'accessibilité, les boutons
+/// passent sous le titre et les statistiques en colonne.
 struct LiveHeader: View {
     let session: LiveSession
     let onFinish: () -> Void
@@ -15,6 +16,8 @@ struct LiveHeader: View {
     var calendar: Calendar = .current
     /// Les photos de la séance ; `nil` sans bouton photo (pas de service, saisie après coup, ou récap ouvert par-dessus).
     var photos: SessionPhotosModel?
+    /// Réduit l'écran, la séance continue ; `nil` sans chevron (saisie après coup).
+    var onMinimize: (() -> Void)?
     @Environment(\.pulseTheme) private var theme
     @Environment(\.dynamicTypeSize) private var typeSize
 
@@ -24,12 +27,15 @@ struct LiveHeader: View {
         let statsRow = isLarge ? AnyLayout(VStackLayout(alignment: .leading, spacing: 6)) : AnyLayout(HStackLayout())
         VStack(spacing: 4) {
             titleRow {
-                Text(Self.titleText(session.title))
-                    .font(PulseFont.title(.title3))
-                    .foregroundStyle(PulsePalette.text)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .accessibilityAddTraits(.isHeader)
+                HStack(spacing: 4) {
+                    if let onMinimize { minimizeButton(onMinimize) }
+                    Text(Self.titleText(session.title))
+                        .font(PulseFont.title(.title3))
+                        .foregroundStyle(PulsePalette.text)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .accessibilityAddTraits(.isHeader)
+                }
                 HStack(spacing: 8) {
                     if let photos { LiveCameraButton(model: photos) }
                     menu
@@ -50,12 +56,13 @@ struct LiveHeader: View {
                         Text(PulseFormat.duration(minutes: minutes))
                     }
                 } else {
-                    // Le chrono visible se met à jour seul ; VoiceOver dit la durée à la minute près.
+                    // Le chrono visible se met à jour seul, avec les heures comme la Live Activity (« 1:15:12 ») ; VoiceOver
+                    // dit la durée à la minute près.
                     TimelineView(.periodic(from: session.startedAt, by: 60)) { context in
                         stat(String(localized: "Durée", bundle: .module),
                              spoken: Self.elapsedSpokenText(from: session.startedAt, to: context.date), updatesFrequently: true) {
                             Text(timerInterval: session.startedAt...Date.distantFuture, pauseTime: nil, countsDown: false,
-                                 showsHours: false)
+                                 showsHours: true)
                         }
                     }
                 }
@@ -90,6 +97,21 @@ struct LiveHeader: View {
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier(LiveSessionIdentifiers.finishButton)
+    }
+
+    /// Le chevron qui réduit l'écran, comme celui de la course : la séance continue et le bandeau « Reprendre » la rouvre.
+    private func minimizeButton(_ action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: "chevron.down")
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(PulsePalette.text2)
+                .frame(width: LiveSetRow.targetHeight, height: LiveSetRow.targetHeight)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(String(localized: "Réduire la séance", bundle: .module))
+        .accessibilityHint(String(localized: "La séance continue en arrière-plan", bundle: .module))
+        .accessibilityIdentifier(LiveSessionIdentifiers.minimizeButton)
     }
 
     private var menu: some View {
@@ -180,9 +202,9 @@ extension LiveHeader {
         Int((max(0, end.timeIntervalSince(start)) / 60).rounded())
     }
 
-    /// « 1240 kg », « 62,5 kg ».
+    /// « 1 240 kg », « 62,5 kg ».
     nonisolated static func tonnageText(kg: Double) -> String {
-        String(localized: "\(PulseFormat.decimal(kg, maxFractionDigits: 1)) kg", bundle: .module)
+        String(localized: "\(PulseFormat.grouped(kg, maxFractionDigits: 1)) kg", bundle: .module)
     }
 
     /// « 1 240 kilos ».

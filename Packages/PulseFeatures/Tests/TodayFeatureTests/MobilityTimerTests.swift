@@ -30,6 +30,19 @@ struct MobilityTimerTests {
         #expect(timer.isOver(at: start.addingTimeInterval(1300)))
     }
 
+    @Test func runsOnlyBetweenStartAndPauseOrFinish() {
+        var timer = MobilityTimer()
+        #expect(!timer.isRunning)
+        timer.start(at: start)
+        #expect(timer.isRunning)
+        timer.pause(at: start.addingTimeInterval(30))
+        #expect(!timer.isRunning)
+        timer.start(at: start.addingTimeInterval(60))
+        #expect(timer.isRunning)
+        timer.finish()
+        #expect(!timer.isRunning)
+    }
+
     @Test func finishEndsAtOnce() {
         var timer = MobilityTimer()
         timer.start(at: start)

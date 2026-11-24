@@ -5,7 +5,7 @@ import PulseServices
 import SwiftUI
 
 /// La carte d'une séance de musculation : titre, badge « Ajustée » ou « Planifiée », mini-carte musculaire et résumé,
-/// « Pourquoi ? » et « Séance d'origine » côte à côte. « Démarrer » n'est pas dans la carte : l'accueil l'ancre en bas de
+/// « Pourquoi ? » et « Rétablir la séance d'origine » côte à côte. « Démarrer » n'est pas dans la carte : l'accueil l'ancre en bas de
 /// l'écran, sous le pouce (`TodayView`).
 struct StrengthSessionCard: View {
     let card: StrengthCard
@@ -158,7 +158,7 @@ private struct SessionOverview: View {
                 title: "Push", badge: .adjusted,
                 summary: SessionSummary(setCount: 19, estimatedMinutes: 55, maxRPE: 7.5, topMuscles: [.chest, .triceps, .frontDelts],
                                         muscleWeights: [.chest: 10, .triceps: 6, .frontDelts: 4]),
-                showsWhy: true, originButton: "Séance d'origine", startButton: "Démarrer la séance"),
+                showsWhy: true, originButton: "Rétablir la séance d'origine", startButton: "Démarrer la séance"),
                                 onWhy: {}, onOrigin: {})
         }
         .padding()

@@ -44,11 +44,10 @@ public struct NextWorkoutWidgetContent: Sendable, Equatable {
         return String(localized: "Prochaine séance : \(parts)", bundle: .module)
     }
 
-    /// La prochaine séance de l'instantané du jour ; l'exemple sans instantané du jour ou sans semaine.
+    /// La prochaine séance de l'instantané du jour. Sans instantané du jour ou sans semaine, le widget le dit au lieu d'inventer
+    /// une séance.
     public static func make(snapshot: WidgetSnapshot?, at date: Date, calendar: Calendar) -> NextWorkoutWidgetContent {
-        guard let planning = WidgetPlanningText.planning(snapshot, at: date, calendar: calendar) else {
-            return sample(at: date, calendar: calendar)
-        }
+        guard let planning = WidgetPlanningText.planning(snapshot, at: date, calendar: calendar) else { return notReady }
         guard let next = planning.snapshot.nextSession else {
             let title = String(localized: "Rien de prévu", bundle: .module)
             let detail = String(localized: "Cette semaine", bundle: .module)
@@ -63,6 +62,16 @@ public struct NextWorkoutWidgetContent: Sendable, Equatable {
                                         accessibilityLabel: spoken)
     }
 
+    /// Pas encore d'instantané du jour : une invitation à ouvrir l'app.
+    static var notReady: NextWorkoutWidgetContent {
+        let title = String(localized: "Pas encore prête", bundle: .module)
+        return NextWorkoutWidgetContent(
+            timingText: displayName, title: title, zoneText: String(localized: "Ouvre Pulse pour la charger", bundle: .module),
+            activeZone: 0, inlineText: String(localized: "Prochaine séance pas encore prête", bundle: .module),
+            accessibilityLabel: String(localized: "Prochaine séance pas encore prête. Ouvre Pulse pour la charger", bundle: .module))
+    }
+
+    /// Un exemple, pour la galerie de widgets et le gabarit avant le premier chargement.
     public static func sample(at date: Date, calendar: Calendar) -> NextWorkoutWidgetContent {
         let timing = String(localized: "Demain · 8:00", bundle: .module)
         let title = String(localized: "Endurance 45 min", bundle: .module)

@@ -45,7 +45,7 @@ struct SessionCardStateTests {
         #expect(card.badge == .adjusted)
         #expect(card.summary.setCount == 15)
         #expect(card.showsWhy)
-        #expect(card.originButton == "Séance d'origine")
+        #expect(card.originButton == "Rétablir la séance d'origine")
         #expect(card.startButton == "Démarrer la séance")
     }
 

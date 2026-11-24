@@ -41,6 +41,17 @@ struct RoutineEditorTests {
         #expect(added.exercise == unknown && added.sets == 3 && added.repsMin == 8 && added.restSeconds == 90)
     }
 
+    @Test func aLongCustomRestIsBroughtWithinTheRoutineBounds() {
+        let date = Date(timeIntervalSince1970: 0)
+        let long = UserExercise(name: "Soulevé lourd", primaryMuscle: .hamstrings, secondaryMuscles: [], equipment: .barbell,
+                                pattern: .hinge, region: .lower, isUnilateral: false, defaultIncrementKg: 5,
+                                defaultRestSeconds: 600, createdAt: date, updatedAt: date)
+        let directory = ExerciseDirectory(library: .bundled, userExercises: [long])
+        let added = RoutineEditor.add([.user(id: long.id)], to: emptyDay, directory: directory).exercises[0]
+        #expect(added.restSeconds == RoutineRules.rest.upperBound)
+        #expect(RoutineRules.issues(in: added, tracksDuration: false).isEmpty)
+    }
+
     @Test func movingReordersAndRenumbers() {
         let base = day([bench, pecDeck, plank])
         let moved = RoutineEditor.move(fromOffsets: IndexSet(integer: 0), toOffset: 3, in: base)

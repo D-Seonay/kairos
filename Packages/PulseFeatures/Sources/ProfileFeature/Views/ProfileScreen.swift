@@ -1,8 +1,10 @@
 import PhotosFeature
 import PulseDesignSystem
+import PulseDomain
 import PulseServices
 import SupplementsFeature
 import SwiftUI
+import TrainFeature
 
 /// Les écrans poussés depuis la page Profil.
 enum ProfileDestination: Hashable {
@@ -11,9 +13,11 @@ enum ProfileDestination: Hashable {
     case supplements
     case settings
     case myData
+    /// La fiche d'un levé du mur des records, ouverte sur sa progression.
+    case exercise(ExerciseReference)
 }
 
-/// L'onglet Profil (spec M7 §13) : l'en-tête, les trois tuiles, le poids (et les photos de corps), le mur des records, la vitrine
+/// L'onglet Profil (spec M7 §13) : l'en-tête, les deux tuiles, le poids (et les photos de corps), le mur des records, la vitrine
 /// des badges, puis les liens vers Statistiques, Compléments, Paramètres et Mes données.
 public struct ProfileScreen: View {
     private let model: ProfileModel
@@ -60,13 +64,13 @@ public struct ProfileScreen: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 if let summary = model.summary {
-                    ProfileTiles(summary: summary, trend: model.body?.trend, calendar: calendar, today: today)
+                    ProfileTiles(summary: summary)
                     WeightCard(trend: model.body?.trend, calendar: calendar, today: today)
                     if model.environment.offersBodyPhotos {
                         BodyPhotosLink()
                     }
                     RecordsWall(lifts: summary.mainLifts, runs: summary.runs, calendar: calendar, today: today,
-                                onOpenRecords: onOpenRecords)
+                                opensLifts: model.environment.train != nil, onOpenRecords: onOpenRecords)
                     BadgeShelfSection(shelf: summary.badges, calendar: calendar, today: today)
                 } else if !model.hasLoaded {
                     ProgressView()
@@ -102,7 +106,18 @@ public struct ProfileScreen: View {
             }
         case .myData:
             MyDataScreen(environment: model.environment, screens: screens, onErased: onErased)
+        case .exercise(let reference):
+            if let train = model.environment.train {
+                ExerciseSheetView(model: Self.progressionSheet(train: train, reference: reference))
+            }
         }
+    }
+
+    /// La fiche d'un exercice, ouverte sur l'onglet Progression, comme depuis Stats → Records.
+    private static func progressionSheet(train: TrainEnvironment, reference: ExerciseReference) -> ExerciseSheetModel {
+        let sheet = ExerciseSheetModel(environment: train, reference: reference)
+        sheet.tab = .progression
+        return sheet
     }
 }
 

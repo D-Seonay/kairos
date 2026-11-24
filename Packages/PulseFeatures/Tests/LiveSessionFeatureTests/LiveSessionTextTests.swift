@@ -95,7 +95,9 @@ import Testing
         #expect(LiveHeader.progressText(done: 4, planned: 14) == "4 / 14")
         #expect(LiveHeader.progressAccessibilityText(done: 4, planned: 14) == "4 séries faites sur 14")
         #expect(LiveHeader.progressAccessibilityText(done: 1, planned: 1) == "1 série faite sur 1")
-        #expect(LiveHeader.tonnageText(kg: 1_240) == "1240 kg")
+        // Les milliers sont séparés comme ailleurs dans l'app (espace fine insécable en français).
+        #expect(LiveHeader.tonnageText(kg: 1_240).replacingOccurrences(of: "\u{202F}", with: " ")
+            .replacingOccurrences(of: "\u{00A0}", with: " ") == "1 240 kg")
         #expect(LiveHeader.tonnageText(kg: 62.5) == "62,5 kg")
         #expect(LiveHeader.tonnageText(kg: 0) == "0 kg")
     }

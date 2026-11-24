@@ -140,6 +140,36 @@ import Testing
     #expect(TrainModel(environment: monday.environment).runLaunch() == RunLaunch.free())
 }
 
+@MainActor @Test func aRunRoutineLaunchesItsOwnRunAdjustedOnlyOnItsDay() async throws {
+    let intervals = RoutineDay(order: 3, name: "Fractionné", kind: .run, runType: .intervals, runTargetMinutes: 30)
+    var tough = pplProgram(withRun: true)
+    tough.days = tough.days.filter { $0.kind == .strength } + [intervals]
+    tough.weekLayout[5] = intervals.id
+
+    // Un autre jour que celui de la course : la course telle qu'au programme, sans l'ajustement du jour.
+    let monday = TrainFixture()
+    try await monday.activate(tough)
+    try await monday.scoreToday(.moderateFatigue)
+    let other = TrainModel(environment: monday.environment)
+    await other.refresh()
+    let planned = try #require(other.runLaunch(routine: intervals.id))
+    #expect(planned.routineDayID == intervals.id && planned.programID == tough.id)
+    #expect(planned.runType == .intervals && planned.targetMinutes == 30 && planned.adjustmentNote == nil)
+
+    // Le jour de la course : ajustée comme sur l'accueil.
+    let saturday = TrainFixture(now: TrainClock.date(day: 7, hour: 9))
+    try await saturday.activate(tough)
+    try await saturday.scoreToday(.moderateFatigue)
+    let today = TrainModel(environment: saturday.environment)
+    await today.refresh()
+    #expect(today.runLaunch(routine: intervals.id)?.runType == .easy)
+
+    // Une routine de musculation ou un jour inconnu ne se lancent pas en course.
+    let push = try #require(tough.days.first { $0.kind == .strength })
+    #expect(other.runLaunch(routine: push.id) == nil)
+    #expect(other.runLaunch(routine: UUID()) == nil)
+}
+
 /// Une ligne de la semaine datée d'aujourd'hui (samedi 7 novembre) : `routineDayID` nul pour un jour de repos.
 private func override(_ routineDay: RoutineDay?, for program: Program) -> ScheduledDay {
     let date = TrainClock.date(day: 7, hour: 0)

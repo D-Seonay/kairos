@@ -61,6 +61,19 @@ struct WeightModelTests {
         #expect(model.overview?.measurements.count == 2, "Le point vaut la virgule")
     }
 
+    @Test func newWeighInStartsFromTheLastWeight() async throws {
+        let (model, _) = model()
+        await model.load()
+        model.startNew()
+        #expect(model.editor?.weightText == "", "Sans pesée, la feuille s'ouvre vide")
+        model.editor?.weightText = "78,4"
+        await model.save()
+        model.startNew()
+        #expect(model.editor?.weightText == "78,4")
+        #expect(model.editor?.measurementID == nil)
+        #expect(model.editor?.date == ProfileTestClock.now)
+    }
+
     @Test func invalidDraftShowsMessageAndKeepsSheet() async throws {
         let (model, changes) = model()
         await model.load()

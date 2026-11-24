@@ -14,9 +14,9 @@ struct BiometrySection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: PulseMetrics.spacing) {
             StatsTileGrid(tiles: tiles)
-            BaselineChartCard(title: String(localized: "Variabilité et ligne de base", bundle: .module),
+            BaselineChartCard(title: String(localized: "Variabilité et ligne de base", bundle: .module), unit: "ms",
                               measure: .hrv, points: biometry.hrvPoints, style: .points, window: window)
-            BaselineChartCard(title: String(localized: "FC au repos", bundle: .module),
+            BaselineChartCard(title: String(localized: "FC au repos", bundle: .module), unit: "bpm",
                               measure: .restingHeartRate, points: biometry.restingPoints, style: .line, window: window)
             SleepChartCard(points: biometry.sleepPoints, deepShare: biometry.deepShare, window: window)
             CategoriesCard(categories: biometry.categories, window: window)
@@ -77,6 +77,8 @@ private struct BaselineChartCard: View {
     }
 
     let title: String
+    /// L'unité écrite sur l'axe des valeurs.
+    let unit: String
     let measure: BiometricMeasure
     let points: [BaselinePoint]
     let style: Style
@@ -139,7 +141,7 @@ private struct BaselineChartCard: View {
         }
         .statsPinnedDomain(window)
         .chartYScale(domain: .automatic(includesZero: false))
-        .statsAxes(calendar: window.calendar)
+        .statsAxes(calendar: window.calendar, yUnit: unit)
         .frame(height: chartHeight)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(StatsText.baselineSummary(measure: measure, points: points, period: window.period))
@@ -192,7 +194,7 @@ private struct SleepChartCard: View {
             }
         }
         .statsPinnedDomain(window)
-        .statsAxes(calendar: window.calendar)
+        .statsAxes(calendar: window.calendar, yUnit: "h")
         .frame(height: chartHeight)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(StatsText.sleepSummary(points: points, deepShare: deepShare, period: window.period, bucket: bucket,

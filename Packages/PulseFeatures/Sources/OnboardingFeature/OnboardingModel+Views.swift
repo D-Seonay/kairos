@@ -16,6 +16,16 @@ extension OnboardingModel {
         return calendar.date(byAdding: .year, value: -30, to: today) ?? today
     }
 
+    /// Les jours de la semaine sans repos obligatoire : au plus autant de séances par semaine.
+    public var freeWeekdayCount: Int {
+        Weekday.allCases.count - Set(profile.restWeekdays).count
+    }
+
+    /// Vrai quand les séances par semaine dépassent les jours laissés libres par les repos obligatoires : l'écran le signale.
+    public var sessionsExceedFreeDays: Bool {
+        profile.trainingDaysPerWeek > freeWeekdayCount
+    }
+
     /// La dernière date de naissance possible : aujourd'hui.
     public var latestBirthDate: Date {
         environment.now()

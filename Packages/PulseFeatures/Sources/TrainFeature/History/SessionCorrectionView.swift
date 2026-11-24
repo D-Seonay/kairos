@@ -4,24 +4,46 @@ import PulseServices
 import SwiftUI
 
 /// La feuille « Modifier » du détail d'une séance (spec M6 §8) : RPE global et note, puis pour chaque exercice ses séries hors
-/// échauffement (charge, répétitions ou durée tenue, RPE). Un balayage retire une série.
+/// échauffement (charge, répétitions ou durée tenue, RPE). Un balayage retire une série. Un enregistrement raté s'affiche dans
+/// la feuille, qui reste ouverte ; avec des modifications, la fermer (« Annuler » ou balayage) demande confirmation.
 struct SessionCorrectionView: View {
     let blocks: [(name: String, setIDs: [UUID])]
     let onSave: (SessionCorrection) async -> Bool
+    @State private var original: SessionCorrection
     @State private var correction: SessionCorrection
     @State private var isSaving = false
+    @State private var saveFailed = false
+    @State private var confirmsDiscard = false
     @Environment(\.dismiss) private var dismiss
 
     init(correction: SessionCorrection, blocks: [(name: String, setIDs: [UUID])], onSave: @escaping (SessionCorrection) async -> Bool) {
+        _original = State(initialValue: correction)
         _correction = State(initialValue: correction)
         self.blocks = blocks
         self.onSave = onSave
     }
 
+    private var hasChanges: Bool {
+        correction != original
+    }
+
+    private var errorMessage: String? {
+        saveFailed ? String(localized: "Pulse n'a pas pu enregistrer tes corrections.", bundle: .module) : nil
+    }
+
     var body: some View {
         Form {
+            if let errorMessage {
+                Section {
+                    Text(errorMessage)
+                        .font(.footnote)
+                        .foregroundStyle(PulsePalette.bad)
+                }
+                .listRowBackground(PulsePalette.surface)
+            }
             Section {
-                RPEPicker(title: String(localized: "RPE de la séance", bundle: .module), value: $correction.overallRPE)
+                RPEPicker(title: String(localized: "RPE de la séance", bundle: .module), values: RPEPicker.sessionValues,
+                          value: $correction.overallRPE)
                 TextField(String(localized: "Note", bundle: .module), text: $correction.note, axis: .vertical)
                     .lineLimit(2...6)
             } header: {
@@ -55,19 +77,41 @@ struct SessionCorrectionView: View {
         .pulseInlineTitle()
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                Button(String(localized: "Annuler", bundle: .module)) { dismiss() }
+                Button(String(localized: "Annuler", bundle: .module), action: cancel)
             }
             ToolbarItem(placement: .confirmationAction) {
-                Button(String(localized: "Enregistrer", bundle: .module)) {
-                    Task {
-                        isSaving = true
-                        if await onSave(correction) { dismiss() }
-                        isSaving = false
-                    }
-                }
-                .disabled(isSaving)
-                .accessibilityIdentifier(TrainIdentifiers.sessionCorrectionSave)
+                Button(String(localized: "Enregistrer", bundle: .module)) { Task { await save() } }
+                    .disabled(isSaving)
+                    .accessibilityIdentifier(TrainIdentifiers.sessionCorrectionSave)
             }
+        }
+        // Un balayage vers le bas ne jette pas les corrections en cours : « Annuler » demande d'abord.
+        .interactiveDismissDisabled(hasChanges || isSaving)
+        .confirmationDialog(String(localized: "Abandonner les modifications ?", bundle: .module), isPresented: $confirmsDiscard,
+                            titleVisibility: .visible) {
+            Button(String(localized: "Abandonner", bundle: .module), role: .destructive) { dismiss() }
+            Button(String(localized: "Continuer à modifier", bundle: .module), role: .cancel) {}
+        }
+        .pulseAnnounceError(errorMessage)
+    }
+
+    private func cancel() {
+        if hasChanges {
+            confirmsDiscard = true
+        } else {
+            dismiss()
+        }
+    }
+
+    private func save() async {
+        isSaving = true
+        defer { isSaving = false }
+        // Remis à zéro avant chaque essai : un échec répété change de nouveau l'état et est annoncé.
+        saveFailed = false
+        if await onSave(correction) {
+            dismiss()
+        } else {
+            saveFailed = true
         }
     }
 
@@ -110,7 +154,7 @@ private struct SetCorrectionRow: View {
                 }
             }
             RPEPicker(title: String(localized: "RPE de la série \(number)", bundle: .module),
-                      shortTitle: String(localized: "RPE", bundle: .module), value: $correction.rpe)
+                      shortTitle: String(localized: "RPE", bundle: .module), values: RPEPicker.setValues, value: $correction.rpe)
         }
         .padding(.vertical, 4)
         .accessibilityElement(children: .contain)
@@ -135,21 +179,28 @@ private struct SetCorrectionRow: View {
     }
 }
 
-/// Un RPE de 5 à 10 par demi-point, ou aucun. `shortTitle` est l'intitulé visible quand `title` est plus long que la place
-/// n'en laisse (« RPE » pour « RPE de la série 2 »).
+/// Un RPE choisi parmi `values`, ou aucun : de 6 à 10 par demi-point pour une série, comme pendant la séance
+/// (`RoutineRules.rpe`) ; de 1 à 10 pour l'effort global, comme le récap (`RoutineRules.overallRPE`). Une valeur enregistrée hors
+/// de la liste (ancienne échelle, import) reste proposée telle quelle. `shortTitle` est l'intitulé visible quand `title` est
+/// plus long que la place n'en laisse (« RPE » pour « RPE de la série 2 »).
 struct RPEPicker: View {
+    /// Le RPE d'une série.
+    static let setValues: [Double] = stride(from: RoutineRules.rpe.lowerBound, through: RoutineRules.rpe.upperBound,
+                                            by: RoutineRules.rpeStep).map { $0 }
+    /// L'effort global d'une séance.
+    static let sessionValues: [Double] = RoutineRules.overallRPE.map { Double($0) }
+
     let title: String
     var shortTitle: String?
+    let values: [Double]
     @Binding var value: Double?
-
-    private static let values: [Double] = stride(from: 5.0, through: 10.0, by: 0.5).map { $0 }
 
     var body: some View {
         Picker(selection: $value) {
             Text(String(localized: "—", bundle: .module))
                 .accessibilityLabel(String(localized: "Aucun", bundle: .module))
                 .tag(Double?.none)
-            ForEach(Self.values, id: \.self) { rpe in
+            ForEach(Self.options(values, keeping: value), id: \.self) { rpe in
                 Text(PulseFormat.decimal(rpe, maxFractionDigits: 1)).tag(Double?.some(rpe))
             }
         } label: {
@@ -157,5 +208,11 @@ struct RPEPicker: View {
         }
         .accessibilityLabel(title)
         .accessibilityValue(value.map { PulseFormat.decimal($0, maxFractionDigits: 1) } ?? String(localized: "Aucun", bundle: .module))
+    }
+
+    /// Les valeurs proposées : `values`, plus `current` s'il n'en fait pas partie, pour que le choix enregistré s'affiche.
+    nonisolated static func options(_ values: [Double], keeping current: Double?) -> [Double] {
+        guard let current, !values.contains(current) else { return values }
+        return (values + [current]).sorted()
     }
 }

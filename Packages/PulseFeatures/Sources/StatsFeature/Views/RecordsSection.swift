@@ -84,13 +84,11 @@ private struct StrengthRecordsCard: View {
                         if let mark = mark(line) {
                             Text(mark)
                                 .font(.caption.weight(.semibold))
-                                .foregroundStyle(PulsePalette.text)
+                                .foregroundStyle(PulsePalette.gold)
                         }
                     }
                     if dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 8) }
-                    Image(systemName: "chevron.right")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(PulsePalette.muted)
+                    RowChevron()
                 }
             }
             .padding(.vertical, 10)
@@ -179,7 +177,7 @@ private struct RunRecordsCard: View {
                     if run.isNew {
                         Text(RecordsSection.newMark)
                             .font(.caption.weight(.semibold))
-                            .foregroundStyle(PulsePalette.text)
+                            .foregroundStyle(PulsePalette.gold)
                     }
                 } else {
                     Text(String(localized: "Pas encore couru", bundle: .module))

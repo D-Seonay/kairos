@@ -2,8 +2,9 @@ import PulseDesignSystem
 import SwiftUI
 
 /// L'écran de la séance avec la suite de « Terminer » et d'« Abandonner » (spec M4 §14.6, §16, §17) : la confirmation s'il reste
-/// des séries prévues, l'alerte de la séance oubliée avec l'heure proposée, puis le récap en plein écran, qu'on ne ferme
-/// qu'en enregistrant. `onFinished` est appelé une fois la séance enregistrée ou abandonnée (`LiveSessionCoordinator.didFinish`).
+/// des séries prévues, l'alerte de la séance oubliée avec l'heure proposée, puis le récap en plein écran, qu'on ferme en
+/// enregistrant ou en revenant à la séance. `onFinished` est appelé une fois la séance enregistrée ou abandonnée
+/// (`LiveSessionCoordinator.didFinish`).
 public struct FinishFlow: View {
     private let model: LiveSessionModel
     @State private var flow: FinishFlowModel
@@ -20,7 +21,7 @@ public struct FinishFlow: View {
 
     public var body: some View {
         LiveSessionView(model: model, showsPhotoButton: flow.recap == nil, onFinish: { Task { await flow.finishTapped() } },
-                        onAbandon: { flow.abandonTapped() })
+                        onAbandon: { flow.abandonTapped() }, onMinimize: minimizeAction)
             .confirmationDialog(confirmationTitle, isPresented: isShowingConfirmation, titleVisibility: .visible) {
                 confirmationActions
             } message: {
@@ -39,9 +40,16 @@ public struct FinishFlow: View {
                 Text(flow.errorMessage ?? "")
             }
             .recapCover(item: recapBinding) { recap in
-                RecapView(model: recap, calendar: flow.calendar) { flow.recapSaved() }
+                RecapView(model: recap, calendar: flow.calendar, onSaved: { flow.recapSaved() },
+                          onResume: { flow.resumeFromRecap() })
                     .interactiveDismissDisabled()
             }
+    }
+
+    /// Le chevron qui réduit l'écran ; aucun pour une saisie après coup, qui n'a pas de bandeau pour revenir.
+    private var minimizeAction: (() -> Void)? {
+        guard flow.canMinimize else { return nil }
+        return { flow.minimize() }
     }
 
     // MARK: Confirmation

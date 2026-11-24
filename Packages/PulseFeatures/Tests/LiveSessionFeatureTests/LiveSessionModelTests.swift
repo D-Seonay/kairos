@@ -94,6 +94,23 @@ private func field(_ model: LiveSessionModel, exercise: Int = 0, set: Int, _ kin
     #expect(!model.isSaving)
 }
 
+@MainActor @Test func validatingTheFocusedSetMovesTheKeypadToTheNextOpenSet() async throws {
+    let fixture = LiveFixture()
+    try await fixture.seedBenchHistory()
+    let model = try await fixture.startedModel()
+    let sets = model.session.exercises[0].sets.map(\.id)
+    model.focus(field(model, set: 0, .reps))
+    await model.tap(set: sets[0])
+    #expect(model.session.exercises[0].sets[0].completedAt != nil)
+    #expect(model.focus == field(model, set: 1, .reps))
+    // Valider une autre série que celle du clavier ne le déplace pas.
+    await model.tap(set: sets[2])
+    #expect(model.focus == field(model, set: 1, .reps))
+    // Plus de série ouverte après celle-ci : le clavier se ferme.
+    await model.tap(set: sets[1])
+    #expect(model.focus == nil)
+}
+
 @MainActor @Test func tappingAValidatedCheckUnvalidatesIt() async throws {
     let fixture = LiveFixture()
     try await fixture.seedBenchHistory()

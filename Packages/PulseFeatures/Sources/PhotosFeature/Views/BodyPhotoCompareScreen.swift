@@ -174,7 +174,7 @@ private struct BodyPhotoCompareStage: View {
             })
         }
         .aspectRatio(3 / 4, contentMode: .fit)
-        .clipShape(RoundedRectangle(cornerRadius: PulseMetrics.radiusTiny * 2, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: PulseMetrics.radius, style: .continuous))
         .overlay(alignment: .topLeading) { tag(model.beforeTag) }
         .overlay(alignment: .topTrailing) { tag(model.afterTag) }
         .accessibilityElement(children: .ignore)

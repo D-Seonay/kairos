@@ -132,7 +132,7 @@ struct WeightChart: View {
 }
 
 private extension View {
-    /// Les axes des courbes de Stats : filets pointillés, étiquettes grises, dates en « 12 nov. ».
+    /// Les axes des courbes de Stats : filets pointillés, étiquettes grises, dates en « 12 nov. », poids en « 78 kg ».
     func weightAxes(calendar: Calendar) -> some View {
         chartXAxis {
             AxisMarks(values: .automatic(desiredCount: 4)) { _ in
@@ -141,9 +141,12 @@ private extension View {
             }
         }
         .chartYAxis {
-            AxisMarks(position: .leading) { _ in
+            AxisMarks(position: .leading) { value in
                 AxisGridLine(stroke: StrokeStyle(lineWidth: 1, dash: [2, 4])).foregroundStyle(PulsePalette.line)
-                AxisValueLabel().foregroundStyle(PulsePalette.muted)
+                AxisValueLabel {
+                    Text(value.as(Double.self).map { ProfileText.weight($0) } ?? "")
+                }
+                .foregroundStyle(PulsePalette.muted)
             }
         }
         .environment(\.locale, Locale(identifier: "fr_FR"))

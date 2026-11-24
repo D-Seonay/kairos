@@ -18,7 +18,7 @@ struct StrengthCard: Equatable {
     var summary: SessionSummary
     /// « Pourquoi ? » n'a de sens que si un ajustement existe, gardé ou quitté.
     var showsWhy: Bool
-    /// « Séance d'origine » ou « Revenir à l'ajustée » ; nul sans ajustement.
+    /// « Rétablir la séance d'origine » ou « Revenir à l'ajustée », comme sur l'écran « Pourquoi » ; nul sans ajustement.
     var originButton: String?
     var startButton: String
 }
@@ -103,7 +103,7 @@ enum SessionCardState: Equatable {
             }
             return .strength(StrengthCard(
                 title: session.title ?? day.name, badge: .adjusted, summary: SessionSummary.make(day: adjusted.day, directory: directory),
-                showsWhy: true, originButton: String(localized: "Séance d'origine", bundle: .module),
+                showsWhy: true, originButton: String(localized: "Rétablir la séance d'origine", bundle: .module),
                 startButton: String(localized: "Démarrer la séance", bundle: .module)))
         case .restored:
             let base = session.baseDay ?? day

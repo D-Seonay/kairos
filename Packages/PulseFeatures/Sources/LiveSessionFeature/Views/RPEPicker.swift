@@ -1,13 +1,15 @@
 import PulseDesignSystem
 import PulseDomain
+import PulseServices
 import SwiftUI
 
 /// Le choix du RPE par pilules, de 6 à 10 par pas de 0,5 (spec M4 §14.4), et « — » pour l'effacer. Choisir ferme le panneau.
 /// À l'ouverture, VoiceOver se place sur le titre. L'appelant plafonne sa taille de texte ; trois colonnes aux tailles
 /// d'accessibilité.
 struct RPEPicker: View {
-    /// Les valeurs que le modèle accepte.
-    static let values: [Double] = stride(from: 6.0, through: 10.0, by: 0.5).map { $0 }
+    /// Les valeurs que le modèle accepte : celles des routines et de la correction d'une séance.
+    static let values: [Double] = stride(from: RoutineRules.rpe.lowerBound, through: RoutineRules.rpe.upperBound,
+                                         by: RoutineRules.rpeStep).map { $0 }
 
     let title: String
     let spokenTitle: String

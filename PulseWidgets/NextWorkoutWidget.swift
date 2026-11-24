@@ -23,8 +23,10 @@ private struct NextWorkoutWidgetEntryView: View {
 
     var body: some View {
         content
-            .widgetURL(AppLink.today.url)
-            .containerBackground(for: .widget) { background }
+            // La prochaine séance se retrouve dans l'onglet Planning.
+            .widgetURL(AppLink.planning.url)
+            .containerBackground(for: .widget) { background.pulsePaperAppearance(for: family) }
+            .pulsePaperAppearance(for: family)
     }
 
     @ViewBuilder

@@ -34,7 +34,8 @@ struct LiveExerciseCard: View {
             ForEach(Array(exercise.sets.enumerated()), id: \.element.id) { position, set in
                 LiveSetRow(model: model, exercise: exercise, exerciseIndex: index, set: set, index: position, rpeSet: $rpeSet)
                     .listRowBackground(Self.background())
-                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                    // Une série validée ne part pas d'un balayage complet : sa suppression ne se défait pas.
+                    .swipeActions(edge: .trailing, allowsFullSwipe: set.completedAt == nil) {
                         Button(role: .destructive) {
                             Task { await model.deleteSet(set.id) }
                         } label: {

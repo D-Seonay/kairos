@@ -43,7 +43,7 @@ struct RunLiveMetrics: View {
     }
 
     private var distance: some View {
-        Text(RunText.distance(snapshot.distanceMeters))
+        Text(RunText.liveDistance(snapshot.distanceMeters))
             .font(PulseFont.score(size: min(distanceSize, 80)))
             .monospacedDigit()
             .lineLimit(1)

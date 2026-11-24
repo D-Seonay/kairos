@@ -6,8 +6,9 @@ import PulseServices
 import SupplementsFeature
 
 /// L'état du récap de fin de séance (spec M4 §17) : le bilan lu du service, le RPE global pré-placé sur la moyenne des RPE de
-/// série, la note, et les deux sorties « Enregistrer » et « Plus tard ». Une erreur laisse le récap ouvert : on peut réessayer.
-/// La première fois, l'enregistrement passe par l'écran d'explication d'Apple Santé, puis la demande système (spec M4 §19.5).
+/// série, la note, et les deux sorties « Enregistrer » et « Enregistrer sans noter ». Une erreur laisse le récap ouvert : on
+/// peut réessayer. La première fois, l'enregistrement passe par l'écran d'explication d'Apple Santé, puis la demande système
+/// (spec M4 §19.5).
 @MainActor
 @Observable
 public final class RecapModel {
@@ -27,7 +28,8 @@ public final class RecapModel {
     /// des photos et pour une saisie après coup.
     public let photos: SessionPhotosModel?
 
-    public static let rpeRange = 1...10
+    /// La même échelle que la correction d'une séance enregistrée.
+    public static let rpeRange = RoutineRules.overallRPE
     /// Le RPE avant que le bilan, qui le suggère, soit lu.
     private static let initialRPE = 7
 
@@ -82,7 +84,7 @@ public final class RecapModel {
         await finishOrExplain(overallRPE: rpe)
     }
 
-    /// « Plus tard » : la séance avec le RPE pré-placé, pas celui du curseur, et la note déjà saisie.
+    /// « Enregistrer sans noter » : la séance avec le RPE pré-placé, pas celui du curseur, et la note déjà saisie.
     public func later() async -> Bool {
         await finishOrExplain(overallRPE: recap?.suggestedRPE ?? Self.initialRPE)
     }

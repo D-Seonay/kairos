@@ -112,3 +112,14 @@ import Testing
     #expect(saved.isCompound && saved.tracksDuration && saved.isUnilateral)
     #expect(saved.loadKind == .bodyweight)
 }
+
+@MainActor @Test func customExerciseKnowsWhenItWasChanged() {
+    let model = CustomExerciseModel(environment: TrainFixture().environment, draft: nil, editing: nil)
+    #expect(!model.hasChanges)
+    model.restSeconds = 120
+    #expect(model.hasChanges)
+    model.restSeconds = 90
+    #expect(!model.hasChanges)
+    model.setPrimaryMuscle(.lats)
+    #expect(model.hasChanges)
+}

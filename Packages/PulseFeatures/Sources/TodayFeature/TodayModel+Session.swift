@@ -23,9 +23,11 @@ extension TodayModel {
                                      originalChosen: startsOriginal, profile: profile, deload: deloadStatus)
     }
 
-    /// La séance telle que la carte la montre : l'originale si elle a été rétablie, l'ajustée sinon.
-    func shownSessionLaunch() -> SessionLaunch? {
-        sessionLaunch(startsOriginal: session?.status == .restored)
+    /// La séance telle que la carte la montre : l'originale si elle a été rétablie, l'ajustée sinon. L'app la lance aussi depuis le
+    /// contrôle « Séance du jour ». Rien tant que le check-in du jour attend : la séance part ajustée, une fois le score connu.
+    public func shownSessionLaunch() -> SessionLaunch? {
+        if case .needsCheckIn = score { return nil }
+        return sessionLaunch(startsOriginal: session?.status == .restored)
     }
 
     /// Ouvre les 20 min de mobilité. Rien n'est enregistré.

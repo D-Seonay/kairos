@@ -14,6 +14,7 @@ struct RoutineRulesTests {
         #expect(RoutineRules.sets == 1...10 && RoutineRules.reps == 1...30 && RoutineRules.seconds == 5...600)
         #expect(RoutineRules.rpe == 6.0...10.0 && RoutineRules.rest == 0...300)
         #expect(RoutineRules.rpeStep == 0.5 && RoutineRules.restStep == 15)
+        #expect(RoutineRules.overallRPE == 1...10)
     }
 
     @Test func aDefaultExerciseHasNoIssue() {
@@ -54,6 +55,14 @@ struct RoutineRulesTests {
         #expect(RoutineRules.issues(in: exercise(rpe: 8.5), tracksDuration: false).isEmpty)
         #expect(RoutineRules.issues(in: exercise(rest: 100), tracksDuration: false) == [.rest])
         #expect(RoutineRules.issues(in: exercise(rest: -15), tracksDuration: false) == [.rest])
+    }
+
+    @Test func routineRestRoundsToTheStepAndStaysInBounds() {
+        #expect(RoutineRules.routineRest(90) == 90)
+        #expect(RoutineRules.routineRest(100) == 105)
+        #expect(RoutineRules.routineRest(600) == 300)
+        #expect(RoutineRules.routineRest(-20) == 0)
+        #expect(RoutineRules.issues(in: exercise(rest: RoutineRules.routineRest(415)), tracksDuration: false).isEmpty)
     }
 
     @Test func setTargetsMustMatchTheSetCount() {

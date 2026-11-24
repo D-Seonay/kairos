@@ -8,7 +8,8 @@ public enum RoutineEditor {
     /// Le repos d'un exercice que l'annuaire ne connaît pas.
     static let fallbackRestSeconds = 90
 
-    /// Ajoute `references` en fin de jour : 3 séries de 8 à 12 répétitions (30 à 60 s pour un exercice tenu), RPE 8.
+    /// Ajoute `references` en fin de jour : 3 séries de 8 à 12 répétitions (30 à 60 s pour un exercice tenu), RPE 8, et le repos
+    /// par défaut de l'exercice ramené dans les bornes de `RoutineRules`.
     public static func add(_ references: [ExerciseReference], to day: RoutineDay, directory: ExerciseDirectory) -> RoutineDay {
         var result = day
         for reference in references {
@@ -16,7 +17,7 @@ public enum RoutineEditor {
             let held = info?.tracksDuration ?? false
             result.exercises.append(RoutineExercise(
                 order: result.exercises.count, exercise: reference, sets: 3, repsMin: held ? 30 : 8, repsMax: held ? 60 : 12,
-                targetRPE: 8, restSeconds: info?.defaultRestSeconds ?? fallbackRestSeconds))
+                targetRPE: 8, restSeconds: RoutineRules.routineRest(info?.defaultRestSeconds ?? fallbackRestSeconds)))
         }
         return normalized(result)
     }

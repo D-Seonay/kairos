@@ -124,7 +124,7 @@ public final class TrainModel {
     }
 
     /// La routine `dayID` du programme actif avec les ajustements du jour (le score du jour et « Séance d'origine » s'il a été
-    /// choisie). `nil` pour un jour inconnu ou une course : les courses ne se démarrent pas avant M6.
+    /// choisie). `nil` pour un jour inconnu ou une course, qui se lance par `runLaunch(routine:)`.
     public func launch(routine dayID: UUID) -> SessionLaunch? {
         guard let day = program?.days.first(where: { $0.id == dayID }), day.kind == .strength else { return nil }
         return SessionLaunch.routine(day, programID: program?.id, recovery: scoredToday,
@@ -150,6 +150,14 @@ public final class TrainModel {
     public func runLaunch() -> RunLaunch {
         guard let day = todaysRun else { return .free() }
         return .planned(day, programID: program?.id, adjusted: today?.status == .adjusted ? today?.adjusted : nil)
+    }
+
+    /// La course `dayID` de « Mes routines », titrée comme sur l'accueil, et ajustée comme lui quand c'est la course du jour ;
+    /// `nil` pour un jour inconnu ou une routine de musculation.
+    public func runLaunch(routine dayID: UUID) -> RunLaunch? {
+        guard let day = program?.days.first(where: { $0.id == dayID }), day.kind == .run else { return nil }
+        let adjusted = todaysRun?.id == dayID && today?.status == .adjusted ? today?.adjusted : nil
+        return .planned(day, programID: program?.id, adjusted: adjusted)
     }
 
     /// Vrai quand `runLaunch()` rend la course du jour plutôt qu'une course libre ; le libellé du bouton en dépend, pour dire ce

@@ -3,6 +3,7 @@ public enum PlanningIdentifiers {
     public static let todayCard = "planning.today"
     public static let start = "planning.today.start"
     public static let resume = "planning.today.resume"
+    public static let startRun = "planning.today.run"
     public static let dayPrefix = "planning.day."
     public static let stripPrefix = "planning.strip."
     public static let restoreWeek = "planning.restore"

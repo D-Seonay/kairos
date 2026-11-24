@@ -21,10 +21,14 @@ private struct WeekWidgetEntryView: View {
 
     var body: some View {
         WeekWidgetLargeView(content: entry.content)
-            .widgetURL(AppLink.today.url)
+            // Le planning de la semaine s'ouvre sur l'onglet Planning.
+            .widgetURL(AppLink.planning.url)
             .containerBackground(for: .widget) {
                 PulsePalette.surface
+                    .pulsePaperAppearance(for: .systemLarge)
             }
+            // Le seul format est le grand widget de l'écran d'accueil : toujours sur papier, comme l'app.
+            .pulsePaperAppearance(for: .systemLarge)
     }
 }
 

@@ -46,7 +46,7 @@ struct ProgramStepView: View {
         OnboardingOptionCard(
             systemImage: "square.and.pencil", title: String(localized: "Je construis le mien", bundle: .module),
             detail: String(
-                localized: "Pas de programme pour l'instant : tu créeras tes propres routines dès que l'éditeur sera disponible.",
+                localized: "Pas de programme pour l'instant : tu crées tes propres routines dans l'onglet Séance.",
                 bundle: .module),
             isSelected: model.choseCustomProgram
         ) { model.choseCustomProgram = true }

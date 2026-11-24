@@ -28,6 +28,8 @@ public struct StreakWidgetContent: Sendable, Equatable {
     public var subtitle: String
     public var inlineText: String
     public var accessibilityLabel: String
+    /// Faux sans instantané du jour : le widget montre un tiret au lieu d'un nombre de semaines.
+    public var isReady: Bool
 
     public init(
         streakWeeks: Int,
@@ -36,7 +38,8 @@ public struct StreakWidgetContent: Sendable, Equatable {
         weekDays: [DayState],
         subtitle: String,
         inlineText: String,
-        accessibilityLabel: String
+        accessibilityLabel: String,
+        isReady: Bool = true
     ) {
         self.streakWeeks = streakWeeks
         self.completedThisWeek = completedThisWeek
@@ -45,19 +48,35 @@ public struct StreakWidgetContent: Sendable, Equatable {
         self.subtitle = subtitle
         self.inlineText = inlineText
         self.accessibilityLabel = accessibilityLabel
+        self.isReady = isReady
     }
 
-    /// La série et la semaine de l'instantané du jour ; l'exemple sans instantané du jour ou sans série.
+    /// Le nombre de semaines affiché : un tiret tant que la série n'est pas chargée.
+    public var weeksText: String {
+        isReady ? "\(streakWeeks)" : PulseFormat.dash
+    }
+
+    /// La série et la semaine de l'instantané du jour. Sans instantané du jour ou sans série, le widget le dit au lieu d'inventer
+    /// une série.
     public static func make(snapshot: WidgetSnapshot?, at date: Date, calendar: Calendar) -> StreakWidgetContent {
-        guard let planning = WidgetPlanningText.planning(snapshot, at: date, calendar: calendar) else {
-            return sample(at: date, calendar: calendar)
-        }
+        guard let planning = WidgetPlanningText.planning(snapshot, at: date, calendar: calendar) else { return notReady }
         let streak = planning.streak
         return content(weeks: streak.weeks, completed: streak.completed, target: streak.target,
                        days: planning.week.map(WidgetPlanningText.state(of:)),
                        spokenDays: spokenDays(of: planning.week, calendar: calendar))
     }
 
+    /// Pas encore d'instantané du jour : ni semaines ni pastilles inventées, une invitation à ouvrir l'app.
+    static var notReady: StreakWidgetContent {
+        StreakWidgetContent(
+            streakWeeks: 0, completedThisWeek: 0, targetThisWeek: 0, weekDays: [],
+            subtitle: String(localized: "Ouvre Pulse pour la mettre à jour", bundle: .module),
+            inlineText: String(localized: "Série pas encore prête", bundle: .module),
+            accessibilityLabel: String(localized: "Série pas encore prête. Ouvre Pulse pour la mettre à jour", bundle: .module),
+            isReady: false)
+    }
+
+    /// Un exemple, pour la galerie de widgets et le gabarit avant le premier chargement.
     public static func sample(at date: Date, calendar: Calendar) -> StreakWidgetContent {
         let week = WidgetPlanningText.sampleWeek(containing: date, calendar: calendar)
         return content(weeks: 14, completed: 3, target: 5, days: week.map(WidgetPlanningText.state(of:)),

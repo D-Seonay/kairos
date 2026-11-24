@@ -13,7 +13,10 @@ struct LoadSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: PulseMetrics.spacing) {
-            StatsTileGrid(tiles: tiles)
+            // Avant 28 jours d'historique, la carte du ratio le dit seule : trois tuiles vides répéteraient la même phrase.
+            if load.daysUntilRatio == nil || load.today != nil {
+                StatsTileGrid(tiles: tiles)
+            }
             LoadRatioCard(load: load, window: window)
             LoadBarsCard(bars: load.bars, totals: load.totals, window: window)
             LoadTotalsCard(totals: load.totals)
@@ -27,8 +30,9 @@ struct LoadSection: View {
         var acuteSpoken: [String] = []
         if let today, let before = load.acuteWeekBefore,
            let change = StatsText.change(StatsComparison(value: today.acute, previous: before)) {
-            acuteDetails.append(String(localized: "\(change) vs semaine passée", bundle: .module))
-            acuteSpoken.append(String(localized: "\(change) par rapport à la semaine passée", bundle: .module))
+            let detail = String(localized: "\(change) par rapport à la semaine passée", bundle: .module)
+            acuteDetails.append(detail)
+            acuteSpoken.append(detail)
         }
         return [
             StatsTileContent(title: String(localized: "Charge aiguë, 7 j", bundle: .module),
@@ -53,6 +57,14 @@ struct LoadSection: View {
         return days == 1
             ? String(localized: "28 jours d'historique nécessaires, encore 1 jour", bundle: .module)
             : String(localized: "28 jours d'historique nécessaires, encore \(days) jours", bundle: .module)
+    }
+
+    /// La phrase de la carte du ratio avant 28 jours d'historique, seule carte de la vue tant qu'elle s'affiche.
+    static func ratioWaitingText(days: Int) -> String {
+        days == 1
+            ? String(localized: "Le ratio aigu / chronique s'affiche après 28 jours d'historique (encore 1 jour)", bundle: .module)
+            : String(localized: "Le ratio aigu / chronique s'affiche après 28 jours d'historique (encore \(days) jours)",
+                     bundle: .module)
     }
 
     static func zoneTitle(_ zone: ACWRZone) -> String {
@@ -89,7 +101,7 @@ struct LoadSection: View {
 // MARK: - Courbe du ratio
 
 /// La courbe du ratio, la bande optimale 0,8 – 1,3 et la ligne de risque à 1,5, seule touche de couleur ; avant 28 jours
-/// d'historique, une phrase à la place.
+/// d'historique, une phrase à la place. Le ratio du jour est dans sa tuile, pas répété ici.
 private struct LoadRatioCard: View {
     let load: LoadStats
     let window: StatsWindow
@@ -97,10 +109,9 @@ private struct LoadRatioCard: View {
 
     var body: some View {
         StatsChartCard(title: String(localized: "Ratio aigu / chronique", bundle: .module),
-                       spokenTitle: String(localized: "Ratio aigu sur chronique", bundle: .module),
-                       trailing: load.today.map { PulseFormat.decimal($0.ratio, maxFractionDigits: 2) }) {
+                       spokenTitle: String(localized: "Ratio aigu sur chronique", bundle: .module)) {
             if let days = load.daysUntilRatio {
-                Text(Self.waitingText(days: days))
+                Text(LoadSection.ratioWaitingText(days: days))
                     .font(.footnote)
                     .foregroundStyle(PulsePalette.text2)
                     .fixedSize(horizontal: false, vertical: true)
@@ -163,12 +174,6 @@ private struct LoadRatioCard: View {
         .accessibilityElement(children: .contain)
         .accessibilityLabel(StatsText.ratioSummary(points: points, period: window.period))
         .accessibilityChartDescriptor(StatsChartDescriptors.ratio(points: points, window: window))
-    }
-
-    static func waitingText(days: Int) -> String {
-        days == 1
-            ? String(localized: "L'ACWR s'affiche après 28 jours d'entraînement (encore 1 jour)", bundle: .module)
-            : String(localized: "L'ACWR s'affiche après 28 jours d'entraînement (encore \(days) jours)", bundle: .module)
     }
 }
 

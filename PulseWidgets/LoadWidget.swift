@@ -24,7 +24,8 @@ private struct LoadWidgetEntryView: View {
     var body: some View {
         content
             .widgetURL(AppLink.today.url)
-            .containerBackground(for: .widget) { background }
+            .containerBackground(for: .widget) { background.pulsePaperAppearance(for: family) }
+            .pulsePaperAppearance(for: family)
     }
 
     @ViewBuilder

@@ -17,19 +17,17 @@ private struct ProfileTileContent: Identifiable {
     var id: String { title }
 }
 
-/// Série en cours, score de ce matin et poids tendance, sur trois colonnes (une seule aux tailles d'accessibilité).
+/// Série en cours et score de ce matin, sur deux colonnes (une seule aux tailles d'accessibilité). Le poids n'a pas de tuile : la
+/// carte « Poids et corps », juste dessous, le donne déjà.
 struct ProfileTiles: View {
     let summary: ProfileSummary
-    let trend: WeightTrend?
-    let calendar: Calendar
-    let today: Date
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         let columns = Array(repeating: GridItem(.flexible(), spacing: 10, alignment: .top),
-                            count: dynamicTypeSize.isAccessibilitySize ? 1 : 3)
+                            count: dynamicTypeSize.isAccessibilitySize ? 1 : 2)
         LazyVGrid(columns: columns, spacing: 10) {
-            ForEach([streakTile, scoreTile, weightTile]) { ProfileTile(content: $0) }
+            ForEach([streakTile, scoreTile]) { ProfileTile(content: $0) }
         }
     }
 
@@ -53,21 +51,6 @@ struct ProfileTiles: View {
                 : String(localized: "sur 100", bundle: .module),
             spoken: summary.morningScore.map { ProfileText.morningScoreSpoken($0, isEstimated: summary.morningScoreIsEstimated) },
             emptyText: String(localized: "Pas encore de score aujourd'hui", bundle: .module))
-    }
-
-    /// La tendance, datée quand la dernière pesée a plus de 14 jours.
-    private var weightTile: ProfileTileContent {
-        let current = trend?.current
-        var unit = String(localized: "kg", bundle: .module)
-        if trend?.isStale == true, let last = trend?.lastMeasured {
-            unit = String(localized: "kg au \(ProfileText.shortDate(last, calendar: calendar, today: today))", bundle: .module)
-        }
-        let staleSince = trend?.isStale == true ? trend?.lastMeasured : nil
-        return ProfileTileContent(
-            title: String(localized: "Poids", bundle: .module),
-            value: current.map { PulseFormat.decimal($0, maxFractionDigits: 1) }, unit: unit,
-            spoken: current.map { ProfileText.trendWeightSpoken($0, staleSince: staleSince, calendar: calendar, today: today) },
-            emptyText: String(localized: "Pas encore de pesée", bundle: .module))
     }
 }
 
@@ -174,86 +157,6 @@ struct WeightCard: View {
                 .font(.subheadline)
                 .foregroundStyle(PulsePalette.text)
         }
-    }
-}
-
-// MARK: - Mur des records
-
-/// Les quatre levés de base et les trois chronos de course, toujours affichés ; « Tout voir » ouvre Stats → Records.
-struct RecordsWall: View {
-    let lifts: [StrengthRecordLine]
-    let runs: [RunBest]
-    let calendar: Calendar
-    let today: Date
-    let onOpenRecords: () -> Void
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            PulseSectionHeader(String(localized: "Records", bundle: .module)) {
-                Button(String(localized: "Tout voir", bundle: .module), action: onOpenRecords)
-                    .buttonStyle(PillButtonStyle())
-            }
-            ObsidianCard {
-                VStack(alignment: .leading, spacing: 0) {
-                    ForEach(RecordStats.mainLifts, id: \.self) { id in
-                        liftRow(id)
-                    }
-                    Divider().overlay(PulsePalette.line)
-                    ForEach(runs) { run in
-                        row(title: ProfileText.runTitle(run.distance),
-                            detail: run.date.map { ProfileText.shortDate($0, calendar: calendar, today: today) },
-                            value: run.seconds.map { ProfileText.raceTime(seconds: $0) },
-                            missing: String(localized: "Pas encore couru", bundle: .module),
-                            spoken: ProfileText.runRecordSpoken(run, calendar: calendar, today: today))
-                    }
-                }
-            }
-        }
-    }
-
-    /// Le record d'un levé de base, nommé par le répertoire d'exercices ; sans record, son nom français et « Pas encore de record ».
-    private func liftRow(_ id: String) -> some View {
-        let line = lifts.first { $0.exercise == .content(id: id) }
-        let title = line?.name ?? ProfileText.mainLiftName(id)
-        return row(title: title,
-                   detail: line.map { ProfileText.shortDate($0.date, calendar: calendar, today: today) },
-                   value: line.map(ProfileText.recordValue),
-                   missing: String(localized: "Pas encore de record", bundle: .module),
-                   spoken: ProfileText.liftRecordSpoken(title: title, line: line, calendar: calendar, today: today))
-    }
-
-    /// Sans valeur (un levé sans record, une distance jamais couverte) : `missing`.
-    /// Titre et valeur côte à côte ; aux tailles d'accessibilité, la valeur sous le titre. VoiceOver lit `spoken`, la valeur d'abord.
-    private func row(title: String, detail: String?, value: String?, missing: String, spoken: String) -> some View {
-        let layout = dynamicTypeSize.isAccessibilitySize
-            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
-            : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: 12))
-        return layout {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(PulsePalette.text)
-                if let detail {
-                    Text(detail)
-                        .font(.caption)
-                        .foregroundStyle(PulsePalette.text2)
-                }
-            }
-            if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 8) }
-            if let value {
-                Text(value)
-                    .font(PulseFont.value(.headline))
-                    .foregroundStyle(PulsePalette.text)
-            } else {
-                Text(missing)
-                    .font(.subheadline)
-                    .foregroundStyle(PulsePalette.text2)
-            }
-        }
-        .padding(.vertical, 10)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(spoken)
     }
 }
 

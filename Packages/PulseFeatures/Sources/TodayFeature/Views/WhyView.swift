@@ -2,7 +2,7 @@ import PulseDesignSystem
 import PulseDomain
 import SwiftUI
 
-/// « Pourquoi cette adaptation » : la lecture de la nuit, ce que le moteur a changé, les signaux du score et la formule,
+/// « Pourquoi ce score » : la lecture de la nuit, ce que le moteur a changé, les signaux du score et la formule,
 /// puis les boutons. Poussé dans la pile de l'accueil depuis la carte de récupération ou le bouton « Pourquoi ? ».
 struct WhyView: View {
     let model: TodayModel
@@ -24,7 +24,8 @@ struct WhyView: View {
             }
         }
         .pulseScreenBackground(aura: 0.6)
-        .navigationTitle(String(localized: "Pourquoi cette adaptation", bundle: .module))
+        // Le même mot que le lien de la carte : l'écran explique le score, qu'il ait adapté la séance ou non.
+        .navigationTitle(String(localized: "Pourquoi ce score", bundle: .module))
         .pulseInlineTitle()
     }
 }

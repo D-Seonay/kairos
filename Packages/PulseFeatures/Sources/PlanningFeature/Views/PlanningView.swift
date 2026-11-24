@@ -11,17 +11,23 @@ public struct PlanningView: View {
     private let train: TrainModel
     private let onStartSession: (SessionLaunch) -> Void
     private let onResumeSession: () -> Void
+    private let onStartRun: ((RunLaunch) -> Void)?
+    private let onPlanChanged: () -> Void
     @State private var path: [PlanningDestination] = []
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// `train` donne la séance du jour ajustée au score et son lancement, comme l'onglet Séance ; `onStartSession` démarre la
-    /// séance rendue ; `onResumeSession` rouvre celle en cours.
+    /// séance rendue ; `onResumeSession` rouvre celle en cours. `onStartRun` démarre la course rendue : sans lui, la carte du jour
+    /// n'offre pas « Courir ». `onPlanChanged` dit à l'app qu'un déplacement a changé la semaine, pour relire les autres onglets.
     public init(model: PlanningModel, train: TrainModel, onStartSession: @escaping (SessionLaunch) -> Void,
-                onResumeSession: @escaping () -> Void) {
+                onResumeSession: @escaping () -> Void, onStartRun: ((RunLaunch) -> Void)? = nil,
+                onPlanChanged: @escaping () -> Void = {}) {
         self.model = model
         self.train = train
         self.onStartSession = onStartSession
         self.onResumeSession = onResumeSession
+        self.onStartRun = onStartRun
+        self.onPlanChanged = onPlanChanged
     }
 
     public var body: some View {
@@ -41,7 +47,10 @@ public struct PlanningView: View {
             if let day = model.moving {
                 ForEach(model.targets(for: day)) { target in
                     Button("\(model.weekdayName(target.date).capitalized) · \(model.title(of: target))") {
-                        Task { await model.swap(day, with: target) }
+                        Task {
+                            await model.swap(day, with: target)
+                            await planChanged()
+                        }
                     }
                 }
             }
@@ -56,6 +65,13 @@ public struct PlanningView: View {
         await train.refresh()
     }
 
+    /// Après un déplacement, la semaine est déjà relue : la séance du jour et son lancement, qui viennent de l'onglet Séance, le
+    /// sont à leur tour, puis l'app relit les autres onglets.
+    private func planChanged() async {
+        await train.refresh()
+        onPlanChanged()
+    }
+
     private func content(proxy: ScrollViewProxy) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: PulseMetrics.spacing) {
@@ -65,25 +81,38 @@ public struct PlanningView: View {
                         .font(.footnote)
                         .foregroundStyle(PulsePalette.bad)
                 }
-                // Sept colonnes ne tiennent pas au-delà de `xxxLarge`, et la liste « Cette semaine » donne les mêmes jours en grand.
-                WeekStrip(model: model) { day in
-                    if let destination = model.destination(for: day) {
-                        path.append(destination)
-                    } else {
-                        PulseMotion.perform(.default, reduceMotion: reduceMotion) { proxy.scrollTo(day.id, anchor: .center) }
-                    }
+                if model.hasLoaded {
+                    loaded(proxy: proxy)
+                } else {
+                    ProgressView()
+                        .accessibilityLabel(String(localized: "Chargement du planning", bundle: .module))
+                        .frame(maxWidth: .infinity, minHeight: 200)
                 }
-                .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
-                if let today = model.today {
-                    TodayPlanCard(model: model, train: train, day: today, onStart: start, onResume: onResumeSession)
-                }
-                week
-                monthEntry
             }
             .padding(PulseMetrics.spacing)
         }
         .refreshable { await refresh() }
         .pulseAnnounceError(model.errorMessage)
+    }
+
+    /// La bande, la carte du jour, la semaine et l'entrée du mois, une fois la semaine lue : avant, ce serait une semaine vide.
+    @ViewBuilder
+    private func loaded(proxy: ScrollViewProxy) -> some View {
+        // Sept colonnes ne tiennent pas au-delà de `xxxLarge`, et la liste « Cette semaine » donne les mêmes jours en grand.
+        WeekStrip(model: model) { day in
+            if let destination = model.destination(for: day) {
+                path.append(destination)
+            } else {
+                PulseMotion.perform(.default, reduceMotion: reduceMotion) { proxy.scrollTo(day.id, anchor: .center) }
+            }
+        }
+        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+        if let today = model.today {
+            TodayPlanCard(model: model, train: train, day: today, onStart: start, onResume: onResumeSession,
+                          onStartRun: onStartRun == nil ? nil : startRun)
+        }
+        week
+        monthEntry
     }
 
     private var header: some View {
@@ -103,12 +132,16 @@ public struct PlanningView: View {
         VStack(alignment: .leading, spacing: 8) {
             PulseSectionHeader(String(localized: "Cette semaine", bundle: .module))
             ForEach(model.days) { day in
-                WeekDayRow(model: model, day: day, onOpen: model.destination(for: day).map { destination in { path.append(destination) } })
+                WeekDayRow(model: model, day: day, onOpen: model.destination(for: day).map { destination in { path.append(destination) } },
+                           onKeepPlanned: { keepPlanned(day) })
                     .id(day.id)
             }
             if model.overview?.hasUserMoves == true {
                 Button(String(localized: "Rétablir la semaine type", bundle: .module)) {
-                    Task { await model.restoreWeek() }
+                    Task {
+                        await model.restoreWeek()
+                        await planChanged()
+                    }
                 }
                 .buttonStyle(PulseDesignSystem.LinkButtonStyle())
                 .accessibilityIdentifier(PlanningIdentifiers.restoreWeek)
@@ -144,6 +177,23 @@ public struct PlanningView: View {
             onResumeSession()
         } else if let launch = train.launchToday() {
             onStartSession(launch)
+        }
+    }
+
+    /// Lance la course du jour, comme « Courir » de l'onglet Séance ; avec une séance déjà en cours, la rouvre.
+    private func startRun() {
+        if train.activeSessionTitle != nil {
+            onResumeSession()
+        } else {
+            onStartRun?(train.runLaunch())
+        }
+    }
+
+    /// « Garder le jour prévu » : rend le jour à la semaine type, puis relit la séance du jour.
+    private func keepPlanned(_ day: PlanningDay) {
+        Task {
+            await model.keepPlanned(day)
+            await planChanged()
         }
     }
 

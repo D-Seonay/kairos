@@ -16,7 +16,7 @@ enum TrainDestination: Hashable {
 }
 
 /// L'onglet « Séance » : « Reprendre la séance » pendant une séance, la tuile Musculation (« Démarrer »), la tuile Course,
-/// « Mes routines » (« Lancer », « Mon programme » et « + Nouvelle »), puis la bibliothèque d'exercices, l'historique,
+/// « Mes routines » (« Lancer » ou « Courir », « Mon programme », « + Nouvelle »), puis la bibliothèque d'exercices, l'historique,
 /// « Séance libre », « Courir », « Saisir une séance passée » et l'import Hevy. Lancer une séance la rend à l'app, qui ouvre
 /// l'écran en direct (« Courir », sur la tuile Course ou dans l'entrée, rend de même la course à lancer) ; s'il y a déjà une
 /// séance en cours, l'onglet propose de la reprendre. Une séance passée se saisit à côté de celle en cours.
@@ -168,10 +168,27 @@ public struct TrainView: View {
         }
     }
 
+    /// « Lancer » démarre une routine de musculation, « Courir » une course : sa course GPS, avec son objectif.
     private func routineRow(_ routine: RoutineSummary) -> some View {
+        let dayID = routine.day.id
         let isStrength = routine.day.kind == .strength
-        return RoutineRow(routine: routine, programID: isStrength ? model.program?.id : nil,
-                          onLaunch: isStrength ? { start(model.launch(routine: routine.day.id)) } : nil)
+        return RoutineRow(routine: routine, programID: isStrength ? model.program?.id : nil, onLaunch: {
+            if isStrength {
+                start(model.launch(routine: dayID))
+            } else {
+                startRun(routine: dayID)
+            }
+        })
+    }
+
+    /// Lance la course `dayID` de « Mes routines » ; avec une séance de musculation en cours, propose de la reprendre à la place.
+    private func startRun(routine dayID: UUID) {
+        guard let launch = model.runLaunch(routine: dayID) else { return }
+        if model.activeSessionTitle == nil {
+            onStartRun(launch)
+        } else {
+            offersResume = true
+        }
     }
 
     /// Crée une routine vide dans le programme actif et ouvre son éditeur.

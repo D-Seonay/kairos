@@ -40,13 +40,21 @@ public final class FinishFlowModel {
     /// question n'est pas reposée.
     @ObservationIgnored private var continuedAfter: Date?
     @ObservationIgnored private let onFinished: @MainActor () -> Void
+    @ObservationIgnored private let onMinimize: (@MainActor () -> Void)?
 
-    public init(live: LiveSessionModel, onFinished: @escaping @MainActor () -> Void) {
+    /// `onMinimize` ferme l'écran sans finir la séance (`LiveSessionCoordinator.minimize`) ; `nil` sans bandeau pour la
+    /// reprendre, comme une saisie après coup.
+    public init(live: LiveSessionModel, onFinished: @escaping @MainActor () -> Void,
+                onMinimize: (@MainActor () -> Void)? = nil) {
         self.live = live
         self.onFinished = onFinished
+        self.onMinimize = onMinimize
     }
 
     var calendar: Calendar { live.environment.calendar }
+
+    /// Vrai quand l'écran peut se réduire : la séance continue et son bandeau « Reprendre » la rouvre.
+    public var canMinimize: Bool { onMinimize != nil }
 
     // MARK: Gestes de l'écran
 
@@ -110,10 +118,24 @@ public final class FinishFlowModel {
         forgotten = nil
     }
 
-    /// « Enregistrer » ou « Plus tard » du récap, une fois la séance écrite.
+    /// Le chevron de l'en-tête : l'écran se ferme, la séance continue et son bandeau « Reprendre » apparaît. Sans effet pendant
+    /// une étape de la suite (confirmation, alerte, récap).
+    public func minimize() {
+        guard isIdle, let onMinimize else { return }
+        onMinimize()
+    }
+
+    /// « Enregistrer » ou « Enregistrer sans noter » du récap, une fois la séance écrite.
     public func recapSaved() {
         recap = nil
         onFinished()
+    }
+
+    /// « Revenir à la séance » du récap : rien n'est encore écrit, la séance reprend telle quelle et « Terminer » ouvrira un
+    /// récap neuf. Sans effet pendant un enregistrement.
+    public func resumeFromRecap() {
+        guard let recap, !recap.isSaving else { return }
+        self.recap = nil
     }
 
     public func dismissError() {

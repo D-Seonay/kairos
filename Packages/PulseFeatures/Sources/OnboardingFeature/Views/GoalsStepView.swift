@@ -48,11 +48,30 @@ struct GoalsStepView: View {
         }
     }
 
+    /// Les jours de repos, et un avertissement quand ils ne laissent pas assez de jours pour les séances demandées.
     private var restDaysSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             OnboardingSectionTitle(String(localized: "Jours de repos obligatoires", bundle: .module))
             WeekdayToggleRow(selection: restDaysBinding)
+            if model.sessionsExceedFreeDays {
+                Label {
+                    Text(String(
+                        localized: "Plus de séances que de jours libres : retire une séance ou un jour de repos.", bundle: .module))
+                } icon: {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .accessibilityHidden(true)
+                }
+                .font(.footnote)
+                .foregroundStyle(PulsePalette.warn)
+                .fixedSize(horizontal: false, vertical: true)
+            }
         }
+        // L'avertissement apparaît sous le doigt qui vient de cocher un jour : on le dit.
+        .pulseAnnounce(model.sessionsExceedFreeDays ? Self.tooManySessionsAnnouncement : nil)
+    }
+
+    private static var tooManySessionsAnnouncement: String {
+        String(localized: "Plus de séances que de jours libres", bundle: .module)
     }
 
     private var equipmentSection: some View {

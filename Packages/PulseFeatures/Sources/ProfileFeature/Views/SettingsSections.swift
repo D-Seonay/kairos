@@ -9,6 +9,9 @@ import SwiftUI
 struct ProfileSettingsSection: View {
     let model: SettingsModel
     let profile: UserProfile
+    /// « Renseigner » ouvre un sélecteur ; rien n'est écrit avant « Enregistrer ».
+    @State private var isPickingBirthDate = false
+    @State private var pendingBirthDate = Date()
 
     var body: some View {
         Section {
@@ -40,7 +43,8 @@ struct ProfileSettingsSection: View {
         .listRowBackground(PulsePalette.surface)
     }
 
-    /// Sans date, un bouton la propose (30 ans avant aujourd'hui, comme l'onboarding) ; jamais après aujourd'hui.
+    /// Sans date, « Renseigner » ouvre un sélecteur réglé sur 30 ans avant aujourd'hui, comme l'onboarding, et n'écrit qu'à
+    /// « Enregistrer » ; jamais après aujourd'hui.
     @ViewBuilder
     private var birthDate: some View {
         let calendar = model.environment.calendar
@@ -59,8 +63,8 @@ struct ProfileSettingsSection: View {
             .frame(minHeight: 44)
         } else {
             Button {
-                let suggested = calendar.date(byAdding: .year, value: -30, to: calendar.startOfDay(for: today)) ?? today
-                Task { await model.update { $0.birthDate = suggested } }
+                pendingBirthDate = calendar.date(byAdding: .year, value: -30, to: calendar.startOfDay(for: today)) ?? today
+                isPickingBirthDate = true
             } label: {
                 AdaptiveRow { isLarge in
                     birthDateLabel
@@ -73,7 +77,40 @@ struct ProfileSettingsSection: View {
             .frame(minHeight: 44)
             .accessibilityLabel(String(localized: "Renseigner la date de naissance", bundle: .module))
             .accessibilityHint(ProfileText.birthDateHint)
+            .sheet(isPresented: $isPickingBirthDate) { birthDateSheet(calendar: calendar, today: today) }
         }
+    }
+
+    /// Le sélecteur de « Renseigner » : la date proposée se règle, puis « Enregistrer » l'écrit ; « Annuler » n'écrit rien.
+    private func birthDateSheet(calendar: Calendar, today: Date) -> some View {
+        NavigationStack {
+            Form {
+                DatePicker(String(localized: "Date de naissance", bundle: .module), selection: $pendingBirthDate, in: ...today,
+                           displayedComponents: .date)
+                    .environment(\.locale, Locale(identifier: "fr_FR"))
+                    .environment(\.calendar, calendar)
+                    .environment(\.timeZone, calendar.timeZone)
+                    .frame(minHeight: 44)
+                    .listRowBackground(PulsePalette.surface)
+            }
+            .scrollContentBackground(.hidden)
+            .background(PulsePalette.background)
+            .navigationTitle(String(localized: "Date de naissance", bundle: .module))
+            .pulseInlineTitle()
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(String(localized: "Annuler", bundle: .module)) { isPickingBirthDate = false }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(String(localized: "Enregistrer", bundle: .module)) {
+                        let date = pendingBirthDate
+                        isPickingBirthDate = false
+                        Task { await model.update { $0.birthDate = date } }
+                    }
+                }
+            }
+        }
+        .presentationDetents([.medium])
     }
 
     private var birthDateLabel: some View {

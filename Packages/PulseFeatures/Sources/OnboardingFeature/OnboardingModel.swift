@@ -36,7 +36,8 @@ public final class OnboardingModel {
     @ObservationIgnored var healthSkipped = false
     /// Numéro de la calibration en cours : une lecture périmée (retour arrière, nouvelle lecture) n'écrit plus rien.
     @ObservationIgnored var calibrationGeneration = 0
-    @ObservationIgnored var isSubmittingCheckIn = false
+    /// Vrai pendant l'enregistrement du check-in : observé, le bouton du check-in reste inactif.
+    var isSubmittingCheckIn = false
     /// Valeurs d'Apple Santé placées dans le brouillon et pas encore validées à l'étape du profil : le formulaire les montre,
     /// mais elles ne sont ni enregistrées ni synchronisées avant `continueFromProfile()`.
     @ObservationIgnored var unvalidatedHints: HealthProfileHints?

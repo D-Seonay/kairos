@@ -28,7 +28,7 @@ struct StreakWidgetCircularViewBody: View {
         VStack(spacing: 2) {
             Image(systemName: "flame.fill")
                 .font(.system(size: flameSize))
-            Text("\(content.streakWeeks)")
+            Text(verbatim: content.weeksText)
                 .font(.system(size: numberSize, weight: .bold))
                 .monospacedDigit()
                 .lineLimit(1)

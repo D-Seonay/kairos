@@ -33,16 +33,20 @@ public final class CustomExerciseModel {
 
     @ObservationIgnored private let environment: TrainEnvironment
     @ObservationIgnored private let original: UserExercise?
+    /// Les champs à l'ouverture du formulaire, pour savoir s'il a été modifié.
+    @ObservationIgnored private var initialFields: Fields?
 
     /// Un formulaire vide (machine, poussée horizontale, haut du corps, charge externe, 2,5 kg, 90 s), rempli du brouillon `draft`
-    /// quand il y en a un, ou de `editing`, l'exercice à modifier, qui l'emporte sur le brouillon.
-    public init(environment: TrainEnvironment, draft: UserExerciseDraft?, editing: UserExercise?) {
+    /// quand il y en a un, ou de `editing`, l'exercice à modifier, qui l'emporte sur le brouillon. `name`, s'il n'est pas vide,
+    /// remplace le nom d'une création (la recherche de la bibliothèque qui n'a rien trouvé).
+    public init(environment: TrainEnvironment, draft: UserExerciseDraft?, editing: UserExercise?, name prefilledName: String = "") {
         self.environment = environment
         original = editing
         isEditing = editing != nil
         let now = environment.now()
         let seed = editing ?? draft?.userExercise(id: UUID(), now: now) ?? Self.blank(now: now)
-        name = seed.name
+        let trimmedPrefill = prefilledName.trimmingCharacters(in: .whitespacesAndNewlines)
+        name = editing == nil && !trimmedPrefill.isEmpty ? trimmedPrefill : seed.name
         primaryMuscle = seed.primaryMuscle
         secondaryMuscles = Set(seed.secondaryMuscles)
         equipment = seed.equipment
@@ -54,11 +58,17 @@ public final class CustomExerciseModel {
         restSeconds = seed.defaultRestSeconds
         isCompound = seed.isCompound
         tracksDuration = seed.tracksDuration
+        initialFields = fields
     }
 
     /// Un nom une fois rogné, et des muscles secondaires qui n'incluent pas le principal.
     public var canSave: Bool {
         !trimmedName.isEmpty && !secondaryMuscles.contains(primaryMuscle)
+    }
+
+    /// Vrai si un champ diffère de ce qu'il valait à l'ouverture du formulaire.
+    public var hasChanges: Bool {
+        fields != initialFields
     }
 
     /// Le muscle principal ; il quitte les muscles secondaires.
@@ -103,6 +113,28 @@ public final class CustomExerciseModel {
 
     private var trimmedName: String {
         name.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// Tous les champs du formulaire, comparables d'un coup.
+    private struct Fields: Equatable {
+        var name: String
+        var primaryMuscle: Muscle
+        var secondaryMuscles: Set<Muscle>
+        var equipment: Equipment
+        var pattern: MovementPattern
+        var region: BodyRegion
+        var isUnilateral: Bool
+        var loadKind: LoadKind
+        var incrementKg: Double
+        var restSeconds: Int
+        var isCompound: Bool
+        var tracksDuration: Bool
+    }
+
+    private var fields: Fields {
+        Fields(name: name, primaryMuscle: primaryMuscle, secondaryMuscles: secondaryMuscles, equipment: equipment, pattern: pattern,
+               region: region, isUnilateral: isUnilateral, loadKind: loadKind, incrementKg: incrementKg, restSeconds: restSeconds,
+               isCompound: isCompound, tracksDuration: tracksDuration)
     }
 
     private static func blank(now: Date) -> UserExercise {

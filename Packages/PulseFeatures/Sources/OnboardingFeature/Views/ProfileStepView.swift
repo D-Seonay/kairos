@@ -4,8 +4,14 @@ import SwiftUI
 
 /// Écran 3, `profil-init` : prénom, morphologie, unités et niveaux. Rien n'est obligatoire, « Continuer » n'est jamais bloqué.
 struct ProfileStepView: View {
+    /// Les champs numériques : le clavier décimal n'a pas de touche Retour, « OK » le referme.
+    private enum MeasureField: Hashable {
+        case height, weight
+    }
+
     @Bindable var model: OnboardingModel
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @FocusState private var focusedField: MeasureField?
 
     var body: some View {
         OnboardingScreen(errorMessage: model.errorMessage) {
@@ -47,8 +53,18 @@ struct ProfileStepView: View {
             OnboardingButton(
                 title: String(localized: "Continuer", bundle: .module), identifier: OnboardingIdentifiers.profileContinue,
                 style: PrimaryButtonStyle()
-            ) { await model.continueFromProfile() }
+            ) { await continueFromProfile() }
         }
+    }
+
+    /// Un champ numérique en cours de saisie ne valide sa valeur qu'en perdant le focus : on le lui retire d'abord, et on laisse
+    /// le formulaire l'écrire dans le profil avant d'enregistrer.
+    private func continueFromProfile() async {
+        if focusedField != nil {
+            focusedField = nil
+            try? await Task.sleep(for: .milliseconds(100))
+        }
+        await model.continueFromProfile()
     }
 
     // MARK: - Champs
@@ -117,7 +133,7 @@ struct ProfileStepView: View {
         OnboardingField(title: String(localized: "Taille", bundle: .module)) {
             measureInput(
                 title: String(localized: "Taille", bundle: .module), value: $model.profile.heightCm,
-                unit: String(localized: "cm", bundle: .module), spokenUnit: .centimeters)
+                unit: String(localized: "cm", bundle: .module), spokenUnit: .centimeters, field: .height)
         }
     }
 
@@ -125,7 +141,8 @@ struct ProfileStepView: View {
         OnboardingField(title: String(localized: "Poids actuel", bundle: .module)) {
             measureInput(
                 title: String(localized: "Poids actuel", bundle: .module), value: weightBinding,
-                unit: model.profile.weightUnit.rawValue, spokenUnit: OnboardingCopy.MeasureUnit(model.profile.weightUnit))
+                unit: model.profile.weightUnit.rawValue, spokenUnit: OnboardingCopy.MeasureUnit(model.profile.weightUnit),
+                field: .weight)
         }
     }
 
@@ -145,13 +162,25 @@ struct ProfileStepView: View {
         }
     }
 
-    /// La saisie d'une mesure : l'unité visible à côté est masquée, le champ la dit dans son étiquette.
+    /// La saisie d'une mesure : l'unité visible à côté est masquée, le champ la dit dans son étiquette. Le clavier décimal n'a pas
+    /// de touche Retour : « OK », au-dessus du clavier, le referme et valide la valeur.
     private func measureInput(
-        title: String, value: Binding<Double?>, unit: String, spokenUnit: OnboardingCopy.MeasureUnit
+        title: String, value: Binding<Double?>, unit: String, spokenUnit: OnboardingCopy.MeasureUnit, field: MeasureField
     ) -> some View {
         HStack(spacing: 6) {
             TextField(title, value: value, format: .number.precision(.fractionLength(0...1)))
                 .pulseNumericKeyboard()
+                .focused($focusedField, equals: field)
+                .toolbar {
+                    #if os(iOS)
+                    ToolbarItemGroup(placement: .keyboard) {
+                        if focusedField == field {
+                            Spacer()
+                            Button(String(localized: "OK", bundle: .module)) { focusedField = nil }
+                        }
+                    }
+                    #endif
+                }
                 .accessibilityLabel(OnboardingCopy.measureLabel(title: title, unit: spokenUnit))
             Text(unit)
                 .font(.subheadline)

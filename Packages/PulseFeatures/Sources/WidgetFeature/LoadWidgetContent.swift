@@ -34,12 +34,12 @@ public struct LoadWidgetContent: Sendable, Equatable {
         self.accessibilityLabel = accessibilityLabel
     }
 
-    /// Le ratio de l'instantané du jour ; l'exemple sans instantané du jour. Sans 28 jours d'historique, le widget le dit.
+    /// Le ratio de l'instantané du jour. Sans instantané du jour ou sans 28 jours d'historique, le widget le dit.
     public static func make(snapshot: WidgetSnapshot?, at date: Date, calendar: Calendar) -> LoadWidgetContent {
-        guard let snapshot, calendar.isDate(snapshot.day, inSameDayAs: date) else { return sample(at: date, calendar: calendar) }
+        guard let snapshot, calendar.isDate(snapshot.day, inSameDayAs: date) else { return notReady }
         guard let ratio = snapshot.loadRatio else {
             let text = String(localized: "Après 28 jours", bundle: .module)
-            return LoadWidgetContent(ratio: 1, ratioText: "–", zoneText: text, isOptimal: false,
+            return LoadWidgetContent(ratio: 1, ratioText: PulseFormat.dash, zoneText: text, isOptimal: false,
                                      accessibilityLabel: String(localized: "Charge d'entraînement disponible après 28 jours",
                                                                 bundle: .module))
         }
@@ -50,6 +50,14 @@ public struct LoadWidgetContent: Sendable, Equatable {
                                                             bundle: .module))
     }
 
+    /// Pas encore d'instantané du jour : pas de ratio inventé, une invitation à ouvrir l'app.
+    static var notReady: LoadWidgetContent {
+        let spoken = String(localized: "Charge d'entraînement pas encore prête. Ouvre Pulse pour la mettre à jour", bundle: .module)
+        return LoadWidgetContent(ratio: 1, ratioText: PulseFormat.dash, zoneText: String(localized: "Ouvre Pulse", bundle: .module),
+                                 isOptimal: false, accessibilityLabel: spoken)
+    }
+
+    /// Un exemple, pour la galerie de widgets et le gabarit avant le premier chargement.
     public static func sample(at date: Date, calendar: Calendar) -> LoadWidgetContent {
         let ratio = 1.12
         let ratioString = "1,12"

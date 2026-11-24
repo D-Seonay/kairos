@@ -25,28 +25,18 @@ struct CalibrationView: View {
     private var checkIn: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(String(localized: "Pas encore de score mesuré", bundle: .module))
-                        .font(PulseFont.title(.title2))
-                        .foregroundStyle(PulsePalette.text)
-                        .accessibilityAddTraits(.isHeader)
-                    Text(explanation)
-                        .font(.subheadline)
-                        .foregroundStyle(PulsePalette.text2)
-                    if let message = model.errorMessage {
-                        Text(message)
-                            .font(.footnote)
-                            .foregroundStyle(PulsePalette.bad)
-                    }
-                }
-                .padding(.bottom, 20)
-                CheckInView(form: model.checkIn, scrollable: false) { _ in
+                // Le même titre que les autres écrans du parcours.
+                OnboardingTitle(title: String(localized: "Pas encore de score mesuré", bundle: .module), subtitle: explanation)
+                    .padding(.bottom, 20)
+                // L'erreur d'enregistrement s'affiche juste au-dessus du bouton du check-in, pas en haut de l'écran.
+                CheckInView(form: model.checkIn, scrollable: false, errorMessage: model.errorMessage,
+                            isSubmitting: model.isSubmittingCheckIn) { _ in
                     Task { await model.submitCheckIn() }
                 }
             }
             .padding(PulseMetrics.spacing)
         }
-        .background(PulsePalette.background)
+        // Pas de fond opaque : l'aura du parcours reste visible derrière le check-in, comme sur les autres écrans.
         .pulseAnnounceError(model.errorMessage)
     }
 

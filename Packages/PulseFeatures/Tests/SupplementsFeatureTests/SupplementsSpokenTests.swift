@@ -184,15 +184,20 @@ actor FailingIntakeRepository: SupplementRepository {
     private var failing = false
 
     private var failingReads = false
+    private var failingSupplementSaves = false
 
     func setFailing(_ failing: Bool) { self.failing = failing }
     func setFailingReads(_ failing: Bool) { failingReads = failing }
+    func setFailingSupplementSaves(_ failing: Bool) { failingSupplementSaves = failing }
 
     func supplements(includeArchived: Bool) async throws -> [Supplement] {
         if failingReads { throw Failure() }
         return try await base.supplements(includeArchived: includeArchived)
     }
-    func save(_ supplement: Supplement) async throws { try await base.save(supplement) }
+    func save(_ supplement: Supplement) async throws {
+        if failingSupplementSaves { throw Failure() }
+        try await base.save(supplement)
+    }
     func delete(id: UUID) async throws { try await base.delete(id: id) }
     func intakes(from: Date, to: Date) async throws -> [SupplementIntake] { try await base.intakes(from: from, to: to) }
     func save(_ intake: SupplementIntake) async throws {
@@ -214,6 +219,23 @@ extension SupplementsAnnouncementTests {
         await repository.setFailingReads(true)
         await model.toggle(item)
         #expect(log.entries.map(\.text) == ["Pulse n'a pas pu enregistrer ta prise."])
+    }
+
+    @Test func aFailedSaveStaysInTheFormAndIsAnnounced() async throws {
+        await repository.setFailingSupplementSaves(true)
+        model.startNew()
+        await save("Créatine")
+        #expect(model.editor != nil, "Le formulaire reste ouvert")
+        #expect(model.editorError == "Pulse n'a pas pu enregistrer le complément.")
+        #expect(model.errorMessage == nil, "L'écran derrière le formulaire n'affiche rien")
+        #expect(log.entries.map(\.text) == ["Pulse n'a pas pu enregistrer le complément."])
+        #expect(log.entries.allSatisfy { $0.isError })
+        await repository.setFailingSupplementSaves(false)
+        await save("Créatine")
+        #expect(model.editor == nil)
+        #expect(model.editorError == nil)
+        model.startNew()
+        #expect(model.editorError == nil)
     }
 
     @Test func loadFailuresAreSilentUnlessAskedFor() async throws {

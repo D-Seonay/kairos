@@ -3,7 +3,8 @@ import Foundation
 /// Formats de nombres et de durées de la maquette. Le signe moins est U+2212, les espaces sont ordinaires.
 public enum PulseFormat {
     private static let minus = "\u{2212}"
-    private static let dash = "\u{2014}"
+    /// Le tiret cadratin « — » d'une valeur absente : le même partout, jauges, widgets et check-in.
+    public static let dash = "\u{2014}"
     /// Au-delà, la conversion en `Int` n'a plus de sens pour un affichage.
     private static let displayLimit = 1e15
 

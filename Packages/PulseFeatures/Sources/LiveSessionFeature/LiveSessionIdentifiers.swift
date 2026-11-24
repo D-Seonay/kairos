@@ -5,6 +5,7 @@ public enum LiveSessionIdentifiers {
     public static let abandonBannerButton = "live.abandonBanner"
     public static let finishButton = "live.finish"
     public static let menuButton = "live.menu"
+    public static let minimizeButton = "live.minimize"
     public static let abandonButton = "live.abandon"
     public static let keypad = "live.keypad"
     public static let keypadKeyPrefix = "live.key."
@@ -17,6 +18,7 @@ public enum LiveSessionIdentifiers {
     public static let addExercise = "live.addExercise"
     public static let recapSave = "recap.save"
     public static let recapLater = "recap.later"
+    public static let recapResume = "recap.resume"
     public static let recapHealthContinue = "recap.health.continue"
     public static let recapRPE = "recap.rpe"
 

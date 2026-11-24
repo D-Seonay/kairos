@@ -238,6 +238,21 @@ struct OnboardingModelTests {
         #expect(model.weekProposal.runs == 2)
     }
 
+    /// Cinq séances avec trois jours de repos obligatoires ne tiennent pas dans la semaine : l'écran le signale.
+    @Test func sessionsBeyondTheFreeDaysAreFlagged() async {
+        let model = OnboardingFixture().makeModel()
+        await model.start()
+        model.profile.trainingDaysPerWeek = 5
+        model.profile.restWeekdays = [.monday, .wednesday]
+        #expect(model.freeWeekdayCount == 5)
+        #expect(!model.sessionsExceedFreeDays)
+        model.profile.restWeekdays = [.monday, .wednesday, .friday]
+        #expect(model.freeWeekdayCount == 4)
+        #expect(model.sessionsExceedFreeDays)
+        model.profile.trainingDaysPerWeek = 4
+        #expect(!model.sessionsExceedFreeDays)
+    }
+
     @Test func goBackStepsBackAndRemembersIt() async {
         let fixture = OnboardingFixture()
         let model = fixture.makeModel()

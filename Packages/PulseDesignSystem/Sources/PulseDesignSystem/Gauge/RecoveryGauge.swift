@@ -154,7 +154,7 @@ public struct RecoveryGauge: View {
 
     private func scoreLabel(side: CGFloat) -> some View {
         VStack(spacing: side * 0.026) {
-            Text(verbatim: Self.roundedScore(score).map(String.init) ?? "—")
+            Text(verbatim: Self.roundedScore(score).map(String.init) ?? PulseFormat.dash)
                 .font(PulseFont.score(size: side * style.scoreScale))
                 // Un nouveau score fait rouler les chiffres au lieu de les remplacer d'un coup.
                 .pulseNumericTransition(value: Double(Self.roundedScore(score) ?? 0))

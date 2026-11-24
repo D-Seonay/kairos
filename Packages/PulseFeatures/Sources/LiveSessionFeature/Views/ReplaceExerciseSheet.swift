@@ -9,7 +9,8 @@ import TrainFeature
 struct ReplaceExerciseSheet: View {
     let model: LiveSessionModel
     let exercise: LiveExercise
-    @State private var reason: ReplacementReason?
+    /// « Machine occupée », la raison la plus courante, est choisie d'office : les alternatives s'affichent tout de suite.
+    @State private var reason: ReplacementReason? = .machineBusy
     @State private var options: [ReplacementOption] = []
     @State private var isLoading = false
     @State private var isSearching = false

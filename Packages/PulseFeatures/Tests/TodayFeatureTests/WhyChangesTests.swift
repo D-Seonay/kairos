@@ -131,7 +131,7 @@ struct WhyChangesTests {
         let content = try WhyFixture.content(WhyFixture.recovery(score: 30))
         #expect(content.changes == [Change(
             pill: "20", title: "Séance remplacée par 20 min de mobilité ou du repos, au choix",
-            detail: "La séance prévue reste disponible avec « Séance d'origine ».")])
+            detail: "La séance prévue reste disponible avec « Rétablir la séance d'origine ».")])
         #expect(content.primaryAction == .startMobility)
         #expect(content.restoreTitle == "Rétablir la séance d'origine")
     }

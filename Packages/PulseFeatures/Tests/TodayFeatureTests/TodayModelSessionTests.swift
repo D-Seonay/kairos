@@ -23,7 +23,7 @@ struct TodayModelSessionTests {
         #expect(card.badge == .adjusted)
         #expect(card.title == "Push, volume allégé")
         #expect(card.summary.setCount == 15)
-        #expect(card.originButton == "Séance d'origine")
+        #expect(card.originButton == "Rétablir la séance d'origine")
         #expect(model.session?.status == .adjusted)
     }
 
@@ -101,6 +101,19 @@ struct TodayModelSessionTests {
         #expect(launch.day == original)
         #expect(launch.applied.isEmpty)
         #expect(launch.refused.map(\.kind) == [.volume, .rpeCap, .rest])
+    }
+
+    /// Le contrôle « Séance du jour » ne lance rien tant que le check-in du jour attend : la séance partirait sans ajustement.
+    @Test func nothingLaunchesWhileTheCheckInWaits() async throws {
+        let fixture = TodayFixture(scenario: .threeNights)
+        try await fixture.adopt("ppl-3")
+        let model = fixture.makeModel()
+        await model.refresh()
+        guard case .needsCheckIn = model.score else {
+            Issue.record("Un check-in était attendu, obtenu \(String(describing: model.score))")
+            return
+        }
+        #expect(model.shownSessionLaunch() == nil)
     }
 
     /// Le chemin de la vue : la séance affichée est l'ajustée, puis l'originale une fois rétablie.
