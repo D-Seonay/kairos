@@ -107,7 +107,8 @@ struct MainTabView: View {
                           onStartRun: startRun, onCreateRoutine: { router.selectedTab = .session })
             }
             Tab(String(localized: "Planning"), systemImage: "calendar", value: Item.planning) {
-                PlanningView(model: planning, train: train, onStartSession: start, onResumeSession: resume)
+                PlanningView(model: planning, train: train, onStartSession: start, onResumeSession: resume,
+                             onStartRun: startRun, onPlanChanged: planChanged)
             }
             Tab(String(localized: "Séance"), systemImage: "dumbbell", value: Item.session) {
                 TrainView(model: train, onOpenToday: { router.selectedTab = .today }, onStartSession: start,
@@ -206,6 +207,16 @@ struct MainTabView: View {
     /// Rouvre la séance en cours, sur l'alerte de la séance oubliée si elle est restée ouverte plus de 3 h.
     private func resume() {
         Task { await liveSession.resume() }
+    }
+
+    /// Un déplacement dans le planning change la séance du jour et les jours d'entraînement : l'accueil et les rappels de
+    /// compléments suivent (le planning et la séance se relisent eux-mêmes).
+    private func planChanged() {
+        Task {
+            await today.refresh()
+            await supplements.load()
+            await dependencies.supplementService.rescheduleReminders()
+        }
     }
 
     private func refreshTabs() {
