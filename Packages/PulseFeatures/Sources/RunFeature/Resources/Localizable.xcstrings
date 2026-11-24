@@ -1,0 +1,906 @@
+{
+  "sourceLanguage" : "fr",
+  "strings" : {
+    "%@ battements par minute" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ battements par minute"
+          }
+        }
+      }
+    },
+    "%@ de dénivelé positif" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ de dénivelé positif"
+          }
+        }
+      }
+    },
+    "%@ km" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ km"
+          }
+        }
+      }
+    },
+    "%@ · obj. %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · obj. %2$@"
+          }
+        }
+      }
+    },
+    "%@. %@. Allure %@." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@. %2$@. Allure %3$@."
+          }
+        }
+      }
+    },
+    "%@/km" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/km"
+          }
+        }
+      }
+    },
+    "%lld h %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld h %2$@"
+          }
+        }
+      }
+    },
+    "Allure du kilomètre en cours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allure du kilomètre en cours"
+          }
+        }
+      }
+    },
+    "Allure moyenne" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allure moyenne"
+          }
+        }
+      }
+    },
+    "Annonces vocales" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annonces vocales"
+          }
+        }
+      }
+    },
+    "Annuler" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annuler"
+          }
+        }
+      }
+    },
+    "Comment s'est passée la course ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comment s'est passée la course ?"
+          }
+        }
+      }
+    },
+    "Course" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Course"
+          }
+        }
+      }
+    },
+    "Course en cours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Course en cours"
+          }
+        }
+      }
+    },
+    "Course en pause" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Course en pause"
+          }
+        }
+      }
+    },
+    "Course interrompue : enregistrer %@ km jusqu'à %@ ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Course interrompue : enregistrer %1$@ km jusqu'à %2$@ ?"
+          }
+        }
+      }
+    },
+    "Course interrompue : l'enregistrer jusqu'à %@ ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Course interrompue : l'enregistrer jusqu'à %@ ?"
+          }
+        }
+      }
+    },
+    "Course terminée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Course terminée"
+          }
+        }
+      }
+    },
+    "Course toujours en cours ? Pulse peut la terminer à %@, ton dernier déplacement." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Course toujours en cours ? Pulse peut la terminer à %@, ton dernier déplacement."
+          }
+        }
+      }
+    },
+    "Distance" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Distance"
+          }
+        }
+      }
+    },
+    "Distance, temps et allure à chaque kilomètre" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Distance, temps et allure à chaque kilomètre"
+          }
+        }
+      }
+    },
+    "Dénivelé" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dénivelé"
+          }
+        }
+      }
+    },
+    "Effort global ressenti" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effort global ressenti"
+          }
+        }
+      }
+    },
+    "En mouvement" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En mouvement"
+          }
+        }
+      }
+    },
+    "En pause" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En pause"
+          }
+        }
+      }
+    },
+    "Enregistrer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrer"
+          }
+        }
+      }
+    },
+    "FC moyenne" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FC moyenne"
+          }
+        }
+      }
+    },
+    "Fréquence cardiaque" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fréquence cardiaque"
+          }
+        }
+      }
+    },
+    "GPS" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GPS"
+          }
+        }
+      }
+    },
+    "Indisponible" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Indisponible"
+          }
+        }
+      }
+    },
+    "Kilomètre %lld partiel, %@, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kilomètre %1$lld partiel, %2$@, %3$@"
+          }
+        }
+      }
+    },
+    "Kilomètre %lld, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kilomètre %1$lld, %2$@"
+          }
+        }
+      }
+    },
+    "Km %lld" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Km %lld"
+          }
+        }
+      }
+    },
+    "La course continue en arrière-plan" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La course continue en arrière-plan"
+          }
+        }
+      }
+    },
+    "La course, son tracé et l'entraînement écrit dans Apple Santé sont supprimés." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La course, son tracé et l'entraînement écrit dans Apple Santé sont supprimés."
+          }
+        }
+      }
+    },
+    "La distance comptera dès le premier signal précis" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La distance comptera dès le premier signal précis"
+          }
+        }
+      }
+    },
+    "Localisation refusée : seul le temps est enregistré." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Localisation refusée : seul le temps est enregistré."
+          }
+        }
+      }
+    },
+    "Mettre la course en pause" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mettre la course en pause"
+          }
+        }
+      }
+    },
+    "Mi-objectif." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mi-objectif."
+          }
+        }
+      }
+    },
+    "Note" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Note"
+          }
+        }
+      }
+    },
+    "Note ton effort : sans note, Pulse l'estime" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Note ton effort : sans note, Pulse l'estime"
+          }
+        }
+      }
+    },
+    "Objectif" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Objectif"
+          }
+        }
+      }
+    },
+    "Objectif : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Objectif : %@"
+          }
+        }
+      }
+    },
+    "Objectif atteint." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Objectif atteint."
+          }
+        }
+      }
+    },
+    "Parti avant le signal : la distance compte depuis le premier point GPS précis." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parti avant le signal : la distance compte depuis le premier point GPS précis."
+          }
+        }
+      }
+    },
+    "Partir" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partir"
+          }
+        }
+      }
+    },
+    "Pas noté" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas noté"
+          }
+        }
+      }
+    },
+    "Pause" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause"
+          }
+        }
+      }
+    },
+    "Progression de l'objectif" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Progression de l'objectif"
+          }
+        }
+      }
+    },
+    "Prêt" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prêt"
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu démarrer la course." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu démarrer la course."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu enregistrer la course interrompue." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu enregistrer la course interrompue."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu enregistrer le récap." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu enregistrer le récap."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu supprimer la course." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu supprimer la course."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu terminer la course." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu terminer la course."
+          }
+        }
+      }
+    },
+    "Recherche du signal" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recherche du signal"
+          }
+        }
+      }
+    },
+    "Reprendre" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprendre"
+          }
+        }
+      }
+    },
+    "Reprendre la course" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprendre la course"
+          }
+        }
+      }
+    },
+    "Reprise de la course" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprise de la course"
+          }
+        }
+      }
+    },
+    "Récap" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Récap"
+          }
+        }
+      }
+    },
+    "Réduire la course" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réduire la course"
+          }
+        }
+      }
+    },
+    "Réessayer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réessayer"
+          }
+        }
+      }
+    },
+    "Signal GPS" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Signal GPS"
+          }
+        }
+      }
+    },
+    "Signal GPS prêt" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Signal GPS prêt"
+          }
+        }
+      }
+    },
+    "Signal faible" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Signal faible"
+          }
+        }
+      }
+    },
+    "Supprimer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer"
+          }
+        }
+      }
+    },
+    "Supprimer la course" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer la course"
+          }
+        }
+      }
+    },
+    "Supprimer la course ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer la course ?"
+          }
+        }
+      }
+    },
+    "Temps en mouvement" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temps en mouvement"
+          }
+        }
+      }
+    },
+    "Temps par kilomètre" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temps par kilomètre"
+          }
+        }
+      }
+    },
+    "Terminer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminer"
+          }
+        }
+      }
+    },
+    "Terminer la course" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminer la course"
+          }
+        }
+      }
+    },
+    "Terminer la course ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminer la course ?"
+          }
+        }
+      }
+    },
+    "Tracé de la course, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tracé de la course, %@"
+          }
+        }
+      }
+    },
+    "Une course interrompue attend : enregistre-la ou supprime-la d'abord." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une course interrompue attend : enregistre-la ou supprime-la d'abord."
+          }
+        }
+      }
+    },
+    "Une séance de musculation est en cours." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une séance de musculation est en cours."
+          }
+        }
+      }
+    },
+    "allure km" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "allure km"
+          }
+        }
+      }
+    },
+    "heure" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "heure"
+          }
+        }
+      }
+    },
+    "heures" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "heures"
+          }
+        }
+      }
+    },
+    "kilomètre" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kilomètre"
+          }
+        }
+      }
+    },
+    "kilomètres" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kilomètres"
+          }
+        }
+      }
+    },
+    "minute" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "minute"
+          }
+        }
+      }
+    },
+    "minutes" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "minutes"
+          }
+        }
+      }
+    },
+    "moyenne" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "moyenne"
+          }
+        }
+      }
+    },
+    "mètre" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mètre"
+          }
+        }
+      }
+    },
+    "mètres" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mètres"
+          }
+        }
+      }
+    },
+    "non mesurée" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "non mesurée"
+          }
+        }
+      }
+    },
+    "pas encore d'allure" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pas encore d'allure"
+          }
+        }
+      }
+    },
+    "seconde" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "seconde"
+          }
+        }
+      }
+    },
+    "secondes" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "secondes"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
