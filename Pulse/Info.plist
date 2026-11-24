@@ -47,7 +47,6 @@
 	<array>
 		<string>remote-notification</string>
 		<string>location</string>
-		<string>workout-processing</string>
 		<string>audio</string>
 	</array>
 	<key>UILaunchScreen</key>
