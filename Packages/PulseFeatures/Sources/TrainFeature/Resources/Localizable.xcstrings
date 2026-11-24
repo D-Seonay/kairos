@@ -833,16 +833,6 @@
         }
       }
     },
-    "Course · modifiable plus tard" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Course · modifiable plus tard"
-          }
-        }
-      }
-    },
     "Créer" : {
       "localizations" : {
         "fr" : {
@@ -929,6 +919,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Il ne sera plus proposé, mais tes séances le gardent."
+          }
+        }
+      }
+    },
+    "Lancer la course %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lancer la course %@"
           }
         }
       }
@@ -3659,16 +3659,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Réordonner les exercices"
-          }
-        }
-      }
-    },
-    "Course, modifiable plus tard" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Course, modifiable plus tard"
           }
         }
       }

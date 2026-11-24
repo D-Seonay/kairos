@@ -5,12 +5,12 @@ import PulseDomain
 import SwiftUI
 
 /// Une routine de « Mes routines » : icône, nom et résumé (« 5 exercices · ~ 65 min · lundi, jeudi »), chevron vers l'éditeur,
-/// et « Lancer » (musculation seulement), une pastille à part de la touche qui ouvre l'éditeur.
+/// et « Lancer » (musculation) ou « Courir » (course), une pastille à part de la touche qui ouvre l'éditeur.
 struct RoutineRow: View {
     let routine: RoutineSummary
-    /// Le programme dont la routine s'ouvre dans l'éditeur ; `nil` pour une course, qui ne se modifie pas avant M6.
+    /// Le programme dont la routine s'ouvre dans l'éditeur ; `nil` pour une course, qui n'a pas encore d'éditeur.
     let programID: UUID?
-    /// Lance la routine ; `nil` pour une course, qui ne se démarre pas avant M6.
+    /// Lance la routine : la séance de musculation, ou la course ; `nil` sans pastille.
     let onLaunch: (() -> Void)?
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
@@ -22,12 +22,15 @@ struct RoutineRow: View {
             layout {
                 summary
                 if let onLaunch {
+                    let isRun = routine.day.kind == .run
                     Button(action: onLaunch) {
-                        Label(String(localized: "Lancer", bundle: .module), systemImage: "play.fill")
+                        Label(isRun ? String(localized: "Courir", bundle: .module) : String(localized: "Lancer", bundle: .module),
+                              systemImage: isRun ? "figure.run" : "play.fill")
                             .labelStyle(.titleAndIcon)
                     }
                     .buttonStyle(PillButtonStyle(prominent: true))
-                    .accessibilityLabel(String(localized: "Lancer \(routine.day.name)", bundle: .module))
+                    .accessibilityLabel(isRun ? String(localized: "Lancer la course \(routine.day.name)", bundle: .module)
+                                            : String(localized: "Lancer \(routine.day.name)", bundle: .module))
                     .accessibilityIdentifier(TrainIdentifiers.routineLaunchPrefix + routine.day.id.uuidString)
                 }
             }

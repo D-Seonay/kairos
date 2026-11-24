@@ -233,6 +233,13 @@ import Testing
             == "Squat gobelet, Squat, haltère")
     }
 
+    @Test func runSummaryNamesTheTypeAndTheGoal() {
+        let easy = RoutineDay(order: 0, name: "Footing", kind: .run, runType: .easy, runTargetMinutes: 40)
+        #expect(TrainText.runSummary(easy) == "Sortie facile · 40 min")
+        #expect(TrainText.runSummarySpoken(easy) == "Sortie facile, 40 minutes")
+        #expect(TrainText.runSummary(RoutineDay(order: 0, name: "Course", kind: .run)) == "Course")
+    }
+
     /// La correction reprend les échelles de la séance : RPE de série de 6 à 10 par demi-point, effort global de 1 à 10.
     @MainActor @Test func correctionPickersUseTheLiveScalesAndKeepAStoredValue() {
         #expect(RPEPicker.setValues == [6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10])

@@ -146,11 +146,11 @@ public struct ProgramEditorView: View {
     @ViewBuilder
     private func routineRow(_ day: RoutineDay, in program: Program) -> some View {
         if day.kind == .run {
-            LabeledRow(title: day.name, detail: String(localized: "Course · modifiable plus tard", bundle: .module),
-                       systemImage: "lock.fill")
+            // Une course se lance depuis « Mes routines » ; elle n'a pas encore d'éditeur.
+            LabeledRow(title: day.name, detail: TrainText.runSummary(day), systemImage: "lock.fill")
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel(TrainText.rowSpoken(title: day.name,
-                                                        detail: String(localized: "Course, modifiable plus tard", bundle: .module)))
+                .accessibilityLabel(TrainText.rowSpoken(title: day.name, detail: TrainText.runSummarySpoken(day)))
+                .accessibilityHint(String(localized: "Les courses ne se modifient pas encore", bundle: .module))
         } else {
             NavigationLink(value: TrainDestination.routine(program: program.id, day: day.id)) {
                 LabeledRow(title: day.name, detail: TrainText.exercises(day.exercises.count), systemImage: nil)
