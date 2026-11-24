@@ -31,6 +31,7 @@ export function AppStoreBadge({
     <Image
       src={BADGE_SRC}
       alt=""
+      aria-hidden="true"
       width={width}
       height={height}
       unoptimized

@@ -9,7 +9,7 @@ describe("AppStoreBadge", () => {
   it("links to the App Store page once the app is live", () => {
     render(<AppStoreBadge live />);
     const link = screen.getByRole("link", { name: "Télécharger Pulse dans l'App Store" });
-    expect(link).toHaveAttribute("href", "https://apps.apple.com/fr/app/id6829265826");
+    expect(link).toHaveAttribute("href", "https://apps.apple.com/fr/app/pulse-r%C3%A9cup%C3%A9ration-muscu/id6829265826");
     expect(screen.queryByText("Bientôt sur l'App Store")).not.toBeInTheDocument();
   });
 
