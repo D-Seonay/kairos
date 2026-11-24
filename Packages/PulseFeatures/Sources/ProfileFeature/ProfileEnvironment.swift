@@ -5,7 +5,7 @@ import SwiftUI
 
 /// Tout ce dont l'onglet Profil a besoin du dehors : le résumé, les pesées, les réglages, l'état d'Apple Santé, les données
 /// stockées (inspection, export, suppression), ce que seule l'app sait (autorisation des notifications, passage du jour,
-/// version, politique de confidentialité), les réglages de la course et l'horloge.
+/// version, politique de confidentialité), les réglages de la course, les photos de corps et l'horloge.
 public struct ProfileEnvironment: Sendable {
     public var profile: ProfileService
     public var body: BodyService
@@ -28,6 +28,12 @@ public struct ProfileEnvironment: Sendable {
     public var now: @Sendable () -> Date
     /// Les réglages de la course, par appareil : pour l'instant les annonces vocales à chaque kilomètre.
     public var runPreferences: any RunPreferencesStore
+    /// Les photos de corps ; `nil` : la ligne « Photos de corps » n'apparaît pas.
+    public var bodyPhotos: BodyPhotoService?
+    /// Face ID ou le code de l'iPhone, qui verrouille les photos de corps ; `nil` compte comme un iPhone sans code.
+    public var ownerAuthentication: (any DeviceOwnerAuthenticating)?
+    /// Le réglage « Verrouiller avec Face ID », par appareil.
+    public var bodyPhotoLock: any BodyPhotoLockStore
 
     public init(profile: ProfileService, body: BodyService, settings: SettingsService, healthCache: any HealthSampleCache,
                 inspector: any StoreInspector, exporter: any DataExporter, eraser: any DataEraser,
@@ -35,7 +41,9 @@ public struct ProfileEnvironment: Sendable {
                 requestNotificationAuthorization: @escaping @Sendable () async -> Bool,
                 refreshHealth: @escaping @Sendable () async -> Void,
                 appVersion: String, privacyPolicyURL: URL?, calendar: Calendar, now: @escaping @Sendable () -> Date,
-                runPreferences: any RunPreferencesStore = InMemoryRunPreferencesStore()) {
+                runPreferences: any RunPreferencesStore = InMemoryRunPreferencesStore(), bodyPhotos: BodyPhotoService? = nil,
+                ownerAuthentication: (any DeviceOwnerAuthenticating)? = nil,
+                bodyPhotoLock: any BodyPhotoLockStore = InMemoryBodyPhotoLockStore()) {
         self.profile = profile
         self.body = body
         self.settings = settings
@@ -51,6 +59,9 @@ public struct ProfileEnvironment: Sendable {
         self.calendar = calendar
         self.now = now
         self.runPreferences = runPreferences
+        self.bodyPhotos = bodyPhotos
+        self.ownerAuthentication = ownerAuthentication
+        self.bodyPhotoLock = bodyPhotoLock
     }
 }
 

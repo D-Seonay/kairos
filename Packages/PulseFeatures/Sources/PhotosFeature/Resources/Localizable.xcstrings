@@ -11,6 +11,46 @@
         }
       }
     },
+    "%@ kg" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kg"
+          }
+        }
+      }
+    },
+    "%@, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@"
+          }
+        }
+      }
+    },
+    "%@, moins %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, moins %2$@"
+          }
+        }
+      }
+    },
+    "%@, plus %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, plus %2$@"
+          }
+        }
+      }
+    },
     "%lld photos ajoutées" : {
       "localizations" : {
         "fr" : {
@@ -47,6 +87,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ajout de la photo en cours"
+          }
+        }
+      }
+    },
+    "Ajoute une photo de face, de profil ou de dos pour suivre ta progression." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajoute une photo de face, de profil ou de dos pour suivre ta progression."
           }
         }
       }
@@ -121,6 +171,26 @@
         }
       }
     },
+    "Après" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Après"
+          }
+        }
+      }
+    },
+    "Aucune photo pour l'instant" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune photo pour l'instant"
+          }
+        }
+      }
+    },
     "Autoriser l'appareil photo dans Réglages" : {
       "localizations" : {
         "fr" : {
@@ -131,12 +201,82 @@
         }
       }
     },
+    "Avant" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avant"
+          }
+        }
+      }
+    },
+    "Avant, %@ · Après, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avant, %1$@ · Après, %2$@"
+          }
+        }
+      }
+    },
+    "Changer les dates" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Changer les dates"
+          }
+        }
+      }
+    },
     "Choisir dans Photos" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Choisir dans Photos"
+          }
+        }
+      }
+    },
+    "Comparer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comparer"
+          }
+        }
+      }
+    },
+    "Comparer avant / après" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comparer avant / après"
+          }
+        }
+      }
+    },
+    "Côte à côte" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Côte à côte"
+          }
+        }
+      }
+    },
+    "Date" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date"
           }
         }
       }
@@ -191,12 +331,72 @@
         }
       }
     },
+    "Déverrouille tes photos de corps." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déverrouille tes photos de corps."
+          }
+        }
+      }
+    },
+    "Déverrouiller" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déverrouiller"
+          }
+        }
+      }
+    },
+    "Elles sont effacées de cet iPhone. Sans export, elles sont perdues." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elles sont effacées de cet iPhone. Sans export, elles sont perdues."
+          }
+        }
+      }
+    },
+    "Enregistrer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrer"
+          }
+        }
+      }
+    },
+    "Exporter les photos de corps" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exporter les photos de corps"
+          }
+        }
+      }
+    },
     "Face" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Face"
+          }
+        }
+      }
+    },
+    "Fais glisser pour comparer · %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fais glisser pour comparer · %@"
           }
         }
       }
@@ -217,6 +417,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "L'appareil photo est refusé. Autorise-le dans Réglages ; l'import depuis Photos reste possible."
+          }
+        }
+      }
+    },
+    "L'export n'a pas pu être enregistré." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'export n'a pas pu être enregistré."
+          }
+        }
+      }
+    },
+    "L'export n'a pas pu être préparé." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'export n'a pas pu être préparé."
+          }
+        }
+      }
+    },
+    "La photo est effacée de cet iPhone. Il n'en reste aucune autre copie, sauf dans un export." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La photo est effacée de cet iPhone. Il n'en reste aucune autre copie, sauf dans un export."
           }
         }
       }
@@ -261,12 +491,62 @@
         }
       }
     },
+    "Le verrou demande un code sur cet iPhone." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le verrou demande un code sur cet iPhone."
+          }
+        }
+      }
+    },
+    "Les photos de corps n'ont pas pu être supprimées." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les photos de corps n'ont pas pu être supprimées."
+          }
+        }
+      }
+    },
     "Les photos n'ont pas pu être chargées." : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Les photos n'ont pas pu être chargées."
+          }
+        }
+      }
+    },
+    "Les variations sont affichées sans jugement : c'est toi qui décides de ce qui compte." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les variations sont affichées sans jugement : c'est toi qui décides de ce qui compte."
+          }
+        }
+      }
+    },
+    "Même lumière, même tenue, même distance." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Même lumière, même tenue, même distance."
+          }
+        }
+      }
+    },
+    "OK" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
           }
         }
       }
@@ -361,6 +641,76 @@
         }
       }
     },
+    "Photos de corps" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photos de corps"
+          }
+        }
+      }
+    },
+    "Photos de corps déverrouillées" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photos de corps déverrouillées"
+          }
+        }
+      }
+    },
+    "Photos de corps supprimées" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photos de corps supprimées"
+          }
+        }
+      }
+    },
+    "Photos de corps verrouillées" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photos de corps verrouillées"
+          }
+        }
+      }
+    },
+    "Poids, tendance" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poids, tendance"
+          }
+        }
+      }
+    },
+    "Pose" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pose"
+          }
+        }
+      }
+    },
+    "Pour comparer, il faut deux dates d'une même pose." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour comparer, il faut deux dates d'une même pose."
+          }
+        }
+      }
+    },
     "Prendre une photo" : {
       "localizations" : {
         "fr" : {
@@ -377,6 +727,86 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Profil"
+          }
+        }
+      }
+    },
+    "Préparation de la photo" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Préparation de la photo"
+          }
+        }
+      }
+    },
+    "Remplacer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remplacer"
+          }
+        }
+      }
+    },
+    "Remplacer la photo de dos du %@ ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remplacer la photo de dos du %@ ?"
+          }
+        }
+      }
+    },
+    "Remplacer la photo de face du %@ ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remplacer la photo de face du %@ ?"
+          }
+        }
+      }
+    },
+    "Remplacer la photo de profil du %@ ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remplacer la photo de profil du %@ ?"
+          }
+        }
+      }
+    },
+    "Réglages" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réglages"
+          }
+        }
+      }
+    },
+    "Sans code sur cet iPhone, ces photos ne sont ni chiffrées ni verrouillables." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sans code sur cet iPhone, ces photos ne sont ni chiffrées ni verrouillables."
+          }
+        }
+      }
+    },
+    "Superposer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Superposer"
           }
         }
       }
@@ -401,12 +831,82 @@
         }
       }
     },
+    "Supprimer toutes les photos de corps" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer toutes les photos de corps"
+          }
+        }
+      }
+    },
+    "Supprimer toutes les photos de corps ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer toutes les photos de corps ?"
+          }
+        }
+      }
+    },
+    "Sur cet iPhone seulement. Ni iCloud, ni sauvegarde. Exporte-les avant de changer de téléphone." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur cet iPhone seulement. Ni iCloud, ni sauvegarde. Exporte-les avant de changer de téléphone."
+          }
+        }
+      }
+    },
+    "Tout supprimer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tout supprimer"
+          }
+        }
+      }
+    },
+    "Une archive enregistrée dans Fichiers, à l'emplacement que tu choisis." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une archive enregistrée dans Fichiers, à l'emplacement que tu choisis."
+          }
+        }
+      }
+    },
     "Une image n'a pas pu être lue." : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Une image n'a pas pu être lue."
+          }
+        }
+      }
+    },
+    "Une seule photo par pose et par jour : l'ancienne est supprimée." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une seule photo par pose et par jour : l'ancienne est supprimée."
+          }
+        }
+      }
+    },
+    "Verrouiller avec Face ID" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verrouiller avec Face ID"
           }
         }
       }

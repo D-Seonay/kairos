@@ -98,6 +98,20 @@ public enum PhotoText {
         return day == 1 ? "1er \(monthAndYear)" : "\(day) \(monthAndYear)"
     }
 
+    /// « 1er août », « 28 octobre » : le jour et le mois, sans l'année.
+    static func dayMonth(_ date: Date, calendar: Calendar) -> String {
+        let day = calendar.component(.day, from: date)
+        let month = formatted(date, calendar: calendar, format: "MMMM")
+        return day == 1 ? "1er \(month)" : "\(day) \(month)"
+    }
+
+    /// Le titre d'un jour de prise : « 28 octobre » dans l'année en cours, « 28 octobre 2025 » avant.
+    static func dayTitle(_ day: Date, now: Date, calendar: Calendar) -> String {
+        calendar.component(.year, from: day) == calendar.component(.year, from: now)
+            ? dayMonth(day, calendar: calendar)
+            : longDate(day, calendar: calendar)
+    }
+
     private static func formatted(_ date: Date, calendar: Calendar, format: String) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "fr_FR")
