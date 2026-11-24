@@ -1,6 +1,6 @@
 # Pulse V2b — Photos de séance et photos de corps
 
-Date : 2026-11-24. Statut : brouillon, à approuver par Mathéo.
+Date : 2026-11-24. Statut : approuvée par Mathéo le 2026-11-24 (« Bien sûr »).
 
 Références : spec V1 `2026-10-31-pulse-v1-design.md` (§2 non-objectifs, §5.6 récap, §5.7 séance passée, §5.9 profil et Mes données, §15 V2), spec M8 `2026-11-22-pulse-m8-app-store-design.md` (frontière iCloud / appareil, confidentialité, accessibilité), spec V2a `2026-11-23-pulse-v2a-course-gps-design.md` (schéma V5, récap de course, tracé en `externalStorage`), maquette V3 `maquette.html` (écrans « Photos » du récap, de la séance passée et de la course, « Photos de progression », « Comparer »).
 
