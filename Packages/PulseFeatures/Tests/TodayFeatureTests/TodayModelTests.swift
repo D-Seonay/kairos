@@ -178,8 +178,10 @@ struct TodayModelTests {
     @Test func refreshWithFailingSourceKeepsCachedScore() async {
         let fixture = TodayFixture()
         let model = fixture.makeModel()
+        #expect(!model.scoreFailed)
         await model.refresh()
         let scored = model.score
+        #expect(!model.scoreFailed, "Un score calculé n'est pas un échec")
         #expect(model.lastSync == TodayClock.date("2026-11-02T08:00"))
 
         await fixture.source.setFails(true)

@@ -13,6 +13,9 @@ struct RecoveryCard: View {
     /// Le marqueur tel que VoiceOver le dit (« estimé », « en calibration, 9 nuits »).
     var spokenMarker: String?
     var onWhy: () -> Void = {}
+    /// Sans score : la lecture d'Apple Santé est en cours (indicateur) ou a échoué (message et façon de réessayer).
+    var isLoading = false
+    var scoreFailed = false
 
     var body: some View {
         switch score {
@@ -75,14 +78,42 @@ struct RecoveryCard: View {
 
     // MARK: - Avant la première lecture
 
+    /// La jauge vide, avec ce qui se passe : la lecture en cours, ou l'échec du calcul et comment réessayer. Jamais un « — » muet.
     private var placeholderCard: some View {
         OpalCard {
             VStack(spacing: 16) {
                 CardHeader(title: String(localized: "Récupération", bundle: .module), category: nil, marker: nil)
                 RecoveryGauge(score: nil, category: nil, style: .large)
                     .frame(maxWidth: .infinity)
+                placeholderStatus
             }
         }
+    }
+
+    @ViewBuilder
+    private var placeholderStatus: some View {
+        if isLoading {
+            HStack(spacing: 8) {
+                ProgressView()
+                    .tint(PulsePalette.opalInk)
+                Text(String(localized: "Lecture d'Apple Santé…", bundle: .module))
+                    .font(.footnote)
+                    .foregroundStyle(PulsePalette.opalMuted)
+            }
+            .frame(maxWidth: .infinity)
+            .accessibilityElement(children: .combine)
+        } else if scoreFailed {
+            Text(Self.failedNote)
+                .font(.footnote)
+                .foregroundStyle(PulsePalette.opalMuted)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity)
+        }
+    }
+
+    private static var failedNote: String {
+        String(localized: "Pulse n'a pas pu calculer ton score. Tire l'écran vers le bas pour réessayer.", bundle: .module)
     }
 }
 

@@ -156,6 +156,16 @@
         }
       }
     },
+    "hier" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hier"
+          }
+        }
+      }
+    },
     "La séance prévue reste disponible avec « Rétablir la séance d'origine »." : {
       "localizations" : {
         "fr" : {
@@ -166,12 +176,52 @@
         }
       }
     },
+    "Lecture d'Apple Santé…" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lecture d'Apple Santé…"
+          }
+        }
+      }
+    },
+    "Lecture en cours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lecture en cours"
+          }
+        }
+      }
+    },
     "Ouvre l'onglet Séance" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ouvre l'onglet Séance"
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu calculer ton score. Tire l'écran vers le bas pour réessayer." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu calculer ton score. Tire l'écran vers le bas pour réessayer."
+          }
+        }
+      }
+    },
+    "Synchro, %@, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchro, %@, %@"
           }
         }
       }

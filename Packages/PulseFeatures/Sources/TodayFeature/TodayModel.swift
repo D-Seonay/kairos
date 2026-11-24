@@ -32,6 +32,8 @@ public final class TodayModel {
     /// Vrai quand l'écran « Pourquoi » est poussé dans la pile de l'accueil.
     var isShowingWhy = false
     public private(set) var isLoading = false
+    /// Vrai quand la dernière lecture n'a pas pu calculer le score : sans score affiché, la carte le dit et propose de réessayer.
+    public private(set) var scoreFailed = false
     public internal(set) var errorMessage: String?
     /// L'échec de l'enregistrement du choix de décharge, montré sur la carte de la proposition.
     public internal(set) var deloadErrorMessage: String?
@@ -62,9 +64,16 @@ public final class TodayModel {
         dateText = Self.dateText(environment.now(), calendar: environment.calendar)
     }
 
-    /// L'heure de la dernière lecture d'Apple Santé réussie, « 08:00 ».
+    /// L'heure de la dernière lecture d'Apple Santé réussie, « 08:00 » ; précédée du jour quand ce n'est pas aujourd'hui,
+    /// « hier 08:00 », « 30 oct. 08:00 » : une synchro ancienne ne passe pas pour celle du matin.
     public var lastSyncText: String? {
-        lastSync.map { Self.timeText($0, calendar: environment.calendar) }
+        lastSync.map { date -> String in
+            let time = Self.timeText(date, calendar: environment.calendar)
+            guard let day = Self.syncDay(date, now: environment.now(), calendar: environment.calendar, spoken: false) else {
+                return time
+            }
+            return "\(day) \(time)"
+        }
     }
 
     /// Relit le profil, le programme actif et Apple Santé, recalcule le score et la séance. Un appel pendant une lecture
@@ -137,6 +146,7 @@ public final class TodayModel {
 
     /// Affiche le score lu par le rafraîchissement et la séance qu'il ajuste.
     private func showScoreAndSession(of day: DayRefresh) {
+        scoreFailed = day.score == nil
         if let updated = day.score {
             apply(updated)
             todayCheckIn = day.checkIn
@@ -166,6 +176,7 @@ public final class TodayModel {
     /// Affiche un score que l'accueil vient d'écrire, et la séance qu'il ajuste.
     func applyWritten(_ recovery: DailyRecovery) {
         scoreEpoch += 1
+        scoreFailed = false
         apply(.scored(recovery))
         show(TodaySession(plannedDay: session?.plannedDay ?? .noProgram, recovery: recovery, deload: session?.isDeload == true))
     }

@@ -84,6 +84,21 @@ struct SpokenTextTests {
             == "Synchro, 18 heures 30")
     }
 
+    /// Une synchro d'un autre jour dit son jour : elle ne passe pas pour celle du matin.
+    @Test func syncLabelNamesTheDayWhenItIsNotToday() {
+        let calendar = TodayClock.calendar
+        let now = TodayClock.date("2026-11-02T09:00")
+        #expect(TodayModel.syncAccessibilityText(lastSync: TodayClock.date("2026-11-02T08:00"), calendar: calendar, now: now)
+            == "Synchro, 8 heures")
+        #expect(TodayModel.syncAccessibilityText(lastSync: TodayClock.date("2026-11-01T18:30"), calendar: calendar, now: now)
+            == "Synchro, hier, 18 heures 30")
+        #expect(TodayModel.syncAccessibilityText(lastSync: TodayClock.date("2026-10-30T08:00"), calendar: calendar, now: now)
+            == "Synchro, 30 octobre, 8 heures")
+        #expect(TodayModel.syncDay(TodayClock.date("2026-11-02T06:00"), now: now, calendar: calendar, spoken: false) == nil)
+        #expect(TodayModel.syncDay(TodayClock.date("2026-11-01T22:00"), now: now, calendar: calendar, spoken: false) == "hier")
+        #expect(TodayModel.syncDay(TodayClock.date("2026-10-30T08:00"), now: now, calendar: calendar, spoken: false) == "30 oct.")
+    }
+
     // MARK: - Annonce du score
 
     private func scored(_ score: Double, estimated: Bool = false) -> TodayScore {

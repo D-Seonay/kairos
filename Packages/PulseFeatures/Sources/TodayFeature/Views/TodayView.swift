@@ -149,7 +149,7 @@ public struct TodayView: View {
             .pulseAnnounceError(model.errorMessage)
         } else {
             RecoveryCard(score: model.score, factors: model.factors, marker: model.marker, spokenMarker: model.spokenMarker,
-                         onWhy: model.showWhy)
+                         onWhy: model.showWhy, isLoading: model.isLoading, scoreFailed: model.scoreFailed)
         }
     }
 }
@@ -192,9 +192,16 @@ private struct TodayHeader: View {
             Task { await model.refresh() }
         } label: {
             HStack(spacing: 8) {
-                Circle()
-                    .fill(model.lastSyncText == nil ? PulsePalette.muted : PulsePalette.text)
-                    .frame(width: 6, height: 6)
+                // Pendant la lecture, un indicateur à la place du point : la touche a bien été prise en compte.
+                if model.isLoading {
+                    ProgressView()
+                        .controlSize(.mini)
+                        .frame(width: 12, height: 12)
+                } else {
+                    Circle()
+                        .fill(model.lastSyncText == nil ? PulsePalette.muted : PulsePalette.text)
+                        .frame(width: 6, height: 6)
+                }
                 Text(syncText)
                     .pulseEyebrow(PulsePalette.text2)
             }
@@ -209,6 +216,7 @@ private struct TodayHeader: View {
         .buttonStyle(PressableButtonStyle())
         .disabled(model.isLoading)
         .accessibilityLabel(model.syncAccessibilityText)
+        .accessibilityValue(model.isLoading ? String(localized: "Lecture en cours", bundle: .module) : "")
         .accessibilityHint(String(localized: "Relit tes données Apple Santé", bundle: .module))
     }
 
