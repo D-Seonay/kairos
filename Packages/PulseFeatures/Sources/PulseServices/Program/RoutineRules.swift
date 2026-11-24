@@ -21,6 +21,9 @@ public enum RoutineRules {
     public static let rpeStep = 0.5
     public static let rest = 0...300
     public static let restStep = 15
+    /// L'effort global ressenti d'une séance, de 1 à 10 par point : le récap le demande, la correction d'une séance le reprend.
+    /// Le RPE d'une série suit `rpe` et `rpeStep`.
+    public static let overallRPE = 1...10
 
     /// Les problèmes de `exercise`, dans l'ordre séries, répétitions, RPE, repos, fourchettes par série.
     /// Une fourchette inversée est signalée sans jamais passer par `repRange(forSet:)`, qui planterait.

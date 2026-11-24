@@ -14,6 +14,7 @@ struct RoutineRulesTests {
         #expect(RoutineRules.sets == 1...10 && RoutineRules.reps == 1...30 && RoutineRules.seconds == 5...600)
         #expect(RoutineRules.rpe == 6.0...10.0 && RoutineRules.rest == 0...300)
         #expect(RoutineRules.rpeStep == 0.5 && RoutineRules.restStep == 15)
+        #expect(RoutineRules.overallRPE == 1...10)
     }
 
     @Test func aDefaultExerciseHasNoIssue() {

@@ -103,7 +103,7 @@ public final class LiveSessionModel {
 
     /// Le RPE d'une série, de 6 à 10 par pas de 0,5 ; `nil` l'efface. Une autre valeur est ignorée.
     public func setRPE(_ rpe: Double?, set: UUID) async {
-        if let rpe, !(6...10).contains(rpe) || (rpe * 2).rounded() != rpe * 2 { return }
+        if let rpe, !RoutineRules.rpe.contains(rpe) || (rpe * 2).rounded() != rpe * 2 { return }
         guard let exercise = exerciseID(containing: set) else { return }
         haptics.light()
         await perform(.edit(exercise: exercise, set: set, rpe: .some(rpe)))

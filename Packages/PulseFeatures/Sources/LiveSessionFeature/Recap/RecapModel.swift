@@ -28,7 +28,8 @@ public final class RecapModel {
     /// des photos et pour une saisie après coup.
     public let photos: SessionPhotosModel?
 
-    public static let rpeRange = 1...10
+    /// La même échelle que la correction d'une séance enregistrée.
+    public static let rpeRange = RoutineRules.overallRPE
     /// Le RPE avant que le bilan, qui le suggère, soit lu.
     private static let initialRPE = 7
 
