@@ -131,6 +131,30 @@ Pour chaque écran : balayer de gauche à droite du début à la fin. L'ordre do
 - [ ] Un échec d'enregistrement d'une prise est annoncé une seule fois : ni l'échec du rechargement qui suit, ni la carte de l'accueil ne doivent parler en plus.
 - [ ] Le rappel du matin (notification) et son action « Pris » : l'action est nommée et fonctionne.
 
+### Photos de séance
+
+- [ ] Séance en direct : le bouton appareil photo de l'en-tête dit « Ajouter une photo », puis « Ajouter une photo, 3 photos dans la séance » ; il garde une cible de 44 pt et n'interrompt pas la saisie d'une série.
+- [ ] Le menu d'ajout propose « Prendre une photo » et « Choisir dans Photos » ; appareil photo refusé, le texte dit de l'autoriser dans Réglages et l'import reste proposé.
+- [ ] Section « Photos » du récap, du détail d'une séance, du récap et du détail d'une course : chaque vignette dit « Photo 2 sur 4, ajoutée à 18 h 42 ». Écouter l'heure : elle doit se dire « 18 heures 42 », pas « 18 h 42 » lettre à lettre ; sinon, le signaler.
+- [ ] Pendant l'ajout, la case d'attente dit « Ajout de la photo en cours » ; à la fin, « Photo ajoutée » (ou « 3 photos ajoutées ») est annoncé une fois, et de nouveau à l'ajout suivant.
+- [ ] Au-delà de 6 photos, « 6 photos au maximum par séance : 2 n'ont pas été ajoutées. » est annoncé ; une image illisible et un échec d'ajout le sont aussi.
+- [ ] Visionneuse plein écran : la photo se lit avec son libellé, « Partager », « Supprimer » et « Fermer » sont des boutons ; la confirmation de suppression se lit en entier, puis « Photo supprimée » est annoncé.
+- [ ] Feuille de partage, « Enregistrer l'image » : iOS demande l'autorisation d'ajouter à Photos avec le texte de Pulse, lu en entier.
+
+### Photos de corps
+
+- [ ] Profil : la ligne « Photos de corps », sous la carte Poids, dit son titre ; le cadenas n'est pas lu en plus.
+- [ ] À l'ouverture, Face ID (ou le code) est demandé avec « Déverrouille tes photos de corps. » ; refusé, l'écran reste couvert et « Déverrouiller » est un bouton atteignable.
+- [ ] Déverrouillé : « Photos de corps déverrouillées » est annoncé une fois. Le texte fixe se lit, puis, sur un iPhone sans code, « Sans code sur cet iPhone, ces photos ne sont ni chiffrées ni verrouillables. »
+- [ ] Sélecteur d'apps et passage en arrière-plan : le cache couvre les photos, VoiceOver ne lit rien dessous ; au retour, Face ID est redemandé une seule fois.
+- [ ] Chaque jour de prise se lit par ses trois cases : « Photo de face, 1er août 2026 », « Photo de profil, … », « Photo de dos, … » ; une case vide dit « Ajouter une photo de face » (ou de profil, de dos) et c'est un bouton.
+- [ ] « Dernière prise il y a 5 jours » (ou « hier », « il y a 4 semaines ») se lit sans abréviation.
+- [ ] Feuille d'ajout : la pose (« Face », « Profil », « Dos ») et la date sont des contrôles nommés ; « Préparation de la photo » se lit pendant le traitement ; la confirmation « Remplacer la photo de face du 1er août ? » se lit en entier.
+- [ ] Comparaison : le curseur dit « Avant, 1er août · Après, 28 octobre » et sa valeur en pourcentage, et se règle par balayage vertical (glisser vers le haut, vers le bas). Écouter le point médian : il ne doit pas être lu « point médian » ; sinon, le signaler.
+- [ ] Comparaison : « Côte à côte » / « Superposer » et « Changer les dates » sont des boutons ; la variation de poids dit « Poids, tendance, moins 1,4 kilo » (sans « kg »), et rien quand une des deux dates n'a pas de tendance.
+- [ ] Réglages de la section : « Verrouiller avec Face ID » est un interrupteur avec son état ; sans code, « Le verrou demande un code sur cet iPhone. » se lit. « Exporter les photos de corps » et « Supprimer toutes les photos de corps » sont des boutons, la confirmation se lit, puis « Photos de corps supprimées » est annoncé.
+- [ ] Un échec (export, suppression, chargement) est annoncé une fois.
+
 ### Widgets et Live Activity
 
 - [ ] Écran verrouillé et écran d'accueil, VoiceOver actif : chaque widget (récupération, charge, série, prochaine séance, semaine) dit une phrase complète.
@@ -162,6 +186,8 @@ Réglages → Accessibilité → Affichage et taille du texte → Police plus gr
 - [ ] Stats : les lignes de totaux passent en pile, les étiquettes d'axe restent lisibles, les tuiles ne se coupent pas.
 - [ ] Profil : les rangées passent en colonne (valeur sous le libellé), les paramètres restent lisibles, les formulaires se saisissent.
 - [ ] Compléments : les rangées passent en colonne, les doses ne sont jamais tronquées.
+- [ ] Photos de séance : la section « Photos » garde ses vignettes touchables, le titre et « privées · 6 au maximum » passent à la ligne sans être coupés ; le bouton appareil photo de la séance en direct reste dans l'en-tête sans le faire déborder.
+- [ ] Photos de corps : le texte fixe, le cache verrouillé et son bouton « Déverrouiller », les titres des jours, la feuille d'ajout et les réglages se lisent en entier ; la comparaison garde son curseur et la variation de poids lisibles.
 - [ ] Widgets : le plafond est xxxLarge. Les widgets de 158 pt et le rectangle de 66 pt reposent sur une réduction automatique du texte : aucune capture n'a été faite. Regarder chacun à xxxLarge sur l'iPhone, sur l'écran d'accueil et l'écran verrouillé, et noter tout texte coupé en haut ou en bas.
 - [ ] Live Activity et Dynamic Island : le texte reste entier au plus grand réglage.
 - [ ] Pilules de choix (objectifs, période des Stats, réglages) dans une rangée serrée, **à la taille par défaut** : un libellé long peut passer sur deux lignes. Vérifier qu'il n'est jamais coupé et que la rangée garde une cible de 44 pt.
@@ -180,6 +206,7 @@ Réglages → Accessibilité → Mouvement → Réduire les animations activé. 
 - [ ] Planning : le seul mouvement animé est le défilement vers un jour ; il passe par `PulseMotion` et saute directement au jour, sans défiler, quand le réglage est activé.
 - [ ] Onboarding : le passage d'une étape à l'autre se fait en fondu.
 - [ ] Stats et Profil : aucune barre ni courbe ne se dessine en s'animant.
+- [ ] Photos de corps : le cache du sélecteur d'apps et le déverrouillage apparaissent en fondu, sans mouvement ; le passage « Côte à côte » / « Superposer » de la comparaison ne glisse pas.
 
 ## 5. Animations système non pilotables
 

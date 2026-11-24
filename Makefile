@@ -28,3 +28,4 @@ test-app:
 	xcodebuild test-without-building -scheme Pulse -destination '$(DEST)' -quiet
 lint:
 	swiftlint lint --strict
+	scripts/check-info-plist.sh

@@ -77,6 +77,8 @@ struct AppDependencies: Sendable {
     let sessionActivity: any SessionActivityControlling
     /// La course : son seul service, ses tracés, ses réglages et sa séance HealthKit.
     let run: RunDependencies
+    /// Les photos de séance et de corps, avec le verrou et l'authentification des photos de corps.
+    let photos: PhotoDependencies
     let inspector: any StoreInspector
     let exporter: any DataExporter
     let eraser: any DataEraser
@@ -110,6 +112,8 @@ struct AppDependencies: Sendable {
         /// La course : séance HealthKit, localisation, voix, Live Activity et rappel d'oubli ; des doublures en mode mémoire et
         /// dans les tests.
         var run: RunAdapters
+        /// Le dossier des photos de corps de l'app réelle ; en mémoire dans les modes des tests d'interface et dans les tests.
+        var bodyPhotos: any BodyPhotoStore
         /// `nil` : la suppression totale n'a aucune notification à retirer.
         var notificationCanceling: (any NotificationCanceling)?
         var backgroundDelivery: HealthKitBackgroundDelivery?
@@ -125,7 +129,8 @@ struct AppDependencies: Sendable {
 
         #if DEBUG
         /// Les modes des tests d'interface (mémoire, disque) n'écrivent ni dans les préférences, ni dans le groupe d'apps, ni dans
-        /// les notifications de l'app réelle. L'écran en direct y a l'autorisation ; l'onboarding garde le refus.
+        /// les notifications, ni dans le dossier des photos de corps de l'app réelle. L'écran en direct y a l'autorisation ;
+        /// l'onboarding garde le refus.
         mutating func useMemoryDoubles(defaultsSuite suite: String) {
             defaultsSuite = suite
             notifications = StubNotificationAuthorizer(granted: false)
@@ -136,6 +141,7 @@ struct AppDependencies: Sendable {
             supplementReminders = StubSupplementReminderScheduler()
             sessionActivity = StubSessionActivityController()
             run = .stubs
+            bodyPhotos = InMemoryBodyPhotoStore()
             healthWriter = nil
             supplementHealth = nil
             healthEraser = StubHealthEraser()
@@ -180,7 +186,7 @@ struct AppDependencies: Sendable {
                             morningScore: scheduler, restNotifier: scheduler, supplementReminders: scheduler,
                             supplementHealth: writer, sessionActivity: SessionActivityController(),
                             run: .live(healthSession: writer != nil ? HealthKitRunRecorder() : nil, reminders: scheduler),
-                            notificationCanceling: scheduler,
+                            bodyPhotos: FileBodyPhotoStore(directory: bodyPhotosDirectory), notificationCanceling: scheduler,
                             backgroundDelivery: launch.healthScenario == nil ? reader.map(HealthKitBackgroundDelivery.init) : nil,
                             inspector: nil, notificationStatus: { await UserNotificationAuthorizer.status() },
                             defaultsSuite: nil, calendar: calendar, now: now, launch: launch)
@@ -217,7 +223,8 @@ struct AppDependencies: Sendable {
             liveSessionNotifications: StubNotificationAuthorizer(granted: false), healthEraser: healthEraser, healthWriter: nil,
             widgets: StubWidgetPublisher(), morningScore: StubNotificationScheduler(), restNotifier: StubRestTimerNotifier(),
             supplementReminders: StubSupplementReminderScheduler(), supplementHealth: nil,
-            sessionActivity: StubSessionActivityController(), run: .stubs, notificationCanceling: nil,
+            sessionActivity: StubSessionActivityController(), run: .stubs, bodyPhotos: InMemoryBodyPhotoStore(),
+            notificationCanceling: nil,
             backgroundDelivery: nil, inspector: inspector, notificationStatus: { .authorized }, defaultsSuite: testingDefaultsSuite,
             calendar: calendar, now: now, launch: LaunchOptions())
         guard let dependencies = try? make(wiring, mode: .inMemory, error: nil) else { crash(nil) }
@@ -257,12 +264,12 @@ struct AppDependencies: Sendable {
         let activeSession = SwiftDataActiveSessionStore(modelContainer: container)
         let exerciseSettings = SwiftDataExerciseSettingsRepository(modelContainer: container)
         let supplements = SwiftDataSupplementRepository(modelContainer: container)
-        let supplementService = makeSupplementService(wiring, supplements: supplements, programs: programs, profiles: profiles,
-                                                      workouts: workouts)
+        let supplementService = makeSupplements(wiring, supplements, programs: programs, profiles: profiles, workouts: workouts)
+        let photos = PhotoDependencies(wiring, container: container, measurements: bodyMeasurements)
         let liveSession = ActiveSessionService(
             store: activeSession, workouts: workouts, profiles: profiles, settings: exerciseSettings, userExercises: userExercises,
             records: records, library: content, restNotifier: wiring.restNotifier, activity: wiring.sessionActivity, calendar: calendar,
-            now: wiring.now, health: healthExporter(wiring.healthWriter, workouts, profiles, bodyMeasurements, calendar))
+            now: wiring.now, health: healthExporter(wiring, workouts, profiles, bodyMeasurements), sessionPhotos: photos.sessionRepository)
         return AppDependencies(
             health: wiring.health, healthSource: wiring.healthSource, notifications: wiring.notifications,
             liveSessionNotifications: wiring.liveSessionNotifications,
@@ -276,7 +283,7 @@ struct AppDependencies: Sendable {
                                        library: content, calendar: calendar, now: wiring.now),
             healthCache: healthCache, activity: activity, refresher: refresher, backgroundDelivery: wiring.backgroundDelivery,
             activeSession: activeSession, liveSession: liveSession, sessionActivity: wiring.sessionActivity,
-            run: RunDependencies(wiring, container: container, workouts: workouts, profiles: profiles),
+            run: RunDependencies(wiring, container: container, workouts: workouts, profiles: profiles), photos: photos,
             inspector: wiring.inspector ?? SwiftDataStoreInspector(container: container, cloudEnabled: mode == .cloud),
             exporter: makeExporter(container: container, content: content),
             eraser: makeEraser(wiring, container: container, refresher: refresher),
@@ -301,6 +308,8 @@ struct AppDependencies: Sendable {
             try? FileManager.default.removeItem(at: directory)
         }
         wiring.useMemoryDoubles(defaultsSuite: diskDefaultsSuite)
+        // Les photos de corps du mode disque vivent avec son magasin, et s'effacent avec lui.
+        wiring.bodyPhotos = FileBodyPhotoStore(directory: directory.appending(path: "BodyPhotos", directoryHint: .isDirectory))
         do {
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
             return try make(wiring, container: PersistenceStack.makeContainer(directory: directory), mode: .localOnly, error: nil)
@@ -331,13 +340,15 @@ extension AppDependencies {
                           exerciseNames: { content.exercise(id: $0)?.name.fr })
     }
 
-    /// Efface le magasin, les préférences, les notifications, l'instantané du widget et les exports. Elle attend la fin d'un
-    /// rafraîchissement en cours, qui republierait l'instantané effacé.
+    /// Efface le magasin, les photos de corps et leur export, les préférences, les notifications, l'instantané du widget et les
+    /// exports. Elle attend la fin d'un rafraîchissement en cours, qui republierait l'instantané effacé. Le dépôt des photos de corps
+    /// est celui du câblage, que lit aussi leur service : jamais un second sur le même dossier.
     private static func makeEraser(_ wiring: Wiring, container: ModelContainer, refresher: DayRefresher) -> any DataEraser {
         let store = SwiftDataEraser(container: container, defaultsSuite: wiring.defaultsSuite,
                                     defaultsDomain: wiring.defaultsSuite ?? Bundle.main.bundleIdentifier ?? "fr.seonay.pulse",
                                     healthEraser: wiring.healthEraser, notifications: wiring.notificationCanceling,
-                                    widgets: wiring.widgets, exportsDirectory: SwiftDataExporter.exportsDirectory)
+                                    widgets: wiring.widgets, exportsDirectory: SwiftDataExporter.exportsDirectory,
+                                    bodyPhotos: wiring.bodyPhotos, bodyPhotoExportDirectory: BodyPhotoService.exportDirectory)
         return SerializedDataEraser(refresher: refresher, inner: store)
     }
 }
@@ -346,9 +357,8 @@ extension AppDependencies {
 
 extension AppDependencies {
     /// Le service des compléments, avec les rappels et l'écriture Apple Santé du câblage.
-    private static func makeSupplementService(_ wiring: Wiring, supplements: any SupplementRepository,
-                                              programs: any ProgramRepository, profiles: any ProfileRepository,
-                                              workouts: any WorkoutRepository) -> SupplementService {
+    private static func makeSupplements(_ wiring: Wiring, _ supplements: any SupplementRepository, programs: any ProgramRepository,
+                                        profiles: any ProfileRepository, workouts: any WorkoutRepository) -> SupplementService {
         SupplementService(supplements: supplements, programs: programs, profiles: profiles, workouts: workouts,
                           reminders: wiring.supplementReminders, health: wiring.supplementHealth, calendar: wiring.calendar,
                           now: wiring.now)
