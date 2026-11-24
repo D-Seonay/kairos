@@ -26,8 +26,11 @@ struct SettingsScreen: View {
                 .scrollContentBackground(.hidden)
                 .scrollDismissesKeyboard(.interactively)
                 // Un réglage refusé se règle souvent loin en bas : la liste remonte jusqu'à son message.
+                // Le message vient d'être inséré : on attend le tour suivant, que sa ligne existe, avant d'y remonter.
                 .onChange(of: model.failureCount) {
-                    PulseMotion.perform(.default, reduceMotion: reduceMotion) { proxy.scrollTo(Self.errorID, anchor: .top) }
+                    Task { @MainActor in
+                        PulseMotion.perform(.default, reduceMotion: reduceMotion) { proxy.scrollTo(Self.errorID, anchor: .top) }
+                    }
                 }
         }
         .pulseAnnounceOnce(model.errorMessage, id: model.failureCount, isError: true)
@@ -49,8 +52,8 @@ struct SettingsScreen: View {
                         .font(.footnote)
                         .foregroundStyle(PulsePalette.bad)
                         .fixedSize(horizontal: false, vertical: true)
+                        .id(Self.errorID)
                 }
-                .id(Self.errorID)
                 .listRowBackground(PulsePalette.surface)
             }
             if let profile = model.profile {
