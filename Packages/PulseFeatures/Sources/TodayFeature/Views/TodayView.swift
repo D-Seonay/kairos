@@ -18,13 +18,16 @@ public struct TodayView: View {
     private let onStartSession: (SessionLaunch) -> Void
     private let onResumeSession: () -> Void
     private let onStartRun: (RunLaunch) -> Void
+    /// Sans programme, « Créer une routine » : l'app ouvre l'onglet Séance.
+    private let onCreateRoutine: () -> Void
     /// L'écran Compléments poussé ; l'app le tient pour qu'un rappel touché l'ouvre. Sans lui, l'accueil garde le sien.
     private let showsSupplements: Binding<Bool>?
     @State private var localShowsSupplements = false
 
     public init(model: TodayModel, supplements: SupplementsModel? = nil, showsSupplements: Binding<Bool>? = nil,
                 onOpenProfile: @escaping () -> Void, onStartSession: @escaping (SessionLaunch) -> Void,
-                onResumeSession: @escaping () -> Void, onStartRun: @escaping (RunLaunch) -> Void = { _ in }) {
+                onResumeSession: @escaping () -> Void, onStartRun: @escaping (RunLaunch) -> Void = { _ in },
+                onCreateRoutine: @escaping () -> Void = {}) {
         self.model = model
         self.supplements = supplements
         self.showsSupplements = showsSupplements
@@ -32,6 +35,7 @@ public struct TodayView: View {
         self.onStartSession = onStartSession
         self.onResumeSession = onResumeSession
         self.onStartRun = onStartRun
+        self.onCreateRoutine = onCreateRoutine
     }
 
     public var body: some View {
@@ -78,7 +82,8 @@ public struct TodayView: View {
             VStack(spacing: PulseMetrics.spacing) {
                 TodayHeader(model: model, onOpenProfile: onOpenProfile)
                 recoveryOrCheckIn
-                SessionCard(model: model, onWhy: model.showWhy, onResume: onResumeSession, onStartRun: onStartRun)
+                SessionCard(model: model, onWhy: model.showWhy, onResume: onResumeSession, onStartRun: onStartRun,
+                            onCreateRoutine: onCreateRoutine)
                 if let offer = model.deloadOffer {
                     DeloadOfferCard(offer: offer, errorMessage: model.deloadErrorMessage) { accepted in
                         Task { await model.decideDeload(accepted) }

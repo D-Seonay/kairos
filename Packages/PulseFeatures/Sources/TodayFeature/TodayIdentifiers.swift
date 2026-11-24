@@ -8,6 +8,7 @@ public enum TodayIdentifiers {
     public static let sessionWhy = "today.session.why"
     public static let sessionDone = "today.session.done"
     public static let sessionResume = "today.session.resume"
+    public static let createRoutine = "today.session.createRoutine"
     public static let deloadOffer = "today.deload"
     public static let deloadAccept = "today.deload.accept"
     public static let deloadDecline = "today.deload.decline"

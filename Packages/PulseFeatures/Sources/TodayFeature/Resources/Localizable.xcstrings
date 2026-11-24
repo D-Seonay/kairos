@@ -116,6 +116,36 @@
         }
       }
     },
+    "Aucune séance prévue" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune séance prévue"
+          }
+        }
+      }
+    },
+    "Crée une routine dans l'onglet Séance : tu pourras la lancer d'ici." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crée une routine dans l'onglet Séance : tu pourras la lancer d'ici."
+          }
+        }
+      }
+    },
+    "Créer une routine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer une routine"
+          }
+        }
+      }
+    },
     "Exercice inconnu" : {
       "localizations" : {
         "fr" : {
@@ -132,6 +162,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "La séance prévue reste disponible avec « Rétablir la séance d'origine »."
+          }
+        }
+      }
+    },
+    "Ouvre l'onglet Séance" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvre l'onglet Séance"
           }
         }
       }
@@ -212,16 +252,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucune autre séance prévue cette semaine."
-          }
-        }
-      }
-    },
-    "Aucune séance prévue." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucune séance prévue."
           }
         }
       }
@@ -534,16 +564,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "jeudi"
-          }
-        }
-      }
-    },
-    "L'éditeur de routines arrive avec la séance en direct." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "L'éditeur de routines arrive avec la séance en direct."
           }
         }
       }

@@ -104,7 +104,7 @@ struct MainTabView: View {
             Tab(String(localized: "Aujourd'hui"), systemImage: "sun.max", value: Item.today) {
                 TodayView(model: today, supplements: supplements, showsSupplements: $router.isShowingSupplements,
                           onOpenProfile: { router.selectedTab = .profile }, onStartSession: start, onResumeSession: resume,
-                          onStartRun: startRun)
+                          onStartRun: startRun, onCreateRoutine: { router.selectedTab = .session })
             }
             Tab(String(localized: "Planning"), systemImage: "calendar", value: Item.planning) {
                 PlanningView(model: planning, train: train, onStartSession: start, onResumeSession: resume)

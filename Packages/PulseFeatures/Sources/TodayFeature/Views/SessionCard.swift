@@ -15,6 +15,8 @@ struct SessionCard: View {
     let onResume: () -> Void
     /// Lance la course de la carte.
     var onStartRun: (RunLaunch) -> Void = { _ in }
+    /// Sans programme : ouvre l'onglet Séance, où se créent les routines.
+    var onCreateRoutine: () -> Void = {}
 
     var body: some View {
         ObsidianCard {
@@ -100,10 +102,17 @@ struct SessionCard: View {
 
     // MARK: - Sans programme
 
+    /// Pas de cul-de-sac : la carte mène à l'onglet Séance, où se créent les routines.
     @ViewBuilder
     private var noProgram: some View {
-        SessionCardHeader(title: String(localized: "Aucune séance prévue.", bundle: .module))
-        detail(String(localized: "L'éditeur de routines arrive avec la séance en direct.", bundle: .module))
+        SessionCardHeader(title: String(localized: "Aucune séance prévue", bundle: .module))
+        detail(String(localized: "Crée une routine dans l'onglet Séance : tu pourras la lancer d'ici.", bundle: .module))
+        Button(action: onCreateRoutine) {
+            Label(String(localized: "Créer une routine", bundle: .module), systemImage: "plus")
+        }
+        .buttonStyle(SecondaryButtonStyle())
+        .accessibilityIdentifier(TodayIdentifiers.createRoutine)
+        .accessibilityHint(String(localized: "Ouvre l'onglet Séance", bundle: .module))
     }
 
     private func detail(_ text: String) -> some View {
