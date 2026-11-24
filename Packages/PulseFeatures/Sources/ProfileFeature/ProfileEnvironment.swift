@@ -2,6 +2,7 @@ import Foundation
 import PulseDomain
 import PulseServices
 import SwiftUI
+import TrainFeature
 
 /// Tout ce dont l'onglet Profil a besoin du dehors : le résumé, les pesées, les réglages, l'état d'Apple Santé, les données
 /// stockées (inspection, export, suppression), ce que seule l'app sait (autorisation des notifications, passage du jour,
@@ -35,6 +36,9 @@ public struct ProfileEnvironment: Sendable {
     public var ownerAuthentication: (any DeviceOwnerAuthenticating)?
     /// Le réglage « Verrouiller avec Face ID », par appareil.
     public var bodyPhotoLock: any BodyPhotoLockStore
+    /// L'environnement de l'onglet Séance, pour ouvrir la progression d'un levé depuis le mur des records, comme Stats → Records ;
+    /// `nil` : les lignes du mur ne s'ouvrent pas.
+    public var train: TrainEnvironment?
 
     /// Les photos de corps ne s'offrent qu'avec leur service et leur authentificateur : jamais d'écran ouvert sans verrou.
     public var offersBodyPhotos: Bool {
@@ -49,7 +53,7 @@ public struct ProfileEnvironment: Sendable {
                 appVersion: String, privacyPolicyURL: URL?, calendar: Calendar, now: @escaping @Sendable () -> Date,
                 runPreferences: any RunPreferencesStore = InMemoryRunPreferencesStore(), bodyPhotos: BodyPhotoService? = nil,
                 ownerAuthentication: (any DeviceOwnerAuthenticating)? = nil,
-                bodyPhotoLock: any BodyPhotoLockStore = InMemoryBodyPhotoLockStore()) {
+                bodyPhotoLock: any BodyPhotoLockStore = InMemoryBodyPhotoLockStore(), train: TrainEnvironment? = nil) {
         self.profile = profile
         self.body = body
         self.settings = settings
@@ -68,6 +72,7 @@ public struct ProfileEnvironment: Sendable {
         self.bodyPhotos = bodyPhotos
         self.ownerAuthentication = ownerAuthentication
         self.bodyPhotoLock = bodyPhotoLock
+        self.train = train
     }
 }
 
