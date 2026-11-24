@@ -4,6 +4,13 @@ import PulseDomain
 import PulseRecoveryEngine
 
 /// Une tuile de tendance sur 14 jours : le titre, la valeur à retenir et la série pour la courbe (un trou par nuit sans mesure).
+///
+/// Les 14 jours sont un choix d'affichage (spec M3 §12), pas une ligne de base : la tuile Sommeil donne la moyenne des nuits
+/// des 14 derniers jours, sa courbe et le sens de la dernière semaine contre la précédente. Le moteur n'a pas de ligne de base
+/// de sommeil : `SleepScorer` note chaque nuit contre des cibles fixes (8 h, 20 % de profond), et les 60 jours du cache
+/// (`NightHistory.historyDays`) servent à reconstituer les nuits, pas à les moyenner. Les trois tuiles partagent la même
+/// fenêtre que la ligne de base de variabilité (`RecoveryCalculator.hrvWindowDays`) et que l'écart à la moyenne de l'écran
+/// Nuit, pour qu'elles se lisent ensemble. Seule l'ouverture de l'écran Nuit regarde tout le cache (`TodayModel.canOpenNight`).
 struct TrendTile: Equatable {
     static let days = 14
     private static let dash = "\u{2014}"
