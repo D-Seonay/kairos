@@ -83,6 +83,24 @@ struct RunCoordinatorTests {
         #expect(coordinator.model().recap?.data.session.endedAt == RunFeatureFixture.start)
     }
 
+    @Test func refreshExposesForgottenEndAfterReattach() async throws {
+        // Un point tous les 2 s, à 6 m du précédent : le dernier déplacement est à la 60e seconde.
+        let start = RunFeatureFixture.start
+        let points = stride(from: 0, through: 60, by: 2).map { second in
+            RunTrackPoint(timestamp: start.addingTimeInterval(Double(second)),
+                          latitude: 48.8566 + Double(second) * 3 / 111_195, longitude: 2.3522, horizontalAccuracy: 5)
+        }
+        let draft = RunDraft(sessionID: UUID(), launch: .free(), startedAt: start, points: points,
+                             updatedAt: start.addingTimeInterval(60))
+        let fixture = RunFeatureFixture(recorder: StubRunWorkoutRecorder(recoverable: true), draft: draft)
+        fixture.clock.advance(minutes: 32)
+        let coordinator = fixture.coordinator()
+        await coordinator.refresh()
+        #expect(coordinator.isPresented)
+        #expect(coordinator.current?.sessionID == draft.sessionID)
+        #expect(coordinator.forgottenEnd == start.addingTimeInterval(60))
+    }
+
     @Test func dismissingForgottenEndKeepsTheRun() async throws {
         let fixture = RunFeatureFixture()
         let coordinator = fixture.coordinator()

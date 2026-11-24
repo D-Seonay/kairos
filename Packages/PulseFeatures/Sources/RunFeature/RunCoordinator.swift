@@ -70,6 +70,8 @@ public final class RunCoordinator {
             recovery = nil
             showRunning(snapshot)
             isPresented = true
+            // Une course oubliée puis rattachée au relancement (rappel touché) propose aussi d'être terminée.
+            forgottenEnd = await service.forgottenEnd()
         } else {
             recovery = offer
         }
