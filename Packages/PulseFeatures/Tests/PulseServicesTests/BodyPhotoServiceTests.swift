@@ -92,6 +92,16 @@ struct BodyPhotoServiceTests {
         #expect(change == nil)
     }
 
+    @Test func weightChangeReadsEnoughWeighingsForTheTrendBeforeTheFirstDate() async throws {
+        // La tendance du 14 août (point le plus récent dans les 7 jours avant le 20) moyenne le 8 (71) et le 14 (70) : 70,5.
+        for weighing in [weighing("2026-08-08T07:00", 71), weighing("2026-08-14T07:00", 70), weighing("2026-10-28T07:00", 68.5)] {
+            try await measurements.save(weighing)
+        }
+        let change = try await makeService().weightChange(from: TestClock.date("2026-08-20T10:00"),
+                                                          to: TestClock.date("2026-10-30T10:00"))
+        #expect(try abs(#require(change) - -2.0) < 0.01)
+    }
+
     @Test func weightChangeCountsAWeighingOfTheLastDay() async throws {
         try await measurements.save(weighing("2026-08-01T07:00", 70))
         try await measurements.save(weighing("2026-10-30T23:30", 68.5))

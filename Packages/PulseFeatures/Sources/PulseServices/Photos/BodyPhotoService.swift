@@ -92,9 +92,10 @@ public actor BodyPhotoService {
     }
 
     /// Variation de la tendance du poids entre deux dates, toutes sources de pesées confondues, ou `nil` si l'une des deux n'a pas
-    /// de tendance. Les pesées lues vont de 7 jours avant la première date à la fin du jour de la seconde.
+    /// de tendance. Les pesées lues vont de 14 jours avant la première date (la tendance d'un jour moyenne les 7 jours qui le finissent,
+    /// et le dernier point de tendance utile peut dater de 6 jours avant la date) à la fin du jour de la seconde.
     public func weightChange(from: Date, to: Date) async throws -> Double? {
-        let start = calendar.date(byAdding: .day, value: -WeightTrend.window, to: calendar.startOfDay(for: from)) ?? from
+        let start = calendar.date(byAdding: .day, value: -2 * WeightTrend.window, to: calendar.startOfDay(for: from)) ?? from
         let end = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: to)) ?? to
         let trend = WeightTrend.make(measurements: try await measurements.measurements(from: start, to: end), now: now(),
                                      calendar: calendar)
