@@ -119,6 +119,6 @@ struct PlanningWidgetsContentTests {
         let ready = LoadWidgetContent.make(snapshot: snapshot(loadRatio: 1.1), at: now, calendar: calendar)
         #expect(ready.ratioText == "1,1" && ready.zoneText == "Zone optimale" && ready.isOptimal)
         let early = LoadWidgetContent.make(snapshot: snapshot(loadRatio: nil), at: now, calendar: calendar)
-        #expect(early.ratioText == "–" && early.zoneText == "Après 28 jours" && !early.isOptimal)
+        #expect(early.ratioText == "—" && early.zoneText == "Après 28 jours" && !early.isOptimal)
     }
 }

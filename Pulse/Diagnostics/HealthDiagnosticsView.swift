@@ -106,12 +106,12 @@ struct HealthDiagnosticsView: View {
     // MARK: - Formats
 
     private static func text(_ value: Double?, unit: String) -> String {
-        guard let value else { return "–" }
+        guard let value else { return "—" }
         return "\(value.formatted(.number.precision(.fractionLength(0)))) \(unit)"
     }
 
     private static func sleepText(_ sleep: SleepSummary?) -> String {
-        guard let sleep else { return "–" }
+        guard let sleep else { return "—" }
         let total = "\(sleep.asleepMinutes / 60) h \(String(format: "%02d", sleep.asleepMinutes % 60))"
         guard let deep = sleep.deepMinutes else { return total }
         return "\(total) · \(deep) min"

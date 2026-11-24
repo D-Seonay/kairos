@@ -39,7 +39,7 @@ public struct LoadWidgetContent: Sendable, Equatable {
         guard let snapshot, calendar.isDate(snapshot.day, inSameDayAs: date) else { return sample(at: date, calendar: calendar) }
         guard let ratio = snapshot.loadRatio else {
             let text = String(localized: "Après 28 jours", bundle: .module)
-            return LoadWidgetContent(ratio: 1, ratioText: "–", zoneText: text, isOptimal: false,
+            return LoadWidgetContent(ratio: 1, ratioText: PulseFormat.dash, zoneText: text, isOptimal: false,
                                      accessibilityLabel: String(localized: "Charge d'entraînement disponible après 28 jours",
                                                                 bundle: .module))
         }

@@ -133,7 +133,7 @@ public struct CheckInView: View {
     }
 
     private var scoreText: String {
-        form.estimatedScore.map { String(Int($0.rounded())) } ?? "–"
+        form.estimatedScore.map { String(Int($0.rounded())) } ?? PulseFormat.dash
     }
 }
 
