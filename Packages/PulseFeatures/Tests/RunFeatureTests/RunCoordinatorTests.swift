@@ -54,6 +54,20 @@ struct RunCoordinatorTests {
         #expect(coordinator.model().recap?.data.session.id == draft.sessionID)
     }
 
+    /// Un enregistrement qui échoue garde l'offre, pour que l'alerte revienne, et le dit.
+    @Test func failedInterruptedSaveKeepsTheOffer() async throws {
+        let fixture = RunFeatureFixture(draft: RunFeatureFixture.interruptedDraft())
+        let coordinator = fixture.coordinator()
+        await coordinator.refresh()
+        let offer = try #require(coordinator.recovery)
+        // Le brouillon a disparu entre l'alerte et « Enregistrer » : le service n'a rien à enregistrer.
+        try await fixture.drafts.clear()
+        await coordinator.saveInterruptedRun()
+        #expect(coordinator.recovery == offer)
+        #expect(coordinator.errorMessage == "Pulse n'a pas pu enregistrer la course interrompue.")
+        #expect(!coordinator.isPresented)
+    }
+
     @Test func discardingAnInterruptedRunKeepsNothing() async throws {
         let fixture = RunFeatureFixture(draft: RunFeatureFixture.interruptedDraft())
         let coordinator = fixture.coordinator()

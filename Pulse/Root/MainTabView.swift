@@ -235,9 +235,11 @@ struct MainTabView: View {
     }
 
     // L'alerte de reprise attend la réponse du coordinateur, et celle d'oubli se résout dans son bouton (« Terminer » lit l'heure
-    // proposée après la fermeture) : une fermeture sans bouton ne change rien.
+    // proposée après la fermeture) : une fermeture sans bouton ne change rien. Un enregistrement en échec montre son erreur
+    // d'abord, puis l'alerte de reprise revient.
     private var isShowingRecovery: Binding<Bool> {
-        Binding(get: { run.recovery != nil && !run.isPresented && !isAnsweringRecovery }, set: { _ in })
+        Binding(get: { run.recovery != nil && !run.isPresented && !isAnsweringRecovery && run.errorMessage == nil },
+                set: { _ in })
     }
 
     private var isShowingForgotten: Binding<Bool> {

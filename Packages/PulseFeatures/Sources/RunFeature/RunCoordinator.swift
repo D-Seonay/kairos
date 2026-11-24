@@ -94,15 +94,14 @@ public final class RunCoordinator {
 
     // MARK: Reprise et oubli
 
-    /// « Enregistrer » de l'alerte de course interrompue : la course est enregistrée jusqu'à son dernier point, puis son récap
-    /// s'ouvre pour le RPE et la note.
+    /// « Enregistrer » de l'alerte de course interrompue : la course est enregistrée jusqu'à son dernier déplacement, puis son récap
+    /// s'ouvre pour le RPE et la note. Un échec garde l'offre : l'alerte revient après le message d'erreur.
     public func saveInterruptedRun() async {
         do {
             let data = try await environment.service.saveInterrupted()
             recovery = nil
             showRecap(data)
         } catch {
-            recovery = nil
             errorMessage = String(localized: "Pulse n'a pas pu enregistrer la course interrompue.", bundle: .module)
         }
     }
