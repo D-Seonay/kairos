@@ -3,7 +3,8 @@ import SwiftUI
 
 /// L'écran de la séance avec la suite de « Terminer » et d'« Abandonner » (spec M4 §14.6, §16, §17) : la confirmation s'il reste
 /// des séries prévues, l'alerte de la séance oubliée avec l'heure proposée, puis le récap en plein écran, qu'on ferme en
-/// enregistrant ou en revenant à la séance. `onFinished` est appelé une fois la séance enregistrée ou abandonnée (`LiveSessionCoordinator.didFinish`).
+/// enregistrant ou en revenant à la séance. `onFinished` est appelé une fois la séance enregistrée ou abandonnée
+/// (`LiveSessionCoordinator.didFinish`).
 public struct FinishFlow: View {
     private let model: LiveSessionModel
     @State private var flow: FinishFlowModel
