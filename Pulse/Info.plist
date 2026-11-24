@@ -38,7 +38,7 @@
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>Pulse enregistre vos séances de musculation, vos courses avec leur tracé et vos prises de compléments dans Apple Santé.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Pulse utilise ta position pendant une course que tu lances, pour mesurer la distance et tracer ton parcours. Elle reste sur ton iPhone, dans ton iCloud et dans Apple Santé.</string>
+	<string>Pulse utilise votre position pendant une course que vous lancez, pour mesurer la distance et tracer votre parcours. Elle reste sur votre iPhone, dans votre iCloud et dans Apple Santé.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>PulsePrivacyPolicyURL</key>
