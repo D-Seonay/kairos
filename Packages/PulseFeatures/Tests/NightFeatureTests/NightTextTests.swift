@@ -37,6 +37,19 @@ struct NightTextTests {
         #expect(rows.map(\.stage) == [.deep, .core, .rem, .awake])
     }
 
+    @Test func barIsHiddenAtZeroMinutes() {
+        let empty = BreakdownRow(stage: .awake, minutes: 0, share: 0, delta: nil)
+        #expect(empty.barWidth(available: 300, minimum: 8) == 0)
+    }
+
+    @Test func barKeepsAMinimumWidthWhenPresent() {
+        let tiny = BreakdownRow(stage: .awake, minutes: 1, share: 0.002, delta: nil)
+        #expect(tiny.barWidth(available: 300, minimum: 8) == 8)
+        let half = BreakdownRow(stage: .core, minutes: 225, share: 0.5, delta: nil)
+        #expect(half.barWidth(available: 300, minimum: 8) == 150)
+        #expect(tiny.barWidth(available: 4, minimum: 8) == 4)
+    }
+
     @Test func breakdownIsEmptyWithoutStages() {
         #expect(NightText.breakdownRows(NightDetail(night: NightFixtures.typicalNight(hasStages: false), averages: nil)).isEmpty)
     }

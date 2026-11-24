@@ -11,6 +11,13 @@ struct BreakdownRow: Equatable, Identifiable {
     var delta: String?
 
     var id: SleepStage { stage }
+
+    /// La largeur de la barre colorée dans une piste de `available` points. Une phase absente (0 min) n'a pas de barre, seule
+    /// la piste reste ; une phase présente garde au moins `minimum`, pour rester visible à côté des autres.
+    func barWidth(available: CGFloat, minimum: CGFloat) -> CGFloat {
+        guard minutes > 0, share > 0 else { return 0 }
+        return min(available, max(minimum, available * share))
+    }
 }
 
 /// Les textes de l'écran Nuit, affichés et parlés. Vocabulaire neutre : l'écran montre, il ne diagnostique pas.

@@ -39,7 +39,7 @@ private struct BreakdownRowView: View {
                 ZStack(alignment: .leading) {
                     Capsule().fill(PulsePalette.line)
                     Capsule().fill(row.stage.color)
-                        .frame(width: max(barHeight, proxy.size.width * row.share))
+                        .frame(width: row.barWidth(available: proxy.size.width, minimum: barHeight))
                 }
             }
             .frame(height: barHeight)
