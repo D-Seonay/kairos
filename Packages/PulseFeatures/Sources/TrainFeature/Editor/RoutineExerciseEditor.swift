@@ -4,7 +4,7 @@ import PulseServices
 import SwiftUI
 
 /// Un exercice de la routine : un en-tête qui résume ses réglages et, déplié, les commandes de chacun (spec M4 §11.2) : séries,
-/// fourchette de répétitions (ou de secondes) commune ou par série, RPE, repos, super set, incrément, retrait.
+/// fourchette de répétitions (ou de secondes) commune ou par série, RPE, repos, super set, retrait.
 struct RoutineExerciseEditor: View {
     let model: RoutineEditorModel
     let index: Int
@@ -121,7 +121,7 @@ struct RoutineExerciseEditor: View {
         .frame(minHeight: 44)
     }
 
-    /// Le super set, l'incrément, les erreurs et le retrait.
+    /// Le super set, les erreurs et le retrait.
     @ViewBuilder
     private func options(_ exercise: RoutineExercise) -> some View {
         Toggle(isOn: Binding(get: { model.isSuperset(at: index) }, set: { _ in model.toggleSuperset(at: index) })) {
@@ -129,15 +129,8 @@ struct RoutineExerciseEditor: View {
         }
         .disabled(!model.canToggleSuperset(at: index))
         .frame(minHeight: 44)
-        Stepper(value: Binding(get: { model.increment(for: exercise.exercise) },
-                               set: { kg in Task { await model.setIncrement(kg, for: exercise.exercise) } }),
-                in: IncrementStore.range, step: IncrementStore.step) {
-            label(String(localized: "Incrément : \(PulseFormat.decimal(model.increment(for: exercise.exercise), maxFractionDigits: 2)) kg",
-                         bundle: .module))
-        }
-        .accessibilityLabel(String(localized: "Incrément de charge", bundle: .module))
-        .accessibilityValue(PulseSpoken.kilos(model.increment(for: exercise.exercise)))
-        .frame(minHeight: 44)
+        // L'incrément est un réglage de l'exercice, écrit tout de suite : il se règle sur sa fiche, pas dans le brouillon de la
+        // routine qu'« Annuler » abandonne.
         ForEach(model.issues[index] ?? [], id: \.self) { issue in
             Text(issue.message(tracksDuration: model.tracksDuration(exercise.exercise)))
                 .font(.footnote)

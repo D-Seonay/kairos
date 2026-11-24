@@ -59,7 +59,7 @@ public final class SessionDetailModel {
     public private(set) var session: WorkoutSession?
     public private(set) var blocks: [SessionExerciseBlock] = []
     public private(set) var muscleLevels: [MuscleMapRegion: Int] = [:]
-    /// Ce que VoiceOver lit pour la carte musculaire : « Muscles sollicités par la séance. Pectoraux, intensité forte. … ».
+    /// Ce que VoiceOver lit pour la carte musculaire : « Muscles travaillés par la séance. Pectoraux, intensité forte. … ».
     public private(set) var musclesSpokenText = ""
     /// Vrai une fois la séance lue, qu'elle ait été trouvée ou non.
     public private(set) var hasLoaded = false
@@ -97,10 +97,10 @@ public final class SessionDetailModel {
         }
     }
 
-    /// « Muscles sollicités par la séance. Pectoraux, intensité forte. Triceps, intensité moyenne. »
+    /// « Muscles travaillés par la séance. Pectoraux, intensité forte. Triceps, intensité moyenne. »
     static func musclesSpokenText(weights: [Muscle: Double]) -> String {
         let summary = MuscleMapSummary.text(levels: MuscleIntensity.byMuscle(weights: weights))
-        return String(localized: "Muscles sollicités par la séance. \(summary)", bundle: .module)
+        return String(localized: "Muscles travaillés par la séance. \(summary)", bundle: .module)
     }
 
     /// Vrai si la séance a au moins une série hors échauffement.

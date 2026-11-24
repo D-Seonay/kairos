@@ -101,9 +101,19 @@ public final class LibraryModel {
         ExerciseSheetModel(environment: environment, reference: reference)
     }
 
-    /// Le formulaire de création d'un exercice perso.
-    public func creator() -> CustomExerciseModel {
-        CustomExerciseModel(environment: environment, draft: nil, editing: nil)
+    /// Le formulaire de création d'un exercice perso, nommé `name` s'il n'est pas vide (la recherche restée sans résultat).
+    public func creator(name: String = "") -> CustomExerciseModel {
+        CustomExerciseModel(environment: environment, draft: nil, editing: nil, name: name)
+    }
+
+    /// Un exercice vient d'être créé : la bibliothèque est relue et, en choix, l'exercice est choisi. Vrai en choix unique, où
+    /// il est alors le choix complet à rendre.
+    public func didCreate(_ exercise: UserExercise) async -> Bool {
+        await load()
+        let reference = ExerciseReference.user(id: exercise.id)
+        guard case .pick(let multiple) = mode else { return false }
+        if !selectionOrder.contains(reference) { toggle(reference) }
+        return !multiple
     }
 
     private func recentStart() -> Date? {

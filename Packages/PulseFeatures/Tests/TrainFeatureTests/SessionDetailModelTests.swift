@@ -198,7 +198,7 @@ private func hevyPush(_ fixture: TrainFixture, status: SessionStatus = .complete
     #expect(!model.summarySpokenText.contains(" · ") && !model.summarySpokenText.contains("kg"))
     #expect(model.summarySpokenText.hasPrefix("1 heure, 3 séries") || model.summarySpokenText.hasPrefix("1 heure 0"))
     #expect(model.headerSpokenText.contains("importée de Hevy") && model.headerSpokenText.hasSuffix(model.summarySpokenText))
-    #expect(model.musclesSpokenText.hasPrefix("Muscles sollicités par la séance. "))
+    #expect(model.musclesSpokenText.hasPrefix("Muscles travaillés par la séance. "))
     #expect(model.musclesSpokenText.contains("Pectoraux, intensité "))
 }
 

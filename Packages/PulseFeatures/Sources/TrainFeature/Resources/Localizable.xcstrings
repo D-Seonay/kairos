@@ -293,6 +293,26 @@
         }
       }
     },
+    "Activer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activer"
+          }
+        }
+      }
+    },
+    "Activer « %@ » ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activer « %@ » ?"
+          }
+        }
+      }
+    },
     "Adopte ce modèle comme programme actif" : {
       "localizations" : {
         "fr" : {
@@ -453,6 +473,16 @@
         }
       }
     },
+    "Archiver « %@ » ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archiver « %@ » ?"
+          }
+        }
+      }
+    },
     "Associe tes exercices" : {
       "localizations" : {
         "fr" : {
@@ -569,16 +599,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bibliothèque d'exercices"
-          }
-        }
-      }
-    },
-    "Brzycki" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Brzycki"
           }
         }
       }
@@ -803,22 +823,22 @@
         }
       }
     },
-    "Course · modifiable plus tard" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Course · modifiable plus tard"
-          }
-        }
-      }
-    },
     "Créer" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Créer"
+          }
+        }
+      }
+    },
+    "Créer l'exercice %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer l'exercice %@"
           }
         }
       }
@@ -879,6 +899,86 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Date"
+          }
+        }
+      }
+    },
+    "Il devient ton programme actif ; l'actuel reste dans tes programmes." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il devient ton programme actif ; l'actuel reste dans tes programmes."
+          }
+        }
+      }
+    },
+    "Il ne sera plus proposé, mais tes séances le gardent." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il ne sera plus proposé, mais tes séances le gardent."
+          }
+        }
+      }
+    },
+    "Lancer la course %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lancer la course %@"
+          }
+        }
+      }
+    },
+    "Muscles travaillés" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muscles travaillés"
+          }
+        }
+      }
+    },
+    "Muscles travaillés par la séance. %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muscles travaillés par la séance. %@"
+          }
+        }
+      }
+    },
+    "Note" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Note"
+          }
+        }
+      }
+    },
+    "Rechercher (ex. développé)" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechercher (ex. développé)"
+          }
+        }
+      }
+    },
+    "Réordonner" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réordonner"
           }
         }
       }
@@ -1493,16 +1593,6 @@
         }
       }
     },
-    "Muscles sollicités" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Muscles sollicités"
-          }
-        }
-      }
-    },
     "Muscles sollicités. Principaux : %@." : {
       "localizations" : {
         "fr" : {
@@ -1613,16 +1703,6 @@
         }
       }
     },
-    "Notes" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Notes"
-          }
-        }
-      }
-    },
     "Nouveau programme" : {
       "localizations" : {
         "fr" : {
@@ -1659,16 +1739,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "OK"
-          }
-        }
-      }
-    },
-    "Ordonner" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ordonner"
           }
         }
       }
@@ -2069,16 +2139,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "RPE entre 6 et 10, par pas de 0,5."
-          }
-        }
-      }
-    },
-    "Rechercher (ex. developpe)" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rechercher (ex. developpe)"
           }
         }
       }
@@ -2679,6 +2739,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "du %@ au %@"
+          }
+        }
+      }
+    },
+    "formule de Brzycki" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "formule de Brzycki"
           }
         }
       }
@@ -3413,16 +3483,6 @@
         }
       }
     },
-    "Muscles sollicités par la séance. %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Muscles sollicités par la séance. %@"
-          }
-        }
-      }
-    },
     "Chargement de l'historique" : {
       "localizations" : {
         "fr" : {
@@ -3609,16 +3669,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Réordonner les exercices"
-          }
-        }
-      }
-    },
-    "Course, modifiable plus tard" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Course, modifiable plus tard"
           }
         }
       }

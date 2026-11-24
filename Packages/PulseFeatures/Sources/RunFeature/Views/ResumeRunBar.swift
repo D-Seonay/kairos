@@ -50,7 +50,7 @@ public struct ResumeRunBar: View {
     static func detail(_ snapshot: RunSnapshot, seconds: Int) -> String {
         let time = RunText.elapsed(seconds: seconds)
         guard snapshot.distanceMeters != nil else { return time }
-        return "\(time) · \(RunText.distance(snapshot.distanceMeters))"
+        return "\(time) · \(RunText.liveDistance(snapshot.distanceMeters))"
     }
 
     /// « Course en cours, Footing facile, 24 minutes 13, 4,4 kilomètres ».

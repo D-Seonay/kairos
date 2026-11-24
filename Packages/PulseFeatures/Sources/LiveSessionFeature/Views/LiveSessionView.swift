@@ -10,25 +10,27 @@ public struct LiveSessionView: View {
     private let model: LiveSessionModel
     private let onFinish: () -> Void
     private let onAbandon: () -> Void
+    private let onMinimize: (() -> Void)?
     private let showsPhotoButton: Bool
     @State private var rpeSet: UUID?
     @State private var isAddingExercise = false
     @Environment(\.pulseTheme) private var theme
 
     /// `showsPhotoButton` est faux quand le récap, qui a la section Photos, est ouvert par-dessus : un seul des deux écrans
-    /// poste les annonces VoiceOver des photos.
+    /// poste les annonces VoiceOver des photos. `onMinimize` ajoute le chevron qui réduit l'écran sans finir la séance.
     public init(model: LiveSessionModel, showsPhotoButton: Bool = true, onFinish: @escaping () -> Void,
-                onAbandon: @escaping () -> Void) {
+                onAbandon: @escaping () -> Void, onMinimize: (() -> Void)? = nil) {
         self.model = model
         self.showsPhotoButton = showsPhotoButton
         self.onFinish = onFinish
         self.onAbandon = onAbandon
+        self.onMinimize = onMinimize
     }
 
     public var body: some View {
         VStack(spacing: 0) {
             LiveHeader(session: model.session, onFinish: onFinish, onAbandon: onAbandon, calendar: model.environment.calendar,
-                       photos: showsPhotoButton ? model.photos : nil)
+                       photos: showsPhotoButton ? model.photos : nil, onMinimize: onMinimize)
             if let message = model.errorMessage {
                 Text(message)
                     .font(.footnote)

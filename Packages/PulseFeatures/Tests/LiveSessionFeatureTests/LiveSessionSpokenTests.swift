@@ -215,7 +215,7 @@ import Testing
         #expect(PlateCalculatorSheet.loadAnnouncement(load: 70, result: .exact(PlateLoading(totalKg: 70, perSide: [20, 5])))
                 == "70 kilos. Par côté : 20 kilos et 5 kilos")
         #expect(PlateCalculatorSheet.loadAnnouncement(load: 71, result: .approximate(lower: nil, upper: nil))
-                == "71 kilos. Impossible tout juste avec tes disques")
+                == "71 kilos. Pas possible exactement avec tes disques")
         #expect(PlateCalculatorSheet.plateSpokenText(2.5) == "2,5 kilos")
     }
 

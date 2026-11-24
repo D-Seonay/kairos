@@ -15,6 +15,7 @@ public enum TrainIdentifiers {
     public static let resumeSession = "train.resume"
     public static let library = "train.library"
     public static let libraryCreate = "train.library.create"
+    public static let libraryCreateFromSearch = "train.library.createFromSearch"
     public static let exerciseRowPrefix = "train.exercise."
     public static let history = "train.history"
     public static let hevyImport = "train.import"

@@ -93,7 +93,7 @@ public struct SessionDetailView: View {
                         .font(.subheadline)
                         .foregroundStyle(PulsePalette.text)
                 } header: {
-                    Text(String(localized: "Notes", bundle: .module))
+                    Text(String(localized: "Note", bundle: .module))
                 }
                 .listRowBackground(PulsePalette.surface)
             }
@@ -151,7 +151,7 @@ public struct SessionDetailView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
         } header: {
-            Text(String(localized: "Muscles sollicités", bundle: .module))
+            Text(String(localized: "Muscles travaillés", bundle: .module))
         }
         .listRowBackground(PulsePalette.surface)
     }
@@ -189,13 +189,13 @@ public struct SessionDetailView: View {
         }
     }
 
+    /// Un échec reste dans la feuille de correction, qui l'affiche et reste ouverte : rien ne s'écrit derrière elle.
     private func save(_ correction: SessionCorrection) async -> Bool {
         do {
             try await model.save(correction)
             errorMessage = nil
             return true
         } catch {
-            errorMessage = String(localized: "Pulse n'a pas pu enregistrer tes corrections.", bundle: .module)
             return false
         }
     }

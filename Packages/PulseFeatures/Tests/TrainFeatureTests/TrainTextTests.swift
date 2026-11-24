@@ -232,4 +232,22 @@ import Testing
         #expect(TrainText.alternativeSpoken(name: "Squat gobelet", pattern: "Squat", equipment: "Haltère")
             == "Squat gobelet, Squat, haltère")
     }
+
+    @Test func runSummaryNamesTheTypeAndTheGoal() {
+        let easy = RoutineDay(order: 0, name: "Footing", kind: .run, runType: .easy, runTargetMinutes: 40)
+        #expect(TrainText.runSummary(easy) == "Sortie facile · 40 min")
+        #expect(TrainText.runSummarySpoken(easy) == "Sortie facile, 40 minutes")
+        #expect(TrainText.runSummary(RoutineDay(order: 0, name: "Course", kind: .run)) == "Course")
+    }
+
+    /// La correction reprend les échelles de la séance : RPE de série de 6 à 10 par demi-point, effort global de 1 à 10.
+    @MainActor @Test func correctionPickersUseTheLiveScalesAndKeepAStoredValue() {
+        #expect(RPEPicker.setValues == [6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10])
+        #expect(RPEPicker.sessionValues == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+        #expect(RPEPicker.options([6, 6.5, 7], keeping: nil) == [6, 6.5, 7])
+        #expect(RPEPicker.options([6, 6.5, 7], keeping: 6.5) == [6, 6.5, 7])
+        // Une valeur de l'ancienne échelle reste affichée plutôt que de laisser le choix vide.
+        #expect(RPEPicker.options([6, 6.5, 7], keeping: 5.5) == [5.5, 6, 6.5, 7])
+        #expect(RPEPicker.options(RPEPicker.sessionValues, keeping: 7.5).contains(7.5))
+    }
 }

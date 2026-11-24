@@ -7,19 +7,22 @@ import SupplementsFeature
 import SwiftUI
 
 /// Le récap de fin de séance (spec M4 §17, maquette `recap`) : le bilan, les records battus, les muscles travaillés, l'effort
-/// global ressenti, la note, puis « Enregistrer » et « Plus tard ». Il n'a pas de bouton de fermeture : on en sort en
-/// enregistrant. `onSaved` est appelé une fois la séance écrite.
+/// global ressenti, la note, puis « Enregistrer », « Enregistrer sans noter » (l'effort proposé) et « Revenir à la séance ». Il
+/// n'a pas de bouton de fermeture : on en sort en enregistrant, ou en revenant à la séance tant que rien n'est écrit. `onSaved`
+/// est appelé une fois la séance écrite ; `onResume`, s'il est donné, rouvre la séance.
 public struct RecapView: View {
     private let model: RecapModel
     private let calendar: Calendar
     private let onSaved: () -> Void
+    private let onResume: (() -> Void)?
     @Environment(\.pulseTheme) private var theme
     @Environment(\.dynamicTypeSize) private var typeSize
 
-    public init(model: RecapModel, calendar: Calendar, onSaved: @escaping () -> Void) {
+    public init(model: RecapModel, calendar: Calendar, onSaved: @escaping () -> Void, onResume: (() -> Void)? = nil) {
         self.model = model
         self.calendar = calendar
         self.onSaved = onSaved
+        self.onResume = onResume
     }
 
     public var body: some View {
@@ -112,7 +115,7 @@ public struct RecapView: View {
         return LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: columns), spacing: 8) {
             stat(PulseFormat.duration(minutes: recap.durationMinutes), String(localized: "Durée", bundle: .module),
                  spoken: Self.statSpoken(.duration(minutes: recap.durationMinutes)))
-            stat(PulseFormat.decimal(recap.tonnageKg, maxFractionDigits: 1), String(localized: "kg soulevés", bundle: .module),
+            stat(PulseFormat.grouped(recap.tonnageKg, maxFractionDigits: 1), String(localized: "kg soulevés", bundle: .module),
                  spoken: Self.statSpoken(.tonnage(kg: recap.tonnageKg)))
             stat("\(recap.workingSets)", String(localized: "Séries", bundle: .module),
                  spoken: Self.statSpoken(.sets(recap.workingSets)))
@@ -234,11 +237,19 @@ public struct RecapView: View {
             Button {
                 Task { if await model.later() { onSaved() } }
             } label: {
-                Text(String(localized: "Plus tard", bundle: .module))
+                Text(String(localized: "Enregistrer sans noter", bundle: .module))
             }
             .buttonStyle(SecondaryButtonStyle())
             .accessibilityHint(String(localized: "Enregistre la séance avec l'effort proposé", bundle: .module))
             .accessibilityIdentifier(LiveSessionIdentifiers.recapLater)
+            if let onResume {
+                Button(action: onResume) {
+                    Text(String(localized: "Revenir à la séance", bundle: .module))
+                }
+                .buttonStyle(LinkButtonStyle())
+                .accessibilityHint(String(localized: "Rien n'est encore enregistré", bundle: .module))
+                .accessibilityIdentifier(LiveSessionIdentifiers.recapResume)
+            }
         }
         .disabled(model.isSaving)
         .padding(.horizontal, 16)

@@ -35,6 +35,20 @@ extension TrainText {
         return parts.joined(separator: ", ")
     }
 
+    /// « Sortie facile · 40 min » : le type et l'objectif d'une course, sans ses jours.
+    static func runSummary(_ day: RoutineDay) -> String {
+        var parts = [day.runType?.localizedName ?? String(localized: "Course", bundle: .module)]
+        if let target = runTarget(day) { parts.append(target) }
+        return parts.joined(separator: " · ")
+    }
+
+    /// « Sortie facile, 40 minutes » : `runSummary` dit en mots.
+    static func runSummarySpoken(_ day: RoutineDay) -> String {
+        var parts = [day.runType?.localizedName ?? String(localized: "Course", bundle: .module)]
+        if let target = runTargetSpoken(day) { parts.append(target) }
+        return parts.joined(separator: ", ")
+    }
+
     /// « environ 55 minutes », « environ 1 heure 5 minutes » : la durée estimée d'une séance.
     static func approximateMinutes(_ minutes: Int) -> String {
         String(localized: "environ \(PulseSpoken.duration(seconds: minutes * 60))", bundle: .module)

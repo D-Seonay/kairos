@@ -88,6 +88,36 @@ import Testing
 }
 
 /// Un exercice perso de poussée, prêt à enregistrer.
+@MainActor @Test func aCreatedExerciseIsPickedInPickModes() async throws {
+    let fixture = TrainFixture()
+    let created = userExercise(name: "Squat landmine")
+    try await fixture.store(created)
+    let reference = ExerciseReference.user(id: created.id)
+
+    let multiple = LibraryModel(environment: fixture.environment, mode: .pick(multiple: true))
+    multiple.toggle(.content(id: "plank"))
+    #expect(await multiple.didCreate(created) == false)
+    #expect(multiple.confirm() == [.content(id: "plank"), reference])
+    #expect(multiple.results.map(\.reference).contains(reference))
+    // Déjà choisi, il le reste.
+    _ = await multiple.didCreate(created)
+    #expect(multiple.confirm() == [.content(id: "plank"), reference])
+
+    let single = LibraryModel(environment: fixture.environment, mode: .pick(multiple: false))
+    #expect(await single.didCreate(created))
+    #expect(single.confirm() == [reference])
+
+    let browse = LibraryModel(environment: fixture.environment, mode: .browse)
+    #expect(await browse.didCreate(created) == false)
+    #expect(browse.confirm().isEmpty)
+}
+
+@MainActor @Test func theCreatorStartsFromTheSearchedName() {
+    let model = LibraryModel(environment: TrainFixture().environment, mode: .browse)
+    #expect(model.creator(name: " Rowing landmine ").name == "Rowing landmine")
+    #expect(model.creator().name.isEmpty)
+}
+
 func userExercise(name: String, isArchived: Bool = false) -> UserExercise {
     let date = TrainClock.date(day: 1, hour: 9)
     return UserExercise(name: name, primaryMuscle: .quads, secondaryMuscles: [.glutes], equipment: .barbell, pattern: .squat,

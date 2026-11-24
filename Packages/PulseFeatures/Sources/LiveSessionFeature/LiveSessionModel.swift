@@ -52,7 +52,8 @@ public final class LiveSessionModel {
 
     /// La coche : valide la série, avec une double vibration, ou la dévalide si elle l'est déjà. Sans répétitions (ou secondes)
     /// ni proposition, ou sans charge pour un exercice à charge externe, elle ouvre le clavier sur le champ manquant
-    /// **(choix du constructeur)**.
+    /// **(choix du constructeur)**. Valider la série que le clavier édite le fait passer au même champ de la série suivante
+    /// non validée de l'exercice, ou le ferme s'il n'y en a plus.
     public func tap(set id: UUID) async {
         guard let exercise = session.exercises.first(where: { $0.sets.contains { $0.id == id } }),
               let set = exercise.sets.first(where: { $0.id == id }) else { return }
@@ -62,6 +63,7 @@ public final class LiveSessionModel {
             focus(KeypadField(exercise: exercise.id, set: id, kind: missing))
         } else if await perform(.validate(exercise: exercise.id, set: id)) {
             haptics.validation()
+            if let focus, focus.set == id { moveFocus(afterValidating: focus) }
         }
     }
 
@@ -101,7 +103,7 @@ public final class LiveSessionModel {
 
     /// Le RPE d'une série, de 6 à 10 par pas de 0,5 ; `nil` l'efface. Une autre valeur est ignorée.
     public func setRPE(_ rpe: Double?, set: UUID) async {
-        if let rpe, !(6...10).contains(rpe) || (rpe * 2).rounded() != rpe * 2 { return }
+        if let rpe, !RoutineRules.rpe.contains(rpe) || (rpe * 2).rounded() != rpe * 2 { return }
         guard let exercise = exerciseID(containing: set) else { return }
         haptics.light()
         await perform(.edit(exercise: exercise, set: set, rpe: .some(rpe)))
@@ -263,6 +265,18 @@ public final class LiveSessionModel {
         } else {
             focus = nil
         }
+    }
+
+    /// La série du clavier vient d'être validée : le même champ de la série suivante non validée de l'exercice, sinon le clavier
+    /// se ferme.
+    private func moveFocus(afterValidating field: KeypadField) {
+        guard let exercise = session.exercises.first(where: { $0.id == field.exercise }),
+              let index = exercise.sets.firstIndex(where: { $0.id == field.set }),
+              let next = exercise.sets[(index + 1)...].first(where: { $0.completedAt == nil }) else {
+            focus = nil
+            return
+        }
+        self.focus(KeypadField(exercise: exercise.id, set: next.id, kind: field.kind))
     }
 
     /// Le champ à remplir avant de valider : la charge d'un exercice à charge externe, puis les répétitions ou les secondes.

@@ -120,9 +120,17 @@ public final class LiveSessionCoordinator {
     /// La suite de « Terminer » et d'« Abandonner » de la séance en cours, créée une fois avec son modèle.
     public func finishFlow() -> FinishFlowModel {
         if let flowModel { return flowModel }
-        let flow = FinishFlowModel(live: model(), onFinished: { [weak self] in self?.didFinish() })
+        let flow = FinishFlowModel(live: model(), onFinished: { [weak self] in self?.didFinish() },
+                                   onMinimize: { [weak self] in self?.minimize() })
         flowModel = flow
         return flow
+    }
+
+    /// Le chevron de l'écran de séance : l'écran se ferme, la séance continue (repos, Live Activity) et le bandeau « Reprendre
+    /// la séance » la rouvre sur le même modèle.
+    public func minimize() {
+        guard current != nil else { return }
+        isPresented = false
     }
 
     /// La séance est terminée ou abandonnée : plus de bandeau, plus d'écran, plus de modèle.
