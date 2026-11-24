@@ -2,9 +2,10 @@ import Foundation
 import PulseDomain
 import UserNotifications
 
-/// La notification du score du matin, envoyée tout de suite, celle de la fin du repos, les rappels de compléments, et la
-/// suppression des notifications de Pulse.
-struct UserNotificationScheduler: NotificationScheduling, NotificationCanceling, RestTimerNotifying, SupplementReminderScheduling {
+/// La notification du score du matin, envoyée tout de suite, celle de la fin du repos, les rappels de compléments, celui d'une
+/// course oubliée, et la suppression des notifications de Pulse.
+struct UserNotificationScheduler: NotificationScheduling, NotificationCanceling, RestTimerNotifying, SupplementReminderScheduling,
+    RunReminderScheduling {
     static let morningScoreIdentifier = "fr.seonay.pulse.morning-score"
     /// Un seul identifiant : chaque nouveau repos remplace la notification du précédent.
     static let restTimerIdentifier = "fr.seonay.pulse.rest-timer"
@@ -15,6 +16,8 @@ struct UserNotificationScheduler: NotificationScheduling, NotificationCanceling,
     static let supplementTakeAction = "fr.seonay.pulse.supplement.take"
     static let supplementIDKey = "supplementID"
     static let supplementDayKey = "day"
+    /// Un seul identifiant : chaque report du rappel remplace le précédent.
+    static let runForgottenIdentifier = "fr.seonay.pulse.run-forgotten"
 
     let now: @Sendable () -> Date
 
@@ -114,6 +117,33 @@ struct UserNotificationScheduler: NotificationScheduling, NotificationCanceling,
             supplementIDKey: reminder.supplementID.uuidString,
             supplementDayKey: reminder.day.timeIntervalSince1970
         ]
+        return content
+    }
+
+    // MARK: - Course oubliée
+
+    /// Remplace le rappel en attente, et retire celui d'un report précédent resté dans le centre de notifications.
+    func scheduleForgotten(at date: Date) async {
+        let center = UNUserNotificationCenter.current()
+        center.removeDeliveredNotifications(withIdentifiers: [Self.runForgottenIdentifier])
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: Self.restEndDelay(until: date, now: now()), repeats: false)
+        let request = UNNotificationRequest(identifier: Self.runForgottenIdentifier, content: Self.runForgottenContent(),
+                                            trigger: trigger)
+        try? await center.add(request)
+    }
+
+    func cancelForgotten() async {
+        let center = UNUserNotificationCenter.current()
+        center.removePendingNotificationRequests(withIdentifiers: [Self.runForgottenIdentifier])
+        center.removeDeliveredNotifications(withIdentifiers: [Self.runForgottenIdentifier])
+    }
+
+    /// « Course toujours en cours ? », après 30 min sans déplacement hors pause.
+    static func runForgottenContent() -> UNMutableNotificationContent {
+        let content = UNMutableNotificationContent()
+        content.title = String(localized: "Course toujours en cours ?")
+        content.body = String(localized: "Aucun déplacement depuis 30 minutes. Ouvre Pulse pour la terminer.")
+        content.sound = .default
         return content
     }
 }

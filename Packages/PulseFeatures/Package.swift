@@ -17,6 +17,7 @@ let package = Package(
         .library(name: "OnboardingFeature", targets: ["OnboardingFeature"]),
         .library(name: "PlanningFeature", targets: ["PlanningFeature"]),
         .library(name: "ProfileFeature", targets: ["ProfileFeature"]),
+        .library(name: "RunFeature", targets: ["RunFeature"]),
         .library(name: "StatsFeature", targets: ["StatsFeature"]),
         .library(name: "SupplementsFeature", targets: ["SupplementsFeature"]),
         .library(name: "TodayFeature", targets: ["TodayFeature"]),
@@ -56,7 +57,7 @@ let package = Package(
         ),
         .target(
             name: "PlanningFeature",
-            dependencies: ["PulseServices", "TrainFeature", designSystem, domain, content],
+            dependencies: ["PulseServices", "TrainFeature", "RunFeature", designSystem, domain, content],
             resources: [.process("Resources")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
@@ -64,6 +65,12 @@ let package = Package(
             name: "ProfileFeature",
             dependencies: ["PulseServices", "StatsFeature", "SupplementsFeature", "TrainFeature", designSystem, domain, recoveryEngine,
                            content],
+            resources: [.process("Resources")],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .target(
+            name: "RunFeature",
+            dependencies: ["PulseServices", designSystem, domain],
             resources: [.process("Resources")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
@@ -125,6 +132,11 @@ let package = Package(
         .testTarget(
             name: "ProfileFeatureTests",
             dependencies: ["ProfileFeature", "PulseServices", designSystem, domain, content],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .testTarget(
+            name: "RunFeatureTests",
+            dependencies: ["RunFeature", "PulseServices", designSystem, domain],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(

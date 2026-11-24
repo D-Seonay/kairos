@@ -41,6 +41,8 @@ struct AppDependencies: Sendable {
     let profiles: any ProfileRepository
     let programs: any ProgramRepository
     let userExercises: any UserExerciseRepository
+    /// Les séances sans les courses de la montre déjà couvertes par une course Pulse : tous les écrans et services le lisent,
+    /// sauf `WorkoutHistory`, qui garde le dépôt brut pour aligner les séances importées (spec V2a §5.3).
     let workouts: any WorkoutRepository
     let scheduledDays: any ScheduledDayRepository
     /// Le seul chemin vers la semaine datée : l'onglet Planning, ses déplacements, la série et le mois.
@@ -73,6 +75,8 @@ struct AppDependencies: Sendable {
     let liveSession: ActiveSessionService
     /// La Live Activity de la séance ; la racine y ferme, au lancement, celles qui ne correspondent plus à la séance en cours.
     let sessionActivity: any SessionActivityControlling
+    /// La course : son seul service, ses tracés, ses réglages et sa séance HealthKit.
+    let run: RunDependencies
     let inspector: any StoreInspector
     let exporter: any DataExporter
     let eraser: any DataEraser
@@ -80,8 +84,9 @@ struct AppDependencies: Sendable {
     /// L'autorisation des notifications dans les réglages d'iOS ; toujours accordée en mode mémoire et dans les tests.
     let notificationStatus: @Sendable () async -> NotificationAuthorizationStatus
 
-    /// Ce qui change entre l'app réelle, le mode mémoire des tests d'interface et les tests de la cible app.
-    private struct Wiring {
+    /// Ce qui change entre l'app réelle, le mode mémoire des tests d'interface et les tests de la cible app. Les extensions des
+    /// autres fichiers (passage du jour, course) le lisent.
+    struct Wiring {
         var health: any HealthReading
         var healthSource: any HealthSampleSource
         var notifications: any NotificationAuthorizing
@@ -102,6 +107,9 @@ struct AppDependencies: Sendable {
         var supplementHealth: (any SupplementHealthWriting)?
         /// La Live Activity de la séance ; une doublure en mode mémoire et dans les tests.
         var sessionActivity: any SessionActivityControlling
+        /// La course : séance HealthKit, localisation, voix, Live Activity et rappel d'oubli ; des doublures en mode mémoire et
+        /// dans les tests.
+        var run: RunAdapters
         /// `nil` : la suppression totale n'a aucune notification à retirer.
         var notificationCanceling: (any NotificationCanceling)?
         var backgroundDelivery: HealthKitBackgroundDelivery?
@@ -127,6 +135,7 @@ struct AppDependencies: Sendable {
             restNotifier = StubRestTimerNotifier()
             supplementReminders = StubSupplementReminderScheduler()
             sessionActivity = StubSessionActivityController()
+            run = .stubs
             healthWriter = nil
             supplementHealth = nil
             healthEraser = StubHealthEraser()
@@ -170,6 +179,7 @@ struct AppDependencies: Sendable {
                             widgets: AppGroupWidgetPublisher(file: WidgetSnapshotFile.appGroup()),
                             morningScore: scheduler, restNotifier: scheduler, supplementReminders: scheduler,
                             supplementHealth: writer, sessionActivity: SessionActivityController(),
+                            run: .live(healthSession: writer != nil ? HealthKitRunRecorder() : nil, reminders: scheduler),
                             notificationCanceling: scheduler,
                             backgroundDelivery: launch.healthScenario == nil ? reader.map(HealthKitBackgroundDelivery.init) : nil,
                             inspector: nil, notificationStatus: { await UserNotificationAuthorizer.status() },
@@ -207,7 +217,7 @@ struct AppDependencies: Sendable {
             liveSessionNotifications: StubNotificationAuthorizer(granted: false), healthEraser: healthEraser, healthWriter: nil,
             widgets: StubWidgetPublisher(), morningScore: StubNotificationScheduler(), restNotifier: StubRestTimerNotifier(),
             supplementReminders: StubSupplementReminderScheduler(), supplementHealth: nil,
-            sessionActivity: StubSessionActivityController(), notificationCanceling: nil,
+            sessionActivity: StubSessionActivityController(), run: .stubs, notificationCanceling: nil,
             backgroundDelivery: nil, inspector: inspector, notificationStatus: { .authorized }, defaultsSuite: testingDefaultsSuite,
             calendar: calendar, now: now, launch: LaunchOptions())
         guard let dependencies = try? make(wiring, mode: .inMemory, error: nil) else { crash(nil) }
@@ -228,14 +238,16 @@ struct AppDependencies: Sendable {
         let scores = DailyScoreService(recovery: recovery, calendar: calendar)
         let healthCache = SwiftDataHealthSampleCache(modelContainer: container)
         let activity = UserDefaultsDayActivityLog(suiteName: wiring.defaultsSuite)
-        let workouts = SwiftDataWorkoutRepository(modelContainer: container)
+        // Tout le monde lit les séances sans les doublons de la montre, sauf `WorkoutHistory` (spec V2a §5.3).
+        let storedWorkouts = SwiftDataWorkoutRepository(modelContainer: container)
+        let workouts = DeduplicatingWorkoutRepository(base: storedWorkouts)
         let scheduledDays = SwiftDataScheduledDayRepository(modelContainer: container)
         let userExercises = SwiftDataUserExerciseRepository(modelContainer: container)
         let bodyMeasurements = SwiftDataBodyMeasurementRepository(modelContainer: container)
         let planning = PlanningService(profiles: profiles, programs: programs, workouts: workouts, scheduledDays: scheduledDays,
                                        calendar: calendar, now: wiring.now)
         let refresher = makeRefresher(wiring, stores: RefresherStores(
-            profiles: profiles, programs: programs, recovery: recovery, workouts: workouts, scheduledDays: scheduledDays,
+            profiles: profiles, programs: programs, recovery: recovery, storedWorkouts: storedWorkouts, scheduledDays: scheduledDays,
             userExercises: userExercises, bodyMeasurements: bodyMeasurements, healthCache: healthCache, activity: activity,
             planning: planning, relocation: SwiftDataHealthDataRelocation(modelContainer: container)), scores: scores)
         let personalRecords = SwiftDataPersonalRecordRepository(modelContainer: container)
@@ -247,25 +259,24 @@ struct AppDependencies: Sendable {
         let supplements = SwiftDataSupplementRepository(modelContainer: container)
         let supplementService = makeSupplementService(wiring, supplements: supplements, programs: programs, profiles: profiles,
                                                       workouts: workouts)
-        let health = healthExporter(wiring.healthWriter, workouts, profiles, bodyMeasurements, calendar)
         let liveSession = ActiveSessionService(
             store: activeSession, workouts: workouts, profiles: profiles, settings: exerciseSettings, userExercises: userExercises,
-            records: records, library: content, restNotifier: wiring.restNotifier, activity: wiring.sessionActivity,
-            calendar: calendar, now: wiring.now, health: health)
+            records: records, library: content, restNotifier: wiring.restNotifier, activity: wiring.sessionActivity, calendar: calendar,
+            now: wiring.now, health: healthExporter(wiring.healthWriter, workouts, profiles, bodyMeasurements, calendar))
         return AppDependencies(
             health: wiring.health, healthSource: wiring.healthSource, notifications: wiring.notifications,
             liveSessionNotifications: wiring.liveSessionNotifications,
             onboardingSteps: UserDefaultsOnboardingStepStore(suiteName: wiring.defaultsSuite), now: wiring.now, launch: wiring.launch,
             calendar: calendar, content: content, container: container, storeMode: mode, storeError: error,
-            profiles: profiles, programs: programs, userExercises: userExercises, workouts: workouts,
-            scheduledDays: scheduledDays, planning: planning, recovery: recovery, scores: scores,
-            supplements: supplements, supplementService: supplementService,
+            profiles: profiles, programs: programs, userExercises: userExercises, workouts: workouts, scheduledDays: scheduledDays,
+            planning: planning, recovery: recovery, scores: scores, supplements: supplements, supplementService: supplementService,
             settings: makeSettings(wiring, profiles: profiles, supplementService: supplementService), bodyMeasurements: bodyMeasurements,
             personalRecords: personalRecords, exerciseSettings: exerciseSettings, records: records, hevyMappings: hevyMappings,
             hevyImporter: HevyImporter(workouts: workouts, userExercises: userExercises, records: records, mappings: hevyMappings,
                                        library: content, calendar: calendar, now: wiring.now),
             healthCache: healthCache, activity: activity, refresher: refresher, backgroundDelivery: wiring.backgroundDelivery,
             activeSession: activeSession, liveSession: liveSession, sessionActivity: wiring.sessionActivity,
+            run: RunDependencies(wiring, container: container, workouts: workouts, profiles: profiles),
             inspector: wiring.inspector ?? SwiftDataStoreInspector(container: container, cloudEnabled: mode == .cloud),
             exporter: makeExporter(container: container, content: content),
             eraser: makeEraser(wiring, container: container, refresher: refresher),
@@ -301,50 +312,6 @@ struct AppDependencies: Sendable {
 
     private static func crash(_ error: (any Error)?) -> Never {
         fatalError("Impossible de créer le conteneur SwiftData : \(error.map { String(describing: $0) } ?? "inconnu")")
-    }
-}
-
-// MARK: - Passage du jour
-
-extension AppDependencies {
-    /// Les dépôts que lit le passage du jour.
-    private struct RefresherStores {
-        var profiles: any ProfileRepository
-        var programs: any ProgramRepository
-        var recovery: any RecoveryRepository
-        var workouts: any WorkoutRepository
-        var scheduledDays: any ScheduledDayRepository
-        var userExercises: any UserExerciseRepository
-        var bodyMeasurements: any BodyMeasurementRepository
-        var healthCache: any HealthSampleCache
-        var activity: any DayActivityLog
-        var planning: PlanningService
-        var relocation: any HealthDataRelocating
-    }
-
-    /// Le passage du jour : les nuits, puis les courses et les vélos quand la source Apple Santé sait les lire (spec M6 §3), le
-    /// poids et la masse grasse (spec M7 §14), les règles anti-interférence (§9), et la série et la semaine publiées avec
-    /// l'instantané du widget (§11).
-    private static func makeRefresher(_ wiring: Wiring, stores: RefresherStores, scores: DailyScoreService) -> DayRefresher {
-        let calendar = wiring.calendar
-        let workoutHistory = (wiring.healthSource as? any HealthWorkoutSource).map { source in
-            WorkoutHistory(source: source, cache: stores.healthCache, workouts: stores.workouts, profiles: stores.profiles,
-                           windows: UserDefaultsHealthReadWindowStore(suiteName: wiring.defaultsSuite), calendar: calendar)
-        }
-        let bodyHistory = (wiring.healthSource as? any HealthBodySource).map { source in
-            BodyHistory(source: source, cache: stores.healthCache, measurements: stores.bodyMeasurements,
-                        profiles: stores.profiles, windows: UserDefaultsHealthReadWindowStore(suiteName: wiring.defaultsSuite),
-                        calendar: calendar)
-        }
-        return DayRefresher(
-            profiles: stores.profiles, programs: stores.programs, recovery: stores.recovery,
-            nightHistory: NightHistory(source: wiring.healthSource, cache: stores.healthCache, calendar: calendar), scores: scores,
-            widgets: wiring.widgets, notifications: wiring.morningScore, activity: stores.activity,
-            scheduledDays: stores.scheduledDays, workoutHistory: workoutHistory, bodyHistory: bodyHistory,
-            antiInterference: AntiInterferenceService(
-                profiles: stores.profiles, programs: stores.programs, workouts: stores.workouts, scheduledDays: stores.scheduledDays,
-                userExercises: stores.userExercises, library: .bundled, calendar: calendar, now: wiring.now),
-            planning: stores.planning, relocation: stores.relocation, calendar: calendar, now: wiring.now)
     }
 }
 

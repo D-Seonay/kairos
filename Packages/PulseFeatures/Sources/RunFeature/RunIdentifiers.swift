@@ -1,0 +1,19 @@
+/// Les identifiants d'accessibilité des éléments de la course que les tests d'interface lisent.
+public enum RunIdentifiers {
+    public static let startButton = "run.start"
+    public static let cancelButton = "run.cancel"
+    public static let gpsStatus = "run.gps"
+    public static let announcesToggle = "run.announces"
+    public static let elapsed = "run.elapsed"
+    public static let distance = "run.distance"
+    public static let pauseButton = "run.pause"
+    public static let finishButton = "run.finish"
+    public static let minimizeButton = "run.minimize"
+    public static let resumeBar = "run.resumeBar"
+    public static let resumeButton = "run.resume"
+    public static let recapSave = "run.recap.save"
+    public static let recapDelete = "run.recap.delete"
+    public static let routeMap = "run.recap.map"
+    public static let effortPrefix = "run.recap.rpe."
+    public static let effortUnset = "run.recap.rpe.unset"
+}

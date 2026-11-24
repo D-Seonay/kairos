@@ -155,6 +155,34 @@ struct TodayModelSessionTests {
         #expect(model.card == .done(DoneCard(title: "Push", durationMinutes: 55, setCount: 4, tonnageKg: 2_400, recordCount: 1)))
     }
 
+    /// Une course terminée aujourd'hui retire « Démarrer la course » ; celle d'hier, non.
+    @Test func aRunDoneTodayHidesStartRun() async throws {
+        let fixture = TodayFixture(at: "2026-11-05T08:00")
+        try await fixture.adopt("runner-strength")
+        let yesterday = TodayClock.date("2026-11-04T18:00")
+        try await fixture.workouts.save(WorkoutSession(
+            startedAt: yesterday, endedAt: yesterday.addingTimeInterval(1_800), kind: .run, source: .pulse, status: .completed,
+            title: "Hier", durationMinutes: 30, distanceMeters: 5_000, createdAt: yesterday, updatedAt: yesterday))
+        let model = fixture.makeModel()
+        await model.refresh()
+        guard case .run(let toDo) = model.card else {
+            Issue.record("Une carte de course était attendue, obtenu \(model.card)")
+            return
+        }
+        #expect(!toDo.isDone)
+
+        let start = TodayClock.date("2026-11-05T07:00")
+        try await fixture.workouts.save(WorkoutSession(
+            startedAt: start, endedAt: start.addingTimeInterval(1_800), kind: .run, source: .pulse, status: .completed,
+            title: "Fractionné", durationMinutes: 30, distanceMeters: 6_000, createdAt: start, updatedAt: start))
+        await model.refresh()
+        guard case .run(let done) = model.card else {
+            Issue.record("Une carte de course était attendue, obtenu \(model.card)")
+            return
+        }
+        #expect(done.isDone)
+    }
+
     @Test func anAbandonedSessionDoesNotReplaceStart() async throws {
         let fixture = TodayFixture(scenario: .goodNight)
         try await fixture.adopt("ppl-3")

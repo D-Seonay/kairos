@@ -1,4 +1,4 @@
-/// Les tables du magasin, dans l'ordre de l'export. Les trois dernières sont locales, jamais exportées.
+/// Les tables du magasin, dans l'ordre de l'export. Les cinq dernières sont locales, jamais exportées.
 public enum StoreTable: String, Sendable, CaseIterable {
     case profile
     case programs
@@ -8,6 +8,7 @@ public enum StoreTable: String, Sendable, CaseIterable {
     case exerciseSettings
     case workoutSessions
     case workoutSets
+    case runTracks
     case scheduledDays
     case dailyRecoveries
     case checkIns
@@ -18,6 +19,8 @@ public enum StoreTable: String, Sendable, CaseIterable {
     case cachedHealthSamples
     case healthQueryAnchors
     case activeSessionSnapshots
+    case runDrafts
+    case runHealthSummaries
 
     /// Nom de fichier CSV, en snake_case.
     public var fileName: String {
@@ -33,6 +36,8 @@ public enum StoreTable: String, Sendable, CaseIterable {
 
     /// Les tables qui entrent dans l'export JSON et CSV.
     public static var exported: [StoreTable] {
-        allCases.filter { ![.cachedHealthSamples, .healthQueryAnchors, .activeSessionSnapshots].contains($0) }
+        allCases.filter {
+            ![.cachedHealthSamples, .healthQueryAnchors, .activeSessionSnapshots, .runDrafts, .runHealthSummaries].contains($0)
+        }
     }
 }

@@ -7,6 +7,8 @@ import PulseServices
 struct LiveReading {
     var inProgressTitle: String?
     var done: DoneCard?
+    /// Une course est terminée aujourd'hui, quelle que soit sa source.
+    var runDone = false
     var history: [ExerciseReference: [WorkoutSet]] = [:]
     var settings: [ExerciseReference: ExerciseSettings] = [:]
 }
@@ -21,6 +23,7 @@ extension TodayEnvironment {
         if let end = calendar.date(byAdding: .day, value: 1, to: start),
            let today = try? await workouts.sessions(from: start, to: end) {
             reading.done = DoneCard.latest(in: today)
+            reading.runDone = today.contains { $0.kind == .run && $0.status == .completed }
         }
         reading.history = [:]
         reading.settings = [:]

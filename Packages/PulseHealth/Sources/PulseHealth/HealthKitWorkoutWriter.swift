@@ -12,9 +12,10 @@ public final class HealthKitWorkoutWriter: WorkoutHealthWriting, HealthErasing, 
         self.store = store
     }
 
-    /// Les types que Pulse écrit : l'entraînement et son énergie active.
+    /// Les types que Pulse écrit : l'entraînement et son énergie active, et pour une course sa distance GPS et son tracé.
     static var shared: Set<HKSampleType> {
-        [HKWorkoutType.workoutType(), HKQuantityType(.activeEnergyBurned)]
+        [HKWorkoutType.workoutType(), HKQuantityType(.activeEnergyBurned), HKSeriesType.workoutRoute(),
+         HKQuantityType(.distanceWalkingRunning)]
     }
 
     // MARK: - WorkoutHealthWriting
@@ -67,12 +68,16 @@ public final class HealthKitWorkoutWriter: WorkoutHealthWriting, HealthErasing, 
 
     // MARK: - HealthErasing
 
-    /// Supprime les entraînements, l'énergie et les prises de compléments écrits par Pulse. Sans accès en écriture à un type,
-    /// Pulse n'a rien pu y écrire.
+    /// Supprime les entraînements, l'énergie, les distances et tracés de course et les prises de compléments écrits par Pulse.
+    /// Sans accès en écriture à un type, Pulse n'a rien pu y écrire.
     public func deleteAllSamplesWrittenByPulse() async throws {
         try await deleteAllSupplementSamples()
         guard await writeAccess() == .authorized else { return }
         let fromPulse = HKQuery.predicateForObjects(from: HKSource.default())
+        let runTypes: [HKObjectType] = [HKSeriesType.workoutRoute(), HKQuantityType(.distanceWalkingRunning)]
+        for type in runTypes where store.authorizationStatus(for: type) == .sharingAuthorized {
+            try await deleteObjects(of: type, matching: fromPulse)
+        }
         for type in [HKQuantityType(.activeEnergyBurned), HKWorkoutType.workoutType()] as [HKObjectType] {
             try await deleteObjects(of: type, matching: fromPulse)
         }

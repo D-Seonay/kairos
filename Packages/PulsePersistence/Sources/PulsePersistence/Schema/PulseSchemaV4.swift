@@ -7,7 +7,21 @@ import SwiftData
 public enum PulseSchemaV4: VersionedSchema {
     public static let versionIdentifier = Schema.Version(4, 0, 0)
 
+    /// Les 15 modèles synchronisés, figés en V2a : `StoredRunTrack`, ajouté en V5, n'en fait pas partie.
+    static let syncedModels: [any PersistentModel.Type] = [
+        StoredProfile.self, StoredProgram.self, StoredRoutineDay.self, StoredRoutineExercise.self, StoredUserExercise.self,
+        StoredWorkoutSession.self, StoredWorkoutSet.self, StoredScheduledDay.self, StoredDailyRecovery.self, StoredCheckIn.self,
+        StoredSupplement.self, StoredSupplementIntake.self, StoredBodyMeasurement.self, StoredPersonalRecord.self,
+        StoredExerciseSettings.self
+    ]
+
+    /// Les 6 modèles locaux, figés en V2a : `StoredRunDraft` et `StoredRunHealthSummary`, ajoutés en V5, n'en font pas partie.
+    static let localModels: [any PersistentModel.Type] = [
+        StoredCachedHealthSample.self, StoredHealthQueryAnchor.self, StoredActiveSessionSnapshot.self,
+        StoredRecoveryReading.self, StoredImportedWorkout.self, StoredImportedBodyMeasurement.self
+    ]
+
     public static var models: [any PersistentModel.Type] {
-        PersistenceStack.syncedModels + PersistenceStack.localModels
+        syncedModels + localModels
     }
 }

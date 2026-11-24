@@ -10,6 +10,8 @@ struct TrainTiles: View {
     let onOpenToday: () -> Void
     /// Lance la séance du jour ; `nil` quand il n'y a pas de séance de musculation à lancer aujourd'hui.
     let onStart: (() -> Void)?
+    /// Lance la course du jour, ou une course libre sans course aujourd'hui.
+    var onStartRun: () -> Void = {}
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
@@ -19,7 +21,8 @@ struct TrainTiles: View {
         layout {
             StrengthTile(subtitle: model.strengthSubtitle, spokenSubtitle: model.strengthSubtitleSpoken,
                          onOpenToday: onOpenToday, onStart: onStart)
-            RunTile(nextRun: model.nextRun, daysUntil: model.nextRun.flatMap { model.daysUntil($0.weekday) })
+            RunTile(nextRun: model.nextRun, daysUntil: model.nextRun.flatMap { model.daysUntil($0.weekday) },
+                     startLabel: model.runStartLabel, onStart: onStartRun)
         }
     }
 }
@@ -64,28 +67,38 @@ private struct StrengthTile: View {
     }
 }
 
-/// La course du jour ou la prochaine de la semaine type. Rien à lancer en M4a : la tuile informe.
+/// La course du jour ou la prochaine de la semaine type. « Courir » lance celle d'aujourd'hui, ou une course libre quand elle
+/// tombe un autre jour : la tuile informe, le bouton à part lance.
 private struct RunTile: View {
     let nextRun: NextSession?
     /// Les jours d'ici la prochaine course : 0 aujourd'hui, 1 demain.
     let daysUntil: Int?
+    /// Ce que le bouton lance, dit à VoiceOver.
+    let startLabel: String
+    let onStart: () -> Void
 
     var body: some View {
         ObsidianCard {
             VStack(alignment: .leading, spacing: 10) {
-                IconChip(systemName: "figure.run")
-                Text(String(localized: "Course", bundle: .module))
-                    .font(.headline)
-                Text(subtitle)
-                    .font(.footnote)
-                    .foregroundStyle(PulsePalette.text2)
-                    .fixedSize(horizontal: false, vertical: true)
+                VStack(alignment: .leading, spacing: 10) {
+                    IconChip(systemName: "figure.run")
+                    Text(String(localized: "Course", bundle: .module))
+                        .font(.headline)
+                    Text(subtitle)
+                        .font(.footnote)
+                        .foregroundStyle(PulsePalette.text2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(maxWidth: .infinity, minHeight: 110, alignment: .topLeading)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(String(localized: "Course : \(subtitle)", bundle: .module))
+                .accessibilityIdentifier(TrainIdentifiers.runTile)
+                Button(String(localized: "Courir", bundle: .module), action: onStart)
+                    .buttonStyle(PrimaryButtonStyle())
+                    .accessibilityLabel(startLabel)
+                    .accessibilityIdentifier(TrainIdentifiers.runStart)
             }
-            .frame(maxWidth: .infinity, minHeight: 110, alignment: .topLeading)
         }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(String(localized: "Course : \(subtitle)", bundle: .module))
-        .accessibilityIdentifier(TrainIdentifiers.runTile)
     }
 
     /// « Sortie facile · aujourd'hui », « Fractionné · prévue demain », « Sortie longue · prévue samedi ».

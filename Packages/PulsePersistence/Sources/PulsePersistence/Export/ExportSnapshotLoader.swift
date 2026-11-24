@@ -9,6 +9,7 @@ public struct ExportSnapshot: Sendable {
     public var userExercises: [UserExercise] = []
     public var exerciseSettings: [ExerciseSettings] = []
     public var workoutSessions: [WorkoutSession] = []
+    public var runTracks: [RunTrack] = []
     public var scheduledDays: [ScheduledDay] = []
     public var dailyRecoveries: [DailyRecovery] = []
     public var checkIns: [CheckIn] = []
@@ -43,12 +44,15 @@ public actor ExportSnapshotLoader {
                                            [SortDescriptor(\.name), SortDescriptor(\.createdAt)]).map { $0.toDomain() }
         snapshot.exerciseSettings = try fetch(StoredExerciseSettings.self, #Predicate { $0.deletedAt == nil },
                                               [SortDescriptor(\.createdAt), SortDescriptor(\.id)]).map { $0.toDomain() }
-        // Les séances Pulse (magasin synchronisé) et les séances importées d'Apple Health (magasin local), fusionnées.
-        let synced = try fetch(StoredWorkoutSession.self, #Predicate { $0.deletedAt == nil },
-                               [SortDescriptor(\.startedAt), SortDescriptor(\.createdAt)]).map { $0.toDomain() }
+        // Les séances Pulse (magasin synchronisé) et les séances importées d'Apple Health (magasin local), fusionnées ;
+        // les courses Pulse retrouvent leur FC et leur RPE estimé dans le résumé local.
+        let syncedRows = try fetch(StoredWorkoutSession.self, #Predicate { $0.deletedAt == nil },
+                                   [SortDescriptor(\.startedAt), SortDescriptor(\.createdAt)])
+        let synced = try RunHealthSummaryJoin.fill(syncedRows.map { $0.toDomain() }, in: modelContext)
         let imported = try fetch(StoredImportedWorkout.self, #Predicate { $0.deletedAt == nil },
                                  [SortDescriptor(\.startedAt), SortDescriptor(\.createdAt)]).map { $0.toDomain() }
         snapshot.workoutSessions = (synced + imported).sorted { ($0.startedAt, $0.createdAt) < ($1.startedAt, $1.createdAt) }
+        snapshot.runTracks = try runTracks()
         snapshot.scheduledDays = try fetch(StoredScheduledDay.self, #Predicate { $0.deletedAt == nil },
                                            [SortDescriptor(\.date), SortDescriptor(\.createdAt)]).map { $0.toDomain() }
         // Les valeurs brutes d'Apple Health viennent du magasin local, recollées sur chaque score.
@@ -70,6 +74,14 @@ public actor ExportSnapshotLoader {
         snapshot.personalRecords = try fetch(StoredPersonalRecord.self, #Predicate { $0.deletedAt == nil },
                                              [SortDescriptor(\.date, order: .reverse)]).map { $0.toDomain() }
         return snapshot
+    }
+
+    /// Un tracé par séance : si deux appareils en ont créé chacun un (pas de clé unique côté CloudKit), le plus récent.
+    private func runTracks() throws -> [RunTrack] {
+        let rows = try fetch(StoredRunTrack.self, #Predicate { $0.deletedAt == nil }, [SortDescriptor(\.updatedAt, order: .reverse)])
+        var seen = Set<UUID>()
+        return rows.filter { seen.insert($0.id).inserted }.map { $0.toDomain() }
+            .sorted { $0.createdAt != $1.createdAt ? $0.createdAt < $1.createdAt : $0.id.uuidString < $1.id.uuidString }
     }
 
     private func fetch<T: PersistentModel>(_ type: T.Type, _ predicate: Predicate<T>, _ sort: [SortDescriptor<T>]) throws -> [T] {

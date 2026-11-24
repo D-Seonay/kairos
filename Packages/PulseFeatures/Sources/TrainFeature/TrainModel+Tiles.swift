@@ -43,6 +43,13 @@ extension TrainModel {
         }
     }
 
+    /// Ce que dit le bouton « Courir » à VoiceOver : la course du jour ou une course libre, d'après ce que `runLaunch()` lance.
+    var runStartLabel: String {
+        runLaunchIsPlanned
+            ? String(localized: "Lancer la course du jour", bundle: .module)
+            : String(localized: "Lancer une course libre", bundle: .module)
+    }
+
     /// Le nombre de jours d'aujourd'hui à `target`, de 0 à 6 ; `nil` avant la première lecture.
     func daysUntil(_ target: Weekday) -> Int? {
         guard let weekday else { return nil }

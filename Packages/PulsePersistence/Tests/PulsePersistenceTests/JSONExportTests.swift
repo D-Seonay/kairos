@@ -102,3 +102,20 @@ private func makeExporter(_ container: ModelContainerBox, directory: URL? = nil)
     #expect(json.contains("\"healthKitUUID\" : \"RUN\""))
     #expect(json.contains("\"healthKitUUID\" : \"ABC\""))
 }
+
+/// Les tracés vivants partent dans l'export ; une course Pulse y retrouve sa FC et son RPE estimé, lus dans le résumé local.
+@Test func exportCarriesRunTracksAndPulseRunHeartRate() async throws {
+    let box = try ModelContainerBox()
+    let run = Sample.pulseRun()
+    try await SwiftDataWorkoutRepository(modelContainer: box.container).save(run)
+    let tracks = SwiftDataRunTrackRepository(modelContainer: box.container)
+    try await tracks.save(Sample.runTrack(sessionID: run.id))
+    let deleted = Sample.runTrack()
+    try await tracks.save(deleted)
+    try await tracks.delete(sessionID: deleted.id)
+    let url = try await makeExporter(box).exportJSON()
+    let doc = try ExportCoding.decoder().decode(ExportDocument.self, from: Data(contentsOf: url))
+    #expect(doc.runTracks.map(\.id) == [run.id])
+    #expect(doc.runTracks.first?.points.count == 4 && doc.runTracks.first?.splits.count == 2)
+    #expect(doc.workoutSessions.map(\.averageHeartRate) == [150] && doc.workoutSessions.map(\.estimatedRPE) == [8])
+}

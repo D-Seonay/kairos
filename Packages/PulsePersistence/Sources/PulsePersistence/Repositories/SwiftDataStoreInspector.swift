@@ -47,6 +47,7 @@ actor StoreCounter {
                 + live(StoredImportedWorkout.self, #Predicate { $0.deletedAt == nil }, in: $0)
         },
         .workoutSets: { try live(StoredWorkoutSet.self, #Predicate { $0.deletedAt == nil }, in: $0) },
+        .runTracks: { try live(StoredRunTrack.self, #Predicate { $0.deletedAt == nil }, in: $0) },
         .scheduledDays: { try live(StoredScheduledDay.self, #Predicate { $0.deletedAt == nil }, in: $0) },
         .dailyRecoveries: { try live(StoredDailyRecovery.self, #Predicate { $0.deletedAt == nil }, in: $0) },
         .checkIns: { try live(StoredCheckIn.self, #Predicate { $0.deletedAt == nil }, in: $0) },
@@ -59,7 +60,9 @@ actor StoreCounter {
         .personalRecords: { try live(StoredPersonalRecord.self, #Predicate { $0.deletedAt == nil }, in: $0) },
         .cachedHealthSamples: { try $0.fetchCount(FetchDescriptor<StoredCachedHealthSample>()) },
         .healthQueryAnchors: { try $0.fetchCount(FetchDescriptor<StoredHealthQueryAnchor>()) },
-        .activeSessionSnapshots: { try $0.fetchCount(FetchDescriptor<StoredActiveSessionSnapshot>()) }
+        .activeSessionSnapshots: { try $0.fetchCount(FetchDescriptor<StoredActiveSessionSnapshot>()) },
+        .runDrafts: { try $0.fetchCount(FetchDescriptor<StoredRunDraft>()) },
+        .runHealthSummaries: { try $0.fetchCount(FetchDescriptor<StoredRunHealthSummary>()) }
     ]
 
     func counts() throws -> [StoreTable: Int] {

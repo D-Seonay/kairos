@@ -7,8 +7,9 @@ import SwiftData
 public enum PulseSchemaV3: VersionedSchema {
     public static let versionIdentifier = Schema.Version(3, 0, 0)
 
-    /// Les modèles synchronisés actuels et la liste locale figée en M8a : les trois modèles locaux ajoutés en V4 n'en font pas partie.
+    /// Les modèles synchronisés figés de la V4 (inchangés depuis la V3) et la liste locale figée en M8a : les trois modèles locaux
+    /// ajoutés en V4 n'en font pas partie.
     public static var models: [any PersistentModel.Type] {
-        PersistenceStack.syncedModels + [StoredCachedHealthSample.self, StoredHealthQueryAnchor.self, StoredActiveSessionSnapshot.self]
+        PulseSchemaV4.syncedModels + [StoredCachedHealthSample.self, StoredHealthQueryAnchor.self, StoredActiveSessionSnapshot.self]
     }
 }

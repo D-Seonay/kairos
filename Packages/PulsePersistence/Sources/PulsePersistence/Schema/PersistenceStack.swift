@@ -16,12 +16,13 @@ public enum PersistenceStack {
         [StoredProfile.self, StoredProgram.self, StoredRoutineDay.self, StoredRoutineExercise.self, StoredUserExercise.self,
          StoredWorkoutSession.self, StoredWorkoutSet.self, StoredScheduledDay.self, StoredDailyRecovery.self, StoredCheckIn.self,
          StoredSupplement.self, StoredSupplementIntake.self, StoredBodyMeasurement.self, StoredPersonalRecord.self,
-         StoredExerciseSettings.self]
+         StoredExerciseSettings.self, StoredRunTrack.self]
     }
 
     public static var localModels: [any PersistentModel.Type] {
         [StoredCachedHealthSample.self, StoredHealthQueryAnchor.self, StoredActiveSessionSnapshot.self,
-         StoredRecoveryReading.self, StoredImportedWorkout.self, StoredImportedBodyMeasurement.self]
+         StoredRecoveryReading.self, StoredImportedWorkout.self, StoredImportedBodyMeasurement.self,
+         StoredRunDraft.self, StoredRunHealthSummary.self]
     }
 
     public static func makeContainer(mode: StoreMode) throws -> ModelContainer {
@@ -55,7 +56,7 @@ public enum PersistenceStack {
     }
 
     private static func makeContainer(configurations: [ModelConfiguration]) throws -> ModelContainer {
-        try ModelContainer(for: Schema(versionedSchema: PulseSchemaV4.self), migrationPlan: PulseMigrationPlan.self,
+        try ModelContainer(for: Schema(versionedSchema: PulseSchemaV5.self), migrationPlan: PulseMigrationPlan.self,
                            configurations: configurations)
     }
 

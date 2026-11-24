@@ -20,12 +20,15 @@ actor StoreWiper {
         try modelContext.delete(model: StoredSupplementIntake.self)
         try modelContext.delete(model: StoredBodyMeasurement.self)
         try modelContext.delete(model: StoredPersonalRecord.self)
+        try modelContext.delete(model: StoredRunTrack.self)
         try modelContext.delete(model: StoredRecoveryReading.self)
         try modelContext.delete(model: StoredImportedWorkout.self)
         try modelContext.delete(model: StoredImportedBodyMeasurement.self)
         try modelContext.delete(model: StoredCachedHealthSample.self)
         try modelContext.delete(model: StoredHealthQueryAnchor.self)
         try modelContext.delete(model: StoredActiveSessionSnapshot.self)
+        try modelContext.delete(model: StoredRunDraft.self)
+        try modelContext.delete(model: StoredRunHealthSummary.self)
         try modelContext.save()
     }
 }

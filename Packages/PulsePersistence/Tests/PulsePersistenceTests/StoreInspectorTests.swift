@@ -34,3 +34,17 @@ import Testing
     let counts = try await SwiftDataStoreInspector(container: container, cloudEnabled: false).counts()
     #expect(counts[.workoutSessions] == 2 && counts[.bodyMeasurements] == 2)
 }
+
+@Test func countsIncludeRunModels() async throws {
+    let container = try TestContainer.make()
+    let run = Sample.pulseRun()
+    try await SwiftDataWorkoutRepository(modelContainer: container).save(run)
+    let tracks = SwiftDataRunTrackRepository(modelContainer: container)
+    try await tracks.save(Sample.runTrack(sessionID: run.id))
+    let deleted = Sample.runTrack()
+    try await tracks.save(deleted)
+    try await tracks.delete(sessionID: deleted.id)
+    try await SwiftDataRunDraftStore(modelContainer: container).save(Sample.runDraft())
+    let counts = try await SwiftDataStoreInspector(container: container, cloudEnabled: false).counts()
+    #expect(counts[.runTracks] == 1 && counts[.runDrafts] == 1 && counts[.runHealthSummaries] == 1)
+}

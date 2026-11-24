@@ -13,10 +13,18 @@ final class MutableClock: Sendable {
         value = Mutex(TestClock.date(text))
     }
 
+    init(date: Date) {
+        value = Mutex(date)
+    }
+
     var now: Date { value.withLock { $0 } }
 
     func set(_ text: String) {
         value.withLock { $0 = TestClock.date(text) }
+    }
+
+    func set(date: Date) {
+        value.withLock { $0 = date }
     }
 }
 

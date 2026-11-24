@@ -5,12 +5,15 @@ import PulseDomain
 import PulseServices
 
 /// Le détail d'une course ou d'un vélo lu d'Apple Santé (spec M6 §7) : distance, durée, allure, FC moyenne, RPE estimé ; le
-/// RPE et la note se corrigent. L'entraînement se supprime dans Apple Santé, pas ici.
+/// RPE et la note se corrigent. L'entraînement se supprime dans Apple Santé, pas ici. Une course faite avec Pulse y ajoute son
+/// tracé et ses temps par kilomètre (spec V2a §4.5).
 @MainActor
 @Observable
 public final class ActivityDetailModel {
     public private(set) var session: WorkoutSession?
     public private(set) var hasLoaded = false
+    /// Le tracé d'une course Pulse, quand il a des points ou des kilomètres à montrer ; `nil` sinon.
+    public private(set) var routeTrack: RunTrack?
     public private(set) var errorMessage: String?
     public var rpe: Double?
     public var note = ""
@@ -28,11 +31,20 @@ public final class ActivityDetailModel {
             session = try await environment.train.workouts.session(id: sessionID)
             rpe = session?.overallRPE
             note = session?.note ?? ""
+            routeTrack = await track(of: session)
             errorMessage = nil
         } catch {
             errorMessage = String(localized: "Pulse n'a pas pu lire cette séance.", bundle: .module)
         }
         hasLoaded = true
+    }
+
+    /// Le tracé de `session` si c'est une course Pulse qui en a un d'utilisable. Un tracé illisible ne gâche pas le détail : il
+    /// manque, rien de plus.
+    private func track(of session: WorkoutSession?) async -> RunTrack? {
+        guard let session, session.source == .pulse, session.kind == .run, let tracks = environment.tracks,
+              let track = try? await tracks.track(for: session.id), !track.points.isEmpty || !track.splits.isEmpty else { return nil }
+        return track
     }
 
     /// Vrai quand le RPE ou la note diffère de ce qui est enregistré.

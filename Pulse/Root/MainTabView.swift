@@ -2,15 +2,17 @@ import LiveSessionFeature
 import PlanningFeature
 import ProfileFeature
 import PulseDesignSystem
+import PulseDomain
 import PulseServices
+import RunFeature
 import StatsFeature
 import SupplementsFeature
 import SwiftUI
 import TodayFeature
 import TrainFeature
 
-/// Les cinq onglets de l'app. La séance en direct s'ouvre en plein écran par-dessus ; une séance en cours qui n'est pas à
-/// l'écran garde le bandeau « Reprendre la séance » en haut.
+/// Les cinq onglets de l'app. La séance en direct et la course s'ouvrent en plein écran par-dessus ; une séance ou une course en
+/// cours qui n'est pas à l'écran garde son bandeau « Reprendre » en haut.
 struct MainTabView: View {
     enum Item: Hashable {
         case today
@@ -29,17 +31,49 @@ struct MainTabView: View {
     let stats: StatsModel
     let profile: ProfileModel
     @Bindable var liveSession: LiveSessionCoordinator
+    /// La course : l'écran de départ, de course et de récap, le bandeau et les alertes de reprise et d'oubli.
+    @Bindable var run: RunCoordinator
     /// La saisie d'une séance passée, ouverte depuis l'onglet Séance.
     @Bindable var pastSession: PastSessionCoordinator
     let supplements: SupplementsModel
     /// Appelé après une suppression totale réussie depuis « Mes données » (ou l'écran de debug « Données »).
     let onErased: () async -> Void
+    /// Vrai pendant l'enregistrement ou la suppression d'une course interrompue : l'alerte ne revient pas en attendant.
+    @State private var isAnsweringRecovery = false
 
     var body: some View {
+        // La course a son plein écran sur une vue à part : deux plein écrans sur la même vue se gênent.
+        ZStack {
+            tabsLayer
+        }
+        .fullScreenCover(isPresented: $run.isPresented, onDismiss: refreshTabs) {
+            RunFlowView(model: run.model())
+                .alert(forgottenTitle, isPresented: isShowingForgotten) {
+                    forgottenActions
+                }
+                .alert(run.errorMessage ?? "", isPresented: isShowingRunError(presented: true)) {
+                    Button(String(localized: "OK")) { run.errorMessage = nil }
+                }
+        }
+        .alert(recoveryTitle, isPresented: isShowingRecovery) {
+            recoveryActions
+        }
+        .alert(run.errorMessage ?? "", isPresented: isShowingRunError(presented: false)) {
+            Button(String(localized: "OK")) { run.errorMessage = nil }
+        }
+    }
+
+    /// Les bandeaux « Reprendre », les onglets et le plein écran de la séance en direct.
+    private var tabsLayer: some View {
         VStack(spacing: 0) {
             if let session = liveSession.current, !liveSession.isPresented {
                 ResumeSessionBar(title: session.title, startedAt: session.startedAt, onResume: resume,
                                  onAbandon: { Task { await liveSession.abandonFromBanner() } })
+                    .padding(.horizontal, PulseMetrics.spacing)
+                    .padding(.bottom, 8)
+            }
+            if let snapshot = run.current, !run.isPresented {
+                ResumeRunBar(snapshot: snapshot, onResume: { Task { await run.resume() } })
                     .padding(.horizontal, PulseMetrics.spacing)
                     .padding(.bottom, 8)
             }
@@ -65,14 +99,15 @@ struct MainTabView: View {
         TabView(selection: $router.selectedTab) {
             Tab(String(localized: "Aujourd'hui"), systemImage: "sun.max", value: Item.today) {
                 TodayView(model: today, supplements: supplements, showsSupplements: $router.isShowingSupplements,
-                          onOpenProfile: { router.selectedTab = .profile }, onStartSession: start, onResumeSession: resume)
+                          onOpenProfile: { router.selectedTab = .profile }, onStartSession: start, onResumeSession: resume,
+                          onStartRun: startRun)
             }
             Tab(String(localized: "Planning"), systemImage: "calendar", value: Item.planning) {
                 PlanningView(model: planning, train: train, onStartSession: start, onResumeSession: resume)
             }
             Tab(String(localized: "Séance"), systemImage: "dumbbell", value: Item.session) {
                 TrainView(model: train, onOpenToday: { router.selectedTab = .today }, onStartSession: start,
-                          onResumeSession: resume, onEnterPastSession: enterPastSession)
+                          onResumeSession: resume, onEnterPastSession: enterPastSession, onStartRun: startRun)
             }
             Tab(String(localized: "Stats"), systemImage: "chart.bar", value: Item.stats) {
                 StatsScreen(model: stats)
@@ -93,9 +128,19 @@ struct MainTabView: View {
         }
     }
 
-    /// Démarre la séance, ou présente celle déjà en cours (le coordinateur ne démarre jamais une seconde séance).
+    /// Démarre la séance, ou présente celle déjà en cours (le coordinateur ne démarre jamais une seconde séance). Une course en
+    /// cours l'empêche : une seule activité à la fois.
     private func start(_ launch: SessionLaunch) {
+        guard run.current == nil else {
+            run.errorMessage = String(localized: "Une course est en cours.")
+            return
+        }
         Task { await liveSession.start(launch) }
+    }
+
+    /// Ouvre l'écran de départ de la course, ou celui de la course déjà en cours.
+    private func startRun(_ launch: RunLaunch) {
+        run.prepare(launch)
     }
 
     /// Ouvre la saisie de la séance passée rendue par le formulaire de l'onglet Séance.
@@ -150,6 +195,61 @@ struct MainTabView: View {
             // Une séance finie change la série, le nombre de séances, les records et les badges du profil.
             if profile.hasLoaded { await profile.load() }
         }
+    }
+
+    // MARK: Course
+
+    /// « Course interrompue : enregistrer 4,2 km jusqu'à 7 h 52 ? » (spec V2a §5.4).
+    private var recoveryTitle: String {
+        run.recovery.map { RunText.recoveryMessage($0, calendar: dependencies.calendar) } ?? ""
+    }
+
+    @ViewBuilder
+    private var recoveryActions: some View {
+        Button(String(localized: "Enregistrer")) { answerRecovery { await run.saveInterruptedRun() } }
+            .keyboardShortcut(.defaultAction)
+        Button(String(localized: "Supprimer"), role: .destructive) { answerRecovery { await run.discardInterruptedRun() } }
+    }
+
+    private func answerRecovery(_ action: @escaping @MainActor () async -> Void) {
+        isAnsweringRecovery = true
+        Task {
+            await action()
+            isAnsweringRecovery = false
+        }
+    }
+
+    /// « Course toujours en cours ? Pulse peut la terminer à 7 h 52, ton dernier déplacement. »
+    private var forgottenTitle: String {
+        run.forgottenEnd.map { RunText.forgottenMessage($0, calendar: dependencies.calendar) } ?? ""
+    }
+
+    @ViewBuilder
+    private var forgottenActions: some View {
+        if let end = run.forgottenEnd {
+            let time = RunText.clock(end, calendar: dependencies.calendar)
+            Button(String(localized: "Terminer à \(time)")) { Task { await run.finishAtForgottenEnd() } }
+                .keyboardShortcut(.defaultAction)
+            Button(String(localized: "Continuer"), role: .cancel) { run.dismissForgotten() }
+        }
+    }
+
+    // L'alerte de reprise attend la réponse du coordinateur, et celle d'oubli se résout dans son bouton (« Terminer » lit l'heure
+    // proposée après la fermeture) : une fermeture sans bouton ne change rien. Un enregistrement en échec montre son erreur
+    // d'abord, puis l'alerte de reprise revient.
+    private var isShowingRecovery: Binding<Bool> {
+        Binding(get: { run.recovery != nil && !run.isPresented && !isAnsweringRecovery && run.errorMessage == nil },
+                set: { _ in })
+    }
+
+    private var isShowingForgotten: Binding<Bool> {
+        Binding(get: { run.forgottenEnd != nil }, set: { _ in })
+    }
+
+    /// L'erreur de la course s'affiche sur l'écran de course quand il est ouvert, sur les onglets sinon.
+    private func isShowingRunError(presented: Bool) -> Binding<Bool> {
+        Binding(get: { run.errorMessage != nil && run.isPresented == presented },
+                set: { if !$0 { run.errorMessage = nil } })
     }
 
     private var isShowingNotice: Binding<Bool> {
