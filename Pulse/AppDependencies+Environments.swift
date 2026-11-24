@@ -26,7 +26,8 @@ extension AppDependencies {
 
     func todayEnvironment() -> TodayEnvironment {
         TodayEnvironment(refresher: refresher, workouts: workouts, userExercises: userExercises, exerciseSettings: exerciseSettings,
-                         activeSession: liveSession, library: content, calendar: calendar, now: now)
+                         activeSession: liveSession, library: content, calendar: calendar, now: now,
+                         nights: NightDetailService(cache: healthCache, calendar: calendar, now: now))
     }
 
     func trainEnvironment() -> TrainEnvironment {

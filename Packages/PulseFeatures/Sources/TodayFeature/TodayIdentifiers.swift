@@ -12,4 +12,5 @@ public enum TodayIdentifiers {
     public static let deloadOffer = "today.deload"
     public static let deloadAccept = "today.deload.accept"
     public static let deloadDecline = "today.deload.decline"
+    public static let sleepTile = "today.trends.sleep"
 }

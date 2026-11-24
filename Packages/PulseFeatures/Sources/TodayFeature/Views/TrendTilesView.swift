@@ -6,6 +6,8 @@ import SwiftUI
 /// largeur, sans trou à côté. Une seule colonne dès les grandes tailles de texte (xxxLarge).
 struct TrendTilesView: View {
     let tiles: [TrendTile]
+    /// Ouvre l'écran Nuit : la tuile Sommeil devient un bouton. Nul tant qu'aucune nuit n'est montrée.
+    var onOpenSleep: (() -> Void)?
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
@@ -13,11 +15,25 @@ struct TrendTilesView: View {
             ForEach(rowStarts, id: \.self) { start in
                 HStack(alignment: .top, spacing: 10) {
                     ForEach(Array(tiles[start..<min(start + columnCount, tiles.count)]), id: \.factor) { tile in
-                        TrendTileView(tile: tile)
+                        tileView(tile)
                             .frame(maxWidth: .infinity)
                     }
                 }
             }
+        }
+    }
+
+    @ViewBuilder
+    private func tileView(_ tile: TrendTile) -> some View {
+        if tile.factor == .sleep, let onOpenSleep {
+            Button(action: onOpenSleep) {
+                TrendTileView(tile: tile)
+            }
+            .buttonStyle(.plain)
+            .accessibilityHint(String(localized: "Ouvre le détail des nuits", bundle: .module))
+            .accessibilityIdentifier(TodayIdentifiers.sleepTile)
+        } else {
+            TrendTileView(tile: tile)
         }
     }
 

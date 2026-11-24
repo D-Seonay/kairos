@@ -61,6 +61,17 @@ struct TodayModelTests {
         #expect(model.trends.count == 3)
     }
 
+    @Test func canOpenNightOnlyWithASleepValue() async {
+        let model = TodayFixture().makeModel()
+        #expect(!model.canOpenNight, "avant la première lecture, la tuile n'a rien à ouvrir")
+        await model.refresh()
+        #expect(model.canOpenNight)
+
+        let empty = TodayFixture(scenario: .noData).makeModel()
+        await empty.refresh()
+        #expect(!empty.canOpenNight)
+    }
+
     @Test func refreshShowsTheLoadRatioAfterFourWeeks() async throws {
         let fixture = TodayFixture()
         let calendar = TodayClock.calendar

@@ -95,9 +95,10 @@ struct TodayFixture {
         source = SwitchableHealthSource(health ?? scenarioSource)
         let recovery = recovery ?? InMemoryRecoveryRepository(calendar: calendar)
         self.recovery = recovery
+        let healthCache = InMemoryHealthSampleCache()
         let refresher = DayRefresher(
             profiles: profiles, programs: programs, recovery: recovery,
-            nightHistory: NightHistory(source: source, cache: InMemoryHealthSampleCache(), calendar: calendar),
+            nightHistory: NightHistory(source: source, cache: healthCache, calendar: calendar),
             scores: DailyScoreService(recovery: recovery, calendar: calendar),
             widgets: StubWidgetPublisher(), notifications: StubNotificationScheduler(), activity: InMemoryDayActivityLog(),
             calendar: calendar, now: { clock.now })
@@ -109,7 +110,8 @@ struct TodayFixture {
             activity: StubSessionActivityController(), calendar: calendar, now: { clock.now })
         environment = TodayEnvironment(
             refresher: refresher, workouts: workouts, userExercises: userExercises, exerciseSettings: exerciseSettings,
-            activeSession: liveSession, library: .bundled, calendar: calendar, now: { clock.now })
+            activeSession: liveSession, library: .bundled, calendar: calendar, now: { clock.now },
+            nights: NightDetailService(cache: healthCache, calendar: calendar, now: { clock.now }))
     }
 
     func makeModel() -> TodayModel {
