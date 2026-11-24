@@ -1,6 +1,16 @@
 {
   "sourceLanguage" : "fr",
   "strings" : {
+    "%@. Pas possible exactement avec tes disques" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@. Pas possible exactement avec tes disques"
+          }
+        }
+      }
+    },
     "," : {
 
     },
@@ -153,6 +163,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "La séance continue en arrière-plan"
+          }
+        }
+      }
+    },
+    "Pas possible exactement avec tes disques. Les charges les plus proches :" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas possible exactement avec tes disques. Les charges les plus proches :"
           }
         }
       }
@@ -1623,16 +1643,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@. %@"
-          }
-        }
-      }
-    },
-    "%@. Impossible tout juste avec tes disques" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@. Impossible tout juste avec tes disques"
           }
         }
       }

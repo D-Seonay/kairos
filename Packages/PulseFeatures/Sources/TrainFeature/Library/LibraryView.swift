@@ -40,7 +40,7 @@ public struct LibraryView: View {
         .background(PulsePalette.background)
         .navigationTitle(String(localized: "Exercices", bundle: .module))
         .pulseInlineTitle()
-        .searchable(text: $model.query, prompt: String(localized: "Rechercher (ex. developpe)", bundle: .module))
+        .searchable(text: $model.query, prompt: String(localized: "Rechercher (ex. développé)", bundle: .module))
         .safeAreaInset(edge: .bottom) { confirmBar }
         .navigationDestination(item: $opened) { reference in
             ExerciseSheetView(model: model.sheet(for: reference))

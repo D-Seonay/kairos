@@ -145,7 +145,7 @@ public struct RoutineEditorView: View {
                 .accessibilityAddTraits(.isHeader)
             Spacer()
             if model.day.exercises.count > 1 {
-                Button(isReordering ? String(localized: "OK", bundle: .module) : String(localized: "Ordonner", bundle: .module)) {
+                Button(isReordering ? String(localized: "OK", bundle: .module) : String(localized: "Réordonner", bundle: .module)) {
                     isReordering.toggle()
                 }
                 .textCase(nil)
@@ -213,7 +213,7 @@ public struct RoutineEditorView: View {
 }
 
 private extension View {
-    /// Le mode « Ordonner » : les poignées de déplacement apparaissent sur iOS ; sur Mac, les lignes se déplacent sans mode.
+    /// Le mode « Réordonner » : les poignées de déplacement apparaissent sur iOS ; sur Mac, les lignes se déplacent sans mode.
     func reordering(_ isActive: Bool) -> some View {
         #if os(iOS)
         environment(\.editMode, .constant(isActive ? .active : .inactive))

@@ -116,7 +116,7 @@ struct PlateCalculatorSheet: View {
         case .approximate(let lower, let upper):
             PlateBarDiagram(perSide: (lower ?? upper)?.perSide ?? [])
                 .frame(height: 120)
-            Text(String(localized: "Impossible tout juste avec tes disques. Les charges les plus proches :", bundle: .module))
+            Text(String(localized: "Pas possible exactement avec tes disques. Les charges les plus proches :", bundle: .module))
                 .font(.footnote)
                 .foregroundStyle(PulsePalette.text2)
             HStack(spacing: 8) {
@@ -192,7 +192,7 @@ struct PlateCalculatorSheet: View {
         String(localized: "Charge \(PulseSpoken.kilos(load))", bundle: .module)
     }
 
-    /// Dit après ±2,5 kg ou un choix : « 70 kilos. Par côté : 20 kilos et 5 kilos » ; « 71 kilos. Impossible tout juste avec
+    /// Dit après ±2,5 kg ou un choix : « 70 kilos. Par côté : 20 kilos et 5 kilos » ; « 71 kilos. Pas possible exactement avec
     /// tes disques ».
     nonisolated static func loadAnnouncement(load: Double, result: PlateResult) -> String {
         let total = PulseSpoken.kilos(load)
@@ -200,7 +200,7 @@ struct PlateCalculatorSheet: View {
         case .exact(let loading):
             return String(localized: "\(total). \(perSideSpokenText(loading))", bundle: .module)
         case .approximate:
-            return String(localized: "\(total). Impossible tout juste avec tes disques", bundle: .module)
+            return String(localized: "\(total). Pas possible exactement avec tes disques", bundle: .module)
         }
     }
 

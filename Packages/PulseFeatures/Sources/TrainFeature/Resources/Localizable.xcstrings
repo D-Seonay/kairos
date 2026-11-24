@@ -603,16 +603,6 @@
         }
       }
     },
-    "Brzycki" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Brzycki"
-          }
-        }
-      }
-    },
     "Ce fichier n'est pas un export de séances Hevy." : {
       "localizations" : {
         "fr" : {
@@ -939,6 +929,56 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lancer la course %@"
+          }
+        }
+      }
+    },
+    "Muscles travaillés" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muscles travaillés"
+          }
+        }
+      }
+    },
+    "Muscles travaillés par la séance. %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muscles travaillés par la séance. %@"
+          }
+        }
+      }
+    },
+    "Note" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Note"
+          }
+        }
+      }
+    },
+    "Rechercher (ex. développé)" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechercher (ex. développé)"
+          }
+        }
+      }
+    },
+    "Réordonner" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réordonner"
           }
         }
       }
@@ -1553,16 +1593,6 @@
         }
       }
     },
-    "Muscles sollicités" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Muscles sollicités"
-          }
-        }
-      }
-    },
     "Muscles sollicités. Principaux : %@." : {
       "localizations" : {
         "fr" : {
@@ -1673,16 +1703,6 @@
         }
       }
     },
-    "Notes" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Notes"
-          }
-        }
-      }
-    },
     "Nouveau programme" : {
       "localizations" : {
         "fr" : {
@@ -1719,16 +1739,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "OK"
-          }
-        }
-      }
-    },
-    "Ordonner" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ordonner"
           }
         }
       }
@@ -2129,16 +2139,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "RPE entre 6 et 10, par pas de 0,5."
-          }
-        }
-      }
-    },
-    "Rechercher (ex. developpe)" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rechercher (ex. developpe)"
           }
         }
       }
@@ -2739,6 +2739,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "du %@ au %@"
+          }
+        }
+      }
+    },
+    "formule de Brzycki" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "formule de Brzycki"
           }
         }
       }
@@ -3469,16 +3479,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucun"
-          }
-        }
-      }
-    },
-    "Muscles sollicités par la séance. %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Muscles sollicités par la séance. %@"
           }
         }
       }

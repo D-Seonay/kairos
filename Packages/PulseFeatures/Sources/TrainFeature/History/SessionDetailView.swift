@@ -93,7 +93,7 @@ public struct SessionDetailView: View {
                         .font(.subheadline)
                         .foregroundStyle(PulsePalette.text)
                 } header: {
-                    Text(String(localized: "Notes", bundle: .module))
+                    Text(String(localized: "Note", bundle: .module))
                 }
                 .listRowBackground(PulsePalette.surface)
             }
@@ -151,7 +151,7 @@ public struct SessionDetailView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
         } header: {
-            Text(String(localized: "Muscles sollicités", bundle: .module))
+            Text(String(localized: "Muscles travaillés", bundle: .module))
         }
         .listRowBackground(PulsePalette.surface)
     }
