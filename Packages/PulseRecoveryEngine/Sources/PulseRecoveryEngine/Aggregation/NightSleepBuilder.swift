@@ -129,7 +129,8 @@ public struct NightSleepBuilder: Sendable {
     }
 
     /// Les minutes de chaque phase endormie ; le total est arrondi une fois, comme dans `NightAggregator`. Le profond n'est
-    /// jamais ajusté : le reste d'arrondi va au léger, sinon au sans-phase, sinon au paradoxal, pour que la somme égale le total.
+    /// jamais ajusté : le reste d'arrondi va à la plus longue des autres phases (en secondes), pour que la somme égale le total
+    /// sans qu'aucune phase passe sous zéro.
     private static func stageMinutes(_ segments: [SleepSegment]) -> StageMinutes {
         func seconds(_ stage: SleepStage) -> TimeInterval {
             segments.filter { $0.stage == stage }.reduce(0) { $0 + $1.end.timeIntervalSince($1.start) }
@@ -141,12 +142,12 @@ public struct NightSleepBuilder: Sendable {
         minutes.unspecified = rounded(seconds(.asleepUnspecified))
         minutes.core = rounded(seconds(.core))
         let residue = minutes.asleep - (minutes.deep + minutes.core + minutes.rem + minutes.unspecified)
-        if seconds(.core) > 0 {
-            minutes.core = max(0, minutes.core + residue)
-        } else if seconds(.asleepUnspecified) > 0 {
-            minutes.unspecified = max(0, minutes.unspecified + residue)
-        } else if seconds(.rem) > 0 {
-            minutes.rem = max(0, minutes.rem + residue)
+        let longest = [SleepStage.core, .asleepUnspecified, .rem].max { seconds($0) < seconds($1) }
+        guard residue != 0, let longest, seconds(longest) > 0 else { return minutes }
+        switch longest {
+        case .core: minutes.core = max(0, minutes.core + residue)
+        case .asleepUnspecified: minutes.unspecified = max(0, minutes.unspecified + residue)
+        default: minutes.rem = max(0, minutes.rem + residue)
         }
         return minutes
     }

@@ -98,7 +98,7 @@ public actor InMemoryRecoveryRepository: RecoveryRepository {
             guard let sleep = night.sleep, sleep.coreMinutes != nil else { continue }
             let day = calendar.startOfDay(for: night.day)
             guard var recovery = recoveries[day], recovery.coreMinutes == nil,
-                  recovery.asleepMinutes == sleep.asleepMinutes else { continue }
+                  recovery.asleepMinutes == sleep.asleepMinutes, recovery.deepMinutes == sleep.deepMinutes else { continue }
             recovery.coreMinutes = sleep.coreMinutes
             recovery.remMinutes = sleep.remMinutes
             recovery.unspecifiedMinutes = sleep.unspecifiedMinutes

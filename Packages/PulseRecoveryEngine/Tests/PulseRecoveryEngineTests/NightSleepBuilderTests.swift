@@ -110,6 +110,20 @@ import Testing
         #expect(night.deepMinutes + night.coreMinutes + night.remMinutes + night.unspecifiedMinutes == night.asleepMinutes)
     }
 
+    /// 20 s de léger, puis deux plages de 30,5 min : les arrondis donneraient 31 + 31 + 0 pour un total de 61. Le reste va à la
+    /// plus longue phase hors profond, jamais à une phase qui tomberait sous zéro.
+    @Test func roundingResidueNeverBreaksTheSum() throws {
+        let start = d(2026, 11, 20, 1, 0)
+        let sleep = [SleepInterval(start: start, end: start.addingTimeInterval(20), stage: .core),
+                     .init(start: start.addingTimeInterval(20), end: start.addingTimeInterval(20 + 1830), stage: .deep),
+                     .init(start: start.addingTimeInterval(20 + 1830), end: start.addingTimeInterval(20 + 3660), stage: .rem)]
+        let night = try #require(builder.night(for: day, sleep: sleep))
+        #expect(night.asleepMinutes == 61)
+        #expect(night.deepMinutes == 31)
+        #expect(night.deepMinutes + night.coreMinutes + night.remMinutes + night.unspecifiedMinutes == night.asleepMinutes)
+        #expect(night.coreMinutes >= 0 && night.remMinutes >= 0)
+    }
+
     @Test func dstNightUsesCalendar() throws {
         let wakeDay = TestCalendar.day(2026, 10, 25)
         let sleep = [SleepInterval(start: d(2026, 10, 24, 23, 0), end: d(2026, 10, 25, 7, 0), stage: .core)]

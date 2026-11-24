@@ -227,3 +227,13 @@ private func hex(_ color: PulseRGBA) -> UInt32 {
     #expect(Set(stages.map(\.displayName)).count == 6)
     #expect(SleepStage.chartOrder == [.awake, .rem, .core, .deep])
 }
+
+/// Les tranches voisines d'une barre de Stats (profond, léger, paradoxal, sans phase, de bas en haut) se distinguent par leur
+/// clarté, pas seulement par leur teinte : lisibles avec un daltonisme courant (deutéranopie), où le bleu et le violet se confondent.
+@Test func adjacentStackedStagesDifferInLightness() {
+    let stack: [SleepStage] = [.deep, .core, .rem, .asleepUnspecified]
+    for (lower, upper) in zip(stack, stack.dropFirst()) {
+        let ratio = Contrast.ratio(lower.colorRGBA, on: upper.colorRGBA)
+        #expect(ratio >= 1.5, "\(lower) / \(upper) : \(ratio)")
+    }
+}

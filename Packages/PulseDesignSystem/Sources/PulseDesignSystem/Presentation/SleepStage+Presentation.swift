@@ -2,7 +2,8 @@ import PulseDomain
 import SwiftUI
 
 /// Le nom et la couleur d'une phase de sommeil, communs à l'écran Nuit et aux barres de Stats. Le papier étant le thème clair,
-/// forcé dans l'app, chaque couleur atteint 3:1 sur le fond et la carte ; le nom est toujours écrit à côté.
+/// forcé dans l'app, chaque couleur atteint 3:1 sur le fond et la carte ; les tranches voisines d'une barre (profond, léger,
+/// paradoxal, sans phase) diffèrent aussi par leur clarté, pour un daltonisme courant. Le nom est toujours écrit à côté.
 public extension SleepStage {
     /// Les rangées de l'hypnogramme, de haut en bas.
     static let chartOrder: [SleepStage] = [.awake, .rem, .core, .deep]
@@ -21,10 +22,10 @@ public extension SleepStage {
     var colorRGBA: PulseRGBA {
         switch self {
         case .deep: PulseRGBA(hex: 0x1E3A8A)
-        case .core: PulseRGBA(hex: 0x2563EB)
+        case .core: PulseRGBA(hex: 0x3B82F6)
         case .rem: PulseRGBA(hex: 0x7C3AED)
         case .awake: PulseRGBA(hex: 0xC2410C)
-        case .asleepUnspecified: PulseRGBA(hex: 0x57554F)
+        case .asleepUnspecified: PulseRGBA(hex: 0x44403C)
         case .inBed: PulseRGBA(hex: 0x68655F)
         }
     }

@@ -66,6 +66,19 @@ private func stagedNight(day: Date, asleep: Int = 420) -> NightSample {
     #expect(read[0].coreMinutes == nil && read[0].awakeMinutes == nil)
 }
 
+/// Le total est resté le même mais le profond a changé (phases arrivées après le figeage, sur une nuit enregistrée sans phases) :
+/// les phases n'iraient pas avec le profond enregistré, la lecture reste sans phases.
+@Test func backfillSkipsAReadingWhoseDeepNoLongerMatches() async throws {
+    let repo = SwiftDataRecoveryRepository(modelContainer: try TestContainer.make(), calendar: Fixed.calendar)
+    let today = Fixed.calendar.startOfDay(for: Fixed.t0)
+    var recovery = Sample.recovery(day: today)   // 420 min
+    recovery.deepMinutes = nil
+    try await repo.save(recovery)
+    try await repo.backfillSleepStages([stagedNight(day: today)])   // 420 min, profond 80
+    let read = try await repo.dailyRecoveries(from: today, to: Fixed.calendar.date(byAdding: .day, value: 1, to: today)!)
+    #expect(read[0].coreMinutes == nil && read[0].deepMinutes == nil)
+}
+
 @Test func backfillNeverOverwritesStoredStages() async throws {
     let repo = SwiftDataRecoveryRepository(modelContainer: try TestContainer.make(), calendar: Fixed.calendar)
     let today = Fixed.calendar.startOfDay(for: Fixed.t0)

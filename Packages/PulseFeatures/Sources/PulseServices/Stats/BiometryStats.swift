@@ -182,16 +182,14 @@ public struct BiometryStats: Sendable, Equatable {
 
     /// Les parts de phase sur les nuits qui ont leurs phases (et un sommeil non nul), pondérées par leur durée.
     private static func stageShares(of recoveries: [DailyRecovery]) -> StageShares? {
-        let staged = recoveries.compactMap { recovery -> (asleep: Int, deep: Int, core: Int, rem: Int, unspecified: Int)? in
-            guard let asleep = recovery.asleepMinutes, asleep > 0, let core = recovery.coreMinutes else { return nil }
-            return (asleep, recovery.deepMinutes ?? 0, core, recovery.remMinutes ?? 0, recovery.unspecifiedMinutes ?? 0)
+        let staged = recoveries.filter { ($0.asleepMinutes ?? 0) > 0 && $0.coreMinutes != nil }
+        func total(_ minutes: KeyPath<DailyRecovery, Int?>) -> Double {
+            Double(staged.reduce(0) { $0 + ($1[keyPath: minutes] ?? 0) })
         }
-        let asleep = Double(staged.reduce(0) { $0 + $1.asleep })
+        let asleep = total(\.asleepMinutes)
         guard asleep > 0 else { return nil }
-        return StageShares(deep: Double(staged.reduce(0) { $0 + $1.deep }) / asleep,
-                           core: Double(staged.reduce(0) { $0 + $1.core }) / asleep,
-                           rem: Double(staged.reduce(0) { $0 + $1.rem }) / asleep,
-                           unspecified: Double(staged.reduce(0) { $0 + $1.unspecified }) / asleep)
+        return StageShares(deep: total(\.deepMinutes) / asleep, core: total(\.coreMinutes) / asleep,
+                           rem: total(\.remMinutes) / asleep, unspecified: total(\.unspecifiedMinutes) / asleep)
     }
 
     // MARK: - Moyennes

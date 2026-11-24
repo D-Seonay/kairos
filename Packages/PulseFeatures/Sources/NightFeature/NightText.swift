@@ -65,7 +65,7 @@ enum NightText {
 
     static var noStagesNote: String {
         // swiftlint:disable:next line_length
-        String(localized:"Ta source n'envoie pas les phases de sommeil à Apple Santé : seuls l'endormissement, le réveil et la durée sont connus.",
+        String(localized: "Ta source n'envoie pas les phases de sommeil à Apple Santé : seuls l'endormissement, le réveil et la durée sont connus.",
                bundle: .module)
     }
 
@@ -79,15 +79,22 @@ enum NightText {
         let night = detail.night
         guard night.hasStages else { return [] }
         let averages = detail.averages
-        var entries: [(SleepStage, Int, Double?)] = [
-            (.deep, night.deepMinutes, averages?.deep), (.core, night.coreMinutes, averages?.core),
-            (.rem, night.remMinutes, averages?.rem), (.awake, night.awakeMinutes, averages?.awake)
-        ]
-        if night.unspecifiedMinutes > 0 { entries.append((.asleepUnspecified, night.unspecifiedMinutes, nil)) }
-        let total = Double(entries.reduce(0) { $0 + $1.1 })
-        return entries.map { stage, minutes, average in
-            BreakdownRow(stage: stage, minutes: minutes, share: total > 0 ? Double(minutes) / total : 0,
-                         delta: delta(minutes: minutes, average: average))
+        var rows = [BreakdownRow(stage: .deep, minutes: night.deepMinutes, share: 0,
+                                 delta: delta(minutes: night.deepMinutes, average: averages?.deep)),
+                    BreakdownRow(stage: .core, minutes: night.coreMinutes, share: 0,
+                                 delta: delta(minutes: night.coreMinutes, average: averages?.core)),
+                    BreakdownRow(stage: .rem, minutes: night.remMinutes, share: 0,
+                                 delta: delta(minutes: night.remMinutes, average: averages?.rem)),
+                    BreakdownRow(stage: .awake, minutes: night.awakeMinutes, share: 0,
+                                 delta: delta(minutes: night.awakeMinutes, average: averages?.awake))]
+        if night.unspecifiedMinutes > 0 {
+            rows.append(BreakdownRow(stage: .asleepUnspecified, minutes: night.unspecifiedMinutes, share: 0, delta: nil))
+        }
+        let total = Double(rows.reduce(0) { $0 + $1.minutes })
+        return rows.map { row in
+            var shared = row
+            shared.share = total > 0 ? Double(row.minutes) / total : 0
+            return shared
         }
     }
 
