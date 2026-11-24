@@ -21,6 +21,24 @@ import Testing
     #expect(try context.fetchCount(FetchDescriptor<StoredDailyRecovery>()) == 1)
 }
 
+@Test func saveKeepsSleepStagesInTheLocalReading() async throws {
+    let repo = SwiftDataRecoveryRepository(modelContainer: try TestContainer.make(), calendar: Fixed.calendar)
+    let cal = Fixed.calendar
+    let today = cal.startOfDay(for: Fixed.t0)
+    var recovery = Sample.recovery(day: today)
+    recovery.coreMinutes = 300
+    recovery.remMinutes = 60
+    recovery.unspecifiedMinutes = 0
+    recovery.awakeMinutes = 10
+    try await repo.save(recovery)
+    let read = try await repo.dailyRecoveries(from: today, to: cal.date(byAdding: .day, value: 1, to: today)!)
+    #expect(read.count == 1)
+    #expect(read[0].coreMinutes == 300 && read[0].remMinutes == 60 && read[0].unspecifiedMinutes == 0 && read[0].awakeMinutes == 10)
+    let context = ModelContext(repo.modelContainer)
+    let reading = try #require(try context.fetch(FetchDescriptor<StoredRecoveryReading>()).first)
+    #expect(reading.coreMinutes == 300 && reading.awakeMinutes == 10)
+}
+
 @Test func recoveriesSortedByDayWithinRange() async throws {
     let repo = SwiftDataRecoveryRepository(modelContainer: try TestContainer.make(), calendar: Fixed.calendar)
     let cal = Fixed.calendar

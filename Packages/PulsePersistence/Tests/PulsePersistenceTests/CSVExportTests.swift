@@ -62,6 +62,10 @@ import Testing
     #expect(try #require(tables[.workoutSessions]).header.contains("exercise_notes"))
     #expect(try #require(tables[.workoutSets]).header.contains("duration_seconds"))
     #expect(try #require(tables[.routineExercises]).header.contains("set_targets"))
+    let recoveryHeader = try #require(tables[.dailyRecoveries]).header
+    let deep = try #require(recoveryHeader.firstIndex(of: "deep_minutes"))
+    #expect(Array(recoveryHeader[deep...].prefix(5))
+        == ["deep_minutes", "core_minutes", "rem_minutes", "unspecified_minutes", "awake_minutes"])
     let userHeader = try #require(tables[.userExercises]).header
     #expect(["load_kind", "is_compound", "tracks_duration"].allSatisfy(userHeader.contains))
     #expect(CSVTables.readme(for: document).contains("exercise_settings.csv : réglages par exercice (incrément, échauffement)"))

@@ -56,7 +56,7 @@ public enum PersistenceStack {
     }
 
     private static func makeContainer(configurations: [ModelConfiguration]) throws -> ModelContainer {
-        try ModelContainer(for: Schema(versionedSchema: PulseSchemaV6.self), migrationPlan: PulseMigrationPlan.self,
+        try ModelContainer(for: Schema(versionedSchema: PulseSchemaV7.self), migrationPlan: PulseMigrationPlan.self,
                            configurations: configurations)
     }
 

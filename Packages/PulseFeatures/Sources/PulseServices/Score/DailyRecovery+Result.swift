@@ -15,6 +15,8 @@ extension DailyRecovery {
                   sdnnMs: hrv?.todayValue, sdnnBaselineMs: hrv?.baselineValue,
                   restingHeartRate: restingHeartRate?.todayValue, restingHeartRateBaseline: restingHeartRate?.baselineValue,
                   asleepMinutes: night.sleep?.asleepMinutes, deepMinutes: night.sleep?.deepMinutes,
+                  coreMinutes: night.sleep?.coreMinutes, remMinutes: night.sleep?.remMinutes,
+                  unspecifiedMinutes: night.sleep?.unspecifiedMinutes, awakeMinutes: night.sleep?.awakeMinutes,
                   missingFactors: result.missing, calibration: result.calibration, adjustments: [],
                   createdAt: now, updatedAt: now)
     }
