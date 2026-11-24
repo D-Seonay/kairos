@@ -6,9 +6,9 @@ import PulseDomain
 /// Toutes les bornes viennent du calendrier, jamais d'une arithmétique en secondes : la nuit du changement d'heure dure 25 h.
 public struct NightAggregator: Sendable {
     /// Début de la fenêtre candidate de la nuit, en heures avant minuit du jour de réveil (18 h la veille).
-    static let windowStartHours = -6
+    static let windowStartHours = NightWindow.startHours
     /// Fin de la fenêtre candidate, en heures après minuit (midi).
-    static let windowEndHours = 12
+    static let windowEndHours = NightWindow.endHours
     /// Fenêtre SDNN de repli sans sommeil délimité : de minuit à 8 h.
     static let fallbackSDNNHours = 8
 
@@ -40,9 +40,7 @@ public struct NightAggregator: Sendable {
     // MARK: - Sommeil
 
     private func retainedIntervals(for day: Date, in sleep: [SleepInterval]) -> [SleepInterval] {
-        let start = hours(Self.windowStartHours, from: day)
-        let end = hours(Self.windowEndHours, from: day)
-        return sleep.filter { $0.stage.isAsleep && $0.end >= start && $0.end <= end && $0.end > $0.start }
+        NightWindow.retainedAsleep(for: day, in: sleep, calendar: calendar)
     }
 
     private func mergedAsleepIntervals(for day: Date, in sleep: [SleepInterval]) -> [DateInterval] {
