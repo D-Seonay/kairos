@@ -105,7 +105,7 @@ public struct RecapView: View {
                 .font(.subheadline)
                 .foregroundStyle(PulsePalette.text2)
                 .multilineTextAlignment(.center)
-            ShareCardButton(content: model.shareContent(calendar: calendar))
+            ShareCardButton(content: model.shareContent(calendar: calendar), photos: model.photos?.shareCardPhotos ?? [])
                 .labelStyle(.titleAndIcon)
                 .buttonStyle(PillButtonStyle())
                 .padding(.top, 6)

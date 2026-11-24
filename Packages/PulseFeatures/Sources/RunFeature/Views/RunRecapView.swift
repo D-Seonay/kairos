@@ -48,7 +48,7 @@ struct RunRecapView: View {
         .pulseInlineTitle()
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                ShareCardButton(content: model.shareContent(calendar: calendar))
+                ShareCardButton(content: model.shareContent(calendar: calendar), photos: model.photos?.shareCardPhotos ?? [])
             }
         }
         .pulseScreenBackground(aura: 0.5)

@@ -31,6 +31,17 @@ struct SessionPhotosModelTests {
         #expect(model.errorMessage == nil)
     }
 
+    @Test func shareCardPhotosOfferEachPhotoWithItsThumbnailAndLoadTheFullImage() async throws {
+        try await seed(2)
+        let model = makeModel()
+        await model.load()
+        let offered = model.shareCardPhotos
+        #expect(offered.map(\.id) == model.photos.map(\.id))
+        #expect(offered.allSatisfy { !$0.thumbnail.isEmpty })
+        let full = await offered[0].load()
+        #expect(full?.isEmpty == false)
+    }
+
     @Test func otherSessionsPhotosAreNotShown() async throws {
         _ = try await service.add(TestImages.jpeg(), to: UUID())
         let model = makeModel()

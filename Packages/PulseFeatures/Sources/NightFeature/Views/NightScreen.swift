@@ -37,6 +37,11 @@ public struct NightScreen: View {
         .pulseScreenBackground(aura: 0.5)
         .navigationTitle(String(localized: "Nuit", bundle: .module))
         .pulseInlineTitle()
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                ShareCardButton(content: model.shareContent)
+            }
+        }
         .accessibilityIdentifier(NightIdentifiers.screen)
         .task {
             if !model.hasLoaded { await model.load() }

@@ -50,7 +50,7 @@ public struct SessionDetailView: View {
         .toolbar {
             if model.session != nil {
                 ToolbarItem(placement: .primaryAction) {
-                    ShareCardButton(content: model.shareContent)
+                    ShareCardButton(content: model.shareContent, photos: model.photos?.shareCardPhotos ?? [])
                         .disabled(isWorking)
                 }
                 ToolbarItem(placement: .primaryAction) {

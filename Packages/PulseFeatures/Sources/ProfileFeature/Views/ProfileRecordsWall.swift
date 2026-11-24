@@ -1,6 +1,7 @@
 import PulseDesignSystem
 import PulseDomain
 import PulseServices
+import StatsFeature
 import SwiftUI
 
 // MARK: - Mur des records
@@ -15,6 +16,7 @@ struct RecordsWall: View {
     /// Vrai quand le profil peut pousser la fiche d'un exercice (`ProfileDestination.exercise`).
     var opensLifts = false
     let onOpenRecords: () -> Void
+    @State private var sharing: ShareCardContent?
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
@@ -35,10 +37,12 @@ struct RecordsWall: View {
                             value: run.seconds.map { ProfileText.raceTime(seconds: $0) },
                             missing: String(localized: "Pas encore couru", bundle: .module),
                             spoken: ProfileText.runRecordSpoken(run, calendar: calendar, today: today))
+                            .recordShareMenu(RecordShareCard.run(run, calendar: calendar)) { sharing = $0 }
                     }
                 }
             }
         }
+        .shareCardSheet(content: $sharing)
     }
 
     /// Le record d'un levé de base, nommé par le répertoire d'exercices ; sans record, son nom français et « Pas encore de record ».
@@ -52,6 +56,7 @@ struct RecordsWall: View {
                           value: line.map(ProfileText.recordValue),
                           missing: String(localized: "Pas encore de record", bundle: .module),
                           spoken: spoken, showsChevron: opensLifts && line != nil)
+        let card = line.map { RecordShareCard.strength($0, calendar: calendar) }
         if opensLifts, let line {
             NavigationLink(value: ProfileDestination.exercise(line.exercise)) { content }
                 .buttonStyle(.plain)
@@ -59,8 +64,10 @@ struct RecordsWall: View {
                 .accessibilityLabel(spoken)
                 .accessibilityHint(String(localized: "Ouvre la progression de l'exercice", bundle: .module))
                 .accessibilityAddTraits(.isButton)
+                .recordShareMenu(card) { sharing = $0 }
         } else {
             content
+                .recordShareMenu(card) { sharing = $0 }
         }
     }
 
