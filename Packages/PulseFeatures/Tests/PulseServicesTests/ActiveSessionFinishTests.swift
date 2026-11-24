@@ -103,6 +103,45 @@ struct ActiveSessionFinishTests {
         #expect(await fixture.notifier.cancelCount == 1)
     }
 
+    @Test func abandonWithoutSetsDeletesSessionPhotos() async throws {
+        let live = Fix.session([Fix.bench([Fix.set(60, 12), Fix.set(70, 5)])])
+        let service = try await fixture.resume(live)
+        try await addPhoto(to: live.id)
+        _ = try await service.abandon(endedAt: ended)
+        #expect(try await fixture.sessionPhotos.photos(for: live.id).isEmpty)
+    }
+
+    @Test func abandonWithSetsKeepsSessionPhotos() async throws {
+        let live = benchSession()
+        let service = try await fixture.resume(live)
+        try await addPhoto(to: live.id)
+        _ = try await service.abandon(endedAt: ended)
+        #expect(try await fixture.sessionPhotos.photos(for: live.id).count == 1)
+    }
+
+    @Test func abandoningAnUnreadableSnapshotDeletesItsPhotos() async throws {
+        let snapshot = ActiveSessionSnapshot(startedAt: Fix.start, updatedAt: Fix.start, payload: Data("{\"formatVersion\":99}".utf8))
+        try await fixture.store.save(snapshot)
+        try await addPhoto(to: snapshot.id)
+        _ = try await fixture.makeService().abandon(endedAt: ended)
+        #expect(try await fixture.sessionPhotos.photos(for: snapshot.id).isEmpty)
+    }
+
+    @Test func abandonLeavesOtherSessionsPhotosAlone() async throws {
+        let live = Fix.session([Fix.bench([Fix.set(60, 12)])])
+        let service = try await fixture.resume(live)
+        let other = UUID()
+        try await addPhoto(to: other)
+        _ = try await service.abandon(endedAt: ended)
+        #expect(try await fixture.sessionPhotos.photos(for: other).count == 1)
+    }
+
+    private func addPhoto(to sessionID: UUID) async throws {
+        try await fixture.sessionPhotos.add(
+            SessionPhoto(id: UUID(), sessionID: sessionID, order: 0, createdAt: ended, updatedAt: ended),
+            image: PhotoImage(image: Data([1]), thumbnail: Data([2])))
+    }
+
     @Test func abandonWithoutSnapshotThrows() async throws {
         let service = fixture.makeService()
         await #expect(throws: ActiveSessionError.noSession) { try await service.abandon(endedAt: ended) }

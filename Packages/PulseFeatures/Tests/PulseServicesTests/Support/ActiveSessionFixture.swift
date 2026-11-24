@@ -17,6 +17,7 @@ struct ActiveSessionFixture {
     let userExercises = InMemoryUserExerciseRepository()
     let notifier = StubRestTimerNotifier()
     let activity = StubSessionActivityController()
+    let sessionPhotos = InMemorySessionPhotoRepository()
 
     init(store: (any ActiveSessionStore)? = nil, failingWorkoutSaveAt: Int? = nil) {
         self.store = store ?? memoryStore
@@ -31,7 +32,8 @@ struct ActiveSessionFixture {
                                      library: .bundled, now: { clock.now })
         return ActiveSessionService(store: store, workouts: workoutStore, profiles: profiles, settings: settings,
                                     userExercises: userExercises, records: records, library: .bundled, restNotifier: notifier,
-                                    activity: activity, calendar: TestClock.calendar, now: { clock.now })
+                                    activity: activity, calendar: TestClock.calendar, now: { clock.now },
+                                    sessionPhotos: sessionPhotos)
     }
 
     /// Une séance terminée la semaine dernière avec ces séries, dans l'ordre.
