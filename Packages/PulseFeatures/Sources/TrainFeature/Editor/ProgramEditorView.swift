@@ -209,7 +209,10 @@ public struct ProgramEditorView: View {
         }
         .listRowBackground(PulsePalette.surface)
     }
+}
 
+// Les actions et les boîtes de dialogue, hors du corps du type pour qu'il reste court.
+extension ProgramEditorView {
     // MARK: - Actions
 
     private func summary(of program: Program) -> String {

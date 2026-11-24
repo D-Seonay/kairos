@@ -257,7 +257,10 @@ public struct RecapView: View {
         .padding(.bottom, 8)
         .background(PulsePalette.background)
     }
+}
 
+// La carte commune du récap, hors du corps du type pour qu'il reste court.
+extension RecapView {
     /// `detailIsSpoken` est faux quand le détail double ce que VoiceOver dit déjà ailleurs (le curseur d'effort, l'unité des barres).
     private func card(title: String, detail: String? = nil, detailIsSpoken: Bool = true,
                       @ViewBuilder content: () -> some View) -> some View {

@@ -10,7 +10,7 @@ struct SupplementFormView: View {
     let model: SupplementsModel
     let editing: Supplement?
     /// Le brouillon à l'ouverture : le formulaire est modifié dès que `draft` en diffère.
-    private let initialDraft: SupplementDraft
+    @State private var initialDraft: SupplementDraft
     @State private var draft: SupplementDraft
     @State private var archiving: Supplement?
     @State private var confirmsDiscard = false
@@ -21,7 +21,7 @@ struct SupplementFormView: View {
         self.model = model
         self.editing = editing
         let initial = editing.map(SupplementDraft.init) ?? SupplementDraft()
-        initialDraft = initial
+        _initialDraft = State(initialValue: initial)
         _draft = State(initialValue: initial)
     }
 
@@ -233,7 +233,10 @@ struct SupplementFormView: View {
         }
         .listRowBackground(PulsePalette.surface)
     }
+}
 
+// Les lignes et liaisons communes du formulaire, hors du corps du type pour qu'il reste court.
+extension SupplementFormView {
     /// Le titre est le nom du champ pour VoiceOver ; « — » n'est que l'indice visuel d'un champ vide.
     private func numberRow(_ title: String, value: Binding<Double?>) -> some View {
         let field = TextField(title, value: value, format: .number.locale(Locale(identifier: "fr_FR")),
