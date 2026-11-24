@@ -4,20 +4,28 @@ import PulseServices
 import SwiftUI
 
 /// Le formulaire d'un complément (spec M5 §10, maquette `supplement-new`) : suggestions, nom, forme, dose, moment, jours,
-/// rappel, Apple Santé, stock. À présenter dans une `NavigationStack` : il fournit « Annuler » et « Enregistrer ».
+/// rappel, Apple Santé, stock. À présenter dans une `NavigationStack` : il fournit « Annuler » et « Enregistrer ». Un brouillon
+/// modifié ne se perd ni d'un glissé ni d'« Annuler » sans confirmation ; un enregistrement raté s'affiche dans le formulaire.
 struct SupplementFormView: View {
     let model: SupplementsModel
     let editing: Supplement?
+    /// Le brouillon à l'ouverture : le formulaire est modifié dès que `draft` en diffère.
+    private let initialDraft: SupplementDraft
     @State private var draft: SupplementDraft
-    @State private var isConfirmingArchive = false
+    @State private var archiving: Supplement?
+    @State private var confirmsDiscard = false
     @Environment(\.dismiss) private var dismiss
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     init(model: SupplementsModel, editing: Supplement?) {
         self.model = model
         self.editing = editing
-        _draft = State(initialValue: editing.map(SupplementDraft.init) ?? SupplementDraft())
+        let initial = editing.map(SupplementDraft.init) ?? SupplementDraft()
+        initialDraft = initial
+        _draft = State(initialValue: initial)
     }
+
+    private var isDirty: Bool { draft != initialDraft }
 
     var body: some View {
         Form {
@@ -40,6 +48,15 @@ struct SupplementFormView: View {
                 }
                 .listRowBackground(PulsePalette.surface)
             }
+            if let message = model.editorError {
+                Section {
+                    Text(message)
+                        .font(.footnote)
+                        .foregroundStyle(PulsePalette.bad)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .listRowBackground(PulsePalette.surface)
+            }
             Section {
             } footer: {
                 Text(SupplementLabels.disclaimer)
@@ -51,7 +68,9 @@ struct SupplementFormView: View {
         .pulseInlineTitle()
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                Button(String(localized: "Annuler", bundle: .module)) { dismiss() }
+                Button(String(localized: "Annuler", bundle: .module)) {
+                    if isDirty { confirmsDiscard = true } else { dismiss() }
+                }
             }
             ToolbarItem(placement: .confirmationAction) {
                 Button(String(localized: "Enregistrer", bundle: .module)) {
@@ -60,6 +79,15 @@ struct SupplementFormView: View {
                 .disabled(draft.problem != nil || model.isSaving)
                 .accessibilityIdentifier(SupplementsIdentifiers.formSave)
             }
+        }
+        .interactiveDismissDisabled(isDirty)
+        .confirmationDialog(String(localized: "Abandonner les modifications ?", bundle: .module), isPresented: $confirmsDiscard,
+                            titleVisibility: .visible) {
+            Button(String(localized: "Abandonner", bundle: .module), role: .destructive) { dismiss() }
+            Button(String(localized: "Continuer à modifier", bundle: .module), role: .cancel) {}
+        }
+        .supplementArchiveConfirmation($archiving) { supplement in
+            Task { await model.archive(supplement) }
         }
     }
 
@@ -230,17 +258,8 @@ struct SupplementFormView: View {
 
     private func archiveSection(_ supplement: Supplement) -> some View {
         Section {
-            Button(String(localized: "Archiver", bundle: .module), role: .destructive) { isConfirmingArchive = true }
+            Button(String(localized: "Archiver", bundle: .module), role: .destructive) { archiving = supplement }
                 .frame(minHeight: 44)
-                .confirmationDialog(String(localized: "Archiver \(supplement.name) ?", bundle: .module),
-                                    isPresented: $isConfirmingArchive, titleVisibility: .visible) {
-                    Button(String(localized: "Archiver", bundle: .module), role: .destructive) {
-                        Task { await model.archive(supplement) }
-                    }
-                } message: {
-                    Text(String(localized: "Il quitte la liste et ses rappels s'arrêtent. Ses prises restent dans tes données.",
-                                bundle: .module))
-                }
         }
         .listRowBackground(PulsePalette.surface)
     }
