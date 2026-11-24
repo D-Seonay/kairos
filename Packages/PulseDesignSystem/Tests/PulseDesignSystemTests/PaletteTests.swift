@@ -209,3 +209,21 @@ private func hex(_ color: PulseRGBA) -> UInt32 {
     #expect(PulsePalette.liveBackgroundRGBA == PulseRGBA(hex: 0x000000))
     #expect(PulsePalette.liveBackgroundRGBA.opacity == 1)
 }
+
+/// WCAG 1.4.11 : chaque phase de sommeil, dessinée dans l'hypnogramme et les barres de Stats, atteint 3:1 sur le papier et la carte.
+@Test func sleepStageColorsReachThreeToOne() {
+    let papers = [PulsePalette.backgroundLightRGBA, PulsePalette.surfaceLightRGBA]
+    let stages: [SleepStage] = [.inBed, .awake, .asleepUnspecified, .core, .deep, .rem]
+    for stage in stages {
+        for paper in papers {
+            let ratio = Contrast.ratio(stage.colorRGBA, on: paper)
+            #expect(ratio >= 3, "\(stage) : \(ratio)")
+        }
+    }
+}
+
+@Test func sleepStageNamesAreDistinct() {
+    let stages: [SleepStage] = [.inBed, .awake, .asleepUnspecified, .core, .deep, .rem]
+    #expect(Set(stages.map(\.displayName)).count == 6)
+    #expect(SleepStage.chartOrder == [.awake, .rem, .core, .deep])
+}
