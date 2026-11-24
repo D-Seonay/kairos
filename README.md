@@ -22,6 +22,12 @@
   <img src="https://img.shields.io/badge/CI-Xcode%20Cloud-grey?style=flat-square" alt="Xcode Cloud">
 </p>
 
+<p align="center">
+  <a href="https://apps.apple.com/fr/app/pulse-r%C3%A9cup%C3%A9ration-muscu/id6829265826">
+    <img src="site/public/badges/app-store-fr.svg" height="48" alt="Télécharger Pulse - Récupération &amp; Muscu dans l'App Store">
+  </a>
+</p>
+
 ---
 
 ## 📑 Sommaire
