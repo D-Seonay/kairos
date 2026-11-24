@@ -123,7 +123,7 @@ public struct WeekWidgetContent: Sendable, Equatable {
     /// Pas encore d'instantané du jour : les sept jours de la vraie semaine, vides, aujourd'hui marqué, et une invitation à ouvrir
     /// l'app ; ni séance, ni charge, ni série inventées.
     static func notReady(at date: Date, calendar: Calendar) -> WeekWidgetContent {
-        let days = WidgetPlanningText.weekDates(containing: date, calendar: calendar).map { day in
+        let days = WidgetPlanningText.weekDates(containing: date, calendar: calendar).map { day -> DayItem in
             let isToday = calendar.isDate(day, inSameDayAs: date)
             let widgetDay = WidgetDay(date: day, kind: .rest, state: .rest, isToday: isToday)
             return DayItem(letter: WidgetPlanningText.letter(of: widgetDay, calendar: calendar), iconName: "minus", isRest: false,
