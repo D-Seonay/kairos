@@ -56,14 +56,21 @@ public actor SwiftDataRecoveryRepository: ModelActor, RecoveryRepository {
         }
     }
 
-    /// Ne touche que les lectures locales : la ligne synchronisée (et son `updatedAt`) reste telle quelle. Un seul `save()`.
+    /// Ne touche que les lectures locales : la ligne synchronisée (et son `updatedAt`) reste telle quelle. Une seule lecture
+    /// SwiftData pour toute la plage des nuits à phases (les lectures déjà à phases restent en base), puis un seul `save()`.
     public func backfillSleepStages(_ nights: [NightSample]) throws {
-        var changed = false
+        var sleepByDay: [Date: SleepSummary] = [:]
         for night in nights {
             guard let sleep = night.sleep, sleep.coreMinutes != nil else { continue }
-            let day = calendar.startOfDay(for: night.day)
-            guard let reading = try modelContext.first(StoredRecoveryReading.self, where: #Predicate { $0.day == day }),
-                  reading.coreMinutes == nil, reading.asleepMinutes == sleep.asleepMinutes,
+            sleepByDay[calendar.startOfDay(for: night.day)] = sleep
+        }
+        guard let first = sleepByDay.keys.min(), let last = sleepByDay.keys.max(),
+              let end = calendar.date(byAdding: .day, value: 1, to: last) else { return }
+        let readings = try modelContext.fetch(FetchDescriptor<StoredRecoveryReading>(
+            predicate: #Predicate { $0.day >= first && $0.day < end && $0.coreMinutes == nil }))
+        var changed = false
+        for reading in readings {
+            guard let sleep = sleepByDay[reading.day], reading.asleepMinutes == sleep.asleepMinutes,
                   reading.deepMinutes == sleep.deepMinutes else { continue }
             reading.coreMinutes = sleep.coreMinutes
             reading.remMinutes = sleep.remMinutes
