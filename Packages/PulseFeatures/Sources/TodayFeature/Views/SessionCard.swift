@@ -50,7 +50,7 @@ struct SessionCard: View {
         Button(String(localized: "20 min de mobilité", bundle: .module), action: model.startMobility)
             .buttonStyle(PrimaryButtonStyle())
             .accessibilityIdentifier(TodayIdentifiers.sessionStart)
-        Button(String(localized: "Séance d'origine", bundle: .module)) { choose(original: true) }
+        Button(String(localized: "Rétablir la séance d'origine", bundle: .module)) { choose(original: true) }
             .buttonStyle(SecondaryButtonStyle())
             .accessibilityIdentifier(TodayIdentifiers.sessionOrigin)
     }

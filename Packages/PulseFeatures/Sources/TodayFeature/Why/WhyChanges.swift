@@ -45,7 +45,8 @@ enum WhyChanges {
         case .replaceWithMobility:
             let minutes = PulseFormat.integer(adjustment.value ?? Double(SessionAdjuster.mobilityMinutes), unit: nil)
             return Change(pill: minutes, title: title,
-                          detail: String(localized: "La séance prévue reste disponible avec « Séance d'origine ».", bundle: .module))
+                          detail: String(localized: "La séance prévue reste disponible avec « Rétablir la séance d'origine ».",
+                                         bundle: .module))
         case .swapIntervalsForEasy:
             return Change(pill: "→", title: title, detail: nil)
         case .suggestRest:

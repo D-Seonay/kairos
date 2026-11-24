@@ -7,14 +7,21 @@ import SwiftUI
 public struct CheckInView: View {
     private let form: CheckInForm
     private let scrollable: Bool
+    private let errorMessage: String?
+    private let isSubmitting: Bool
     private let onSubmit: (CheckInAnswers) -> Void
     /// La taille de l'estimation suit Dynamic Type : un grand chiffre reste lisible au réglage du texte choisi.
     @ScaledMetric(relativeTo: .largeTitle) private var scoreSize: CGFloat = 64
 
     /// `scrollable: false` : le check-in s'intègre à une page qui défile déjà (l'accueil), sans défilement, marge ni fond propres.
-    public init(form: CheckInForm, scrollable: Bool = true, onSubmit: @escaping (CheckInAnswers) -> Void) {
+    /// `errorMessage` : l'échec de l'enregistrement, affiché juste au-dessus du bouton. `isSubmitting` : le bouton reste inactif
+    /// pendant l'enregistrement.
+    public init(form: CheckInForm, scrollable: Bool = true, errorMessage: String? = nil, isSubmitting: Bool = false,
+                onSubmit: @escaping (CheckInAnswers) -> Void) {
         self.form = form
         self.scrollable = scrollable
+        self.errorMessage = errorMessage
+        self.isSubmitting = isSubmitting
         self.onSubmit = onSubmit
     }
 
@@ -37,6 +44,14 @@ public struct CheckInView: View {
                 questionBlock(question)
             }
             estimationCard
+            if let errorMessage {
+                // Sous les yeux, juste au-dessus du bouton qui vient d'échouer.
+                Text(errorMessage)
+                    .font(.footnote)
+                    .foregroundStyle(PulsePalette.bad)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             submitButton
             Text(String(localized: "Un score estimé n'autorise jamais de surcharge progressive.", bundle: .module))
                 .font(.footnote)
@@ -125,7 +140,7 @@ public struct CheckInView: View {
             if let answers = form.answers { onSubmit(answers) }
         }
         .buttonStyle(PrimaryButtonStyle())
-        .disabled(form.answers == nil)
+        .disabled(form.answers == nil || isSubmitting)
     }
 
     private var category: RecoveryCategory? {
@@ -157,4 +172,10 @@ public struct CheckInView: View {
     let form = CheckInForm()
     form.selection = [.sleep: 3, .pain: 3, .motivation: 3]
     return CheckInView(form: form, onSubmit: { _ in })
+}
+
+#Preview("Rempli, échec de l'enregistrement") {
+    let form = CheckInForm()
+    form.selection = [.sleep: 3, .pain: 3, .motivation: 3]
+    return CheckInView(form: form, errorMessage: "Pulse n'a pas pu enregistrer ton check-in.", onSubmit: { _ in })
 }

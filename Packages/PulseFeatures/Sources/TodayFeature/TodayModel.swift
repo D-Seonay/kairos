@@ -33,10 +33,13 @@ public final class TodayModel {
     var isShowingWhy = false
     public private(set) var isLoading = false
     public internal(set) var errorMessage: String?
+    /// L'échec de l'enregistrement du choix de décharge, montré sur la carte de la proposition.
+    public internal(set) var deloadErrorMessage: String?
     public let checkIn = CheckInForm()
+    /// Vrai pendant l'enregistrement du check-in : son bouton reste inactif.
+    public private(set) var isSubmittingCheckIn = false
 
     @ObservationIgnored let environment: TodayEnvironment
-    @ObservationIgnored private var isSubmittingCheckIn = false
     /// Le contenu et les exercices de l'utilisateur, relus à chaque actualisation pour nommer et compter les muscles des séances.
     @ObservationIgnored private var directory: ExerciseDirectory
     /// Change à chaque écriture du score (check-in, choix de la séance). Le rafraîchisseur sérialisant ses opérations, la garde

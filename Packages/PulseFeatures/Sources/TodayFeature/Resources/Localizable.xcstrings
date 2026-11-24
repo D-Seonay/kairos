@@ -126,6 +126,16 @@
         }
       }
     },
+    "La séance prévue reste disponible avec « Rétablir la séance d'origine »." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La séance prévue reste disponible avec « Rétablir la séance d'origine »."
+          }
+        }
+      }
+    },
     "~ %@" : {
       "localizations" : {
         "fr" : {
@@ -548,16 +558,6 @@
         }
       }
     },
-    "La séance prévue reste disponible avec « Séance d'origine »." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La séance prévue reste disponible avec « Séance d'origine »."
-          }
-        }
-      }
-    },
     "Le score du jour se calcule après 4 h" : {
       "localizations" : {
         "fr" : {
@@ -784,16 +784,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pourquoi ce score ?"
-          }
-        }
-      }
-    },
-    "Pourquoi cette adaptation" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pourquoi cette adaptation"
           }
         }
       }
@@ -1034,16 +1024,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Score sous 65 : 20 min de mobilité t'aideront à récupérer."
-          }
-        }
-      }
-    },
-    "Séance d'origine" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Séance d'origine"
           }
         }
       }

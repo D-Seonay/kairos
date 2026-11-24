@@ -33,14 +33,11 @@ struct CalibrationView: View {
                     Text(explanation)
                         .font(.subheadline)
                         .foregroundStyle(PulsePalette.text2)
-                    if let message = model.errorMessage {
-                        Text(message)
-                            .font(.footnote)
-                            .foregroundStyle(PulsePalette.bad)
-                    }
                 }
                 .padding(.bottom, 20)
-                CheckInView(form: model.checkIn, scrollable: false) { _ in
+                // L'erreur d'enregistrement s'affiche juste au-dessus du bouton du check-in, pas en haut de l'écran.
+                CheckInView(form: model.checkIn, scrollable: false, errorMessage: model.errorMessage,
+                            isSubmitting: model.isSubmittingCheckIn) { _ in
                     Task { await model.submitCheckIn() }
                 }
             }

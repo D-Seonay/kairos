@@ -5,6 +5,8 @@ import SwiftUI
 /// La proposition d'une semaine de décharge (spec M6 §10) : le ratio qui reste haut, ce que la décharge change, et deux choix.
 struct DeloadOfferCard: View {
     let offer: DeloadOffer
+    /// L'échec de l'enregistrement du choix, juste au-dessus des boutons.
+    var errorMessage: String?
     let onDecide: (Bool) -> Void
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
@@ -18,10 +20,18 @@ struct DeloadOfferCard: View {
                     .font(.subheadline)
                     .foregroundStyle(PulsePalette.text)
                     .fixedSize(horizontal: false, vertical: true)
+                if let errorMessage {
+                    Text(errorMessage)
+                        .font(.footnote)
+                        .foregroundStyle(PulsePalette.bad)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 buttons
             }
         }
         .accessibilityIdentifier(TodayIdentifiers.deloadOffer)
+        // Le message apparaît sous le focus, sur la carte qui reste là : l'annonce suit son changement.
+        .pulseAnnounceError(errorMessage)
     }
 
     /// « Ta charge reste haute : ratio 1,62 deux jours de suite. … »
