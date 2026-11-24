@@ -22,6 +22,9 @@ struct SessionLiveActivity: Widget {
                 DynamicIslandExpandedRegion(.trailing) {
                     SessionIslandTrailing(state: context.model)
                 }
+                DynamicIslandExpandedRegion(.center) {
+                    SessionIslandCenter(state: context.model)
+                }
                 DynamicIslandExpandedRegion(.bottom) {
                     SessionIslandBottom(state: context.model)
                 }

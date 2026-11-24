@@ -142,6 +142,7 @@ struct SessionRestButton<Intent: AppIntent>: View {
     let title: String
     let label: String
     var isPrimary = false
+    var height: CGFloat = 44
 
     var body: some View {
         Button(intent: intent) {
@@ -149,7 +150,7 @@ struct SessionRestButton<Intent: AppIntent>: View {
                 .font(.subheadline.weight(.bold))
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
-                .frame(maxWidth: .infinity, minHeight: 44)
+                .frame(maxWidth: .infinity, minHeight: height)
                 .foregroundStyle(isPrimary ? SessionActivityStyle.accentInk : .white)
                 .background(isPrimary ? SessionActivityStyle.accent : .white.opacity(0.14), in: Capsule())
         }
@@ -158,63 +159,56 @@ struct SessionRestButton<Intent: AppIntent>: View {
     }
 }
 
-/// Les trois boutons du repos.
+/// Les trois boutons du repos. Plus bas dans la Dynamic Island, qui plafonne à 160 pt de haut.
 struct SessionRestButtons: View {
+    var height: CGFloat = 44
+
     var body: some View {
         HStack(spacing: 8) {
             SessionRestButton(intent: RestMinus30Intent(), title: SessionActivityText.minus30Title,
-                              label: SessionActivityText.minus30Label)
+                              label: SessionActivityText.minus30Label, height: height)
             SessionRestButton(intent: RestPlus30Intent(), title: SessionActivityText.plus30Title,
-                              label: SessionActivityText.plus30Label)
+                              label: SessionActivityText.plus30Label, height: height)
             SessionRestButton(intent: SkipRestIntent(), title: SessionActivityText.skipTitle,
-                              label: SessionActivityText.skipLabel, isPrimary: true)
+                              label: SessionActivityText.skipLabel, isPrimary: true, height: height)
         }
     }
 }
 
-/// La série suivante, sur deux lignes au plus.
+/// La série suivante (« Développé couché à la barre · série 3 · 12 kg × 6 »), sans intitulé : elle se lit d'elle-même, et
+/// VoiceOver la dit avec le titre.
 struct SessionNextSetText: View {
     let nextSet: String
+    let lineLimit: Int
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(SessionActivityText.nextSetTitle)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.white.opacity(0.6))
-            Text(nextSet)
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(.white)
-                .lineLimit(2)
-        }
-        .accessibilityElement(children: .combine)
+        Text(nextSet)
+            .font(.footnote.weight(.semibold))
+            .foregroundStyle(.white.opacity(0.75))
+            .lineLimit(lineLimit)
+            .minimumScaleFactor(0.85)
+            .accessibilityHidden(true)
     }
 }
 
-/// Le titre (« Repos » pendant un repos, celui de la séance sinon) suivi de « 4 / 15 », et la série suivante, lus d'un seul
-/// tenant par VoiceOver.
-struct SessionTitleAndNextSet: View {
+/// Le titre (« Repos » pendant un repos, celui de la séance sinon), suivi de « 2 / 18 » sur la même ligne.
+struct SessionTitleLine: View {
     let state: SessionActivityModel
-    let spacing: CGFloat
 
     var body: some View {
-        VStack(alignment: .leading, spacing: spacing) {
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text(state.restInterval == nil ? state.title : SessionActivityText.restTitle)
-                    .font(.headline)
-                    .foregroundStyle(.white)
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Text(state.restInterval == nil ? state.title : SessionActivityText.restTitle)
+                .font(.headline)
+                .foregroundStyle(.white)
+                .lineLimit(1)
+            if state.showsProgress {
+                Text(SessionActivityText.progressText(done: state.doneSets, planned: state.plannedSets))
+                    .font(.subheadline.weight(.semibold))
+                    .monospacedDigit()
+                    .foregroundStyle(.white.opacity(0.55))
                     .lineLimit(1)
-                if state.showsProgress {
-                    Text(SessionActivityText.progressText(done: state.doneSets, planned: state.plannedSets))
-                        .font(.caption.weight(.semibold))
-                        .monospacedDigit()
-                        .foregroundStyle(.white.opacity(0.6))
-                        .lineLimit(1)
-                        .layoutPriority(1)
-                        .contentTransition(.numericText(value: Double(state.doneSets)))
-                }
-            }
-            if let nextSet = state.nextSet {
-                SessionNextSetText(nextSet: nextSet)
+                    .fixedSize()
+                    .contentTransition(.numericText(value: Double(state.doneSets)))
             }
         }
         .accessibilityElement(children: .ignore)
@@ -222,24 +216,23 @@ struct SessionTitleAndNextSet: View {
     }
 }
 
-/// L'écran verrouillé : anneau, temps restant, série suivante et boutons pendant un repos ; anneau des séries, titre, durée
-/// écoulée et série suivante sinon. La barre des séries passe sous l'en-tête.
+/// L'écran verrouillé, sur 160 pt au plus : anneau, titre et « 2 / 18 », série suivante et temps restant, puis les boutons pendant
+/// un repos ; hors repos, l'anneau des séries, la durée écoulée et la barre des séries sous l'en-tête.
 struct SessionLockScreenView: View {
     let state: SessionActivityModel
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 10) {
             header
-            if state.showsProgress {
-                SessionProgressBar(state: state)
-            }
             if state.restInterval != nil {
                 SessionRestButtons()
+            } else if state.showsProgress {
+                SessionProgressBar(state: state)
             }
         }
         .padding(16)
         // L'écran verrouillé de la Live Activity plafonne à 160 pt de haut : au-delà, les boutons du repos seraient rognés.
-        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+        .dynamicTypeSize(...DynamicTypeSize.xxLarge)
         .sessionActivityDark()
     }
 
@@ -247,11 +240,20 @@ struct SessionLockScreenView: View {
         HStack(alignment: .center, spacing: 12) {
             SessionLeadingGlyph(state: state, iconFont: .title2)
                 .frame(width: 44, height: 44)
-            SessionTitleAndNextSet(state: state, spacing: 4)
-            Spacer(minLength: 8)
+            VStack(alignment: .leading, spacing: 2) {
+                SessionTitleLine(state: state)
+                if let nextSet = state.nextSet {
+                    SessionNextSetText(nextSet: nextSet, lineLimit: 2)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            // Un minuteur système réserve sa largeur la plus grande : calé à droite dans une largeur bornée, il touche le bord.
             SessionClockText(state: state)
                 .font(PulseFont.value(.largeTitle))
                 .foregroundStyle(SessionActivityStyle.accent)
+                .minimumScaleFactor(0.6)
+                .multilineTextAlignment(.trailing)
+                .frame(maxWidth: 124, alignment: .trailing)
         }
     }
 }
@@ -262,8 +264,57 @@ struct SessionIslandLeading: View {
 
     var body: some View {
         SessionLeadingGlyph(state: state, iconFont: .title3)
-            .frame(width: 40, height: 40)
+            .frame(width: 36, height: 36)
+            .padding(.leading, 4)
             .sessionActivityDark()
+    }
+}
+
+/// À droite de la Dynamic Island étendue : le temps restant, ou la durée écoulée.
+struct SessionIslandTrailing: View {
+    let state: SessionActivityModel
+
+    var body: some View {
+        SessionClockText(state: state)
+            .font(PulseFont.value(.title))
+            .foregroundStyle(SessionActivityStyle.accent)
+            .minimumScaleFactor(0.7)
+            .multilineTextAlignment(.trailing)
+            .frame(maxWidth: 96, alignment: .trailing)
+            .padding(.trailing, 4)
+            .sessionActivityDark()
+    }
+}
+
+/// Au centre de la Dynamic Island étendue, entre l'anneau et le temps : le titre et « 2 / 18 ».
+struct SessionIslandCenter: View {
+    let state: SessionActivityModel
+
+    var body: some View {
+        SessionTitleLine(state: state)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .dynamicTypeSize(...DynamicTypeSize.xLarge)
+            .sessionActivityDark()
+    }
+}
+
+/// Sous la Dynamic Island étendue, qui plafonne à 160 pt de haut : la série suivante sur une ligne, puis les boutons du repos.
+struct SessionIslandBottom: View {
+    let state: SessionActivityModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if let nextSet = state.nextSet {
+                SessionNextSetText(nextSet: nextSet, lineLimit: 1)
+            }
+            if state.restInterval != nil {
+                SessionRestButtons(height: 36)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 4)
+        .dynamicTypeSize(...DynamicTypeSize.xLarge)
+        .sessionActivityDark()
     }
 }
 
@@ -294,35 +345,6 @@ struct SessionCompactLeading: View {
                     .accessibilityHidden(true)
             }
         }
-        .sessionActivityDark()
-    }
-}
-
-/// À droite de la Dynamic Island étendue : le temps restant, ou la durée écoulée.
-struct SessionIslandTrailing: View {
-    let state: SessionActivityModel
-
-    var body: some View {
-        SessionClockText(state: state)
-            .font(PulseFont.value(.title))
-            .foregroundStyle(SessionActivityStyle.accent)
-            .sessionActivityDark()
-    }
-}
-
-/// Sous la Dynamic Island étendue : le titre du repos ou de la séance, la série suivante et les boutons.
-struct SessionIslandBottom: View {
-    let state: SessionActivityModel
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            SessionTitleAndNextSet(state: state, spacing: 2)
-            if state.restInterval != nil {
-                SessionRestButtons()
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
         .sessionActivityDark()
     }
 }
