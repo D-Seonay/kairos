@@ -39,3 +39,17 @@
 
 - Le partage vers Instagram (story et publication), WhatsApp et Photos.
 - La lisibilité de la carte sur un vrai écran, et le rendu de la silhouette homme.
+
+## Lot 2 : photo en fond, records, nuit
+
+- **Photo de la séance en fond** : la feuille propose une rangée de fonds, la « Trame Pulse » ou une vignette par photo de la séance (`SessionPhotosModel.shareCardPhotos`).
+  - L'image entière n'est lue et décodée (redressée, 2 048 px max) que si on la choisit, hors de l'acteur principal.
+  - Sur une photo, le dessin s'efface. Un dégradé noir garde les chiffres lisibles et une trame légère couvre la partie sombre.
+  - Les photos du corps restent exclues.
+- **Records** : un appui long sur une ligne de Stats → Records (force et chronos 5 km, 10 km, semi) ou du mur des records du profil propose « Partager ce record ». La même action existe pour VoiceOver.
+  - La carte met la valeur en très grand (`Visual.hero`), avec la série d'origine, le gain ou l'allure.
+  - Le texte joint reprend la valeur juste après le titre.
+- **Nuit** : un bouton Partager dans la barre de l'écran Nuit.
+  - Avec des phases, la carte dessine l'hypnogramme en blanc (`Visual.hypnogram`) : une barre fine par tranche, des liaisons verticales et l'encre plus forte vers le profond. Elle donne aussi le temps endormi, le profond, le paradoxal et le léger.
+  - Sans phases, elle montre le temps endormi en très grand, avec les réveils.
+- Restent à faire : le score de récupération du jour, et une semaine d'entraînement résumée.
