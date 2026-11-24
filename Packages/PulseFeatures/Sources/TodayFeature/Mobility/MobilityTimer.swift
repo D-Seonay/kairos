@@ -46,6 +46,12 @@ struct MobilityTimer: Sendable, Equatable {
         phase == .finished || remaining(at: date) <= 0
     }
 
+    /// Vrai quand le décompte tourne : la feuille ne se ferme pas d'un glissement et l'écran reste allumé. Faux en pause, avant
+    /// le départ et une fois terminé.
+    var isRunning: Bool {
+        if case .running = phase { true } else { false }
+    }
+
     /// « 18:55 » : les secondes entamées comptent en entier, donc 0,4 s s'écrit « 00:01 ».
     static func clockText(_ remaining: TimeInterval) -> String {
         let seconds = Int(max(0, min(remaining, duration)).rounded(.up))
