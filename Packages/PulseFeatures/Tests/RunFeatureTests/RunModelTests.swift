@@ -115,6 +115,17 @@ struct RunModelTests {
         #expect(!fixture.preferences.announcesKilometres)
     }
 
+    @Test func voiceOverKilometreOnlyWithoutSpokenAnnouncements() {
+        let fixture = RunFeatureFixture()
+        let coordinator = fixture.coordinator()
+        coordinator.prepare(.free())
+        let model = coordinator.model()
+        #expect(model.kilometerAnnouncement(from: 950, to: 1_010) == nil)
+        model.announcesKilometres = false
+        #expect(model.kilometerAnnouncement(from: 950, to: 1_010) == "1 kilomètre")
+        #expect(model.kilometerAnnouncement(from: 1_010, to: 1_200) == nil)
+    }
+
     @Test func cancellingTheStartScreenCloses() async {
         let fixture = RunFeatureFixture()
         let coordinator = fixture.coordinator()

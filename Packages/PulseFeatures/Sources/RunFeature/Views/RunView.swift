@@ -38,8 +38,8 @@ struct RunView: View {
         .pulseScreenBackground(aura: 0.5)
         .pulseAnnounceError(model.errorMessage)
         .onChange(of: model.snapshot?.distanceMeters) { previous, current in
-            // Le passage d'un km est dit à VoiceOver sans couper la parole en cours.
-            if let text = RunText.kilometerPassed(from: previous, to: current) { PulseAnnouncement.post(text, priority: .low) }
+            // Le passage d'un km est dit à VoiceOver sans couper la parole en cours, seulement sans annonces vocales.
+            if let text = model.kilometerAnnouncement(from: previous, to: current) { PulseAnnouncement.post(text, priority: .low) }
         }
         .confirmationDialog(String(localized: "Terminer la course ?", bundle: .module), isPresented: $confirmsFinish,
                             titleVisibility: .visible) {

@@ -122,6 +122,11 @@ public final class RunModel {
 
     // MARK: Course
 
+    /// Le km passé à dire à VoiceOver ; `nil` quand les annonces vocales le disent déjà, pour ne pas l'entendre deux fois.
+    func kilometerAnnouncement(from previous: Double?, to current: Double?) -> String? {
+        announcesKilometres ? nil : RunText.kilometerPassed(from: previous, to: current)
+    }
+
     public func pause() async {
         guard phase == .running else { return }
         await environment.service.pause()
