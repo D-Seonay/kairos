@@ -13,6 +13,8 @@ struct LiveExerciseCard: View {
     let exercise: LiveExercise
     let index: Int
     let isLast: Bool
+    /// La série à faire maintenant dans toute la séance, pour éclairer sa ligne si elle est dans cette carte.
+    var upcomingSetID: UUID?
     @Binding var rpeSet: UUID?
     @State private var isShowingSheet = false
     @State private var isShowingPlates = false
@@ -32,7 +34,8 @@ struct LiveExerciseCard: View {
                     .listRowBackground(Self.background())
             }
             ForEach(Array(exercise.sets.enumerated()), id: \.element.id) { position, set in
-                LiveSetRow(model: model, exercise: exercise, exerciseIndex: index, set: set, index: position, rpeSet: $rpeSet)
+                LiveSetRow(model: model, exercise: exercise, exerciseIndex: index, set: set, index: position,
+                           isUpcoming: set.id == upcomingSetID, rpeSet: $rpeSet)
                     .listRowBackground(Self.background())
                     // Une série validée ne part pas d'un balayage complet : sa suppression ne se défait pas.
                     .swipeActions(edge: .trailing, allowsFullSwipe: set.completedAt == nil) {
@@ -63,7 +66,8 @@ struct LiveExerciseCard: View {
                 } label: {
                     Text(exercise.name)
                         .font(.headline)
-                        .foregroundStyle(PulsePalette.text)
+                        // Un exercice fini s'efface d'un cran : l'œil va à ceux qui restent.
+                        .foregroundStyle(exercise.isDone ? PulsePalette.text2 : PulsePalette.text)
                         .multilineTextAlignment(.leading)
                         .frame(maxWidth: .infinity, minHeight: LiveSetRow.targetHeight, alignment: .leading)
                         .contentShape(Rectangle())
@@ -74,13 +78,18 @@ struct LiveExerciseCard: View {
                 .accessibilityHint(String(localized: "Ouvre la fiche de l'exercice", bundle: .module))
                 details
             }
-            HStack(spacing: 8) {
+            HStack(spacing: 4) {
                 if exercise.isBarbell && exercise.loadKind == .external {
                     platesButton
                 }
+                ExerciseProgressRing(done: exercise.doneSetCount, total: exercise.sets.count)
+                    .frame(minWidth: 44, minHeight: LiveSetRow.targetHeight)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(Self.progressSpokenText(done: exercise.doneSetCount, total: exercise.sets.count))
                 menu
             }
         }
+        .pulseAnimation(.snappy(duration: 0.25), value: exercise.isDone)
         .padding(.horizontal, 12)
         .padding(.top, 4)
         .sheet(isPresented: $isShowingSheet) { exerciseSheet }
@@ -238,13 +247,18 @@ struct LiveExerciseCard: View {
         Button {
             Task { await model.addSet(exercise: exercise.id) }
         } label: {
+            let shape = RoundedRectangle(cornerRadius: PulseMetrics.radiusTiny, style: .continuous)
             Text(String(localized: "+ Ajouter une série", bundle: .module))
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(Color(PulsePalette.accent(for: theme).accent))
-                .frame(maxWidth: .infinity, minHeight: LiveSetRow.targetHeight)
-                .contentShape(Rectangle())
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .overlay(shape.strokeBorder(PulsePalette.ink.opacity(0.14), style: StrokeStyle(lineWidth: 1, dash: [4, 4])))
+                .contentShape(shape)
+                .padding(.horizontal, 12)
+                .padding(.top, 6)
+                .padding(.bottom, 12)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(LivePressStyle(pressedScale: 0.97))
         .accessibilityLabel(Self.addSetSpokenText(exercise: exercise.name))
         .accessibilityIdentifier(LiveSessionIdentifiers.addSet)
     }
@@ -272,6 +286,13 @@ extension LiveExerciseCard {
         let letters = Array("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
         let letter = letters[((group - 1) % letters.count + letters.count) % letters.count]
         return String(localized: "Super set \(String(letter))", bundle: .module)
+    }
+
+    /// « 2 séries faites sur 5 », « Exercice terminé » : l'anneau de la carte dit en mots.
+    nonisolated static func progressSpokenText(done: Int, total: Int) -> String {
+        if total > 0 && done >= total { return String(localized: "Exercice terminé", bundle: .module) }
+        return done == 1 ? String(localized: "1 série faite sur \(total)", bundle: .module)
+            : String(localized: "\(done) séries faites sur \(total)", bundle: .module)
     }
 
     /// « Ajouter une série à Développé couché » : chaque carte a son bouton, VoiceOver dit lequel.

@@ -42,6 +42,50 @@ public enum PulseHaptics {
         AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
         #endif
     }
+
+    /// Sèche et brève : un tic de compte à rebours, l'ajout d'une série.
+    @MainActor
+    public static func tick() {
+        #if os(iOS)
+        UIImpactFeedbackGenerator(style: .rigid).impactOccurred(intensity: 0.7)
+        #endif
+    }
+
+    /// Molle : une série dévalidée ou supprimée, un pas en arrière.
+    @MainActor
+    public static func soft() {
+        #if os(iOS)
+        UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+        #endif
+    }
+
+    /// Le succès du système, juste après la double vibration de la validation : la dernière série d'un exercice est faite.
+    @MainActor
+    public static func success() {
+        #if os(iOS)
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(260))
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+        }
+        #endif
+    }
+
+    /// Une montée de trois coups de plus en plus forts puis le succès : toute la séance est faite.
+    @MainActor
+    public static func celebration() {
+        #if os(iOS)
+        let generator = UIImpactFeedbackGenerator(style: .heavy)
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(260))
+            for intensity in [0.45, 0.7, 1.0] {
+                generator.impactOccurred(intensity: intensity)
+                try? await Task.sleep(for: .milliseconds(110))
+            }
+            try? await Task.sleep(for: .milliseconds(80))
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+        }
+        #endif
+    }
 }
 
 public extension View {

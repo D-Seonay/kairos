@@ -49,10 +49,16 @@ final class HapticLog {
     var light = 0
     var validation = 0
     var restEnded = 0
+    var exerciseDone = 0
+    var sessionDone = 0
+    var tick = 0
+    var soft = 0
 
     var haptics: LiveSessionHaptics {
         LiveSessionHaptics(light: { [self] in light += 1 }, validation: { [self] in validation += 1 },
-                           restEnded: { [self] in restEnded += 1 })
+                           restEnded: { [self] in restEnded += 1 }, exerciseDone: { [self] in exerciseDone += 1 },
+                           sessionDone: { [self] in sessionDone += 1 }, tick: { [self] in tick += 1 },
+                           soft: { [self] in soft += 1 })
     }
 }
 

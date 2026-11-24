@@ -22,7 +22,11 @@ struct LiveSetRow: View {
     let exerciseIndex: Int
     let set: LiveSet
     let index: Int
+    /// La série à faire maintenant (la suivante de la séance) : sa ligne est éclairée et son numéro passe en pastille.
+    var isUpcoming = false
     @Binding var rpeSet: UUID?
+    /// Compte les validations de la série : chacune fait jaillir l'anneau de la coche et passer un voile sur la ligne.
+    @State private var validations = 0
     @ScaledMetric(relativeTo: .title2) private var weightWidth = LiveSetRow.weightWidth
     @ScaledMetric(relativeTo: .title2) private var valueWidth = LiveSetRow.valueWidth
     @ScaledMetric(relativeTo: .title2) private var rpeWidth = LiveSetRow.rpeWidth
@@ -56,6 +60,12 @@ struct LiveSetRow: View {
         }
         .padding(.horizontal, Self.horizontalPadding)
         .padding(.vertical, 4)
+        .background { rowBackground }
+        .pulseAnimation(.snappy(duration: 0.25), value: isUpcoming)
+        .pulseAnimation(.snappy(duration: 0.25), value: isDone)
+        .onChange(of: isDone) { _, done in
+            if done { validations += 1 }
+        }
         // Le rotor « Conteneurs » annonce la série en entier ; à l'intérieur, chaque cellule dit sa valeur.
         .accessibilityElement(children: .contain)
         .accessibilityLabel(Self.accessibilityText(for: set, index: index, loadKind: exercise.loadKind,
@@ -73,6 +83,23 @@ struct LiveSetRow: View {
             cell()
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var isDone: Bool {
+        self.set.completedAt != nil
+    }
+
+    /// Le fond de la ligne, en retrait de la carte : un lavis d'encre une fois validée, un peu plus marqué et cerné pour la
+    /// série à faire ; le voile de la validation passe par-dessus.
+    private var rowBackground: some View {
+        let shape = RoundedRectangle(cornerRadius: PulseMetrics.radiusTiny, style: .continuous)
+        return shape
+            .fill(PulsePalette.ink.opacity(isUpcoming ? 0.07 : (isDone ? 0.045 : 0)))
+            .overlay(shape.strokeBorder(PulsePalette.ink.opacity(isUpcoming ? 0.16 : 0), lineWidth: 1))
+            .validationFlash(trigger: validations, color: PulsePalette.ink.opacity(0.16), in: shape)
+            .padding(.horizontal, 3)
+            .padding(.vertical, 1)
+            .accessibilityHidden(true)
     }
 
     private var valueKind: KeypadField.Kind {
@@ -96,9 +123,12 @@ struct LiveSetRow: View {
             }
         } label: {
             Text(Self.badge(for: set.setType, index: index))
-                .font(PulseFont.value(.headline))
-                .foregroundStyle(badgeColor)
+                .font(PulseFont.value(.headline, weight: isUpcoming ? .bold : .medium))
+                .foregroundStyle(isUpcoming ? PulsePalette.liveBackground : badgeColor)
+                .frame(minWidth: 30, minHeight: 30)
+                .background(PulsePalette.text.opacity(isUpcoming ? 1 : 0), in: Capsule())
                 .frame(width: Self.badgeWidth, height: Self.targetHeight)
+                .contentShape(Rectangle())
         }
         .accessibilityLabel(String(localized: "Type de la série \(index + 1)", bundle: .module))
         .accessibilityValue(Self.typeName(set.setType) ?? String(localized: "normale", bundle: .module))
@@ -120,7 +150,7 @@ struct LiveSetRow: View {
     private var previous: some View {
         Text(set.previous ?? "\u{2014}")
             .font(.footnote.monospacedDigit())
-            .foregroundStyle(PulsePalette.muted)
+            .foregroundStyle(PulsePalette.muted.opacity(isDone ? 0.6 : 1))
             .lineLimit(2)
             .minimumScaleFactor(0.7)
             .multilineTextAlignment(.center)
@@ -135,7 +165,7 @@ struct LiveSetRow: View {
         return ValueCell(
             text: text(for: kind, saved: Self.weightText(set.weightKg, loadKind: exercise.loadKind)),
             isEmpty: set.weightKg == nil && exercise.loadKind == .external,
-            isProposed: Self.isProposed(kind, in: set), isFocused: model.focus == field(kind), width: width(weightWidth),
+            isProposed: !isDone && Self.isProposed(kind, in: set), isFocused: model.focus == field(kind), width: width(weightWidth),
             label: Self.weightSpokenTitle(for: exercise.loadKind), hint: keypadHint,
             identifier: LiveSessionIdentifiers.weight(exercise: exerciseIndex, set: index)
         ) { model.focus(field(kind)); rpeSet = nil }
@@ -146,7 +176,7 @@ struct LiveSetRow: View {
         let saved = exercise.tracksDuration ? set.durationSeconds : set.reps
         return ValueCell(
             text: text(for: kind, saved: saved.map(String.init) ?? "\u{2013}"), isEmpty: saved == nil,
-            isProposed: Self.isProposed(kind, in: set), isFocused: model.focus == field(kind), width: width(valueWidth),
+            isProposed: !isDone && Self.isProposed(kind, in: set), isFocused: model.focus == field(kind), width: width(valueWidth),
             label: exercise.tracksDuration ? String(localized: "Secondes", bundle: .module)
                 : String(localized: "Répétitions", bundle: .module), hint: keypadHint,
             identifier: LiveSessionIdentifiers.reps(exercise: exerciseIndex, set: index)
@@ -192,23 +222,25 @@ struct LiveSetRow: View {
     // MARK: Coche
 
     private var checkButton: some View {
-        let isDone = set.completedAt != nil
-        return Button {
+        Button {
             Task { await model.tap(set: set.id) }
         } label: {
-            // Validée : une coche pleine sur un disque menthe ; à faire : un cercle cerclé, estompé. Le glyphe change, pas que
-            // la couleur.
+            // Validée : une coche pleine sur un disque d'encre ; à faire : un cercle cerclé, estompé. Le glyphe change, pas que
+            // la couleur. La série à faire a une coche plus nette que les autres : c'est là que le pouce va.
             Image(systemName: isDone ? "checkmark" : "checkmark.circle")
                 .font(isDone ? .title3.weight(.black) : .title2.weight(.regular))
-                .foregroundStyle(isDone ? PulsePalette.liveBackground : PulsePalette.muted)
+                .foregroundStyle(isDone ? PulsePalette.liveBackground : (isUpcoming ? PulsePalette.text : PulsePalette.muted))
+                .symbolEffect(.bounce, value: validations)
                 .frame(width: Self.targetHeight, height: Self.targetHeight)
                 .background(isDone ? PulsePalette.ok : PulsePalette.surface2, in: Circle())
-                // Une série validée s'allume : la lueur menthe dit « fait » d'un coup d'œil, entre deux séries.
-                .shadow(color: isDone ? PulsePalette.ok.opacity(0.55) : .clear, radius: 10)
+                .overlay(Circle().strokeBorder(PulsePalette.ink.opacity(isUpcoming && !isDone ? 0.35 : 0), lineWidth: 1.5))
+                // Une série validée s'allume : la lueur dit « fait » d'un coup d'œil, entre deux séries.
+                .shadow(color: isDone ? PulsePalette.ok.opacity(0.45) : .clear, radius: 10)
+                .validationRing(trigger: validations, color: PulsePalette.ok)
                 .scaleEffect(isDone ? 1 : 0.92)
-                .pulseAnimation(.spring(response: 0.3, dampingFraction: 0.55), value: isDone)
+                .pulseAnimation(.spring(response: 0.3, dampingFraction: 0.5), value: isDone)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(LivePressStyle(pressedScale: 0.86))
         .accessibilityLabel(Self.checkSpokenLabel(index: index, type: set.setType))
         .accessibilityValue(Self.checkSpokenValue(isDone: isDone))
         .accessibilityHint(isDone ? String(localized: "Annule la validation de la série", bundle: .module)
@@ -244,6 +276,7 @@ private struct ValueCell: View {
         Button(action: action) {
             Text(text)
                 .font(PulseFont.value(.title2, weight: .bold))
+                .padding(.horizontal, 4)
                 .foregroundStyle(isEmpty ? PulsePalette.muted : (isProposed ? PulsePalette.text2 : PulsePalette.text))
                 .pulseNumericTransition(value: Double(text.replacingOccurrences(of: ",", with: ".")) ?? 0)
                 .lineLimit(1)
@@ -255,7 +288,8 @@ private struct ValueCell: View {
                                             style: StrokeStyle(lineWidth: isFocused ? 2 : 1, dash: isProposed && !isFocused ? [3, 3] : [])))
                 .contentShape(shape)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(LivePressStyle())
+        .pulseAnimation(.snappy(duration: 0.18), value: isFocused)
         .accessibilityLabel(label)
         .accessibilityValue(LiveSetRow.cellSpokenValue(text: text, isEmpty: isEmpty, isProposed: isProposed))
         .accessibilityHint(hint)
