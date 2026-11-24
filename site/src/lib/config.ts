@@ -1,8 +1,8 @@
 export const APP_STORE_ID = "6829265826";
-export const APP_STORE_URL = `https://apps.apple.com/fr/app/id${APP_STORE_ID}`;
+export const APP_STORE_URL = `https://apps.apple.com/fr/app/pulse-r%C3%A9cup%C3%A9ration-muscu/id${APP_STORE_ID}`;
 
-// Passer à true le jour où Apple approuve l'app : le badge devient un vrai lien.
-export const APP_STORE_LIVE = false;
+// Apple a approuvé l'app le 2026-11-24 : le badge est un vrai lien vers la fiche.
+export const APP_STORE_LIVE = true;
 
 // À renseigner avant la mise en production : le build Vercel de production échoue tant que c'est null.
 export const CONTACT_EMAIL: string | null = "contact@seonay.com";
