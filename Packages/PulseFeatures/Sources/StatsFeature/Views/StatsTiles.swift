@@ -52,20 +52,32 @@ struct StatsTileContent: Identifiable {
     var id: String { title }
 }
 
-/// Les tuiles sur deux colonnes, une seule aux tailles d'accessibilité (comme les tendances de l'accueil).
+/// Les tuiles sur deux colonnes, une seule aux tailles d'accessibilité (comme les tendances de l'accueil). Les tuiles d'une même
+/// ligne prennent la hauteur de la plus haute.
 struct StatsTileGrid: View {
     let tiles: [StatsTileContent]
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        LazyVGrid(columns: columns, spacing: 10) {
-            ForEach(tiles) { StatsTile(content: $0) }
+        VStack(spacing: 10) {
+            ForEach(rows.indices, id: \.self) { index in
+                HStack(alignment: .top, spacing: 10) {
+                    ForEach(rows[index]) { StatsTile(content: $0) }
+                    // Une ligne incomplète garde la largeur d'une colonne à sa tuile.
+                    ForEach(rows[index].count..<columnCount, id: \.self) { _ in
+                        Color.clear.frame(maxWidth: .infinity, maxHeight: 0)
+                    }
+                }
+                // La ligne prend la hauteur de sa plus haute tuile, que les autres remplissent.
+                .fixedSize(horizontal: false, vertical: true)
+            }
         }
     }
 
-    private var columns: [GridItem] {
-        let count = dynamicTypeSize.isAccessibilitySize ? 1 : 2
-        return Array(repeating: GridItem(.flexible(), spacing: 10, alignment: .top), count: count)
+    private var columnCount: Int { dynamicTypeSize.isAccessibilitySize ? 1 : 2 }
+
+    private var rows: [[StatsTileContent]] {
+        stride(from: 0, to: tiles.count, by: columnCount).map { Array(tiles[$0..<min($0 + columnCount, tiles.count)]) }
     }
 }
 
@@ -103,7 +115,7 @@ struct StatsTile: View {
                         .padding(.top, 4)
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(StatsText.tileSpoken(content))
