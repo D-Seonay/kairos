@@ -38,12 +38,9 @@ extension TodayModel {
         if let yesterday = calendar.date(byAdding: .day, value: -1, to: now), calendar.isDate(date, inSameDayAs: yesterday) {
             return String(localized: "hier", bundle: .module)
         }
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "fr_FR")
-        formatter.calendar = calendar
-        formatter.timeZone = calendar.timeZone
-        formatter.setLocalizedDateFormatFromTemplate(spoken ? "dMMMM" : "dMMM")
-        return formatter.string(from: date)
+        // Un style de format, pas un `DateFormatter` coûteux recréé à chaque rendu de l'en-tête.
+        let style = Date.FormatStyle(locale: Locale(identifier: "fr_FR"), calendar: calendar, timeZone: calendar.timeZone)
+        return date.formatted(style.day().month(spoken ? .wide : .abbreviated))
     }
 
     /// L'étiquette de la pastille de synchronisation.
