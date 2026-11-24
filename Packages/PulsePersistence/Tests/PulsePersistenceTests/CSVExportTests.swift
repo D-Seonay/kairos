@@ -87,3 +87,63 @@ import Testing
     let measurements = try lines("body_measurements")
     #expect(measurements.count == 2 && measurements[1].contains("ABC"))
 }
+
+private struct PhotoArchive {
+    let folder: URL
+    let photos: [(photo: SessionPhoto, image: PhotoImage)]
+    let removed: SessionPhoto
+}
+
+private func photoArchive() async throws -> PhotoArchive {
+    let box = try ModelContainerBox()
+    let repo = SwiftDataSessionPhotoRepository(modelContainer: box.container)
+    let sessionID = try #require(UUID(uuidString: "ABCDEF12-0000-0000-0000-000000000001"))
+    var photos: [(photo: SessionPhoto, image: PhotoImage)] = []
+    for order in 0..<2 {
+        let photo = Sample.sessionPhoto(sessionID: sessionID, order: order, createdAt: Fixed.t0)
+        let image = Sample.photoImage(seed: UInt8(order + 1))
+        try await repo.add(photo, image: image)
+        photos.append((photo, image))
+    }
+    let removed = Sample.sessionPhoto(sessionID: sessionID, order: 2)
+    try await repo.add(removed, image: Sample.photoImage(seed: 9))
+    try await repo.delete(photoID: removed.id)
+    let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    let exporter = SwiftDataExporter(container: box.container, appVersion: "1.0 (1)", contentVersion: "1.0.0",
+                                     exerciseNames: { _ in nil }, directory: directory, timeZone: Fixed.calendar.timeZone)
+    _ = try await exporter.exportCSVArchive()
+    return PhotoArchive(folder: try #require(exporter.lastCSVDirectory(in: directory)), photos: photos, removed: removed)
+}
+
+@Test func csvArchiveContainsSessionPhotos() async throws {
+    let archive = try await photoArchive()
+    let names = try FileManager.default.contentsOfDirectory(atPath: archive.folder.appendingPathComponent("photos").path).sorted()
+    #expect(names == ["2026-11-15-abcdef12-1.jpg", "2026-11-15-abcdef12-2.jpg"])
+    let table = try String(contentsOf: archive.folder.appendingPathComponent("session_photos.csv"), encoding: .utf8)
+    let lines = table.split(separator: "\n").map(String.init)
+    #expect(lines.first == "id,session_id,order,created_at,file")
+    #expect(lines.count == 3)
+    #expect(lines[1].hasSuffix(",photos/2026-11-15-abcdef12-1.jpg") && lines[2].hasSuffix(",photos/2026-11-15-abcdef12-2.jpg"))
+    #expect(lines[1].hasPrefix(archive.photos[0].photo.id.uuidString + ",ABCDEF12-0000-0000-0000-000000000001,0,"))
+    #expect(!table.contains(archive.removed.id.uuidString))
+    let readme = try String(contentsOf: archive.folder.appendingPathComponent("README.txt"), encoding: .utf8)
+    #expect(readme.contains("session_photos.csv") && readme.contains("photos/"))
+}
+
+@Test func csvArchiveCopiesPhotoBytesUnchanged() async throws {
+    let archive = try await photoArchive()
+    for (index, entry) in archive.photos.enumerated() {
+        let url = archive.folder.appendingPathComponent("photos/2026-11-15-abcdef12-\(index + 1).jpg")
+        #expect(try Data(contentsOf: url) == entry.image.image)
+    }
+}
+
+@Test func csvArchiveWithoutPhotosHasNoPhotosFolder() async throws {
+    let box = try ModelContainerBox()
+    let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    let exporter = SwiftDataExporter(container: box.container, appVersion: "1.0 (1)", contentVersion: "1.0.0",
+                                     exerciseNames: { _ in nil }, directory: directory)
+    _ = try await exporter.exportCSVArchive()
+    let folder = try #require(exporter.lastCSVDirectory(in: directory))
+    #expect(!FileManager.default.fileExists(atPath: folder.appendingPathComponent("photos").path))
+}

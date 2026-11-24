@@ -48,3 +48,15 @@ import Testing
     let counts = try await SwiftDataStoreInspector(container: container, cloudEnabled: false).counts()
     #expect(counts[.runTracks] == 1 && counts[.runDrafts] == 1 && counts[.runHealthSummaries] == 1)
 }
+
+@Test func countsIncludeLiveSessionPhotosOnly() async throws {
+    let container = try TestContainer.make()
+    let photos = SwiftDataSessionPhotoRepository(modelContainer: container)
+    let sessionID = UUID()
+    let removed = Sample.sessionPhoto(sessionID: sessionID, order: 1)
+    try await photos.add(Sample.sessionPhoto(sessionID: sessionID, order: 0), image: Sample.photoImage(seed: 1))
+    try await photos.add(removed, image: Sample.photoImage(seed: 2))
+    try await photos.delete(photoID: removed.id)
+    let counts = try await SwiftDataStoreInspector(container: container, cloudEnabled: false).counts()
+    #expect(counts[.sessionPhotos] == 1)
+}

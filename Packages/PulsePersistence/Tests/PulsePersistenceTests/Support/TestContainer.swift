@@ -166,6 +166,17 @@ extension Sample {
     }
 }
 
+extension Sample {
+    /// Une photo de séance ; `seed` distingue les octets de l'image et de la vignette.
+    static func sessionPhoto(sessionID: UUID, order: Int, createdAt: Date = Fixed.t0) -> SessionPhoto {
+        SessionPhoto(id: UUID(), sessionID: sessionID, order: order, createdAt: createdAt, updatedAt: createdAt)
+    }
+
+    static func photoImage(seed: UInt8) -> PhotoImage {
+        PhotoImage(image: Data(repeating: seed, count: 4_096) + Data([0xFF, 0xD9]), thumbnail: Data(repeating: seed &+ 100, count: 256))
+    }
+}
+
 /// Un conteneur en mémoire prêt à l'emploi.
 struct ModelContainerBox {
     let container: ModelContainer

@@ -56,7 +56,7 @@ struct CSVFormat: @unchecked Sendable {
     }
 }
 
-/// Les 16 tables de l'export CSV (spec M2 §6.2, plus le tracé des courses en V2a).
+/// Les 17 tables de l'export CSV (spec M2 §6.2, plus le tracé des courses en V2a et les photos de séance en V2b).
 public enum CSVTables {
     public static func tables(from document: ExportDocument, timeZone: TimeZone) -> [StoreTable: CSVTable] {
         let format = CSVFormat(timeZone: timeZone)
@@ -73,6 +73,7 @@ public enum CSVTables {
             .workoutSessions: table(document.workoutSessions, CSVColumns.workoutSessions, format),
             .workoutSets: table(sets, CSVColumns.workoutSets, format),
             .runTracks: table(document.runTracks, CSVColumns.runTracks, format),
+            .sessionPhotos: table(document.sessionPhotos, CSVColumns.sessionPhotos(timeZone: timeZone), format),
             .scheduledDays: table(document.scheduledDays, CSVColumns.scheduledDays, format),
             .dailyRecoveries: table(document.dailyRecoveries, CSVColumns.dailyRecoveries, format),
             .checkIns: table(document.checkIns, CSVColumns.checkIns, format),
@@ -106,6 +107,7 @@ public enum CSVTables {
         .exerciseSettings: "réglages par exercice (incrément, échauffement)",
         .workoutSessions: "séances (musculation Pulse, courses et vélos importés)", .workoutSets: "séries de chaque séance",
         .runTracks: "tracé des courses Pulse : temps par km (secondes, joints par |), dénivelé positif, nombre de points",
+        .sessionPhotos: "photos des séances : une ligne par photo, le fichier est dans le dossier photos/ de l'archive",
         .scheduledDays: "semaine datée : séances placées, déplacées, validées", .dailyRecoveries: "score de récupération par jour",
         .checkIns: "check-ins du matin", .supplements: "compléments", .supplementIntakes: "prises de compléments",
         .bodyMeasurements: "poids et masse grasse", .personalRecords: "records personnels"

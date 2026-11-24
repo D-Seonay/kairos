@@ -37,16 +37,19 @@ public struct SwiftDataExporter: DataExporter {
         return try JSONExportWriter.write(document, to: directory, date: now, timeZone: timeZone)
     }
 
-    /// Dossier `Pulse-AAAA-MM-JJ-csv/` avec un CSV par table et `README.txt`, zippé à côté.
+    /// Dossier `Pulse-AAAA-MM-JJ-csv/` avec un CSV par table, `README.txt` et les photos de séance dans `photos/`, zippé à côté.
+    /// Le JSON ne contient aucune image : seule cette archive les porte.
     public func exportCSVArchive() async throws -> URL {
         let snapshot = try await ExportSnapshotLoader(modelContainer: container).snapshot()
         let now = Date()
         let metadata = ExportMetadata(appVersion: appVersion, contentVersion: contentVersion, locale: locale, exportedAt: now)
-        let document = JSONExportWriter.document(from: snapshot, metadata: metadata, exerciseNames: exerciseNames)
+        var document = JSONExportWriter.document(from: snapshot, metadata: metadata, exerciseNames: exerciseNames)
         try resetDirectory()
         let stem = "Pulse-\(ExportNaming.dayStamp(now, timeZone: timeZone))-csv"
         let folder = directory.appendingPathComponent(stem, isDirectory: true)
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        // Seules les photos dont l'image est là ont une ligne : la colonne `file` désigne toujours un fichier de l'archive.
+        document.sessionPhotos = try await writePhotos(document.sessionPhotos, to: folder)
         for (table, csv) in CSVTables.tables(from: document, timeZone: timeZone) {
             try CSVWriter.file(header: csv.header, rows: csv.rows)
                 .write(to: folder.appendingPathComponent(table.fileName + ".csv"), atomically: true, encoding: .utf8)
@@ -55,6 +58,20 @@ public struct SwiftDataExporter: DataExporter {
         let zip = directory.appendingPathComponent(stem + ".zip")
         try ZipArchiver.zip(directory: folder, to: zip)
         return zip
+    }
+
+    /// Copie chaque image vivante, octet pour octet, dans `photos/` ; rend les photos écrites. Le dossier n'existe que s'il y en a.
+    private func writePhotos(_ photos: [SessionPhoto], to folder: URL) async throws -> [SessionPhoto] {
+        let loader = ExportSnapshotLoader(modelContainer: container)
+        let photosFolder = folder.appendingPathComponent("photos", isDirectory: true)
+        var written: [SessionPhoto] = []
+        for photo in photos {
+            guard let data = try await loader.imageData(ofPhoto: photo.id) else { continue }
+            try FileManager.default.createDirectory(at: photosFolder, withIntermediateDirectories: true)
+            try data.write(to: folder.appendingPathComponent(ExportNaming.photoPath(photo, timeZone: timeZone)), options: .atomic)
+            written.append(photo)
+        }
+        return written
     }
 
     /// Le dossier CSV du dernier export, s'il existe encore (tests et inspection).

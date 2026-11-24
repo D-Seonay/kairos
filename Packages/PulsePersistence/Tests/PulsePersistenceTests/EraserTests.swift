@@ -156,3 +156,14 @@ private struct EraseFixture {
     #expect(try check.fetchCount(FetchDescriptor<StoredRunDraft>()) == 0)
     #expect(try check.fetchCount(FetchDescriptor<StoredRunHealthSummary>()) == 0)
 }
+
+@Test func wipeAllRemovesSessionPhotos() async throws {
+    let container = try TestContainer.make()
+    let photos = SwiftDataSessionPhotoRepository(modelContainer: container)
+    let sessionID = UUID()
+    try await photos.add(Sample.sessionPhoto(sessionID: sessionID, order: 0), image: Sample.photoImage(seed: 1))
+    try await photos.add(Sample.sessionPhoto(sessionID: sessionID, order: 1), image: Sample.photoImage(seed: 2))
+    #expect(try ModelContext(container).fetchCount(FetchDescriptor<StoredSessionPhoto>()) == 2)
+    try await StoreWiper(modelContainer: container).wipeAll()
+    #expect(try ModelContext(container).fetchCount(FetchDescriptor<StoredSessionPhoto>()) == 0)
+}

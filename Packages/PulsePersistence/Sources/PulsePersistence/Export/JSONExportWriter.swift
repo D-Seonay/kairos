@@ -30,6 +30,7 @@ public enum JSONExportWriter {
                               programs: snapshot.programs, userExercises: snapshot.userExercises,
                               exerciseSettings: snapshot.exerciseSettings,
                               workoutSessions: snapshot.workoutSessions, runTracks: snapshot.runTracks,
+                              sessionPhotos: snapshot.sessionPhotos,
                               scheduledDays: snapshot.scheduledDays,
                               dailyRecoveries: snapshot.dailyRecoveries, checkIns: snapshot.checkIns,
                               supplements: snapshot.supplements, supplementIntakes: snapshot.supplementIntakes,
@@ -46,6 +47,12 @@ public enum JSONExportWriter {
 }
 
 enum ExportNaming {
+    /// `photos/AAAA-MM-JJ-<8 premiers caractères de la séance>-<rang + 1>.jpg`, le jour étant celui de la prise de vue.
+    static func photoPath(_ photo: SessionPhoto, timeZone: TimeZone) -> String {
+        let session = photo.sessionID.uuidString.prefix(8).lowercased()
+        return "photos/\(dayStamp(photo.createdAt, timeZone: timeZone))-\(session)-\(photo.order + 1).jpg"
+    }
+
     /// `AAAA-MM-JJ` dans le fuseau donné.
     static func dayStamp(_ date: Date, timeZone: TimeZone) -> String {
         var calendar = Calendar(identifier: .gregorian)

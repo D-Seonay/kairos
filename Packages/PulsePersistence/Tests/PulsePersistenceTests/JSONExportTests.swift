@@ -119,3 +119,24 @@ private func makeExporter(_ container: ModelContainerBox, directory: URL? = nil)
     #expect(doc.runTracks.first?.points.count == 4 && doc.runTracks.first?.splits.count == 2)
     #expect(doc.workoutSessions.map(\.averageHeartRate) == [150] && doc.workoutSessions.map(\.estimatedRPE) == [8])
 }
+
+/// Le JSON liste les photos vivantes, jamais leurs octets.
+@Test func jsonExportListsPhotosWithoutImages() async throws {
+    let box = try ModelContainerBox()
+    let photos = SwiftDataSessionPhotoRepository(modelContainer: box.container)
+    let sessionID = UUID()
+    let kept = Sample.sessionPhoto(sessionID: sessionID, order: 0)
+    let removed = Sample.sessionPhoto(sessionID: sessionID, order: 1)
+    try await photos.add(kept, image: Sample.photoImage(seed: 5))
+    try await photos.add(removed, image: Sample.photoImage(seed: 6))
+    try await photos.delete(photoID: removed.id)
+    let url = try await makeExporter(box).exportJSON()
+    let data = try Data(contentsOf: url)
+    let doc = try ExportCoding.decoder().decode(ExportDocument.self, from: data)
+    #expect(doc.sessionPhotos.map(\.id) == [kept.id])
+    #expect(doc.sessionPhotos.first?.sessionID == sessionID && doc.sessionPhotos.first?.order == 0)
+    let json = try #require(String(data: data, encoding: .utf8))
+    #expect(json.contains("\"sessionPhotos\""))
+    let base64Run = try Regex("[A-Za-z0-9+/=]{1000,}")
+    #expect(json.firstMatch(of: base64Run) == nil)
+}

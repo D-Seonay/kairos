@@ -48,6 +48,7 @@ actor StoreCounter {
         },
         .workoutSets: { try live(StoredWorkoutSet.self, #Predicate { $0.deletedAt == nil }, in: $0) },
         .runTracks: { try live(StoredRunTrack.self, #Predicate { $0.deletedAt == nil }, in: $0) },
+        .sessionPhotos: { try live(StoredSessionPhoto.self, #Predicate { $0.deletedAt == nil }, in: $0) },
         .scheduledDays: { try live(StoredScheduledDay.self, #Predicate { $0.deletedAt == nil }, in: $0) },
         .dailyRecoveries: { try live(StoredDailyRecovery.self, #Predicate { $0.deletedAt == nil }, in: $0) },
         .checkIns: { try live(StoredCheckIn.self, #Predicate { $0.deletedAt == nil }, in: $0) },
