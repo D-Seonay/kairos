@@ -1,0 +1,31 @@
+# Pulse — Récupération & Muscu
+
+> Pulse est une app iPhone gratuite, en français, qui calcule chaque matin un score de récupération à partir du sommeil, de la variabilité cardiaque (VFC) et de la fréquence cardiaque au repos lus dans Apple Santé, puis ajuste la séance de musculation ou de course du jour. Sans compte, sans abonnement, sans publicité. Éditée par Seonay Studio (France).
+
+## Ce que fait l'app
+- Score de récupération chaque matin, comparé à la propre ligne de base de l'utilisateur (14 nuits pour une ligne de base complète, le facteur VFC entre dès 5 nuits). Sans montre, un check-in de trois questions donne un score estimé.
+- Écran Nuit : hypnogramme et répartition du sommeil en phases (profond, paradoxal, léger, éveil), quand la source les écrit dans Apple Santé.
+- Musculation : programme adapté au niveau, au matériel et aux douleurs ou limitations, séance live avec chrono de repos, séries, records et récap. La charge n'augmente que si la ligne de base le permet. Séance libre, saisie d'une séance passée, import depuis Hevy.
+- Course GPS avec le GPS de l'iPhone, sans montre : temps, distance, allure, annonce vocale à chaque kilomètre, Live Activity, tracé et temps au kilomètre. La course est écrite dans Apple Santé.
+- Photos de séance (6 au maximum par séance) et photos de corps (face, profil, dos) protégées par Face ID.
+- Planning, charge d'entraînement sur 28 jours, statistiques, compléments (vitamine D, magnésium, caféine, protéines) sans aucun conseil de dose, widgets.
+
+## Données et confidentialité
+- Aucun serveur Pulse, aucune analytics, aucun SDK tiers.
+- Les valeurs lues dans Apple Santé restent sur l'iPhone et ne sont jamais écrites dans iCloud.
+- Ce que l'utilisateur saisit et ce que Pulse calcule se synchronise dans son iCloud privé.
+- Les photos de corps ne quittent jamais l'iPhone (ni iCloud, ni sauvegarde).
+- Export JSON ou CSV et suppression complète depuis l'app.
+
+## Compatibilité et prix
+- iPhone avec iOS 26 ou plus récent. Pas d'Android, pas d'iPad.
+- Toute montre qui écrit sommeil, VFC (SDNN) et fréquence cardiaque au repos dans Apple Santé convient (Apple Watch ou autre).
+- Gratuite, sans achat intégré. Interface en français uniquement.
+- Pulse n'est pas un dispositif médical : le score et les ajustements sont des repères d'entraînement, pas un avis médical.
+
+## Liens
+- Site : https://pulserecovery.app
+- App Store : https://apps.apple.com/fr/app/pulse-r%C3%A9cup%C3%A9ration-muscu/id6829265826
+- Politique de confidentialité : https://d-seonay.github.io/kairos/confidentialite/
+- Support : https://d-seonay.github.io/kairos/support/
+- Contact : contact@seonay.com
