@@ -41,6 +41,16 @@
         }
       }
     },
+    "%@ km" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ km"
+          }
+        }
+      }
+    },
     "%lld" : {
 
     },
@@ -70,6 +80,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld sur %lld cette semaine"
+          }
+        }
+      }
+    },
+    "%lld'%@\" /km" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld'%@\" /km"
           }
         }
       }
@@ -114,6 +134,16 @@
         }
       }
     },
+    "Course %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Course %@"
+          }
+        }
+      }
+    },
     "Demain, %@" : {
       "localizations" : {
         "fr" : {
@@ -130,6 +160,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Demain, endurance 45 minutes, zone 2"
+          }
+        }
+      }
+    },
+    "En pause" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En pause"
+          }
+        }
+      }
+    },
+    "en pause" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "en pause"
           }
         }
       }
@@ -154,12 +204,32 @@
         }
       }
     },
+    "Mettre la course en pause" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mettre la course en pause"
+          }
+        }
+      }
+    },
     "moins %@" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "moins %@"
+          }
+        }
+      }
+    },
+    "Pause" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause"
           }
         }
       }
@@ -190,6 +260,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "repos"
+          }
+        }
+      }
+    },
+    "Reprendre" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprendre"
+          }
+        }
+      }
+    },
+    "Reprendre la course" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprendre la course"
           }
         }
       }
