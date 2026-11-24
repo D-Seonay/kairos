@@ -64,6 +64,14 @@ struct RunTextTests {
         #expect(RunText.distance(nil) == "—")
     }
 
+    @Test func liveDistanceAlwaysKeepsTwoDecimals() {
+        #expect(RunText.liveDistance(4_990) == "4,99 km")
+        #expect(RunText.liveDistance(5_000) == "5,00 km")
+        #expect(RunText.liveDistance(5_010) == "5,01 km")
+        #expect(RunText.liveDistance(12_400) == "12,40 km")
+        #expect(RunText.liveDistance(nil) == "—")
+    }
+
     @Test func goalLine() {
         let timed = RunLaunch(title: "Footing facile", runType: .easy, targetMinutes: 30)
         #expect(RunText.goalLine(timed) == "Footing facile · obj. 30 min")

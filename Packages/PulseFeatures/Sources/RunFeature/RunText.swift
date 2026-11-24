@@ -108,6 +108,17 @@ public enum RunText {
         return String(localized: "\(PulseFormat.decimal(meters / 1_000, maxFractionDigits: 2)) km", bundle: .module)
     }
 
+    /// « 4,99 km », « 5,00 km » : la distance de la course en cours, toujours à deux décimales pour que le chiffre ne saute pas
+    /// d'une largeur à l'autre en courant ; « — » sans distance.
+    static func liveDistance(_ meters: Double?) -> String {
+        guard let meters, meters.isFinite else { return dash }
+        let style = FloatingPointFormatStyle<Double>.number
+            .locale(Locale(identifier: "fr_FR"))
+            .precision(.fractionLength(2))
+            .grouping(.never)
+        return String(localized: "\((max(0, meters) / 1_000).formatted(style)) km", bundle: .module)
+    }
+
     /// « 4,4 kilomètres » ; `nil` sans distance.
     static func distanceSpoken(_ meters: Double?) -> String? {
         guard let meters, meters.isFinite else { return nil }
