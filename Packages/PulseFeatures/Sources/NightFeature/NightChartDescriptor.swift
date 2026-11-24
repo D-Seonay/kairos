@@ -12,7 +12,8 @@ enum NightChartDescriptor {
             let points = night.segments.filter { $0.stage == stage }.map { segment in
                 PulseChartDescriptor.Point(date: segment.start, y: (segment.end.timeIntervalSince(segment.start) / 60).rounded())
             }
-            return points.isEmpty ? nil : PulseChartDescriptor.Series(name: stage.displayName, points: points)
+            return points.isEmpty ? nil
+                : PulseChartDescriptor.Series(name: NightText.stageName(stage, hasStages: night.hasStages), points: points)
         }
     }
 

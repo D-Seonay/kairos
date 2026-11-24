@@ -18,6 +18,15 @@ struct NightChartDescriptorTests {
         #expect(series.first { $0.name == "Léger" }?.points.map(\.y) == [110, 190])
     }
 
+    @Test func unspecifiedRestOfAStagedNightIsItsOwnSeries() {
+        var night = NightFixtures.typicalNight(unspecified: 60)
+        night.segments = [SleepSegment(start: date(2026, 11, 19, 23, 10), end: date(2026, 11, 20, 1, 0), stage: .core),
+                          .init(start: date(2026, 11, 20, 5, 50), end: date(2026, 11, 20, 6, 50), stage: .asleepUnspecified)]
+        let series = NightChartDescriptor.series(night)
+        #expect(series.map(\.name) == ["Léger", "Sans phase"])
+        #expect(series.first { $0.name == "Léger" }?.points.map(\.y) == [110])
+    }
+
     @Test func unstagedDescriptorHasAsleepAndAwake() {
         var night = NightFixtures.typicalNight(hasStages: false)
         night.segments = [SleepSegment(start: date(2026, 11, 19, 23, 0), end: date(2026, 11, 20, 3, 0), stage: .asleepUnspecified),

@@ -32,6 +32,32 @@ struct NightTextTests {
         #expect(rows.allSatisfy { $0.delta == nil })
     }
 
+    @Test func breakdownNamesTheUnstagedRestSansPhase() {
+        let rows = NightText.breakdownRows(NightDetail(night: NightFixtures.typicalNight(unspecified: 15), averages: nil))
+        #expect(rows.map(\.name) == ["Profond", "Léger", "Paradoxal", "Éveil", "Sans phase"])
+    }
+
+    @Test func hypnogramGivesTheUnstagedRestItsOwnRow() {
+        var night = NightFixtures.typicalNight(unspecified: 60)
+        night.segments = [SleepSegment(start: NightFixtures.date(2026, 11, 20, 5, 50), end: NightFixtures.date(2026, 11, 20, 6, 50),
+                                       stage: .asleepUnspecified)]
+        #expect(NightText.hypnogramRows(night) == [.awake, .rem, .core, .deep, .asleepUnspecified])
+        #expect(NightText.stageName(.asleepUnspecified, hasStages: true) == "Sans phase")
+    }
+
+    @Test func hypnogramRowsWithoutUnstagedRest() {
+        var night = NightFixtures.typicalNight()
+        night.segments = [SleepSegment(start: NightFixtures.date(2026, 11, 20, 1), end: NightFixtures.date(2026, 11, 20, 2),
+                                       stage: .deep)]
+        #expect(NightText.hypnogramRows(night) == [.awake, .rem, .core, .deep])
+    }
+
+    @Test func hypnogramWithoutStagesHasAwakeAndAsleep() {
+        let night = NightFixtures.typicalNight(hasStages: false)
+        #expect(NightText.hypnogramRows(night) == [.awake, .asleepUnspecified])
+        #expect(NightText.stageName(.asleepUnspecified, hasStages: false) == "Endormi")
+    }
+
     @Test func breakdownHidesUnstagedRowWhenEmpty() {
         let rows = NightText.breakdownRows(NightDetail(night: NightFixtures.typicalNight(), averages: nil))
         #expect(rows.map(\.stage) == [.deep, .core, .rem, .awake])

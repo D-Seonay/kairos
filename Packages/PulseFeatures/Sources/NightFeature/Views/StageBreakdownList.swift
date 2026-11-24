@@ -49,7 +49,7 @@ private struct BreakdownRowView: View {
     }
 
     @ViewBuilder private var labels: some View {
-        Text(row.stage.displayName)
+        Text(row.name)
             .font(.subheadline.weight(.semibold))
             .foregroundStyle(PulsePalette.text)
         Text(PulseFormat.duration(minutes: row.minutes))
@@ -67,7 +67,7 @@ private struct BreakdownRowView: View {
 
     /// « Profond, 1 heure 30 minutes, 20 %, 12 minutes de plus que ta moyenne ».
     private var spoken: String {
-        var text = "\(row.stage.displayName), \(NightText.spokenMinutes(row.minutes)), \(NightText.share(row.share))"
+        var text = "\(row.name), \(NightText.spokenMinutes(row.minutes)), \(NightText.share(row.share))"
         if let delta = row.delta {
             text += String(localized: ", \(delta) par rapport à ta moyenne", bundle: .module)
         }
