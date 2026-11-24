@@ -33,7 +33,7 @@ public struct NightAggregator: Sendable {
             day: day,
             sdnnMs: meanSDNN(sdnn, in: sleepWindow),
             restingHeartRate: lastRestingHeartRate(restingHeartRate, on: day),
-            sleep: summary(asleepIntervals: asleep, retained: retainedIntervals(for: day, in: sleep))
+            sleep: summary(for: day, asleepIntervals: asleep, sleep: sleep)
         )
     }
 
@@ -47,11 +47,19 @@ public struct NightAggregator: Sendable {
         merge(retainedIntervals(for: day, in: sleep).map { DateInterval(start: $0.start, end: $0.end) })
     }
 
-    private func summary(asleepIntervals: [DateInterval], retained: [SleepInterval]) -> SleepSummary? {
+    /// Le total et le profond gardent leur calcul (ils font le score) ; les autres phases viennent de `NightSleepBuilder`,
+    /// qui compte les mêmes minutes endormies et profondes.
+    private func summary(for day: Date, asleepIntervals: [DateInterval], sleep: [SleepInterval]) -> SleepSummary? {
         guard !asleepIntervals.isEmpty else { return nil }
+        let retained = retainedIntervals(for: day, in: sleep)
         let hasStages = retained.contains { [.core, .deep, .rem].contains($0.stage) }
         let deep = merge(retained.filter { $0.stage == .deep }.map { DateInterval(start: $0.start, end: $0.end) })
-        return SleepSummary(asleepMinutes: minutes(asleepIntervals), deepMinutes: hasStages ? minutes(deep) : nil)
+        guard hasStages, let night = NightSleepBuilder(calendar: calendar).night(for: day, sleep: sleep) else {
+            return SleepSummary(asleepMinutes: minutes(asleepIntervals), deepMinutes: hasStages ? minutes(deep) : nil)
+        }
+        return SleepSummary(asleepMinutes: minutes(asleepIntervals), deepMinutes: minutes(deep), coreMinutes: night.coreMinutes,
+                            remMinutes: night.remMinutes, unspecifiedMinutes: night.unspecifiedMinutes,
+                            awakeMinutes: night.awakeMinutes)
     }
 
     /// Union d'intervalles : tri par début, fusion des chevauchements et des contacts.

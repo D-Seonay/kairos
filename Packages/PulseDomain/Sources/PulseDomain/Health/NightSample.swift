@@ -1,13 +1,23 @@
 import Foundation
 
-/// Résumé du sommeil d'une nuit. `deepMinutes` est nul quand la source ne fournit pas de phases.
+/// Résumé du sommeil d'une nuit. Les minutes par phase sont nulles quand la source ne fournit pas de phases ; sinon profond,
+/// léger, paradoxal et sans phase s'additionnent à `asleepMinutes`, et `awakeMinutes` compte l'éveil du bloc principal.
 public struct SleepSummary: Sendable, Equatable, Codable {
     public var asleepMinutes: Int
     public var deepMinutes: Int?
+    public var coreMinutes: Int?
+    public var remMinutes: Int?
+    public var unspecifiedMinutes: Int?
+    public var awakeMinutes: Int?
 
-    public init(asleepMinutes: Int, deepMinutes: Int?) {
+    public init(asleepMinutes: Int, deepMinutes: Int?, coreMinutes: Int? = nil, remMinutes: Int? = nil,
+                unspecifiedMinutes: Int? = nil, awakeMinutes: Int? = nil) {
         self.asleepMinutes = asleepMinutes
         self.deepMinutes = deepMinutes
+        self.coreMinutes = coreMinutes
+        self.remMinutes = remMinutes
+        self.unspecifiedMinutes = unspecifiedMinutes
+        self.awakeMinutes = awakeMinutes
     }
 }
 
