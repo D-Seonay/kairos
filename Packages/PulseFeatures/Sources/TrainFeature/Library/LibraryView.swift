@@ -12,6 +12,8 @@ public struct LibraryView: View {
     private let onPick: ([ExerciseReference]) -> Void
     @State private var opened: ExerciseReference?
     @State private var isCreating = false
+    /// Le nom donné au formulaire de création : la recherche restée sans résultat, ou rien.
+    @State private var creationName = ""
 
     /// Le modèle est gardé par l'écran : le premier reçu l'emporte, comme le veut `@State`.
     public init(model: LibraryModel, onPick: @escaping ([ExerciseReference]) -> Void = { _ in }) {
@@ -23,7 +25,7 @@ public struct LibraryView: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 10) {
                 filters
-                Button(String(localized: "Créer un exercice", bundle: .module)) { isCreating = true }
+                Button(String(localized: "Créer un exercice", bundle: .module)) { create(named: "") }
                     .buttonStyle(SecondaryButtonStyle())
                     .accessibilityIdentifier(TrainIdentifiers.libraryCreate)
                 if let message = model.errorMessage {
@@ -45,7 +47,7 @@ public struct LibraryView: View {
         }
         .sheet(isPresented: $isCreating) {
             NavigationStack {
-                CustomExerciseForm(model: model.creator(), onSaved: { _ in Task { await model.load() } })
+                CustomExerciseForm(model: model.creator(name: creationName), onSaved: { saved in Task { await didCreate(saved) } })
             }
         }
         .pulseAnnounceError(model.errorMessage)
@@ -99,6 +101,13 @@ public struct LibraryView: View {
                 .font(.subheadline)
                 .foregroundStyle(PulsePalette.text2)
                 .padding(.top, 8)
+            let searched = model.query.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !searched.isEmpty {
+                Button(String(localized: "Créer « \(searched) »", bundle: .module)) { create(named: searched) }
+                    .buttonStyle(SecondaryButtonStyle())
+                    .accessibilityLabel(String(localized: "Créer l'exercice \(searched)", bundle: .module))
+                    .accessibilityIdentifier(TrainIdentifiers.libraryCreateFromSearch)
+            }
         }
         section(String(localized: "Récents", bundle: .module), recents)
         section(recents.isEmpty ? String(localized: "Tous les exercices", bundle: .module)
@@ -120,6 +129,16 @@ public struct LibraryView: View {
                 }
             }
         }
+    }
+
+    private func create(named name: String) {
+        creationName = name
+        isCreating = true
+    }
+
+    /// Un exercice créé est choisi en mode choix ; en choix unique, il est rendu tout de suite.
+    private func didCreate(_ exercise: UserExercise) async {
+        if await model.didCreate(exercise) { onPick(model.confirm()) }
     }
 
     private func touch(_ reference: ExerciseReference) {

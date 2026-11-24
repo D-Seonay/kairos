@@ -843,6 +843,16 @@
         }
       }
     },
+    "Créer l'exercice %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer l'exercice %@"
+          }
+        }
+      }
+    },
     "Créer un exercice" : {
       "localizations" : {
         "fr" : {
