@@ -37,7 +37,8 @@ import Testing
         #expect(model.nights.count == 60)
         #expect(model.nights.last?.day == today)
         #expect(model.nights.last?.sdnnMs == 50)
-        #expect(model.nights.last?.sleep == SleepSummary(asleepMinutes: 480, deepMinutes: 0))
+        #expect(model.nights.last?.sleep == SleepSummary(asleepMinutes: 480, deepMinutes: 0, coreMinutes: 480, remMinutes: 0,
+                                                             unspecifiedMinutes: 0, awakeMinutes: 0))
         guard case .measured(let r)? = model.outcome else {
             Issue.record("expected measured, got \(String(describing: model.outcome))")
             return

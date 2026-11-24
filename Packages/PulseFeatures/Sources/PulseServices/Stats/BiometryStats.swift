@@ -16,18 +16,44 @@ public struct BaselinePoint: Sendable, Equatable, Identifiable {
     }
 }
 
-/// Une barre de sommeil : minutes dormies, dont la part de sommeil profond quand elle est connue.
+/// Une barre de sommeil : minutes dormies, dont la part de sommeil profond quand elle est connue. Quand au moins une nuit du
+/// grain a ses phases, les quatre phases (profond compris) se partagent la hauteur de la barre (spec sommeil §6.5).
 public struct SleepPoint: Sendable, Equatable, Identifiable {
     public var date: Date
     public var asleepMinutes: Double
     public var deepMinutes: Double?
+    public var coreMinutes: Double?
+    public var remMinutes: Double?
+    public var unspecifiedMinutes: Double?
 
     public var id: Date { date }
 
-    public init(date: Date, asleepMinutes: Double, deepMinutes: Double?) {
+    /// Vrai si la barre se découpe en phases ; sinon seul le profond est connu (ou rien).
+    public var hasStages: Bool { coreMinutes != nil }
+
+    public init(date: Date, asleepMinutes: Double, deepMinutes: Double?, coreMinutes: Double? = nil, remMinutes: Double? = nil,
+                unspecifiedMinutes: Double? = nil) {
         self.date = date
         self.asleepMinutes = asleepMinutes
         self.deepMinutes = deepMinutes
+        self.coreMinutes = coreMinutes
+        self.remMinutes = remMinutes
+        self.unspecifiedMinutes = unspecifiedMinutes
+    }
+}
+
+/// La part de chaque phase dans le sommeil des seules nuits qui ont leurs phases, de 0 à 1 ; les quatre s'additionnent à 1.
+public struct StageShares: Sendable, Equatable {
+    public var deep: Double
+    public var core: Double
+    public var rem: Double
+    public var unspecified: Double
+
+    public init(deep: Double, core: Double, rem: Double, unspecified: Double) {
+        self.deep = deep
+        self.core = core
+        self.rem = rem
+        self.unspecified = unspecified
     }
 }
 
@@ -52,6 +78,8 @@ public struct BiometryStats: Sendable, Equatable {
     public var sleepMinutes: StatsComparison?
     /// La part de sommeil profond, de 0 à 1 ; `nil` sans nuit qui connaisse le sommeil et sa part profonde.
     public var deepShare: Double?
+    /// La part de chaque phase sur les seules nuits qui ont leurs phases ; `nil` sans aucune.
+    public var stageShares: StageShares?
     public var score: StatsComparison?
     public var hrvPoints: [BaselinePoint]
     public var restingPoints: [BaselinePoint]
@@ -82,6 +110,7 @@ public struct BiometryStats: Sendable, Equatable {
             restingHeartRate: comparison { $0.restingHeartRate },
             sleepMinutes: comparison { $0.asleepMinutes.map(Double.init) },
             deepShare: deepShare(of: measured),
+            stageShares: stageShares(of: measured.map(\.recovery)),
             score: comparison({ $0.score }, measuredOnly: false),
             hrvPoints: baselinePoints(of: measured, bucket: bucket, calendar: calendar, value: { $0.sdnnMs },
                                       baseline: { $0.sdnnBaselineMs }),
@@ -135,13 +164,32 @@ public struct BiometryStats: Sendable, Equatable {
         }
     }
 
+    /// La hauteur d'une barre est la moyenne d'`asleepMinutes` de toutes les nuits du grain. Si au moins une nuit a ses phases,
+    /// leur part (sur ces seules nuits) découpe cette hauteur : les tranches s'additionnent toujours à la barre. Sinon seul le
+    /// profond moyen est donné, comme avant les phases.
     private static func sleepPoints(of rows: [DayRow], bucket: StatsBucket, calendar: Calendar) -> [SleepPoint] {
         grouped(rows, bucket: bucket, calendar: calendar).compactMap { group in
-            let deep = average(group.rows.compactMap { $0.deepMinutes.map(Double.init) })
-            return average(group.rows.compactMap { $0.asleepMinutes.map(Double.init) }).map {
-                SleepPoint(date: group.start, asleepMinutes: $0, deepMinutes: deep)
+            guard let height = average(group.rows.compactMap { $0.asleepMinutes.map(Double.init) }) else { return nil }
+            guard let shares = stageShares(of: group.rows) else {
+                let deep = average(group.rows.compactMap { $0.deepMinutes.map(Double.init) })
+                return SleepPoint(date: group.start, asleepMinutes: height, deepMinutes: deep)
             }
+            return SleepPoint(date: group.start, asleepMinutes: height, deepMinutes: shares.deep * height,
+                              coreMinutes: shares.core * height, remMinutes: shares.rem * height,
+                              unspecifiedMinutes: shares.unspecified * height)
         }
+    }
+
+    /// Les parts de phase sur les nuits qui ont leurs phases (et un sommeil non nul), pondérées par leur durée.
+    private static func stageShares(of recoveries: [DailyRecovery]) -> StageShares? {
+        let staged = recoveries.filter { ($0.asleepMinutes ?? 0) > 0 && $0.coreMinutes != nil }
+        func total(_ minutes: KeyPath<DailyRecovery, Int?>) -> Double {
+            Double(staged.reduce(0) { $0 + ($1[keyPath: minutes] ?? 0) })
+        }
+        let asleep = total(\.asleepMinutes)
+        guard asleep > 0 else { return nil }
+        return StageShares(deep: total(\.deepMinutes) / asleep, core: total(\.coreMinutes) / asleep,
+                           rem: total(\.remMinutes) / asleep, unspecified: total(\.unspecifiedMinutes) / asleep)
     }
 
     // MARK: - Moyennes

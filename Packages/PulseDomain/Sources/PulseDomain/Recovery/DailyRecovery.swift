@@ -16,6 +16,11 @@ public struct DailyRecovery: Sendable, Equatable, Codable, Identifiable {
     public var restingHeartRateBaseline: Double?
     public var asleepMinutes: Int?
     public var deepMinutes: Int?
+    /// Les minutes de léger, paradoxal, endormi sans phase et d'éveil de la nuit ; nulles sans phases (spec sommeil §6.2).
+    public var coreMinutes: Int?
+    public var remMinutes: Int?
+    public var unspecifiedMinutes: Int?
+    public var awakeMinutes: Int?
     public var missingFactors: [Factor]
     public var calibration: CalibrationState
     public var adjustments: [SessionAdjustment]
@@ -29,6 +34,7 @@ public struct DailyRecovery: Sendable, Equatable, Codable, Identifiable {
                 hrvScore: Double? = nil, restingHeartRateScore: Double? = nil, sleepScore: Double? = nil,
                 sdnnMs: Double? = nil, sdnnBaselineMs: Double? = nil, restingHeartRate: Double? = nil,
                 restingHeartRateBaseline: Double? = nil, asleepMinutes: Int? = nil, deepMinutes: Int? = nil,
+                coreMinutes: Int? = nil, remMinutes: Int? = nil, unspecifiedMinutes: Int? = nil, awakeMinutes: Int? = nil,
                 missingFactors: [Factor] = [], calibration: CalibrationState, adjustments: [SessionAdjustment] = [],
                 frozenAt: Date? = nil, originalSessionChosen: Bool? = nil, createdAt: Date, updatedAt: Date) {
         self.id = id
@@ -45,6 +51,10 @@ public struct DailyRecovery: Sendable, Equatable, Codable, Identifiable {
         self.restingHeartRateBaseline = restingHeartRateBaseline
         self.asleepMinutes = asleepMinutes
         self.deepMinutes = deepMinutes
+        self.coreMinutes = coreMinutes
+        self.remMinutes = remMinutes
+        self.unspecifiedMinutes = unspecifiedMinutes
+        self.awakeMinutes = awakeMinutes
         self.missingFactors = missingFactors
         self.calibration = calibration
         self.adjustments = adjustments

@@ -9,12 +9,16 @@ public struct StatsEnvironment: Sendable {
     public var train: TrainEnvironment
     public var calendar: Calendar
     public var now: @Sendable () -> Date
+    /// Les nuits du cache, pour l'écran Nuit ouvert depuis la carte Sommeil.
+    public var nights: NightDetailService
 
-    public init(service: StatsService, train: TrainEnvironment, calendar: Calendar, now: @escaping @Sendable () -> Date) {
+    public init(service: StatsService, train: TrainEnvironment, calendar: Calendar, now: @escaping @Sendable () -> Date,
+                nights: NightDetailService) {
         self.service = service
         self.train = train
         self.calendar = calendar
         self.now = now
+        self.nights = nights
     }
 }
 

@@ -26,7 +26,7 @@ import Testing
     @Test func typicalNight() {
         let rhr = [TimedSample(date: d(2026, 11, 20, 10, 0), value: 49)]
         let n = aggregator.night(for: day, sdnn: typicalSDNN, restingHeartRate: rhr, sleep: typicalSleep)
-        #expect(n == NightSample(day: day, sdnnMs: 50, restingHeartRate: 49, sleep: .init(asleepMinutes: 450, deepMinutes: 90)))
+        #expect(n == NightSample(day: day, sdnnMs: 50, restingHeartRate: 49, sleep: typicalSummary))
     }
 
     @Test func noSleepFallsBackToMidnightToEight() {
@@ -46,7 +46,40 @@ import Testing
 
     @Test func overlappingSourcesAreMergedNotSummed() {
         let n = aggregator.night(for: day, sdnn: [], restingHeartRate: [], sleep: typicalSleep + typicalSleep)
-        #expect(n.sleep == SleepSummary(asleepMinutes: 450, deepMinutes: 90))
+        #expect(n.sleep == typicalSummary)
+    }
+
+    /// Le résumé de `typicalSleep` : 300 min de léger, 90 de profond, 60 de paradoxal, 10 d'éveil.
+    var typicalSummary: SleepSummary {
+        SleepSummary(asleepMinutes: 450, deepMinutes: 90, coreMinutes: 300, remMinutes: 60, unspecifiedMinutes: 0, awakeMinutes: 10)
+    }
+
+    /// Le moteur de l'écran Nuit et celui du score comptent les mêmes minutes endormies et profondes pour la même nuit.
+    @Test func builderAgreesWithAggregatorOnTotals() {
+        let builder = NightSleepBuilder(calendar: TestCalendar.paris)
+        let wakeDayDST = TestCalendar.day(2026, 10, 25)
+        let fixtures: [(day: Date, sleep: [SleepInterval])] = [
+            (day, typicalSleep),
+            (day, typicalSleep + typicalSleep),
+            (day, [SleepInterval(start: d(2026, 11, 19, 23, 0), end: d(2026, 11, 20, 7, 0), stage: .core),
+                   .init(start: d(2026, 11, 20, 1, 0), end: d(2026, 11, 20, 2, 0), stage: .deep),
+                   .init(start: d(2026, 11, 19, 22, 30), end: d(2026, 11, 20, 7, 0), stage: .asleepUnspecified)]),
+            (day, [SleepInterval(start: d(2026, 11, 19, 18, 5), end: d(2026, 11, 19, 18, 30), stage: .core),
+                   .init(start: d(2026, 11, 19, 23, 0), end: d(2026, 11, 20, 7, 0), stage: .core)]),
+            (day, [SleepInterval(start: d(2026, 11, 20, 1, 0).addingTimeInterval(30), end: d(2026, 11, 20, 1, 30), stage: .deep),
+                   .init(start: d(2026, 11, 20, 1, 30), end: d(2026, 11, 20, 2, 0).addingTimeInterval(30), stage: .rem),
+                   .init(start: d(2026, 11, 20, 2, 0).addingTimeInterval(30), end: d(2026, 11, 20, 2, 30), stage: .core)]),
+            (day, [SleepInterval(start: d(2026, 11, 19, 23, 0), end: d(2026, 11, 20, 7, 0), stage: .asleepUnspecified)]),
+            (wakeDayDST, [SleepInterval(start: d(2026, 10, 24, 23, 0), end: d(2026, 10, 25, 7, 0), stage: .core)])
+        ]
+        for fixture in fixtures {
+            let summary = aggregator.night(for: fixture.day, sdnn: [], restingHeartRate: [], sleep: fixture.sleep).sleep
+            let night = builder.night(for: fixture.day, sleep: fixture.sleep)
+            #expect(summary?.asleepMinutes == night?.asleepMinutes)
+            if night?.hasStages == true {
+                #expect(summary?.deepMinutes == night?.deepMinutes)
+            }
+        }
     }
 
     @Test func dstNightUsesCalendar() {

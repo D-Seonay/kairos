@@ -78,7 +78,8 @@ struct StatsModelTests {
         let service = StatsService(profiles: profiles, programs: programs, workouts: workouts, recoveries: recoveries,
                                    records: personalRecords, userExercises: userExercises, library: library, calendar: calendar,
                                    now: clock)
-        environment = StatsEnvironment(service: service, train: train, calendar: calendar, now: clock)
+        environment = StatsEnvironment(service: service, train: train, calendar: calendar, now: clock,
+                                       nights: NightDetailService(cache: InMemoryHealthSampleCache(), calendar: calendar, now: clock))
     }
 
     @Test func loadFillsSnapshot() async {

@@ -109,6 +109,51 @@ struct BiometryStatsTests {
         #expect(result.hrv?.value == 53)
     }
 
+    /// Une nuit avec phases : profond, léger, paradoxal et sans phase s'additionnent à `asleep`.
+    private func staged(daysAgo: Int, asleep: Int, deep: Int, core: Int, rem: Int, unspecified: Int = 0) -> DailyRecovery {
+        var night = recovery(daysAgo: daysAgo, asleep: asleep, deep: deep)
+        night.coreMinutes = core
+        night.remMinutes = rem
+        night.unspecifiedMinutes = unspecified
+        night.awakeMinutes = 10
+        return night
+    }
+
+    @Test func sleepPointCarriesStagesWhenNightsHaveThem() throws {
+        let result = stats([staged(daysAgo: 1, asleep: 480, deep: 96, core: 288, rem: 96)])
+        let point = try #require(result.sleepPoints.first)
+        #expect(point.hasStages)
+        #expect(point.deepMinutes == 96 && point.coreMinutes == 288 && point.remMinutes == 96 && point.unspecifiedMinutes == 0)
+    }
+
+    @Test func mixedWeekScalesStageSharesToTheBarHeight() throws {
+        let result = stats([recovery(daysAgo: 1, asleep: 420, deep: 70), staged(daysAgo: 2, asleep: 480, deep: 96, core: 288, rem: 96)],
+                           period: .year)
+        let point = try #require(result.sleepPoints.first)
+        #expect(result.sleepPoints.count == 1)
+        #expect(point.asleepMinutes == 450)
+        func near(_ value: Double?, _ expected: Double) -> Bool { value.map { abs($0 - expected) < 1e-9 } ?? false }
+        #expect(near(point.deepMinutes, 90) && near(point.coreMinutes, 270) && near(point.remMinutes, 90))
+        #expect(near(point.unspecifiedMinutes, 0))
+        let sum = (point.deepMinutes ?? 0) + (point.coreMinutes ?? 0) + (point.remMinutes ?? 0) + (point.unspecifiedMinutes ?? 0)
+        #expect(abs(sum - point.asleepMinutes) < 1e-9)
+    }
+
+    @Test func weekWithoutStagedNightsKeepsDeepOnly() throws {
+        let result = stats([recovery(daysAgo: 1, asleep: 420, deep: 80), recovery(daysAgo: 2, asleep: 480, deep: 100)], period: .year)
+        let point = try #require(result.sleepPoints.first)
+        #expect(!point.hasStages)
+        #expect(point.deepMinutes == 90 && point.coreMinutes == nil && point.remMinutes == nil)
+    }
+
+    @Test func stageSharesIgnoreUnstagedNights() throws {
+        let result = stats([recovery(daysAgo: 1, asleep: 300, deep: 100),
+                            staged(daysAgo: 2, asleep: 400, deep: 80, core: 240, rem: 60, unspecified: 20)])
+        let shares = try #require(result.stageShares)
+        #expect(shares.deep == 0.2 && shares.core == 0.6 && shares.rem == 0.15 && shares.unspecified == 0.05)
+        #expect(stats([recovery(daysAgo: 1, asleep: 300, deep: 100)]).stageShares == nil)
+    }
+
     @Test func categoriesAlwaysListed() {
         let result = stats([])
         #expect(result.categories == RecoveryCategory.allCases.map { CategoryCount(category: $0, days: 0) })

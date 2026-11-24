@@ -14,10 +14,12 @@ public struct TodayEnvironment: Sendable {
     public var library: ContentLibrary
     public var calendar: Calendar
     public var now: @Sendable () -> Date
+    /// Les nuits du cache, pour l'écran Nuit ouvert depuis la tuile Sommeil.
+    public var nights: NightDetailService
 
     public init(refresher: DayRefresher, workouts: any WorkoutRepository, userExercises: any UserExerciseRepository,
                 exerciseSettings: any ExerciseSettingsRepository, activeSession: ActiveSessionService, library: ContentLibrary,
-                calendar: Calendar, now: @escaping @Sendable () -> Date) {
+                calendar: Calendar, now: @escaping @Sendable () -> Date, nights: NightDetailService) {
         self.refresher = refresher
         self.workouts = workouts
         self.userExercises = userExercises
@@ -26,5 +28,6 @@ public struct TodayEnvironment: Sendable {
         self.library = library
         self.calendar = calendar
         self.now = now
+        self.nights = nights
     }
 }

@@ -93,6 +93,20 @@ public actor InMemoryRecoveryRepository: RecoveryRepository {
         checkInsByDay.values.filter { $0.day >= from && $0.day < to }.sorted { $0.day < $1.day }
     }
 
+    public func backfillSleepStages(_ nights: [NightSample]) async throws {
+        for night in nights {
+            guard let sleep = night.sleep, sleep.coreMinutes != nil else { continue }
+            let day = calendar.startOfDay(for: night.day)
+            guard var recovery = recoveries[day], recovery.coreMinutes == nil,
+                  recovery.asleepMinutes == sleep.asleepMinutes, recovery.deepMinutes == sleep.deepMinutes else { continue }
+            recovery.coreMinutes = sleep.coreMinutes
+            recovery.remMinutes = sleep.remMinutes
+            recovery.unspecifiedMinutes = sleep.unspecifiedMinutes
+            recovery.awakeMinutes = sleep.awakeMinutes
+            recoveries[day] = recovery
+        }
+    }
+
     public func save(_ checkIn: CheckIn) async throws {
         var stamped = checkIn
         stamped.day = calendar.startOfDay(for: checkIn.day)

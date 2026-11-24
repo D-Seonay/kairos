@@ -1,4 +1,5 @@
 import CheckInFeature
+import NightFeature
 import PulseDesignSystem
 import PulseDomain
 import PulseServices
@@ -23,6 +24,8 @@ public struct TodayView: View {
     /// L'écran Compléments poussé ; l'app le tient pour qu'un rappel touché l'ouvre. Sans lui, l'accueil garde le sien.
     private let showsSupplements: Binding<Bool>?
     @State private var localShowsSupplements = false
+    /// Le modèle de l'écran Nuit, créé au toucher de la tuile Sommeil : il garde la nuit affichée tant que l'écran reste poussé.
+    @State private var nightModel: NightModel?
 
     public init(model: TodayModel, supplements: SupplementsModel? = nil, showsSupplements: Binding<Bool>? = nil,
                 onOpenProfile: @escaping () -> Void, onStartSession: @escaping (SessionLaunch) -> Void,
@@ -57,6 +60,9 @@ public struct TodayView: View {
                 }
                 .navigationDestination(isPresented: isShowingSupplements) {
                     if let supplements { SupplementsView(model: supplements) }
+                }
+                .navigationDestination(isPresented: $model.isShowingNight) {
+                    if let nightModel { NightScreen(model: nightModel) }
                 }
         }
         .sheet(item: $model.sheet) { sheet in
@@ -94,7 +100,7 @@ public struct TodayView: View {
                 }
                 PulseSectionHeader(String(localized: "Tendances", bundle: .module))
                 LoadCard(content: model.load)
-                TrendTilesView(tiles: model.trends)
+                TrendTilesView(tiles: model.trends, onOpenSleep: model.canOpenNight ? openNight : nil)
             }
             .padding(PulseMetrics.spacing)
         }
@@ -102,6 +108,13 @@ public struct TodayView: View {
             await model.refresh()
             await supplements?.load()
         }
+    }
+
+    /// Pousse l'écran Nuit sur la nuit qui s'est terminée ce matin (ou la plus récente).
+    private func openNight() {
+        let environment = model.environment
+        nightModel = NightModel(service: environment.nights, initialDay: environment.now(), calendar: environment.calendar)
+        model.isShowingNight = true
     }
 
     private var isShowingSupplements: Binding<Bool> {

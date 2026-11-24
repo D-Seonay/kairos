@@ -18,7 +18,7 @@ public enum PulseSchemaV4: VersionedSchema {
     /// Les 6 modèles locaux, figés en V2a : `StoredRunDraft` et `StoredRunHealthSummary`, ajoutés en V5, n'en font pas partie.
     static let localModels: [any PersistentModel.Type] = [
         StoredCachedHealthSample.self, StoredHealthQueryAnchor.self, StoredActiveSessionSnapshot.self,
-        StoredRecoveryReading.self, StoredImportedWorkout.self, StoredImportedBodyMeasurement.self
+        PulseSchemaV6.StoredRecoveryReading.self, StoredImportedWorkout.self, StoredImportedBodyMeasurement.self
     ]
 
     public static var models: [any PersistentModel.Type] {

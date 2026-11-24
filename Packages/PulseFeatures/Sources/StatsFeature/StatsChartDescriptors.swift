@@ -59,6 +59,15 @@ enum StatsChartDescriptors {
         let bucket = window.period.chartBucket
         let axisTitle = StatsText.nightAxisName(bucket)
         let top = (points.map(\.asleepMinutes).max() ?? 0) / 60
+        // Typées à part : concaténées à `stageSeries`, ces deux séries en `.init` ralentiraient trop le vérificateur de types.
+        let base: [PulseChartDescriptor.Series] = [
+            .init(name: String(localized: "Sommeil total", bundle: .module),
+                  points: points.map { .init(date: $0.date, y: $0.asleepMinutes / 60) }),
+            .init(name: String(localized: "Sommeil profond", bundle: .module),
+                  points: points.compactMap { point in
+                      point.deepMinutes.map { .init(date: point.date, y: min($0, point.asleepMinutes) / 60) }
+                  })
+        ]
         return PulseChartDescriptor(
             title: String(localized: "Sommeil", bundle: .module),
             summary: StatsText.sleepSummary(points: points, deepShare: deepShare, period: window.period, bucket: bucket,
@@ -66,13 +75,23 @@ enum StatsChartDescriptors {
             xAxis: .dates(title: axisTitle),
             yAxis: .init(title: String(localized: "Sommeil, en heures", bundle: .module), unit: "", range: 0...max(top, 1),
                          valueText: { StatsText.durationSpoken(minutes: $0 * 60) }),
-            series: [.init(name: String(localized: "Sommeil total", bundle: .module),
-                           points: points.map { .init(date: $0.date, y: $0.asleepMinutes / 60) }),
-                     .init(name: String(localized: "Sommeil profond", bundle: .module),
-                           points: points.compactMap { point in
-                               point.deepMinutes.map { .init(date: point.date, y: min($0, point.asleepMinutes) / 60) }
-                           })],
+            series: base + stageSeries(points),
             calendar: window.calendar)
+    }
+
+    /// Une série par autre phase présente sur la période (léger, paradoxal, sans phase), seulement pour les barres à phases.
+    private static func stageSeries(_ points: [SleepPoint]) -> [PulseChartDescriptor.Series] {
+        let stages: [(String, KeyPath<SleepPoint, Double?>)] = [
+            (String(localized: "Sommeil léger", bundle: .module), \.coreMinutes),
+            (String(localized: "Sommeil paradoxal", bundle: .module), \.remMinutes),
+            (String(localized: "Sommeil sans phase", bundle: .module), \.unspecifiedMinutes)
+        ]
+        return stages.compactMap { name, keyPath in
+            let series = points.compactMap { point in
+                point[keyPath: keyPath].map { PulseChartDescriptor.Point(date: point.date, y: $0 / 60) }
+            }
+            return series.contains { $0.y > 0 } ? PulseChartDescriptor.Series(name: name, points: series) : nil
+        }
     }
 
     static func categories(_ categories: [CategoryCount], window: StatsWindow) -> PulseChartDescriptor {

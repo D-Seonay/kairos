@@ -26,7 +26,8 @@ extension AppDependencies {
 
     func todayEnvironment() -> TodayEnvironment {
         TodayEnvironment(refresher: refresher, workouts: workouts, userExercises: userExercises, exerciseSettings: exerciseSettings,
-                         activeSession: liveSession, library: content, calendar: calendar, now: now)
+                         activeSession: liveSession, library: content, calendar: calendar, now: now,
+                         nights: NightDetailService(cache: healthCache, calendar: calendar, now: now))
     }
 
     func trainEnvironment() -> TrainEnvironment {
@@ -45,7 +46,8 @@ extension AppDependencies {
         let service = StatsService(profiles: profiles, programs: programs, workouts: workouts, recoveries: recovery,
                                    records: personalRecords, userExercises: userExercises, library: content, calendar: calendar,
                                    now: now)
-        return StatsEnvironment(service: service, train: trainEnvironment(), calendar: calendar, now: now)
+        return StatsEnvironment(service: service, train: trainEnvironment(), calendar: calendar, now: now,
+                                nights: NightDetailService(cache: healthCache, calendar: calendar, now: now))
     }
 
     /// L'onglet Profil : le résumé et les pesées relisent les dépôts à chaque lecture, les réglages passent par le service partagé,

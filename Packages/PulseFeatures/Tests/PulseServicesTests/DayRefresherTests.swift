@@ -102,6 +102,23 @@ struct DayRefresherTests {
         #expect(await fixture.notifications.scheduled.isEmpty)
     }
 
+    /// Hier a un score enregistré avant les phases (480 min, profond 96) : le passage du jour lui ajoute ses phases, et rien d'autre.
+    @Test func refreshBackfillsStagesOfPastNights() async throws {
+        let fixture = RefresherFixture(scenario: .goodNight)
+        try await fixture.adopt()
+        let yesterday = TestClock.date("2026-11-01T00:00")
+        let stored = DailyRecovery(day: yesterday, score: 74, category: .normal, isEstimated: false, asleepMinutes: 480,
+                                   deepMinutes: 96, calibration: .ready, createdAt: yesterday, updatedAt: yesterday)
+        try await fixture.recovery.save(stored)
+
+        _ = await fixture.refresher.refresh(origin: .foreground)
+
+        let backfilled = try #require(try await fixture.score(on: "2026-11-01T00:00"))
+        #expect(backfilled.coreMinutes == 294 && backfilled.remMinutes == 90)
+        #expect(backfilled.unspecifiedMinutes == 0 && backfilled.awakeMinutes == 0)
+        #expect(backfilled.score == 74 && backfilled.asleepMinutes == 480 && backfilled.deepMinutes == 96)
+    }
+
     @Test func publishedSnapshotCarriesTheProfileFigure() async throws {
         let fixture = RefresherFixture(scenario: .goodNight)
         try await fixture.adopt()

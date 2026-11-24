@@ -56,6 +56,24 @@ public actor SwiftDataRecoveryRepository: ModelActor, RecoveryRepository {
         }
     }
 
+    /// Ne touche que les lectures locales : la ligne synchronisée (et son `updatedAt`) reste telle quelle. Un seul `save()`.
+    public func backfillSleepStages(_ nights: [NightSample]) throws {
+        var changed = false
+        for night in nights {
+            guard let sleep = night.sleep, sleep.coreMinutes != nil else { continue }
+            let day = calendar.startOfDay(for: night.day)
+            guard let reading = try modelContext.first(StoredRecoveryReading.self, where: #Predicate { $0.day == day }),
+                  reading.coreMinutes == nil, reading.asleepMinutes == sleep.asleepMinutes,
+                  reading.deepMinutes == sleep.deepMinutes else { continue }
+            reading.coreMinutes = sleep.coreMinutes
+            reading.remMinutes = sleep.remMinutes
+            reading.unspecifiedMinutes = sleep.unspecifiedMinutes
+            reading.awakeMinutes = sleep.awakeMinutes
+            changed = true
+        }
+        if changed { try modelContext.save() }
+    }
+
     public func checkIns(from: Date, to: Date) throws -> [CheckIn] {
         let descriptor = FetchDescriptor<StoredCheckIn>(
             predicate: #Predicate { $0.deletedAt == nil && $0.day >= from && $0.day < to },

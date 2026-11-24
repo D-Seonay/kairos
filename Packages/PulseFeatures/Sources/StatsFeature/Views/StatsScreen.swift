@@ -1,3 +1,4 @@
+import NightFeature
 import PulseDesignSystem
 import PulseDomain
 import PulseServices
@@ -11,6 +12,10 @@ public struct StatsScreen: View {
     /// La période choisie, gardée par sa valeur brute ; poussée dans le modèle à l'apparition et à chaque choix.
     @AppStorage("stats.period") private var storedPeriod = StatsPeriod.month.rawValue
     @State private var openedExercise: ExerciseReference?
+    /// Vrai quand l'écran Nuit est poussé depuis la carte Sommeil de la vue Biométrie.
+    @State private var showsNights = false
+    /// Le modèle de l'écran Nuit, créé au toucher du lien : il garde la nuit affichée tant que l'écran reste poussé.
+    @State private var nightModel: NightModel?
 
     public init(model: StatsModel) {
         self.model = model
@@ -23,6 +28,9 @@ public struct StatsScreen: View {
                 .hidingNavigationBar()
                 .navigationDestination(item: $openedExercise) { reference in
                     ExerciseSheetView(model: progressionSheet(for: reference))
+                }
+                .navigationDestination(isPresented: $showsNights) {
+                    if let nightModel { NightScreen(model: nightModel) }
                 }
         }
         .onAppear(perform: applyStoredPeriod)
@@ -37,6 +45,12 @@ public struct StatsScreen: View {
         let sheet = ExerciseSheetModel(environment: model.environment.train, reference: reference)
         sheet.tab = .progression
         return sheet
+    }
+
+    /// Pousse l'écran Nuit sur la nuit la plus récente.
+    private func openNights() {
+        nightModel = NightModel(service: model.environment.nights, initialDay: nil, calendar: model.environment.calendar)
+        showsNights = true
     }
 
     private func applyStoredPeriod() {
@@ -108,7 +122,7 @@ public struct StatsScreen: View {
         case .load:
             LoadSection(load: snapshot.load, window: window)
         case .biometry:
-            BiometrySection(biometry: snapshot.biometry, window: window)
+            BiometrySection(biometry: snapshot.biometry, window: window, onOpenNights: openNights)
         case .muscles:
             MusclesSection(muscles: snapshot.muscles, window: window)
         case .attendance:

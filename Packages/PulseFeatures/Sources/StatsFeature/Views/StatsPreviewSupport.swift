@@ -60,7 +60,8 @@ enum StatsPreviewSupport {
         let service = StatsService(profiles: profiles, programs: programs, workouts: workouts, recoveries: recoveries,
                                    records: personalRecords, userExercises: userExercises, library: library, calendar: calendar,
                                    now: clock)
-        return StatsEnvironment(service: service, train: train, calendar: calendar, now: clock)
+        return StatsEnvironment(service: service, train: train, calendar: calendar, now: clock,
+                                nights: NightDetailService(cache: InMemoryHealthSampleCache(), calendar: calendar, now: clock))
     }
 
     /// Le jour `offset` (0 = aujourd'hui, négatif = passé) à l'heure donnée.

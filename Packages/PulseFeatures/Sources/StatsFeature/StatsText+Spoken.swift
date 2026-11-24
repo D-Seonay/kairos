@@ -370,6 +370,20 @@ extension StatsText {
     /// « Nuit du 12 novembre » et « 7 heures 12 minutes, dont 1 heure 20 minutes de sommeil profond ».
     static func sleepPointSpoken(point: SleepPoint, bucket: StatsBucket, calendar: Calendar) -> (label: String, value: String) {
         var value = durationSpoken(minutes: point.asleepMinutes)
+        if point.hasStages {
+            let parts = [(point.deepMinutes, String(localized: "de profond", bundle: .module)),
+                         (point.coreMinutes, String(localized: "de léger", bundle: .module)),
+                         (point.remMinutes, String(localized: "de paradoxal", bundle: .module)),
+                         (point.unspecifiedMinutes, String(localized: "sans phase", bundle: .module))]
+                .compactMap { minutes, name -> String? in
+                    guard let minutes, minutes.rounded() > 0 else { return nil }
+                    return "\(durationSpoken(minutes: minutes)) \(name)"
+                }
+            if !parts.isEmpty {
+                value += String(localized: ", dont \(parts.joined(separator: ", "))", bundle: .module)
+            }
+            return (nightLabel(point.date, bucket: bucket, calendar: calendar), value)
+        }
         if let deep = point.deepMinutes, deep > 0 {
             let duration = durationSpoken(minutes: min(deep, point.asleepMinutes))
             value += String(localized: ", dont \(duration) de sommeil profond", bundle: .module)

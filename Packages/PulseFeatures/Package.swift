@@ -14,6 +14,7 @@ let package = Package(
         .library(name: "PulseServices", targets: ["PulseServices"]),
         .library(name: "CheckInFeature", targets: ["CheckInFeature"]),
         .library(name: "LiveSessionFeature", targets: ["LiveSessionFeature"]),
+        .library(name: "NightFeature", targets: ["NightFeature"]),
         .library(name: "OnboardingFeature", targets: ["OnboardingFeature"]),
         .library(name: "PhotosFeature", targets: ["PhotosFeature"]),
         .library(name: "PlanningFeature", targets: ["PlanningFeature"]),
@@ -52,6 +53,12 @@ let package = Package(
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .target(
+            name: "NightFeature",
+            dependencies: ["PulseServices", designSystem, domain],
+            resources: [.process("Resources")],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .target(
             name: "OnboardingFeature",
             dependencies: ["PulseServices", "CheckInFeature", designSystem, domain, content],
             resources: [.process("Resources")],
@@ -84,7 +91,7 @@ let package = Package(
         ),
         .target(
             name: "StatsFeature",
-            dependencies: ["PulseServices", "TrainFeature", designSystem, domain, recoveryEngine, content],
+            dependencies: ["PulseServices", "TrainFeature", "NightFeature", designSystem, domain, recoveryEngine, content],
             resources: [.process("Resources")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
@@ -96,7 +103,8 @@ let package = Package(
         ),
         .target(
             name: "TodayFeature",
-            dependencies: ["PulseServices", "CheckInFeature", "SupplementsFeature", designSystem, domain, recoveryEngine, content],
+            dependencies: ["PulseServices", "CheckInFeature", "SupplementsFeature", "NightFeature", designSystem, domain, recoveryEngine,
+                           content],
             resources: [.process("Resources")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
@@ -125,6 +133,11 @@ let package = Package(
         .testTarget(
             name: "LiveSessionFeatureTests",
             dependencies: ["LiveSessionFeature", "TrainFeature", "PhotosFeature", "PulseServices", domain, recoveryEngine, content],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .testTarget(
+            name: "NightFeatureTests",
+            dependencies: ["NightFeature", "PulseServices", domain],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(

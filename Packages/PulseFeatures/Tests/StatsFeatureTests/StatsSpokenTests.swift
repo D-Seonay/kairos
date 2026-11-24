@@ -266,6 +266,14 @@ struct StatsMarkSpokenTests {
         #expect(light.value == "7 heures")
     }
 
+    @Test func sleepPointSpokenListsStages() {
+        let point = SleepPoint(date: Spoken.date(11, 12), asleepMinutes: 450, deepMinutes: 90, coreMinutes: 270, remMinutes: 90,
+                               unspecifiedMinutes: 0)
+        let spoken = StatsText.sleepPointSpoken(point: point, bucket: .day, calendar: Spoken.calendar)
+        #expect(spoken.value
+            == "7 heures 30 minutes, dont 1 heure 30 minutes de profond, 4 heures 30 minutes de léger, 1 heure 30 minutes de paradoxal")
+    }
+
     @Test func categoryPoint() {
         let spoken = StatsText.categorySpoken(CategoryCount(category: .overreached, days: 1))
         #expect(spoken.label == "Surmenage" && spoken.value == "1 jour")

@@ -78,9 +78,10 @@ enum TodayPreviewSupport {
             try? await recovery.save(seeded)
         }
         let source = ScenarioHealthSource(scenario: scenario, now: now, calendar: calendar)
+        let healthCache = InMemoryHealthSampleCache()
         let refresher = DayRefresher(
             profiles: profiles, programs: programs, recovery: recovery,
-            nightHistory: NightHistory(source: source, cache: InMemoryHealthSampleCache(), calendar: calendar),
+            nightHistory: NightHistory(source: source, cache: healthCache, calendar: calendar),
             scores: DailyScoreService(recovery: recovery, calendar: calendar),
             widgets: StubWidgetPublisher(), notifications: StubNotificationScheduler(), activity: InMemoryDayActivityLog(),
             calendar: calendar, now: { now })
@@ -94,7 +95,8 @@ enum TodayPreviewSupport {
             activity: StubSessionActivityController(), calendar: calendar, now: { now })
         return TodayModel(environment: TodayEnvironment(
             refresher: refresher, workouts: workouts, userExercises: userExercises, exerciseSettings: settings,
-            activeSession: activeSession, library: library, calendar: calendar, now: { now }))
+            activeSession: activeSession, library: library, calendar: calendar, now: { now },
+            nights: NightDetailService(cache: healthCache, calendar: calendar, now: { now })))
     }
 
     /// Un score estimé de surmenage (check-in très bas), lundi 2 novembre.

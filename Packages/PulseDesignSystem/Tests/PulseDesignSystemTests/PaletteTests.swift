@@ -209,3 +209,31 @@ private func hex(_ color: PulseRGBA) -> UInt32 {
     #expect(PulsePalette.liveBackgroundRGBA == PulseRGBA(hex: 0x000000))
     #expect(PulsePalette.liveBackgroundRGBA.opacity == 1)
 }
+
+/// WCAG 1.4.11 : chaque phase de sommeil, dessinée dans l'hypnogramme et les barres de Stats, atteint 3:1 sur le papier et la carte.
+@Test func sleepStageColorsReachThreeToOne() {
+    let papers = [PulsePalette.backgroundLightRGBA, PulsePalette.surfaceLightRGBA]
+    let stages: [SleepStage] = [.inBed, .awake, .asleepUnspecified, .core, .deep, .rem]
+    for stage in stages {
+        for paper in papers {
+            let ratio = Contrast.ratio(stage.colorRGBA, on: paper)
+            #expect(ratio >= 3, "\(stage) : \(ratio)")
+        }
+    }
+}
+
+@Test func sleepStageNamesAreDistinct() {
+    let stages: [SleepStage] = [.inBed, .awake, .asleepUnspecified, .core, .deep, .rem]
+    #expect(Set(stages.map(\.displayName)).count == 6)
+    #expect(SleepStage.chartOrder == [.awake, .rem, .core, .deep])
+}
+
+/// Les tranches voisines d'une barre de Stats (profond, léger, paradoxal, sans phase, de bas en haut) se distinguent par leur
+/// clarté, pas seulement par leur teinte : lisibles avec un daltonisme courant (deutéranopie), où le bleu et le violet se confondent.
+@Test func adjacentStackedStagesDifferInLightness() {
+    let stack: [SleepStage] = [.deep, .core, .rem, .asleepUnspecified]
+    for (lower, upper) in zip(stack, stack.dropFirst()) {
+        let ratio = Contrast.ratio(lower.colorRGBA, on: upper.colorRGBA)
+        #expect(ratio >= 1.5, "\(lower) / \(upper) : \(ratio)")
+    }
+}

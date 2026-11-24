@@ -31,6 +31,13 @@ public final class TodayModel {
     private(set) var why: WhyContent?
     /// Vrai quand l'écran « Pourquoi » est poussé dans la pile de l'accueil.
     var isShowingWhy = false
+    /// Vrai quand l'écran Nuit est poussé depuis la tuile Sommeil.
+    var isShowingNight = false
+
+    /// La tuile Sommeil ouvre l'écran Nuit dès qu'elle montre au moins une nuit ; sans nuit, elle reste non touchable.
+    var canOpenNight: Bool {
+        trends.first { $0.factor == .sleep }?.values.contains { $0 != nil } ?? false
+    }
     public private(set) var isLoading = false
     /// Vrai quand la dernière lecture n'a pas pu calculer le score : sans score affiché, la carte le dit et propose de réessayer.
     public private(set) var scoreFailed = false
