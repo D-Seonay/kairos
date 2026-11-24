@@ -19,7 +19,7 @@ struct SessionLiveActivity: Widget {
                 DynamicIslandExpandedRegion(.leading) {
                     SessionIslandLeading(state: context.model)
                 }
-                DynamicIslandExpandedRegion(.trailing) {
+                DynamicIslandExpandedRegion(.trailing, priority: 1) {
                     SessionIslandTrailing(state: context.model)
                 }
                 DynamicIslandExpandedRegion(.center) {

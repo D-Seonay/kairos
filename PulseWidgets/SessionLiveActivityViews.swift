@@ -216,14 +216,17 @@ struct SessionTitleLine: View {
     }
 }
 
-/// L'écran verrouillé, sur 160 pt au plus : anneau, titre et « 2 / 18 », série suivante et temps restant, puis les boutons pendant
-/// un repos ; hors repos, l'anneau des séries, la durée écoulée et la barre des séries sous l'en-tête.
+/// L'écran verrouillé, sur 160 pt au plus, rangé comme la Dynamic Island étendue : anneau, titre et « 2 / 18 », temps restant ;
+/// la série suivante sur toute la largeur ; puis les boutons pendant un repos, ou la barre des séries hors repos.
 struct SessionLockScreenView: View {
     let state: SessionActivityModel
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 8) {
             header
+            if let nextSet = state.nextSet {
+                SessionNextSetText(nextSet: nextSet, lineLimit: 1)
+            }
             if state.restInterval != nil {
                 SessionRestButtons()
             } else if state.showsProgress {
@@ -240,20 +243,16 @@ struct SessionLockScreenView: View {
         HStack(alignment: .center, spacing: 12) {
             SessionLeadingGlyph(state: state, iconFont: .title2)
                 .frame(width: 44, height: 44)
-            VStack(alignment: .leading, spacing: 2) {
-                SessionTitleLine(state: state)
-                if let nextSet = state.nextSet {
-                    SessionNextSetText(nextSet: nextSet, lineLimit: 2)
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            // Un minuteur système réserve sa largeur la plus grande : calé à droite dans une largeur bornée, il touche le bord.
+            SessionTitleLine(state: state)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            // Un minuteur système ne rétrécit pas : il se coupe (« 1:… »). Sa taille est plafonnée pour que « 1:15:12 » tienne
+            // dans les 124 pt réservés, calé à droite.
             SessionClockText(state: state)
-                .font(PulseFont.value(.largeTitle))
+                .font(PulseFont.value(.title))
                 .foregroundStyle(SessionActivityStyle.accent)
-                .minimumScaleFactor(0.6)
                 .multilineTextAlignment(.trailing)
-                .frame(maxWidth: 124, alignment: .trailing)
+                .dynamicTypeSize(...DynamicTypeSize.xLarge)
+                .frame(width: 124, alignment: .trailing)
         }
     }
 }
@@ -270,17 +269,18 @@ struct SessionIslandLeading: View {
     }
 }
 
-/// À droite de la Dynamic Island étendue : le temps restant, ou la durée écoulée.
+/// À droite de la Dynamic Island étendue : le temps restant, ou la durée écoulée. Un minuteur système ne rétrécit pas, il se
+/// coupe (« 1:… ») : la région a la priorité sur le titre, une largeur fixe et une taille plafonnée où « 1:15:12 » tient.
 struct SessionIslandTrailing: View {
     let state: SessionActivityModel
 
     var body: some View {
         SessionClockText(state: state)
-            .font(PulseFont.value(.title))
+            .font(PulseFont.value(.title2))
             .foregroundStyle(SessionActivityStyle.accent)
-            .minimumScaleFactor(0.7)
             .multilineTextAlignment(.trailing)
-            .frame(maxWidth: 96, alignment: .trailing)
+            .dynamicTypeSize(...DynamicTypeSize.large)
+            .frame(width: 100, alignment: .trailing)
             .padding(.trailing, 4)
             .sessionActivityDark()
     }
