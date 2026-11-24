@@ -167,3 +167,19 @@ private struct EraseFixture {
     try await StoreWiper(modelContainer: container).wipeAll()
     #expect(try ModelContext(container).fetchCount(FetchDescriptor<StoredSessionPhoto>()) == 0)
 }
+
+/// Les photos de corps vivent hors du magasin : l'effacement total doit les vider elles aussi, même si Santé échoue.
+@Test func eraserDeletesBodyPhotos() async throws {
+    let fixture = try EraseFixture()
+    let directory = FileManager.default.temporaryDirectory.appendingPathComponent("pulse-body-\(UUID().uuidString)", isDirectory: true)
+    let store = FileBodyPhotoStore(directory: directory)
+    try await store.save(BodyPhoto(id: UUID(), pose: .front, takenAt: Fixed.t0, createdAt: Fixed.t0), image: Sample.photoImage(seed: 1))
+    try await store.save(BodyPhoto(id: UUID(), pose: .back, takenAt: Fixed.t1, createdAt: Fixed.t1), image: Sample.photoImage(seed: 2))
+    #expect(try await store.photos().count == 2)
+    let eraser = SwiftDataEraser(container: fixture.box.container, defaultsSuite: fixture.suite, defaultsDomain: fixture.suite,
+                                 healthEraser: fixture.health, notifications: nil, widgets: nil, exportsDirectory: fixture.exports,
+                                 bodyPhotos: store)
+    try await eraser.eraseEverything(options: EraseOptions(includeAppleHealth: false))
+    #expect(try await store.photos().isEmpty)
+    #expect(!FileManager.default.fileExists(atPath: directory.path))
+}
