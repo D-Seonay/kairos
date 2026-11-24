@@ -102,7 +102,7 @@ struct MonthView: View {
             Circle().strokeBorder(PulsePalette.ink, lineWidth: 1).frame(width: 10, height: 10)
         }
         legendItem(String(localized: "Deux séances ou record", bundle: .module)) {
-            Circle().fill(PulsePalette.signal).frame(width: 5, height: 5)
+            Circle().fill(PulsePalette.gold).frame(width: 5, height: 5)
         }
     }
 
@@ -114,8 +114,8 @@ struct MonthView: View {
     }
 }
 
-/// Un jour du calendrier : pastille pleine avec l'icône de la discipline faite, creuse pour celle prévue, point pour deux
-/// séances ou un record, cercle pour aujourd'hui.
+/// Un jour du calendrier : le numéro toujours lisible, sur une pastille pleine quand une séance est faite, creuse quand une est
+/// prévue, cercle pour aujourd'hui. Dessous, la petite icône de la discipline et le point doré de deux séances ou d'un record.
 private struct MonthDayCell: View {
     let day: MonthDay
     let number: String
@@ -123,34 +123,46 @@ private struct MonthDayCell: View {
     var body: some View {
         VStack(spacing: 2) {
             ZStack {
-                if let kind = day.done.first {
+                if !day.done.isEmpty {
                     Circle().fill(PulsePalette.ink)
-                    Image(systemName: PlanningText.icon(of: kind))
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(PulsePalette.page)
-                } else {
-                    if let planned = day.planned {
-                        Circle().strokeBorder(PulsePalette.ink.opacity(0.45), lineWidth: 1)
-                        Image(systemName: PlanningText.icon(of: planned))
-                            .font(.system(size: 11))
-                            .foregroundStyle(PulsePalette.text2)
-                    } else {
-                        Text(number)
-                            .font(.footnote.monospacedDigit())
-                            .foregroundStyle(day.isInMonth ? PulsePalette.text : PulsePalette.muted)
-                    }
+                } else if day.planned != nil {
+                    Circle().strokeBorder(PulsePalette.ink.opacity(0.45), lineWidth: 1)
                 }
+                Text(number)
+                    .font(.footnote.monospacedDigit())
+                    .fontWeight(day.done.isEmpty ? .regular : .semibold)
+                    .foregroundStyle(numberColor)
                 if day.isToday {
                     Circle().strokeBorder(PulsePalette.ink, lineWidth: 1.5).padding(-3)
                 }
             }
             .frame(width: 34, height: 34)
-            Circle()
-                .fill(day.hasMark ? PulsePalette.signal : .clear)
-                .frame(width: 5, height: 5)
+            HStack(spacing: 2) {
+                if let icon {
+                    Image(systemName: icon)
+                        .font(.caption2.weight(.semibold))
+                        .imageScale(.small)
+                        .foregroundStyle(PulsePalette.text2)
+                }
+                if day.hasMark {
+                    Circle().fill(PulsePalette.gold).frame(width: 5, height: 5)
+                }
+            }
+            .frame(minHeight: 5)
         }
         .opacity(day.isInMonth ? 1 : 0.35)
         .frame(maxWidth: .infinity)
+    }
+
+    private var numberColor: Color {
+        if !day.done.isEmpty { return PulsePalette.page }
+        return day.isInMonth ? PulsePalette.text : PulsePalette.muted
+    }
+
+    /// La discipline faite, sinon celle prévue ; `nil` un jour sans séance.
+    private var icon: String? {
+        if let kind = day.done.first { return PlanningText.icon(of: kind) }
+        return day.planned.map { PlanningText.icon(of: $0) }
     }
 }
 
