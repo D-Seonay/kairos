@@ -24,6 +24,8 @@ struct RecoveryScoreControlWidget: ControlWidget {
 struct OpenRecoveryScoreIntent: AppIntent {
     static let title: LocalizedStringResource = "Consulter la récupération"
     static let description = IntentDescription("Ouvre Pulse sur le tableau de bord de récupération.")
+    /// Le bouton du contrôle seulement : Raccourcis et Spotlight proposent déjà le raccourci de l'app, qui fait la même chose.
+    static let isDiscoverable = false
 
     func perform() async throws -> some IntentResult & OpensIntent {
         guard let url = AppLink.today.url else { throw URLError(.badURL) }

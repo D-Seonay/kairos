@@ -23,6 +23,24 @@ import UserNotifications
         #expect(router.todayRootVersion == version + 1)
     }
 
+    /// Le rappel de photos ouvre l'onglet Profil et demande l'écran Photos de corps, qui garde son verrou.
+    @Test func bodyPhotosLinkOpensProfileAndAsksForThePhotos() {
+        let router = AppRouter()
+        router.open(.bodyPhotos)
+        #expect(router.selectedTab == .profile)
+        #expect(router.opensBodyPhotos)
+        #expect(!router.isShowingSupplements)
+    }
+
+    /// Le rappel de photos ne dit rien du sujet sur l'écran verrouillé et n'a pas d'image.
+    @Test func bodyPhotoReminderIsNeutral() {
+        let content = UserNotificationScheduler.bodyPhotoContent()
+        #expect(content.attachments.isEmpty)
+        #expect(content.body.isEmpty && content.subtitle.isEmpty)
+        #expect(!content.title.localizedCaseInsensitiveContains("corps"))
+        #expect(NotificationRouter.link(from: content.userInfo) == .bodyPhotos)
+    }
+
     @Test func planningLinkSelectsThePlanningTab() {
         let router = AppRouter()
         router.open(.planning)
@@ -38,6 +56,42 @@ import UserNotifications
         #expect(router.selectedTab == .today)
         #expect(router.pendingSessionStart)
         #expect(router.sessionStartRequests == 1)
+    }
+
+    /// « Voir pourquoi » du raccourci Siri : l'accueil sans l'écran Compléments, sans changer la version qui refermerait
+    /// l'écran « Pourquoi » demandé.
+    @Test func whyLinkOpensTodayAndAsksForTheWhyScreen() {
+        let router = AppRouter()
+        router.open(.supplements)
+        router.selectedTab = .stats
+        let version = router.todayRootVersion
+        router.open(.why)
+        #expect(router.selectedTab == .today)
+        #expect(!router.isShowingSupplements)
+        #expect(router.todayRootVersion == version)
+        #expect(router.pendingWhy)
+        #expect(router.whyRequests == 1)
+    }
+
+    /// « Lancer une course » laisse une demande de course aux onglets, sans changer d'onglet.
+    @Test func runLinkAsksForTheRun() {
+        let router = AppRouter()
+        router.selectedTab = .stats
+        router.open(.run)
+        #expect(router.selectedTab == .stats)
+        #expect(router.pendingRunStart)
+        #expect(router.runStartRequests == 1)
+    }
+
+    @Test func pendingRequestsAreDroppedTogether() {
+        let router = AppRouter()
+        router.open(.startSession)
+        router.open(.why)
+        router.open(.run)
+        router.dropPendingRequests()
+        #expect(!router.pendingSessionStart)
+        #expect(!router.pendingWhy)
+        #expect(!router.pendingRunStart)
     }
 
     @Test func notificationLinkDefaultsToToday() {

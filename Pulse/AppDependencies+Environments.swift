@@ -45,7 +45,7 @@ extension AppDependencies {
     func statsEnvironment() -> StatsEnvironment {
         let service = StatsService(profiles: profiles, programs: programs, workouts: workouts, recoveries: recovery,
                                    records: personalRecords, userExercises: userExercises, library: content, calendar: calendar,
-                                   now: now)
+                                   now: now, runEfforts: run.bestEfforts)
         return StatsEnvironment(service: service, train: trainEnvironment(), calendar: calendar, now: now,
                                 nights: NightDetailService(cache: healthCache, calendar: calendar, now: now))
     }
@@ -56,7 +56,7 @@ extension AppDependencies {
     func profileEnvironment() -> ProfileEnvironment {
         let profile = ProfileService(profiles: profiles, programs: programs, workouts: workouts, recoveries: recovery,
                                      records: personalRecords, userExercises: userExercises, library: content, calendar: calendar,
-                                     now: now)
+                                     now: now, runEfforts: run.bestEfforts)
         let refresher = refresher
         let notifications = notifications
         return ProfileEnvironment(
@@ -67,7 +67,7 @@ extension AppDependencies {
             refreshHealth: { _ = await refresher.refresh(origin: .foreground) },
             appVersion: Self.appVersion, privacyPolicyURL: Self.privacyPolicyURL, calendar: calendar, now: now,
             runPreferences: run.preferences, bodyPhotos: photos.body, ownerAuthentication: photos.ownerAuthentication,
-            bodyPhotoLock: photos.bodyLock, train: trainEnvironment())
+            bodyPhotoLock: photos.bodyLock, bodyPhotoReminders: photos.reminders, train: trainEnvironment())
     }
 
     /// La politique de confidentialité, lue dans l'Info.plist (`PulsePrivacyPolicyURL`) ; `nil` tant que la clé est vide ou

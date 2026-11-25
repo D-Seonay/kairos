@@ -301,182 +301,182 @@
         }
       }
     },
-    "Dernière fois : %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dernière fois : %@"
+    "Dernière fois : %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dernière fois : %@"
           }
         }
       }
     },
-    ", puis " : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ", puis "
+    ", puis ": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ", puis "
           }
         }
       }
     },
-    "lest de %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "lest de %@"
+    "lest de %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "lest de %@"
           }
         }
       }
     },
-    "assistance de %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "assistance de %@"
+    "assistance de %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "assistance de %@"
           }
         }
       }
     },
-    "%lld seconde" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld seconde"
+    "%lld seconde": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld seconde"
           }
         }
       }
     },
-    "%lld secondes" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld secondes"
+    "%lld secondes": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld secondes"
           }
         }
       }
     },
-    "%lld répétition" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld répétition"
+    "%lld répétition": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld répétition"
           }
         }
       }
     },
-    "%lld répétitions" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld répétitions"
+    "%lld répétitions": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld répétitions"
           }
         }
       }
     },
-    "%lld exercice" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld exercice"
+    "%lld exercice": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld exercice"
           }
         }
       }
     },
-    "%lld exercices" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld exercices"
+    "%lld exercices": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld exercices"
           }
         }
       }
     },
-    "%lld série" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld série"
+    "%lld série": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld série"
           }
         }
       }
     },
-    "%lld séries" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld séries"
+    "%lld séries": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld séries"
           }
         }
       }
     },
-    "%@ · %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ · %@"
+    "%@ · %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · %@"
           }
         }
       }
     },
-    "%@, %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@, %@"
+    "%@, %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@"
           }
         }
       }
     },
-    "sans lest" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "sans lest"
+    "sans lest": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sans lest"
           }
         }
       }
     },
-    "sans assistance" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "sans assistance"
+    "sans assistance": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sans assistance"
           }
         }
       }
     },
-    "%@ kilo" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ kilo"
+    "%@ kilo": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kilo"
           }
         }
       }
     },
-    "%@ kilos" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ kilos"
+    "%@ kilos": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kilos"
           }
         }
       }
@@ -537,6 +537,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ : %@ avec une assistance de %@, nouveau record"
+          }
+        }
+      }
+    },
+    "Ton score de récupération n'est pas encore prêt. Ouvre Pulse pour le calculer.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ton score de récupération n'est pas encore prêt. Ouvre Pulse pour le calculer."
+          }
+        }
+      }
+    },
+    "Ton score de récupération est estimé à %lld sur 100 : %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ton score de récupération est estimé à %lld sur 100 : %@."
+          }
+        }
+      }
+    },
+    "Ton score de récupération est de %lld sur 100 : %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ton score de récupération est de %lld sur 100 : %@."
+          }
+        }
+      }
+    },
+    "C'est noté : prise de %@ cochée pour aujourd'hui.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "C'est noté : prise de %@ cochée pour aujourd'hui."
+          }
+        }
+      }
+    },
+    "La prise de %@ est déjà cochée aujourd'hui.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La prise de %@ est déjà cochée aujourd'hui."
+          }
+        }
+      }
+    },
+    "Ce complément n'est plus dans Pulse.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce complément n'est plus dans Pulse."
+          }
+        }
+      }
+    },
+    "Ton score de récupération est de %lld sur 100 : %@, %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ton score de récupération est de %lld sur 100 : %@, %@."
           }
         }
       }

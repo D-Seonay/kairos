@@ -38,21 +38,25 @@ public enum RunDistance: Double, CaseIterable, Sendable {
     case half = 21_097.5
 }
 
-/// Le meilleur temps sur une distance, ramené à l'allure moyenne de la sortie qui la couvre.
+/// Le meilleur temps sur une distance : le meilleur segment continu d'une course Pulse quand son tracé l'a donné, sinon le temps
+/// de la sortie ramené à son allure moyenne.
 public struct RunBest: Sendable, Equatable, Identifiable {
     public var distance: RunDistance
     public var seconds: Double?
     /// Le début de la sortie qui donne le temps.
     public var date: Date?
     public var isNew: Bool
+    /// Vrai si le temps vient d'un vrai segment du tracé ; faux s'il est ramené à l'allure moyenne de la sortie.
+    public var isSegment: Bool
 
     public var id: RunDistance { distance }
 
-    public init(distance: RunDistance, seconds: Double?, date: Date?, isNew: Bool) {
+    public init(distance: RunDistance, seconds: Double?, date: Date?, isNew: Bool, isSegment: Bool = false) {
         self.distance = distance
         self.seconds = seconds
         self.date = date
         self.isNew = isNew
+        self.isSegment = isSegment
     }
 }
 
@@ -74,11 +78,13 @@ public struct RecordStats: Sendable, Equatable {
 
     // swiftlint:disable:next function_parameter_count
     public static func make(records: [PersonalRecord], sessions: [WorkoutSession], directory: ExerciseDirectory,
-                            period: StatsPeriod, now: Date, calendar: Calendar) -> RecordStats {
+                            period: StatsPeriod, now: Date, calendar: Calendar,
+                            runEfforts: [UUID: RunBestEfforts] = [:]) -> RecordStats {
+        // `runEfforts` : les meilleurs segments déjà calculés des courses Pulse (cache rempli au passage du jour), par séance.
         let interval = period.interval(now: now, calendar: calendar)
         return RecordStats(
             strength: strengthLines(records: records, sessions: sessions, directory: directory, interval: interval),
-            runs: runBests(sessions: sessions, interval: interval))
+            runs: runBests(sessions: sessions, efforts: runEfforts, interval: interval))
     }
 
     // MARK: - Force
@@ -140,19 +146,36 @@ public struct RecordStats: Sendable, Equatable {
 
     // MARK: - Course
 
-    private static func runBests(sessions: [WorkoutSession], interval: DateInterval) -> [RunBest] {
+    private static func runBests(sessions: [WorkoutSession], efforts: [UUID: RunBestEfforts], interval: DateInterval) -> [RunBest] {
         let runs = sessions.filter { $0.kind == .run && $0.status == .completed }
         return RunDistance.allCases.map { distance in
-            let timed = runs.compactMap { run -> (seconds: Double, date: Date)? in
-                guard let meters = run.distanceMeters, meters >= distance.rawValue,
-                      let minutes = run.durationMinutes, minutes > 0 else { return nil }
-                return (minutes * 60 * distance.rawValue / meters, run.startedAt)
-            }
+            let timed = runs.compactMap { run in time(of: run, over: distance, segment: efforts[run.id]) }
             guard let winner = timed.min(by: { $0.seconds != $1.seconds ? $0.seconds < $1.seconds : $0.date < $1.date }) else {
                 return RunBest(distance: distance, seconds: nil, date: nil, isNew: false)
             }
-            return RunBest(distance: distance, seconds: winner.seconds, date: winner.date, isNew: contains(interval, winner.date))
+            return RunBest(distance: distance, seconds: winner.seconds, date: winner.date, isNew: contains(interval, winner.date),
+                           isSegment: winner.isSegment)
         }
+    }
+
+    /// Le temps d'une sortie sur `distance` : son meilleur segment s'il est connu, sinon son temps ramené à l'allure moyenne.
+    /// Les deux majorent le vrai meilleur segment (un segment lu sur un tracé sans pauses peut en traverser une) : le plus court
+    /// est gardé. `nil` si la sortie est plus courte que la distance.
+    private static func time(of run: WorkoutSession, over distance: RunDistance, segment: RunBestEfforts?) -> RunTime? {
+        var average: Double?
+        if let meters = run.distanceMeters, meters >= distance.rawValue, let minutes = run.durationMinutes, minutes > 0 {
+            average = minutes * 60 * distance.rawValue / meters
+        }
+        let best = segment?.seconds(for: distance.rawValue).flatMap { $0 > 0 ? $0 : nil }
+        if let best, best <= average ?? .infinity { return RunTime(seconds: best, date: run.startedAt, isSegment: true) }
+        return average.map { RunTime(seconds: $0, date: run.startedAt, isSegment: false) }
+    }
+
+    /// Le temps d'une sortie sur une distance, et s'il vient d'un vrai segment.
+    private struct RunTime {
+        var seconds: Double
+        var date: Date
+        var isSegment: Bool
     }
 
     private static func contains(_ interval: DateInterval, _ date: Date) -> Bool {

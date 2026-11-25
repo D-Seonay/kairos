@@ -57,15 +57,22 @@ public struct SupplementSchedule: Sendable {
     public var plannedTrainingDays: [Date: Bool]
     /// Les séances récentes, toutes sortes et tous statuts ; le planificateur choisit celles qui comptent.
     public var sessions: [WorkoutSession]
+    /// L'heure habituelle d'endormissement (`HabitualBedtime`), en minutes après minuit ; `nil` sous 5 nuits.
+    public var habitualBedtimeMinutes: Int?
+    /// Les compléments « au coucher » qui suivent les nuits.
+    public var followingNights: Set<UUID>
     public var calendar: Calendar
 
     public init(supplements: [Supplement], intakes: [SupplementIntake], trainingWeekdays: Set<Weekday>,
-                plannedTrainingDays: [Date: Bool] = [:], sessions: [WorkoutSession], calendar: Calendar) {
+                plannedTrainingDays: [Date: Bool] = [:], sessions: [WorkoutSession], habitualBedtimeMinutes: Int? = nil,
+                followingNights: Set<UUID> = [], calendar: Calendar) {
         self.supplements = supplements
         self.intakes = intakes
         self.trainingWeekdays = trainingWeekdays
         self.plannedTrainingDays = plannedTrainingDays
         self.sessions = sessions
+        self.habitualBedtimeMinutes = habitualBedtimeMinutes
+        self.followingNights = followingNights
         self.calendar = calendar
     }
 
@@ -137,11 +144,25 @@ public struct SupplementSchedule: Sendable {
     public func plannedMinutes(of supplement: Supplement, on day: Date) -> Int {
         switch supplement.timing {
         case .fixedTime: return supplement.timeOfDayMinutes ?? 8 * 60
-        case .bedtime: return supplement.timeOfDayMinutes ?? 22 * 60 + 30
+        case .bedtime: return bedtimeMinutes(of: supplement)
         case .beforeWorkout: return max(0, workoutStartMinutes(on: day) - Self.beforeWorkoutLeadMinutes)
         case .afterWorkout:
             return workoutEndMinutes(on: day) ?? min(24 * 60 - 1, workoutStartMinutes(on: day) + Self.assumedSessionMinutes)
         }
+    }
+
+    /// Vrai quand le complément « au coucher » suit les nuits et qu'il y en a assez pour une heure habituelle.
+    public func followsNights(_ supplement: Supplement) -> Bool {
+        supplement.timing == .bedtime && followingNights.contains(supplement.id) && habitualBedtimeMinutes != nil
+    }
+
+    /// L'heure d'un complément « au coucher » : 30 min avant l'heure habituelle d'endormissement s'il suit les nuits et qu'il y
+    /// en a assez, sinon son heure fixe (22:30 sans heure).
+    private func bedtimeMinutes(of supplement: Supplement) -> Int {
+        if followingNights.contains(supplement.id), let habitualBedtimeMinutes {
+            return HabitualBedtime.reminderMinutes(habitual: habitualBedtimeMinutes)
+        }
+        return supplement.timeOfDayMinutes ?? 22 * 60 + 30
     }
 
     /// Le moment d'affichage d'un complément à cette heure.

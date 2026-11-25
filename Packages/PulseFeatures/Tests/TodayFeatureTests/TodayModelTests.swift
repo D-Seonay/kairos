@@ -233,13 +233,13 @@ struct TodayModelTests {
         #expect(model.why == nil)
         await model.refresh()
         #expect(model.why != nil)
-        model.showWhy()
+        model.openWhy()
         #expect(model.isShowingWhy)
 
         let empty = TodayFixture(scenario: .noData).makeModel()
         await empty.refresh()
         #expect(empty.why == nil)
-        empty.showWhy()
+        empty.openWhy()
         #expect(!empty.isShowingWhy)
     }
 }

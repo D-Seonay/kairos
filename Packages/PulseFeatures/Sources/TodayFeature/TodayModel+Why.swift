@@ -1,6 +1,7 @@
 extension TodayModel {
-    /// Pousse l'écran « Pourquoi ». Sans effet tant qu'il n'y a pas de score du jour à expliquer.
-    func showWhy() {
+    /// Pousse l'écran « Pourquoi » : la carte du score, et le raccourci Siri « Voir pourquoi ». Sans effet tant qu'il n'y a pas
+    /// de score du jour à expliquer.
+    public func openWhy() {
         guard why != nil else { return }
         isShowingWhy = true
     }

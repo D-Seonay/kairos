@@ -28,19 +28,24 @@ public struct ProfileScreen: View {
     private let onOpenRecords: () -> Void
     /// Part une fois tout supprimé depuis Mes données.
     private let onErased: () async -> Void
+    /// Vrai quand un rappel de photos touché demande l'écran Photos de corps : la pile y revient, puis le remet à faux.
+    @Binding private var opensBodyPhotos: Bool
+    @State private var path = NavigationPath()
 
     public init(model: ProfileModel, supplements: SupplementsModel, screens: ProfileAppScreens,
-                onOpenStats: @escaping () -> Void, onOpenRecords: @escaping () -> Void, onErased: @escaping () async -> Void) {
+                opensBodyPhotos: Binding<Bool> = .constant(false), onOpenStats: @escaping () -> Void,
+                onOpenRecords: @escaping () -> Void, onErased: @escaping () async -> Void) {
         self.model = model
         self.supplements = supplements
         self.screens = screens
+        _opensBodyPhotos = opensBodyPhotos
         self.onOpenStats = onOpenStats
         self.onOpenRecords = onOpenRecords
         self.onErased = onErased
     }
 
     public var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             content
                 .pulseScreenBackground(aura: 0.5)
                 .hidingNavigationBar()
@@ -49,6 +54,20 @@ public struct ProfileScreen: View {
         .task {
             if !model.hasLoaded { await model.load() }
         }
+        // Au lancement à froid, la demande arrive avant l'onglet : `initial` la traite dès qu'il apparaît.
+        .onChange(of: opensBodyPhotos, initial: true) { _, opens in
+            guard opens else { return }
+            opensBodyPhotos = false
+            showBodyPhotos()
+        }
+    }
+
+    /// Ramène la pile à l'écran Photos de corps seul, qui demande Face ID à son apparition comme depuis la ligne du profil.
+    private func showBodyPhotos() {
+        guard model.environment.offersBodyPhotos else { return }
+        var photos = NavigationPath()
+        photos.append(ProfileDestination.bodyPhotos)
+        if path != photos { path = photos }
     }
 
     private var content: some View {
@@ -96,8 +115,8 @@ public struct ProfileScreen: View {
         case .bodyPhotos:
             if let service = model.environment.bodyPhotos, let authentication = model.environment.ownerAuthentication {
                 BodyPhotosScreen(service: service, authentication: authentication,
-                                 lock: model.environment.bodyPhotoLock, calendar: model.environment.calendar,
-                                 now: model.environment.now)
+                                 lock: model.environment.bodyPhotoLock, reminders: model.environment.bodyPhotoReminders,
+                                 calendar: model.environment.calendar, now: model.environment.now)
             }
         case .settings:
             // Un réglage enregistré part vers l'app (thème, prénom) ; la page ne se relit que pour un prénom changé.

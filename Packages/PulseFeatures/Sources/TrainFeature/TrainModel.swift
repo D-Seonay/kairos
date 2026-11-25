@@ -46,7 +46,8 @@ public final class TrainModel {
     /// Le profil et le score du jour de la dernière lecture : ils règlent ce qu'une séance lancée applique.
     @ObservationIgnored private var profile: UserProfile?
     @ObservationIgnored private var scoredToday: DailyRecovery?
-    @ObservationIgnored private var isRefreshing = false
+    /// Vrai pendant une lecture : le raccourci « Lancer une course » l'attend avant de choisir la course.
+    @ObservationIgnored public private(set) var isRefreshing = false
 
     public init(environment: TrainEnvironment) {
         self.environment = environment

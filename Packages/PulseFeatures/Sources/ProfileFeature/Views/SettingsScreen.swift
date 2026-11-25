@@ -58,7 +58,7 @@ struct SettingsScreen: View {
             }
             if let profile = model.profile {
                 ProfileSettingsSection(model: model, profile: profile)
-                HealthSettingsSection(model: model, screens: screens)
+                HealthSettingsSection(model: model)
                 AdaptationSettingsSection(model: model, profile: profile)
                 AntiInterferenceSection(disabled: profile.antiInterferenceRulesDisabled) { rule, enabled in
                     Task { await model.update { $0.setRule(rule, enabled: enabled) } }
@@ -73,7 +73,7 @@ struct SettingsScreen: View {
                     .accessibilityLabel(String(localized: "Chargement des réglages", bundle: .module))
                     .listRowBackground(Color.clear)
             }
-            AboutSettingsSection(appVersion: model.environment.appVersion)
+            AboutSettingsSection(appVersion: model.environment.appVersion, screens: screens)
         }
     }
 }
@@ -100,9 +100,11 @@ struct DisplaySettingsSection: View {
 
 // MARK: - À propos
 
-/// La version et le build, le lien pour noter Pulse et les licences.
+/// La version et le build, le lien pour noter Pulse, les licences, et l'écran Diagnostic (Apple Santé, rapports de plantage
+/// et de lenteur), où l'on vient le chercher pour l'assistance.
 struct AboutSettingsSection: View {
     let appVersion: String
+    let screens: ProfileAppScreens
 
     var body: some View {
         Section {
@@ -122,6 +124,13 @@ struct AboutSettingsSection: View {
                 LicensesView()
             } label: {
                 Text(String(localized: "Licences", bundle: .module))
+                    .foregroundStyle(PulsePalette.text)
+            }
+            .frame(minHeight: 44)
+            NavigationLink {
+                screens.healthDiagnostics()
+            } label: {
+                Text(String(localized: "Diagnostic", bundle: .module))
                     .foregroundStyle(PulsePalette.text)
             }
             .frame(minHeight: 44)

@@ -2042,6 +2042,16 @@
         }
       }
     },
+    "meilleur segment de la sortie du %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "meilleur segment de la sortie du %@"
+          }
+        }
+      }
+    },
     "milliseconde": {
       "localizations": {
         "fr": {

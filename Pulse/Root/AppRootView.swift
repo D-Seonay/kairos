@@ -1,3 +1,4 @@
+import AppIntents
 import OnboardingFeature
 import PulseDesignSystem
 import PulseDomain
@@ -26,6 +27,8 @@ struct AppRootView: View {
             .task { await model.load() }
             .onOpenURL { AppLink(url: $0).map(router.open) }
             .onChange(of: scenePhase) { _, phase in
+                // En quittant l'app, Siri reçoit les noms des compléments, peut-être modifiés, pour « J'ai pris ma créatine ».
+                if phase == .background { PulseShortcuts.updateAppShortcutParameters() }
                 // Chaque retour au premier plan relit la séance en cours, « Aujourd'hui » et « Séance », quel que soit l'onglet.
                 guard phase == .active else { return }
                 Task { await model.becameActive() }
@@ -43,9 +46,9 @@ struct AppRootView: View {
                     .id(ObjectIdentifier(onboarding))
                     .onChange(of: onboarding.isFinished, initial: true) { _, finished in
                         guard finished else { return }
-                        // Après une suppression totale, les onglets repartent d'« Aujourd'hui ». Une demande « Séance du jour »
-                        // faite pendant l'onboarding est oubliée : elle ne lance rien des minutes plus tard.
-                        router.pendingSessionStart = false
+                        // Après une suppression totale, les onglets repartent d'« Aujourd'hui ». Une demande « Séance du jour »,
+                        // « Pourquoi » ou de course faite pendant l'onboarding est oubliée : elle ne lance rien des minutes plus tard.
+                        router.dropPendingRequests()
                         router.open(.today)
                         model.onboardingFinished()
                     }

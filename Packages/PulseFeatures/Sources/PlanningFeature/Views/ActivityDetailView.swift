@@ -5,8 +5,8 @@ import RunFeature
 import SwiftUI
 
 /// Le détail d'une course ou d'un vélo lu d'Apple Santé (spec M6 §7) : mesures, RPE et note modifiables. Une course Pulse
-/// ajoute la section « Tracé » : la carte du parcours et les temps par kilomètre. Tant qu'une correction n'est pas enregistrée,
-/// le retour cède la place à « Annuler », qui demande confirmation avant d'abandonner.
+/// ajoute la section « Tracé » : la carte du parcours, les temps par kilomètre et l'export GPX. Tant qu'une correction n'est
+/// pas enregistrée, le retour cède la place à « Annuler », qui demande confirmation avant d'abandonner.
 struct ActivityDetailView: View {
     @State private var model: ActivityDetailModel
     @State private var confirmsDiscard = false
@@ -29,8 +29,21 @@ struct ActivityDetailView: View {
             if !track.splits.isEmpty {
                 RunSplitsList(splits: track.splits)
             }
+            if let url = model.gpxFileURL {
+                ShareLink(item: url) {
+                    Label(String(localized: "Exporter en GPX", bundle: .module), systemImage: "square.and.arrow.up")
+                        .foregroundStyle(PulsePalette.text)
+                }
+                .frame(minHeight: 44)
+                .accessibilityHint(String(localized: "Ouvre la feuille de partage avec le fichier du parcours.", bundle: .module))
+            }
         } header: {
             Text(String(localized: "Tracé", bundle: .module))
+        } footer: {
+            if model.gpxFileURL != nil {
+                Text(String(localized: "Le fichier GPX contient la position de chaque point du parcours. Tu choisis où il va.",
+                            bundle: .module))
+            }
         }
         .listRowBackground(PulsePalette.surface)
     }
@@ -123,5 +136,7 @@ struct ActivityDetailView: View {
             Button(String(localized: "Continuer à modifier", bundle: .module), role: .cancel) {}
         }
         .task { await model.load() }
+        // Une feuille (partage, photos) ne fait pas disparaître le détail : seul le retour, ou un écran poussé, retire le fichier.
+        .onDisappear { model.discardGPXFile() }
     }
 }

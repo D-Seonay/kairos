@@ -17,6 +17,8 @@ public struct SwiftDataExporter: DataExporter {
     private let locale: String
     /// Le nombre d'images lues dans un même contexte SwiftData ; les tests le réduisent pour traverser plusieurs lots.
     var photoBatchSize = 8
+    /// L'heure de l'export (README, métadonnées, nom du dossier) ; les tests la figent pour comparer deux archives.
+    var now: @Sendable () -> Date = { Date() }
 
     public init(container: ModelContainer, appVersion: String, contentVersion: String,
                 exerciseNames: @Sendable @escaping (String) -> String?, directory: URL = SwiftDataExporter.exportsDirectory,
@@ -32,7 +34,7 @@ public struct SwiftDataExporter: DataExporter {
 
     public func exportJSON() async throws -> URL {
         let snapshot = try await ExportSnapshotLoader(modelContainer: container).snapshot()
-        let now = Date()
+        let now = now()
         let metadata = ExportMetadata(appVersion: appVersion, contentVersion: contentVersion, locale: locale, exportedAt: now)
         let document = JSONExportWriter.document(from: snapshot, metadata: metadata, exerciseNames: exerciseNames)
         try resetDirectory()
@@ -43,7 +45,7 @@ public struct SwiftDataExporter: DataExporter {
     /// Le JSON ne contient aucune image : seule cette archive les porte.
     public func exportCSVArchive() async throws -> URL {
         let snapshot = try await ExportSnapshotLoader(modelContainer: container).snapshot()
-        let now = Date()
+        let now = now()
         let metadata = ExportMetadata(appVersion: appVersion, contentVersion: contentVersion, locale: locale, exportedAt: now)
         var document = JSONExportWriter.document(from: snapshot, metadata: metadata, exerciseNames: exerciseNames)
         try resetDirectory()
