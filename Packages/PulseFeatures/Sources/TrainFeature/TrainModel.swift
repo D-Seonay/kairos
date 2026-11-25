@@ -37,8 +37,6 @@ public final class TrainModel {
     public private(set) var errorMessage: String?
     /// Le titre de la séance en cours, relu à chaque `refresh()` ; `nil` sans séance en cours.
     public private(set) var activeSessionTitle: String?
-    /// Le début de la séance en cours, pour dire depuis combien de temps elle dure.
-    public private(set) var activeSessionStartedAt: Date?
     /// Le jour de la semaine de la dernière lecture, pour dire « aujourd'hui » ou « demain » de la prochaine course.
     private(set) var weekday: Weekday?
 
@@ -63,7 +61,6 @@ public final class TrainModel {
         await refreshDirectory()
         let active = await environment.activeSession.current()
         activeSessionTitle = active?.title
-        activeSessionStartedAt = active?.startedAt
         do {
             let profile = try await environment.profiles.load()
             let program = try await activeProgram(of: profile)
