@@ -37,7 +37,7 @@ public final class ActivityDetailModel {
             rpe = session?.overallRPE
             note = session?.note ?? ""
             routeTrack = await track(of: session)
-            gpxFileURL = gpxFile(of: routeTrack, session: session)
+            gpxFileURL = await gpxFile(of: routeTrack, session: session)
             photos = makePhotos(for: session)
             errorMessage = nil
         } catch {
@@ -54,11 +54,22 @@ public final class ActivityDetailModel {
         return track
     }
 
-    /// Le fichier GPX du tracé, réécrit à chaque lecture ; rien sans point à exporter. Un échec d'écriture retire seulement le
-    /// bouton d'export.
-    private func gpxFile(of track: RunTrack?, session: WorkoutSession?) -> URL? {
+    /// Le fichier GPX du tracé, réécrit à chaque affichage du détail, hors du fil principal ; rien sans point à exporter. Un
+    /// échec d'écriture retire seulement le bouton d'export.
+    private func gpxFile(of track: RunTrack?, session: WorkoutSession?) async -> URL? {
         guard let track, let session, !track.points.isEmpty else { return nil }
-        return try? RunGPXFile.write(track, session: session, calendar: environment.calendar)
+        let calendar = environment.calendar
+        return await Task.detached(priority: .userInitiated) {
+            try? RunGPXFile.write(track, session: session, calendar: calendar)
+        }.value
+    }
+
+    /// Le détail se ferme : le fichier GPX (le tracé, donc des positions) ne reste pas dans le dossier temporaire. Il est réécrit
+    /// au prochain affichage.
+    public func discardGPXFile() {
+        guard gpxFileURL != nil else { return }
+        gpxFileURL = nil
+        RunGPXFile.remove(sessionID: sessionID)
     }
 
     /// Le modèle de la section Photos de `session`, gardé s'il existe déjà ; `nil` sans service ou pour une séance qui n'accepte

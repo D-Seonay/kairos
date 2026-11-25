@@ -136,5 +136,7 @@ struct ActivityDetailView: View {
             Button(String(localized: "Continuer à modifier", bundle: .module), role: .cancel) {}
         }
         .task { await model.load() }
+        // Une feuille (partage, photos) ne fait pas disparaître le détail : seul le retour, ou un écran poussé, retire le fichier.
+        .onDisappear { model.discardGPXFile() }
     }
 }

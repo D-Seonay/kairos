@@ -122,14 +122,15 @@ extension RunSessionService {
         try await workouts.save(session)
     }
 
-    /// Supprime la séance, son tracé et l'entraînement écrit dans Santé. Un échec côté Santé ne bloque pas la suppression.
-    /// Sans identifiant Santé (écriture laissée à HealthKit, iPhone verrouillé), l'entraînement est cherché par celui de la
-    /// course.
+    /// Supprime la séance, son tracé, son fichier GPX et l'entraînement écrit dans Santé. Un échec côté Santé ne bloque pas la
+    /// suppression. Sans identifiant Santé (écriture laissée à HealthKit, iPhone verrouillé), l'entraînement est cherché par
+    /// celui de la course.
     public func deleteRun(sessionID: UUID) async throws {
         let session = try await workouts.session(id: sessionID)
         try await tracks.delete(sessionID: sessionID)
         try await workouts.delete(id: sessionID)
         await bestEfforts?.remove([sessionID])
+        RunGPXFile.remove(sessionID: sessionID)
         if let healthKitID = session?.healthKitUUID.flatMap(UUID.init(uuidString:)) {
             try? await recorder.deleteWorkout(id: healthKitID)
         } else if session != nil {

@@ -117,6 +117,10 @@ struct PlanningModelTests {
         #expect(url.pathExtension == "gpx")
         let gpx = try String(contentsOf: url, encoding: .utf8)
         #expect(gpx.components(separatedBy: "<trkpt ").count - 1 == saved.points.count)
+        // Le détail se ferme : le fichier (des positions) ne reste pas dans le dossier temporaire.
+        model.discardGPXFile()
+        #expect(model.gpxFileURL == nil)
+        #expect(!FileManager.default.fileExists(atPath: url.path(percentEncoded: false)))
     }
 
     @Test func runDetailHasNoRouteWithoutAUsableTrack() async throws {

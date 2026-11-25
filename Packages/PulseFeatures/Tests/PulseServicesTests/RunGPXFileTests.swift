@@ -43,5 +43,12 @@ struct RunGPXFileTests {
         #expect(!FileManager.default.fileExists(atPath: firstURL.path(percentEncoded: false)))
         let folder = secondURL.deletingLastPathComponent()
         #expect(try FileManager.default.contentsOfDirectory(atPath: folder.path(percentEncoded: false)) == [secondURL.lastPathComponent])
+        #expect(try FileManager.default.contentsOfDirectory(atPath: directory.path(percentEncoded: false)) == [second.id.uuidString])
+
+        // Une autre course ne retire rien ; la course supprimée emporte son fichier.
+        RunGPXFile.remove(sessionID: first.id, directory: directory)
+        #expect(FileManager.default.fileExists(atPath: secondURL.path(percentEncoded: false)))
+        RunGPXFile.remove(sessionID: second.id, directory: directory)
+        #expect(!FileManager.default.fileExists(atPath: secondURL.path(percentEncoded: false)))
     }
 }

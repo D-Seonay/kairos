@@ -197,3 +197,17 @@ private struct EraseFixture {
     try await eraser.eraseEverything(options: EraseOptions(includeAppleHealth: false))
     #expect(!FileManager.default.fileExists(atPath: export.path))
 }
+
+/// Le fichier GPX d'une course à partager (son tracé) ne survit pas à l'effacement total.
+@Test func eraserRemovesTheRunGPXDirectory() async throws {
+    let fixture = try EraseFixture()
+    let gpx = FileManager.default.temporaryDirectory.appendingPathComponent("pulse-gpx-\(UUID().uuidString)", isDirectory: true)
+    let folder = gpx.appendingPathComponent(UUID().uuidString, isDirectory: true)
+    try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+    try Data("<gpx/>".utf8).write(to: folder.appendingPathComponent("Pulse-course-2026-11-25-0730.gpx"))
+    let eraser = SwiftDataEraser(container: fixture.box.container, defaultsSuite: fixture.suite, defaultsDomain: fixture.suite,
+                                 healthEraser: fixture.health, notifications: nil, widgets: nil, exportsDirectory: fixture.exports,
+                                 runGPXDirectory: gpx)
+    try await eraser.eraseEverything(options: EraseOptions(includeAppleHealth: false))
+    #expect(!FileManager.default.fileExists(atPath: gpx.path))
+}
