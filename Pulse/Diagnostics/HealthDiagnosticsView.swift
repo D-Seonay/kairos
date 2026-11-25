@@ -3,12 +3,15 @@ import PulseHealth
 import PulseRecoveryEngine
 import SwiftUI
 
-/// Écran de diagnostic M1, ouvert depuis le profil : sources Apple Santé, 14 dernières nuits et score provisoire. Sans style.
+/// Écran de diagnostic M1, ouvert depuis le profil : sources Apple Santé, 14 dernières nuits et score provisoire, puis les
+/// rapports de plantage et de lenteur gardés sur l'iPhone. Sans style.
 struct HealthDiagnosticsView: View {
     @State private var model: HealthDiagnosticsModel
+    @State private var reports: DiagnosticReportsModel
 
-    init(model: HealthDiagnosticsModel) {
+    init(model: HealthDiagnosticsModel, reports: DiagnosticReportsModel = DiagnosticReportsModel()) {
         _model = State(initialValue: model)
+        _reports = State(initialValue: reports)
     }
 
     var body: some View {
@@ -17,8 +20,9 @@ struct HealthDiagnosticsView: View {
             sourcesSection
             nightsSection
             scoreSection
+            DiagnosticReportsSection(model: reports)
         }
-        .navigationTitle(String(localized: "Diagnostic Apple Santé"))
+        .navigationTitle(String(localized: "Diagnostic"))
         .task { await model.refresh() }
     }
 

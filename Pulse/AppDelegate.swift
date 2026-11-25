@@ -14,6 +14,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
                                                                runService: dependencies.run.service)
     /// Le centre de notifications ne retient pas son délégué : c'est l'app qui le garde.
     private var notificationRouter: NotificationRouter?
+    /// Les rapports de plantage et de lenteur de MetricKit, gardés sur l'iPhone pour l'écran Diagnostic.
+    private let metricKitReports = MetricKitReportCollector()
 
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
@@ -22,6 +24,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         UNUserNotificationCenter.current().setNotificationCategories(UserNotificationScheduler.supplementCategories)
         self.notificationRouter = notificationRouter
         sessionIntents.install()
+        metricKitReports.start()
         let dependencies = dependencies
         dependencies.backgroundDelivery?.start {
             // L'app ouverte lit elle-même au premier plan : une lecture d'arrière-plan l'annoncerait pendant qu'on la regarde.

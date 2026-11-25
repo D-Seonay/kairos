@@ -340,16 +340,17 @@ extension AppDependencies {
                           exerciseNames: { content.exercise(id: $0)?.name.fr })
     }
 
-    /// Efface le magasin, les photos de corps et leur export, les préférences, les notifications, l'instantané du widget et les
-    /// exports. Elle attend la fin d'un rafraîchissement en cours, qui republierait l'instantané effacé. Le dépôt des photos de corps
-    /// est celui du câblage, que lit aussi leur service : jamais un second sur le même dossier.
+    /// Efface le magasin, les photos de corps et leur export, les préférences, les notifications, l'instantané du widget, les
+    /// exports et les rapports de diagnostic. Elle attend la fin d'un rafraîchissement en cours, qui republierait l'instantané
+    /// effacé. Le dépôt des photos de corps est celui du câblage, que lit aussi leur service : jamais un second sur le même
+    /// dossier.
     private static func makeEraser(_ wiring: Wiring, container: ModelContainer, refresher: DayRefresher) -> any DataEraser {
         let store = SwiftDataEraser(container: container, defaultsSuite: wiring.defaultsSuite,
                                     defaultsDomain: wiring.defaultsSuite ?? Bundle.main.bundleIdentifier ?? "fr.seonay.pulse",
                                     healthEraser: wiring.healthEraser, notifications: wiring.notificationCanceling,
                                     widgets: wiring.widgets, exportsDirectory: SwiftDataExporter.exportsDirectory,
                                     bodyPhotos: wiring.bodyPhotos, bodyPhotoExportDirectory: BodyPhotoService.exportDirectory)
-        return SerializedDataEraser(refresher: refresher, inner: store)
+        return DiagnosticReportsEraser(inner: SerializedDataEraser(refresher: refresher, inner: store), reports: diagnosticReports)
     }
 }
 
