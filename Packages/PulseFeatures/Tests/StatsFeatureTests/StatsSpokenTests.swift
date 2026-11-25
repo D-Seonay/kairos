@@ -175,6 +175,15 @@ struct StatsChartSummaryTests {
         #expect(StatsText.sleepSharesSpoken(deepShare: nil, stageShares: nil) == nil)
     }
 
+    /// Une source sans paradoxal : la légende ne le nomme pas, le résumé ne dit pas « paradoxal 0 % » non plus.
+    @Test func sleepSharesLeaveOutAShareRoundedToZero() {
+        let noREM = StageShares(deep: 0.2, core: 0.796, rem: 0.004, unspecified: 0)
+        #expect(StatsText.sleepSharesSpoken(deepShare: 0.2, stageShares: noREM) == "profond 20 %, léger 80 %")
+        #expect(StatsText.sleepShareParts(deepShare: 0.2, stageShares: noREM, order: [.deep, .rem, .core])
+            == ["profond 20 %", "léger 80 %"])
+        #expect(StatsText.sleepSharesSpoken(deepShare: 0.003, stageShares: nil) == nil)
+    }
+
     @Test func categoriesSummarySpeaksDays() {
         let counts = [CategoryCount(category: .optimal, days: 6), CategoryCount(category: .normal, days: 18),
                       CategoryCount(category: .moderateFatigue, days: 5), CategoryCount(category: .overreached, days: 1)]

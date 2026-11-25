@@ -27,19 +27,44 @@ extension StatsText {
     }
 
     /// « profond 19 %, léger 58 %, paradoxal 23 % » (plus « sans phase 2 % » s'il y en a), dans l'ordre d'empilement des
-    /// barres ; « profond 19 % » sans phases connues ; rien sans profond.
+    /// barres ; « profond 19 % » sans phases connues ; rien sans part à dire.
     static func sleepSharesSpoken(deepShare: Double?, stageShares: StageShares?) -> String? {
-        func percent(_ share: Double) -> String { PulseFormat.integer(share * 100, unit: "%") }
-        guard let shares = stageShares else {
-            return deepShare.map { String(localized: "profond \(percent($0))", bundle: .module) }
+        let parts = sleepShareParts(deepShare: deepShare, stageShares: stageShares, order: [.deep, .core, .rem, .asleepUnspecified])
+        return parts.isEmpty ? nil : parts.joined(separator: ", ")
+    }
+
+    /// Les parts de sommeil à dire ou écrire, dans `order` : « profond 19 % », « léger 58 % »… Une part n'y figure que si elle
+    /// s'arrondit au-dessus de 0 %, le seuil de la légende du graphique qui ne nomme que les tranches dessinées : une source
+    /// sans paradoxal ne fait pas dire « paradoxal 0 % ». Sans phases connues, seule la part de profond.
+    static func sleepShareParts(deepShare: Double?, stageShares: StageShares?, order: [SleepStage]) -> [String] {
+        let values: [(SleepStage, Double)] = if let shares = stageShares {
+            order.compactMap { stage in share(of: stage, in: shares).map { (stage, $0) } }
+        } else {
+            deepShare.map { [(SleepStage.deep, $0)] } ?? []
         }
-        var parts = [String(localized: "profond \(percent(shares.deep))", bundle: .module),
-                     String(localized: "léger \(percent(shares.core))", bundle: .module),
-                     String(localized: "paradoxal \(percent(shares.rem))", bundle: .module)]
-        if (shares.unspecified * 100).rounded() > 0 {
-            parts.append(String(localized: "sans phase \(percent(shares.unspecified))", bundle: .module))
+        return values.compactMap { stage, share in
+            guard share.isFinite, (share * 100).rounded() > 0 else { return nil }
+            return sharePart(stage, percent: PulseFormat.integer(share * 100, unit: "%"))
         }
-        return parts.joined(separator: ", ")
+    }
+
+    private static func share(of stage: SleepStage, in shares: StageShares) -> Double? {
+        switch stage {
+        case .deep: shares.deep
+        case .core: shares.core
+        case .rem: shares.rem
+        case .asleepUnspecified: shares.unspecified
+        case .awake, .inBed: nil
+        }
+    }
+
+    private static func sharePart(_ stage: SleepStage, percent: String) -> String {
+        switch stage {
+        case .deep: String(localized: "profond \(percent)", bundle: .module)
+        case .core: String(localized: "léger \(percent)", bundle: .module)
+        case .rem: String(localized: "paradoxal \(percent)", bundle: .module)
+        case .asleepUnspecified, .awake, .inBed: String(localized: "sans phase \(percent)", bundle: .module)
+        }
     }
 
     private static func extreme(_ point: SleepPoint, isShortest: Bool, bucket: StatsBucket, calendar: Calendar) -> String {

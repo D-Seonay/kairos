@@ -30,18 +30,13 @@ struct BiometrySection: View {
         let noNight = String(localized: "aucune nuit mesurée sur la période", bundle: .module)
         var sleepDetails = details(biometry.sleepMinutes)
         var sleepSpoken = spokenDetails(biometry.sleepMinutes)
-        if let shares = biometry.stageShares {
-            // « profond 18 % · paradoxal 22 % · léger 60 % » : les nuits qui ont leurs phases.
-            let deep = PulseFormat.integer(shares.deep * 100, unit: "%")
-            let rem = PulseFormat.integer(shares.rem * 100, unit: "%")
-            let core = PulseFormat.integer(shares.core * 100, unit: "%")
-            let share = String(localized: "profond \(deep) · paradoxal \(rem) · léger \(core)", bundle: .module)
-            sleepDetails.insert(share, at: 0)
-            sleepSpoken.insert(share.replacingOccurrences(of: " · ", with: ", "), at: 0)
-        } else if let deep = biometry.deepShare {
-            let share = String(localized: "profond \(PulseFormat.integer(deep * 100, unit: "%"))", bundle: .module)
-            sleepDetails.insert(share, at: 0)
-            sleepSpoken.insert(share, at: 0)
+        // « profond 18 % · paradoxal 22 % · léger 60 % » sur les nuits qui ont leurs phases, sinon « profond 19 % » ; une part
+        // arrondie à 0 % n'est ni écrite ni dite, comme dans le résumé du graphique.
+        let shares = StatsText.sleepShareParts(deepShare: biometry.deepShare, stageShares: biometry.stageShares,
+                                               order: [.deep, .rem, .core])
+        if !shares.isEmpty {
+            sleepDetails.insert(shares.joined(separator: " · "), at: 0)
+            sleepSpoken.insert(shares.joined(separator: ", "), at: 0)
         }
         return [
             StatsTileContent(title: String(localized: "Variabilité moyenne", bundle: .module),
