@@ -11,6 +11,9 @@ public protocol RunLocationTracking: Sendable {
     func authorization() async -> RunLocationAuthorization
     /// Montre la demande système si elle n'a jamais été faite, puis rend l'état.
     func requestAuthorization() async -> RunLocationAuthorization
+    /// Vrai si seule la position approximative est permise (« Position exacte » coupée dans les réglages) : les points, trop
+    /// imprécis, ne sont jamais retenus.
+    func isAccuracyReduced() async -> Bool
     /// Démarre le suivi ; le flux rend chaque point livré, jusqu'à `stop()`.
     func start() async -> AsyncStream<RunTrackPoint>
     func stop() async
@@ -23,11 +26,23 @@ public actor StubRunLocationTracker: RunLocationTracking {
     public private(set) var requestCount = 0
     public private(set) var startCount = 0
     public private(set) var stopCount = 0
+    public private(set) var accuracyReduced: Bool
     private var continuation: AsyncStream<RunTrackPoint>.Continuation?
 
-    public init(state: RunLocationAuthorization = .authorized, grantedOnRequest: RunLocationAuthorization = .authorized) {
+    public init(state: RunLocationAuthorization = .authorized, grantedOnRequest: RunLocationAuthorization = .authorized,
+                accuracyReduced: Bool = false) {
         self.state = state
         self.grantedOnRequest = grantedOnRequest
+        self.accuracyReduced = accuracyReduced
+    }
+
+    public func isAccuracyReduced() async -> Bool {
+        accuracyReduced
+    }
+
+    /// « Position exacte » coupée ou rétablie dans les réglages.
+    public func setAccuracyReduced(_ reduced: Bool) {
+        accuracyReduced = reduced
     }
 
     public func authorization() async -> RunLocationAuthorization {

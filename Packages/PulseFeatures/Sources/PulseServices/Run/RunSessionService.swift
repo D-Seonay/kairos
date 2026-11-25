@@ -148,6 +148,12 @@ public actor RunSessionService {
         await stopPreview()
     }
 
+    /// Vrai si la localisation est permise, mais seulement approximative : aucun point n'est assez précis pour la distance.
+    public func isLocationApproximate() async -> Bool {
+        guard await location.authorization() == .authorized else { return false }
+        return await location.isAccuracyReduced()
+    }
+
     // MARK: Départ
 
     public func start(_ launch: RunLaunch) async throws -> RunSnapshot {

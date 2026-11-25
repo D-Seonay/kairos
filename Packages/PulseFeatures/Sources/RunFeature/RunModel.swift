@@ -26,6 +26,8 @@ public final class RunModel {
     public private(set) var phase: Phase
     /// Le signal du départ ; `nil` avant la première valeur.
     public private(set) var gps: RunGPSQuality?
+    /// « Position exacte » est coupée pour Pulse : la position approximative ne mesure pas la distance, l'écran l'explique.
+    public private(set) var locationApproximate = false
     public private(set) var isBusy = false
     public private(set) var errorMessage: String?
     /// Mémorisé par appareil : coupé ici, il l'est aussi dans Paramètres.
@@ -80,6 +82,17 @@ public final class RunModel {
         locationDenied ? RunText.locationDenied : nil
     }
 
+    /// L'explication de la position approximative, avec le chemin vers les réglages ; `nil` si la localisation est refusée,
+    /// déjà expliqué par `locationNotice`.
+    public var approximateNotice: String? {
+        locationApproximate && !locationDenied ? RunText.locationApproximate : nil
+    }
+
+    /// Relit la précision permise : à l'ouverture de l'écran et au retour dans l'app, les réglages ont pu changer.
+    public func refreshLocationAccuracy() async {
+        locationApproximate = await environment.service.isLocationApproximate()
+    }
+
     // MARK: Départ
 
     /// Suit le signal GPS de l'écran de départ jusqu'au départ ou à l'annulation. Le flux se termine aussitôt, sans valeur, quand
@@ -87,7 +100,10 @@ public final class RunModel {
     public func watchGPS() async {
         guard case .start = phase else { return }
         var received = false
-        for await quality in await environment.service.gpsPreview() {
+        let qualities = await environment.service.gpsPreview()
+        // L'aperçu a demandé l'autorisation : la précision accordée est connue.
+        await refreshLocationAccuracy()
+        for await quality in qualities {
             received = true
             gps = quality
         }

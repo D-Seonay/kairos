@@ -265,6 +265,10 @@ private actor GatedRunLocationTracker: RunLocationTracking {
         await inner.requestAuthorization()
     }
 
+    func isAccuracyReduced() async -> Bool {
+        await inner.isAccuracyReduced()
+    }
+
     func start() async -> AsyncStream<RunTrackPoint> {
         await inner.start()
     }

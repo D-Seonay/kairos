@@ -102,6 +102,8 @@ struct RunView: View {
     private func notices(_ snapshot: RunSnapshot) -> some View {
         if let notice = model.locationNotice {
             RunNoticeLine(text: notice, systemImage: "location.slash")
+        } else if let notice = model.approximateNotice {
+            RunApproximateLocationNotice(text: notice)
         } else if snapshot.gps != .ready {
             RunNoticeLine(text: RunText.gpsStatus(snapshot.gps), systemImage: "location")
         }

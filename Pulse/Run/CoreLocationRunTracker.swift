@@ -21,6 +21,10 @@ actor CoreLocationRunTracker: RunLocationTracking {
         return await LocationPermission.shared.request()
     }
 
+    func isAccuracyReduced() async -> Bool {
+        await LocationPermission.shared.isAccuracyReduced()
+    }
+
     /// Remplace un suivi déjà démarré : le flux précédent se termine.
     func start() async -> AsyncStream<RunTrackPoint> {
         let session = await MainActor.run { CLBackgroundActivitySession() }
@@ -81,6 +85,11 @@ private final class LocationPermission: NSObject, CLLocationManagerDelegate {
 
     func state() -> RunLocationAuthorization {
         Self.authorization(manager.authorizationStatus)
+    }
+
+    /// « Position exacte » coupée pour Pulse dans les réglages : seule une position approximative est livrée.
+    func isAccuracyReduced() -> Bool {
+        manager.accuracyAuthorization == .reducedAccuracy
     }
 
     func request() async -> RunLocationAuthorization {
