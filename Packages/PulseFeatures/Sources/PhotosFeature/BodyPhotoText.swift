@@ -1,6 +1,7 @@
 import Foundation
 import PulseDesignSystem
 import PulseDomain
+import PulseServices
 
 /// Les textes des photos de corps, affichés et parlés : verrou, en-tête, ajout, comparaison et réglages.
 extension PhotoText {
@@ -118,6 +119,19 @@ extension PhotoText {
     static var lockWithFaceID: String { String(localized: "Verrouiller avec Face ID", bundle: .module) }
     static var lockNeedsPasscode: String {
         String(localized: "Le verrou demande un code sur cet iPhone.", bundle: .module)
+    }
+    static var reminderTitle: String { String(localized: "Rappel de photo", bundle: .module) }
+    /// « Désactivé », « Toutes les 2 semaines », « Tous les mois ».
+    static func reminderInterval(_ interval: BodyPhotoReminderInterval) -> String {
+        switch interval {
+        case .off: String(localized: "Désactivé", bundle: .module)
+        case .everyTwoWeeks: String(localized: "Toutes les 2 semaines", bundle: .module)
+        case .monthly: String(localized: "Tous les mois", bundle: .module)
+        }
+    }
+    static var reminderNote: String {
+        String(localized: "Une notification à 9 h, sans image ni mot sur le sujet. Chaque nouvelle photo repousse la suivante.",
+               bundle: .module)
     }
     static var export: String { String(localized: "Exporter les photos de corps", bundle: .module) }
     static var exportNote: String {

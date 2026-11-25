@@ -1,13 +1,14 @@
 import Foundation
 
 /// Les liens que l'app sait ouvrir : `fr.seonay.pulse://today` mène à l'accueil, `fr.seonay.pulse://supplements` à l'écran
-/// Compléments, `fr.seonay.pulse://planning` à l'onglet Planning, et `fr.seonay.pulse://start-session` lance (ou rouvre) la
-/// séance du jour depuis l'accueil.
+/// Compléments, `fr.seonay.pulse://planning` à l'onglet Planning, `fr.seonay.pulse://start-session` lance (ou rouvre) la
+/// séance du jour depuis l'accueil, et `fr.seonay.pulse://body-photos` ouvre les photos de corps (derrière Face ID) depuis Profil.
 public enum AppLink: String, Sendable {
     case today
     case supplements
     case planning
     case startSession = "start-session"
+    case bodyPhotos = "body-photos"
 
     public static let scheme = "fr.seonay.pulse"
 

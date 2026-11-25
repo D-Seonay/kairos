@@ -4,20 +4,6 @@ import PulseDomain
 import PulseServices
 import SwiftUI
 
-/// Le verrou des photos de corps. `unavailable` : l'iPhone n'a pas de code, il n'y a ni verrou ni chiffrement.
-public enum BodyPhotosLockState: Equatable, Sendable {
-    case locked
-    case unlocked
-    case unavailable
-}
-
-/// Une photo prête à enregistrer : l'image déjà redressée, réduite et nettoyée, et la date proposée.
-public struct BodyPhotoDraft: Equatable, Sendable {
-    public var processed: ProcessedPhoto
-    /// La date de prise de vue des métadonnées, sinon maintenant ; jamais dans le futur.
-    public var takenAt: Date
-}
-
 /// L'état de la section Photos de corps : le verrou (Face ID ou code), le cache quand l'app n'est plus active, la liste par jour,
 /// l'ajout, la suppression, l'export et le réglage du verrou. Aucun fichier n'est lu tant que la section est verrouillée : la
 /// liste et les vignettes ne se chargent qu'une fois déverrouillée, et elles sont oubliées dès qu'elle se reverrouille.
@@ -41,10 +27,14 @@ public final class BodyPhotosModel {
     public private(set) var announcementSerial = 0
     /// Le réglage « Verrouiller avec Face ID », recopié du magasin pour que la vue le suive.
     private var lockSetting: Bool
+    /// Le rythme du rappel de photos, recopié du réglage pour que la vue le suive ; désactivé sans rappels branchés.
+    public internal(set) var reminderInterval: BodyPhotoReminderInterval
 
     @ObservationIgnored private let service: BodyPhotoService
     @ObservationIgnored private let authentication: (any DeviceOwnerAuthenticating)?
     @ObservationIgnored private let lock: any BodyPhotoLockStore
+    /// Le rappel de reprendre des photos ; `nil` : pas de réglage de rappel.
+    @ObservationIgnored let reminders: BodyPhotoReminders?
     @ObservationIgnored let calendar: Calendar
     @ObservationIgnored private let now: @Sendable () -> Date
     @ObservationIgnored private var phase: ScenePhase = .active
@@ -62,13 +52,15 @@ public final class BodyPhotosModel {
     @ObservationIgnored private(set) var pendingLeave: Task<Void, Never>?
 
     public init(service: BodyPhotoService, authentication: (any DeviceOwnerAuthenticating)?, lock: any BodyPhotoLockStore,
-                calendar: Calendar, now: @escaping @Sendable () -> Date) {
+                reminders: BodyPhotoReminders? = nil, calendar: Calendar, now: @escaping @Sendable () -> Date) {
         self.service = service
         self.authentication = authentication
         self.lock = lock
+        self.reminders = reminders
         self.calendar = calendar
         self.now = now
         lockSetting = lock.isLockEnabled
+        reminderInterval = reminders?.interval ?? .off
     }
 
     /// Le verrou est actif : il y a un code et le réglage n'est pas coupé.
@@ -313,6 +305,7 @@ extension BodyPhotosModel {
             _ = try await service.save(draft.processed, pose: pose, takenAt: min(takenAt, now()), replacing: replacing)
             announce(PhotoText.photoAdded)
             await load()
+            await rescheduleReminder()
             return true
         } catch {
             errorMessage = PhotoText.addFailed
@@ -327,6 +320,7 @@ extension BodyPhotosModel {
             thumbnails[photoID] = nil
             announce(PhotoText.photoDeleted)
             await load()
+            await rescheduleReminder()
             return true
         } catch {
             errorMessage = PhotoText.deleteFailed
@@ -386,6 +380,7 @@ extension BodyPhotosModel {
             thumbnails = [:]
             errorMessage = nil
             announce(PhotoText.allDeleted)
+            await rescheduleReminder()
         } catch {
             errorMessage = PhotoText.deleteAllFailed
         }

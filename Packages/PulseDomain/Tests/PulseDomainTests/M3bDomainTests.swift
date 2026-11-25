@@ -17,7 +17,8 @@ import Testing
 @Test func appLinksOfTheWidgetsAndControlsRoundTrip() throws {
     #expect(AppLink.planning.url?.absoluteString == "fr.seonay.pulse://planning")
     #expect(AppLink.startSession.url?.absoluteString == "fr.seonay.pulse://start-session")
-    for link in [AppLink.today, .supplements, .planning, .startSession] {
+    #expect(AppLink.bodyPhotos.url?.absoluteString == "fr.seonay.pulse://body-photos")
+    for link in [AppLink.today, .supplements, .planning, .startSession, .bodyPhotos] {
         let url = try #require(link.url)
         #expect(AppLink(url: url) == link)
     }

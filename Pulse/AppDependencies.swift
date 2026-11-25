@@ -105,6 +105,8 @@ struct AppDependencies: Sendable {
         var restNotifier: any RestTimerNotifying
         /// Les rappels de compléments ; une doublure en mode mémoire et dans les tests.
         var supplementReminders: any SupplementReminderScheduling
+        /// Le rappel de reprendre des photos de corps ; une doublure en mode mémoire et dans les tests.
+        var bodyPhotoReminders: any BodyPhotoReminderScheduling
         /// L'écriture des prises dans Apple Santé ; `nil` dans les mêmes cas que `healthWriter`.
         var supplementHealth: (any SupplementHealthWriting)?
         /// La Live Activity de la séance ; une doublure en mode mémoire et dans les tests.
@@ -126,30 +128,6 @@ struct AppDependencies: Sendable {
         var calendar: Calendar
         var now: @Sendable () -> Date
         var launch: LaunchOptions
-
-        #if DEBUG
-        /// Les modes des tests d'interface (mémoire, disque) n'écrivent ni dans les préférences, ni dans le groupe d'apps, ni dans
-        /// les notifications, ni dans le dossier des photos de corps de l'app réelle. L'écran en direct y a l'autorisation ;
-        /// l'onboarding garde le refus.
-        mutating func useMemoryDoubles(defaultsSuite suite: String) {
-            defaultsSuite = suite
-            notifications = StubNotificationAuthorizer(granted: false)
-            liveSessionNotifications = StubNotificationAuthorizer(granted: true)
-            widgets = StubWidgetPublisher()
-            morningScore = StubNotificationScheduler()
-            restNotifier = StubRestTimerNotifier()
-            supplementReminders = StubSupplementReminderScheduler()
-            sessionActivity = StubSessionActivityController()
-            run = .stubs
-            bodyPhotos = InMemoryBodyPhotoStore()
-            healthWriter = nil
-            supplementHealth = nil
-            healthEraser = StubHealthEraser()
-            notificationCanceling = nil
-            notificationStatus = { .authorized }
-            backgroundDelivery = nil
-        }
-        #endif
     }
 
     /// Apple Santé réel quand l'appareil le permet ; iCloud sur appareil, fichier local sur simulateur, mémoire en dernier recours.
@@ -184,7 +162,7 @@ struct AppDependencies: Sendable {
                             healthEraser: writer ?? StubHealthEraser(), healthWriter: writer,
                             widgets: AppGroupWidgetPublisher(file: WidgetSnapshotFile.appGroup()),
                             morningScore: scheduler, restNotifier: scheduler, supplementReminders: scheduler,
-                            supplementHealth: writer, sessionActivity: SessionActivityController(),
+                            bodyPhotoReminders: scheduler, supplementHealth: writer, sessionActivity: SessionActivityController(),
                             run: .live(healthSession: writer != nil ? HealthKitRunRecorder() : nil, reminders: scheduler),
                             bodyPhotos: FileBodyPhotoStore(directory: bodyPhotosDirectory), notificationCanceling: scheduler,
                             backgroundDelivery: launch.healthScenario == nil ? reader.map(HealthKitBackgroundDelivery.init) : nil,
@@ -222,7 +200,8 @@ struct AppDependencies: Sendable {
             notifications: StubNotificationAuthorizer(granted: false),
             liveSessionNotifications: StubNotificationAuthorizer(granted: false), healthEraser: healthEraser, healthWriter: nil,
             widgets: StubWidgetPublisher(), morningScore: StubNotificationScheduler(), restNotifier: StubRestTimerNotifier(),
-            supplementReminders: StubSupplementReminderScheduler(), supplementHealth: nil,
+            supplementReminders: StubSupplementReminderScheduler(), bodyPhotoReminders: StubBodyPhotoReminderScheduler(),
+            supplementHealth: nil,
             sessionActivity: StubSessionActivityController(), run: .stubs, bodyPhotos: InMemoryBodyPhotoStore(),
             notificationCanceling: nil,
             backgroundDelivery: nil, inspector: inspector, notificationStatus: { .authorized }, defaultsSuite: testingDefaultsSuite,
@@ -382,4 +361,33 @@ extension AppDependencies {
             await supplementService.rescheduleReminders()
         }
     }
+}
+
+// MARK: - Doublures des tests d'interface
+
+extension AppDependencies.Wiring {
+    #if DEBUG
+    /// Les modes des tests d'interface (mémoire, disque) n'écrivent ni dans les préférences, ni dans le groupe d'apps, ni dans
+    /// les notifications, ni dans le dossier des photos de corps de l'app réelle. L'écran en direct y a l'autorisation ;
+    /// l'onboarding garde le refus.
+    mutating func useMemoryDoubles(defaultsSuite suite: String) {
+        defaultsSuite = suite
+        notifications = StubNotificationAuthorizer(granted: false)
+        liveSessionNotifications = StubNotificationAuthorizer(granted: true)
+        widgets = StubWidgetPublisher()
+        morningScore = StubNotificationScheduler()
+        restNotifier = StubRestTimerNotifier()
+        supplementReminders = StubSupplementReminderScheduler()
+        bodyPhotoReminders = StubBodyPhotoReminderScheduler()
+        sessionActivity = StubSessionActivityController()
+        run = .stubs
+        bodyPhotos = InMemoryBodyPhotoStore()
+        healthWriter = nil
+        supplementHealth = nil
+        healthEraser = StubHealthEraser()
+        notificationCanceling = nil
+        notificationStatus = { .authorized }
+        backgroundDelivery = nil
+    }
+    #endif
 }

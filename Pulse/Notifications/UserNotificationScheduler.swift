@@ -3,9 +3,9 @@ import PulseDomain
 import UserNotifications
 
 /// La notification du score du matin, envoyée tout de suite, celle de la fin du repos, les rappels de compléments, celui d'une
-/// course oubliée, et la suppression des notifications de Pulse.
+/// course oubliée, celui des photos de corps, et la suppression des notifications de Pulse.
 struct UserNotificationScheduler: NotificationScheduling, NotificationCanceling, RestTimerNotifying, SupplementReminderScheduling,
-    RunReminderScheduling {
+    RunReminderScheduling, BodyPhotoReminderScheduling {
     static let morningScoreIdentifier = "fr.seonay.pulse.morning-score"
     /// Un seul identifiant : chaque nouveau repos remplace la notification du précédent.
     static let restTimerIdentifier = "fr.seonay.pulse.rest-timer"
@@ -18,6 +18,8 @@ struct UserNotificationScheduler: NotificationScheduling, NotificationCanceling,
     static let supplementDayKey = "day"
     /// Un seul identifiant : chaque report du rappel remplace le précédent.
     static let runForgottenIdentifier = "fr.seonay.pulse.run-forgotten"
+    /// Le début de l'identifiant d'un rappel de photos de corps, suivi de son rang.
+    static let bodyPhotoPrefix = "fr.seonay.pulse.body-photo."
 
     let now: @Sendable () -> Date
 
@@ -144,6 +146,32 @@ struct UserNotificationScheduler: NotificationScheduling, NotificationCanceling,
         content.title = String(localized: "Course toujours en cours ?")
         content.body = String(localized: "Aucun déplacement depuis 30 minutes. Ouvre Pulse pour la terminer.")
         content.sound = .default
+        return content
+    }
+
+    // MARK: - Photos de corps
+
+    /// Retire les rappels de photos de corps en attente, puis en planifie un à chaque date, à l'heure locale.
+    func replaceBodyPhotoReminders(at dates: [Date]) async {
+        let center = UNUserNotificationCenter.current()
+        let pending = await center.pendingNotificationRequests().map(\.identifier).filter { $0.hasPrefix(Self.bodyPhotoPrefix) }
+        center.removePendingNotificationRequests(withIdentifiers: pending)
+        let calendar = Calendar.current
+        for (index, date) in dates.enumerated() {
+            let components = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: date)
+            let request = UNNotificationRequest(identifier: "\(Self.bodyPhotoPrefix)\(index)", content: Self.bodyPhotoContent(),
+                                                trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: false))
+            try? await center.add(request)
+        }
+    }
+
+    /// Neutre sur l'écran verrouillé : ni image, ni mot qui dise de quelles photos il s'agit. Touchée, elle ouvre les photos de
+    /// corps derrière Face ID.
+    static func bodyPhotoContent() -> UNMutableNotificationContent {
+        let content = UNMutableNotificationContent()
+        content.title = String(localized: "C'est le moment de ta photo de suivi")
+        content.sound = .default
+        content.userInfo = [NotificationRouter.linkKey: AppLink.bodyPhotos.rawValue]
         return content
     }
 }
