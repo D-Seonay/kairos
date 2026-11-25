@@ -118,7 +118,7 @@ Les 20 cibles de test des packages (`PulseDomain`, `PulseRecoveryEngine`, `Pulse
   - Les sept cibles de `PulseFeatures` ajoutées au plan n'avaient jamais tourné sur simulateur iOS.
 - **Lenteur du simulateur en CI.** Le premier lancement de l'app est plus lent que sur un Mac de développement. Si un test échoue sur « Élément introuvable » sans autre cause, allonger le `timeout` du `tapWhenHittable` concerné plutôt que de désactiver le test.
 - **Fuseau et région.** Couverts par le plan (`fr`/`FR`, `TZ`) et par `launchEnvironment` dans les tests d'interface. Un nouveau test d'interface qui fige l'horloge doit lui aussi poser `TZ`.
-- **Scripts.** `ci_post_clone.sh` installe SwiftLint avec Homebrew à chaque action : une panne de Homebrew fait échouer les tests sans rapport avec le code.
+- **Scripts.** `ci_post_clone.sh` installe SwiftLint avec Homebrew avant chaque build : une panne de Homebrew fait échouer les tests sans rapport avec le code.
 
 ### Corriger ou désactiver un test rouge
 
