@@ -106,24 +106,23 @@ public actor RunSessionService {
     // MARK: Écran de départ
 
     /// Écran de départ : démarre la localisation et rend la qualité du signal (`ready` à ≤ 20 m) ; arrêtée par `start` ou
-    /// `cancelPreview()`. Avec la localisation refusée, le flux se termine aussitôt.
+    /// `cancelPreview()`. Avec la localisation refusée, le flux se termine aussitôt. L'aperçu ne garde pas la localisation en
+    /// arrière-plan : quitter l'app sur l'écran de départ n'affiche pas la flèche de localisation.
     ///
     /// Un départ ou un rattachement pendant les attentes garde la localisation pour sa course : l'aperçu se termine sans la toucher.
+    /// Un arrêt pendant l'attente de l'autorisation (écran fermé) l'emporte : la localisation ne démarre pas après coup.
     public func gpsPreview() async -> AsyncStream<RunGPSQuality> {
         let (stream, continuation) = AsyncStream.makeStream(of: RunGPSQuality.self)
-        guard run == nil, await authorizeLocation() == .authorized else {
-            continuation.finish()
-            return stream
-        }
         await stopPreview()
-        guard run == nil, !isTransitioning else {
+        let generation = previewGeneration
+        guard run == nil, !isTransitioning, await authorizeLocation() == .authorized,
+              generation == previewGeneration, run == nil, !isTransitioning else {
             continuation.finish()
             return stream
         }
         continuation.yield(.searching)
         previewContinuation = continuation
-        let generation = previewGeneration
-        let points = await location.start()
+        let points = await location.start(keepsRunningInBackground: false)
         // Arrêté pendant l'attente (départ, annulation, autre aperçu) : celui qui l'a arrêté a aussi arrêté la localisation.
         // Une course rattachée entre-temps a relancé la sienne, qui ne doit pas être arrêtée.
         guard generation == previewGeneration, run == nil else {
@@ -171,7 +170,7 @@ public actor RunSessionService {
         var heartRates: AsyncStream<Double>?
         if canWriteHealth { heartRates = try? await recorder.start(sessionID: sessionID, at: startedAt) }
         var points: AsyncStream<RunTrackPoint>?
-        if !locationDenied { points = await location.start() }
+        if !locationDenied { points = await location.start(keepsRunningInBackground: true) }
         let draft = RunDraft(sessionID: sessionID, launch: launch, startedAt: startedAt, locationDenied: locationDenied,
                              updatedAt: startedAt)
         let active = ActiveRun(draft: draft, recordsHealth: heartRates != nil, at: startedAt)
@@ -258,9 +257,11 @@ extension RunSessionService {
         return access == .notDetermined ? await recorder.requestWriteAccess() : access
     }
 
+    /// Arrête l'aperçu. La génération avance même sans aperçu enregistré : un aperçu encore en attente de l'autorisation ne
+    /// démarre pas la localisation ensuite.
     func stopPreview() async {
-        guard previewTask != nil || previewContinuation != nil else { return }
         previewGeneration += 1
+        guard previewTask != nil || previewContinuation != nil else { return }
         previewTask?.cancel()
         previewTask = nil
         previewContinuation?.finish()

@@ -14,8 +14,9 @@ public protocol RunLocationTracking: Sendable {
     /// Vrai si seule la position approximative est permise (« Position exacte » coupée dans les réglages) : les points, trop
     /// imprécis, ne sont jamais retenus.
     func isAccuracyReduced() async -> Bool
-    /// Démarre le suivi ; le flux rend chaque point livré, jusqu'à `stop()`.
-    func start() async -> AsyncStream<RunTrackPoint>
+    /// Démarre le suivi ; le flux rend chaque point livré, jusqu'à `stop()`. `keepsRunningInBackground` garde le suivi écran
+    /// verrouillé ou app en arrière-plan (la flèche de localisation s'affiche) : pour une course, jamais pour l'aperçu du départ.
+    func start(keepsRunningInBackground: Bool) async -> AsyncStream<RunTrackPoint>
     func stop() async
 }
 
@@ -25,6 +26,8 @@ public actor StubRunLocationTracker: RunLocationTracking {
     private let grantedOnRequest: RunLocationAuthorization
     public private(set) var requestCount = 0
     public private(set) var startCount = 0
+    /// `keepsRunningInBackground` de chaque démarrage, dans l'ordre.
+    public private(set) var backgroundStarts: [Bool] = []
     public private(set) var stopCount = 0
     public private(set) var accuracyReduced: Bool
     private var continuation: AsyncStream<RunTrackPoint>.Continuation?
@@ -55,8 +58,9 @@ public actor StubRunLocationTracker: RunLocationTracking {
         return state
     }
 
-    public func start() async -> AsyncStream<RunTrackPoint> {
+    public func start(keepsRunningInBackground: Bool) async -> AsyncStream<RunTrackPoint> {
         startCount += 1
+        backgroundStarts.append(keepsRunningInBackground)
         continuation?.finish()
         let (stream, continuation) = AsyncStream.makeStream(of: RunTrackPoint.self)
         self.continuation = continuation

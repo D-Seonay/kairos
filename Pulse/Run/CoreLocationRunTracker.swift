@@ -3,12 +3,18 @@ import Foundation
 import PulseDomain
 
 /// La localisation de la course au-dessus de CoreLocation (spec V2a) : les mises à jour en direct réglées pour le sport, et une
-/// session d'arrière-plan gardée pendant le suivi, pour que la course continue écran verrouillé avec l'autorisation « lorsque
-/// l'app est active ». Les points partent tels quels : le filtre de précision et de vitesse est celui de `RunTrackBuilder`.
+/// session d'arrière-plan gardée pendant le suivi d'une course, pour qu'elle continue écran verrouillé avec l'autorisation
+/// « lorsque l'app est active ». Les points partent tels quels : le filtre de précision et de vitesse est celui de
+/// `RunTrackBuilder`.
+///
+/// La session d'arrière-plan affiche la flèche de localisation : elle n'existe qu'entre un `start(keepsRunningInBackground: true)`
+/// et le `stop()` ou le départ suivant, et un arrêt arrivé pendant qu'un départ attendait le fil principal l'emporte.
 actor CoreLocationRunTracker: RunLocationTracking {
     private var updates: Task<Void, Never>?
     private var background: CLBackgroundActivitySession?
     private var continuation: AsyncStream<RunTrackPoint>.Continuation?
+    /// Avance à chaque départ et à chaque arrêt : un départ repris après son attente sait qu'un appel plus récent l'a remplacé.
+    private var generation = 0
 
     func authorization() async -> RunLocationAuthorization {
         await LocationPermission.shared.state()
@@ -25,9 +31,18 @@ actor CoreLocationRunTracker: RunLocationTracking {
         await LocationPermission.shared.isAccuracyReduced()
     }
 
-    /// Remplace un suivi déjà démarré : le flux précédent se termine.
-    func start() async -> AsyncStream<RunTrackPoint> {
-        let session = await MainActor.run { CLBackgroundActivitySession() }
+    /// Remplace un suivi déjà démarré : le flux précédent se termine. L'acteur est réentrant pendant la création de la session
+    /// sur le fil principal : un arrêt ou un autre départ arrivé entre-temps l'emporte, et ce départ rend un flux déjà terminé
+    /// sans rien garder.
+    func start(keepsRunningInBackground: Bool) async -> AsyncStream<RunTrackPoint> {
+        generation += 1
+        let token = generation
+        var session: CLBackgroundActivitySession?
+        if keepsRunningInBackground { session = await MainActor.run { CLBackgroundActivitySession() } }
+        guard token == generation else {
+            session?.invalidate()
+            return AsyncStream { $0.finish() }
+        }
         stopUpdates()
         let (stream, continuation) = AsyncStream.makeStream(of: RunTrackPoint.self)
         self.continuation = continuation
@@ -47,6 +62,7 @@ actor CoreLocationRunTracker: RunLocationTracking {
     }
 
     func stop() async {
+        generation += 1
         stopUpdates()
     }
 

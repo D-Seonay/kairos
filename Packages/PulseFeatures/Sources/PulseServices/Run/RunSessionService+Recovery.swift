@@ -22,11 +22,13 @@ extension RunSessionService {
         isTransitioning = true
         defer { isTransitioning = false }
         guard let draft = try? await drafts.load(), await recorder.recoverActiveSession() else { return nil }
+        // Un aperçu encore ouvert lâche la localisation, que la course reprend : sa fermeture ne l'arrêtera plus.
+        await stopPreview()
         let date = now()
         let builder = RunTrackBuilder.replay(startedAt: draft.startedAt, points: draft.points, pauses: draft.pauses)
         let active = ActiveRun(draft: draft, builder: builder, recordsHealth: true, at: date)
         var points: AsyncStream<RunTrackPoint>?
-        if !draft.locationDenied { points = await location.start() }
+        if !draft.locationDenied { points = await location.start(keepsRunningInBackground: true) }
         run = active
         consume(points: points, heartRates: nil)
         // La Live Activity a survécu au processus : elle est retrouvée par l'identifiant de la séance.

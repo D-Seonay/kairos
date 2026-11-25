@@ -100,6 +100,52 @@ struct RunSessionServiceTests {
         #expect(await service.current()?.gps == .ready)
     }
 
+    // MARK: Localisation laissée allumée (flèche de localisation hors course)
+
+    /// L'aperçu du départ ne garde pas la localisation en arrière-plan ; la course, si.
+    @Test func onlyTheRunKeepsLocationInTheBackground() async throws {
+        let fixture = RunSessionFixture()
+        _ = await fixture.service.gpsPreview()
+        _ = try await fixture.service.start(.free())
+        #expect(await fixture.location.backgroundStarts == [false, true])
+        _ = try await fixture.service.finish()
+        #expect(await fixture.location.stopCount == 2)
+    }
+
+    /// L'écran de départ fermé pendant que l'aperçu attendait l'autorisation : la localisation ne démarre pas après coup.
+    @Test func previewCancelledWhileAuthorizingNeverStartsLocation() async throws {
+        let tracker = GatedRunLocationTracker()
+        let service = RunSessionService(
+            recorder: StubRunWorkoutRecorder(), location: tracker, announcer: StubRunAnnouncer(),
+            activity: StubRunActivityController(), reminders: StubRunReminderScheduler(), drafts: InMemoryRunDraftStore(),
+            workouts: InMemoryWorkoutRepository(), tracks: InMemoryRunTrackRepository(), profiles: InMemoryProfileRepository(),
+            preferences: InMemoryRunPreferencesStore(), spokenText: RunSessionFixture.spokenText,
+            now: { RunSessionFixture.start }, calendar: TestClock.calendar, keepAliveTicks: { _ in AsyncStream { $0.finish() } })
+        let preview = Task { await service.gpsPreview() }
+        await tracker.gate.waitForArrival()
+        await service.cancelPreview()
+        await tracker.gate.open()
+
+        var iterator = await preview.value.makeAsyncIterator()
+        #expect(await iterator.next() == nil)
+        #expect(await tracker.inner.startCount == 0)
+    }
+
+    /// Une course rattachée pendant que l'écran de départ suivait le signal : l'aperçu lâche la localisation, et sa fermeture
+    /// n'arrête pas celle de la course.
+    @Test func reattachTakesOverThePreviewLocation() async throws {
+        let draft = RunSessionFixture.interruptedDraft(meters: 500)
+        let fixture = RunSessionFixture(recorder: StubRunWorkoutRecorder(recoverable: true), draft: draft)
+        _ = await fixture.service.gpsPreview()
+        #expect(await fixture.service.reattach() != nil)
+        #expect(await fixture.location.backgroundStarts == [false, true])
+        let stops = await fixture.location.stopCount
+        await fixture.service.cancelPreview()
+        #expect(await fixture.location.stopCount == stops)
+        await fixture.service.discard()
+        #expect(await fixture.location.stopCount == stops + 1)
+    }
+
     // MARK: Annonces, brouillon et Live Activity
 
     @Test func kilometreIsAnnouncedOnce() async throws {
@@ -269,8 +315,8 @@ private actor GatedRunLocationTracker: RunLocationTracking {
         await inner.isAccuracyReduced()
     }
 
-    func start() async -> AsyncStream<RunTrackPoint> {
-        await inner.start()
+    func start(keepsRunningInBackground: Bool) async -> AsyncStream<RunTrackPoint> {
+        await inner.start(keepsRunningInBackground: keepsRunningInBackground)
     }
 
     func stop() async {
