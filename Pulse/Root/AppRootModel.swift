@@ -166,7 +166,16 @@ final class AppRootModel {
                     let goalChanged = saved.sleepGoalMinutes != profile?.sleepGoalMinutes
                     profile = saved
                     guard goalChanged, let today else { return }
-                    Task { await today.refresh() }
+                    // Une lecture déjà en cours fait revenir `refresh()` tout de suite, peut-être sur l'ancien objectif : on
+                    // l'attend, quelques secondes au plus, comme `MainTabView`, puis on relit.
+                    Task {
+                        var waits = 0
+                        while today.isLoading, waits < 50 {
+                            try? await Task.sleep(for: .milliseconds(100))
+                            waits += 1
+                        }
+                        await today.refresh()
+                    }
                 }
                 let liveSession = LiveSessionCoordinator(environment: dependencies.liveSessionEnvironment())
                 self.liveSession = liveSession

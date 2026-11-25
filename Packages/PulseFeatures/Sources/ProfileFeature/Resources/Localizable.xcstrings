@@ -241,16 +241,6 @@
         }
       }
     },
-    "%lld min avant" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld min avant"
-          }
-        }
-      }
-    },
     "%lld reps" : {
       "localizations" : {
         "fr" : {

@@ -30,6 +30,7 @@ struct SleepSettingsTextTests {
         #expect(ProfileText.sleepGoal(minutes: 480) == "8 h")
         #expect(ProfileText.sleepGoal(minutes: 450) == "7 h 30")
         #expect(ProfileText.bedtimeLead(minutes: 30) == "30 min avant")
+        #expect(ProfileText.bedtimeLead(minutes: 60) == "1 h avant")
     }
 }
 

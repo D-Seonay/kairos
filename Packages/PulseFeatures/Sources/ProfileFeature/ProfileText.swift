@@ -197,9 +197,9 @@ enum ProfileText {
         }
     }
 
-    /// « 30 min avant » : l'avance du rappel de coucher.
+    /// « 30 min avant », « 1 h avant » : l'avance du rappel de coucher.
     static func bedtimeLead(minutes: Int) -> String {
-        String(localized: "\(minutes) min avant", bundle: .module)
+        String(localized: "\(PulseFormat.duration(minutes: minutes)) avant", bundle: .module)
     }
 
     static func sex(_ sex: Sex) -> String {

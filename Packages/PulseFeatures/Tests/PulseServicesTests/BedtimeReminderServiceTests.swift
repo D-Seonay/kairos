@@ -3,17 +3,19 @@ import PulseDomain
 import PulseServices
 import Testing
 
-/// Midi le vendredi 20 novembre 2026 ; « Jambes » le mercredi dans la semaine type.
+/// Midi le vendredi 20 novembre 2026 ; « Jambes » le mercredi et un fractionné le jeudi dans la semaine type.
 struct BedtimeReminderServiceTests {
     private let calendar = TestClock.calendar
     private let now = TestClock.date("2026-11-20T12:00")
     private let created = TestClock.date("2026-10-01T08:00")
     private let legs = RoutineDay(order: 0, name: "Jambes", kind: .strength)
+    private let intervals = RoutineDay(order: 1, name: "Course du jeudi", kind: .run, runType: .intervals)
     private let programID = UUID()
 
     private var program: Program {
-        Program(id: programID, name: "Jambes le mercredi", sessionsPerWeek: 1,
-                weekLayout: [nil, nil, legs.id, nil, nil, nil, nil], days: [legs], createdAt: created, updatedAt: created)
+        Program(id: programID, name: "Jambes le mercredi", sessionsPerWeek: 2,
+                weekLayout: [nil, nil, legs.id, intervals.id, nil, nil, nil], days: [legs, intervals], createdAt: created,
+                updatedAt: created)
     }
 
     private func profile(weekday: Int? = 420, weekend: Int? = 540, enabled: Bool = true) -> UserProfile {
@@ -55,6 +57,33 @@ struct BedtimeReminderServiceTests {
         // La semaine type : mardi 24, « Jambes » le lendemain.
         #expect(await reminders.reminders.first { $0.evening == TestClock.date("2026-11-24T00:00") }?.body
             == "Séance Jambes demain : vise tes 8 h de sommeil.")
+    }
+
+    @Test func aRunIsNamedByItsRunTypeAndAStrengthDayByItsName() async throws {
+        let reminders = StubBedtimeReminderScheduler()
+        try await service(profiles: profiles(profile()), reminders: reminders).reschedule()
+        let planned = await reminders.reminders
+        #expect(planned.first { $0.evening == TestClock.date("2026-11-25T00:00") }?.body
+            == "Séance Fractionné demain : vise tes 8 h de sommeil.")
+        #expect(planned.first { $0.evening == TestClock.date("2026-11-24T00:00") }?.body
+            == "Séance Jambes demain : vise tes 8 h de sommeil.")
+    }
+
+    @Test func aRescheduleWaitsForTheOneInFlight() async throws {
+        let profiles = GatedProfileRepository(profile())
+        let reminders = StubBedtimeReminderScheduler()
+        let service = try await service(profiles: profiles, reminders: reminders)
+        let first = Task { await service.reschedule() }
+        await profiles.waitForArrival()
+        // Le rappel désactivé pendant que la première lecture attend : sa liste vide doit passer après.
+        await profiles.set(profile(enabled: false))
+        let second = Task { await service.reschedule() }
+        for _ in 0..<100 { await Task.yield() }
+        await profiles.open()
+        await first.value
+        await second.value
+        #expect(await reminders.replaceCount == 2)
+        #expect(await reminders.reminders.isEmpty)
     }
 
     @Test func rescheduleClearsThemWhenDisabled() async throws {
@@ -117,6 +146,53 @@ struct BedtimeReminderServiceTests {
         try await service(profiles: profiles(profile()), cache: cache, reminders: reminders).reschedule()
         #expect(await reminders.reminders.first?.body == "Nuit courte hier (6 h) : vise tes 8 h cette nuit.")
     }
+}
+
+/// Un dépôt de profils dont la première lecture rend le profil du moment après `open()` ; les suivantes le rendent tout de suite.
+private actor GatedProfileRepository: ProfileRepository {
+    private var profile: UserProfile
+    private var reads = 0
+    private var arrived = false
+    private var arrival: CheckedContinuation<Void, Never>?
+    private var gate: CheckedContinuation<Void, Never>?
+
+    init(_ profile: UserProfile) {
+        self.profile = profile
+    }
+
+    func set(_ profile: UserProfile) {
+        self.profile = profile
+    }
+
+    /// Attend que la première lecture soit arrêtée à la barrière.
+    func waitForArrival() async {
+        guard !arrived else { return }
+        await withCheckedContinuation { arrival = $0 }
+    }
+
+    func open() {
+        gate?.resume()
+        gate = nil
+    }
+
+    func load() async throws -> UserProfile? {
+        reads += 1
+        let read = profile
+        guard reads == 1 else { return read }
+        arrived = true
+        arrival?.resume()
+        arrival = nil
+        await withCheckedContinuation { gate = $0 }
+        return read
+    }
+
+    func save(_ profile: UserProfile) async throws {
+        self.profile = profile
+    }
+
+    func delete(id: UUID) async throws {}
+
+    func update(_ transform: @Sendable (inout UserProfile) throws -> Void) async throws -> ProfileUpdate? { nil }
 }
 
 /// Un dépôt de profils dont la lecture lève toujours.

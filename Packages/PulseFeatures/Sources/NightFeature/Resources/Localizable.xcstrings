@@ -161,6 +161,16 @@
         }
       }
     },
+    "Coucher régulier, à la même heure sur %lld nuits": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coucher régulier, à la même heure sur %lld nuits"
+          }
+        }
+      }
+    },
     "Coucher régulier, à plus ou moins %@ sur %lld nuits": {
       "localizations": {
         "fr": {

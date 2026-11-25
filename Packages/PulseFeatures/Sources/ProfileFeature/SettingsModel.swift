@@ -150,7 +150,8 @@ public final class SettingsModel {
 /// Ce que la section « Sommeil » affiche et écrit. Afficher n'écrit jamais rien : une valeur venue d'iCloud hors des choix est
 /// montrée sur le choix le plus proche, ou comme « Selon mes nuits », et reste stockée telle quelle jusqu'au prochain geste.
 extension SettingsModel {
-    /// Les réveils de départ d'une « Heure choisie » sans réveil habituel : 07:00 en semaine, 09:00 le week-end.
+    /// Les réveils de départ d'une « Heure choisie » : 07:00 en semaine, 09:00 le week-end, quel que soit le réveil habituel
+    /// (une heure tirée d'Apple Santé n'est jamais écrite dans le profil).
     nonisolated static let defaultWeekdayWake = 7 * 60
     nonisolated static let defaultWeekendWake = 9 * 60
 
@@ -179,19 +180,13 @@ extension SettingsModel {
         return min(max(rounded, SettingsService.wakeRange.lowerBound), SettingsService.wakeRange.upperBound)
     }
 
-    /// Le réveil écrit en passant à « Heure choisie » : le réveil habituel du groupe, sinon 07:00 en semaine et 09:00 le week-end.
-    func startingWake(weekend: Bool) -> Int {
-        let habitual = weekend ? sleepPlan?.habitualWeekendWake : sleepPlan?.habitualWeekdayWake
-        return Self.snappedWake(habitual ?? (weekend ? Self.defaultWeekendWake : Self.defaultWeekdayWake))
-    }
-
     /// Le choix « Selon mes nuits » (`chosen` faux) écrit `nil`, jamais l'heure mesurée ; « Heure choisie » écrit le réveil de
-    /// départ. Le choix déjà en place n'écrit rien.
+    /// départ fixe (07:00 en semaine, 09:00 le week-end). Le choix déjà en place n'écrit rien.
     func chooseWake(_ chosen: Bool, weekend: Bool) async {
         guard let profile else { return }
         if chosen {
             guard Self.chosenWake(profile, weekend: weekend) == nil else { return }
-            await setWake(startingWake(weekend: weekend), weekend: weekend)
+            await setWake(weekend ? Self.defaultWeekendWake : Self.defaultWeekdayWake, weekend: weekend)
         } else {
             guard (weekend ? profile.weekendWakeMinutes : profile.weekdayWakeMinutes) != nil else { return }
             await update { $0.setWake(nil, weekend: weekend) }

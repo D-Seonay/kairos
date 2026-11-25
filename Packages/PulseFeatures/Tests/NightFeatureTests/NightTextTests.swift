@@ -140,6 +140,11 @@ struct NightTextTests {
         #expect(NightText.regularity(minutes: 90) == "Coucher irrégulier, à ± 1 h 30 sur 14 nuits")
     }
 
+    @Test func noGapReadsTheSameTime() {
+        #expect(NightText.regularity(minutes: 0) == "Coucher régulier, à la même heure sur 14 nuits")
+        #expect(NightText.spokenRegularity(minutes: 0) == "Coucher régulier, à la même heure sur 14 nuits")
+    }
+
     @Test func spokenRegularityUsesWords() {
         #expect(NightText.spokenRegularity(minutes: 25) == "Coucher régulier, à plus ou moins 25 minutes sur 14 nuits")
     }

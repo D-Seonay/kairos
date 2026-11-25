@@ -273,11 +273,13 @@ struct SettingsModelTests {
 // MARK: - Sommeil
 
 extension SettingsModelTests {
-    /// Le plan relu dans le dépôt des profils, avec des réveils à `wakeHour` du lundi 16 au vendredi 20 novembre (aucun : pas
-    /// d'heure habituelle).
-    private func sleepPlan(wakeHour: Int? = nil) -> @Sendable () async -> SleepPlan? {
+    /// Le plan relu dans le dépôt des profils, avec des réveils à `wake` (minutes après minuit) du lundi 16 au vendredi
+    /// 20 novembre (aucun : pas d'heure habituelle).
+    private func sleepPlan(wake: Int? = nil) -> @Sendable () async -> SleepPlan? {
         let profiles = profiles
-        let wokeUp = wakeHour.map { hour in (16...20).map { ProfileTestClock.date(2026, 11, $0, hour: hour) } } ?? []
+        let wokeUp = wake.map { wake in
+            (16...20).map { ProfileTestClock.date(2026, 11, $0).addingTimeInterval(TimeInterval(wake * 60)) }
+        } ?? []
         return { SleepPlan(profile: try? await profiles.load(), wokeUp: wokeUp, calendar: ProfileTestClock.calendar) }
     }
 
@@ -296,7 +298,7 @@ extension SettingsModelTests {
         var stored = try await storeProfile()
         stored.weekdayWakeMinutes = 450
         try await profiles.save(stored)
-        let model = SettingsModel(environment: environment(sleepPlan: sleepPlan(wakeHour: 7))) { _ in }
+        let model = SettingsModel(environment: environment(sleepPlan: sleepPlan(wake: 420))) { _ in }
         await model.load()
         #expect(model.sleepPlan?.habitualWeekdayWake == 420)
 
@@ -307,29 +309,22 @@ extension SettingsModelTests {
         #expect(model.sleepPlan?.wakeMinutes(weekend: false) == 420)
     }
 
-    @Test func choosingATimeStartsFromTheHabitualWakeOrTheDefault() async throws {
+    @Test func choosingATimeStartsFromTheFixedDefaultNeverTheHabitualWake() async throws {
         _ = try await storeProfile()
-        let habitual = SettingsModel(environment: environment(sleepPlan: sleepPlan(wakeHour: 7))) { _ in }
-        await habitual.load()
-        #expect(habitual.startingWake(weekend: false) == 420)
-
-        let model = SettingsModel(environment: environment(sleepPlan: sleepPlan())) { _ in }
+        let model = SettingsModel(environment: environment(sleepPlan: sleepPlan(wake: 430))) { _ in }
         await model.load()
-        #expect(model.startingWake(weekend: false) == 420 && model.startingWake(weekend: true) == 540)
+        #expect(model.sleepPlan?.habitualWeekdayWake == 430 && model.sleepPlan?.habitualWeekendWake == 430)
 
+        await model.chooseWake(true, weekend: false)
         await model.chooseWake(true, weekend: true)
-        #expect(try await profiles.load()?.weekendWakeMinutes == 540)
+        let saved = try #require(try await profiles.load())
+        #expect(saved.weekdayWakeMinutes == 420, "07:00, jamais l'heure tirée d'Apple Santé")
+        #expect(saved.weekendWakeMinutes == 540, "09:00, jamais l'heure tirée d'Apple Santé")
+
         await model.setWake(553, weekend: true)
         #expect(try await profiles.load()?.weekendWakeMinutes == 555, "Arrondi à 5 minutes")
         await model.chooseWake(true, weekend: true)
         #expect(try await profiles.load()?.weekendWakeMinutes == 555, "Déjà choisie : l'heure reste")
-    }
-
-    @Test func aHabitualWakeOutsideTheRangeStartsInsideIt() async throws {
-        _ = try await storeProfile()
-        let model = SettingsModel(environment: environment(sleepPlan: sleepPlan(wakeHour: 13))) { _ in }
-        await model.load()
-        #expect(model.startingWake(weekend: false) == SettingsService.wakeRange.upperBound)
     }
 
     @Test func deniedNotificationsTurnTheBedtimeReminderBackOff() async throws {
