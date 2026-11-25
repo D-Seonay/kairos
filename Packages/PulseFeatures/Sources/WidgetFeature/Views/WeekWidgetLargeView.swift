@@ -140,7 +140,7 @@ struct WeekWidgetLargeViewBody: View {
                 Spacer()
                 Text(content.acwrZoneText)
                     .font(.system(size: smallSize, weight: .bold))
-                    .foregroundStyle(PulsePalette.ok)
+                    .foregroundStyle(content.acwrZone?.tint ?? PulsePalette.muted)
                     .multilineTextAlignment(.trailing)
                     .lineLimit(2)
                     .minimumScaleFactor(0.75)

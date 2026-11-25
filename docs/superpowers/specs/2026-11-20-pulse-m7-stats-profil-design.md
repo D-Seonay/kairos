@@ -116,7 +116,7 @@ Sur 7 jours, la vue s'affiche telle quelle ; la règle « délaissé » ne s'app
 
 ## 9. Assiduité
 
-- **Matrice 7 × 16 :** lundi à dimanche en lignes, les 16 dernières semaines en colonnes, la semaine en cours à droite. Cinq niveaux : 0 = aucune séance ; 1 à 4 = quartiles de la charge quotidienne (minutes × RPE) des jours entraînés sur ces 16 semaines. Les niveaux s'adaptent ainsi à l'utilisateur **(choix du constructeur)**.
+- **Matrice 7 × 16 :** lundi à dimanche en lignes, les 16 dernières semaines en colonnes, la semaine en cours à droite. Cinq niveaux : 0 = aucune séance ; 1 à 4 = quartiles de la charge quotidienne (minutes × RPE) des jours entraînés sur ces 16 semaines. Les niveaux s'adaptent ainsi à l'utilisateur **(choix du constructeur)**. La matrice montre aussi les vélos terminés lus d'Apple Santé (charge plafonnée à RPE 5, comme `TrainingLoad`) : le vélo ne compte pas pour la série (spec M6 §5), mais une sortie reste un jour d'activité. Les tuiles et la série, elles, ne comptent que les séances de `WeekStreak.counts` **(choix du constructeur, issue #71)**.
 - **Tuiles :** série en cours et sa semaine (`WeekStreak`), **meilleure série** avec ses dates (nouveau : `WeekStreak.best`, sur tout l'historique), séances validées sur la période et depuis la première séance, durée moyenne et heure habituelle (l'heure de début la plus fréquente, par tranche d'une heure).
 - Régularité en pourcentage : semaines réussies / semaines de la période.
 

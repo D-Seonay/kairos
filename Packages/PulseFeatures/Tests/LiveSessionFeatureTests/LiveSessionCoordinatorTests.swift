@@ -231,6 +231,26 @@ private func leftOpenSession(_ fixture: LiveFixture, until time: String) async t
     #expect(flow.forgotten?.suggestedEnd == LiveClock.date("2026-11-03T07:47"))
 }
 
+/// « Continuer » à 07:30, puis plus rien : un nouvel oubli de plus de 3 h après la réponse repose la question, une fois.
+@MainActor @Test func aSecondForgottenGapAfterContinuingAsksAgain() async throws {
+    let fixture = LiveFixture()
+    let coordinator = try await leftOpenSession(fixture, until: "2026-11-03T07:30")
+    coordinator.isPresented = true
+    await coordinator.refresh()
+    let flow = coordinator.finishFlow()
+    flow.cancelForgotten()
+    fixture.clock.set("2026-11-03T10:30")
+    await coordinator.refresh()
+    #expect(flow.forgotten == nil, "3 h pile après la réponse : pas encore")
+    fixture.clock.set("2026-11-03T10:31")
+    await coordinator.refresh()
+    let prompt = try #require(flow.forgotten)
+    #expect(prompt.suggestedEnd == LiveClock.date("2026-11-02T08:02") && prompt.isOnResume)
+    flow.cancelForgotten()
+    await coordinator.refresh()
+    #expect(flow.forgotten == nil, "La seconde réponse vaut à son tour 3 h")
+}
+
 @MainActor @Test func returningToTheTabsDoesNotAsk() async throws {
     let fixture = LiveFixture()
     let coordinator = try await leftOpenSession(fixture, until: "2026-11-03T07:30")

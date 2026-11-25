@@ -2,6 +2,7 @@ import Foundation
 @testable import PhotosFeature
 import PulseDomain
 import PulseServices
+import PulseTestSupport
 import Testing
 
 /// Les réglages, l'ajout et la suppression des photos de corps.
@@ -61,6 +62,7 @@ struct BodyPhotosModelActionsTests: BodyPhotosModelTesting {
         let store = GatedExportBodyPhotoStore()
         let service = BodyPhotoService(store: store, measurements: InMemoryBodyMeasurementRepository(),
                                        calendar: PhotosTestClock.calendar, timeZone: PhotosTestClock.calendar.timeZone,
+                                       exportDirectory: Self.uniqueExportDirectory(),
                                        now: { PhotosTestClock.date("2026-11-20T12:00") })
         _ = try await service.save(service.process(TestImages.jpeg()), pose: .front,
                                    takenAt: PhotosTestClock.date("2026-11-01T08:00"))
@@ -126,6 +128,19 @@ struct BodyPhotosModelActionsTests: BodyPhotosModelTesting {
         #expect(await model.photoToReplace(pose: .front, on: PhotosTestClock.date("2026-11-01T21:00"))?.id == existing.id)
         #expect(await model.photoToReplace(pose: .side, on: PhotosTestClock.date("2026-11-01T21:00")) == nil)
         #expect(await model.photoToReplace(pose: .front, on: PhotosTestClock.date("2026-11-02T08:00")) == nil)
+    }
+
+    /// Le remplacement confirmé ne supprime que la photo montrée, jamais les autres du même créneau.
+    @Test func confirmedReplaceDeletesOnlyTheShownPhoto() async throws {
+        let hidden = try await seed(.front, "2026-11-01T08:00")
+        let shown = try await seed(.front, "2026-11-01T09:00")
+        let model = await unlockedModel(StubOwnerAuthentication())
+        let confirmed = try #require(await model.photoToReplace(pose: .front, on: PhotosTestClock.date("2026-11-01T21:00")))
+        #expect(confirmed.id == shown.id)
+        let draft = try #require(await model.prepare(TestImages.jpeg()))
+        #expect(await model.save(draft, pose: .front, takenAt: PhotosTestClock.date("2026-11-01T21:00"), replacing: confirmed.id))
+        let remaining = Set(try await service.photos().map(\.id))
+        #expect(remaining.contains(hidden.id) && !remaining.contains(shown.id) && remaining.count == 2)
     }
 
     @Test func deleteRemovesAndAnnounces() async throws {

@@ -6,7 +6,7 @@ import PulseDomain
 /// que les aides internes : `current()`, `apply(_:)` ou `start(_:)`, qui passent par la file, l'attendraient sans fin.
 extension ActiveSessionService {
     /// Au-delà de cet écart entre la dernière action et maintenant, la séance est tenue pour oubliée.
-    static let forgottenAfter: TimeInterval = 3 * 3_600
+    public static let forgottenAfter: TimeInterval = 3 * 3_600
 
     /// Pour une séance laissée ouverte plus de 3 h sans action, l'heure de fin proposée : la dernière série validée plus son
     /// repos, ou la dernière action sans série validée. `nil` sinon, sans séance lisible, ou pour une séance passée, qui a sa

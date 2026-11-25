@@ -21,8 +21,7 @@ struct TrainTiles: View {
         layout {
             StrengthTile(subtitle: model.strengthSubtitle, spokenSubtitle: model.strengthSubtitleSpoken,
                          onOpenToday: onOpenToday, onStart: onStart)
-            RunTile(nextRun: model.nextRun, daysUntil: model.nextRun.flatMap { model.daysUntil($0.weekday) },
-                     startLabel: model.runStartLabel, onStart: onStartRun)
+            RunTile(subtitle: model.runSubtitle, startLabel: model.runStartLabel, onStart: onStartRun)
         }
     }
 }
@@ -67,12 +66,11 @@ private struct StrengthTile: View {
     }
 }
 
-/// La course du jour ou la prochaine de la semaine type. « Courir » lance celle d'aujourd'hui, ou une course libre quand elle
+/// La course du jour ou la prochaine, d'après la semaine datée. « Courir » lance celle d'aujourd'hui, ou une course libre quand elle
 /// tombe un autre jour : la tuile informe, le bouton à part lance.
 private struct RunTile: View {
-    let nextRun: NextSession?
-    /// Les jours d'ici la prochaine course : 0 aujourd'hui, 1 demain.
-    let daysUntil: Int?
+    /// « Sortie facile · aujourd'hui », « Fractionné · prévue demain », « Sortie longue · prévue samedi ».
+    let subtitle: String
     /// Ce que le bouton lance, dit à VoiceOver.
     let startLabel: String
     let onStart: () -> Void
@@ -98,17 +96,6 @@ private struct RunTile: View {
                     .accessibilityLabel(startLabel)
                     .accessibilityIdentifier(TrainIdentifiers.runStart)
             }
-        }
-    }
-
-    /// « Sortie facile · aujourd'hui », « Fractionné · prévue demain », « Sortie longue · prévue samedi ».
-    private var subtitle: String {
-        guard let nextRun else { return String(localized: "Aucune course au programme", bundle: .module) }
-        let title = nextRun.day.runType?.localizedName ?? nextRun.day.name
-        switch daysUntil {
-        case 0: return String(localized: "\(title) · aujourd'hui", bundle: .module)
-        case 1: return String(localized: "\(title) · prévue demain", bundle: .module)
-        default: return String(localized: "\(title) · prévue \(nextRun.weekday.trainName)", bundle: .module)
         }
     }
 }

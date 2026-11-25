@@ -43,6 +43,7 @@ struct RunTypesTests {
             heartRates: [120, 124],
             locationDenied: false,
             healthKitUUID: UUID(),
+            healthWriteDeferred: true,
             updatedAt: start.addingTimeInterval(10)
         )
         let data = try JSONEncoder().encode(draft)
@@ -58,5 +59,16 @@ struct RunTypesTests {
         let decoded = try JSONDecoder().decode(RunDraft.self, from: JSONSerialization.data(withJSONObject: object))
         #expect(decoded == draft)
         #expect(decoded.healthKitUUID == nil)
+    }
+
+    @Test("un brouillon écrit avant l'écriture Santé différée se relit sans elle")
+    func draftWithoutDeferredHealthWriteStillDecodes() throws {
+        let draft = RunDraft(sessionID: UUID(), launch: RunLaunch(title: "Footing"), startedAt: Date(timeIntervalSince1970: 1_000),
+                             updatedAt: Date(timeIntervalSince1970: 1_010))
+        var object = try #require(try JSONSerialization.jsonObject(with: JSONEncoder().encode(draft)) as? [String: Any])
+        object["healthWriteDeferred"] = nil
+        let decoded = try JSONDecoder().decode(RunDraft.self, from: JSONSerialization.data(withJSONObject: object))
+        #expect(decoded == draft)
+        #expect(!decoded.healthWriteDeferred)
     }
 }

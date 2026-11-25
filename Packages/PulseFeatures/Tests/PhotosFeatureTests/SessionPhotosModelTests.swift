@@ -2,6 +2,7 @@ import Foundation
 @testable import PhotosFeature
 import PulseDomain
 import PulseServices
+import PulseTestSupport
 import Testing
 
 @MainActor
@@ -183,25 +184,6 @@ struct SessionPhotosModelTests {
             calendar: calendar)
         #expect(await failing.image(of: UUID()) == nil)
         #expect(failing.errorMessage == "La photo n'a pas pu être ouverte.")
-    }
-}
-
-/// Un chargeur suspendu jusqu'à ce que le test l'ouvre.
-private actor LoaderGate {
-    private var isOpen = false
-    private var waiter: CheckedContinuation<Void, Never>?
-    private(set) var isWaiting = false
-
-    func wait() async {
-        guard !isOpen else { return }
-        isWaiting = true
-        await withCheckedContinuation { waiter = $0 }
-    }
-
-    func open() {
-        isOpen = true
-        waiter?.resume()
-        waiter = nil
     }
 }
 

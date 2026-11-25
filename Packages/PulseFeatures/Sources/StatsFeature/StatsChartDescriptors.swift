@@ -55,7 +55,8 @@ enum StatsChartDescriptors {
             calendar: window.calendar)
     }
 
-    static func sleep(points: [SleepPoint], deepShare: Double?, window: StatsWindow) -> PulseChartDescriptor {
+    static func sleep(points: [SleepPoint], deepShare: Double?, stageShares: StageShares?,
+                      window: StatsWindow) -> PulseChartDescriptor {
         let bucket = window.period.chartBucket
         let axisTitle = StatsText.nightAxisName(bucket)
         let top = (points.map(\.asleepMinutes).max() ?? 0) / 60
@@ -70,8 +71,8 @@ enum StatsChartDescriptors {
         ]
         return PulseChartDescriptor(
             title: String(localized: "Sommeil", bundle: .module),
-            summary: StatsText.sleepSummary(points: points, deepShare: deepShare, period: window.period, bucket: bucket,
-                                            calendar: window.calendar),
+            summary: StatsText.sleepSummary(points: points, deepShare: deepShare, stageShares: stageShares,
+                                            period: window.period, calendar: window.calendar),
             xAxis: .dates(title: axisTitle),
             yAxis: .init(title: String(localized: "Sommeil, en heures", bundle: .module), unit: "", range: 0...max(top, 1),
                          valueText: { StatsText.durationSpoken(minutes: $0 * 60) }),

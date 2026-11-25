@@ -2,6 +2,7 @@ import Foundation
 import PhotosFeature
 import PulseDomain
 import PulseServices
+import PulseTestSupport
 @testable import RunFeature
 import Testing
 
@@ -21,6 +22,40 @@ struct RunModelTests {
         await model.start()
         #expect(model.snapshot?.locationDenied == true)
         #expect(model.locationNotice == "Localisation refusée : seul le temps est enregistré.")
+    }
+
+    /// « Position exacte » coupée : l'écran l'explique au départ et pendant la course, au lieu de « Signal faible » seul, et
+    /// le retour dans l'app après les réglages relit la précision.
+    @Test func approximateLocationExplainsItself() async throws {
+        let location = StubRunLocationTracker(accuracyReduced: true)
+        let fixture = RunFeatureFixture(location: location)
+        let coordinator = fixture.coordinator()
+        coordinator.prepare(.free())
+        let model = coordinator.model()
+        #expect(model.approximateNotice == nil)
+        let watching = Task { await model.watchGPS() }
+        await model.refreshLocationAccuracy()
+        #expect(model.approximateNotice?.hasPrefix("Position précise désactivée") == true)
+        #expect(model.locationNotice == nil)
+        await model.start()
+        await watching.value
+        #expect(model.approximateNotice != nil)
+
+        await location.setAccuracyReduced(false)
+        await model.refreshLocationAccuracy()
+        #expect(model.approximateNotice == nil)
+    }
+
+    /// Localisation refusée : la ligne du refus suffit, la précision n'est pas expliquée en plus.
+    @Test func deniedLocationIsNotCalledApproximate() async throws {
+        let fixture = RunFeatureFixture(location: StubRunLocationTracker(state: .denied, accuracyReduced: true))
+        let coordinator = fixture.coordinator()
+        coordinator.prepare(.free())
+        let model = coordinator.model()
+        await model.watchGPS()
+        await model.refreshLocationAccuracy()
+        #expect(model.locationNotice != nil)
+        #expect(model.approximateNotice == nil)
     }
 
     @Test func grantedLocationShowsNoNotice() async throws {

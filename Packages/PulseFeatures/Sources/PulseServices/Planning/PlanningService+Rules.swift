@@ -5,6 +5,10 @@ extension PlanningService {
     /// Refuse ce qu'une règle a placé sur `date` (spec M6 §9) : le jour, et l'autre jour d'un déplacement, retrouvent la semaine
     /// type par une ligne `.user`, que les règles ne touchent plus.
     public func keepPlanned(_ date: Date) async throws {
+        try await writes.run { try await self.keepPlannedInQueue(date) }
+    }
+
+    private func keepPlannedInQueue(_ date: Date) async throws {
         let now = now()
         let (profile, program) = try await profileAndProgram()
         guard let program else { throw PlanningError.noProgram }

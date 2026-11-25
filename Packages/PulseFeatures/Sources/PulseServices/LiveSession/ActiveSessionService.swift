@@ -103,8 +103,8 @@ public final class ActiveSessionService: Sendable {
         }
     }
 
-    /// Les exercices à ajouter en séance, planifiés avec leur historique et la règle de hausse du jour. La séance n'est pas
-    /// changée : `apply(.addExercises(_:))` les ajoute.
+    /// Les exercices à ajouter en séance, planifiés avec leur historique, la règle de hausse du jour et, en décharge, la baisse
+    /// de charge du lancement. La séance n'est pas changée : `apply(.addExercises(_:))` les ajoute.
     public func newExercises(_ references: [ExerciseReference]) async throws -> [LiveExercise] {
         try await queue.run {
             guard let session = try await self.loadSession() else { throw ActiveSessionError.noSession }
@@ -116,9 +116,9 @@ public final class ActiveSessionService: Sendable {
             for reference in references {
                 added.append(LiveSessionPlanner.exercise(
                     reference, directory: directory,
-                    history: try await self.workouts.lastSets(for: reference, startedBefore: session.historyLimit),
+                    history: try await self.workouts.lastSets(for: reference, startedBefore: session.proposalHistoryLimit),
                     settings: try await self.settings.settings(for: reference), profile: profile, policy: session.policy,
-                    workedMuscles: worked))
+                    workedMuscles: worked, loadFactor: session.addedLoadFactor))
                 worked.formUnion(directory.info(reference)?.primaryMuscles ?? [])
             }
             return added
@@ -148,11 +148,13 @@ public final class ActiveSessionService: Sendable {
     /// Paramètres arrive en M7). Sans profil, rien n'est enregistré.
     public func saveBarAndPlates(barKg: Double, platesKg: [Double]) async throws {
         try await queue.run {
-            guard var profile = try await self.profiles.load() else { return }
-            profile.barWeightKg = barKg
-            profile.availablePlatesKg = platesKg.filter { $0 > 0 }.sorted(by: >)
-            profile.updatedAt = self.now()
-            try await self.profiles.save(profile)
+            let now = self.now()
+            let plates = platesKg.filter { $0 > 0 }.sorted(by: >)
+            try await self.profiles.update { profile in
+                profile.barWeightKg = barKg
+                profile.availablePlatesKg = plates
+                profile.updatedAt = now
+            }
         }
     }
 

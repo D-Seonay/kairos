@@ -3,6 +3,7 @@ import PhotosFeature
 import PulseDesignSystem
 import PulseDomain
 import PulseServices
+import PulseTestSupport
 import Testing
 @testable import TrainFeature
 

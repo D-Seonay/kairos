@@ -66,7 +66,7 @@ struct LoadWidgetSmallViewBody: View {
     private var zoneLabel: some View {
         Text(content.zoneText)
             .font(.system(size: zoneSize, weight: .bold))
-            .foregroundStyle(content.isOptimal ? PulsePalette.ok : PulsePalette.warn)
+            .foregroundStyle(content.zone?.tint ?? PulsePalette.muted)
             .lineLimit(2)
             .minimumScaleFactor(0.8)
     }
