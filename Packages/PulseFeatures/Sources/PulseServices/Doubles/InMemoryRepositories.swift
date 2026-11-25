@@ -10,24 +10,44 @@ public actor InMemoryProfileRepository: ProfileRepository {
     public init() {}
 
     public func load() async throws -> UserProfile? {
-        profiles.filter { !deletedIDs.contains($0.id) }.min { lhs, rhs in
-            lhs.createdAt != rhs.createdAt ? lhs.createdAt < rhs.createdAt : lhs.id.uuidString < rhs.id.uuidString
-        }
+        current()
     }
 
     public func save(_ profile: UserProfile) async throws {
-        deletedIDs.remove(profile.id)
-        if let index = profiles.firstIndex(where: { $0.id == profile.id }) {
-            profiles[index] = profile
-        } else {
-            profiles.append(profile)
-        }
+        store(profile)
     }
 
     /// Suppression logique : le profil reste stocké mais n'est plus renvoyé.
     public func delete(id: UUID) async throws {
         if profiles.contains(where: { $0.id == id }) {
             deletedIDs.insert(id)
+        }
+    }
+
+    /// Sans suspension entre la lecture et l'écriture : l'acteur sérialise les mises à jour. `updatedAt` reste celui que
+    /// `transform` pose, pour que les tests le comparent à leur horloge.
+    @discardableResult
+    public func update(_ transform: @Sendable (inout UserProfile) throws -> Void) async throws -> ProfileUpdate? {
+        guard let before = current() else { return nil }
+        var after = before
+        try transform(&after)
+        guard after != before else { return ProfileUpdate(before: before, after: before) }
+        store(after)
+        return ProfileUpdate(before: before, after: after)
+    }
+
+    private func current() -> UserProfile? {
+        profiles.filter { !deletedIDs.contains($0.id) }.min { lhs, rhs in
+            lhs.createdAt != rhs.createdAt ? lhs.createdAt < rhs.createdAt : lhs.id.uuidString < rhs.id.uuidString
+        }
+    }
+
+    private func store(_ profile: UserProfile) {
+        deletedIDs.remove(profile.id)
+        if let index = profiles.firstIndex(where: { $0.id == profile.id }) {
+            profiles[index] = profile
+        } else {
+            profiles.append(profile)
         }
     }
 }

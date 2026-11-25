@@ -3,6 +3,7 @@ import Foundation
 import PhotosFeature
 import PulseDomain
 import PulseServices
+import PulseTestSupport
 import Testing
 
 /// Les photos de la séance live et du récap : le même identifiant que la séance enregistrée, un seul modèle, et rien pour une

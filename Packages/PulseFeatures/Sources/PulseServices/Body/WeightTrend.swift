@@ -127,10 +127,11 @@ public enum ProfileWeightSync {
         } else {
             return
         }
-        guard var profile = try await profiles.load(), profile.weightKg != target else { return }
-        profile.weightKg = target
-        profile.updatedAt = now
-        try await profiles.save(profile)
+        try await profiles.update { profile in
+            guard profile.weightKg != target else { return }
+            profile.weightKg = target
+            profile.updatedAt = now
+        }
     }
 
     /// Le poids utilisé par les calculs (lu sur l'appareil, Apple Santé comprise) : la tendance de toutes les pesées des 30 derniers

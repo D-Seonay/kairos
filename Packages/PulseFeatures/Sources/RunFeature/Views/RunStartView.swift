@@ -21,12 +21,7 @@ struct RunStartView: View {
                 if let notice = model.locationNotice { RunNoticeLine(text: notice, systemImage: "location.slash") }
                 if let notice = model.approximateNotice { RunApproximateLocationNotice(text: notice) }
                 RunAnnouncesToggle(model: model)
-                if let message = model.errorMessage {
-                    Text(message)
-                        .font(.footnote)
-                        .foregroundStyle(PulsePalette.signal)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
+                RunErrorLine(message: model.errorMessage)
             }
             .padding(PulseMetrics.spacing)
         }
@@ -38,7 +33,7 @@ struct RunStartView: View {
                     .accessibilityIdentifier(RunIdentifiers.cancelButton)
             }
         }
-        .safeAreaInset(edge: .bottom, spacing: 0) { startButton }
+        .runActionBar { startButton }
         .pulseScreenBackground(aura: 0.5)
         .pulseAnnounceError(model.errorMessage)
         .pulseAnnounce(model.gps == .ready ? Self.readySpoken : nil)
@@ -127,8 +122,6 @@ struct RunStartView: View {
         .accessibilityHint(model.gps == .ready || model.locationDenied ? ""
                            : String(localized: "La distance comptera dès le premier signal précis", bundle: .module))
         .accessibilityIdentifier(RunIdentifiers.startButton)
-        .padding(.horizontal, PulseMetrics.spacing)
-        .padding(.vertical, 8)
     }
 }
 

@@ -86,22 +86,24 @@ public final class ProgramEditorModel {
     /// Active ou désactive une règle anti-interférence. Elle s'applique, ou ses déplacements à venir disparaissent, au prochain
     /// passage du jour.
     public func setRule(_ rule: AntiInterferenceRule, enabled: Bool) async throws {
-        var profile = try await requireProfile()
-        profile.setRule(rule, enabled: enabled)
-        profile.updatedAt = environment.now()
-        try await environment.profiles.save(profile)
-        disabledRules = profile.antiInterferenceRulesDisabled
+        let now = environment.now()
+        let result = try await environment.profiles.update { profile in
+            profile.setRule(rule, enabled: enabled)
+            profile.updatedAt = now
+        }
+        guard let result else { throw ProgramEditorError.noProfile }
+        disabledRules = result.after.antiInterferenceRulesDisabled
     }
 
     // MARK: - Programmes
 
     /// Rend `programID` actif. Un programme inconnu ou archivé est refusé.
     public func activate(_ programID: UUID) async throws {
-        let profile = try await requireProfile()
+        _ = try await requireProfile()
         guard let target = try await environment.programs.program(id: programID), !target.isArchived else {
             throw ProgramEditorError.unknownProgram
         }
-        try await makeActive(target.id, in: profile)
+        try await makeActive(target.id)
         try await reload()
     }
 
@@ -113,17 +115,17 @@ public final class ProgramEditorModel {
             template, equipment: profile.equipmentAccess, painAreas: profile.painAreas,
             restWeekdays: profile.restWeekdays, now: environment.now())
         try await environment.programs.save(adopted)
-        try await makeActive(adopted.id, in: profile)
+        try await makeActive(adopted.id)
         try await reload()
     }
 
     /// Crée un programme vide, nommé « Mon programme » si `name` est vide, puis le rend actif.
     public func createEmpty(named name: String) async throws {
-        let profile = try await requireProfile()
+        _ = try await requireProfile()
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         let created = ProgramEditor.emptyProgram(name: trimmed.isEmpty ? Self.defaultProgramName : trimmed, now: environment.now())
         try await environment.programs.save(created)
-        try await makeActive(created.id, in: profile)
+        try await makeActive(created.id)
         try await reload()
     }
 
@@ -134,10 +136,10 @@ public final class ProgramEditorModel {
         target.isArchived = true
         target.updatedAt = now
         try await environment.programs.save(target)
-        if var profile = try await environment.profiles.load(), profile.activeProgramID == programID {
+        try await environment.profiles.update { profile in
+            guard profile.activeProgramID == programID else { return }
             profile.activeProgramID = nil
             profile.updatedAt = now
-            try await environment.profiles.save(profile)
         }
         try await reload()
     }
@@ -149,11 +151,14 @@ public final class ProgramEditorModel {
         return profile
     }
 
-    private func makeActive(_ programID: UUID, in profile: UserProfile) async throws {
-        var updated = profile
-        updated.activeProgramID = programID
-        updated.updatedAt = environment.now()
-        try await environment.profiles.save(updated)
+    /// Ne touche que le programme actif du profil : une autre écriture du profil pendant l'adoption est conservée.
+    private func makeActive(_ programID: UUID) async throws {
+        let now = environment.now()
+        let result = try await environment.profiles.update { profile in
+            profile.activeProgramID = programID
+            profile.updatedAt = now
+        }
+        if result == nil { throw ProgramEditorError.noProfile }
     }
 
     private func reload() async throws {

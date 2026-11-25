@@ -2,6 +2,7 @@ import Foundation
 @testable import PhotosFeature
 import PulseDomain
 import PulseServices
+import PulseTestSupport
 import Testing
 
 /// Ce que partagent les tests du modèle des photos de corps : un service sur un dépôt en mémoire et une horloge fixe (vendredi 20
