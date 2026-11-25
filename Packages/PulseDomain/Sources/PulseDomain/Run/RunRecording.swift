@@ -124,6 +124,9 @@ public protocol RunWorkoutRecording: Sendable {
     func save(_ entry: RunWorkoutEntry) async throws -> UUID
     /// Supprime l'entraînement écrit par Pulse et son tracé ; sans effet s'il n'existe plus.
     func deleteWorkout(id: UUID) async throws
+    /// Supprime l'entraînement que Pulse a écrit pour la course `sessionID`, retrouvé par son identifiant externe : celui que
+    /// HealthKit a écrit au déverrouillage, sans identifiant connu de Pulse. Sans effet s'il n'existe pas.
+    func deleteWorkout(forRun sessionID: UUID) async throws
     func discard() async
     /// Rattache une séance que le système a gardée après un crash ; vrai si elle tourne encore.
     func recoverActiveSession() async -> Bool
@@ -140,6 +143,8 @@ public actor StubRunWorkoutRecorder: RunWorkoutRecording {
     public private(set) var finished: [RunWorkoutEntry] = []
     public private(set) var saved: [UUID: RunWorkoutEntry] = [:]
     public private(set) var deletedWorkouts: [UUID] = []
+    /// Les courses dont l'entraînement a été cherché par identifiant externe pour être supprimé.
+    public private(set) var deletedRunWorkouts: [UUID] = []
     public private(set) var discardCount = 0
     /// Les entraînements laissés à HealthKit pour plus tard, par `finish` ou `save`.
     public private(set) var deferred: [RunWorkoutEntry] = []
@@ -223,6 +228,11 @@ public actor StubRunWorkoutRecorder: RunWorkoutRecording {
     public func deleteWorkout(id: UUID) async throws {
         saved[id] = nil
         deletedWorkouts.append(id)
+    }
+
+    public func deleteWorkout(forRun sessionID: UUID) async throws {
+        deferred.removeAll { $0.sessionID == sessionID }
+        deletedRunWorkouts.append(sessionID)
     }
 
     public func discard() async {

@@ -155,6 +155,12 @@ public final class HealthKitRunRecorder: NSObject, RunWorkoutRecording, @uncheck
         }
     }
 
+    /// L'entraînement écrit par HealthKit au déverrouillage, sans identifiant connu de Pulse, retrouvé par celui de la course.
+    public func deleteWorkout(forRun sessionID: UUID) async throws {
+        guard let id = await savedWorkout(for: sessionID) else { return }
+        try await deleteWorkout(id: id)
+    }
+
     /// Une reprise en cours est attendue d'abord : la séance qu'elle rattache est terminée avec le reste.
     public func discard() async {
         if let pending = lock.withLock({ recovery }) { _ = await pending.value }

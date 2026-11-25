@@ -26,6 +26,19 @@ struct RunHealthWriteTests {
         #expect(try await fixture.drafts.load() == nil)
     }
 
+    /// La course dont l'entraînement a été écrit au déverrouillage, sans identifiant connu : la supprimer le cherche par
+    /// l'identifiant de la course pour le supprimer aussi.
+    @Test func deletingADeferredRunRemovesItsWorkoutByRunID() async throws {
+        let fixture = RunSessionFixture(recorder: StubRunWorkoutRecorder(defersWrite: true))
+        let snapshot = try await fixture.service.start(.free())
+        await fixture.push(Array(trace(meters: 300)[1...]))
+        _ = try await fixture.service.finish()
+        try await fixture.service.deleteRun(sessionID: snapshot.sessionID)
+        #expect(await fixture.recorder.deletedRunWorkouts == [snapshot.sessionID])
+        #expect(await fixture.recorder.deferred.isEmpty)
+        #expect(await fixture.recorder.deletedWorkouts.isEmpty)
+    }
+
     /// Fin laissée à HealthKit, puis l'enregistrement dans Pulse échoue : « Enregistrer » de la reprise n'écrit rien dans Santé.
     @Test func deferredFinishIsRememberedForTheRecovery() async throws {
         let workouts = CountingWorkoutRepository(failingAtSave: 1)
