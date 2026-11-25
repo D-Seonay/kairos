@@ -170,10 +170,17 @@ public final class LiveSessionModel {
         await perform(.setNote(exercise: exercise, note))
     }
 
+    /// L'incrément de charge de l'exercice : la séance le prend tout de suite, ses réglages pour la suite, comme l'échauffement.
     public func setIncrement(_ incrementKg: Double, exercise: UUID) async {
-        await perform(.setIncrement(exercise: exercise, incrementKg))
+        guard let reference = session.exercises.first(where: { $0.id == exercise })?.exercise,
+              await perform(.setIncrement(exercise: exercise, incrementKg)) else { return }
         // Le tampon vaut la valeur enregistrée : rouvrir le champ lui donne le nouvel incrément.
         if let focus, focus.exercise == exercise { self.focus(focus) }
+        do {
+            try await environment.service.saveIncrement(incrementKg, for: reference)
+        } catch {
+            errorMessage = Self.saveFailure
+        }
     }
 
     /// Le nombre de séries d'échauffement de l'exercice : la séance le prend tout de suite, ses réglages pour la suite.
