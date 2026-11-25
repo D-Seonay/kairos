@@ -9,6 +9,7 @@ struct NextWorkoutWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: NextWorkoutWidgetContent.kind, provider: NextWorkoutTimelineProvider()) { entry in
             NextWorkoutWidgetEntryView(entry: entry)
+                .environment(\.pulseTheme, entry.theme)
         }
         .configurationDisplayName(NextWorkoutWidgetContent.displayName)
         .description(NextWorkoutWidgetContent.summary)

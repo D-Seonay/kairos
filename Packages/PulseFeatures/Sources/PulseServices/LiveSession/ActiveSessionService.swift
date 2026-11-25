@@ -161,17 +161,22 @@ public final class ActiveSessionService: Sendable {
     public func apply(_ change: LiveSessionChange) async throws -> LiveSession {
         try await queue.run {
             guard let loaded = try await self.loadSession() else { throw ActiveSessionError.noSession }
-            let now = self.now()
-            var session = loaded
-            session.clearRest(endedBy: now)
-            let before = session
-            session.applyStructure(change, now: now)
-            session.rest = session.isPastEntry ? nil : Self.rest(after: change, before: before, session: session, now: now)
-            session.lastActionAt = now
-            try await self.save(session, at: now)
-            await self.publish(from: loaded, to: session)
-            return session
+            return try await self.apply(change, to: loaded)
         }
+    }
+
+    /// Le corps de `apply(_:)`, sur la séance déjà lue, à appeler depuis une opération de la file.
+    func apply(_ change: LiveSessionChange, to loaded: LiveSession) async throws -> LiveSession {
+        let now = self.now()
+        var session = loaded
+        session.clearRest(endedBy: now)
+        let before = session
+        session.applyStructure(change, now: now)
+        session.rest = session.isPastEntry ? nil : Self.rest(after: change, before: before, session: session, now: now)
+        session.lastActionAt = now
+        try await save(session, at: now)
+        await publish(from: loaded, to: session)
+        return session
     }
 
     /// La séance du snapshot, ou `nil` sans snapshot ou s'il est illisible.

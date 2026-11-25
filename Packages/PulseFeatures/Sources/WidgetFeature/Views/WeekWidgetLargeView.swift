@@ -19,6 +19,8 @@ public struct WeekWidgetLargeView: View {
 
 /// Le contenu de la vue, plafonné par `WeekWidgetLargeView` : ses `@ScaledMetric` lisent la taille déjà plafonnée.
 struct WeekWidgetLargeViewBody: View {
+    /// L'ambiance choisie dans l'app, posée par l'extension.
+    @Environment(\.pulseTheme) private var theme
     let content: WeekWidgetContent
 
     @ScaledMetric(relativeTo: .subheadline) private var titleSize = 15
@@ -55,8 +57,8 @@ struct WeekWidgetLargeViewBody: View {
                 .lineLimit(1)
                 .padding(.horizontal, 7)
                 .padding(.vertical, 2.5)
-                .background(Color(PulsePalette.accent(for: .amber).accent).opacity(0.18))
-                .foregroundStyle(Color(PulsePalette.accent(for: .amber).accent))
+                .background(Color(PulsePalette.accent(for: theme).accent).opacity(0.18))
+                .foregroundStyle(Color(PulsePalette.accent(for: theme).accent))
                 .clipShape(Capsule())
         }
     }
@@ -80,11 +82,11 @@ struct WeekWidgetLargeViewBody: View {
         let isToday = day.state == .today
         ZStack {
             Circle()
-                .fill(isToday ? Color(PulsePalette.accent(for: .amber).accent).opacity(0.18) : PulsePalette.surface2)
+                .fill(isToday ? Color(PulsePalette.accent(for: theme).accent).opacity(0.18) : PulsePalette.surface2)
                 .overlay(
                     Circle()
                         .strokeBorder(
-                            isToday ? Color(PulsePalette.accent(for: .amber).accent) : Color.clear,
+                            isToday ? Color(PulsePalette.accent(for: theme).accent) : Color.clear,
                             lineWidth: 1.5
                         )
                 )
@@ -92,7 +94,7 @@ struct WeekWidgetLargeViewBody: View {
             Image(systemName: day.iconName)
                 .font(.system(size: smallSize, weight: .bold))
                 .foregroundStyle(
-                    isToday ? Color(PulsePalette.accent(for: .amber).accent)
+                    isToday ? Color(PulsePalette.accent(for: theme).accent)
                         : (day.state == .completed ? PulsePalette.text : PulsePalette.muted)
                 )
         }

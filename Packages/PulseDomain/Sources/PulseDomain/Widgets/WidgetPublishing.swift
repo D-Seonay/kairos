@@ -2,19 +2,26 @@
 public protocol WidgetPublishing: Sendable {
     /// Remplace l'instantané publié et demande au widget de se recharger.
     func publish(_ snapshot: WidgetSnapshot) async
-    /// Efface l'instantané (suppression totale des données).
+    /// Partage l'ambiance choisie (Ivoire ou Acier) avec les widgets, et les recharge si elle a changé.
+    func publishTheme(_ theme: Theme) async
+    /// Efface l'instantané et l'ambiance partagée (suppression totale des données).
     func clear() async
 }
 
-/// Doublure qui garde les instantanés publiés, dans l'ordre, et compte les effacements.
+/// Doublure qui garde les instantanés et les ambiances publiés, dans l'ordre, et compte les effacements.
 public actor StubWidgetPublisher: WidgetPublishing {
     public private(set) var published: [WidgetSnapshot] = []
+    public private(set) var publishedThemes: [Theme] = []
     public private(set) var clearCount = 0
 
     public init() {}
 
     public func publish(_ snapshot: WidgetSnapshot) async {
         published.append(snapshot)
+    }
+
+    public func publishTheme(_ theme: Theme) async {
+        publishedThemes.append(theme)
     }
 
     public func clear() async {

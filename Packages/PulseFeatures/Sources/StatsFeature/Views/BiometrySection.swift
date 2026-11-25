@@ -148,6 +148,7 @@ private struct BaselineChartCard: View {
         .statsPinnedDomain(window)
         .chartYScale(domain: .automatic(includesZero: false))
         .statsAxes(calendar: window.calendar, yUnit: unit)
+        .statsChartSelection { StatsChartReadings.baseline(points, measure: measure, at: $0, bucket: bucket, calendar: window.calendar) }
         .frame(height: chartHeight)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(StatsText.baselineSummary(measure: measure, points: points, period: window.period))
@@ -214,6 +215,7 @@ private struct SleepChartCard: View {
         }
         .statsPinnedDomain(window)
         .statsAxes(calendar: window.calendar, yUnit: "h")
+        .statsChartSelection { StatsChartReadings.sleep(points, at: $0, bucket: bucket, calendar: window.calendar) }
         .frame(height: chartHeight)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(StatsText.sleepSummary(points: points, deepShare: deepShare, stageShares: stageShares,

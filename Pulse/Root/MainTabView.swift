@@ -11,8 +11,9 @@ import SwiftUI
 import TodayFeature
 import TrainFeature
 
-/// Les cinq onglets de l'app. La séance en direct et la course s'ouvrent en plein écran par-dessus ; une séance ou une course en
-/// cours qui n'est pas à l'écran garde son bandeau « Reprendre » en haut.
+/// Les cinq onglets de l'app. La séance en direct et la course s'ouvrent en plein écran par-dessus ; une séance en cours qui n'est
+/// pas à l'écran garde « Reprendre la séance » dans l'accessoire de la barre d'onglets (iOS 26.1, en haut avant), une course son
+/// bandeau « Reprendre » en haut.
 struct MainTabView: View {
     enum Item: Hashable {
         case today
@@ -40,6 +41,8 @@ struct MainTabView: View {
     let onErased: () async -> Void
     /// Vrai pendant l'enregistrement ou la suppression d'une course interrompue : l'alerte ne revient pas en attendant.
     @State private var isAnsweringRecovery = false
+    /// « Abandonner » de l'accessoire « Reprendre la séance », en attente de confirmation.
+    @State private var confirmsAbandon = false
 
     var body: some View {
         // La course a son plein écran sur une vue à part : deux plein écrans sur la même vue se gênent.
@@ -66,7 +69,7 @@ struct MainTabView: View {
     /// Les bandeaux « Reprendre », les onglets et le plein écran de la séance en direct.
     private var tabsLayer: some View {
         VStack(spacing: 0) {
-            if let session = liveSession.current, !liveSession.isPresented {
+            if !Self.usesResumeAccessory, let session = liveSession.current, !liveSession.isPresented {
                 ResumeSessionBar(title: session.title, startedAt: session.startedAt, onResume: resume,
                                  onAbandon: { Task { await liveSession.abandonFromBanner() } })
                     .padding(.horizontal, PulseMetrics.spacing)
@@ -97,6 +100,26 @@ struct MainTabView: View {
         .alert(liveSession.errorMessage ?? "", isPresented: isShowingError) {
             Button(String(localized: "OK")) { liveSession.dismissError() }
         }
+        .confirmationDialog(String(localized: "Abandonner la séance ?"), isPresented: $confirmsAbandon, titleVisibility: .visible) {
+            Button(String(localized: "Abandonner"), role: .destructive) { Task { await liveSession.abandonFromBanner() } }
+            Button(String(localized: "Continuer la séance"), role: .cancel) {}
+        } message: {
+            Text(String(localized: "Les séries validées sont gardées, les autres ne sont pas enregistrées."))
+        }
+    }
+
+    /// L'accessoire de la barre d'onglets n'existe qu'à partir d'iOS 26.1 (`isEnabled`) : avant, le bandeau reste en haut.
+    private static var usesResumeAccessory: Bool {
+        if #available(iOS 26.1, *) { true } else { false }
+    }
+
+    /// « Reprendre la séance » sous les onglets, pour une séance en cours qui n'est pas à l'écran.
+    @ViewBuilder
+    private var resumeAccessory: some View {
+        if let session = liveSession.current {
+            ResumeSessionAccessory(title: session.title, startedAt: session.startedAt, onResume: resume,
+                                   onAbandon: { confirmsAbandon = true })
+        }
     }
 
     private var tabs: some View {
@@ -124,6 +147,8 @@ struct MainTabView: View {
         }
         // La barre d'onglets se replie quand on descend : le contenu et l'action ancrée de l'accueil gagnent de la place.
         .tabBarMinimizeBehavior(.onScrollDown)
+        // Au-dessus de la barre, et dans la barre quand elle se replie : la séance se reprend sans remonter en haut de l'écran.
+        .resumeSessionAccessory(isEnabled: liveSession.current != nil && !liveSession.isPresented) { resumeAccessory }
         // Sur les onglets plutôt qu'à côté de la séance en direct : deux plein écrans sur la même vue se gênent.
         .fullScreenCover(isPresented: $pastSession.isPresented, onDismiss: refreshTabs) {
             FinishFlow(model: pastSession.model(), flow: pastSession.finishFlow())
@@ -299,5 +324,18 @@ struct MainTabView: View {
 
     private var isShowingError: Binding<Bool> {
         Binding(get: { liveSession.errorMessage != nil }, set: { if !$0 { liveSession.dismissError() } })
+    }
+}
+
+private extension View {
+    /// `tabViewBottomAccessory(isEnabled:)` à partir d'iOS 26.1 ; avant, rien (le bandeau du haut reste) : la variante sans
+    /// `isEnabled` d'iOS 26.0 laisserait une capsule vide sans séance en cours.
+    @ViewBuilder
+    func resumeSessionAccessory<Accessory: View>(isEnabled: Bool, @ViewBuilder content: () -> Accessory) -> some View {
+        if #available(iOS 26.1, *) {
+            tabViewBottomAccessory(isEnabled: isEnabled, content: content)
+        } else {
+            self
+        }
     }
 }

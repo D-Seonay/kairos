@@ -61,7 +61,7 @@ extension PulseSessionAttributes.ContentState {
 
     fileprivate static var working: Self {
         Self(title: "Pectoraux et triceps", startedAt: .now.addingTimeInterval(-1_500),
-             nextSet: "Développé couché à la barre · série 2 · 70 kg × 5", doneSets: 4, plannedSets: 15)
+             nextSet: "Développé couché à la barre · série 2 · 70 kg × 5", nextSetID: UUID(), doneSets: 4, plannedSets: 15)
     }
 
     fileprivate static var free: Self {
@@ -71,6 +71,12 @@ extension PulseSessionAttributes.ContentState {
 
 #Preview("Verrouillé, accessibilité 3") {
     SessionLockScreenView(state: SessionActivityModel(content: .resting, isStale: false))
+        .background(PulsePalette.liveBackground)
+        .environment(\.dynamicTypeSize, .accessibility3)
+}
+
+#Preview("Verrouillé hors repos, accessibilité 3") {
+    SessionLockScreenView(state: SessionActivityModel(content: .working, isStale: false))
         .background(PulsePalette.liveBackground)
         .environment(\.dynamicTypeSize, .accessibility3)
 }

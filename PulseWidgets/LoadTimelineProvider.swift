@@ -5,6 +5,8 @@ import WidgetKit
 struct LoadEntry: TimelineEntry {
     let date: Date
     let content: LoadWidgetContent
+    /// L'ambiance choisie dans l'app (Ivoire ou Acier), partagée par le groupe d'apps.
+    var theme: Theme = .amber
 }
 
 /// Lit les données de charge d'entraînement (ACWR) pour le petit widget Charge.
@@ -24,8 +26,9 @@ struct LoadTimelineProvider: TimelineProvider {
     private func entries(now: Date) -> [LoadEntry] {
         let calendar = Calendar.current
         let snapshot = WidgetSnapshotFile.appGroup()?.read()
+        let theme = WidgetThemeStore.appGroup().read()
         return RecoveryWidgetTimeline.entryDates(now: now, calendar: calendar).map { date in
-            LoadEntry(date: date, content: .make(snapshot: snapshot, at: date, calendar: calendar))
+            LoadEntry(date: date, content: .make(snapshot: snapshot, at: date, calendar: calendar), theme: theme)
         }
     }
 

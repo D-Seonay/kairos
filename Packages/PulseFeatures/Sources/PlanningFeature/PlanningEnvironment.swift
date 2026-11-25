@@ -39,3 +39,12 @@ public enum PlanningDestination: Hashable, Sendable {
     /// Le mois et la série.
     case month
 }
+
+extension PlanningDestination {
+    /// Le détail qu'ouvre un jour fait : la dernière séance de musculation, sinon la dernière course ou le dernier vélo ; `nil`
+    /// sans séance. `sessions` va de la plus ancienne à la plus récente.
+    static func detail(of sessions: [(id: UUID, kind: SessionKind)]) -> PlanningDestination? {
+        if let strength = sessions.last(where: { $0.kind == .strength }) { return .session(strength.id) }
+        return sessions.last.map { .activity($0.id) }
+    }
+}

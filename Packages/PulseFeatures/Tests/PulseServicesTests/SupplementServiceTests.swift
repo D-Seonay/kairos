@@ -160,4 +160,27 @@ struct SupplementServiceTests {
         #expect(await reminders.reminders.first?.fireDate == TestClock.date("2026-11-21T17:30"))
         #expect(try await moved.overview().items.isEmpty, "Le vendredi devient un jour de repos")
     }
+
+    @Test func unarchiveBringsItBackInPlaceAndReschedulesItsReminders() async throws {
+        let first = Fixture.supplement(order: 0)
+        let zinc = Fixture.supplement("Zinc", minutes: 21 * 60, order: 1)
+        try await service.save(first)
+        try await service.save(zinc)
+        try await service.archive(id: zinc.id)
+        let archivedOverview = try await service.overview()
+        #expect(archivedOverview.archived.map(\.id) == [zinc.id])
+        #expect(await !reminders.reminders.contains { $0.supplementID == zinc.id })
+        let replacements = await reminders.replaceCount
+
+        try await service.unarchive(id: zinc.id)
+        let overview = try await service.overview()
+        #expect(overview.supplements.map(\.id) == [first.id, zinc.id])
+        #expect(overview.archived.isEmpty)
+        #expect(try await stored(zinc.id)?.isArchived == false)
+        #expect(await reminders.replaceCount == replacements + 1)
+        #expect(await reminders.reminders.contains { $0.supplementID == zinc.id })
+
+        try await service.unarchive(id: zinc.id)
+        #expect(await reminders.replaceCount == replacements + 1)
+    }
 }

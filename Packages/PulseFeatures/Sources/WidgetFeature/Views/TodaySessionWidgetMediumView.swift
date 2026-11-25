@@ -19,6 +19,8 @@ public struct TodaySessionWidgetMediumView: View {
 
 /// Le contenu de la vue, plafonné par `TodaySessionWidgetMediumView` : ses `@ScaledMetric` lisent la taille déjà plafonnée.
 struct TodaySessionWidgetMediumViewBody: View {
+    /// L'ambiance choisie dans l'app, posée par l'extension.
+    @Environment(\.pulseTheme) private var theme
     let content: TodaySessionWidgetContent
 
     @ScaledMetric(relativeTo: .body) private var restIconSize = 26
@@ -100,8 +102,8 @@ struct TodaySessionWidgetMediumViewBody: View {
         }
         .padding(.horizontal, 6)
         .padding(.vertical, 2)
-        .background(Color(PulsePalette.accent(for: .amber).accent).opacity(0.18))
-        .foregroundStyle(Color(PulsePalette.accent(for: .amber).accent))
+        .background(Color(PulsePalette.accent(for: theme).accent).opacity(0.18))
+        .foregroundStyle(Color(PulsePalette.accent(for: theme).accent))
         .clipShape(Capsule())
     }
 
@@ -116,8 +118,8 @@ struct TodaySessionWidgetMediumViewBody: View {
         }
         .frame(maxWidth: .infinity)
         .frame(minHeight: 30)
-        .background(Color(PulsePalette.accent(for: .amber).accent))
-        .foregroundStyle(Color(PulsePalette.accent(for: .amber).accentInk))
+        .background(Color(PulsePalette.accent(for: theme).accent))
+        .foregroundStyle(Color(PulsePalette.accent(for: theme).accentInk))
         .clipShape(Capsule())
     }
 }

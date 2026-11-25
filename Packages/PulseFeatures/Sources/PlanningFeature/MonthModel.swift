@@ -3,6 +3,14 @@ import Observation
 import PulseDomain
 import PulseServices
 
+/// Ce que fait la touche sur une case du calendrier.
+public enum MonthDayAction: Hashable, Sendable {
+    /// Pousse le détail de la séance ou de l'activité faite ce jour-là.
+    case open(PlanningDestination)
+    /// Revient à l'onglet Planning, sur ce jour de la liste « Cette semaine ».
+    case showInWeek(Date)
+}
+
 /// L'écran du mois et de la série (spec M6 §5, §6) : la grille d'un mois, du mois de la première activité au mois suivant
 /// le mois courant, et le pilier de série.
 @MainActor
@@ -46,6 +54,31 @@ public final class MonthModel {
               target >= earliest, target <= latest else { return }
         month = target
         await load()
+    }
+
+    /// Ce qu'ouvre la case d'un jour : la séance de musculation faite, sinon la course ou le vélo, comme un jour de la semaine ;
+    /// un jour prévu de la semaine en cours se montre dans la liste « Cette semaine ». `nil` pour un jour vide, passé sans
+    /// séance, ou prévu au-delà de la semaine : rien d'autre ne le montre.
+    public func action(for day: MonthDay) -> MonthDayAction? {
+        if let destination = PlanningDestination.detail(of: day.sessions.map { ($0.id, $0.kind) }) {
+            return .open(destination)
+        }
+        guard day.planned != nil else { return nil }
+        let calendar = environment.calendar
+        let weekStart = WeekSchedule.weekStart(of: environment.now(), calendar: calendar)
+        guard let weekEnd = calendar.date(byAdding: .day, value: 7, to: weekStart),
+              day.date >= weekStart, day.date < weekEnd else { return nil }
+        return .showInWeek(day.date)
+    }
+
+    /// « Ouvre la séance », « Ouvre l'activité », « Montre ce jour dans la semaine » : l'indice VoiceOver d'une case touchable.
+    public func accessibilityHint(of action: MonthDayAction) -> String {
+        switch action {
+        case .open(.session): String(localized: "Ouvre la séance", bundle: .module)
+        case .open(.activity): String(localized: "Ouvre l'activité", bundle: .module)
+        case .open(.month): ""
+        case .showInWeek: String(localized: "Montre ce jour dans la semaine", bundle: .module)
+        }
     }
 
     /// « novembre 2026 ».

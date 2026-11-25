@@ -68,8 +68,8 @@ extension ActiveSessionService {
         return RestEndMessage(title: title, body: body)
     }
 
-    /// Le titre, les dates de la séance et du repos, « Développé couché à la barre · série 2 · 70 kg × 5 » et le compte des séries
-    /// de travail : chaque série validée ou dévalidée met l'activité à jour.
+    /// Le titre, les dates de la séance et du repos, « Développé couché à la barre · série 2 · 70 kg × 5 », la série que « Valider »
+    /// coche et le compte des séries de travail : chaque série validée ou dévalidée met l'activité à jour.
     static func activityState(for session: LiveSession) -> SessionActivityState {
         let nextSet = session.nextSetParts.map { next in
             next.values.map { String(localized: "\(next.name) · série \(next.number) · \($0)", bundle: .module) }
@@ -77,7 +77,8 @@ extension ActiveSessionService {
         }
         return SessionActivityState(sessionID: session.id, title: session.title, startedAt: session.startedAt,
                                     restStartedAt: session.rest?.startedAt, restEndsAt: session.rest?.endsAt, nextSet: nextSet,
-                                    doneSets: session.doneWorkingSets, plannedSets: session.plannedWorkingSets)
+                                    nextSetID: session.activityValidation?.set, doneSets: session.doneWorkingSets,
+                                    plannedSets: session.plannedWorkingSets)
     }
 }
 
