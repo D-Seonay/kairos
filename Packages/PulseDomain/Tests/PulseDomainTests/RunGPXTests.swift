@@ -53,6 +53,21 @@ struct RunGPXTests {
         #expect(!gpx.contains("<seuil>"))
     }
 
+    @Test("les coordonnées restent dans les bornes du schéma, même arrondies")
+    func coordinatesStayWithinSchemaBounds() {
+        let point = RunTrackPoint(timestamp: Self.start, latitude: 90.00000004, longitude: 179.99999996, horizontalAccuracy: 5)
+        #expect(RunGPX.trackPoint(point).hasPrefix(#"<trkpt lat="90.0000000" lon="179.9999999">"#))
+        let west = RunTrackPoint(timestamp: Self.start, latitude: -90.5, longitude: -180.00000004, horizontalAccuracy: 5)
+        #expect(RunGPX.trackPoint(west).hasPrefix(#"<trkpt lat="-90.0000000" lon="-180.0000000">"#))
+    }
+
+    @Test("les caractères interdits en XML 1.0 ne passent pas dans le nom")
+    func forbiddenCharactersLeaveTheName() throws {
+        let gpx = RunGPX.document(points: [], name: "Sortie\u{FFFE}\u{FFFF}\u{0001}du soir", startedAt: Self.start)
+        let parsed = try #require(GPXProbe.parse(gpx))
+        #expect(parsed.texts["name"] == ["Sortie du soir", "Sortie du soir"])
+    }
+
     @Test("un tracé vide donne un segment vide, toujours valide")
     func emptyTrackStaysValid() throws {
         let parsed = try #require(GPXProbe.parse(RunGPX.document(points: [], name: "Course", startedAt: Self.start)))

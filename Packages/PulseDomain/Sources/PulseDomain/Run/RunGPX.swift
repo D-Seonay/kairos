@@ -35,10 +35,14 @@ public enum RunGPX {
         return lines.joined(separator: "\n")
     }
 
+    /// La plus grande longitude écrite à 7 décimales, sous la borne exclue de 180.
+    static let maxLongitude = 179.9999999
+
     /// Un `trkpt` sur une ligne : l'altitude (`ele`) précède l'heure (`time`), dans l'ordre qu'impose le schéma.
     static func trackPoint(_ point: RunTrackPoint) -> String {
-        let latitude = String(format: "%.7f", point.latitude)
-        let longitude = String(format: "%.7f", point.longitude)
+        // Le schéma borne la latitude à [-90, 90] et la longitude à [-180, 180[ : 179,99999996 arrondi écrirait 180.0000000.
+        let latitude = String(format: "%.7f", min(max(point.latitude, -90), 90))
+        let longitude = String(format: "%.7f", min(max(point.longitude, -180), maxLongitude))
         var children = ""
         if let altitude = point.altitude, altitude.isFinite {
             children += "<ele>\(String(format: "%.1f", altitude))</ele>"
@@ -63,8 +67,9 @@ public enum RunGPX {
             case ">": result += "&gt;"
             case "\"": result += "&quot;"
             case "'": result += "&apos;"
-            // Les caractères de contrôle sont interdits en XML 1.0 : ils disparaissent.
+            // Les caractères de contrôle deviennent des espaces ; U+FFFE et U+FFFF, interdits en XML 1.0, disparaissent.
             case _ where character.unicodeScalars.allSatisfy({ $0.value < 0x20 }): result += " "
+            case _ where character.unicodeScalars.contains(where: { $0.value == 0xFFFE || $0.value == 0xFFFF }): continue
             default: result.append(character)
             }
         }
