@@ -195,6 +195,17 @@ private func field(_ model: LiveSessionModel, exercise: Int = 0, set: Int, _ kin
     #expect(stored == model.session)
 }
 
+@MainActor @Test func theSessionIncrementIsKeptForTheNextSessions() async throws {
+    let fixture = LiveFixture()
+    try await fixture.seedBenchHistory()
+    let model = try await fixture.startedModel()
+    let exercise = model.session.exercises[0]
+    await model.setIncrement(1.25, exercise: exercise.id)
+    #expect(model.session.exercises[0].incrementKg == 1.25)
+    #expect(try await fixture.settings.settings(for: exercise.exercise)?.incrementKg == 1.25)
+    #expect(model.errorMessage == nil)
+}
+
 @MainActor @Test func restButtonsMoveTheEndAndSkipStops() async throws {
     let fixture = LiveFixture()
     try await fixture.seedBenchHistory()

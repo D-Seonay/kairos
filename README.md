@@ -213,7 +213,7 @@ Relevé des « suivis connus » des PR et des revues. Chaque point est à revér
 - [x] Sélection au doigt dans les graphiques des Stats.
 - [x] Cases du calendrier mensuel cliquables.
 - [x] Désarchiver un complément.
-- [ ] Décider si l'incrément choisi en séance est enregistré dans les réglages de l'exercice (aujourd'hui, il ne vaut que pour la séance).
+- [x] L'incrément choisi en séance est enregistré dans les réglages de l'exercice, comme l'échauffement : il vaut pour les séances suivantes.
 
 **Course GPS**
 - [x] Double écriture possible dans Santé quand `finishWorkout` renvoie nil, iPhone verrouillé.

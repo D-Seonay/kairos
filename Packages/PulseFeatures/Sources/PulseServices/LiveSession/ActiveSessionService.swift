@@ -138,6 +138,20 @@ public final class ActiveSessionService: Sendable {
         }
     }
 
+    /// Enregistre l'incrément de charge de l'exercice dans ses réglages, pour toutes les routines et les prochaines séances, comme
+    /// la fiche exercice. La séance en cours change par `apply(.setIncrement(…))`. Un incrément nul ou négatif n'est pas enregistré.
+    public func saveIncrement(_ incrementKg: Double, for reference: ExerciseReference) async throws {
+        guard incrementKg > 0 else { return }
+        try await queue.run {
+            let now = self.now()
+            var settings = try await self.settings.settings(for: reference)
+                ?? ExerciseSettings(exercise: reference, createdAt: now, updatedAt: now)
+            settings.incrementKg = incrementKg
+            settings.updatedAt = now
+            try await self.settings.save(settings)
+        }
+    }
+
     /// La barre et les disques du profil, ou ceux d'une salle courante sans profil (barre de 20 kg, disques de 25 à 1,25 kg).
     public func barAndPlates() async throws -> (barKg: Double, platesKg: [Double]) {
         let profile = try await profiles.load() ?? UserProfile(createdAt: now(), updatedAt: now())

@@ -75,6 +75,8 @@ struct LiveFixture {
     let activity = StubSessionActivityController()
     let authorizer: StubNotificationAuthorizer
     let service: ActiveSessionService
+    /// Les réglages d'exercice, partagés par la séance et l'onglet Séance comme dans l'app.
+    let settings: InMemoryExerciseSettingsRepository
     let environment: LiveSessionEnvironment
     let haptics = HapticLog()
     /// Le service des photos, sur un dépôt en mémoire ; l'environnement ne le reçoit qu'avec `withPhotos`.
@@ -85,6 +87,8 @@ struct LiveFixture {
          healthWriter: StubWorkoutHealthWriter? = nil, withPhotos: Bool = false) {
         let clock = clock
         let now: @Sendable () -> Date = { clock.now }
+        let settings = InMemoryExerciseSettingsRepository()
+        self.settings = settings
         let library = ContentLibrary.bundled
         let calendar = LiveClock.calendar
         let profiles = InMemoryProfileRepository()
@@ -99,14 +103,14 @@ struct LiveFixture {
             writer: $0, workouts: workouts, profiles: profiles, measurements: InMemoryBodyMeasurementRepository(),
             calendar: calendar) }
         service = ActiveSessionService(store: store, workouts: workouts, profiles: profiles,
-                                       settings: InMemoryExerciseSettingsRepository(), userExercises: userExercises,
+                                       settings: settings, userExercises: userExercises,
                                        records: records, library: library, restNotifier: notifier, activity: activity,
                                        calendar: calendar, now: now, health: health)
         let importer = HevyImporter(workouts: workouts, userExercises: userExercises, records: records,
                                     mappings: InMemoryHevyMappingStore(), library: library, calendar: calendar, now: now)
         let train = TrainEnvironment(
             profiles: profiles, programs: InMemoryProgramRepository(), recovery: InMemoryRecoveryRepository(calendar: calendar),
-            workouts: workouts, userExercises: userExercises, exerciseSettings: InMemoryExerciseSettingsRepository(),
+            workouts: workouts, userExercises: userExercises, exerciseSettings: settings,
             personalRecords: personalRecords, records: records, importer: importer, library: library,
             activeSession: service, calendar: calendar, now: now,
             sessionPhotos: withPhotos ? photos : nil)
