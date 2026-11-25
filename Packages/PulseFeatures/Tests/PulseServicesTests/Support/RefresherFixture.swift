@@ -85,8 +85,32 @@ struct HoldingWidgetPublisher: WidgetPublishing {
         await inner.publish(snapshot)
     }
 
+    func publishTheme(_ theme: Theme) async {
+        await inner.publishTheme(theme)
+    }
+
     func clear() async {
         await inner.clear()
+    }
+}
+
+/// Une semaine datée qui suspend chaque écriture derrière une porte avant de la confier au dépôt.
+struct HoldingScheduledDayRepository: ScheduledDayRepository {
+    let inner: any ScheduledDayRepository
+    let gate: Gate
+
+    func days(from: Date, to: Date) async throws -> [ScheduledDay] {
+        try await inner.days(from: from, to: to)
+    }
+
+    func save(_ day: ScheduledDay) async throws {
+        await gate.pass()
+        try await inner.save(day)
+    }
+
+    func delete(id: UUID) async throws {
+        await gate.pass()
+        try await inner.delete(id: id)
     }
 }
 
@@ -104,12 +128,15 @@ struct RefresherFixture {
     let measurements = InMemoryBodyMeasurementRepository()
     let clock: MutableClock
     let refresher: DayRefresher
+    /// Le service du Planning donné au passage, avec `planning` : ses écritures passent par la file du passage.
+    let planningService: PlanningService?
 
     /// Sans `adopt`, il n'y a ni profil ni programme. Avec `gate`, chaque notification planifiée attend que la porte s'ouvre ;
     /// avec `publishGate`, chaque publication de l'instantané. Avec `planning`, le passage applique les règles anti-interférence
-    /// et publie la série et la semaine. `relocation` est le déplacement des valeurs Apple Santé lancé avant les lectures.
+    /// et publie la série et la semaine ; avec `planningGate` en plus, chaque écriture du service du Planning attend la porte.
+    /// `relocation` est le déplacement des valeurs Apple Santé lancé avant les lectures.
     init(scenario: HealthScenario, at start: String = "2026-11-02T08:00", holdingNotificationsAt gate: Gate? = nil,
-         holdingPublishesAt publishGate: Gate? = nil, planning: Bool = false,
+         holdingPublishesAt publishGate: Gate? = nil, holdingPlanningWritesAt planningGate: Gate? = nil, planning: Bool = false,
          bodySamples: [BodySignal: [CachedHealthSample]] = [:], relocation: (any HealthDataRelocating)? = nil) {
         let calendar = TestClock.calendar
         let clock = MutableClock(start)
@@ -131,8 +158,13 @@ struct RefresherFixture {
         let rules = planning ? AntiInterferenceService(
             profiles: profiles, programs: programs, workouts: workouts, scheduledDays: scheduled,
             userExercises: InMemoryUserExerciseRepository(), library: .bundled, calendar: calendar, now: { clock.now }) : nil
+        var planningDays: any ScheduledDayRepository = scheduled
+        if let planningGate {
+            planningDays = HoldingScheduledDayRepository(inner: scheduled, gate: planningGate)
+        }
         let planningService = planning ? PlanningService(profiles: profiles, programs: programs, workouts: workouts,
-                                                         scheduledDays: scheduled, calendar: calendar, now: { clock.now }) : nil
+                                                         scheduledDays: planningDays, calendar: calendar, now: { clock.now }) : nil
+        self.planningService = planningService
         refresher = DayRefresher(
             profiles: profiles, programs: programs, recovery: recovery,
             nightHistory: NightHistory(source: source, cache: InMemoryHealthSampleCache(), calendar: calendar),

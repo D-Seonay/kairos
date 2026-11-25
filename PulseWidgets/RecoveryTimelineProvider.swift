@@ -5,6 +5,8 @@ import WidgetKit
 struct RecoveryEntry: TimelineEntry {
     let date: Date
     let content: RecoveryWidgetContent
+    /// L'ambiance choisie dans l'app (Ivoire ou Acier), partagée par le groupe d'apps.
+    var theme: Theme = .amber
 }
 
 /// Lit l'instantané du groupe d'apps à chaque timeline : l'app le réécrit après chaque synchro et recharge le widget.
@@ -25,8 +27,9 @@ struct RecoveryTimelineProvider: TimelineProvider {
     private func entries(now: Date) -> [RecoveryEntry] {
         let calendar = Calendar.current
         let snapshot = WidgetSnapshotFile.appGroup()?.read()
+        let theme = WidgetThemeStore.appGroup().read()
         return RecoveryWidgetTimeline.entryDates(now: now, calendar: calendar).map { date in
-            RecoveryEntry(date: date, content: .make(snapshot: snapshot, at: date, calendar: calendar))
+            RecoveryEntry(date: date, content: .make(snapshot: snapshot, at: date, calendar: calendar), theme: theme)
         }
     }
 

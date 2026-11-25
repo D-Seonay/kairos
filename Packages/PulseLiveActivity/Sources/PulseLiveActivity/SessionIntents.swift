@@ -1,4 +1,5 @@
 import AppIntents
+import Foundation
 
 /// « −30 s » : raccourcit le repos en cours, sans le faire finir avant maintenant.
 public struct RestMinus30Intent: LiveActivityIntent {
@@ -35,6 +36,29 @@ public struct SkipRestIntent: LiveActivityIntent {
 
     public func perform() async throws -> some IntentResult {
         await SessionIntentBridge.handle(.skip)
+        return .result()
+    }
+}
+
+/// « Valider » : coche la série suivante affichée, avec sa proposition, et lance le repos comme dans l'app. L'identifiant de la
+/// série voyage avec le bouton : une activité en retard sur la séance ne coche pas une autre série.
+public struct ValidateSetIntent: LiveActivityIntent {
+    public static let title: LocalizedStringResource = "Valider la série"
+    public static let isDiscoverable = false
+
+    @Parameter(title: "Série")
+    public var setID: String
+
+    public init() {}
+
+    public init(setID: UUID) {
+        self.setID = setID.uuidString
+    }
+
+    public func perform() async throws -> some IntentResult {
+        if let id = UUID(uuidString: setID) {
+            await SessionIntentBridge.validate(set: id)
+        }
         return .result()
     }
 }

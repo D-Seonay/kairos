@@ -52,15 +52,19 @@ public struct SupplementSchedule: Sendable {
     public var supplements: [Supplement]
     public var intakes: [SupplementIntake]
     public var trainingWeekdays: Set<Weekday>
+    /// Les jours de la semaine datée (déplacements du Planning, règles anti-interférence, spec M6 §4 et §9), par minuit
+    /// local : vrai quand une séance y est prévue. Un jour présent ici remplace `trainingWeekdays`.
+    public var plannedTrainingDays: [Date: Bool]
     /// Les séances récentes, toutes sortes et tous statuts ; le planificateur choisit celles qui comptent.
     public var sessions: [WorkoutSession]
     public var calendar: Calendar
 
     public init(supplements: [Supplement], intakes: [SupplementIntake], trainingWeekdays: Set<Weekday>,
-                sessions: [WorkoutSession], calendar: Calendar) {
+                plannedTrainingDays: [Date: Bool] = [:], sessions: [WorkoutSession], calendar: Calendar) {
         self.supplements = supplements
         self.intakes = intakes
         self.trainingWeekdays = trainingWeekdays
+        self.plannedTrainingDays = plannedTrainingDays
         self.sessions = sessions
         self.calendar = calendar
     }
@@ -71,6 +75,18 @@ public struct SupplementSchedule: Sendable {
         return Set(program.weekLayout.enumerated().compactMap { index, routine in
             routine != nil && Weekday.allCases.indices.contains(index) ? Weekday.allCases[index] : nil
         })
+    }
+
+    /// Les jours de `overrides` qui valent pour `program`, par minuit local : vrai quand la ligne y place une séance.
+    public static func plannedTrainingDays(of program: Program?, overrides: [ScheduledDay],
+                                           calendar: Calendar) -> [Date: Bool] {
+        guard let program else { return [:] }
+        var days: [Date: Bool] = [:]
+        for line in overrides where line.programID == nil || line.programID == program.id {
+            let day = calendar.startOfDay(for: line.date)
+            days[day] = TodayPlanner.routineDay(of: program, on: day, calendar: calendar, overrides: overrides) != nil
+        }
+        return days
     }
 
     // MARK: - Jour
@@ -103,9 +119,12 @@ public struct SupplementSchedule: Sendable {
         }
     }
 
-    /// Un jour d'entraînement : le programme y place une routine, ou une séance terminée ou en cours y a commencé.
+    /// Un jour d'entraînement : la semaine réelle y place une routine (la semaine datée, sinon la semaine type), ou une séance
+    /// terminée ou en cours y a commencé.
     public func isTrainingDay(_ day: Date) -> Bool {
-        trainingWeekdays.contains(Weekday(date: day, calendar: calendar)) || !trainingSessions(on: day).isEmpty
+        let planned = plannedTrainingDays[calendar.startOfDay(for: day)]
+            ?? trainingWeekdays.contains(Weekday(date: day, calendar: calendar))
+        return planned || !trainingSessions(on: day).isEmpty
     }
 
     /// La dernière prise du complément ce jour-là.

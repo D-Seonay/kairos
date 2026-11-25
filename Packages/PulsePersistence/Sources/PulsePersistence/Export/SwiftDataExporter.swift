@@ -15,6 +15,8 @@ public struct SwiftDataExporter: DataExporter {
     private let directory: URL
     private let timeZone: TimeZone
     private let locale: String
+    /// Le nombre d'images lues dans un même contexte SwiftData ; les tests le réduisent pour traverser plusieurs lots.
+    var photoBatchSize = 8
 
     public init(container: ModelContainer, appVersion: String, contentVersion: String,
                 exerciseNames: @Sendable @escaping (String) -> String?, directory: URL = SwiftDataExporter.exportsDirectory,
@@ -64,18 +66,23 @@ public struct SwiftDataExporter: DataExporter {
     /// Copie chaque image vivante, octet pour octet, dans `photos/` ; rend le chemin écrit de chaque photo (identifiant -> chemin
     /// relatif). Deux photos d'une séance peuvent avoir le même rang le même jour (deux appareils) : la seconde reçoit les
     /// premiers caractères de son identifiant avant `.jpg`, jamais d'écrasement. Le dossier n'existe que s'il y a une image.
+    /// Les images sont lues par lots de `photoBatchSize`, chaque lot dans un contexte neuf relâché à la fin du lot : les lignes
+    /// lues et leurs images ne s'accumulent pas dans un même contexte, quel que soit le nombre de photos.
     private func writePhotos(_ photos: [SessionPhoto], to folder: URL) async throws -> [UUID: String] {
-        let loader = ExportSnapshotLoader(modelContainer: container)
         let photosFolder = folder.appendingPathComponent("photos", isDirectory: true)
         var files: [UUID: String] = [:]
         var taken = Set<String>()
-        for photo in photos {
-            guard let data = try await loader.imageData(ofPhoto: photo.id) else { continue }
-            let path = ExportNaming.uniquePhotoPath(photo, timeZone: timeZone, taken: taken)
-            taken.insert(path)
-            try FileManager.default.createDirectory(at: photosFolder, withIntermediateDirectories: true)
-            try data.write(to: folder.appendingPathComponent(path), options: .atomic)
-            files[photo.id] = path
+        for start in stride(from: 0, to: photos.count, by: max(1, photoBatchSize)) {
+            let batch = photos[start..<min(start + max(1, photoBatchSize), photos.count)]
+            let loader = ExportSnapshotLoader(modelContainer: container)
+            for photo in batch {
+                guard let data = try await loader.imageData(ofPhoto: photo.id) else { continue }
+                let path = ExportNaming.uniquePhotoPath(photo, timeZone: timeZone, taken: taken)
+                taken.insert(path)
+                try FileManager.default.createDirectory(at: photosFolder, withIntermediateDirectories: true)
+                try data.write(to: folder.appendingPathComponent(path), options: .atomic)
+                files[photo.id] = path
+            }
         }
         return files
     }

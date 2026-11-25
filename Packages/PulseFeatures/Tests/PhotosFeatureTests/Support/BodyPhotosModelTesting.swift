@@ -2,6 +2,7 @@ import Foundation
 @testable import PhotosFeature
 import PulseDomain
 import PulseServices
+import PulseTestSupport
 import Testing
 
 /// Ce que partagent les tests du modèle des photos de corps : un service sur un dépôt en mémoire et une horloge fixe (vendredi 20
@@ -21,7 +22,13 @@ extension BodyPhotosModelTesting {
     static func makeService() -> BodyPhotoService {
         BodyPhotoService(store: InMemoryBodyPhotoStore(), measurements: InMemoryBodyMeasurementRepository(),
                          calendar: PhotosTestClock.calendar, timeZone: PhotosTestClock.calendar.timeZone,
-                         now: { PhotosTestClock.date("2026-11-20T12:00") })
+                         exportDirectory: uniqueExportDirectory(), now: { PhotosTestClock.date("2026-11-20T12:00") })
+    }
+
+    /// Un dossier d'export propre au test : les tests tournent en parallèle, et la fin d'un export (qui supprime son dossier)
+    /// ne doit jamais emporter l'archive qu'un autre est en train d'écrire.
+    static func uniqueExportDirectory() -> URL {
+        FileManager.default.temporaryDirectory.appendingPathComponent("PulseBodyPhotoExport-\(UUID().uuidString)", isDirectory: true)
     }
 
     func makeModel(_ authentication: StubOwnerAuthentication?,

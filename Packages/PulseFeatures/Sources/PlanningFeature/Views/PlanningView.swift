@@ -14,6 +14,8 @@ public struct PlanningView: View {
     private let onStartRun: ((RunLaunch) -> Void)?
     private let onPlanChanged: () -> Void
     @State private var path: [PlanningDestination] = []
+    /// Le jour prévu touché dans le calendrier du mois : au retour sur l'onglet, la liste « Cette semaine » défile jusqu'à lui.
+    @State private var pendingDay: Date?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// `train` donne la séance du jour ajustée au score et son lancement, comme l'onglet Séance ; `onStartSession` démarre la
@@ -93,6 +95,11 @@ public struct PlanningView: View {
         }
         .refreshable { await refresh() }
         .pulseAnnounceError(model.errorMessage)
+        .onChange(of: path) {
+            guard path.isEmpty, let date = pendingDay else { return }
+            pendingDay = nil
+            proxy.scrollTo(date, anchor: .center)
+        }
     }
 
     /// La bande, la carte du jour, la semaine et l'entrée du mois, une fois la semaine lue : avant, ce serait une semaine vide.
@@ -214,7 +221,18 @@ public struct PlanningView: View {
         case .activity(let id):
             ActivityDetailView(model: model.activityDetailModel(sessionID: id))
         case .month:
-            MonthView(model: model.monthModel())
+            MonthView(model: model.monthModel(), onSelect: selectInMonth)
+        }
+    }
+
+    /// Une case du mois : pousse le détail de la séance faite, ou revient à la semaine sur le jour prévu.
+    private func selectInMonth(_ action: MonthDayAction) {
+        switch action {
+        case .open(let destination):
+            path.append(destination)
+        case .showInWeek(let date):
+            pendingDay = date
+            path.removeAll()
         }
     }
 

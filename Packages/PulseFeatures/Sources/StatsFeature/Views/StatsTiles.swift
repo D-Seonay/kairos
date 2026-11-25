@@ -24,7 +24,7 @@ struct StatsWindow {
 
     /// L'unité d'un grain de courbe ou de barre.
     func unit(of bucket: StatsBucket) -> Calendar.Component {
-        bucket == .day ? .day : .weekOfYear
+        StatsChartReadings.unit(of: bucket)
     }
 
     /// « +6 % par rapport aux 30 jours précédents », « … à l'année précédente » sur un an ; `nil` sans période précédente.

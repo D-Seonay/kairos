@@ -49,6 +49,12 @@ actor FlakyProfileRepository: ProfileRepository {
     func delete(id: UUID) async throws {
         try await inner.delete(id: id)
     }
+
+    @discardableResult
+    func update(_ transform: @Sendable (inout UserProfile) throws -> Void) async throws -> ProfileUpdate? {
+        if failsOnSave { throw SaveFailure() }
+        return try await inner.update(transform)
+    }
 }
 
 /// Les doublures d'un parcours d'onboarding, et le modèle construit dessus.

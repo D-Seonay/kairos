@@ -305,11 +305,12 @@ extension BodyPhotosModel {
         return try? await service.existing(pose: pose, on: date)
     }
 
-    /// Enregistre la photo (celle de même pose et de même jour est remplacée) ; une date future revient à maintenant.
-    public func save(_ draft: BodyPhotoDraft, pose: BodyPose, takenAt: Date) async -> Bool {
+    /// Enregistre la photo ; `replacing` est la photo dont l'utilisateur a confirmé le remplacement (`photoToReplace`), la seule
+    /// supprimée. Une date future revient à maintenant.
+    public func save(_ draft: BodyPhotoDraft, pose: BodyPose, takenAt: Date, replacing: UUID? = nil) async -> Bool {
         guard canReadFiles else { return false }
         do {
-            _ = try await service.save(draft.processed, pose: pose, takenAt: min(takenAt, now()))
+            _ = try await service.save(draft.processed, pose: pose, takenAt: min(takenAt, now()), replacing: replacing)
             announce(PhotoText.photoAdded)
             await load()
             return true

@@ -12,7 +12,6 @@ public enum TrainIdentifiers {
     public static let runStart = "train.tile.run.start"
     public static let pastSession = "train.past"
     public static let pastSessionStart = "train.past.start"
-    public static let resumeSession = "train.resume"
     public static let library = "train.library"
     public static let libraryCreate = "train.library.create"
     public static let libraryCreateFromSearch = "train.library.createFromSearch"

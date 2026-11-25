@@ -2,6 +2,9 @@ import PulseDesignSystem
 import PulseDomain
 import PulseServices
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
 
 /// L'écran de départ (spec V2a §4.2) : l'objectif ou « Course libre », l'état du GPS, l'interrupteur des annonces vocales et un
 /// gros bouton « Partir ». On peut partir sans signal prêt. Le suivi du signal démarre à l'apparition et s'arrête à la sortie.
@@ -16,13 +19,9 @@ struct RunStartView: View {
                 goalCard
                 gpsCard
                 if let notice = model.locationNotice { RunNoticeLine(text: notice, systemImage: "location.slash") }
+                if let notice = model.approximateNotice { RunApproximateLocationNotice(text: notice) }
                 RunAnnouncesToggle(model: model)
-                if let message = model.errorMessage {
-                    Text(message)
-                        .font(.footnote)
-                        .foregroundStyle(PulsePalette.signal)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
+                RunErrorLine(message: model.errorMessage)
             }
             .padding(PulseMetrics.spacing)
         }
@@ -34,7 +33,7 @@ struct RunStartView: View {
                     .accessibilityIdentifier(RunIdentifiers.cancelButton)
             }
         }
-        .safeAreaInset(edge: .bottom, spacing: 0) { startButton }
+        .runActionBar { startButton }
         .pulseScreenBackground(aura: 0.5)
         .pulseAnnounceError(model.errorMessage)
         .pulseAnnounce(model.gps == .ready ? Self.readySpoken : nil)
@@ -80,21 +79,28 @@ struct RunStartView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(String(localized: "GPS", bundle: .module))
                         .pulseEyebrow()
-                    Text(model.locationDenied ? String(localized: "Indisponible", bundle: .module) : RunText.gpsStatus(quality))
+                    Text(gpsStatus(quality))
                         .font(.headline)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                if !model.locationDenied, quality != .ready, !typeSize.isAccessibilitySize {
+                // Sans position exacte, le signal ne deviendra jamais prêt : pas d'attente affichée.
+                if !model.locationDenied, model.approximateNotice == nil, quality != .ready, !typeSize.isAccessibilitySize {
                     ProgressView().accessibilityHidden(true)
                 }
             }
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(String(localized: "Signal GPS", bundle: .module))
-            .accessibilityValue(model.locationDenied ? String(localized: "Indisponible", bundle: .module)
-                                : RunText.gpsStatus(quality))
+            .accessibilityValue(gpsStatus(quality))
             .accessibilityIdentifier(RunIdentifiers.gpsStatus)
         }
+    }
+
+    /// « Indisponible » sans localisation, « Position approximative » sans position exacte, sinon l'état du signal.
+    private func gpsStatus(_ quality: RunGPSQuality) -> String {
+        if model.locationDenied { return String(localized: "Indisponible", bundle: .module) }
+        if model.approximateNotice != nil, quality != .ready { return RunText.approximateStatus }
+        return RunText.gpsStatus(quality)
     }
 
     private static var readySpoken: String {
@@ -116,8 +122,6 @@ struct RunStartView: View {
         .accessibilityHint(model.gps == .ready || model.locationDenied ? ""
                            : String(localized: "La distance comptera dès le premier signal précis", bundle: .module))
         .accessibilityIdentifier(RunIdentifiers.startButton)
-        .padding(.horizontal, PulseMetrics.spacing)
-        .padding(.vertical, 8)
     }
 }
 
@@ -134,6 +138,28 @@ struct RunNoticeLine: View {
         }
         .font(.footnote)
         .foregroundStyle(PulsePalette.text2)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+/// La position exacte est coupée pour Pulse : la phrase qui l'explique, et un bouton vers les réglages de Pulse dans iOS.
+struct RunApproximateLocationNotice: View {
+    let text: String
+    @Environment(\.openURL) private var openURL
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            RunNoticeLine(text: text, systemImage: "location.slash")
+            #if canImport(UIKit)
+            Button(String(localized: "Ouvrir les réglages", bundle: .module)) {
+                if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+            }
+            .buttonStyle(PillButtonStyle())
+            .accessibilityHint(String(localized: "Ouvre les réglages de Pulse dans iOS, où activer la position exacte",
+                                      bundle: .module))
+            .accessibilityIdentifier(RunIdentifiers.locationSettingsButton)
+            #endif
+        }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 }

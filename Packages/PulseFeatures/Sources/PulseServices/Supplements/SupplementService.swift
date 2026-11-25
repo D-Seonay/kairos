@@ -11,14 +11,17 @@ public struct SupplementOverview: Sendable, Equatable {
     public var supplements: [Supplement]
     public var regularity: [UUID: SupplementRegularity]
     public var advice: [SupplementAdvice]
+    /// Les compléments archivés, par ordre : ils peuvent revenir dans la liste.
+    public var archived: [Supplement]
 
     public init(day: Date, items: [SupplementDueItem], supplements: [Supplement], regularity: [UUID: SupplementRegularity],
-                advice: [SupplementAdvice]) {
+                advice: [SupplementAdvice], archived: [Supplement] = []) {
         self.day = day
         self.items = items
         self.supplements = supplements
         self.regularity = regularity
         self.advice = advice
+        self.archived = archived
     }
 
     public static func empty(day: Date) -> SupplementOverview {
@@ -66,6 +69,8 @@ public final class SupplementService: Sendable {
     private let programs: any ProgramRepository
     private let profiles: any ProfileRepository
     private let workouts: any WorkoutRepository
+    /// La semaine datée : un déplacement du Planning change les jours d'entraînement des compléments (spec M6 §4).
+    private let scheduledDays: (any ScheduledDayRepository)?
     private let reminders: (any SupplementReminderScheduling)?
     private let health: (any SupplementHealthWriting)?
     private let calendar: Calendar
@@ -74,11 +79,13 @@ public final class SupplementService: Sendable {
 
     public init(supplements: any SupplementRepository, programs: any ProgramRepository, profiles: any ProfileRepository,
                 workouts: any WorkoutRepository, reminders: (any SupplementReminderScheduling)?,
-                health: (any SupplementHealthWriting)?, calendar: Calendar, now: @escaping @Sendable () -> Date) {
+                health: (any SupplementHealthWriting)?, scheduledDays: (any ScheduledDayRepository)? = nil, calendar: Calendar,
+                now: @escaping @Sendable () -> Date) {
         self.supplements = supplements
         self.programs = programs
         self.profiles = profiles
         self.workouts = workouts
+        self.scheduledDays = scheduledDays
         self.reminders = reminders
         self.health = health
         self.calendar = calendar
@@ -95,8 +102,9 @@ public final class SupplementService: Sendable {
         let regularity = Dictionary(uniqueKeysWithValues: schedule.supplements.map {
             ($0.id, SupplementRegularity.compute(for: $0, schedule: schedule, today: today))
         })
+        let archived = try await supplements.supplements(includeArchived: true).filter(\.isArchived)
         return SupplementOverview(day: today, items: items, supplements: schedule.supplements, regularity: regularity,
-                                  advice: SupplementCatalog.advice(for: items))
+                                  advice: SupplementCatalog.advice(for: items), archived: archived)
     }
 
     // MARK: - Enregistrement
@@ -111,8 +119,18 @@ public final class SupplementService: Sendable {
 
     /// Archive le complément : il sort de la liste et des rappels, ses prises restent dans l'export.
     public func archive(id: UUID) async throws {
-        guard var supplement = try await supplements.supplements(includeArchived: true).first(where: { $0.id == id }) else { return }
-        supplement.isArchived = true
+        try await setArchived(true, id: id)
+    }
+
+    /// Désarchive le complément : il revient dans la liste à sa place, et ses rappels sont replanifiés comme à la création.
+    public func unarchive(id: UUID) async throws {
+        try await setArchived(false, id: id)
+    }
+
+    private func setArchived(_ isArchived: Bool, id: UUID) async throws {
+        guard var supplement = try await supplements.supplements(includeArchived: true).first(where: { $0.id == id }),
+              supplement.isArchived != isArchived else { return }
+        supplement.isArchived = isArchived
         try await save(supplement)
     }
 
@@ -238,8 +256,8 @@ public final class SupplementService: Sendable {
 
     // MARK: - Interne
 
-    /// Les compléments, les prises des 30 derniers jours, les jours d'entraînement du programme actif et les séances des
-    /// 60 derniers jours.
+    /// Les compléments, les prises des 30 derniers jours, les jours d'entraînement du programme actif avec les déplacements de la
+    /// semaine datée sur la régularité et les rappels, et les séances des 60 derniers jours.
     private func loadSchedule() async throws -> SupplementSchedule {
         let now = now()
         let today = calendar.startOfDay(for: now)
@@ -251,8 +269,20 @@ public final class SupplementService: Sendable {
         return SupplementSchedule(supplements: try await supplements.supplements(includeArchived: false),
                                   intakes: try await supplements.intakes(from: intakesStart, to: tomorrow),
                                   trainingWeekdays: SupplementSchedule.trainingWeekdays(of: program),
+                                  plannedTrainingDays: SupplementSchedule.plannedTrainingDays(
+                                      of: program, overrides: await overrides(from: intakesStart, today: today), calendar: calendar),
                                   sessions: try await workouts.sessions(from: sessionsStart, to: tomorrow),
                                   calendar: calendar)
+    }
+}
+
+extension SupplementService {
+    /// Les lignes de la semaine datée de `from` à la fin de l'horizon des rappels ; aucune si leur lecture échoue : les jours
+    /// suivent alors la semaine type.
+    private func overrides(from start: Date, today: Date) async -> [ScheduledDay] {
+        guard let scheduledDays,
+              let end = calendar.date(byAdding: .day, value: SupplementReminderPlanner.horizonDays + 1, to: today) else { return [] }
+        return (try? await scheduledDays.days(from: start, to: end)) ?? []
     }
 }
 

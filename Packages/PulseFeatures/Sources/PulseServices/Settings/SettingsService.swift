@@ -21,7 +21,7 @@ public struct SettingsService: Sendable {
     private let profiles: any ProfileRepository
     private let now: @Sendable () -> Date
     private let onChange: @Sendable (UserProfile, UserProfile) async -> Void
-    /// Les mises à jour rapides de l'écran Réglages ne s'entrelacent pas entre la lecture du profil et son écriture.
+    /// Les mises à jour rapides de l'écran Réglages préviennent l'app dans l'ordre de leurs écritures.
     private let queue = SerialTaskQueue()
 
     /// `onChange(ancien, nouveau)` part après chaque écriture réussie ; c'est là que l'app replanifie.
@@ -40,20 +40,25 @@ public struct SettingsService: Sendable {
     /// Applique `change` à une copie du profil, normalise, valide, et n'enregistre (avec `updatedAt = now()`) que si quelque chose a
     /// changé. Une erreur de validation n'écrit rien et n'appelle rien ; un profil inchangé est rendu tel quel. Seuls les champs
     /// modifiés sont validés : une valeur déjà stockée hors limites (une taille lue dans Santé) ne bloque pas un autre réglage.
-    /// Chaque appel s'exécute en entier (lecture, écriture, `onChange`) avant le suivant.
+    /// Chaque appel s'exécute en entier (écriture, `onChange`) avant le suivant ; l'écriture passe par `ProfileRepository.update`,
+    /// donc une écriture d'ailleurs (poids, disques, programme actif) n'est ni écrasée ni perdue.
     @discardableResult
     public func update(_ change: @escaping @Sendable (inout UserProfile) -> Void) async throws -> UserProfile {
         try await queue.run {
-            let old = try await load()
-            var updated = old
-            change(&updated)
-            Self.normalize(&updated)
-            try Self.validate(updated, against: old)
-            guard updated != old else { return old }
-            updated.updatedAt = now()
-            try await profiles.save(updated)
-            await onChange(old, updated)
-            return updated
+            let stamp = now()
+            let result = try await profiles.update { profile in
+                let old = profile
+                change(&profile)
+                Self.normalize(&profile)
+                try Self.validate(profile, against: old)
+                if profile == old { return }
+                profile.updatedAt = stamp
+            }
+            guard let result else { throw SettingsError.noProfile }
+            if result.didChange {
+                await onChange(result.before, result.after)
+            }
+            return result.after
         }
     }
 

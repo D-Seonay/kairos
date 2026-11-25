@@ -120,9 +120,15 @@ let package = Package(
             resources: [.process("Resources")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
+        // Le code partagé par plusieurs cibles de test ; hors des produits, l'app ne peut pas le lier.
+        .target(
+            name: "PulseTestSupport",
+            path: "Tests/PulseTestSupport",
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
         .testTarget(
             name: "PulseServicesTests",
-            dependencies: ["PulseServices", domain, recoveryEngine, content],
+            dependencies: ["PulseTestSupport", "PulseServices", domain, recoveryEngine, content],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(
@@ -132,8 +138,8 @@ let package = Package(
         ),
         .testTarget(
             name: "LiveSessionFeatureTests",
-            dependencies: ["LiveSessionFeature", "TrainFeature", "PhotosFeature", "PulseServices", designSystem, domain, recoveryEngine,
-                           content],
+            dependencies: ["PulseTestSupport", "LiveSessionFeature", "TrainFeature", "PhotosFeature", "PulseServices", designSystem,
+                           domain, recoveryEngine, content],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(
@@ -148,12 +154,13 @@ let package = Package(
         ),
         .testTarget(
             name: "PhotosFeatureTests",
-            dependencies: ["PhotosFeature", "PulseServices", designSystem, domain],
+            dependencies: ["PulseTestSupport", "PhotosFeature", "PulseServices", designSystem, domain],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(
             name: "PlanningFeatureTests",
-            dependencies: ["PlanningFeature", "TrainFeature", "PhotosFeature", "PulseServices", domain, content],
+            dependencies: ["PulseTestSupport", "PlanningFeature", "TrainFeature", "PhotosFeature", "PulseServices", domain,
+                           content],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(
@@ -163,7 +170,7 @@ let package = Package(
         ),
         .testTarget(
             name: "RunFeatureTests",
-            dependencies: ["RunFeature", "PhotosFeature", "PulseServices", designSystem, domain],
+            dependencies: ["PulseTestSupport", "RunFeature", "PhotosFeature", "PulseServices", designSystem, domain],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(
@@ -183,7 +190,7 @@ let package = Package(
         ),
         .testTarget(
             name: "TrainFeatureTests",
-            dependencies: ["TrainFeature", "PhotosFeature", "PulseServices", domain, content, designSystem],
+            dependencies: ["PulseTestSupport", "TrainFeature", "PhotosFeature", "PulseServices", domain, content, designSystem],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(

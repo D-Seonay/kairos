@@ -55,16 +55,11 @@ struct RunView: View {
                 RunLiveMetrics(snapshot: snapshot)
                 notices(snapshot)
                 RunAnnouncesToggle(model: model)
-                if let message = model.errorMessage {
-                    Text(message)
-                        .font(.footnote)
-                        .foregroundStyle(PulsePalette.signal)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
+                RunErrorLine(message: model.errorMessage)
             }
             .padding(PulseMetrics.spacing)
         }
-        .safeAreaInset(edge: .bottom, spacing: 0) { buttons(snapshot) }
+        .runActionBar { buttons(snapshot) }
     }
 
     // MARK: En-tête
@@ -102,6 +97,8 @@ struct RunView: View {
     private func notices(_ snapshot: RunSnapshot) -> some View {
         if let notice = model.locationNotice {
             RunNoticeLine(text: notice, systemImage: "location.slash")
+        } else if let notice = model.approximateNotice {
+            RunApproximateLocationNotice(text: notice)
         } else if snapshot.gps != .ready {
             RunNoticeLine(text: RunText.gpsStatus(snapshot.gps), systemImage: "location")
         }
@@ -132,8 +129,6 @@ struct RunView: View {
             .accessibilityIdentifier(RunIdentifiers.finishButton)
         }
         .disabled(model.isBusy)
-        .padding(.horizontal, PulseMetrics.spacing)
-        .padding(.vertical, 8)
     }
 }
 

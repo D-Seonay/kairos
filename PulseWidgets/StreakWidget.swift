@@ -9,6 +9,7 @@ struct StreakWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: StreakWidgetContent.kind, provider: StreakTimelineProvider()) { entry in
             StreakWidgetEntryView(entry: entry)
+                .environment(\.pulseTheme, entry.theme)
         }
         .configurationDisplayName(StreakWidgetContent.displayName)
         .description(StreakWidgetContent.summary)
@@ -21,6 +22,7 @@ private struct StreakWidgetEntryView: View {
 
     @Environment(\.widgetFamily) private var family
     @Environment(\.widgetRenderingMode) private var renderingMode
+    @Environment(\.pulseTheme) private var theme
 
     var body: some View {
         content
@@ -40,9 +42,9 @@ private struct StreakWidgetEntryView: View {
             Label(entry.content.inlineText, systemImage: "flame.fill")
                 .accessibilityLabel(entry.content.accessibilityLabel)
         default:
-            let amber = PulsePalette.accent(for: .amber)
+            let palette = PulsePalette.accent(for: theme)
             StreakWidgetSmallView(content: entry.content)
-                .foregroundStyle(renderingMode == .fullColor ? Color(amber.accentInk) : .primary)
+                .foregroundStyle(renderingMode == .fullColor ? Color(palette.accentInk) : .primary)
         }
     }
 
@@ -50,9 +52,9 @@ private struct StreakWidgetEntryView: View {
     private var background: some View {
         switch family {
         case .systemSmall:
-            let amber = PulsePalette.accent(for: .amber)
+            let palette = PulsePalette.accent(for: theme)
             LinearGradient(
-                colors: [Color(amber.accent2), Color(amber.accent)],
+                colors: [Color(palette.accent2), Color(palette.accent)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )

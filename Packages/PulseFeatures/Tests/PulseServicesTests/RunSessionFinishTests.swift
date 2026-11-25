@@ -293,5 +293,6 @@ struct RunSessionFinishTests {
         #expect(try await fixture.workouts.session(id: recap.session.id) == nil)
         #expect(try await fixture.tracks.track(for: recap.session.id) == nil)
         #expect(await fixture.recorder.deletedWorkouts == [healthID])
+        #expect(await fixture.recorder.deletedRunWorkouts.isEmpty)
     }
 }

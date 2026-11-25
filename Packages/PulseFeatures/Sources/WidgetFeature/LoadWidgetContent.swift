@@ -18,6 +18,8 @@ public struct LoadWidgetContent: Sendable, Equatable {
     public var ratioText: String
     public var zoneText: String
     public var isOptimal: Bool
+    /// La zone du ratio, qui colore son texte ; `nil` sans ratio.
+    public var zone: WidgetLoadZone?
     public var accessibilityLabel: String
 
     public init(
@@ -25,12 +27,14 @@ public struct LoadWidgetContent: Sendable, Equatable {
         ratioText: String,
         zoneText: String,
         isOptimal: Bool,
+        zone: WidgetLoadZone? = nil,
         accessibilityLabel: String
     ) {
         self.ratio = ratio
         self.ratioText = ratioText
         self.zoneText = zoneText
         self.isOptimal = isOptimal
+        self.zone = zone
         self.accessibilityLabel = accessibilityLabel
     }
 
@@ -45,7 +49,7 @@ public struct LoadWidgetContent: Sendable, Equatable {
         }
         let ratioText = WidgetPlanningText.ratio(ratio)
         let zone = WidgetPlanningText.zone(of: ratio)
-        return LoadWidgetContent(ratio: ratio, ratioText: ratioText, zoneText: zone.text, isOptimal: zone.isOptimal,
+        return LoadWidgetContent(ratio: ratio, ratioText: ratioText, zoneText: zone.text, isOptimal: zone.isOptimal, zone: zone,
                                  accessibilityLabel: String(localized: "Charge d'entraînement \(ratioText), \(zone.text)",
                                                             bundle: .module))
     }
@@ -68,6 +72,7 @@ public struct LoadWidgetContent: Sendable, Equatable {
             ratioText: ratioString,
             zoneText: zone,
             isOptimal: true,
+            zone: .optimal,
             accessibilityLabel: label
         )
     }

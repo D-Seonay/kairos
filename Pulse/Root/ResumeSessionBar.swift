@@ -2,7 +2,8 @@ import LiveSessionFeature
 import PulseDesignSystem
 import SwiftUI
 
-/// Le bandeau « Reprendre la séance » en haut des onglets, quand une séance est en cours sans être à l'écran (après une relance) :
+/// Le bandeau « Reprendre la séance » en haut des onglets avant iOS 26.1 (ensuite, `ResumeSessionAccessory` sous les onglets),
+/// quand une séance est en cours sans être à l'écran (après une relance) :
 /// son titre, la durée écoulée depuis `startedAt`, « Reprendre » et « Abandonner », confirmé, qui garde les séries validées
 /// (spec M4 §16).
 struct ResumeSessionBar: View {

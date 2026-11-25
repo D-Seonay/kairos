@@ -34,12 +34,7 @@ struct RunRecapView: View {
                 ObsidianCard { RunEffortPicker(selection: $model.rpe) }
                 noteField
                 if let photos = model.photos { SessionPhotosSection(model: photos) }
-                if let message = model.errorMessage {
-                    Text(message)
-                        .font(.footnote)
-                        .foregroundStyle(PulsePalette.signal)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
+                RunErrorLine(message: model.errorMessage)
             }
             .padding(PulseMetrics.spacing)
         }
@@ -53,7 +48,7 @@ struct RunRecapView: View {
         }
         .pulseScreenBackground(aura: 0.5)
         .pulseAnnounceError(model.errorMessage)
-        .safeAreaInset(edge: .bottom, spacing: 0) { actions }
+        .runActionBar(opaque: true) { actions }
         .confirmationDialog(String(localized: "Supprimer la course ?", bundle: .module), isPresented: $confirmsDelete,
                             titleVisibility: .visible) {
             Button(String(localized: "Supprimer", bundle: .module), role: .destructive) { Task { await model.delete() } }
@@ -162,9 +157,6 @@ struct RunRecapView: View {
             .accessibilityIdentifier(RunIdentifiers.recapDelete)
         }
         .disabled(model.isSaving)
-        .padding(.horizontal, PulseMetrics.spacing)
-        .padding(.vertical, 8)
-        .background(PulsePalette.background)
     }
 }
 

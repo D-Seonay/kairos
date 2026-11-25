@@ -10,4 +10,6 @@ public enum PlanningIdentifiers {
     public static let month = "planning.month"
     public static let monthPrevious = "planning.month.previous"
     public static let monthNext = "planning.month.next"
+    /// Une case touchable du calendrier, par son numéro.
+    public static let monthDayPrefix = "planning.month.day."
 }

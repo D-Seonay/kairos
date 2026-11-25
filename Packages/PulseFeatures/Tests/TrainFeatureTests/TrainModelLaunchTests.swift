@@ -188,7 +188,9 @@ private func override(_ routineDay: RoutineDay?, for program: Program) -> Schedu
     try await moved.scheduled.save(override(nil, for: program))
     let movedModel = TrainModel(environment: moved.environment)
     await movedModel.refresh()
-    #expect(movedModel.nextRun?.weekday == .saturday && movedModel.daysUntil(.saturday) == 0)
+    // La tuile ne dit pas « aujourd'hui » : la prochaine course est celle de samedi prochain, dans 7 jours.
+    #expect(movedModel.nextRun?.weekday == .saturday && movedModel.nextRunDaysAhead == 7)
+    #expect(movedModel.runSubtitle.hasSuffix(" · prévue samedi prochain"))
     #expect(movedModel.runLaunch() == RunLaunch.free() && !movedModel.runLaunchIsPlanned)
     #expect(movedModel.runStartLabel == "Lancer une course libre")
 
@@ -203,6 +205,9 @@ private func override(_ routineDay: RoutineDay?, for program: Program) -> Schedu
     let placed = TrainModel(environment: monday.environment)
     await placed.refresh()
     #expect(placed.daysUntil(.saturday) == 5)
+    // La tuile suit la semaine datée, comme la carte du jour : la course est aujourd'hui.
+    #expect(placed.nextRun?.weekday == .monday && placed.nextRunDaysAhead == 0)
+    #expect(placed.runSubtitle.hasSuffix(" · aujourd'hui"))
     #expect(placed.runLaunch().routineDayID == footing.id && placed.runLaunchIsPlanned)
     #expect(placed.runStartLabel == "Lancer la course du jour")
 

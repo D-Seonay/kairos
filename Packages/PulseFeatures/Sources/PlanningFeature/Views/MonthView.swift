@@ -6,9 +6,12 @@ import SwiftUI
 /// Le mois et la série (spec M6 §5, §6) : la série et ses 12 dernières semaines, puis le calendrier du mois et sa légende.
 struct MonthView: View {
     @State private var model: MonthModel
+    /// Une case touchée : l'appelant pousse le détail ou revient au jour dans la semaine.
+    private let onSelect: (MonthDayAction) -> Void
 
-    init(model: MonthModel) {
+    init(model: MonthModel, onSelect: @escaping (MonthDayAction) -> Void = { _ in }) {
         _model = State(initialValue: model)
+        self.onSelect = onSelect
     }
 
     var body: some View {
@@ -71,14 +74,29 @@ struct MonthView: View {
                     ForEach(Array((model.grid?.weeks ?? []).enumerated()), id: \.offset) { _, week in
                         GridRow {
                             ForEach(week) { day in
-                                MonthDayCell(day: day, number: model.number(of: day))
-                                    .accessibilityElement(children: .ignore)
-                                    .accessibilityLabel(model.accessibilityText(of: day))
+                                dayCell(day)
                             }
                         }
                     }
                 }
             }
+        }
+    }
+
+    /// Une case : un bouton quand le jour a quelque chose à ouvrir, sinon une simple étiquette lue par VoiceOver.
+    @ViewBuilder
+    private func dayCell(_ day: MonthDay) -> some View {
+        let cell = MonthDayCell(day: day, number: model.number(of: day))
+        if let action = model.action(for: day) {
+            Button { onSelect(action) } label: { cell.contentShape(Rectangle()) }
+                .buttonStyle(PressableButtonStyle())
+                .accessibilityLabel(model.accessibilityText(of: day))
+                .accessibilityHint(model.accessibilityHint(of: action))
+                .accessibilityIdentifier(PlanningIdentifiers.monthDayPrefix + model.number(of: day))
+        } else {
+            cell
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(model.accessibilityText(of: day))
         }
     }
 

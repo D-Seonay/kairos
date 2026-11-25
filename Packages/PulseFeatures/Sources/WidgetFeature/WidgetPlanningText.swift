@@ -49,12 +49,9 @@ enum WidgetPlanningText {
         PulseFormat.decimal(value, maxFractionDigits: 2)
     }
 
-    /// La zone du ratio en toutes lettres, comme sur la carte de l'accueil.
-    static func zone(of ratio: Double) -> (text: String, isOptimal: Bool) {
-        if ratio < 0.8 { return (String(localized: "Sous-entraînement", bundle: .module), false) }
-        if ratio <= 1.3 { return (String(localized: "Zone optimale", bundle: .module), true) }
-        if ratio < 1.5 { return (String(localized: "Charge élevée", bundle: .module), false) }
-        return (String(localized: "Risque de blessure", bundle: .module), false)
+    /// La zone du ratio, son texte et sa couleur.
+    static func zone(of ratio: Double) -> WidgetLoadZone {
+        WidgetLoadZone(ratio: ratio)
     }
 
     /// « Demain », « Jeudi ».

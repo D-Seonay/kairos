@@ -3,10 +3,11 @@ import Foundation
 import ImageIO
 import UniformTypeIdentifiers
 
-/// Des images de test fabriquées en mémoire : aucune photo n'est versée au dépôt.
-enum TestImages {
+/// Des images de test fabriquées en mémoire : aucune photo n'est versée au dépôt. Partagées par les cibles de test des photos
+/// (services, séance live, course, historique, planning, photos) depuis la cible `PulseTestSupport`.
+public enum TestImages {
     /// Un JPEG uni de `width` × `height` pixels.
-    static func jpeg(width: Int = 64, height: Int = 48) -> Data {
+    public static func jpeg(width: Int = 64, height: Int = 48) -> Data {
         guard let context = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0,
                                       space: CGColorSpaceCreateDeviceRGB(),
                                       bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue) else { return Data() }

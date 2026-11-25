@@ -12,4 +12,9 @@ public enum SupplementsIdentifiers {
     public static func check(_ name: String) -> String {
         "supplements.check.\(name)"
     }
+
+    /// « Désarchiver » d'un complément archivé, par son nom.
+    public static func unarchive(_ name: String) -> String {
+        "supplements.unarchive.\(name)"
+    }
 }

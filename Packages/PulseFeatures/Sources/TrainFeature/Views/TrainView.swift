@@ -15,11 +15,12 @@ enum TrainDestination: Hashable {
     case hevyImport
 }
 
-/// L'onglet « Séance » : « Reprendre la séance » pendant une séance, la tuile Musculation (« Démarrer »), la tuile Course,
+/// L'onglet « Séance » : la tuile Musculation (« Démarrer »), la tuile Course,
 /// « Mes routines » (« Lancer » ou « Courir », « Mon programme », « + Nouvelle »), puis la bibliothèque d'exercices, l'historique,
 /// « Séance libre », « Courir », « Saisir une séance passée » et l'import Hevy. Lancer une séance la rend à l'app, qui ouvre
 /// l'écran en direct (« Courir », sur la tuile Course ou dans l'entrée, rend de même la course à lancer) ; s'il y a déjà une
-/// séance en cours, l'onglet propose de la reprendre. Une séance passée se saisit à côté de celle en cours.
+/// séance en cours, l'onglet propose de la reprendre. Le bandeau « Reprendre la séance » est celui de l'app, au-dessus des
+/// onglets. Une séance passée se saisit à côté de celle en cours.
 public struct TrainView: View {
     private let model: TrainModel
     private let onOpenToday: () -> Void
@@ -104,10 +105,8 @@ public struct TrainView: View {
     private var content: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: PulseMetrics.spacing) {
+                // Pas de bandeau « Reprendre » ici : celui de l'app, au-dessus des onglets, le montre déjà, avec « Abandonner ».
                 TrainHeader()
-                if let title = model.activeSessionTitle {
-                    ResumeSessionBanner(title: title, startedAt: model.activeSessionStartedAt, onResume: onResumeSession)
-                }
                 if let message = model.errorMessage {
                     Text(message)
                         .font(.footnote)

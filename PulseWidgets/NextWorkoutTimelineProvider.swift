@@ -5,6 +5,8 @@ import WidgetKit
 struct NextWorkoutEntry: TimelineEntry {
     let date: Date
     let content: NextWorkoutWidgetContent
+    /// L'ambiance choisie dans l'app (Ivoire ou Acier), partagée par le groupe d'apps.
+    var theme: Theme = .amber
 }
 
 /// Lit la prochaine séance prévue pour alimenter le petit widget Prochaine séance.
@@ -24,8 +26,9 @@ struct NextWorkoutTimelineProvider: TimelineProvider {
     private func entries(now: Date) -> [NextWorkoutEntry] {
         let calendar = Calendar.current
         let snapshot = WidgetSnapshotFile.appGroup()?.read()
+        let theme = WidgetThemeStore.appGroup().read()
         return RecoveryWidgetTimeline.entryDates(now: now, calendar: calendar).map { date in
-            NextWorkoutEntry(date: date, content: .make(snapshot: snapshot, at: date, calendar: calendar))
+            NextWorkoutEntry(date: date, content: .make(snapshot: snapshot, at: date, calendar: calendar), theme: theme)
         }
     }
 

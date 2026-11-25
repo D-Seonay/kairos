@@ -134,4 +134,53 @@ struct SupplementServiceTests {
         #expect(try await service.overview().supplements.map(\.id) == [first.id])
         #expect(try await service.nextOrder() == 5)
     }
+
+    @Test func unarchiveBringsItBackInPlaceAndReschedulesItsReminders() async throws {
+        let first = Fixture.supplement(order: 0)
+        let zinc = Fixture.supplement("Zinc", minutes: 21 * 60, order: 1)
+        try await service.save(first)
+        try await service.save(zinc)
+        try await service.archive(id: zinc.id)
+        let archivedOverview = try await service.overview()
+        #expect(archivedOverview.archived.map(\.id) == [zinc.id])
+        #expect(await !reminders.reminders.contains { $0.supplementID == zinc.id })
+        let replacements = await reminders.replaceCount
+
+        try await service.unarchive(id: zinc.id)
+        let overview = try await service.overview()
+        #expect(overview.supplements.map(\.id) == [first.id, zinc.id])
+        #expect(overview.archived.isEmpty)
+        #expect(try await stored(zinc.id)?.isArchived == false)
+        #expect(await reminders.replaceCount == replacements + 1)
+        #expect(await reminders.reminders.contains { $0.supplementID == zinc.id })
+
+        try await service.unarchive(id: zinc.id)
+        #expect(await reminders.replaceCount == replacements + 1)
+    }
+
+    /// Le Push du vendredi déplacé au samedi dans le Planning : la caféine d'avant la séance suit la semaine réelle.
+    @Test func trainingDayRemindersFollowThePlanningMoves() async throws {
+        let program = Fixture.program()
+        try await programs.save(program)
+        try await profiles.save(UserProfile(activeProgramID: program.id))
+        let scheduled = InMemoryScheduledDayRepository()
+        let friday = TestClock.date("2026-11-20T00:00")
+        let saturday = TestClock.date("2026-11-21T00:00")
+        let push = try #require(program.days.first)
+        try await scheduled.save(ScheduledDay(date: friday, programID: program.id, title: "Repos", kind: .rest, status: .planned,
+                                              moveReason: .user, createdAt: friday, updatedAt: friday))
+        try await scheduled.save(ScheduledDay(date: saturday, programID: program.id, routineDayID: push.id, title: push.name,
+                                              kind: .strength, status: .planned, movedFromDate: friday, moveReason: .user,
+                                              createdAt: friday, updatedAt: friday))
+        let clock = clock
+        let moved = SupplementService(supplements: repository, programs: programs, profiles: profiles, workouts: workouts,
+                                      reminders: reminders, health: health, scheduledDays: scheduled, calendar: TestClock.calendar,
+                                      now: { clock.now })
+        try await moved.save(Fixture.supplement("Caféine", timing: .beforeWorkout, minutes: nil, days: .trainingDays))
+
+        let days = await reminders.reminders.map(\.day)
+        #expect(!days.contains(friday) && days.first == saturday)
+        #expect(await reminders.reminders.first?.fireDate == TestClock.date("2026-11-21T17:30"))
+        #expect(try await moved.overview().items.isEmpty, "Le vendredi devient un jour de repos")
+    }
 }

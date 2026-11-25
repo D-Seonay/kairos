@@ -40,6 +40,9 @@ public struct PlanningService: Sendable {
     let scheduledDays: any ScheduledDayRepository
     let calendar: Calendar
     let now: @Sendable () -> Date
+    /// La file des écritures de la semaine datée (échange, refus d'une règle, rétablissement). Le passage du jour qui reçoit ce
+    /// service passe par la même file : un déplacement et les règles anti-interférence ne s'écrasent plus l'un l'autre.
+    let writes = SerialTaskQueue()
 
     public init(profiles: any ProfileRepository, programs: any ProgramRepository, workouts: any WorkoutRepository,
                 scheduledDays: any ScheduledDayRepository, calendar: Calendar, now: @escaping @Sendable () -> Date) {
@@ -88,6 +91,24 @@ public struct PlanningService: Sendable {
     /// Échange les séances prévues de deux jours de la semaine en cours, aujourd'hui ou plus tard et non validés (spec M6 §4).
     /// Un jour qui retrouve sa séance de la semaine type perd sa ligne.
     public func swap(_ first: Date, _ second: Date) async throws {
+        try await writes.run { try await self.swapInQueue(first, second) }
+    }
+
+    /// Supprime les déplacements de l'utilisateur dans la semaine en cours.
+    public func restoreWeek() async throws {
+        try await writes.run {
+            let now = self.now()
+            let weekStart = WeekSchedule.weekStart(of: now, calendar: self.calendar)
+            let weekEnd = self.calendar.date(byAdding: .day, value: 7, to: weekStart) ?? now
+            for day in try await self.scheduledDays.days(from: weekStart, to: weekEnd) where day.moveReason == .user {
+                try await self.scheduledDays.delete(id: day.id)
+            }
+        }
+    }
+
+    // MARK: - Interne
+
+    private func swapInQueue(_ first: Date, _ second: Date) async throws {
         let now = now()
         let (profile, program) = try await profileAndProgram()
         guard let program else { throw PlanningError.noProgram }
@@ -105,18 +126,6 @@ public struct PlanningService: Sendable {
         try await place(days[1].routine, from: days[1], on: days[0], program: program, keepsLine: touchesRules, now: now)
         try await place(days[0].routine, from: days[0], on: days[1], program: program, keepsLine: touchesRules, now: now)
     }
-
-    /// Supprime les déplacements de l'utilisateur dans la semaine en cours.
-    public func restoreWeek() async throws {
-        let now = now()
-        let weekStart = WeekSchedule.weekStart(of: now, calendar: calendar)
-        let weekEnd = calendar.date(byAdding: .day, value: 7, to: weekStart) ?? now
-        for day in try await scheduledDays.days(from: weekStart, to: weekEnd) where day.moveReason == .user {
-            try await scheduledDays.delete(id: day.id)
-        }
-    }
-
-    // MARK: - Interne
 
     func profileAndProgram() async throws -> (UserProfile?, Program?) {
         let profile = try await profiles.load()

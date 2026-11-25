@@ -13,6 +13,9 @@ private actor UnreadableProfileRepository: ProfileRepository {
     func load() async throws -> UserProfile? { throw Failure.unreadable }
     func save(_ profile: UserProfile) async throws {}
     func delete(id: UUID) async throws {}
+    func update(_ transform: @Sendable (inout UserProfile) throws -> Void) async throws -> ProfileUpdate? {
+        throw Failure.unreadable
+    }
 }
 
 /// PPL : Push lundi et jeudi, Pull mardi et vendredi, Legs mercredi ; `run` ajoute un footing le samedi.
@@ -82,6 +85,8 @@ func pplProgram(withRun run: Bool = false) -> Program {
     await model.refresh()
     #expect(model.nextRun?.day.name == "Footing")
     #expect(model.nextRun?.weekday == .saturday)
+    #expect(model.nextRunDaysAhead == 5)
+    #expect(model.runSubtitle.hasSuffix(" · prévue samedi"))
     #expect(model.routines.last?.estimatedMinutes == 40)
 }
 
@@ -91,6 +96,7 @@ func pplProgram(withRun run: Bool = false) -> Program {
     let model = TrainModel(environment: fixture.environment)
     await model.refresh()
     #expect(model.nextRun?.weekday == .saturday)
+    #expect(model.nextRunDaysAhead == 0)
     #expect(model.today?.plannedDay == .run(model.nextRun!.day))
 }
 

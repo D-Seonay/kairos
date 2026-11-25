@@ -11,6 +11,16 @@ struct BreakdownRow: Equatable, Identifiable {
     var delta: String?
 
     var id: SleepStage { stage }
+
+    /// Les lignes n'existent que pour une nuit à phases : le reste sans phase s'y nomme « Sans phase ».
+    var name: String { NightText.stageName(stage, hasStages: true) }
+
+    /// La largeur de la barre colorée dans une piste de `available` points. Une phase absente (0 min) n'a pas de barre, seule
+    /// la piste reste ; une phase présente garde au moins `minimum`, pour rester visible à côté des autres.
+    func barWidth(available: CGFloat, minimum: CGFloat) -> CGFloat {
+        guard minutes > 0, share > 0 else { return 0 }
+        return min(available, max(minimum, available * share))
+    }
 }
 
 /// Les textes de l'écran Nuit, affichés et parlés. Vocabulaire neutre : l'écran montre, il ne diagnostique pas.
@@ -61,6 +71,29 @@ enum NightText {
         let end = formatted(block.end, calendar: calendar, format: "HH:mm")
         let duration = PulseFormat.duration(minutes: block.asleepMinutes)
         return String(localized: "Aussi compté : \(start)–\(end), \(duration)", bundle: .module)
+    }
+
+    /// Le nom d'une phase dans l'écran Nuit. Le reste « sans phase » d'une nuit à phases se nomme « Sans phase » : à côté de
+    /// Profond, Léger et Paradoxal, « Endormi » laisserait croire à une phase de plus. Sans phases, il reste « Endormi ».
+    static func stageName(_ stage: SleepStage, hasStages: Bool) -> String {
+        guard hasStages, stage == .asleepUnspecified else { return stage.displayName }
+        return String(localized: "Sans phase", bundle: .module)
+    }
+
+    /// Les rangées de l'hypnogramme, de haut en bas : Éveil, Paradoxal, Léger, Profond, puis Sans phase si la nuit en a. Le
+    /// temps sans phase a sa propre rangée, sous l'échelle des phases : il n'est ni du léger ni une profondeur connue. Sans
+    /// phases, deux rangées : Éveil et Endormi.
+    static func hypnogramRows(_ night: NightSleep) -> [SleepStage] {
+        guard night.hasStages else { return [.awake, .asleepUnspecified] }
+        return SleepStage.chartOrder + (showsUnspecifiedRow(night) ? [.asleepUnspecified] : [])
+    }
+
+    /// Vrai quand le temps sans phase du bloc principal d'une nuit à phases dure au moins une minute une fois arrondi : le seuil
+    /// de la répartition, qui compte en minutes entières. Quelques secondes d'un échantillon iPhone n'ouvrent pas de rangée.
+    static func showsUnspecifiedRow(_ night: NightSleep) -> Bool {
+        let seconds = night.segments.filter { $0.stage == .asleepUnspecified }
+            .reduce(0) { $0 + $1.end.timeIntervalSince($1.start) }
+        return (seconds / 60).rounded() > 0
     }
 
     static var noStagesNote: String {

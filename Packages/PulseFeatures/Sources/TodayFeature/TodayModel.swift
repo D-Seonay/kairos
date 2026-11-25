@@ -34,10 +34,12 @@ public final class TodayModel {
     /// Vrai quand l'écran Nuit est poussé depuis la tuile Sommeil.
     var isShowingNight = false
 
-    /// La tuile Sommeil ouvre l'écran Nuit dès qu'elle montre au moins une nuit ; sans nuit, elle reste non touchable.
-    var canOpenNight: Bool {
-        trends.first { $0.factor == .sleep }?.values.contains { $0 != nil } ?? false
-    }
+    /// Vrai quand une nuit du cache (60 jours, `NightHistory.historyDays`) a du sommeil : l'écran Nuit a de quoi s'ouvrir.
+    private(set) var hasNightInCache = false
+
+    /// La tuile Sommeil ouvre l'écran Nuit dès qu'une nuit du cache a du sommeil, comme l'écran Nuit qui parcourt tout le
+    /// cache, même si aucune ne tombe dans les 14 jours de la tuile ; sans nuit, elle reste non touchable (spec sommeil §6.4).
+    var canOpenNight: Bool { hasNightInCache }
     public private(set) var isLoading = false
     /// Vrai quand la dernière lecture n'a pas pu calculer le score : sans score affiché, la carte le dit et propose de réessayer.
     public private(set) var scoreFailed = false
@@ -170,6 +172,7 @@ public final class TodayModel {
         let calendar = environment.calendar
         let today = calendar.startOfDay(for: now)
         trends = TrendTile.make(nights: day.nights, day: today, calendar: calendar)
+        hasNightInCache = day.nights.contains { $0.sleep != nil }
         guard let start = calendar.date(byAdding: .day, value: -LoadCalculator.requiredHistoryDays, to: today),
               let loadStart = calendar.date(byAdding: .day, value: 1, to: start),
               let end = calendar.date(byAdding: .day, value: 1, to: today),

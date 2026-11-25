@@ -26,6 +26,13 @@ struct LaunchOptionsTests {
         #expect(options.seed == .onboardedPPL)
     }
 
+    @Test func ownerAuthenticationScenarioIsRead() {
+        #expect(LaunchOptions.parse(["Pulse"]).ownerAuthentication == .succeeds)
+        #expect(LaunchOptions.parse(["Pulse", "-PulseOwnerAuthentication", "fails"]).ownerAuthentication == .fails)
+        #expect(LaunchOptions.parse(["Pulse", "-PulseOwnerAuthentication", "noPasscode"]).ownerAuthentication == .noPasscode)
+        #expect(LaunchOptions.parse(["Pulse", "-PulseOwnerAuthentication", "faceID"]).ownerAuthentication == .succeeds)
+    }
+
     @Test func eachStoreOptionIsReadOnItsOwn() {
         #expect(LaunchOptions.parse(["Pulse", "-PulseStore", "inMemory"]).storeInMemory)
         let disk = LaunchOptions.parse(["Pulse", "-PulseStore", "disk"])

@@ -1040,6 +1040,36 @@
         }
       }
     },
+    "Valider" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valider"
+          }
+        }
+      }
+    },
+    "Valider la série suivante" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valider la série suivante"
+          }
+        }
+      }
+    },
+    "Valider la série suivante : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valider la série suivante : %@"
+          }
+        }
+      }
+    },
     "Voir" : {
       "localizations" : {
         "fr" : {

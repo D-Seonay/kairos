@@ -37,7 +37,7 @@
 - [3. Moteur Physiologique (PulseRecoveryEngine)](#3-moteur-physiologique-pulserecoveryengine)
 - [4. Architecture Technique & Modularisation](#4-architecture-technique--modularisation)
 - [5. Arborescence du Projet](#5-arborescence-du-projet)
-- [6. Feuille de Route & Avancement (M1 → M8)](#6-feuille-de-route--avancement-m1--m8)
+- [6. Feuille de Route & Reste à Faire](#6-feuille-de-route--reste-à-faire)
 - [7. Démarrage Rapide & Développement](#7-démarrage-rapide--développement)
 - [8. Tests & Qualité](#8-tests--qualité)
 - [9. Confidentialité & Données Santé](#9-confidentialité--données-santé)
@@ -182,21 +182,82 @@ fitness/
 
 ---
 
-## 6. Feuille de Route & Avancement (M1 → M8)
+## 6. Feuille de Route & Reste à Faire
 
-Le développement est segmenté en 8 jalons autonomes livrant chacun un sous-ensemble fonctionnel et vérifiable :
+### Où en est l'app
 
-| Jalon | Intitulé | Statut | Description & Livrables |
+**1.0.3** est en ligne sur l'App Store. **1.0.4** (Live Activity, balayage des séries, vibrations et animations) attend la revue d'Apple depuis le 24/11/2026.
+
+| Jalon | Intitulé | Statut | Ce qui est livré |
 | :---: | :--- | :---: | :--- |
-| **M1** | **Fondations et Moteur** | ✅ Terminé | Architecture packages, moteur physiologique complet, lecture HealthKit, agrégateur nocturne, écran diagnostics, CI Xcode Cloud. |
-| **M2** | **Données et Contenu** | 🚧 En cours | Persistance SwiftData + CloudKit, package `PulseContent` (80 exercices + 4 programmes types en JSON), export et suppression RGPD. |
-| **M3a** | **Onboarding, design system, score du jour** | ✅ Fait | Package `PulseDesignSystem`, onboarding 6 écrans avec import de 60 jours et premier score, cycle de vie du score du jour, check-in, accueil simple, fausse source Apple Santé à scénarios et test d'interface. |
-| **M3b** | **Accueil complet, arrière-plan, widgets** | ✅ Fait | Ajustements de séance par catégorie et « Séance d'origine », écran Pourquoi, mobilité 20 min, charge d'entraînement et tendances 14 jours, lecture ancrée d'Apple Santé et livraison en arrière-plan, notification du matin, widget Récupération (écran d'accueil, écran verrouillé). |
-| **M4** | **Programmes & Séance Live** | ⏳ Prévu | Carnet live, clavier numérique grand format, chrono en Live Activity / Dynamic Island, calculateur de disques, 1RM. |
-| **M5** | **Compléments** | ⏳ Prévu | Suivi des prises par moment, alertes de stock, synchronisation HealthKit, notification interactive « Pris ». |
-| **M6** | **Planning & Anti-interférence** | ⏳ Prévu | Calendrier mensuel, import des courses Apple Santé, détection et résolution des conflits jambes / course à pied, décharge ACWR. |
-| **M7** | **Statistiques & Profil** | ⏳ Prévu | Cartes thermiques musculaires, charge cumulée, records personnels, lissage du poids corporel. |
-| **M8** | **App Store & Polissage** | ⏳ Prévu | Audit accessibilité (VoiceOver, Dynamic Type), conformité vie privée, captures d'écran, soumission TestFlight et App Store. |
+| **M1** | Fondations et moteur | ✅ | Packages, moteur physiologique, lecture Apple Santé, agrégateur nocturne, diagnostics, CI Xcode Cloud. |
+| **M2** | Données et contenu | ✅ | SwiftData + CloudKit, 84 exercices et 4 programmes en JSON, export et suppression RGPD. |
+| **M3** | Onboarding et accueil | ✅ | Design system, onboarding, score du jour, check-in, écran Pourquoi, ajustements de séance, notification du matin, widgets. |
+| **M4** | Programmes et séance live | ✅ | Bibliothèque, éditeur de programmes, import Hevy, records, carnet live, chrono, Live Activity, échauffement, disques, remplacement, séance passée, écriture dans Santé. |
+| **M5** | Compléments | ✅ | Prises par moment, stock, rappels avec « Pris », écriture dans Santé. |
+| **M6** | Planning et anti-interférence | ✅ | Courses lues depuis Santé, semaine datée, série, calendrier, 3 règles jambes / course, décharge ACWR, widgets sur données réelles. |
+| **M7** | Statistiques et profil | ✅ | Onglet Stats (charge, biométrie, muscles, assiduité, records), profil, poids, réglages, Mes données. |
+| **M8** | App Store | ✅ | Données Santé gardées sur l'iPhone, manifestes de confidentialité, pages publiques, passe d'accessibilité, icône, publication. |
+| **V2a** | Course GPS | ✅ | Course suivie dans l'app, tracé, annonces vocales, Live Activity. |
+| **V2b** | Photos | ✅ | Photos de séance (iCloud), photos de corps sous Face ID (iPhone seulement). |
+| **V2** | Sommeil et finitions | ✅ | Phases de sommeil et écran Nuit, passe UI/UX, silhouette homme / femme, séries dans la Dynamic Island. |
+
+### Reste à développer
+
+Relevé des « suivis connus » des PR et des revues. Chaque point est à revérifier avant d'être pris.
+
+**Fonctionnalités laissées pour une passe suivante**
+- [ ] Valider une série depuis la Live Activity.
+- [ ] Appliquer le thème choisi aux widgets.
+- [ ] Barre de reprise compacte en `tabViewBottomAccessory`.
+- [ ] Sélection au doigt dans les graphiques des Stats.
+- [ ] Cases du calendrier mensuel cliquables.
+- [ ] Désarchiver un complément.
+- [ ] Décider si l'incrément choisi en séance est enregistré dans les réglages de l'exercice (aujourd'hui, il ne vaut que pour la séance).
+
+**Course GPS**
+- [ ] Double écriture possible dans Santé quand `finishWorkout` renvoie nil, iPhone verrouillé.
+- [ ] Une course interrompue sans aucun point GPS retenu est enregistrée avec environ 0 min.
+- [ ] Le compteur d'annonces vocales ne revient pas à zéro si iOS perd un rappel de fin de parole.
+- [ ] Le sous-titre « · aujourd'hui » de la tuile course suit la semaine type, pas les déplacements.
+- [ ] Localisation approximative : l'écran affiche « Signal faible » sans dire pourquoi.
+- [ ] La flèche de localisation peut rester dans la barre d'état hors course (session d'arrière-plan à vérifier).
+
+**Photos**
+- [ ] Un index de photos de corps abîmé donne un écran vide, sans moyen de le réparer (rien n'est perdu).
+- [ ] Les photos d'une séance abandonnée pendant l'ajout restent dans iCloud.
+- [ ] L'export général charge toutes les images dans un même contexte SwiftData (mémoire).
+- [ ] Doublure de Face ID pour les tests d'interface.
+
+**Sommeil et écran Nuit**
+- [ ] La légende des Stats liste Profond / Léger / Paradoxal dès qu'une barre a des phases.
+- [ ] Une ligne de répartition à 0 min garde une petite barre.
+- [ ] Le reste « sans phase » d'une nuit à phases est dessiné dans la rangée Léger.
+- [ ] Le résumé VoiceOver du graphique ne cite que la part de profond.
+- [ ] Le rattrapage fait une lecture SwiftData par nuit.
+- [ ] La tuile Sommeil suit 14 jours, pas les 60 du cache.
+
+**Planning, décharge et séance**
+- [ ] Un déplacement ou un refus dans le Planning peut croiser le passage du jour (pas de file d'attente).
+- [ ] Les exercices ajoutés ou remplacés pendant une décharge ne prennent pas les −10 %.
+- [ ] Les rappels de compléments lisent la semaine type, pas les déplacements.
+- [ ] Le texte de zone du widget Semaine est toujours vert.
+- [ ] Deux bandeaux « Reprendre » peuvent s'afficher sur l'onglet Séance.
+- [ ] Après « Continuer », un second oubli dans la même ouverture de l'app ne redemande rien.
+- [ ] Les sorties vélo n'apparaissent pas dans la grille d'assiduité.
+
+**Technique**
+- [ ] `ProfileRepository.update` atomique pour les six écritures du profil.
+- [ ] Remplir les catalogues `Localizable.xcstrings` (ouvrir le projet dans Xcode).
+- [ ] Test instable : `BodyPhotosModelActionsTests.relockWhileTheArchiveIsWrittenDiscardsIt`.
+- [ ] Petits nettoyages : boutons et sélecteurs en double, tests de câblage côté app, libellés absents du catalogue ProfileFeature, `TestImages` copié dans plusieurs cibles.
+
+### Hors code
+
+- [ ] Déployer les schémas CloudKit **V5** (tracés de course) et **V6** (photos de séance) en production. V7 (sommeil) est local et n'a rien à déployer.
+- [ ] Lancer les tests d'interface jamais exécutés : `LiveSessionResumeUITests`, `SupplementsUITests`, `AccessibilityAuditUITests`.
+- [ ] Faire les vérifications sur iPhone listées dans les PR #22 (course), #23 (photos), #24 (passe UI/UX), #26 (Nuit) et #40 (Dynamic Island).
+- [ ] Faire pointer les épingles Pinterest vers la fiche App Store au lieu de la page support.
 
 ---
 

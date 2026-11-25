@@ -68,7 +68,11 @@ struct BodyPhotoAddSheet: View {
             .pulseInlineTitle()
             .toolbar { toolbar }
             .confirmationDialog(replaceTitle, isPresented: replacing, titleVisibility: .visible) {
-                Button(PhotoText.replace, role: .destructive) { Task { await save() } }
+                Button(PhotoText.replace, role: .destructive) {
+                    // La photo montrée dans la confirmation, lue avant que la fermeture du dialogue ne l'efface.
+                    let confirmed = replaced?.id
+                    Task { await save(replacing: confirmed) }
+                }
                 Button(PhotoText.cancel, role: .cancel) {}
             } message: {
                 Text(PhotoText.replaceMessage)
@@ -199,10 +203,10 @@ struct BodyPhotoAddSheet: View {
         }
     }
 
-    private func save() async {
+    private func save(replacing: UUID? = nil) async {
         guard let draft, !isSaving else { return }
         isSaving = true
-        let saved = await model.save(draft, pose: pose, takenAt: takenAt)
+        let saved = await model.save(draft, pose: pose, takenAt: takenAt, replacing: replacing)
         isSaving = false
         if saved { dismiss() }
     }
