@@ -70,8 +70,14 @@ extension RunSessionService {
         if draft.healthWrite == .none, await recorder.writeAccess() == .authorized {
             let entry = Self.healthEntry(draft, builder: builder, end: end)
             draft.healthWrite = await healthWrite { try await self.recorder.save(entry) }
-            // Gardé avant d'enregistrer la séance, comme à la fin : un nouvel essai ne réécrit pas l'entraînement.
-            if draft.healthWrite != .none { try? await drafts.save(draft) }
+            // Gardé avant d'enregistrer la séance, comme à la fin : un nouvel essai ne réécrit pas l'entraînement. Seule
+            // l'écriture est reportée sur le brouillon d'origine : ses pauses non bornées redonnent au nouvel essai la même fin
+            // et la même distance que l'entraînement écrit.
+            if draft.healthWrite != .none {
+                var kept = stored
+                kept.healthWrite = draft.healthWrite
+                try? await drafts.save(kept)
+            }
         }
         // La Live Activity du processus interrompu peut encore être affichée.
         await activity.endAll()
