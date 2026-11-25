@@ -34,6 +34,21 @@ struct InMemoryRepositoriesTests {
         #expect(try await repository.load()?.id == newer.id)
     }
 
+    @Test func profileUpdateKeepsOtherFieldsAndSkipsUnchanged() async throws {
+        let repository = InMemoryProfileRepository()
+        #expect(try await repository.update { $0.weightKg = 75 } == nil)
+        try await repository.save(UserProfile(firstName: "Mathéo", createdAt: day, updatedAt: day))
+        let later = TestClock.date("2026-11-03T00:00")
+        let changed = try #require(try await repository.update { profile in
+            profile.weightKg = 75
+            profile.updatedAt = later
+        })
+        #expect(changed.didChange && changed.after.firstName == "Mathéo" && changed.after.weightKg == 75)
+        let unchanged = try #require(try await repository.update { $0.weightKg = 75 })
+        #expect(!unchanged.didChange)
+        #expect(try await repository.load() == changed.after)
+    }
+
     @Test func bodyMeasurementsAreSoftDeleted() async throws {
         func measurement(_ text: String, _ weight: Double) -> BodyMeasurement {
             BodyMeasurement(date: TestClock.date(text), weightKg: weight, source: .manual, createdAt: day, updatedAt: day)

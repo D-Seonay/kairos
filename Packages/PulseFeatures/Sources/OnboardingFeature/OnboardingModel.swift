@@ -209,6 +209,8 @@ public final class OnboardingModel {
         return true
     }
 
+    /// Le brouillon est le profil entier, à l'onboarding seul jusqu'à `finish()` : il reste écrit par son `id` avec `save`, et non
+    /// avec `update`, qui s'appliquerait au profil de `load()`, c'est-à-dire à un profil terminé restauré depuis iCloud entre-temps.
     func saveDraft() async -> Bool {
         profile.updatedAt = environment.now()
         do {

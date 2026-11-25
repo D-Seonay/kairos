@@ -57,3 +57,57 @@ import Testing
     let context = ModelContext(repo.modelContainer)
     #expect(try context.fetchCount(FetchDescriptor<StoredProfile>()) == 2)
 }
+
+@Test func updateWithoutProfileWritesNothing() async throws {
+    let repo = SwiftDataProfileRepository(modelContainer: try TestContainer.make())
+    let result = try await repo.update { $0.heightCm = 180 }
+    #expect(result == nil)
+    #expect(try await repo.load() == nil)
+}
+
+@Test func updateChangesOnlyTheTransformedFields() async throws {
+    let repo = SwiftDataProfileRepository(modelContainer: try TestContainer.make())
+    try await repo.save(UserProfile(firstName: "Mathéo", heightCm: 180, createdAt: Fixed.t0, updatedAt: Fixed.t0))
+    let before = Date()
+    let result = try #require(try await repo.update { $0.weightKg = 75 })
+    let loaded = try #require(try await repo.load())
+    #expect(loaded.weightKg == 75 && loaded.firstName == "Mathéo" && loaded.heightCm == 180)
+    #expect(result.didChange && result.before.weightKg == nil && result.after == loaded && loaded.updatedAt >= before)
+}
+
+@Test func unchangedUpdateIsNotWritten() async throws {
+    let repo = SwiftDataProfileRepository(modelContainer: try TestContainer.make())
+    try await repo.save(UserProfile(heightCm: 180, createdAt: Fixed.t0, updatedAt: Fixed.t0))
+    let stored = try #require(try await repo.load())
+    let result = try #require(try await repo.update { $0.heightCm = 180 })
+    #expect(!result.didChange && result.after == stored)
+    #expect(try await repo.load()?.updatedAt == stored.updatedAt)
+}
+
+@Test func throwingUpdateWritesNothing() async throws {
+    struct Refused: Error {}
+    let repo = SwiftDataProfileRepository(modelContainer: try TestContainer.make())
+    try await repo.save(UserProfile(heightCm: 180, createdAt: Fixed.t0, updatedAt: Fixed.t0))
+    await #expect(throws: Refused.self) {
+        try await repo.update { profile in
+            profile.heightCm = 150
+            throw Refused()
+        }
+    }
+    #expect(try await repo.load()?.heightCm == 180)
+}
+
+/// Des mises à jour concurrentes de champs différents s'appliquent toutes : aucune ne repart d'une lecture périmée (issue #72).
+@Test func concurrentUpdatesOfDifferentFieldsAreAllKept() async throws {
+    let repo = SwiftDataProfileRepository(modelContainer: try TestContainer.make())
+    try await repo.save(UserProfile(createdAt: Fixed.t0, updatedAt: Fixed.t0))
+    try await withThrowingTaskGroup(of: Void.self) { group in
+        group.addTask { try await repo.update { $0.firstName = "Léa" } }
+        group.addTask { try await repo.update { $0.weightKg = 75 } }
+        group.addTask { try await repo.update { $0.barWeightKg = 15 } }
+        group.addTask { try await repo.update { $0.defaultRestSeconds = 120 } }
+        try await group.waitForAll()
+    }
+    let loaded = try #require(try await repo.load())
+    #expect(loaded.firstName == "Léa" && loaded.weightKg == 75 && loaded.barWeightKg == 15 && loaded.defaultRestSeconds == 120)
+}

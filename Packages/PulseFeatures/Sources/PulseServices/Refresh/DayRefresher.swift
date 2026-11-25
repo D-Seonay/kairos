@@ -108,14 +108,14 @@ public final class DayRefresher: Sendable {
     public func decideDeload(_ accepted: Bool) async throws {
         try await queue.run {
             let now = self.now()
-            guard var profile = try await self.profiles.load() else { return }
-            if accepted {
-                profile.deloadWeekStartedAt = now
-            } else {
-                profile.deloadDeclinedAt = now
+            try await self.profiles.update { profile in
+                if accepted {
+                    profile.deloadWeekStartedAt = now
+                } else {
+                    profile.deloadDeclinedAt = now
+                }
+                profile.updatedAt = now
             }
-            profile.updatedAt = now
-            try await self.profiles.save(profile)
         }
     }
 

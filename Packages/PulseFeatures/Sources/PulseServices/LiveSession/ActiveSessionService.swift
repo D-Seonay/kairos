@@ -148,11 +148,13 @@ public final class ActiveSessionService: Sendable {
     /// Paramètres arrive en M7). Sans profil, rien n'est enregistré.
     public func saveBarAndPlates(barKg: Double, platesKg: [Double]) async throws {
         try await queue.run {
-            guard var profile = try await self.profiles.load() else { return }
-            profile.barWeightKg = barKg
-            profile.availablePlatesKg = platesKg.filter { $0 > 0 }.sorted(by: >)
-            profile.updatedAt = self.now()
-            try await self.profiles.save(profile)
+            let now = self.now()
+            let plates = platesKg.filter { $0 > 0 }.sorted(by: >)
+            try await self.profiles.update { profile in
+                profile.barWeightKg = barKg
+                profile.availablePlatesKg = plates
+                profile.updatedAt = now
+            }
         }
     }
 

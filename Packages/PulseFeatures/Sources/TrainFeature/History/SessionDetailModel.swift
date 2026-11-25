@@ -113,17 +113,18 @@ public final class SessionDetailModel {
     public func saveAsRoutine() async throws -> (programID: UUID, dayID: UUID) {
         guard let session else { throw SessionDetailError.missing }
         guard canSaveAsRoutine else { throw SessionDetailError.nothingToSave }
-        guard var profile = try await environment.profiles.load() else { throw ProgramEditorError.noProfile }
+        guard let profile = try await environment.profiles.load() else { throw ProgramEditorError.noProfile }
         let now = environment.now()
         let existing = try await activeProgram(of: profile)
         let base = existing ?? ProgramEditor.emptyProgram(name: ProgramEditorModel.defaultProgramName, now: now)
         let routine = RoutineFromSession.day(from: session, directory: directory, order: base.days.count)
         let (program, dayID) = ProgramEditor.addDay(named: routineName(of: session), exercises: routine.exercises, to: base, now: now)
         try await environment.programs.save(program)
-        if profile.activeProgramID != program.id {
-            profile.activeProgramID = program.id
+        let programID = program.id
+        try await environment.profiles.update { profile in
+            guard profile.activeProgramID != programID else { return }
+            profile.activeProgramID = programID
             profile.updatedAt = now
-            try await environment.profiles.save(profile)
         }
         return (program.id, dayID)
     }

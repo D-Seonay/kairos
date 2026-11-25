@@ -13,6 +13,9 @@ private actor UnreadableProfileRepository: ProfileRepository {
     func load() async throws -> UserProfile? { throw Failure.unreadable }
     func save(_ profile: UserProfile) async throws {}
     func delete(id: UUID) async throws {}
+    func update(_ transform: @Sendable (inout UserProfile) throws -> Void) async throws -> ProfileUpdate? {
+        throw Failure.unreadable
+    }
 }
 
 /// PPL : Push lundi et jeudi, Pull mardi et vendredi, Legs mercredi ; `run` ajoute un footing le samedi.
