@@ -55,16 +55,11 @@ struct RunView: View {
                 RunLiveMetrics(snapshot: snapshot)
                 notices(snapshot)
                 RunAnnouncesToggle(model: model)
-                if let message = model.errorMessage {
-                    Text(message)
-                        .font(.footnote)
-                        .foregroundStyle(PulsePalette.signal)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
+                RunErrorLine(message: model.errorMessage)
             }
             .padding(PulseMetrics.spacing)
         }
-        .safeAreaInset(edge: .bottom, spacing: 0) { buttons(snapshot) }
+        .runActionBar { buttons(snapshot) }
     }
 
     // MARK: En-tête
@@ -132,8 +127,6 @@ struct RunView: View {
             .accessibilityIdentifier(RunIdentifiers.finishButton)
         }
         .disabled(model.isBusy)
-        .padding(.horizontal, PulseMetrics.spacing)
-        .padding(.vertical, 8)
     }
 }
 
