@@ -700,6 +700,86 @@
           }
         }
       }
+    },
+    "Au lit avant %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Au lit avant %@"
+          }
+        }
+      }
+    },
+    "Nuit courte hier (%@) et séance %@ demain : vise tes %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nuit courte hier (%@) et séance %@ demain : vise tes %@."
+          }
+        }
+      }
+    },
+    "Nuit courte hier (%@) : vise tes %@ cette nuit.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nuit courte hier (%@) : vise tes %@ cette nuit."
+          }
+        }
+      }
+    },
+    "Séance %@ demain : vise tes %@ de sommeil.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Séance %@ demain : vise tes %@ de sommeil."
+          }
+        }
+      }
+    },
+    "Pour tes %@ de sommeil avant le réveil de %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pour tes %@ de sommeil avant le réveil de %@."
+          }
+        }
+      }
+    },
+    "%lld min": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld min"
+          }
+        }
+      }
+    },
+    "%lld h": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld h"
+          }
+        }
+      }
+    },
+    "%lld h %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld h %@"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
