@@ -321,8 +321,8 @@ extension AppDependencies {
 
     /// Efface le magasin, les photos de corps et leur export, les préférences, les notifications, l'instantané du widget, les
     /// exports, le fichier GPX à partager et les rapports de diagnostic. Elle attend la fin d'un rafraîchissement en cours,
-    /// qui republierait l'instantané effacé. Le dépôt des photos de corps est celui du câblage, que lit aussi leur service : jamais un second sur le même
-    /// dossier.
+    /// qui republierait l'instantané effacé. Le dépôt des photos de corps est celui du câblage, que lit aussi leur service :
+    /// jamais un second sur le même dossier.
     private static func makeEraser(_ wiring: Wiring, container: ModelContainer, refresher: DayRefresher) -> any DataEraser {
         let store = SwiftDataEraser(container: container, defaultsSuite: wiring.defaultsSuite,
                                     defaultsDomain: wiring.defaultsSuite ?? Bundle.main.bundleIdentifier ?? "fr.seonay.pulse",
