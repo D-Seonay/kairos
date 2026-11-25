@@ -57,6 +57,11 @@ public struct ShareCardContent: Equatable, Sendable {
             .trimmingCharacters(in: .whitespacesAndNewlines)
         return cleaned.isEmpty ? "Pulse.png" : "Pulse - \(cleaned).png"
     }
+
+    /// Le nom du fichier de l'image sans fond : « Pulse - Push (sans fond).png ».
+    public var stickerFileName: String {
+        String(fileName.dropLast(".png".count)) + " (sans fond).png"
+    }
 }
 
 /// Un chiffre de la carte : « 4 250 » au-dessus de « KG SOULEVÉS ». `caption` est sa forme dans le texte partagé : « 4 250 kg ».

@@ -7,6 +7,7 @@ struct ShareHeroView: View {
     let ink: Color
     let muted: Color
     let isStory: Bool
+    var weight: Font.Weight = .thin
 
     var body: some View {
         VStack(spacing: 10) {
@@ -14,7 +15,7 @@ struct ShareHeroView: View {
                 .font(.system(size: isStory ? 26 : 20))
                 .foregroundStyle(Color(PulsePalette.goldRGBA))
             Text(value)
-                .font(.system(size: isStory ? 104 : 80, weight: .thin).monospacedDigit())
+                .font(.system(size: isStory ? 104 : 80, weight: weight).monospacedDigit())
                 .foregroundStyle(ink)
                 .lineLimit(1)
                 .minimumScaleFactor(0.4)

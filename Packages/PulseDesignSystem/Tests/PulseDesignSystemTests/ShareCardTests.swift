@@ -134,3 +134,95 @@ private func content(title: String = "Push", metrics: [ShareCardMetric] = [], vi
     let image = try #require(ShareCardRenderer.cgImage(content: content(), format: .story, photo: photo))
     #expect(image.width == 1_080)
 }
+
+// MARK: Sticker (sans fond)
+
+/// Le pixel (`x`, `y`) de `image`, compté depuis le haut, en RGBA prémultiplié.
+private func pixel(of image: CGImage, x: Int, y: Int) -> [UInt8] {
+    var pixel: [UInt8] = [0, 0, 0, 0]
+    pixel.withUnsafeMutableBytes { buffer in
+        guard let context = CGContext(data: buffer.baseAddress, width: 1, height: 1, bitsPerComponent: 8, bytesPerRow: 4,
+                                      space: CGColorSpaceCreateDeviceRGB(),
+                                      bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return }
+        context.draw(image, in: CGRect(x: -x, y: y - image.height + 1, width: image.width, height: image.height))
+    }
+    return pixel
+}
+
+/// L'opacité du pixel (`x`, `y`) de `image`, comptée depuis le haut.
+private func alpha(of image: CGImage, x: Int, y: Int) -> UInt8 {
+    pixel(of: image, x: x, y: y)[3]
+}
+
+@MainActor
+@Test func stickerIsTenEightyWideWithTransparentEdges() throws {
+    let image = try #require(ShareCardRenderer.stickerImage(content: .previewSession))
+    #expect(image.width == 1_080)
+    #expect(image.height > 0 && image.height < 1_920)
+    #expect(alpha(of: image, x: 0, y: 0) == 0)
+    #expect(alpha(of: image, x: image.width - 1, y: image.height - 1) == 0)
+    let png = try #require(ShareCardRenderer.png(image))
+    #expect(png.starts(with: [0x89, 0x50, 0x4E, 0x47]))
+}
+
+@MainActor
+@Test func everyVisualRendersASticker() throws {
+    for card in [ShareCardContent.previewSession, .previewRun, .previewRecord, .previewNight] {
+        let image = try #require(ShareCardRenderer.stickerImage(content: card))
+        #expect(image.width == 1_080)
+        #expect(alpha(of: image, x: 0, y: 0) == 0)
+        // De l'encre quelque part : une ligne au premier tiers traverse le titre ou les chiffres.
+        let inked = (0..<image.height).contains { y in
+            stride(from: 0, to: image.width, by: 8).contains { alpha(of: image, x: $0, y: y) > 0 }
+        }
+        #expect(inked)
+    }
+}
+
+@MainActor
+@Test func stickerHeightFollowsTheContent() throws {
+    let small = content(metrics: [ShareCardMetric(value: "18", label: "Séries")], visual: .none)
+    let tall = try #require(ShareCardRenderer.stickerImage(content: .previewSession))
+    let short = try #require(ShareCardRenderer.stickerImage(content: small))
+    #expect(short.height < tall.height)
+}
+
+@Test func stickerFileNameSaysSansFond() {
+    #expect(ShareCardContent.previewSession.stickerFileName == "Pulse - Push (sans fond).png")
+    #expect(content(title: "").stickerFileName == "Pulse (sans fond).png")
+}
+
+@Test func stickerKeyIgnoresTheFormat() {
+    #expect(RenderKey(format: .story, background: .transparent) == RenderKey(format: .post, background: .transparent))
+    #expect(RenderKey(format: .story, background: .pattern) != RenderKey(format: .post, background: .pattern))
+}
+
+@MainActor
+@Test func stickerMuscleMapIsDrawnInLightInk() throws {
+    let card = content(visual: .muscles([.chest: 4]))
+    let image = try #require(ShareCardRenderer.stickerImage(content: card))
+    // La silhouette occupe le milieu de l'image : la moyenne de ses pixels pleins doit être claire, pas noire.
+    var total = 0, count = 0
+    for y in stride(from: image.height * 35 / 100, to: image.height * 65 / 100, by: 6) {
+        for x in stride(from: 0, to: image.width, by: 6) {
+            let rgba = pixel(of: image, x: x, y: y)
+            guard rgba[3] == 255 else { continue }
+            total += (Int(rgba[0]) + Int(rgba[1]) + Int(rgba[2])) / 3
+            count += 1
+        }
+    }
+    #expect(count > 0)
+    #expect(total / max(count, 1) > 128)
+}
+
+@MainActor
+@Test func aCrowdedStickerStaysShorterThanAStory() throws {
+    let card = ShareCardContent(
+        eyebrow: "Séance", title: "Pectoraux, épaules et triceps lourds", subtitle: "mardi 24 novembre",
+        metrics: ShareCardContent.previewSession.metrics,
+        highlights: ["Développé couché à la barre : 82,5 kg", "Dips : 12 répétitions", "Développé militaire : 50 kg",
+                     "Écarté à la poulie : 25 kg", "Extension triceps : 30 kg"],
+        visual: .muscles([.chest: 4, .triceps: 3]))
+    let image = try #require(ShareCardRenderer.stickerImage(content: card))
+    #expect(image.height < 1_920, "\(image.height)")
+}
