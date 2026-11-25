@@ -41,11 +41,15 @@ extension RunSessionService {
     // MARK: Internes
 
     /// La fin d'une course interrompue, même règle que l'oubli : son dernier déplacement, sa dernière reprise ou son départ, s'il
-    /// précède le dernier point, car les points à l'arrêt ne prolongent pas la course. Sans point (localisation refusée, pas de
-    /// signal), la dernière écriture du brouillon. Rend aussi la course rejouée avec tous ses points.
+    /// précède le dernier point, car les points à l'arrêt ne prolongent pas la course. Sans point retenu (localisation refusée,
+    /// pas de signal, positions toutes trop imprécises), le GPS ne dit rien du déplacement : la course va jusqu'à sa dernière
+    /// activité connue, la dernière écriture du brouillon, tenue à jour au fil du temps. Rend aussi la course rejouée avec tous
+    /// ses points.
     static func interruptedEnd(of draft: RunDraft) -> (end: Date, builder: RunTrackBuilder) {
         let builder = RunTrackBuilder.replay(startedAt: draft.startedAt, points: draft.points, pauses: draft.pauses)
-        guard let last = draft.points.last?.timestamp else { return (draft.updatedAt, builder) }
+        guard let last = draft.points.last?.timestamp, !builder.accepted.isEmpty else {
+            return (max(draft.updatedAt, draft.startedAt), builder)
+        }
         let lastResume = draft.pauses.compactMap(\.end).max() ?? draft.startedAt
         let movement = max(builder.lastMovementAt ?? draft.startedAt, lastResume, draft.startedAt)
         return (min(movement, max(last, draft.startedAt)), builder)
