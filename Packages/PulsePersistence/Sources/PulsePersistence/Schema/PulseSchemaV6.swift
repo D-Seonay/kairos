@@ -16,7 +16,7 @@ public enum PulseSchemaV6: VersionedSchema {
     ]
 
     public static var models: [any PersistentModel.Type] {
-        PersistenceStack.syncedModels + localModels
+        PulseSchemaV7.syncedModels + localModels
     }
 }
 

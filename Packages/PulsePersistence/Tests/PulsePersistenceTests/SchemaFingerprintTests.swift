@@ -98,6 +98,20 @@ private let drift = "Un modèle partagé a changé : figer sa copie dans la vers
             "StoredRecoveryReading.remMinutes", "StoredRecoveryReading.unspecifiedMinutes"])
 }
 
+@Test func v8SchemaMatchesItsFingerprint() throws {
+    try checkFingerprint(of: Schema(versionedSchema: PulseSchemaV8.self), against: "schema-v8")
+}
+
+@Test func v8OnlyAddsTheFiveSleepSettings() {
+    let v7 = Set(SchemaFingerprint.lines(Schema(versionedSchema: PulseSchemaV7.self)))
+    let v8 = Set(SchemaFingerprint.lines(Schema(versionedSchema: PulseSchemaV8.self)))
+    #expect(v7.subtracting(v8).isEmpty)
+    let added = v8.subtracting(v7)
+    #expect(Set(added.compactMap { $0.split(separator: ":").first.map(String.init) })
+        == ["StoredProfile.bedtimeReminderEnabled", "StoredProfile.bedtimeReminderLeadMinutes",
+            "StoredProfile.sleepGoalMinutes", "StoredProfile.weekdayWakeMinutes", "StoredProfile.weekendWakeMinutes"])
+}
+
 @Test func fingerprintNamesTheInverseOfEachRelationship() {
     let lines = SchemaFingerprint.lines(Schema(versionedSchema: PulseSchemaV2.self))
     #expect(lines.contains { $0.hasPrefix("StoredProgram.days -> StoredRoutineDay") && $0.contains("inverse: program") })

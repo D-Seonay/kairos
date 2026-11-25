@@ -31,6 +31,11 @@ public final class StoredProfile {
     public var morningScoreDeadlineMinutes: Int?
     public var supplementRemindersEnabled: Bool = true
     public var restTimerNotificationEnabled: Bool = true
+    public var sleepGoalMinutes: Int?
+    public var weekdayWakeMinutes: Int?
+    public var weekendWakeMinutes: Int?
+    public var bedtimeReminderEnabled: Bool = false
+    public var bedtimeReminderLeadMinutes: Int?
     public var onboardingCompletedAt: Date?
     public var activeProgramID: UUID?
     public var deloadWeekStartedAt: Date?
@@ -73,6 +78,11 @@ public final class StoredProfile {
         morningScoreDeadlineMinutes = profile.morningScoreDeadlineMinutes
         supplementRemindersEnabled = profile.supplementRemindersEnabled
         restTimerNotificationEnabled = profile.restTimerNotificationEnabled
+        sleepGoalMinutes = profile.sleepGoalMinutes
+        weekdayWakeMinutes = profile.weekdayWakeMinutes
+        weekendWakeMinutes = profile.weekendWakeMinutes
+        bedtimeReminderEnabled = profile.bedtimeReminderEnabled
+        bedtimeReminderLeadMinutes = profile.bedtimeReminderLeadMinutes
         onboardingCompletedAt = profile.onboardingCompletedAt
         activeProgramID = profile.activeProgramID
         deloadWeekStartedAt = profile.deloadWeekStartedAt
@@ -97,6 +107,8 @@ public final class StoredProfile {
             defaultRestSeconds: defaultRestSeconds, autoWarmupEnabled: autoWarmupEnabled, theme: .stored(theme, default: .amber),
             morningScoreNotification: morningScoreNotification, morningScoreDeadlineMinutes: morningScoreDeadlineMinutes,
             supplementRemindersEnabled: supplementRemindersEnabled, restTimerNotificationEnabled: restTimerNotificationEnabled,
+            sleepGoalMinutes: sleepGoalMinutes, weekdayWakeMinutes: weekdayWakeMinutes, weekendWakeMinutes: weekendWakeMinutes,
+            bedtimeReminderEnabled: bedtimeReminderEnabled, bedtimeReminderLeadMinutes: bedtimeReminderLeadMinutes,
             onboardingCompletedAt: onboardingCompletedAt, activeProgramID: activeProgramID,
             deloadWeekStartedAt: deloadWeekStartedAt, deloadDeclinedAt: deloadDeclinedAt, createdAt: createdAt, updatedAt: updatedAt)
     }

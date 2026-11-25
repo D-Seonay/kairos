@@ -1,3 +1,5 @@
+import Foundation
+import PulseDomain
 import SwiftData
 
 /// Septième version (phases de sommeil) : `StoredRecoveryReading`, local, gagne les minutes de léger, de paradoxal, d'endormi
@@ -7,7 +9,58 @@ import SwiftData
 public enum PulseSchemaV7: VersionedSchema {
     public static let versionIdentifier = Schema.Version(7, 0, 0)
 
+    /// Les 17 modèles synchronisés, figés en V8 : `StoredProfile`, qui gagne les réglages de sommeil en V8, par sa copie figée.
+    static let syncedModels: [any PersistentModel.Type] = [
+        PulseSchemaV7.StoredProfile.self, StoredProgram.self, StoredRoutineDay.self, StoredRoutineExercise.self,
+        StoredUserExercise.self, StoredWorkoutSession.self, StoredWorkoutSet.self, StoredScheduledDay.self, StoredDailyRecovery.self,
+        StoredCheckIn.self, StoredSupplement.self, StoredSupplementIntake.self, StoredBodyMeasurement.self, StoredPersonalRecord.self,
+        StoredExerciseSettings.self, StoredRunTrack.self, StoredSessionPhoto.self
+    ]
+
     public static var models: [any PersistentModel.Type] {
-        PersistenceStack.syncedModels + PersistenceStack.localModels
+        syncedModels + PersistenceStack.localModels
+    }
+}
+
+extension PulseSchemaV7 {
+    /// Copie figée de `StoredProfile` en V7 : ne pas modifier.
+    @Model
+    public final class StoredProfile {
+        public var id: UUID = UUID()
+        public var firstName: String?
+        public var sex: String = Sex.unspecified.rawValue
+        public var birthDate: Date?
+        public var heightCm: Double?
+        public var weightKg: Double?
+        public var strengthLevel: String = TrainingLevel.beginner.rawValue
+        public var runningLevel: String = TrainingLevel.beginner.rawValue
+        public var focus: Double = 0.5
+        public var trainingDaysPerWeek: Int = 3
+        public var restWeekdays: Data?
+        public var equipmentAccess: String = EquipmentAccess.fullGym.rawValue
+        public var painAreas: Data?
+        public var weightUnit: String = WeightUnit.kg.rawValue
+        public var adaptationEnabled: Bool = true
+        public var antiInterferenceRulesDisabled: Data?
+        public var upperIncrementKg: Double = 2.5
+        public var lowerIncrementKg: Double = 5
+        public var barWeightKg: Double = 20
+        public var availablePlatesKg: Data?
+        public var defaultRestSeconds: Int = 90
+        public var autoWarmupEnabled: Bool = true
+        public var theme: String = Theme.amber.rawValue
+        public var morningScoreNotification: Bool = true
+        public var morningScoreDeadlineMinutes: Int?
+        public var supplementRemindersEnabled: Bool = true
+        public var restTimerNotificationEnabled: Bool = true
+        public var onboardingCompletedAt: Date?
+        public var activeProgramID: UUID?
+        public var deloadWeekStartedAt: Date?
+        public var deloadDeclinedAt: Date?
+        public var createdAt: Date = Date()
+        public var updatedAt: Date = Date()
+        public var deletedAt: Date?
+
+        public init() {}
     }
 }

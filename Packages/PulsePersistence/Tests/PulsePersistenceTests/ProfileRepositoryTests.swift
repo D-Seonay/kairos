@@ -21,6 +21,24 @@ import Testing
     #expect(try context.fetchCount(FetchDescriptor<StoredProfile>()) == 1)
 }
 
+@Test func saveKeepsTheSleepSettings() async throws {
+    let repo = SwiftDataProfileRepository(modelContainer: try TestContainer.make())
+    try await repo.save(UserProfile(createdAt: Fixed.t0, updatedAt: Fixed.t0))
+    let fresh = try #require(try await repo.load())
+    #expect(fresh.sleepGoalMinutes == nil && fresh.weekdayWakeMinutes == nil && fresh.weekendWakeMinutes == nil)
+    #expect(fresh.bedtimeReminderEnabled == false && fresh.bedtimeReminderLeadMinutes == nil)
+    var profile = fresh
+    profile.sleepGoalMinutes = 450
+    profile.weekdayWakeMinutes = 420
+    profile.weekendWakeMinutes = 540
+    profile.bedtimeReminderEnabled = true
+    profile.bedtimeReminderLeadMinutes = 45
+    try await repo.save(profile)
+    let loaded = try #require(try await repo.load())
+    #expect(loaded.sleepGoalMinutes == 450 && loaded.weekdayWakeMinutes == 420 && loaded.weekendWakeMinutes == 540)
+    #expect(loaded.bedtimeReminderEnabled && loaded.bedtimeReminderLeadMinutes == 45)
+}
+
 @Test func loadPrefersOldestProfileWhenDuplicatesExist() async throws {   // Review Focus 1
     let repo = SwiftDataProfileRepository(modelContainer: try TestContainer.make())
     let newer = UserProfile(createdAt: Fixed.t2, updatedAt: Fixed.t2)

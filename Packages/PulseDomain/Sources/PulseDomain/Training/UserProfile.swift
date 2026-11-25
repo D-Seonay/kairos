@@ -82,6 +82,16 @@ public struct UserProfile: Sendable, Equatable, Codable, Identifiable {
     public var morningScoreDeadlineMinutes: Int?
     public var supplementRemindersEnabled: Bool
     public var restTimerNotificationEnabled: Bool
+    /// Durée de sommeil visée, en minutes. Nulle tant qu'elle n'est pas choisie : `SleepGoal.minutes(of:)` vise alors 8 h.
+    public var sleepGoalMinutes: Int?
+    /// Heure de lever en semaine, en minutes après minuit. Nulle tant qu'elle n'est pas renseignée.
+    public var weekdayWakeMinutes: Int?
+    /// Heure de lever le week-end, en minutes après minuit. Nulle tant qu'elle n'est pas renseignée.
+    public var weekendWakeMinutes: Int?
+    /// Rappel de coucher, coupé par défaut.
+    public var bedtimeReminderEnabled: Bool
+    /// Avance du rappel sur l'heure de coucher, en minutes. Nulle tant qu'elle n'est pas choisie.
+    public var bedtimeReminderLeadMinutes: Int?
     public var onboardingCompletedAt: Date?
     public var activeProgramID: UUID?
     public var deloadWeekStartedAt: Date?
@@ -117,6 +127,11 @@ public struct UserProfile: Sendable, Equatable, Codable, Identifiable {
         morningScoreDeadlineMinutes: Int? = nil,
         supplementRemindersEnabled: Bool = true,
         restTimerNotificationEnabled: Bool = true,
+        sleepGoalMinutes: Int? = nil,
+        weekdayWakeMinutes: Int? = nil,
+        weekendWakeMinutes: Int? = nil,
+        bedtimeReminderEnabled: Bool = false,
+        bedtimeReminderLeadMinutes: Int? = nil,
         onboardingCompletedAt: Date? = nil,
         activeProgramID: UUID? = nil,
         deloadWeekStartedAt: Date? = nil,
@@ -151,6 +166,11 @@ public struct UserProfile: Sendable, Equatable, Codable, Identifiable {
         self.morningScoreDeadlineMinutes = morningScoreDeadlineMinutes
         self.supplementRemindersEnabled = supplementRemindersEnabled
         self.restTimerNotificationEnabled = restTimerNotificationEnabled
+        self.sleepGoalMinutes = sleepGoalMinutes
+        self.weekdayWakeMinutes = weekdayWakeMinutes
+        self.weekendWakeMinutes = weekendWakeMinutes
+        self.bedtimeReminderEnabled = bedtimeReminderEnabled
+        self.bedtimeReminderLeadMinutes = bedtimeReminderLeadMinutes
         self.onboardingCompletedAt = onboardingCompletedAt
         self.activeProgramID = activeProgramID
         self.deloadWeekStartedAt = deloadWeekStartedAt
