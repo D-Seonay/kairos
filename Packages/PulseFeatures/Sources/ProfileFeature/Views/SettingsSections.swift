@@ -214,14 +214,13 @@ struct SettingsTextField: View {
 
 // MARK: - Apple Santé
 
-/// Une ligne par type lu, la dernière lecture, « Relire maintenant » et le diagnostic. HealthKit ne dit pas si la lecture est
-/// refusée : l'écran donne la dernière donnée lue, jamais une autorisation (spec M7 §14).
+/// Une ligne par type lu, la dernière lecture et « Relire maintenant » ; le diagnostic est dans « À propos ». HealthKit ne dit
+/// pas si la lecture est refusée : l'écran donne la dernière donnée lue, jamais une autorisation (spec M7 §14).
 struct HealthSettingsSection: View {
     /// L'ordre de la spec : le sommeil et la variabilité d'abord, le corps à la fin.
     static let order: [HealthSampleKind] = [.sleep, .sdnn, .restingHeartRate, .run, .ride, .bodyMass, .bodyFat]
 
     let model: SettingsModel
-    let screens: ProfileAppScreens
 
     var body: some View {
         Section {
@@ -260,13 +259,6 @@ struct HealthSettingsSection: View {
             .onChange(of: model.isRefreshingHealth) { _, isRefreshing in
                 PulseAnnouncement.post(isRefreshing ? ProfileText.healthReadStarted : ProfileText.healthReadFinished)
             }
-            NavigationLink {
-                screens.healthDiagnostics()
-            } label: {
-                Text(String(localized: "Diagnostic", bundle: .module))
-                    .foregroundStyle(PulsePalette.text)
-            }
-            .frame(minHeight: 44)
         } header: {
             Text(String(localized: "Apple Santé", bundle: .module))
         } footer: {

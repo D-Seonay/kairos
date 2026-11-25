@@ -1,0 +1,136 @@
+{
+  "sourceLanguage" : "fr",
+  "strings" : {
+    "Cocher un complément dans ${applicationName}" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cocher un complément dans ${applicationName}"
+          }
+        }
+      }
+    },
+    "Comment je récupère selon ${applicationName}" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comment je récupère selon ${applicationName}"
+          }
+        }
+      }
+    },
+    "Courir avec ${applicationName}" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Courir avec ${applicationName}"
+          }
+        }
+      }
+    },
+    "Démarrer la séance du jour dans ${applicationName}" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Démarrer la séance du jour dans ${applicationName}"
+          }
+        }
+      }
+    },
+    "Démarrer ma séance avec ${applicationName}" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Démarrer ma séance avec ${applicationName}"
+          }
+        }
+      }
+    },
+    "J'ai pris ${supplement} avec ${applicationName}" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "J'ai pris ${supplement} avec ${applicationName}"
+          }
+        }
+      }
+    },
+    "J'ai pris ma ${supplement} dans ${applicationName}" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "J'ai pris ma ${supplement} dans ${applicationName}"
+          }
+        }
+      }
+    },
+    "J'ai pris mon ${supplement} dans ${applicationName}" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "J'ai pris mon ${supplement} dans ${applicationName}"
+          }
+        }
+      }
+    },
+    "Lance ma séance ${applicationName}" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lance ma séance ${applicationName}"
+          }
+        }
+      }
+    },
+    "Lance une course ${applicationName}" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lance une course ${applicationName}"
+          }
+        }
+      }
+    },
+    "Lancer une course avec ${applicationName}" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lancer une course avec ${applicationName}"
+          }
+        }
+      }
+    },
+    "Mon score de récupération ${applicationName}" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mon score de récupération ${applicationName}"
+          }
+        }
+      }
+    },
+    "Quel est mon score de récupération dans ${applicationName}" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quel est mon score de récupération dans ${applicationName}"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
