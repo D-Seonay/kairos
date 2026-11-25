@@ -65,4 +65,10 @@ public actor SessionPhotoService {
     public func delete(photoID: UUID) async throws {
         try await repository.delete(photoID: photoID)
     }
+
+    /// Supprime toutes les photos de la séance (suppression logique, l'image est effacée). Elle passe dans la file des ajouts :
+    /// un ajout déjà commencé finit d'abord, puis il est emporté avec les autres.
+    public func deleteAll(sessionID: UUID) async throws {
+        try await queue.run { try await self.repository.deleteAll(sessionID: sessionID) }
+    }
 }

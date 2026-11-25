@@ -331,3 +331,15 @@ public final class LiveSessionModel {
         String(localized: "Pulse n'a pas pu enregistrer ta séance.", bundle: .module)
     }
 }
+
+// MARK: - Abandon
+
+extension LiveSessionModel {
+    /// Après un abandon : une séance abandonnée sans série validée n'est pas enregistrée (`ActiveSessionService.abandon`), et
+    /// ses photos ne doivent pas rester dans iCloud. L'abandon les a supprimées, mais un ajout encore en cours pouvait en écrire
+    /// une après lui : le modèle des photos arrête ses ajouts et supprime ce qui reste. Une séance enregistrée garde ses photos.
+    func discardPhotosIfUnsaved(after abandoned: WorkoutSession) async {
+        guard abandoned.sets.isEmpty else { return }
+        await photos?.discard()
+    }
+}

@@ -181,7 +181,8 @@ public final class FinishFlowModel {
             await model.load()
         case .abandon:
             do {
-                _ = try await live.environment.service.abandon(endedAt: endedAt)
+                let abandoned = try await live.environment.service.abandon(endedAt: endedAt)
+                await live.discardPhotosIfUnsaved(after: abandoned)
                 onFinished()
             } catch {
                 errorMessage = String(localized: "Pulse n'a pas pu abandonner la séance.", bundle: .module)
