@@ -1,6 +1,7 @@
 import Foundation
 import PulseDomain
 import PulseServices
+import PulseTestSupport
 import Testing
 
 struct BodyPhotoServiceTests {

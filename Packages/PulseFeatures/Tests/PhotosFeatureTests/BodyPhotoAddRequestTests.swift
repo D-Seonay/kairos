@@ -2,6 +2,7 @@ import Foundation
 @testable import PhotosFeature
 import PulseDomain
 import PulseServices
+import PulseTestSupport
 import Testing
 
 /// La demande d'ajout : le jour qu'une case vide complète, et la pose que « + » propose.

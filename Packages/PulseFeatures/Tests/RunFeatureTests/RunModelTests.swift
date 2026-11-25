@@ -2,6 +2,7 @@ import Foundation
 import PhotosFeature
 import PulseDomain
 import PulseServices
+import PulseTestSupport
 @testable import RunFeature
 import Testing
 
