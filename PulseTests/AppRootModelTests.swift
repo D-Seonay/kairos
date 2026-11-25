@@ -85,4 +85,50 @@ import Testing
         #expect(await dependencies.liveSession.current() == nil)
         #expect(await activity.endAllCalls.last == .some(nil))
     }
+    // MARK: Course (revue V2a : câblage côté app)
+
+    @Test func tabsCreateTheRunAndHandItToTheLiveActivityButtons() async throws {
+        let dependencies = AppDependencies.testing()
+        try await dependencies.profiles.save(Self.completedProfile())
+        let intents = SessionIntentWiring(service: dependencies.liveSession, runService: dependencies.run.service)
+        let model = AppRootModel(dependencies: dependencies, sessionIntents: intents)
+        await model.load()
+        let run = try #require(model.run)
+        #expect(intents.runCoordinator === run)
+        #expect(intents.coordinator === model.liveSession)
+    }
+
+    @Test func launchFollowsTheRunningRun() async throws {
+        let dependencies = AppDependencies.testing()
+        try await dependencies.profiles.save(Self.completedProfile())
+        let snapshot = try await dependencies.run.service.start(.free())
+        let model = AppRootModel(dependencies: dependencies)
+        await model.load()
+        #expect(model.run?.current?.sessionID == snapshot.sessionID)
+    }
+
+    @Test func erasingDropsTheRunAndDetachesTheButtons() async throws {
+        let dependencies = AppDependencies.testing()
+        try await dependencies.profiles.save(Self.completedProfile())
+        let intents = SessionIntentWiring(service: dependencies.liveSession, runService: dependencies.run.service)
+        let model = AppRootModel(dependencies: dependencies, sessionIntents: intents)
+        await model.load()
+        #expect(model.run != nil)
+        try await dependencies.eraser.eraseEverything(options: EraseOptions(includeAppleHealth: false))
+        await model.dataErased()
+        #expect(model.run == nil)
+        #expect(intents.runCoordinator == nil && intents.coordinator == nil)
+    }
+
+    @Test func erasingDiscardsTheRunningRun() async throws {
+        let dependencies = AppDependencies.testing()
+        try await dependencies.profiles.save(Self.completedProfile())
+        _ = try await dependencies.run.service.start(.free())
+        let model = AppRootModel(dependencies: dependencies)
+        await model.load()
+        try await dependencies.eraser.eraseEverything(options: EraseOptions(includeAppleHealth: false))
+        await model.dataErased()
+        #expect(await dependencies.run.service.current() == nil)
+        #expect(await dependencies.run.service.recoveryOffer() == nil)
+    }
 }
