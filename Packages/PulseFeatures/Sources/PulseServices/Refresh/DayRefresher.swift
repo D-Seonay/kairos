@@ -5,7 +5,7 @@ import Synchronization
 /// Le seul passage qui lit Apple Santé, met le score du jour à jour, décrit la séance, publie l'instantané du widget et,
 /// en arrière-plan, envoie la notification du matin. L'écran d'accueil (premier plan) et la livraison Apple Santé
 /// (arrière-plan) l'appellent tous deux : ses opérations passent l'une après l'autre par la même file,
-/// pour que deux livraisons rapprochées n'annoncent pas deux fois le même score.
+/// pour que deux livraisons rapprochées n'annoncent pas deux fois le même score. Les écritures du Planning y passent aussi.
 public final class DayRefresher: Sendable {
     public enum Origin: Sendable {
         case foreground, background
@@ -33,7 +33,9 @@ public final class DayRefresher: Sendable {
     private let relocation: (any HealthDataRelocating)?
     private let calendar: Calendar
     private let now: @Sendable () -> Date
-    private let queue = SerialTaskQueue()
+    /// La file des opérations du passage. C'est celle des écritures de `planning` quand il est fourni : un déplacement ou un
+    /// refus dans le Planning attend la fin du passage en cours, et le passage suivant attend la fin du déplacement.
+    private let queue: SerialTaskQueue
     /// Vrai après une suppression totale, tant qu'aucun profil n'a terminé l'onboarding : une passe ne relit alors ni Apple
     /// Santé ni ne republie le widget (spec M4 §20).
     private let erased = Mutex(false)
@@ -67,6 +69,7 @@ public final class DayRefresher: Sendable {
         self.bodyHistory = bodyHistory
         self.antiInterference = antiInterference
         self.planning = planning
+        self.queue = planning?.writes ?? SerialTaskQueue()
         self.relocation = relocation
         self.calendar = calendar
         self.now = now

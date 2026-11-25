@@ -60,9 +60,15 @@ struct AttendanceStatsTests {
         #expect(levels.sorted() == [1, 1])
     }
 
-    @Test func matrixOnlyShowsCountedSessions() {
-        let sessions = [session(daysAgo: 1, kind: .ride), session(daysAgo: 2, status: .abandoned)]
-        #expect(stats(sessions).weeks.flatMap { $0 }.allSatisfy { $0.level == 0 })
+    /// Le vélo apparaît dans la matrice sans compter pour la série ni pour les tuiles ; un abandon n'apparaît pas.
+    @Test func matrixShowsRidesWithoutCountingThemForTheStreak() {
+        let sessions = [session(daysAgo: 1, kind: .ride), session(daysAgo: 2, status: .abandoned),
+                        session(daysAgo: 3, kind: .ride, status: .abandoned)]
+        let result = stats(sessions)
+        let active = result.weeks.flatMap { $0 }.filter { $0.level > 0 }
+        #expect(active.map(\.date) == [calendar.startOfDay(for: day(1))])
+        #expect(result.streak.weeks.allSatisfy { $0.count < 1 } && result.sessionsTotal == 0 && result.sessionsInPeriod == 0)
+        #expect(result.firstSession == nil)
     }
 
     @Test func usualHourIsTheMostFrequent() {

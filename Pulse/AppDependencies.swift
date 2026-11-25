@@ -253,18 +253,18 @@ struct AppDependencies: Sendable {
         let bodyMeasurements = SwiftDataBodyMeasurementRepository(modelContainer: container)
         let planning = PlanningService(profiles: profiles, programs: programs, workouts: workouts, scheduledDays: scheduledDays,
                                        calendar: calendar, now: wiring.now)
-        let refresher = makeRefresher(wiring, stores: RefresherStores(
+        let stores = RefresherStores(
             profiles: profiles, programs: programs, recovery: recovery, storedWorkouts: storedWorkouts, scheduledDays: scheduledDays,
             userExercises: userExercises, bodyMeasurements: bodyMeasurements, healthCache: healthCache, activity: activity,
-            planning: planning, relocation: SwiftDataHealthDataRelocation(modelContainer: container)), scores: scores)
+            planning: planning, relocation: SwiftDataHealthDataRelocation(modelContainer: container))
+        let refresher = makeRefresher(wiring, stores: stores, scores: scores)
         let personalRecords = SwiftDataPersonalRecordRepository(modelContainer: container)
         let records = RecordsService(workouts: workouts, records: personalRecords, userExercises: userExercises,
                                      library: content, now: wiring.now)
         let hevyMappings = UserDefaultsHevyMappingStore(suiteName: wiring.defaultsSuite)
         let activeSession = SwiftDataActiveSessionStore(modelContainer: container)
         let exerciseSettings = SwiftDataExerciseSettingsRepository(modelContainer: container)
-        let supplements = SwiftDataSupplementRepository(modelContainer: container)
-        let supplementService = makeSupplements(wiring, supplements, programs: programs, profiles: profiles, workouts: workouts)
+        let (supplements, supplementService) = makeSupplements(wiring, container: container, stores: stores, workouts: workouts)
         let photos = PhotoDependencies(wiring, container: container, measurements: bodyMeasurements)
         let liveSession = ActiveSessionService(
             store: activeSession, workouts: workouts, profiles: profiles, settings: exerciseSettings, userExercises: userExercises,
@@ -356,12 +356,16 @@ extension AppDependencies {
 // MARK: - Compléments
 
 extension AppDependencies {
-    /// Le service des compléments, avec les rappels et l'écriture Apple Santé du câblage.
-    private static func makeSupplements(_ wiring: Wiring, _ supplements: any SupplementRepository, programs: any ProgramRepository,
-                                        profiles: any ProfileRepository, workouts: any WorkoutRepository) -> SupplementService {
-        SupplementService(supplements: supplements, programs: programs, profiles: profiles, workouts: workouts,
-                          reminders: wiring.supplementReminders, health: wiring.supplementHealth, calendar: wiring.calendar,
-                          now: wiring.now)
+    /// Le dépôt des compléments et leur service, avec les rappels et l'écriture Apple Santé du câblage. Le service lit le profil,
+    /// le programme et la semaine datée du passage du jour, et les séances sans doublons.
+    private static func makeSupplements(_ wiring: Wiring, container: ModelContainer, stores: RefresherStores,
+                                        workouts: any WorkoutRepository) -> (SwiftDataSupplementRepository, SupplementService) {
+        let supplements = SwiftDataSupplementRepository(modelContainer: container)
+        let service = SupplementService(
+            supplements: supplements, programs: stores.programs, profiles: stores.profiles, workouts: workouts,
+            reminders: wiring.supplementReminders, health: wiring.supplementHealth, scheduledDays: stores.scheduledDays,
+            calendar: wiring.calendar, now: wiring.now)
+        return (supplements, service)
     }
 
     /// Les réglages du profil. Seuls les rappels de compléments dépendent d'un réglage enregistré : le score du matin, la fin du

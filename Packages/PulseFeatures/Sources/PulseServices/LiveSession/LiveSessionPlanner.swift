@@ -42,24 +42,27 @@ public enum LiveSessionPlanner {
         return LiveSession(title: launch.title, startedAt: launch.past?.start ?? now, lastActionAt: now,
                            programID: launch.programID, routineDayID: launch.day?.id, appliedAdjustments: applied,
                            refusedAdjustments: launch.refused, policy: launch.policy, exercises: exercises,
-                           pastEndedAt: launch.past?.end)
+                           pastEndedAt: launch.past?.end, loadFactor: launch.loadFactor == 1 ? nil : launch.loadFactor,
+                           deloadStartedAt: launch.historyLimit)
     }
     // swiftlint:enable function_parameter_count
 
     // swiftlint:disable function_parameter_count
     /// Un exercice ajouté en séance : 3 séries de 8 à 12 répétitions (30 à 60 s s'il est tenu), au repos par défaut de
     /// l'exercice, sinon à celui du profil. `workedMuscles` : les muscles principaux des exercices déjà dans la séance.
-    /// `routineExercise` remplace ces séries par défaut (le remplacement reprend celles de l'exercice remplacé).
+    /// `routineExercise` remplace ces séries par défaut (le remplacement reprend celles de l'exercice remplacé). `loadFactor`
+    /// baisse les charges externes proposées comme au lancement : 0,9 dans une séance lancée en décharge.
     public static func exercise(_ reference: ExerciseReference, directory: ExerciseDirectory, history: [WorkoutSet],
                                 settings: ExerciseSettings?, profile: UserProfile?, policy: ProgressionPolicy,
-                                workedMuscles: Set<Muscle> = [], routineExercise: RoutineExercise? = nil) -> LiveExercise {
+                                workedMuscles: Set<Muscle> = [], routineExercise: RoutineExercise? = nil,
+                                loadFactor: Double = 1) -> LiveExercise {
         let info = directory.info(reference)
         let range = info?.tracksDuration == true ? addedHoldRange : addedRepRange
         let restSeconds = info?.defaultRestSeconds ?? profile?.defaultRestSeconds ?? fallbackRestSeconds
         let routineExercise = routineExercise ?? RoutineExercise(
             order: 0, exercise: reference, sets: addedSetCount, repsMin: range.lowerBound, repsMax: range.upperBound,
             targetRPE: addedTargetRPE, restSeconds: restSeconds)
-        let context = Context(directory: directory, profile: profile, policy: policy)
+        let context = Context(directory: directory, profile: profile, policy: policy, loadFactor: loadFactor)
         return build(routineExercise, planned: nil, lastSets: history, settings: settings, context: context,
                      workedMuscles: workedMuscles).exercise
     }

@@ -106,4 +106,52 @@ struct DeloadTests {
         #expect(session.exercises.first?.sets.map(\.proposed.weightKg) == [90, 90],
                 "3 séries moins 40 %, à 100 kg d'avant la décharge × 0,9, pas 81")
     }
+
+    /// Le pec deck : 50 kg avant la décharge, 40 pendant. Ajouté ou remplaçant, il part de 50 kg baissés de 10 %, même
+    /// après une relance : ni 40 (la dernière séance, sans baisse), ni 36 (baissé deux fois).
+    @Test func addedAndReplacingExercisesTakeTheDeloadLoads() async throws {
+        let fixture = ActiveSessionFixture()
+        let before = TestClock.date("2026-10-26T08:00")
+        let during = TestClock.date("2026-10-30T08:00")
+        for (date, weight) in [(before, 50.0), (during, 40.0)] {
+            try await fixture.workouts.save(WorkoutSession(
+                startedAt: date, kind: .strength, source: .pulse, status: .completed, title: "Push",
+                sets: (0..<3).map { _ in LiveFixtures.done(LiveFixtures.pecDeck, weight, 12) }, createdAt: date, updatedAt: date))
+        }
+        let day = LiveFixtures.day([LiveFixtures.exercise(LiveFixtures.bench, sets: 3)])
+        let launch = SessionLaunch.routine(day, programID: nil, recovery: nil, originalChosen: false, profile: LiveFixtures.profile(),
+                                           deload: .active(since: TestClock.date("2026-10-29T08:00"), until: .distantFuture))
+        let started = try await fixture.makeService().start(launch)
+        #expect(started.addedLoadFactor == 0.9 && started.proposalHistoryLimit == TestClock.date("2026-10-29T08:00"))
+
+        let relaunched = fixture.makeService()
+        let added = try await relaunched.newExercises([LiveFixtures.pecDeck])
+        #expect(added.first?.sets.map(\.proposed.weightKg) == [45, 45, 45], "50 kg d'avant la décharge × 0,9")
+        let bench = try #require(started.exercises.first)
+        let replacing = try await relaunched.replacement(for: bench.id, with: LiveFixtures.pecDeck, reason: .machineBusy)
+        #expect(replacing?.sets.filter { $0.setType != .warmup }.map(\.proposed.weightKg) == [45, 45])
+    }
+
+    /// Rien de fait pendant la décharge : l'exercice ajouté part de 50 kg, baissés de 10 %.
+    @Test func anExerciseAddedEarlyInTheDeloadIsLowered() async throws {
+        let fixture = ActiveSessionFixture()
+        try await fixture.seedHistory((0..<3).map { _ in LiveFixtures.done(LiveFixtures.pecDeck, 50, 12) })
+        let launch = SessionLaunch.routine(LiveFixtures.day([LiveFixtures.exercise(LiveFixtures.bench)]), programID: nil,
+                                           recovery: nil, originalChosen: false, profile: LiveFixtures.profile(),
+                                           deload: .active(since: TestClock.date("2026-10-29T08:00"), until: .distantFuture))
+        _ = try await fixture.makeService().start(launch)
+        let added = try await fixture.makeService().newExercises([LiveFixtures.pecDeck])
+        #expect(added.first?.sets.map(\.proposed.weightKg) == [45, 45, 45], "50 kg × 0,9")
+    }
+
+    @Test func outsideADeloadAddedExercisesKeepTheirLoads() async throws {
+        let fixture = ActiveSessionFixture()
+        try await fixture.seedHistory((0..<3).map { _ in LiveFixtures.done(LiveFixtures.pecDeck, 50, 12) })
+        let launch = SessionLaunch.routine(LiveFixtures.day([LiveFixtures.exercise(LiveFixtures.bench)]), programID: nil,
+                                           recovery: nil, originalChosen: false, profile: LiveFixtures.profile())
+        let started = try await fixture.makeService().start(launch)
+        #expect(started.loadFactor == nil && started.deloadStartedAt == nil)
+        let added = try await fixture.makeService().newExercises([LiveFixtures.pecDeck])
+        #expect(added.first?.sets.allSatisfy { ($0.proposed.weightKg ?? 0) >= 50 } == true)
+    }
 }
