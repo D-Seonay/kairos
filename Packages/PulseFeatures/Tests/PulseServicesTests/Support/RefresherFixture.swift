@@ -104,6 +104,8 @@ struct RefresherFixture {
     let measurements = InMemoryBodyMeasurementRepository()
     let clock: MutableClock
     let refresher: DayRefresher
+    /// Le service du Planning donné au passage, avec `planning` : ses écritures passent par la file du passage.
+    let planningService: PlanningService?
 
     /// Sans `adopt`, il n'y a ni profil ni programme. Avec `gate`, chaque notification planifiée attend que la porte s'ouvre ;
     /// avec `publishGate`, chaque publication de l'instantané. Avec `planning`, le passage applique les règles anti-interférence
@@ -133,6 +135,7 @@ struct RefresherFixture {
             userExercises: InMemoryUserExerciseRepository(), library: .bundled, calendar: calendar, now: { clock.now }) : nil
         let planningService = planning ? PlanningService(profiles: profiles, programs: programs, workouts: workouts,
                                                          scheduledDays: scheduled, calendar: calendar, now: { clock.now }) : nil
+        self.planningService = planningService
         refresher = DayRefresher(
             profiles: profiles, programs: programs, recovery: recovery,
             nightHistory: NightHistory(source: source, cache: InMemoryHealthSampleCache(), calendar: calendar),

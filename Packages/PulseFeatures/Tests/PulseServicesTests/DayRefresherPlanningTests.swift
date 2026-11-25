@@ -52,4 +52,30 @@ struct DayRefresherPlanningTests {
         #expect(profile.deloadDeclinedAt == fixture.clock.now && profile.deloadWeekStartedAt == nil)
         #expect(!(await fixture.refresher.refresh(origin: .foreground)).session.isDeload)
     }
+
+    /// Le passage est suspendu à la publication : sans file commune, l'échange écrirait la semaine pendant le passage.
+    @Test func aSwapWaitsForTheRunningPassAndThePassForTheSwap() async throws {
+        let gate = Gate()
+        let fixture = RefresherFixture(scenario: .goodNight, holdingPublishesAt: gate, planning: true)
+        try await fixture.adopt()
+        let service = try #require(fixture.planningService)
+
+        async let refresh = fixture.refresher.refresh(origin: .foreground)
+        await gate.waitForArrival()
+        async let swap: Void = service.swap(TestClock.date("2026-11-02T00:00"), TestClock.date("2026-11-03T00:00"))
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(try await fixture.scheduled.days(from: .distantPast, to: .distantFuture).isEmpty,
+                "L'échange attend la fin du passage en cours")
+
+        await gate.open()
+        _ = await refresh
+        try await swap
+        let lines = try await fixture.scheduled.days(from: .distantPast, to: .distantFuture)
+        #expect(lines.count == 2 && lines.allSatisfy { $0.moveReason == .user })
+        let next = await fixture.refresher.refresh(origin: .foreground)
+        guard case .rest = next.plannedDay else {
+            Issue.record("Le passage suivant lit l'échange : le Push du lundi est parti au mardi, \(next.plannedDay)")
+            return
+        }
+    }
 }
