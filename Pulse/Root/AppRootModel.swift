@@ -99,11 +99,13 @@ final class AppRootModel {
     }
 
     /// Les rappels de compléments couvrent 14 jours : chaque lancement et chaque retour au premier plan les recalculent, et
-    /// réécrivent dans Apple Santé les prises faites iPhone verrouillé (spec M5 §5, §7).
+    /// réécrivent dans Apple Santé les prises faites iPhone verrouillé (spec M5 §5, §7). Le rappel de photos de corps, dont
+    /// les trois échéances sont peut-être passées, repart de maintenant s'il est actif et que plus rien n'est en attente.
     func refreshSupplementReminders() async {
         guard destination == .main else { return }
         await dependencies.supplementService.retryHealthWrites()
         await dependencies.supplementService.rescheduleReminders()
+        await dependencies.photos.reminders.resumeIfIdle(now: dependencies.now())
     }
 
     /// Relit la séance en cours (les boutons de la Live Activity ont pu la changer) et ferme les Live Activities qui ne

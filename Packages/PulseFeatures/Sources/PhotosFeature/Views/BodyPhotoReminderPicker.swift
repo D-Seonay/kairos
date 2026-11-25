@@ -3,10 +3,12 @@ import PulseServices
 import SwiftUI
 
 /// « Rappel de photo » dans les réglages des photos de corps : désactivé, toutes les 2 semaines ou tous les mois, et la note qui
-/// dit ce que montre la notification. Aux tailles d'accessibilité, le menu passe sous le titre.
+/// dit ce que montre la notification, ou que les notifications sont coupées. Aux tailles d'accessibilité, le menu passe sous le
+/// titre.
 struct BodyPhotoReminderPicker: View {
     let model: BodyPhotosModel
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -34,6 +36,16 @@ struct BodyPhotoReminderPicker: View {
                 .font(.footnote)
                 .foregroundStyle(PulsePalette.text2)
                 .fixedSize(horizontal: false, vertical: true)
+            if model.notificationsDenied {
+                Text(PhotoText.reminderNotificationsOff)
+                    .font(.footnote)
+                    .foregroundStyle(PulsePalette.signal)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        // Relue à l'apparition et au retour des réglages d'iOS.
+        .task(id: scenePhase) {
+            if scenePhase == .active { await model.refreshNotificationStatus() }
         }
     }
 

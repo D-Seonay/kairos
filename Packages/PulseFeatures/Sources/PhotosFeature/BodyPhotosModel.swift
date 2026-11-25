@@ -29,6 +29,8 @@ public final class BodyPhotosModel {
     private var lockSetting: Bool
     /// Le rythme du rappel de photos, recopié du réglage pour que la vue le suive ; désactivé sans rappels branchés.
     public internal(set) var reminderInterval: BodyPhotoReminderInterval
+    /// Vrai quand les notifications de Pulse sont coupées dans les réglages d'iOS : le rappel n'apparaîtrait pas.
+    public internal(set) var notificationsDenied = false
 
     @ObservationIgnored private let service: BodyPhotoService
     @ObservationIgnored private let authentication: (any DeviceOwnerAuthenticating)?

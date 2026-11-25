@@ -64,4 +64,15 @@ struct BodyPhotosReminderTests: BodyPhotosModelTesting {
         #expect(await model.save(draft, pose: .front, takenAt: PhotosTestClock.date("2026-11-20T11:00")))
         #expect(await scheduler.replaceCount == 0)
     }
+
+    @Test func deniedNotificationsShowUnderTheReminder() async {
+        let reminders = BodyPhotoReminders(store: store, scheduler: scheduler, notifications: nil,
+                                           notificationStatus: { .denied }, calendar: PhotosTestClock.calendar)
+        let model = BodyPhotosModel(service: service, authentication: StubOwnerAuthentication(), lock: InMemoryBodyPhotoLockStore(),
+                                    reminders: reminders, calendar: PhotosTestClock.calendar,
+                                    now: { PhotosTestClock.date("2026-11-20T12:00") })
+        #expect(!model.notificationsDenied)
+        await model.refreshNotificationStatus()
+        #expect(model.notificationsDenied)
+    }
 }

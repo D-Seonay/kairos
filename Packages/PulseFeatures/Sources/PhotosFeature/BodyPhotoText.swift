@@ -133,6 +133,10 @@ extension PhotoText {
         String(localized: "Une notification à 9 h, sans image ni mot sur le sujet. Chaque nouvelle photo repousse la suivante.",
                bundle: .module)
     }
+    static var reminderNotificationsOff: String {
+        String(localized: "Les notifications de Pulse sont coupées dans les réglages d'iOS : le rappel n'apparaîtra pas.",
+               bundle: .module)
+    }
     static var export: String { String(localized: "Exporter les photos de corps", bundle: .module) }
     static var exportNote: String {
         String(localized: "Une archive enregistrée dans Fichiers, à l'emplacement que tu choisis.", bundle: .module)

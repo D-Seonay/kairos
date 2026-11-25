@@ -64,4 +64,69 @@ struct BodyPhotoReminderTests {
         #expect(await scheduler.dates.isEmpty)
         #expect(await notifications.requestCount == 1)
     }
+
+    /// Les trois échéances passées, le retour au premier plan relance le rappel depuis maintenant ; rien ne bouge tant qu'une
+    /// échéance attend, ni quand le rappel est désactivé.
+    @Test func foregroundResumesTheReminderOnlyWhenNothingIsPending() async {
+        let store = InMemoryBodyPhotoReminderStore()
+        let scheduler = StubBodyPhotoReminderScheduler()
+        let reminders = BodyPhotoReminders(store: store, scheduler: scheduler, notifications: nil, calendar: calendar)
+
+        await reminders.resumeIfIdle(now: now)
+        #expect(await scheduler.replaceCount == 0)
+
+        await reminders.setInterval(.monthly, lastPhoto: TestClock.date("2026-11-15T08:00"), now: now)
+        await reminders.resumeIfIdle(now: now)
+        #expect(await scheduler.replaceCount == 1)
+
+        await scheduler.deliverAll()
+        let later = TestClock.date("2027-02-16T18:00")
+        await reminders.resumeIfIdle(now: later)
+        #expect(await scheduler.replaceCount == 2)
+        #expect(await scheduler.dates == [
+            TestClock.date("2027-03-16T09:00"), TestClock.date("2027-04-16T09:00"), TestClock.date("2027-05-16T09:00")
+        ])
+    }
+
+    /// « Tous les mois » puis aussitôt « Désactivé », pendant que la demande d'autorisation du premier attend : rien ne reste.
+    @Test func quickSwitchToOffLeavesNoReminder() async {
+        let store = InMemoryBodyPhotoReminderStore()
+        let scheduler = StubBodyPhotoReminderScheduler()
+        let gate = GatedAuthorizer()
+        let reminders = BodyPhotoReminders(store: store, scheduler: scheduler, notifications: gate, calendar: calendar)
+        let now = now
+        let monthly = Task { await reminders.setInterval(.monthly, lastPhoto: nil, now: now) }
+        while await !gate.isWaiting { await Task.yield() }
+        await reminders.setInterval(.off, lastPhoto: nil, now: now)
+        await gate.open()
+        await monthly.value
+        #expect(store.interval == .off)
+        #expect(await scheduler.dates.isEmpty)
+    }
+
+    @Test func deniedNotificationsAreReported() async {
+        let denied = BodyPhotoReminders(store: InMemoryBodyPhotoReminderStore(), scheduler: StubBodyPhotoReminderScheduler(),
+                                        notifications: nil, notificationStatus: { .denied }, calendar: calendar)
+        let allowed = BodyPhotoReminders(store: InMemoryBodyPhotoReminderStore(), scheduler: StubBodyPhotoReminderScheduler(),
+                                         notifications: nil, notificationStatus: { .authorized }, calendar: calendar)
+        #expect(await denied.notificationsDenied())
+        #expect(await !allowed.notificationsDenied())
+    }
+}
+
+/// Une autorisation qui attend `open()` avant de répondre.
+private actor GatedAuthorizer: NotificationAuthorizing {
+    private var continuation: CheckedContinuation<Void, Never>?
+    private(set) var isWaiting = false
+
+    func requestAuthorization() async -> Bool {
+        isWaiting = true
+        await withCheckedContinuation { continuation = $0 }
+        return true
+    }
+
+    func open() {
+        continuation?.resume()
+        continuation = nil
+    }
 }

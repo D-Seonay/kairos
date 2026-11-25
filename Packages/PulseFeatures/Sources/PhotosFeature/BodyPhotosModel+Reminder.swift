@@ -17,6 +17,12 @@ extension BodyPhotosModel {
         guard let reminders, canReadFiles, interval != reminderInterval else { return }
         reminderInterval = interval
         await reminders.setInterval(interval, lastPhoto: lastPhotoDate, now: today)
+        await refreshNotificationStatus()
+    }
+
+    /// Relit l'état des notifications dans les réglages d'iOS (à l'apparition du réglage, au retour au premier plan).
+    public func refreshNotificationStatus() async {
+        notificationsDenied = await reminders?.notificationsDenied() ?? false
     }
 
     /// Une photo ajoutée ou supprimée déplace la dernière date : le rappel repart d'elle.

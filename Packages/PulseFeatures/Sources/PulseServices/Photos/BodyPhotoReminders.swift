@@ -98,18 +98,25 @@ public final class InMemoryBodyPhotoReminderStore: BodyPhotoReminderStore {
 }
 
 /// Le rappel de reprendre des photos de corps : le réglage, l'autorisation des notifications et la planification. L'écran
-/// Photos de corps le replanifie quand le réglage change et après chaque photo ajoutée ou supprimée.
+/// Photos de corps le replanifie quand le réglage change et après chaque photo ajoutée ou supprimée ; le retour au premier plan
+/// le relance quand toutes ses échéances sont passées. Les planifications passent l'une après l'autre par une même file, et
+/// chacune relit le réglage : la dernière demande l'emporte (« Tous les mois » puis vite « Désactivé » ne laisse rien).
 public struct BodyPhotoReminders: Sendable {
     private let store: any BodyPhotoReminderStore
     private let scheduler: any BodyPhotoReminderScheduling
     private let notifications: (any NotificationAuthorizing)?
+    private let notificationStatus: (@Sendable () async -> NotificationAuthorizationStatus)?
     private let calendar: Calendar
+    /// Partagée par les copies : l'app n'en crée qu'une, que l'écran reçoit par l'environnement du profil.
+    private let queue = SerialTaskQueue()
 
     public init(store: any BodyPhotoReminderStore, scheduler: any BodyPhotoReminderScheduling,
-                notifications: (any NotificationAuthorizing)?, calendar: Calendar) {
+                notifications: (any NotificationAuthorizing)?,
+                notificationStatus: (@Sendable () async -> NotificationAuthorizationStatus)? = nil, calendar: Calendar) {
         self.store = store
         self.scheduler = scheduler
         self.notifications = notifications
+        self.notificationStatus = notificationStatus
         self.calendar = calendar
     }
 
@@ -125,7 +132,24 @@ public struct BodyPhotoReminders: Sendable {
 
     /// Replanifie depuis la dernière photo : une photo prise repousse le rappel suivant.
     public func reschedule(lastPhoto: Date?, now: Date) async {
-        await scheduler.replaceBodyPhotoReminders(at: BodyPhotoReminderPlanner.dates(interval: store.interval, lastPhoto: lastPhoto,
-                                                                                      now: now, calendar: calendar))
+        try? await queue.run { [store, scheduler, calendar] in
+            await scheduler.replaceBodyPhotoReminders(at: BodyPhotoReminderPlanner.dates(
+                interval: store.interval, lastPhoto: lastPhoto, now: now, calendar: calendar))
+        }
+    }
+
+    /// Au lancement et au retour au premier plan : un rappel actif dont toutes les échéances sont passées repart de maintenant,
+    /// sans lire les photos (leurs dates restent dans la section verrouillée, jamais dans les préférences).
+    public func resumeIfIdle(now: Date) async {
+        try? await queue.run { [store, scheduler, calendar] in
+            guard store.interval != .off, await scheduler.pendingBodyPhotoReminderCount() == 0 else { return }
+            await scheduler.replaceBodyPhotoReminders(at: BodyPhotoReminderPlanner.dates(
+                interval: store.interval, lastPhoto: nil, now: now, calendar: calendar))
+        }
+    }
+
+    /// Vrai quand les notifications de Pulse sont coupées dans les réglages d'iOS : le rappel n'apparaîtrait pas.
+    public func notificationsDenied() async -> Bool {
+        await notificationStatus?() == .denied
     }
 }

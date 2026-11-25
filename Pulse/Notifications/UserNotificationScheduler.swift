@@ -151,11 +151,13 @@ struct UserNotificationScheduler: NotificationScheduling, NotificationCanceling,
 
     // MARK: - Photos de corps
 
-    /// Retire les rappels de photos de corps en attente, puis en planifie un à chaque date, à l'heure locale.
+    /// Retire les rappels de photos de corps en attente et ceux déjà reçus, puis en planifie un à chaque date, à l'heure locale.
     func replaceBodyPhotoReminders(at dates: [Date]) async {
         let center = UNUserNotificationCenter.current()
         let pending = await center.pendingNotificationRequests().map(\.identifier).filter { $0.hasPrefix(Self.bodyPhotoPrefix) }
         center.removePendingNotificationRequests(withIdentifiers: pending)
+        let delivered = await center.deliveredNotifications().map(\.request.identifier).filter { $0.hasPrefix(Self.bodyPhotoPrefix) }
+        center.removeDeliveredNotifications(withIdentifiers: delivered)
         let calendar = Calendar.current
         for (index, date) in dates.enumerated() {
             let components = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: date)
@@ -163,6 +165,11 @@ struct UserNotificationScheduler: NotificationScheduling, NotificationCanceling,
                                                 trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: false))
             try? await center.add(request)
         }
+    }
+
+    func pendingBodyPhotoReminderCount() async -> Int {
+        await UNUserNotificationCenter.current().pendingNotificationRequests().filter { $0.identifier.hasPrefix(Self.bodyPhotoPrefix) }
+            .count
     }
 
     /// Neutre sur l'écran verrouillé : ni image, ni mot qui dise de quelles photos il s'agit. Touchée, elle ouvre les photos de

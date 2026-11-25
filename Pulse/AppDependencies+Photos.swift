@@ -37,7 +37,7 @@ extension AppDependencies {
             bodyLock = UserDefaultsBodyPhotoLockStore(suiteName: wiring.defaultsSuite)
             reminders = BodyPhotoReminders(store: UserDefaultsBodyPhotoReminderStore(suiteName: wiring.defaultsSuite),
                                            scheduler: wiring.bodyPhotoReminders, notifications: wiring.notifications,
-                                           calendar: wiring.calendar)
+                                           notificationStatus: wiring.notificationStatus, calendar: wiring.calendar)
             ownerAuthentication = Self.ownerAuthentication(for: wiring.launch)
         }
 

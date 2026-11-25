@@ -541,6 +541,16 @@
         }
       }
     },
+    "Les notifications de Pulse sont coupées dans les réglages d'iOS : le rappel n'apparaîtra pas." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les notifications de Pulse sont coupées dans les réglages d'iOS : le rappel n'apparaîtra pas."
+          }
+        }
+      }
+    },
     "Les photos de corps n'ont pas pu être supprimées." : {
       "localizations" : {
         "fr" : {
