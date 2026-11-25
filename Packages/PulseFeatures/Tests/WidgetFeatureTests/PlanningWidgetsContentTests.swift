@@ -1,5 +1,7 @@
 import Foundation
+import PulseDesignSystem
 import PulseDomain
+import SwiftUI
 import Testing
 @testable import WidgetFeature
 
@@ -59,7 +61,7 @@ struct PlanningWidgetsContentTests {
         #expect(content.days.map(\.iconName) == ["dumbbell.fill", "figure.run", "dumbbell.fill", "figure.run", "dumbbell.fill", "minus",
                                                  "minus"])
         #expect(content.badgeText == "1 sur 4" && content.todayTitle == "Legs" && content.todayMeta == "Comme prévu")
-        #expect(content.acwrRatio == 1.62 && content.acwrZoneText == "1,62 · risque de blessure")
+        #expect(content.acwrRatio == 1.62 && content.acwrZoneText == "1,62 · risque de blessure" && content.acwrZone == .risk)
         #expect(content.tomorrowText == "Demain : Fractionné")
     }
 
@@ -136,5 +138,17 @@ struct PlanningWidgetsContentTests {
         #expect(ready.ratioText == "1,1" && ready.zoneText == "Zone optimale" && ready.isOptimal)
         let early = LoadWidgetContent.make(snapshot: snapshot(loadRatio: nil), at: now, calendar: calendar)
         #expect(early.ratioText == "—" && early.zoneText == "Après 28 jours" && !early.isOptimal)
+        #expect(ready.zone == .optimal && early.zone == nil)
+    }
+
+    /// Le texte de zone suit la zone, aux bornes du moteur, et sa couleur celle de la carte Charge de l'accueil.
+    @Test func theZoneTextFollowsTheZone() {
+        #expect([0.79, 0.8, 1.3, 1.31, 1.49, 1.5].map(WidgetLoadZone.init(ratio:))
+            == [.undertraining, .optimal, .optimal, .elevated, .elevated, .risk])
+        #expect(WidgetLoadZone.risk.tint == PulsePalette.bad && WidgetLoadZone.optimal.tint == PulsePalette.ok)
+        #expect(WidgetLoadZone.elevated.tint == PulsePalette.warn && WidgetLoadZone.undertraining.tint == PulsePalette.run)
+        let early = WeekWidgetContent.make(snapshot: snapshot(loadRatio: nil), at: now, calendar: calendar)
+        #expect(early.acwrZone == nil)
+        #expect(WeekWidgetContent.make(snapshot: snapshot(loadRatio: 1.4), at: now, calendar: calendar).acwrZone == .elevated)
     }
 }
