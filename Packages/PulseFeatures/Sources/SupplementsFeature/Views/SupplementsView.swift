@@ -36,6 +36,9 @@ public struct SupplementsView: View {
                 } else {
                     content
                 }
+                if model.hasLoaded, !model.overview.archived.isEmpty {
+                    SupplementArchivedSection(model: model)
+                }
                 Text(SupplementLabels.disclaimer)
                     .font(.caption)
                     .foregroundStyle(PulsePalette.muted)

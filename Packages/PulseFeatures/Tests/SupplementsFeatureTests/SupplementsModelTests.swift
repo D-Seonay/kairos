@@ -84,6 +84,22 @@ struct SupplementsModelTests {
         #expect(model.overview.supplements.isEmpty)
         #expect(try await repository.supplements(includeArchived: true).first?.isArchived == true)
     }
+
+    @Test func unarchiveBringsTheSupplementBackAndSaysIt() async throws {
+        var spoken: [String] = []
+        model.announce = { text, _ in spoken.append(text) }
+        _ = await model.save(draft("Zinc"), editing: nil)
+        await model.archive(try #require(model.overview.supplements.first))
+        let archived = try #require(model.overview.archived.first)
+        #expect(archived.name == "Zinc" && model.overview.supplements.isEmpty)
+
+        await model.unarchive(archived)
+        #expect(model.overview.archived.isEmpty)
+        #expect(model.overview.supplements.map(\.id) == [archived.id])
+        #expect(model.overview.items.map(\.supplement.name) == ["Zinc"])
+        #expect(spoken.last == "Zinc de retour dans tes compléments.")
+        #expect(model.errorMessage == nil)
+    }
 }
 
 struct SupplementDraftTests {
