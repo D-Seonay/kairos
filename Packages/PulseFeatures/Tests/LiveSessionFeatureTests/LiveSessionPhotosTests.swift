@@ -42,6 +42,46 @@ struct LiveSessionPhotosTests {
         #expect(recap.photos === live.photos)
     }
 
+    /// Abandonnée sans série validée, la séance n'est pas enregistrée : son modèle de photos s'arrête et ne garde rien.
+    @Test func abandoningAnUnsavedSessionDiscardsItsPhotos() async throws {
+        let fixture = LiveFixture(withPhotos: true)
+        let live = try await fixture.startedModel(LiveFixture.plankLaunch)
+        let photos = try #require(live.photos)
+        await photos.add([TestImages.jpeg()])
+        let flow = FinishFlowModel(live: live, onFinished: {})
+        flow.abandonTapped()
+        await flow.confirm()?.value
+        #expect(photos.isDiscarded)
+        #expect(try await fixture.photos.photos(for: live.session.id).isEmpty)
+    }
+
+    /// Abandonnée avec des séries validées, la séance est enregistrée et garde ses photos.
+    @Test func abandoningASavedSessionKeepsItsPhotos() async throws {
+        let fixture = LiveFixture(withPhotos: true)
+        let live = try await fixture.startedModel(LiveFixture.plankLaunch)
+        let photos = try #require(live.photos)
+        await photos.add([TestImages.jpeg()])
+        await live.tap(set: live.session.exercises[0].sets[0].id)
+        let flow = FinishFlowModel(live: live, onFinished: {})
+        flow.abandonTapped()
+        await flow.confirm()?.value
+        #expect(!photos.isDiscarded)
+        #expect(try await fixture.photos.photos(for: live.session.id).count == 1)
+    }
+
+    /// « Abandonner » du bandeau fait le même ménage.
+    @Test func abandoningFromTheBannerDiscardsUnsavedPhotos() async throws {
+        let fixture = LiveFixture(withPhotos: true)
+        let coordinator = fixture.coordinator()
+        await coordinator.start(LiveFixture.plankLaunch)
+        let sessionID = try #require(coordinator.current?.id)
+        let photos = try #require(coordinator.model().photos)
+        await photos.add([TestImages.jpeg()])
+        await coordinator.abandonFromBanner()
+        #expect(photos.isDiscarded)
+        #expect(try await fixture.photos.photos(for: sessionID).isEmpty)
+    }
+
     @Test func noPhotosWithoutService() async throws {
         let fixture = LiveFixture()
         let live = try await fixture.startedModel(LiveFixture.plankLaunch)
