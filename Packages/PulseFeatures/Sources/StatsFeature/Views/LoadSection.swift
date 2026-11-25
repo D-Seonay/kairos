@@ -170,6 +170,7 @@ private struct LoadRatioCard: View {
         .statsPinnedDomain(window)
         .chartYScale(domain: 0...top)
         .statsAxes(calendar: window.calendar)
+        .statsChartSelection { StatsChartReadings.ratio(points, at: $0, calendar: window.calendar) }
         .frame(height: chartHeight)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(StatsText.ratioSummary(points: points, period: window.period))
@@ -236,6 +237,7 @@ private struct LoadBarsCard: View {
                                    range: [StatsInk.full, StatsInk.medium, StatsInk.light])
         .chartLegend(.hidden)
         .statsAxes(calendar: window.calendar)
+        .statsChartSelection { StatsChartReadings.load(bars, at: $0, bucket: bucket, calendar: window.calendar) }
         .frame(height: chartHeight)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(StatsText.loadSummary(totals: totals, period: window.period))
