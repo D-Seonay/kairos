@@ -11,8 +11,12 @@ public protocol RunLocationTracking: Sendable {
     func authorization() async -> RunLocationAuthorization
     /// Montre la demande système si elle n'a jamais été faite, puis rend l'état.
     func requestAuthorization() async -> RunLocationAuthorization
-    /// Démarre le suivi ; le flux rend chaque point livré, jusqu'à `stop()`.
-    func start() async -> AsyncStream<RunTrackPoint>
+    /// Vrai si seule la position approximative est permise (« Position exacte » coupée dans les réglages) : les points, trop
+    /// imprécis, ne sont jamais retenus.
+    func isAccuracyReduced() async -> Bool
+    /// Démarre le suivi ; le flux rend chaque point livré, jusqu'à `stop()`. `keepsRunningInBackground` garde le suivi écran
+    /// verrouillé ou app en arrière-plan (la flèche de localisation s'affiche) : pour une course, jamais pour l'aperçu du départ.
+    func start(keepsRunningInBackground: Bool) async -> AsyncStream<RunTrackPoint>
     func stop() async
 }
 
@@ -22,12 +26,26 @@ public actor StubRunLocationTracker: RunLocationTracking {
     private let grantedOnRequest: RunLocationAuthorization
     public private(set) var requestCount = 0
     public private(set) var startCount = 0
+    /// `keepsRunningInBackground` de chaque démarrage, dans l'ordre.
+    public private(set) var backgroundStarts: [Bool] = []
     public private(set) var stopCount = 0
+    public private(set) var accuracyReduced: Bool
     private var continuation: AsyncStream<RunTrackPoint>.Continuation?
 
-    public init(state: RunLocationAuthorization = .authorized, grantedOnRequest: RunLocationAuthorization = .authorized) {
+    public init(state: RunLocationAuthorization = .authorized, grantedOnRequest: RunLocationAuthorization = .authorized,
+                accuracyReduced: Bool = false) {
         self.state = state
         self.grantedOnRequest = grantedOnRequest
+        self.accuracyReduced = accuracyReduced
+    }
+
+    public func isAccuracyReduced() async -> Bool {
+        accuracyReduced
+    }
+
+    /// « Position exacte » coupée ou rétablie dans les réglages.
+    public func setAccuracyReduced(_ reduced: Bool) {
+        accuracyReduced = reduced
     }
 
     public func authorization() async -> RunLocationAuthorization {
@@ -40,8 +58,9 @@ public actor StubRunLocationTracker: RunLocationTracking {
         return state
     }
 
-    public func start() async -> AsyncStream<RunTrackPoint> {
+    public func start(keepsRunningInBackground: Bool) async -> AsyncStream<RunTrackPoint> {
         startCount += 1
+        backgroundStarts.append(keepsRunningInBackground)
         continuation?.finish()
         let (stream, continuation) = AsyncStream.makeStream(of: RunTrackPoint.self)
         self.continuation = continuation
@@ -82,6 +101,12 @@ public struct RunWorkoutEntry: Sendable, Equatable {
     }
 }
 
+/// HealthKit a accepté l'entraînement sans l'écrire tout de suite (iPhone verrouillé) : il l'écrira de lui-même au déverrouillage.
+/// L'entraînement ne doit donc pas être écrit une seconde fois.
+public struct RunWorkoutWriteDeferred: Error, Equatable {
+    public init() {}
+}
+
 /// La séance HealthKit de la course, derrière un protocole pour les tests. Implémenté par PulseHealth.
 public protocol RunWorkoutRecording: Sendable {
     func writeAccess() async -> HealthWriteAccess
@@ -91,12 +116,17 @@ public protocol RunWorkoutRecording: Sendable {
     func start(sessionID: UUID, at date: Date) async throws -> AsyncStream<Double>
     func pause(at date: Date) async
     func resume(at date: Date) async
-    /// Termine la séance en cours et écrit l'entraînement ; `nil` s'il n'y a pas de séance vivante.
+    /// Termine la séance en cours et écrit l'entraînement ; `nil` s'il n'y a pas de séance vivante. Lance
+    /// `RunWorkoutWriteDeferred` si HealthKit écrira l'entraînement plus tard.
     func finish(_ entry: RunWorkoutEntry) async throws -> UUID?
-    /// Écrit un entraînement sans séance vivante (course interrompue).
+    /// Écrit un entraînement sans séance vivante (course interrompue) ; rend celui déjà écrit pour la même course s'il existe.
+    /// Lance `RunWorkoutWriteDeferred` si HealthKit l'écrira plus tard.
     func save(_ entry: RunWorkoutEntry) async throws -> UUID
     /// Supprime l'entraînement écrit par Pulse et son tracé ; sans effet s'il n'existe plus.
     func deleteWorkout(id: UUID) async throws
+    /// Supprime l'entraînement que Pulse a écrit pour la course `sessionID`, retrouvé par son identifiant externe : celui que
+    /// HealthKit a écrit au déverrouillage, sans identifiant connu de Pulse. Sans effet s'il n'existe pas.
+    func deleteWorkout(forRun sessionID: UUID) async throws
     func discard() async
     /// Rattache une séance que le système a gardée après un crash ; vrai si elle tourne encore.
     func recoverActiveSession() async -> Bool
@@ -113,20 +143,25 @@ public actor StubRunWorkoutRecorder: RunWorkoutRecording {
     public private(set) var finished: [RunWorkoutEntry] = []
     public private(set) var saved: [UUID: RunWorkoutEntry] = [:]
     public private(set) var deletedWorkouts: [UUID] = []
+    /// Les courses dont l'entraînement a été cherché par identifiant externe pour être supprimé.
+    public private(set) var deletedRunWorkouts: [UUID] = []
     public private(set) var discardCount = 0
+    /// Les entraînements laissés à HealthKit pour plus tard, par `finish` ou `save`.
+    public private(set) var deferred: [RunWorkoutEntry] = []
     /// Vrai entre `start` et `finish` / `discard`, ou après une reprise réussie.
     public private(set) var hasLiveSession: Bool
     private let recoverable: Bool
     private let failsOnStart: Bool
     private let failsOnWrite: Bool
     private let failsOnFinish: Bool
+    private let defersWrite: Bool
     private var heartRates: AsyncStream<Double>.Continuation?
 
     public struct Failure: Error {}
 
     public init(access: HealthWriteAccess = .authorized, grantedOnRequest: HealthWriteAccess = .authorized,
                 hasLiveSession: Bool = false, recoverable: Bool = false, failsOnStart: Bool = false,
-                failsOnWrite: Bool = false, failsOnFinish: Bool = false) {
+                failsOnWrite: Bool = false, failsOnFinish: Bool = false, defersWrite: Bool = false) {
         self.access = access
         self.grantedOnRequest = grantedOnRequest
         self.hasLiveSession = hasLiveSession
@@ -134,6 +169,7 @@ public actor StubRunWorkoutRecorder: RunWorkoutRecording {
         self.failsOnStart = failsOnStart
         self.failsOnWrite = failsOnWrite
         self.failsOnFinish = failsOnFinish
+        self.defersWrite = defersWrite
     }
 
     public func writeAccess() async -> HealthWriteAccess {
@@ -170,12 +206,20 @@ public actor StubRunWorkoutRecorder: RunWorkoutRecording {
         hasLiveSession = false
         heartRates?.finish()
         heartRates = nil
+        if defersWrite {
+            deferred.append(entry)
+            throw RunWorkoutWriteDeferred()
+        }
         finished.append(entry)
         return UUID()
     }
 
     public func save(_ entry: RunWorkoutEntry) async throws -> UUID {
         if failsOnWrite { throw Failure() }
+        if defersWrite {
+            deferred.append(entry)
+            throw RunWorkoutWriteDeferred()
+        }
         let id = UUID()
         saved[id] = entry
         return id
@@ -184,6 +228,11 @@ public actor StubRunWorkoutRecorder: RunWorkoutRecording {
     public func deleteWorkout(id: UUID) async throws {
         saved[id] = nil
         deletedWorkouts.append(id)
+    }
+
+    public func deleteWorkout(forRun sessionID: UUID) async throws {
+        deferred.removeAll { $0.sessionID == sessionID }
+        deletedRunWorkouts.append(sessionID)
     }
 
     public func discard() async {

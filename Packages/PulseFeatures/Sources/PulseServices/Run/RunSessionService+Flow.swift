@@ -44,13 +44,16 @@ extension RunSessionService {
         let date = now()
         active.draft.points.append(point)
         active.gps = RunGPSQuality(accuracy: point.horizontalAccuracy)
+        let wasWatching = active.watchesForgetting
         let kilometer = active.builder.add(point, isPaused: active.isPaused)
         var effects = RunEffects(generation: active.generation)
         if !active.isPaused {
             let events = active.announcementEvents(kilometer: kilometer, at: point.timestamp)
             if preferences.announcesKilometres { effects.texts = events.map(spokenText) }
             let reference = active.movementReference
-            if !active.draft.locationDenied, reference.timeIntervalSince(active.reminderReference) > Self.reminderStep {
+            // Le premier point retenu ouvre la surveillance de l'oubli ; ensuite, chaque déplacement assez neuf la repousse.
+            if active.watchesForgetting,
+               !wasWatching || reference.timeIntervalSince(active.reminderReference) > Self.reminderStep {
                 active.reminderReference = reference
                 effects.reminder = .schedule(reference.addingTimeInterval(Self.forgottenAfter))
             }

@@ -3,6 +3,7 @@ public enum RunIdentifiers {
     public static let startButton = "run.start"
     public static let cancelButton = "run.cancel"
     public static let gpsStatus = "run.gps"
+    public static let locationSettingsButton = "run.locationSettings"
     public static let announcesToggle = "run.announces"
     public static let elapsed = "run.elapsed"
     public static let distance = "run.distance"

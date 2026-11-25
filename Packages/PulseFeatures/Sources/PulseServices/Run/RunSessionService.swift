@@ -106,24 +106,23 @@ public actor RunSessionService {
     // MARK: Écran de départ
 
     /// Écran de départ : démarre la localisation et rend la qualité du signal (`ready` à ≤ 20 m) ; arrêtée par `start` ou
-    /// `cancelPreview()`. Avec la localisation refusée, le flux se termine aussitôt.
+    /// `cancelPreview()`. Avec la localisation refusée, le flux se termine aussitôt. L'aperçu ne garde pas la localisation en
+    /// arrière-plan : quitter l'app sur l'écran de départ n'affiche pas la flèche de localisation.
     ///
     /// Un départ ou un rattachement pendant les attentes garde la localisation pour sa course : l'aperçu se termine sans la toucher.
+    /// Un arrêt pendant l'attente de l'autorisation (écran fermé) l'emporte : la localisation ne démarre pas après coup.
     public func gpsPreview() async -> AsyncStream<RunGPSQuality> {
         let (stream, continuation) = AsyncStream.makeStream(of: RunGPSQuality.self)
-        guard run == nil, await authorizeLocation() == .authorized else {
-            continuation.finish()
-            return stream
-        }
         await stopPreview()
-        guard run == nil, !isTransitioning else {
+        let generation = previewGeneration
+        guard run == nil, !isTransitioning, await authorizeLocation() == .authorized,
+              generation == previewGeneration, run == nil, !isTransitioning else {
             continuation.finish()
             return stream
         }
         continuation.yield(.searching)
         previewContinuation = continuation
-        let generation = previewGeneration
-        let points = await location.start()
+        let points = await location.start(keepsRunningInBackground: false)
         // Arrêté pendant l'attente (départ, annulation, autre aperçu) : celui qui l'a arrêté a aussi arrêté la localisation.
         // Une course rattachée entre-temps a relancé la sienne, qui ne doit pas être arrêtée.
         guard generation == previewGeneration, run == nil else {
@@ -148,6 +147,12 @@ public actor RunSessionService {
         await stopPreview()
     }
 
+    /// Vrai si la localisation est permise, mais seulement approximative : aucun point n'est assez précis pour la distance.
+    public func isLocationApproximate() async -> Bool {
+        guard await location.authorization() == .authorized else { return false }
+        return await location.isAccuracyReduced()
+    }
+
     // MARK: Départ
 
     public func start(_ launch: RunLaunch) async throws -> RunSnapshot {
@@ -165,7 +170,7 @@ public actor RunSessionService {
         var heartRates: AsyncStream<Double>?
         if canWriteHealth { heartRates = try? await recorder.start(sessionID: sessionID, at: startedAt) }
         var points: AsyncStream<RunTrackPoint>?
-        if !locationDenied { points = await location.start() }
+        if !locationDenied { points = await location.start(keepsRunningInBackground: true) }
         let draft = RunDraft(sessionID: sessionID, launch: launch, startedAt: startedAt, locationDenied: locationDenied,
                              updatedAt: startedAt)
         let active = ActiveRun(draft: draft, recordsHealth: heartRates != nil, at: startedAt)
@@ -174,9 +179,7 @@ public actor RunSessionService {
 
         await activity.start(activityState(of: active, at: startedAt))
         try? await drafts.save(draft)
-        if !locationDenied {
-            await reminders.scheduleForgotten(at: startedAt.addingTimeInterval(Self.forgottenAfter))
-        }
+        // Pas de rappel d'oubli au départ : il attend le premier point retenu (voir `ActiveRun.watchesForgetting`).
         publish()
         return current() ?? snapshot(of: active, at: startedAt)
     }
@@ -211,7 +214,7 @@ public actor RunSessionService {
         active.lastActivityUpdate = date
         run = active
         if active.recordsHealth { await recorder.resume(at: date) }
-        let reminder: ReminderChange? = active.draft.locationDenied ? nil : .schedule(date.addingTimeInterval(Self.forgottenAfter))
+        let reminder: ReminderChange? = active.watchesForgetting ? .schedule(date.addingTimeInterval(Self.forgottenAfter)) : nil
         await apply(RunEffects(generation: active.generation, savesDraft: true, updatesActivity: true, reminder: reminder),
                     for: active.sessionID)
         publish()
@@ -219,9 +222,10 @@ public actor RunSessionService {
 
     // MARK: Oubli
 
-    /// Le dernier déplacement si la course n'a pas bougé depuis 30 min, hors pause ; `nil` sans localisation.
+    /// Le dernier déplacement si la course n'a pas bougé depuis 30 min, hors pause ; `nil` sans localisation ou tant qu'aucun
+    /// point n'est retenu, le GPS ne disant alors rien du déplacement.
     public func forgottenEnd() async -> Date? {
-        guard let active = run, !active.isPaused, !active.draft.locationDenied else { return nil }
+        guard let active = run, !active.isPaused, active.watchesForgetting else { return nil }
         let reference = active.movementReference
         return now().timeIntervalSince(reference) >= Self.forgottenAfter ? reference : nil
     }
@@ -252,9 +256,11 @@ extension RunSessionService {
         return access == .notDetermined ? await recorder.requestWriteAccess() : access
     }
 
+    /// Arrête l'aperçu. La génération avance même sans aperçu enregistré : un aperçu encore en attente de l'autorisation ne
+    /// démarre pas la localisation ensuite.
     func stopPreview() async {
-        guard previewTask != nil || previewContinuation != nil else { return }
         previewGeneration += 1
+        guard previewTask != nil || previewContinuation != nil else { return }
         previewTask?.cancel()
         previewTask = nil
         previewContinuation?.finish()
