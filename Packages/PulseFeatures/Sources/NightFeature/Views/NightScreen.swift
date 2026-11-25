@@ -17,7 +17,7 @@ public struct NightScreen: View {
             VStack(alignment: .leading, spacing: PulseMetrics.spacing) {
                 if let detail = model.current {
                     NightHeader(model: model, night: detail.night)
-                    SummaryCard(night: detail.night, calendar: model.calendar)
+                    SummaryCard(detail: detail, goalMinutes: model.goalMinutes, calendar: model.calendar)
                     HypnogramCard(night: detail.night, calendar: model.calendar)
                     if detail.night.hasStages {
                         StageBreakdownList(rows: NightText.breakdownRows(detail))
@@ -96,10 +96,13 @@ private struct NightHeader: View {
     }
 }
 
-/// La durée endormie en grand, puis l'endormissement, le réveil et les réveils.
+/// La durée endormie en grand, puis l'endormissement, le réveil et les réveils, l'écart à l'objectif et la régularité du coucher.
 private struct SummaryCard: View {
-    let night: NightSleep
+    let detail: NightDetail
+    let goalMinutes: Int
     let calendar: Calendar
+
+    private var night: NightSleep { detail.night }
 
     var body: some View {
         ObsidianCard {
@@ -115,6 +118,18 @@ private struct SummaryCard: View {
                     .font(.subheadline)
                     .foregroundStyle(PulsePalette.text2)
                     .fixedSize(horizontal: false, vertical: true)
+                Text(NightText.goalGap(asleepMinutes: night.asleepMinutes, goalMinutes: goalMinutes))
+                    .font(.subheadline)
+                    .foregroundStyle(PulsePalette.text2)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityLabel(NightText.spokenGoalGap(asleepMinutes: night.asleepMinutes, goalMinutes: goalMinutes))
+                if let regularity = detail.bedtimeRegularityMinutes {
+                    Text(NightText.regularity(minutes: regularity))
+                        .font(.subheadline)
+                        .foregroundStyle(PulsePalette.text2)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityLabel(NightText.spokenRegularity(minutes: regularity))
+                }
             }
         }
     }

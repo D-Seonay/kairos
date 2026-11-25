@@ -119,4 +119,28 @@ struct NightTextTests {
         #expect(spoken.contains("phases non fournies"))
         #expect(!spoken.contains("profond"))
     }
+
+    @Test func goalGapSaysHowMuchIsMissing() {
+        #expect(NightText.goalGap(asleepMinutes: 430, goalMinutes: 480) == "Objectif 8 h · 50 min de moins")
+    }
+
+    @Test func goalGapSaysWhenTheGoalIsMet() {
+        #expect(NightText.goalGap(asleepMinutes: 480, goalMinutes: 480) == "Objectif 8 h atteint")
+        #expect(NightText.goalGap(asleepMinutes: 500, goalMinutes: 480) == "Objectif 8 h atteint")
+    }
+
+    @Test func spokenGoalGapUsesWords() {
+        #expect(NightText.spokenGoalGap(asleepMinutes: 430, goalMinutes: 480) == "Objectif 8 heures, 50 minutes de moins")
+        #expect(NightText.spokenGoalGap(asleepMinutes: 480, goalMinutes: 480) == "Objectif 8 heures atteint")
+    }
+
+    @Test func regularityNamesItsLevel() {
+        #expect(NightText.regularity(minutes: 25) == "Coucher régulier, à ± 25 min sur 14 nuits")
+        #expect(NightText.regularity(minutes: 45) == "Coucher assez régulier, à ± 45 min sur 14 nuits")
+        #expect(NightText.regularity(minutes: 90) == "Coucher irrégulier, à ± 1 h 30 sur 14 nuits")
+    }
+
+    @Test func spokenRegularityUsesWords() {
+        #expect(NightText.spokenRegularity(minutes: 25) == "Coucher régulier, à plus ou moins 25 minutes sur 14 nuits")
+    }
 }

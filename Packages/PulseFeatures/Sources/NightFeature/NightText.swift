@@ -43,6 +43,25 @@ enum NightText {
         return String(localized: "Endormi à \(asleep) · Réveillé à \(awake) · \(awakenings(night.awakenings))", bundle: .module)
     }
 
+    /// « Objectif 8 h · 50 min de moins », « Objectif 8 h atteint ».
+    static func goalGap(asleepMinutes: Int, goalMinutes: Int) -> String {
+        let goal = PulseFormat.duration(minutes: goalMinutes)
+        guard asleepMinutes < goalMinutes else { return String(localized: "Objectif \(goal) atteint", bundle: .module) }
+        let missing = PulseFormat.duration(minutes: goalMinutes - asleepMinutes)
+        return String(localized: "Objectif \(goal) · \(missing) de moins", bundle: .module)
+    }
+
+    /// « Coucher régulier, à ± 25 min sur 14 nuits » ; assez régulier ou irrégulier selon `BedtimeRegularity.level`.
+    static func regularity(minutes: Int) -> String {
+        let gap = PulseFormat.duration(minutes: minutes)
+        let nights = BedtimeRegularity.windowNights
+        switch BedtimeRegularity.level(minutes: minutes) {
+        case .regular: return String(localized: "Coucher régulier, à ± \(gap) sur \(nights) nuits", bundle: .module)
+        case .fairlyRegular: return String(localized: "Coucher assez régulier, à ± \(gap) sur \(nights) nuits", bundle: .module)
+        case .irregular: return String(localized: "Coucher irrégulier, à ± \(gap) sur \(nights) nuits", bundle: .module)
+        }
+    }
+
     /// « aucun réveil », « 1 réveil », « 3 réveils ».
     static func awakenings(_ count: Int) -> String {
         switch count {
@@ -152,6 +171,26 @@ enum NightText {
             text += String(localized: ", dont \(stages.joined(separator: ", "))", bundle: .module)
         }
         return text
+    }
+
+    /// « Objectif 8 heures, 50 minutes de moins », « Objectif 8 heures atteint ».
+    static func spokenGoalGap(asleepMinutes: Int, goalMinutes: Int) -> String {
+        let goal = spokenMinutes(goalMinutes)
+        guard asleepMinutes < goalMinutes else { return String(localized: "Objectif \(goal) atteint", bundle: .module) }
+        let missing = spokenMinutes(goalMinutes - asleepMinutes)
+        return String(localized: "Objectif \(goal), \(missing) de moins", bundle: .module)
+    }
+
+    /// « Coucher régulier, à plus ou moins 25 minutes sur 14 nuits ».
+    static func spokenRegularity(minutes: Int) -> String {
+        let gap = spokenMinutes(minutes)
+        let nights = BedtimeRegularity.windowNights
+        switch BedtimeRegularity.level(minutes: minutes) {
+        case .regular: return String(localized: "Coucher régulier, à plus ou moins \(gap) sur \(nights) nuits", bundle: .module)
+        case .fairlyRegular:
+            return String(localized: "Coucher assez régulier, à plus ou moins \(gap) sur \(nights) nuits", bundle: .module)
+        case .irregular: return String(localized: "Coucher irrégulier, à plus ou moins \(gap) sur \(nights) nuits", bundle: .module)
+        }
     }
 
     /// « La nuit du 19 au 20 novembre », pour les boutons ‹ ›.

@@ -47,4 +47,16 @@ struct NightModelTests {
         #expect(model.current == nil)
         #expect(model.canGoBack == false && model.canGoForward == false)
     }
+
+    @Test func loadReadsTheGoal() async throws {
+        let profiles = InMemoryProfileRepository()
+        try await profiles.save(UserProfile(sleepGoalMinutes: 420, createdAt: now, updatedAt: now))
+        let now = now
+        let service = NightDetailService(cache: InMemoryHealthSampleCache(), profiles: profiles, calendar: NightFixtures.calendar,
+                                         now: { now })
+        let model = NightModel(service: service, initialDay: nil, calendar: NightFixtures.calendar)
+        #expect(model.goalMinutes == SleepGoal.defaultMinutes)
+        await model.load()
+        #expect(model.goalMinutes == 420)
+    }
 }
