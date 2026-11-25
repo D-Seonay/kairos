@@ -36,24 +36,32 @@ struct SleepLayer: Identifiable, Equatable {
 
 /// Le découpage des barres de sommeil de Stats et la légende qui va avec.
 enum SleepChartLayers {
-    /// Les tranches non vides d'une barre, de bas en haut, en heures. Une barre à phases s'empile profond, léger, paradoxal,
-    /// sans phase ; une barre d'avant les phases garde l'ancien découpage à l'encre : le profond en bas, le reste au-dessus.
+    /// Les tranches d'une barre, de bas en haut, en heures. Une barre à phases s'empile profond, léger, paradoxal, sans phase ;
+    /// une barre d'avant les phases garde l'ancien découpage à l'encre : le profond en bas, le reste au-dessus. Une tranche
+    /// n'existe que si elle dure au moins une minute une fois arrondie, le seuil des phrases dites de chaque barre : quelques
+    /// secondes sans phase ne se dessinent pas et n'entrent pas dans la légende.
     static func layers(of point: SleepPoint) -> [SleepLayer] {
         let total = point.asleepMinutes / 60
         guard point.hasStages else {
             let deep = min(max(point.deepMinutes ?? 0, 0), point.asleepMinutes) / 60
             return [SleepLayer(kind: .deepInk, start: 0, end: deep), SleepLayer(kind: .otherInk, start: deep, end: total)]
-                .filter { $0.end > $0.start }
+                .filter(lastsAMinute)
         }
         let stages: [(SleepStage, Double?)] = [(.deep, point.deepMinutes), (.core, point.coreMinutes), (.rem, point.remMinutes),
                                                (.asleepUnspecified, point.unspecifiedMinutes)]
         var bottom = 0.0
         return stages.compactMap { stage, minutes in
-            guard let minutes, minutes > 0 else { return nil }
+            guard let minutes, minutes.rounded() > 0 else { return nil }
             let top = min(bottom + minutes / 60, total)
             defer { bottom = top }
-            return top > bottom ? SleepLayer(kind: .stage(stage), start: bottom, end: top) : nil
+            let layer = SleepLayer(kind: .stage(stage), start: bottom, end: top)
+            return lastsAMinute(layer) ? layer : nil
         }
+    }
+
+    /// Vrai si la tranche dure au moins une minute une fois arrondie.
+    private static func lastsAMinute(_ layer: SleepLayer) -> Bool {
+        ((layer.end - layer.start) * 60).rounded() > 0
     }
 
     /// La légende nomme exactement les tranches dessinées sur la période affichée : une entrée n'y figure que si au moins une

@@ -53,6 +53,13 @@ struct SleepChartLayersTests {
             == ["Profond", "Léger", "Paradoxal"])
     }
 
+    /// 20 secondes sans phase en moyenne s'arrondissent à 0 min : ni tranche ni entrée de légende, comme la phrase de la barre.
+    @Test func aFewUnstagedSecondsAreNeitherDrawnNorNamed() {
+        let barely = point(0, asleep: 480, deep: 60, core: 299.67, rem: 120, unspecified: 0.33)
+        #expect(SleepChartLayers.layers(of: barely).map(\.kind) == [.stage(.deep), .stage(.core), .stage(.rem)])
+        #expect(labels([barely]) == ["Profond", "Léger", "Paradoxal"])
+    }
+
     @Test func unstagedPeriodWithoutDeepNamesOnlyTheRest() {
         #expect(labels([point(0, asleep: 420, deep: nil), point(1, asleep: 400, deep: nil)]) == ["Autres phases"])
         #expect(labels([point(0, asleep: 420, deep: 60)]) == ["Profond", "Autres phases"])
