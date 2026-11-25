@@ -10,20 +10,25 @@ public actor BodyPhotoService {
     private let calendar: Calendar
     private let timeZone: TimeZone
     private let now: @Sendable () -> Date
-    /// Les enregistrements passent l'un après l'autre : « enregistrer, puis supprimer la photo du jour » se libère à chaque
-    /// `await`, et deux enregistrements concurrents laisseraient deux photos de même pose et de même jour.
+    /// Le dossier de l'archive d'export : `exportDirectory` dans l'app, un dossier propre à chaque test (les tests tournent en
+    /// parallèle, et l'un supprimerait le dossier d'un autre pendant qu'il écrit).
+    private let archiveDirectory: URL
+    /// Les enregistrements et les suppressions passent l'un après l'autre : « enregistrer, puis supprimer la photo remplacée » se
+    /// libère à chaque `await`.
     private let queue = SerialTaskQueue()
 
     public init(store: any BodyPhotoStore, measurements: any BodyMeasurementRepository, calendar: Calendar,
-                timeZone: TimeZone = .current, now: @escaping @Sendable () -> Date) {
+                timeZone: TimeZone = .current, exportDirectory: URL = BodyPhotoService.exportDirectory,
+                now: @escaping @Sendable () -> Date) {
         self.store = store
         self.measurements = measurements
         self.calendar = calendar
         self.timeZone = timeZone
+        archiveDirectory = exportDirectory
         self.now = now
     }
 
-    /// Le dossier de l'archive d'export, dans les fichiers temporaires. L'effaceur le supprime aussi.
+    /// Le dossier de l'archive d'export de l'app, dans les fichiers temporaires. L'effaceur le supprime aussi.
     public static var exportDirectory: URL {
         FileManager.default.temporaryDirectory.appendingPathComponent("PulseBodyPhotoExport", isDirectory: true)
     }
@@ -52,26 +57,27 @@ public actor BodyPhotoService {
         try PhotoProcessor.process(data, timeZone: timeZone)
     }
 
-    /// La photo de cette pose prise ce jour-là, s'il y en a une.
+    /// La photo de cette pose prise ce jour-là, s'il y en a une : celle que l'écran propose de remplacer.
     public func existing(pose: BodyPose, on date: Date) async throws -> BodyPhoto? {
         BodyPhotoTimeline.existing(pose: pose, on: date, in: try await store.photos(), calendar: calendar)
     }
 
-    /// Enregistre la photo, puis supprime celle de même pose et de même jour : l'appelant a confirmé le remplacement.
-    public func save(_ processed: ProcessedPhoto, pose: BodyPose, takenAt: Date) async throws -> BodyPhoto {
-        try await queue.run { try await self.replacingSave(processed, pose: pose, takenAt: takenAt) }
+    /// Enregistre la photo, puis supprime `replacing`, la seule photo dont l'appelant a confirmé le remplacement. Aucune autre
+    /// n'est jamais supprimée, même de même pose et de même jour : la frise n'en montre qu'une par créneau, et supprimer tout le
+    /// créneau emporterait des photos que l'utilisateur n'a pas vues (photos de corps sans autre copie).
+    public func save(_ processed: ProcessedPhoto, pose: BodyPose, takenAt: Date, replacing: UUID? = nil) async throws -> BodyPhoto {
+        try await queue.run { try await self.replacingSave(processed, pose: pose, takenAt: takenAt, replacing: replacing) }
     }
 
-    /// La nouvelle photo d'abord : les photos de corps n'ont aucune autre copie, et une écriture qui échoue (disque plein,
-    /// protection des fichiers) ne doit pas emporter l'ancienne. Les deux partagent brièvement le créneau, et la liste montre la
-    /// plus récente (`BodyPhotoTimeline`). Une ancienne qui ne se supprime pas reste en trop, sans faire échouer l'ajout déjà
-    /// écrit : le remplacement suivant de ce créneau la retire.
-    private func replacingSave(_ processed: ProcessedPhoto, pose: BodyPose, takenAt: Date) async throws -> BodyPhoto {
-        let sameSlot = try await store.photos().filter { $0.pose == pose && calendar.isDate($0.takenAt, inSameDayAs: takenAt) }
+    /// La nouvelle photo d'abord : une écriture qui échoue (disque plein, protection des fichiers) ne doit pas emporter
+    /// l'ancienne. Les deux partagent brièvement le créneau, et la liste montre la plus récente (`BodyPhotoTimeline`). Une
+    /// ancienne qui ne se supprime pas reste en trop, sans faire échouer l'ajout déjà écrit.
+    private func replacingSave(_ processed: ProcessedPhoto, pose: BodyPose, takenAt: Date,
+                               replacing: UUID?) async throws -> BodyPhoto {
         let photo = BodyPhoto(id: UUID(), pose: pose, takenAt: takenAt, createdAt: now())
         try await store.save(photo, image: processed.image)
-        for old in sameSlot {
-            try? await store.delete(photoID: old.id)
+        if let replacing, replacing != photo.id {
+            try? await store.delete(photoID: replacing)
         }
         return photo
     }
@@ -84,15 +90,15 @@ public actor BodyPhotoService {
         try await queue.run { try await self.store.deleteAll() }
     }
 
-    /// Écrit l'archive dans `exportDirectory` (le dépôt protège le zip et retire les archives précédentes). L'écran la propose au
-    /// sélecteur de Fichiers, puis appelle `discardExport`.
+    /// Écrit l'archive dans le dossier d'export (le dépôt protège le zip et retire les archives précédentes). L'écran la propose
+    /// au sélecteur de Fichiers, puis appelle `discardExport`.
     public func exportArchive() async throws -> URL {
-        try await store.exportArchive(to: Self.exportDirectory)
+        try await store.exportArchive(to: archiveDirectory)
     }
 
     /// Supprime le dossier de l'archive. Au mieux : un dossier absent ou déjà vidé n'est pas une erreur.
     public func discardExport() async {
-        try? FileManager.default.removeItem(at: Self.exportDirectory)
+        try? FileManager.default.removeItem(at: archiveDirectory)
     }
 
     /// Variation de la tendance du poids entre deux dates, toutes sources de pesées confondues, ou `nil` si l'une des deux n'a pas

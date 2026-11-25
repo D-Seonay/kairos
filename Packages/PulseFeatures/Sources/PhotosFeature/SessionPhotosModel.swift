@@ -21,6 +21,8 @@ public final class SessionPhotosModel {
     @ObservationIgnored private let sessionID: UUID
     @ObservationIgnored private let calendar: Calendar
     @ObservationIgnored private var addsInFlight = 0
+    /// Vrai une fois la séance abandonnée sans être enregistrée (`discard`) : plus rien ne s'ajoute.
+    @ObservationIgnored public private(set) var isDiscarded = false
 
     public init(service: SessionPhotoService, sessionID: UUID, calendar: Calendar) {
         self.service = service
@@ -29,7 +31,7 @@ public final class SessionPhotosModel {
     }
 
     public var remainingSlots: Int { SessionPhotoRules.remainingSlots(current: photos.count) }
-    public var canAdd: Bool { remainingSlots > 0 }
+    public var canAdd: Bool { remainingSlots > 0 && !isDiscarded }
 
     /// Lit les photos de la séance et les vignettes qui manquent.
     public func load() async {
@@ -61,9 +63,16 @@ public final class SessionPhotosModel {
         addsInFlight += 1
         isAdding = true
         for loader in kept {
+            guard !isDiscarded else { break }
             do {
                 let data = await loader() ?? Data()
+                guard !isDiscarded else { break }
                 let photo = try await service.add(data, to: sessionID)
+                // La séance a été abandonnée pendant l'ajout : la photo arrivée trop tard ne reste pas dans iCloud.
+                guard !isDiscarded else {
+                    try? await service.delete(photoID: photo.id)
+                    break
+                }
                 append(photo)
                 await fetchMissingThumbnails()
                 added += 1
@@ -77,8 +86,19 @@ public final class SessionPhotosModel {
         }
         addsInFlight -= 1
         isAdding = addsInFlight > 0
+        guard !isDiscarded else { return }
         errorMessage = message(dropped: dropped, unreadable: unreadable, failed: failed)
         if added > 0 { announce(PhotoText.photosAdded(added)) }
+    }
+
+    /// La séance a été abandonnée sans être enregistrée : les ajouts en cours s'arrêtent, une photo qui arrive encore est
+    /// supprimée, et celles déjà ajoutées le sont aussi (suppression logique, l'image est effacée). L'abandon les a déjà
+    /// supprimées, mais un ajout qui finissait pendant l'abandon pouvait en laisser une, sans séance, dans iCloud. Idempotent.
+    public func discard() async {
+        isDiscarded = true
+        photos = []
+        thumbnails = [:]
+        try? await service.deleteAll(sessionID: sessionID)
     }
 
     /// Supprime la photo ; une place se libère.
