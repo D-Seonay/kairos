@@ -183,7 +183,8 @@ public final class FinishFlowModel {
             let supplements = live.session.isPastEntry ? nil : live.environment.supplements.map(SupplementsModel.init)
             // Les photos prises pendant la séance sont dans le modèle de la séance live : le récap le reprend.
             let model = RecapModel(service: live.environment.service, endedAt: endedAt, supplements: supplements,
-                                   photos: live.photos)
+                                   photos: live.photos,
+                                   reviewPrompt: live.session.isPastEntry ? nil : live.environment.reviewPrompt)
             recap = model
             await model.load()
         case .abandon:

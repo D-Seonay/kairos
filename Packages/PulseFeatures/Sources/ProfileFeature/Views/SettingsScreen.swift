@@ -100,7 +100,7 @@ struct DisplaySettingsSection: View {
 
 // MARK: - À propos
 
-/// La version et le build, et les licences.
+/// La version et le build, le lien pour noter Pulse et les licences.
 struct AboutSettingsSection: View {
     let appVersion: String
 
@@ -110,6 +110,14 @@ struct AboutSettingsSection: View {
                 .foregroundStyle(PulsePalette.text)
                 .frame(minHeight: 44)
                 .accessibilityElement(children: .combine)
+            if let url = ReviewPrompt.writeReviewURL {
+                Link(destination: url) {
+                    Label(String(localized: "Noter Pulse", bundle: .module), systemImage: "star")
+                        .foregroundStyle(PulsePalette.text)
+                }
+                .frame(minHeight: 44)
+                .accessibilityHint(String(localized: "Ouvre la fiche de Pulse sur l'App Store pour écrire un avis", bundle: .module))
+            }
             NavigationLink {
                 LicensesView()
             } label: {

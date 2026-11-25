@@ -14,14 +14,19 @@ public struct LiveSessionEnvironment: Sendable {
     public var supplements: SupplementsEnvironment?
     public var calendar: Calendar
     public var now: @Sendable () -> Date
+    /// La demande de note au récap d'une séance terminée ; `nil` pour une saisie après coup, dans les tests et les modes des
+    /// tests d'interface.
+    public var reviewPrompt: ReviewPrompt?
 
     public init(service: ActiveSessionService, train: TrainEnvironment, notifications: any NotificationAuthorizing,
-                supplements: SupplementsEnvironment? = nil, calendar: Calendar, now: @escaping @Sendable () -> Date) {
+                supplements: SupplementsEnvironment? = nil, calendar: Calendar, now: @escaping @Sendable () -> Date,
+                reviewPrompt: ReviewPrompt? = nil) {
         self.service = service
         self.train = train
         self.notifications = notifications
         self.supplements = supplements
         self.calendar = calendar
         self.now = now
+        self.reviewPrompt = reviewPrompt
     }
 }

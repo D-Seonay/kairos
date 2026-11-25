@@ -56,6 +56,13 @@ extension ActiveSessionService {
         }
     }
 
+    /// Le nombre de séances de musculation Pulse terminées, pour la demande de note (les séances importées ne comptent pas) ;
+    /// 0 si la lecture échoue.
+    public func completedSessionCount() async -> Int {
+        let sessions = (try? await workouts.sessions(from: .distantPast, to: .distantFuture)) ?? []
+        return sessions.filter { $0.status == .completed && $0.source == .pulse && $0.kind == .strength }.count
+    }
+
     /// Ce que Pulse peut écrire dans Apple Santé ; `unavailable` sans Apple Santé.
     public func healthAccess() async -> HealthWriteAccess {
         await health?.access() ?? .unavailable

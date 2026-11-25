@@ -3,6 +3,7 @@ import PulseContent
 import PulseDesignSystem
 import PulseDomain
 import PulseServices
+import StoreKit
 import SupplementsFeature
 import SwiftUI
 import TrainFeature
@@ -18,6 +19,7 @@ public struct RecapView: View {
     private let onResume: (() -> Void)?
     @Environment(\.pulseTheme) private var theme
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.requestReview) private var requestReview
 
     public init(model: RecapModel, calendar: Calendar, onSaved: @escaping () -> Void, onResume: (() -> Void)? = nil) {
         self.model = model
@@ -67,7 +69,7 @@ public struct RecapView: View {
         .safeAreaInset(edge: .bottom, spacing: 0) { actions }
         .sheet(isPresented: isExplainingHealth) {
             HealthWriteExplanation {
-                Task { if await model.continueAfterHealthExplanation() { onSaved() } }
+                Task { if await model.continueAfterHealthExplanation() { didSave() } }
             }
         }
         .preferredColorScheme(.dark)
@@ -225,7 +227,7 @@ public struct RecapView: View {
         VStack(spacing: 8) {
             if model.recap != nil {
                 Button {
-                    Task { if await model.save() { onSaved() } }
+                    Task { if await model.save() { didSave() } }
                 } label: {
                     Text(model.errorMessage == nil ? String(localized: "Enregistrer", bundle: .module)
                         : String(localized: "Réessayer", bundle: .module))
@@ -241,7 +243,7 @@ public struct RecapView: View {
                 .buttonStyle(PrimaryButtonStyle())
             }
             Button {
-                Task { if await model.later() { onSaved() } }
+                Task { if await model.later() { didSave() } }
             } label: {
                 Text(String(localized: "Enregistrer sans noter", bundle: .module))
             }
@@ -292,6 +294,15 @@ extension RecapView {
         .padding(PulseMetrics.spacing)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(PulsePalette.surface, in: RoundedRectangle(cornerRadius: PulseMetrics.radius, style: .continuous))
+    }
+}
+
+// La sortie après l'enregistrement : la demande de note si la règle la veut, puis la fermeture. iOS décide d'afficher ou non
+// la fenêtre (jamais sur TestFlight, trois fois par an au plus sur l'App Store).
+extension RecapView {
+    private func didSave() {
+        if model.shouldRequestReview { requestReview() }
+        onSaved()
     }
 }
 
