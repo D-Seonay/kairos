@@ -179,9 +179,7 @@ public actor RunSessionService {
 
         await activity.start(activityState(of: active, at: startedAt))
         try? await drafts.save(draft)
-        if !locationDenied {
-            await reminders.scheduleForgotten(at: startedAt.addingTimeInterval(Self.forgottenAfter))
-        }
+        // Pas de rappel d'oubli au départ : il attend le premier point retenu (voir `ActiveRun.watchesForgetting`).
         publish()
         return current() ?? snapshot(of: active, at: startedAt)
     }
@@ -216,7 +214,7 @@ public actor RunSessionService {
         active.lastActivityUpdate = date
         run = active
         if active.recordsHealth { await recorder.resume(at: date) }
-        let reminder: ReminderChange? = active.draft.locationDenied ? nil : .schedule(date.addingTimeInterval(Self.forgottenAfter))
+        let reminder: ReminderChange? = active.watchesForgetting ? .schedule(date.addingTimeInterval(Self.forgottenAfter)) : nil
         await apply(RunEffects(generation: active.generation, savesDraft: true, updatesActivity: true, reminder: reminder),
                     for: active.sessionID)
         publish()
@@ -224,9 +222,10 @@ public actor RunSessionService {
 
     // MARK: Oubli
 
-    /// Le dernier déplacement si la course n'a pas bougé depuis 30 min, hors pause ; `nil` sans localisation.
+    /// Le dernier déplacement si la course n'a pas bougé depuis 30 min, hors pause ; `nil` sans localisation ou tant qu'aucun
+    /// point n'est retenu, le GPS ne disant alors rien du déplacement.
     public func forgottenEnd() async -> Date? {
-        guard let active = run, !active.isPaused, !active.draft.locationDenied else { return nil }
+        guard let active = run, !active.isPaused, active.watchesForgetting else { return nil }
         let reference = active.movementReference
         return now().timeIntervalSince(reference) >= Self.forgottenAfter ? reference : nil
     }

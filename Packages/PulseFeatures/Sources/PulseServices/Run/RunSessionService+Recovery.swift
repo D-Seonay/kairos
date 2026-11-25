@@ -33,7 +33,7 @@ extension RunSessionService {
         consume(points: points, heartRates: nil)
         // La Live Activity a survécu au processus : elle est retrouvée par l'identifiant de la séance.
         await activity.update(activityState(of: active, at: date))
-        if !active.isPaused, !draft.locationDenied {
+        if !active.isPaused, active.watchesForgetting {
             await reminders.scheduleForgotten(at: active.reminderReference.addingTimeInterval(Self.forgottenAfter))
         }
         publish()

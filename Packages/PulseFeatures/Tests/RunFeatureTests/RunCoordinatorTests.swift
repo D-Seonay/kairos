@@ -86,15 +86,35 @@ struct RunCoordinatorTests {
         await coordinator.refresh()
         #expect(coordinator.forgottenEnd == nil)
 
+        // Sans aucun point retenu (position approximative, pas de signal), rien ne dit que la course est oubliée : l'alerte
+        // proposait avant de la terminer au départ, soit ~0 min, pendant que le coureur courait. Plus d'alerte.
         fixture.clock.advance(minutes: 31)
         await coordinator.refresh()
-        #expect(coordinator.forgottenEnd == RunFeatureFixture.start)
+        #expect(coordinator.forgottenEnd == nil)
+
+        // Un point retenu, puis 31 min sans bouger : l'alerte propose de terminer à ce point.
+        let fix = try await pushFix(fixture)
+        fixture.clock.advance(minutes: 31)
+        await coordinator.refresh()
+        #expect(coordinator.forgottenEnd == fix)
 
         // « Terminer » clôt la course à l'heure du dernier déplacement.
         await coordinator.finishAtForgottenEnd()
         #expect(coordinator.forgottenEnd == nil)
         #expect(coordinator.current == nil)
-        #expect(coordinator.model().recap?.data.session.endedAt == RunFeatureFixture.start)
+        #expect(coordinator.model().recap?.data.session.endedAt == fix)
+    }
+
+    /// Un point précis livré maintenant, attendu jusqu'à son traitement par le service ; rend son heure.
+    private func pushFix(_ fixture: RunFeatureFixture) async throws -> Date {
+        let now = fixture.clock.now
+        await fixture.location.push(RunTrackPoint(timestamp: now, latitude: 48.8566, longitude: 2.3522, horizontalAccuracy: 5))
+        for _ in 0..<500 {
+            if await fixture.service.current()?.gps == .ready { return now }
+            try await Task.sleep(for: .milliseconds(2))
+        }
+        Issue.record("Le point n'a jamais été traité")
+        return now
     }
 
     @Test func refreshExposesForgottenEndAfterReattach() async throws {
@@ -120,8 +140,10 @@ struct RunCoordinatorTests {
         let coordinator = fixture.coordinator()
         coordinator.prepare(.free())
         await coordinator.model().start()
+        _ = try await pushFix(fixture)
         fixture.clock.advance(minutes: 31)
         await coordinator.refresh()
+        #expect(coordinator.forgottenEnd != nil)
         coordinator.dismissForgotten()
         #expect(coordinator.forgottenEnd == nil)
         #expect(coordinator.current != nil)
