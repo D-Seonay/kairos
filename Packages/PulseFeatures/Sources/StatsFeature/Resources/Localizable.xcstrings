@@ -1,5 +1,2277 @@
 {
   "sourceLanguage": "fr",
-  "strings": {},
+  "strings": {
+    "": {},
+    "%@ %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@"
+          }
+        }
+      }
+    },
+    "%@ : %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : %@"
+          }
+        }
+      }
+    },
+    "%@ : %@ en %@ — %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : %@ en %@ — %@."
+          }
+        }
+      }
+    },
+    "%@ : %@, %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : %@, %@."
+          }
+        }
+      }
+    },
+    "%@ : %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : %@."
+          }
+        }
+      }
+    },
+    "%@ : %lld séries contre %lld, %@, %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : %lld séries contre %lld, %@, %@."
+          }
+        }
+      }
+    },
+    "%@ : aucune série en %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : aucune série en %@."
+          }
+        }
+      }
+    },
+    "%@ : pas encore couru.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : pas encore couru."
+          }
+        }
+      }
+    },
+    "%@ kg": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kg"
+          }
+        }
+      }
+    },
+    "%@ kg × %lld": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kg × %lld"
+          }
+        }
+      }
+    },
+    "%@ km": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ km"
+          }
+        }
+      }
+    },
+    "%@ par rapport aux %lld jours précédents": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ par rapport aux %lld jours précédents"
+          }
+        }
+      }
+    },
+    "%@ par rapport à l'année précédente": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ par rapport à l'année précédente"
+          }
+        }
+      }
+    },
+    "%@ par rapport à la semaine passée": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ par rapport à la semaine passée"
+          }
+        }
+      }
+    },
+    "%@ série": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ série"
+          }
+        }
+      }
+    },
+    "%@ séries": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ séries"
+          }
+        }
+      }
+    },
+    "%@, %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@"
+          }
+        }
+      }
+    },
+    "%@, %@ : moyenne %@, de %@ à %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@ : moyenne %@, de %@ à %@"
+          }
+        }
+      }
+    },
+    "%lld": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld"
+          }
+        }
+      }
+    },
+    "%lld / %lld séries": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld / %lld séries"
+          }
+        }
+      }
+    },
+    "%lld depuis le %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld depuis le %@"
+          }
+        }
+      }
+    },
+    "%lld h": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld h"
+          }
+        }
+      }
+    },
+    "%lld jours d'entraînement": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld jours d'entraînement"
+          }
+        }
+      }
+    },
+    "%lld reps": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld reps"
+          }
+        }
+      }
+    },
+    "%lld semaine": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld semaine"
+          }
+        }
+      }
+    },
+    "%lld semaines": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld semaines"
+          }
+        }
+      }
+    },
+    "%lld séances": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld séances"
+          }
+        }
+      }
+    },
+    "+%@ kg": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%@ kg"
+          }
+        }
+      }
+    },
+    "+%lld reps": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld reps"
+          }
+        }
+      }
+    },
+    ", dont %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ", dont %@"
+          }
+        }
+      }
+    },
+    ", dont %@ de sommeil profond": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ", dont %@ de sommeil profond"
+          }
+        }
+      }
+    },
+    ", ligne de base %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ", ligne de base %@"
+          }
+        }
+      }
+    },
+    "1 jour d'entraînement": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 jour d'entraînement"
+          }
+        }
+      }
+    },
+    "1 séance": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 séance"
+          }
+        }
+      }
+    },
+    "1,5 risque": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1,5 risque"
+          }
+        }
+      }
+    },
+    "10 kilomètres": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "10 kilomètres"
+          }
+        }
+      }
+    },
+    "10 km": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "10 km"
+          }
+        }
+      }
+    },
+    "16 dernières semaines": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16 dernières semaines"
+          }
+        }
+      }
+    },
+    "1RM estimé": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1RM estimé"
+          }
+        }
+      }
+    },
+    "28 jours d'historique nécessaires, encore %lld jours": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "28 jours d'historique nécessaires, encore %lld jours"
+          }
+        }
+      }
+    },
+    "28 jours d'historique nécessaires, encore 1 jour": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "28 jours d'historique nécessaires, encore 1 jour"
+          }
+        }
+      }
+    },
+    "5 kilomètres": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5 kilomètres"
+          }
+        }
+      }
+    },
+    "5 km": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5 km"
+          }
+        }
+      }
+    },
+    "Allure": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allure"
+          }
+        }
+      }
+    },
+    "Assiduité": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Assiduité"
+          }
+        }
+      }
+    },
+    "Au-dessus de 1,3 depuis %lld jours": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Au-dessus de 1,3 depuis %lld jours"
+          }
+        }
+      }
+    },
+    "Au-dessus de 1,3 depuis 1 jour": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Au-dessus de 1,3 depuis 1 jour"
+          }
+        }
+      }
+    },
+    "Aucune charge": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune charge"
+          }
+        }
+      }
+    },
+    "Autres phases": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autres phases"
+          }
+        }
+      }
+    },
+    "Bas de la zone optimale": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bas de la zone optimale"
+          }
+        }
+      }
+    },
+    "Biométrie": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Biométrie"
+          }
+        }
+      }
+    },
+    "Bras peu sollicités": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bras peu sollicités"
+          }
+        }
+      }
+    },
+    "Charge": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Charge"
+          }
+        }
+      }
+    },
+    "Charge aiguë, 7 j": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Charge aiguë, 7 j"
+          }
+        }
+      }
+    },
+    "Charge aiguë, 7 jours": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Charge aiguë, 7 jours"
+          }
+        }
+      }
+    },
+    "Charge chronique, 28 j": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Charge chronique, 28 j"
+          }
+        }
+      }
+    },
+    "Charge chronique, 28 jours": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Charge chronique, 28 jours"
+          }
+        }
+      }
+    },
+    "Charge maximale": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Charge maximale"
+          }
+        }
+      }
+    },
+    "Charge par jour": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Charge par jour"
+          }
+        }
+      }
+    },
+    "Charge par semaine": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Charge par semaine"
+          }
+        }
+      }
+    },
+    "Charge élevée": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Charge élevée"
+          }
+        }
+      }
+    },
+    "Charge, %@ : %@ en tout, dont musculation %@, course %@, vélo %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Charge, %@ : %@ en tout, dont musculation %@, course %@, vélo %@."
+          }
+        }
+      }
+    },
+    "Chargement des statistiques": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chargement des statistiques"
+          }
+        }
+      }
+    },
+    "Course": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Course"
+          }
+        }
+      }
+    },
+    "Dans la zone optimale": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dans la zone optimale"
+          }
+        }
+      }
+    },
+    "Dans la zone optimale depuis %lld semaines": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dans la zone optimale depuis %lld semaines"
+          }
+        }
+      }
+    },
+    "Dans la zone optimale depuis 1 semaine": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dans la zone optimale depuis 1 semaine"
+          }
+        }
+      }
+    },
+    "Discipline": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discipline"
+          }
+        }
+      }
+    },
+    "Distance courue": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Distance courue"
+          }
+        }
+      }
+    },
+    "Distance roulée": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Distance roulée"
+          }
+        }
+      }
+    },
+    "Dos peu sollicité": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dos peu sollicité"
+          }
+        }
+      }
+    },
+    "Du %@ au %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Du %@ au %@"
+          }
+        }
+      }
+    },
+    "Durée moyenne": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Durée moyenne"
+          }
+        }
+      }
+    },
+    "Durée totale": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Durée totale"
+          }
+        }
+      }
+    },
+    "Début": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Début"
+          }
+        }
+      }
+    },
+    "Décharge en cours jusqu'au %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Décharge en cours jusqu'au %@"
+          }
+        }
+      }
+    },
+    "Endurance %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Endurance %@"
+          }
+        }
+      }
+    },
+    "FC au repos": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "FC au repos"
+          }
+        }
+      }
+    },
+    "Force": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Force"
+          }
+        }
+      }
+    },
+    "Fréquence cardiaque au repos": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fréquence cardiaque au repos"
+          }
+        }
+      }
+    },
+    "Fréquence cardiaque au repos, en battements par minute": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fréquence cardiaque au repos, en battements par minute"
+          }
+        }
+      }
+    },
+    "Haut / bas": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Haut / bas"
+          }
+        }
+      }
+    },
+    "Haut de la zone optimale": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Haut de la zone optimale"
+          }
+        }
+      }
+    },
+    "Haut et bas du corps": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Haut et bas du corps"
+          }
+        }
+      }
+    },
+    "Heure habituelle": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heure habituelle"
+          }
+        }
+      }
+    },
+    "Heures de sommeil": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heures de sommeil"
+          }
+        }
+      }
+    },
+    "Jambes peu sollicitées": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jambes peu sollicitées"
+          }
+        }
+      }
+    },
+    "Jour": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jour"
+          }
+        }
+      }
+    },
+    "Journées par état de forme": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Journées par état de forme"
+          }
+        }
+      }
+    },
+    "Journées par état de forme, %@ : %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Journées par état de forme, %@ : %@."
+          }
+        }
+      }
+    },
+    "Jours": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jours"
+          }
+        }
+      }
+    },
+    "Le ratio aigu / chronique s'affiche après 28 jours d'historique (encore %lld jours)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le ratio aigu / chronique s'affiche après 28 jours d'historique (encore %lld jours)"
+          }
+        }
+      }
+    },
+    "Le ratio aigu / chronique s'affiche après 28 jours d'historique (encore 1 jour)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le ratio aigu / chronique s'affiche après 28 jours d'historique (encore 1 jour)"
+          }
+        }
+      }
+    },
+    "Ligne de base": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ligne de base"
+          }
+        }
+      }
+    },
+    "Ligne de base %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ligne de base %@"
+          }
+        }
+      }
+    },
+    "Lundi en haut": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lundi en haut"
+          }
+        }
+      }
+    },
+    "Meilleur temps": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meilleur temps"
+          }
+        }
+      }
+    },
+    "Meilleure série": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meilleure série"
+          }
+        }
+      }
+    },
+    "Mesure": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mesure"
+          }
+        }
+      }
+    },
+    "Moins": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moins"
+          }
+        }
+      }
+    },
+    "Muscles": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muscles"
+          }
+        }
+      }
+    },
+    "Muscles travaillés, %@ : %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muscles travaillés, %@ : %@."
+          }
+        }
+      }
+    },
+    "Musculation": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Musculation"
+          }
+        }
+      }
+    },
+    "Musculation %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Musculation %@"
+          }
+        }
+      }
+    },
+    "Nuit": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nuit"
+          }
+        }
+      }
+    },
+    "Nuit du %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nuit du %@"
+          }
+        }
+      }
+    },
+    "Ouvre la progression de l'exercice": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvre la progression de l'exercice"
+          }
+        }
+      }
+    },
+    "Partager ce record": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partager ce record"
+          }
+        }
+      }
+    },
+    "Pas assez de données": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas assez de données"
+          }
+        }
+      }
+    },
+    "Pas encore couru": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas encore couru"
+          }
+        }
+      }
+    },
+    "Pas encore de semaine réussie": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas encore de semaine réussie"
+          }
+        }
+      }
+    },
+    "Pectoraux peu sollicités": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pectoraux peu sollicités"
+          }
+        }
+      }
+    },
+    "Peu sollicités": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Peu sollicités"
+          }
+        }
+      }
+    },
+    "Plus": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plus"
+          }
+        }
+      }
+    },
+    "Pousser / tirer": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pousser / tirer"
+          }
+        }
+      }
+    },
+    "Pousser et tirer": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pousser et tirer"
+          }
+        }
+      }
+    },
+    "Profond": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profond"
+          }
+        }
+      }
+    },
+    "Profond, sans détail": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profond, sans détail"
+          }
+        }
+      }
+    },
+    "Progression": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Progression"
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu lire tes statistiques.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pulse n'a pas pu lire tes statistiques."
+          }
+        }
+      }
+    },
+    "Période": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Période"
+          }
+        }
+      }
+    },
+    "Ratio": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ratio"
+          }
+        }
+      }
+    },
+    "Ratio %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ratio %@"
+          }
+        }
+      }
+    },
+    "Ratio aigu / chronique": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ratio aigu / chronique"
+          }
+        }
+      }
+    },
+    "Ratio aigu sur chronique": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ratio aigu sur chronique"
+          }
+        }
+      }
+    },
+    "Ratio aigu sur chronique, %@ : dernier %@, de %@ à %@. Zone optimale de 0,8 à 1,3, risque à 1,5.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ratio aigu sur chronique, %@ : dernier %@, de %@ à %@. Zone optimale de 0,8 à 1,3, risque à 1,5."
+          }
+        }
+      }
+    },
+    "Record": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record"
+          }
+        }
+      }
+    },
+    "Records": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Records"
+          }
+        }
+      }
+    },
+    "Records de tout l'historique ; « nouveau » marque ceux battus dans la période choisie.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Records de tout l'historique ; « nouveau » marque ceux battus dans la période choisie."
+          }
+        }
+      }
+    },
+    "Risque": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Risque"
+          }
+        }
+      }
+    },
+    "Risque de blessure": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Risque de blessure"
+          }
+        }
+      }
+    },
+    "Récupération moyenne": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Récupération moyenne"
+          }
+        }
+      }
+    },
+    "Régularité": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Régularité"
+          }
+        }
+      }
+    },
+    "Répétitions": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Répétitions"
+          }
+        }
+      }
+    },
+    "Sans phase": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sans phase"
+          }
+        }
+      }
+    },
+    "Semaine": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Semaine"
+          }
+        }
+      }
+    },
+    "Semaine du %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Semaine du %@"
+          }
+        }
+      }
+    },
+    "Semaine en cours, du %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Semaine en cours, du %@"
+          }
+        }
+      }
+    },
+    "Semi-marathon": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Semi-marathon"
+          }
+        }
+      }
+    },
+    "Sommeil": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sommeil"
+          }
+        }
+      }
+    },
+    "Sommeil léger": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sommeil léger"
+          }
+        }
+      }
+    },
+    "Sommeil moyen": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sommeil moyen"
+          }
+        }
+      }
+    },
+    "Sommeil paradoxal": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sommeil paradoxal"
+          }
+        }
+      }
+    },
+    "Sommeil profond": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sommeil profond"
+          }
+        }
+      }
+    },
+    "Sommeil sans phase": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sommeil sans phase"
+          }
+        }
+      }
+    },
+    "Sommeil total": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sommeil total"
+          }
+        }
+      }
+    },
+    "Sommeil, %@ : %@ en moyenne": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sommeil, %@ : %@ en moyenne"
+          }
+        }
+      }
+    },
+    "Sommeil, en heures": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sommeil, en heures"
+          }
+        }
+      }
+    },
+    "Sous 0,8 : charge en baisse": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sous 0,8 : charge en baisse"
+          }
+        }
+      }
+    },
+    "Sous-entraînement": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sous-entraînement"
+          }
+        }
+      }
+    },
+    "Statistiques": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Statistiques"
+          }
+        }
+      }
+    },
+    "Séances": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Séances"
+          }
+        }
+      }
+    },
+    "Série": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Série"
+          }
+        }
+      }
+    },
+    "Série en cours": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Série en cours"
+          }
+        }
+      }
+    },
+    "Séries de travail, tronc exclu ; équilibré de %@ à %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Séries de travail, tronc exclu ; équilibré de %@ à %@."
+          }
+        }
+      }
+    },
+    "Séries par muscle": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Séries par muscle"
+          }
+        }
+      }
+    },
+    "Tonnage": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tonnage"
+          }
+        }
+      }
+    },
+    "Totaux de la période": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Totaux de la période"
+          }
+        }
+      }
+    },
+    "Tronc peu sollicité": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tronc peu sollicité"
+          }
+        }
+      }
+    },
+    "Variabilité et ligne de base": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Variabilité et ligne de base"
+          }
+        }
+      }
+    },
+    "Variabilité moyenne": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Variabilité moyenne"
+          }
+        }
+      }
+    },
+    "Variabilité, en millisecondes": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Variabilité, en millisecondes"
+          }
+        }
+      }
+    },
+    "Voir les nuits": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voir les nuits"
+          }
+        }
+      }
+    },
+    "Vélo": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vélo"
+          }
+        }
+      }
+    },
+    "Zone optimale": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zone optimale"
+          }
+        }
+      }
+    },
+    "allure moyenne de la sortie du %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "allure moyenne de la sortie du %@"
+          }
+        }
+      }
+    },
+    "aucun jour d'entraînement": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aucun jour d'entraînement"
+          }
+        }
+      }
+    },
+    "aucun record sur les mouvements de base ni sur un exercice fait au moins 5 fois": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aucun record sur les mouvements de base ni sur un exercice fait au moins 5 fois"
+          }
+        }
+      }
+    },
+    "aucun score du matin sur la période": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aucun score du matin sur la période"
+          }
+        }
+      }
+    },
+    "aucune nuit de sommeil mesurée sur la période": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aucune nuit de sommeil mesurée sur la période"
+          }
+        }
+      }
+    },
+    "aucune nuit mesurée sur la période": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aucune nuit mesurée sur la période"
+          }
+        }
+      }
+    },
+    "aucune semaine n'a encore atteint l'objectif de %lld séances": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aucune semaine n'a encore atteint l'objectif de %lld séances"
+          }
+        }
+      }
+    },
+    "aucune semaine n'a encore atteint l'objectif de 1 séance": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aucune semaine n'a encore atteint l'objectif de 1 séance"
+          }
+        }
+      }
+    },
+    "aucune semaine à juger sur la période": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aucune semaine à juger sur la période"
+          }
+        }
+      }
+    },
+    "aucune séance chronométrée sur la période": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aucune séance chronométrée sur la période"
+          }
+        }
+      }
+    },
+    "aucune séance chronométrée sur la période ni sur les 28 jours d'avant": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aucune séance chronométrée sur la période ni sur les 28 jours d'avant"
+          }
+        }
+      }
+    },
+    "aucune séance chronométrée sur les 28 derniers jours": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aucune séance chronométrée sur les 28 derniers jours"
+          }
+        }
+      }
+    },
+    "aucune séance de musculation terminée sur la période": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aucune séance de musculation terminée sur la période"
+          }
+        }
+      }
+    },
+    "aucune séance sur la période": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aucune séance sur la période"
+          }
+        }
+      }
+    },
+    "aucune séance validée pour l'instant": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aucune séance validée pour l'instant"
+          }
+        }
+      }
+    },
+    "aucune séance validée sur la période": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aucune séance validée sur la période"
+          }
+        }
+      }
+    },
+    "aucune séance validée sur les 16 dernières semaines": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aucune séance validée sur les 16 dernières semaines"
+          }
+        }
+      }
+    },
+    "aucune série de poussée": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aucune série de poussée"
+          }
+        }
+      }
+    },
+    "aucune série de poussée ni de tirage sur la période": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aucune série de poussée ni de tirage sur la période"
+          }
+        }
+      }
+    },
+    "aucune série de tirage": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aucune série de tirage"
+          }
+        }
+      }
+    },
+    "aucune série de travail d'un exercice connu sur la période": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aucune série de travail d'un exercice connu sur la période"
+          }
+        }
+      }
+    },
+    "aucune série du bas du corps": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aucune série du bas du corps"
+          }
+        }
+      }
+    },
+    "aucune série du haut du corps": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aucune série du haut du corps"
+          }
+        }
+      }
+    },
+    "aucune série du haut ni du bas du corps sur la période": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aucune série du haut ni du bas du corps sur la période"
+          }
+        }
+      }
+    },
+    "battement par minute": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "battement par minute"
+          }
+        }
+      }
+    },
+    "battements par minute": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "battements par minute"
+          }
+        }
+      }
+    },
+    "cette semaine %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cette semaine %@"
+          }
+        }
+      }
+    },
+    "cette semaine %lld / %lld": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cette semaine %lld / %lld"
+          }
+        }
+      }
+    },
+    "de léger": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "de léger"
+          }
+        }
+      }
+    },
+    "de paradoxal": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "de paradoxal"
+          }
+        }
+      }
+    },
+    "de profond": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "de profond"
+          }
+        }
+      }
+    },
+    "du %@ au %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "du %@ au %@"
+          }
+        }
+      }
+    },
+    "début de séance le plus fréquent": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "début de séance le plus fréquent"
+          }
+        }
+      }
+    },
+    "déséquilibré": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "déséquilibré"
+          }
+        }
+      }
+    },
+    "jour": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "jour"
+          }
+        }
+      }
+    },
+    "jours": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "jours"
+          }
+        }
+      }
+    },
+    "le %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "le %@"
+          }
+        }
+      }
+    },
+    "léger %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "léger %@"
+          }
+        }
+      }
+    },
+    "maximum estimé sur une répétition": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "maximum estimé sur une répétition"
+          }
+        }
+      }
+    },
+    "milliseconde": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "milliseconde"
+          }
+        }
+      }
+    },
+    "millisecondes": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "millisecondes"
+          }
+        }
+      }
+    },
+    "moyenne par semaine": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "moyenne par semaine"
+          }
+        }
+      }
+    },
+    "nouveau": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "nouveau"
+          }
+        }
+      }
+    },
+    "nuit la plus courte %@ le %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "nuit la plus courte %@ le %@"
+          }
+        }
+      }
+    },
+    "nuit la plus longue %@ le %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "nuit la plus longue %@ le %@"
+          }
+        }
+      }
+    },
+    "objectif %lld séances par semaine": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "objectif %lld séances par semaine"
+          }
+        }
+      }
+    },
+    "objectif 1 séance par semaine": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "objectif 1 séance par semaine"
+          }
+        }
+      }
+    },
+    "paradoxal %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "paradoxal %@"
+          }
+        }
+      }
+    },
+    "plus %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "plus %@"
+          }
+        }
+      }
+    },
+    "profond %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "profond %@"
+          }
+        }
+      }
+    },
+    "ratio %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ratio %@"
+          }
+        }
+      }
+    },
+    "sans phase": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sans phase"
+          }
+        }
+      }
+    },
+    "sans phase %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sans phase %@"
+          }
+        }
+      }
+    },
+    "semaine la plus courte %@ la semaine du %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "semaine la plus courte %@ la semaine du %@"
+          }
+        }
+      }
+    },
+    "semaine la plus longue %@ la semaine du %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "semaine la plus longue %@ la semaine du %@"
+          }
+        }
+      }
+    },
+    "semaines réussies sur la période": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "semaines réussies sur la période"
+          }
+        }
+      }
+    },
+    "sur %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sur %@"
+          }
+        }
+      }
+    },
+    "série de %@ pour %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "série de %@ pour %@"
+          }
+        }
+      }
+    },
+    "Épaules peu sollicitées": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Épaules peu sollicitées"
+          }
+        }
+      }
+    },
+    "Équilibre": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Équilibre"
+          }
+        }
+      }
+    },
+    "État": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "État"
+          }
+        }
+      }
+    },
+    "équilibré": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "équilibré"
+          }
+        }
+      }
+    }
+  },
   "version": "1.0"
 }

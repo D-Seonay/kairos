@@ -1,5 +1,1156 @@
 {
   "sourceLanguage": "fr",
-  "strings": {},
+  "strings": {
+    "%@ %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@"
+          }
+        }
+      }
+    },
+    "%@ archivé.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ archivé."
+          }
+        }
+      }
+    },
+    "%@ de retour dans tes compléments.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ de retour dans tes compléments."
+          }
+        }
+      }
+    },
+    "%@ doses": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ doses"
+          }
+        }
+      }
+    },
+    "%@ pris": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ pris"
+          }
+        }
+      }
+    },
+    "%@ pris. %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ pris. %@."
+          }
+        }
+      }
+    },
+    "%@, pas pris. %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, pas pris. %@."
+          }
+        }
+      }
+    },
+    "%lld": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld"
+          }
+        }
+      }
+    },
+    "%lld pour cent": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld pour cent"
+          }
+        }
+      }
+    },
+    "%lld sur %lld": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld sur %lld"
+          }
+        }
+      }
+    },
+    "1 dose": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 dose"
+          }
+        }
+      }
+    },
+    "30 min avant ton heure habituelle de séance": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "30 min avant ton heure habituelle de séance"
+          }
+        }
+      }
+    },
+    "Abandonner": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abandonner"
+          }
+        }
+      }
+    },
+    "Abandonner les modifications ?": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abandonner les modifications ?"
+          }
+        }
+      }
+    },
+    "Ajoute ce que tu prends : Pulse te le rappelle au bon moment, suit ton stock et ta régularité, et écrit la vitamine D, le magnésium, la caféine et les protéines dans Apple Santé.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajoute ce que tu prends : Pulse te le rappelle au bon moment, suit ton stock et ta régularité, et écrit la vitamine D, le magnésium, la caféine et les protéines dans Apple Santé."
+          }
+        }
+      }
+    },
+    "Ajoute ce que tu prends pour le cocher ici et recevoir un rappel.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajoute ce que tu prends pour le cocher ici et recevoir un rappel."
+          }
+        }
+      }
+    },
+    "Ajouter un complément": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter un complément"
+          }
+        }
+      }
+    },
+    "Annuler": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Annuler"
+          }
+        }
+      }
+    },
+    "Apple Santé a un type pour la vitamine D, le magnésium, la caféine et les protéines. Les autres restent dans Pulse.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Santé a un type pour la vitamine D, le magnésium, la caféine et les protéines. Les autres restent dans Pulse."
+          }
+        }
+      }
+    },
+    "Archiver": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archiver"
+          }
+        }
+      }
+    },
+    "Archiver %@ ?": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archiver %@ ?"
+          }
+        }
+      }
+    },
+    "Archivés": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archivés"
+          }
+        }
+      }
+    },
+    "Aucun": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun"
+          }
+        }
+      }
+    },
+    "Avec cette unité, Pulse ne peut pas écrire la quantité dans Apple Santé.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avec cette unité, Pulse ne peut pas écrire la quantité dans Apple Santé."
+          }
+        }
+      }
+    },
+    "Caféine": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caféine"
+          }
+        }
+      }
+    },
+    "Chaque prise sera écrite dans Apple Santé.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chaque prise sera écrite dans Apple Santé."
+          }
+        }
+      }
+    },
+    "Chargement des compléments": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chargement des compléments"
+          }
+        }
+      }
+    },
+    "Choisis au moins un jour.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisis au moins un jour."
+          }
+        }
+      }
+    },
+    "Compléments": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compléments"
+          }
+        }
+      }
+    },
+    "Comprimé": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comprimé"
+          }
+        }
+      }
+    },
+    "Continuer à modifier": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuer à modifier"
+          }
+        }
+      }
+    },
+    "Donne un nom au complément.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Donne un nom au complément."
+          }
+        }
+      }
+    },
+    "Dose": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dose"
+          }
+        }
+      }
+    },
+    "Dose par prise": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dose par prise"
+          }
+        }
+      }
+    },
+    "Doses restantes": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Doses restantes"
+          }
+        }
+      }
+    },
+    "Désarchiver": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Désarchiver"
+          }
+        }
+      }
+    },
+    "Désarchiver %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Désarchiver %@"
+          }
+        }
+      }
+    },
+    "En prises : chaque prise retire 1. Laisse vide pour ne pas suivre le stock.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En prises : chaque prise retire 1. Laisse vide pour ne pas suivre le stock."
+          }
+        }
+      }
+    },
+    "Enregistrer": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enregistrer"
+          }
+        }
+      }
+    },
+    "Forme": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forme"
+          }
+        }
+      }
+    },
+    "Gélule": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gélule"
+          }
+        }
+      }
+    },
+    "Heure": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heure"
+          }
+        }
+      }
+    },
+    "Il quitte la liste et ses rappels s'arrêtent. Ses prises restent dans tes données.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il quitte la liste et ses rappels s'arrêtent. Ses prises restent dans tes données."
+          }
+        }
+      }
+    },
+    "Indique ta dose par prise.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indique ta dose par prise."
+          }
+        }
+      }
+    },
+    "Jours": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jours"
+          }
+        }
+      }
+    },
+    "Jours d'entraînement": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jours d'entraînement"
+          }
+        }
+      }
+    },
+    "Jours pris sur jours prévus, depuis la création du complément.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jours pris sur jours prévus, depuis la création du complément."
+          }
+        }
+      }
+    },
+    "Liquide": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liquide"
+          }
+        }
+      }
+    },
+    "Magnésium": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Magnésium"
+          }
+        }
+      }
+    },
+    "Marquer comme pris : %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marquer comme pris : %@"
+          }
+        }
+      }
+    },
+    "Modifie le complément": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modifie le complément"
+          }
+        }
+      }
+    },
+    "Moment": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moment"
+          }
+        }
+      }
+    },
+    "Nom": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nom"
+          }
+        }
+      }
+    },
+    "Nouveau complément": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nouveau complément"
+          }
+        }
+      }
+    },
+    "Pas pris": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas pris"
+          }
+        }
+      }
+    },
+    "Pas prévu aujourd'hui": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas prévu aujourd'hui"
+          }
+        }
+      }
+    },
+    "Personnalisé": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personnalisé"
+          }
+        }
+      }
+    },
+    "Poudre": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Poudre"
+          }
+        }
+      }
+    },
+    "Pris": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pris"
+          }
+        }
+      }
+    },
+    "Prochaine prise": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prochaine prise"
+          }
+        }
+      }
+    },
+    "Prochaine prise, %@, %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prochaine prise, %@, %@"
+          }
+        }
+      }
+    },
+    "Protéines": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Protéines"
+          }
+        }
+      }
+    },
+    "Prévenir sous": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prévenir sous"
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu archiver le complément.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pulse n'a pas pu archiver le complément."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu désarchiver le complément.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pulse n'a pas pu désarchiver le complément."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu enregistrer le complément.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pulse n'a pas pu enregistrer le complément."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu enregistrer ta prise.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pulse n'a pas pu enregistrer ta prise."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu lire tes compléments.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pulse n'a pas pu lire tes compléments."
+          }
+        }
+      }
+    },
+    "Pulse ne propose pas de dose. Suis la notice du produit ou l'avis d'un professionnel de santé.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pulse ne propose pas de dose. Suis la notice du produit ou l'avis d'un professionnel de santé."
+          }
+        }
+      }
+    },
+    "Rappel": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rappel"
+          }
+        }
+      }
+    },
+    "Rappel après la fin de la séance": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rappel après la fin de la séance"
+          }
+        }
+      }
+    },
+    "Rien de prévu aujourd'hui": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rien de prévu aujourd'hui"
+          }
+        }
+      }
+    },
+    "Rien de prévu aujourd'hui.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rien de prévu aujourd'hui."
+          }
+        }
+      }
+    },
+    "Régularité, 30 jours": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Régularité, 30 jours"
+          }
+        }
+      }
+    },
+    "Stock": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stock"
+          }
+        }
+      }
+    },
+    "Stock bas": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stock bas"
+          }
+        }
+      }
+    },
+    "Suggestions": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suggestions"
+          }
+        }
+      }
+    },
+    "Tes compléments, cochés en une touche": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tes compléments, cochés en une touche"
+          }
+        }
+      }
+    },
+    "Tous les jours": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tous les jours"
+          }
+        }
+      }
+    },
+    "Tout est pris pour aujourd'hui.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tout est pris pour aujourd'hui."
+          }
+        }
+      }
+    },
+    "UI": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "UI"
+          }
+        }
+      }
+    },
+    "Une notification avec un bouton « Pris », même écran verrouillé.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une notification avec un bouton « Pris », même écran verrouillé."
+          }
+        }
+      }
+    },
+    "Une suggestion remplit tout sauf la dose : c'est la tienne.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une suggestion remplit tout sauf la dose : c'est la tienne."
+          }
+        }
+      }
+    },
+    "Unité": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unité"
+          }
+        }
+      }
+    },
+    "Vitamine D": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vitamine D"
+          }
+        }
+      }
+    },
+    "après la séance": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "après la séance"
+          }
+        }
+      }
+    },
+    "dose": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "dose"
+          }
+        }
+      }
+    },
+    "doses": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "doses"
+          }
+        }
+      }
+    },
+    "g": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "g"
+          }
+        }
+      }
+    },
+    "gramme": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "gramme"
+          }
+        }
+      }
+    },
+    "grammes": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "grammes"
+          }
+        }
+      }
+    },
+    "mg": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "mg"
+          }
+        }
+      }
+    },
+    "microgramme": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "microgramme"
+          }
+        }
+      }
+    },
+    "microgrammes": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "microgrammes"
+          }
+        }
+      }
+    },
+    "milligramme": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "milligramme"
+          }
+        }
+      }
+    },
+    "milligrammes": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "milligrammes"
+          }
+        }
+      }
+    },
+    "millilitre": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "millilitre"
+          }
+        }
+      }
+    },
+    "millilitres": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "millilitres"
+          }
+        }
+      }
+    },
+    "ml": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ml"
+          }
+        }
+      }
+    },
+    "pas encore de jour prévu": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pas encore de jour prévu"
+          }
+        }
+      }
+    },
+    "stock bas": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "stock bas"
+          }
+        }
+      }
+    },
+    "sur %lld pris": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sur %lld pris"
+          }
+        }
+      }
+    },
+    "unité internationale": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "unité internationale"
+          }
+        }
+      }
+    },
+    "unités internationales": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "unités internationales"
+          }
+        }
+      }
+    },
+    "µg": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "µg"
+          }
+        }
+      }
+    },
+    "À l'heure que tu choisis": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À l'heure que tu choisis"
+          }
+        }
+      }
+    },
+    "À racheter : %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À racheter : %@"
+          }
+        }
+      }
+    },
+    "À ton heure de coucher": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À ton heure de coucher"
+          }
+        }
+      }
+    },
+    "Écrire dans Apple Santé": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Écrire dans Apple Santé"
+          }
+        }
+      }
+    },
+    "Écrit dans Apple Santé : %@ par prise.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Écrit dans Apple Santé : %@ par prise."
+          }
+        }
+      }
+    },
+    "à %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "à %@"
+          }
+        }
+      }
+    },
+    "à %@, 30 minutes avant la séance": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "à %@, 30 minutes avant la séance"
+          }
+        }
+      }
+    },
+    "à %@, après la séance": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "à %@, après la séance"
+          }
+        }
+      }
+    },
+    "à %@, au coucher": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "à %@, au coucher"
+          }
+        }
+      }
+    },
+    "—": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "—"
+          }
+        }
+      }
+    }
+  },
   "version": "1.0"
 }
