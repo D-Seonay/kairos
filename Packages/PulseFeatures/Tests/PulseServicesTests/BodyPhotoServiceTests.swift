@@ -24,14 +24,37 @@ struct BodyPhotoServiceTests {
         return BodyMeasurement(date: day, weightKg: kg, source: .manual, createdAt: day, updatedAt: day)
     }
 
-    @Test func saveReplacesSamePoseSameDay() async throws {
+    @Test func saveReplacesTheConfirmedPhoto() async throws {
         let service = makeService()
         let first = try await service.save(processed(), pose: .front, takenAt: TestClock.date("2026-11-01T08:00"))
-        let second = try await service.save(processed(), pose: .front, takenAt: TestClock.date("2026-11-01T20:00"))
+        let second = try await service.save(processed(), pose: .front, takenAt: TestClock.date("2026-11-01T20:00"),
+                                            replacing: first.id)
         let stored = try await service.photos()
         #expect(stored.map(\.id) == [second.id])
         #expect(try await service.image(of: first.id) == nil)
         #expect(try await service.thumbnail(of: second.id) != nil)
+    }
+
+    /// Seule la photo confirmée part : les autres photos du même créneau (cachées par la frise, qui n'en montre qu'une) restent.
+    @Test func saveDeletesOnlyTheConfirmedPhotoOfTheSlot() async throws {
+        let service = makeService()
+        let day = TestClock.date("2026-11-01T08:00")
+        var slot: [BodyPhoto] = []
+        for hour in 8...11 {
+            slot.append(try await service.save(processed(), pose: .front, takenAt: TestClock.date("2026-11-01T\(hour):00")))
+        }
+        let shown = try #require(try await service.existing(pose: .front, on: day))
+        #expect(shown.id == slot[3].id)
+        let new = try await service.save(processed(), pose: .front, takenAt: TestClock.date("2026-11-01T12:00"), replacing: shown.id)
+        #expect(Set(try await service.photos().map(\.id)) == Set(slot.prefix(3).map(\.id) + [new.id]))
+    }
+
+    /// Sans remplacement confirmé, rien n'est supprimé.
+    @Test func saveWithoutConfirmationDeletesNothing() async throws {
+        let service = makeService()
+        let old = try await service.save(processed(), pose: .front, takenAt: TestClock.date("2026-11-01T08:00"))
+        let new = try await service.save(processed(), pose: .front, takenAt: TestClock.date("2026-11-01T20:00"))
+        #expect(Set(try await service.photos().map(\.id)) == [old.id, new.id])
     }
 
     @Test func saveKeepsOtherPosesAndDays() async throws {
@@ -53,15 +76,18 @@ struct BodyPhotoServiceTests {
         #expect(saved.pose == .back && saved.takenAt == taken && saved.createdAt == TestClock.date("2026-11-20T12:00"))
     }
 
-    @Test func concurrentSavesOfTheSamePoseAndDayLeaveOnePhoto() async throws {
+    /// Des enregistrements concurrents qui remplacent la même photo confirmée : elle seule part, chaque nouvelle reste.
+    @Test func concurrentSavesReplacingOnePhotoDeleteOnlyIt() async throws {
         let service = makeService()
         let photo = try processed()
         let day = TestClock.date("2026-11-01T08:00")
+        let confirmed = try await service.save(photo, pose: .front, takenAt: day)
         try await withThrowingTaskGroup(of: Void.self) { group in
-            for _ in 0..<5 { group.addTask { _ = try await service.save(photo, pose: .front, takenAt: day) } }
+            for _ in 0..<5 { group.addTask { _ = try await service.save(photo, pose: .front, takenAt: day, replacing: confirmed.id) } }
             try await group.waitForAll()
         }
-        #expect(try await service.photos().count == 1)
+        let stored = try await service.photos()
+        #expect(stored.count == 5 && !stored.contains { $0.id == confirmed.id })
     }
 
     /// Les photos de corps n'ont aucune autre copie : un remplacement dont l'écriture échoue garde l'ancienne photo.
@@ -72,25 +98,25 @@ struct BodyPhotoServiceTests {
         let old = try await service.save(processed(), pose: .front, takenAt: TestClock.date("2026-11-01T08:00"))
         await failing.setFailsSave(true)
         await #expect(throws: FailingBodyPhotoStore.Failure.self) {
-            _ = try await service.save(processed(), pose: .front, takenAt: TestClock.date("2026-11-01T20:00"))
+            _ = try await service.save(processed(), pose: .front, takenAt: TestClock.date("2026-11-01T20:00"), replacing: old.id)
         }
         #expect(try await service.photos().map(\.id) == [old.id])
         #expect(try await service.image(of: old.id) != nil)
     }
 
-    /// La nouvelle photo est écrite : un échec de suppression de l'ancienne ne fait pas échouer l'ajout, et le remplacement
-    /// suivant la retire.
+    /// La nouvelle photo est écrite : un échec de suppression de l'ancienne ne fait pas échouer l'ajout. L'ancienne reste, en trop
+    /// mais jamais supprimée sans confirmation ; le remplacement suivant ne retire que la photo confirmée.
     @Test func aFailedDeleteOfTheOldPhotoStillSavesTheNewOne() async throws {
         let failing = FailingBodyPhotoStore()
         let service = BodyPhotoService(store: failing, measurements: measurements, calendar: TestClock.calendar, timeZone: .gmt,
                                        now: { TestClock.date("2026-11-20T12:00") })
         let old = try await service.save(processed(), pose: .front, takenAt: TestClock.date("2026-11-01T08:00"))
         await failing.setFailsDelete(true)
-        let new = try await service.save(processed(), pose: .front, takenAt: TestClock.date("2026-11-01T20:00"))
+        let new = try await service.save(processed(), pose: .front, takenAt: TestClock.date("2026-11-01T20:00"), replacing: old.id)
         #expect(Set(try await service.photos().map(\.id)) == [old.id, new.id])
         await failing.setFailsDelete(false)
-        let third = try await service.save(processed(), pose: .front, takenAt: TestClock.date("2026-11-01T21:00"))
-        #expect(try await service.photos().map(\.id) == [third.id])
+        let third = try await service.save(processed(), pose: .front, takenAt: TestClock.date("2026-11-01T21:00"), replacing: new.id)
+        #expect(Set(try await service.photos().map(\.id)) == [old.id, third.id])
     }
 
     @Test func existingFindsSamePoseSameDay() async throws {
