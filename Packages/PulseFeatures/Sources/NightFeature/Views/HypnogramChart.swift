@@ -63,7 +63,8 @@ struct HypnogramChart: View {
     private var chart: some View {
         let stageLabel = String(localized: "Phase", bundle: .module)
         let timeLabel = String(localized: "Heure", bundle: .module)
-        let segments = night.segments
+        // Un segment dont la rangée n'est pas affichée (quelques secondes sans phase) n'est pas dessiné.
+        let segments = night.segments.filter { rows.contains($0.stage) }
         return Chart(segments.indices, id: \.self) { index in
             RectangleMark(xStart: .value(timeLabel, segments[index].start), xEnd: .value(timeLabel, segments[index].end),
                           y: .value(stageLabel, name(of: segments[index].stage)))

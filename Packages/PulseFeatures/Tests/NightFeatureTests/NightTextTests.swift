@@ -45,6 +45,16 @@ struct NightTextTests {
         #expect(NightText.stageName(.asleepUnspecified, hasStages: true) == "Sans phase")
     }
 
+    /// 20 secondes sans phase (un échantillon iPhone) s'arrondissent à 0 min : ni rangée, comme dans la répartition.
+    @Test func hypnogramIgnoresAFewUnstagedSeconds() {
+        var night = NightFixtures.typicalNight()
+        let start = NightFixtures.date(2026, 11, 20, 5, 50)
+        night.segments = [SleepSegment(start: start, end: start.addingTimeInterval(20), stage: .asleepUnspecified)]
+        #expect(NightText.hypnogramRows(night) == [.awake, .rem, .core, .deep])
+        #expect(NightChartDescriptor.series(night).isEmpty)
+        #expect(!NightText.breakdownRows(NightDetail(night: night, averages: nil)).contains { $0.stage == .asleepUnspecified })
+    }
+
     @Test func hypnogramRowsWithoutUnstagedRest() {
         var night = NightFixtures.typicalNight()
         night.segments = [SleepSegment(start: NightFixtures.date(2026, 11, 20, 1), end: NightFixtures.date(2026, 11, 20, 2),

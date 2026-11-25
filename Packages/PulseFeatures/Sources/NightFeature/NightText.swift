@@ -85,8 +85,15 @@ enum NightText {
     /// phases, deux rangées : Éveil et Endormi.
     static func hypnogramRows(_ night: NightSleep) -> [SleepStage] {
         guard night.hasStages else { return [.awake, .asleepUnspecified] }
-        let hasUnspecified = night.segments.contains { $0.stage == .asleepUnspecified }
-        return SleepStage.chartOrder + (hasUnspecified ? [.asleepUnspecified] : [])
+        return SleepStage.chartOrder + (showsUnspecifiedRow(night) ? [.asleepUnspecified] : [])
+    }
+
+    /// Vrai quand le temps sans phase du bloc principal d'une nuit à phases dure au moins une minute une fois arrondi : le seuil
+    /// de la répartition, qui compte en minutes entières. Quelques secondes d'un échantillon iPhone n'ouvrent pas de rangée.
+    static func showsUnspecifiedRow(_ night: NightSleep) -> Bool {
+        let seconds = night.segments.filter { $0.stage == .asleepUnspecified }
+            .reduce(0) { $0 + $1.end.timeIntervalSince($1.start) }
+        return (seconds / 60).rounded() > 0
     }
 
     static var noStagesNote: String {
