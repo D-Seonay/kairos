@@ -53,3 +53,19 @@
   - Avec des phases, la carte dessine l'hypnogramme en blanc (`Visual.hypnogram`) : une barre fine par tranche, des liaisons verticales et l'encre plus forte vers le profond. Elle donne aussi le temps endormi, le profond, le paradoxal et le léger.
   - Sans phases, elle montre le temps endormi en très grand, avec les réveils.
 - Restent à faire : le score de récupération du jour, et une semaine d'entraînement résumée.
+
+## Lot 3 : l'image sans fond (sticker)
+
+- **Intention** : poser ses chiffres sur sa propre photo en story, comme un sticker Strava. L'image ne garde que le contenu de la carte, sans aucun fond.
+- **Approches** :
+  - **Retenue** : un PNG transparent, avec un bouton « Copier » ; on le colle ensuite dans l'éditeur de story d'Instagram, où il devient un sticker. On peut aussi l'enregistrer dans Photos, le PNG garde sa transparence.
+  - **Écartée** : « Partager » seul. Instagram fait du PNG le fond de la story et remplit le transparent d'une couleur.
+  - **Écartée** : l'API « Share to Stories » d'Instagram (`stickerImage`), qui demande un identifiant d'app Meta.
+- **Conception** :
+  - La rangée « Fond » gagne une tuile « Sans fond » (damier), toujours là, même sans photos de séance. La rangée s'affiche donc toujours.
+  - Le rendu reprend le titre, le dessin, les chiffres, les records et la marque, à l'encre blanche avec une ombre douce pour rester lisible sur une photo claire. L'étiquette, la date et le pied « Suivi avec Pulse » restent, la marque discrète aussi.
+  - L'image est recadrée au contenu (1 080 px de large, hauteur selon le contenu), sans le vide d'une story ; le choix story / publication est masqué dans ce mode.
+  - L'aperçu pose l'image sur un damier.
+  - « Copier » met le PNG dans le presse-papiers (`UIPasteboard`, type PNG) et confirme « Copiée, colle-la dans ta story ». « Partager » reste à côté.
+  - Pas d'option d'encre noire : blanc et ombre seulement.
+- **Laissé à vérifier sur iPhone** : le collage dans une story Instagram, la lisibilité sur une photo claire.
