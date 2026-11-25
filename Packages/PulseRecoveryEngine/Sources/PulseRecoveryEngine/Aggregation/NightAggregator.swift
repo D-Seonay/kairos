@@ -9,7 +9,7 @@ public struct NightAggregator: Sendable {
     static let windowStartHours = NightWindow.startHours
     /// Fin de la fenêtre candidate, en heures après minuit (midi).
     static let windowEndHours = NightWindow.endHours
-    /// Fenêtre SDNN de repli sans sommeil délimité : de minuit à 8 h.
+    /// Fenêtre SDNN de repli sans aucun sommeil enregistré : de minuit à 8 h.
     static let fallbackSDNNHours = 8
 
     private let calendar: Calendar
@@ -22,18 +22,18 @@ public struct NightAggregator: Sendable {
         days.map { night(for: $0, sdnn: sdnn, restingHeartRate: restingHeartRate, sleep: sleep) }
     }
 
-    /// `day` est minuit local du jour de réveil.
+    /// `day` est minuit local du jour de réveil. La SDNN de la nuit est la moyenne des mesures prises endormi dans le bloc
+    /// principal : une sieste, un assoupissement du soir et les éveils n'y entrent pas. Sans mesure endormie, pas de SDNN.
     public func night(for day: Date, sdnn: [TimedSample], restingHeartRate: [TimedSample], sleep: [SleepInterval]) -> NightSample {
         let asleep = mergedAsleepIntervals(for: day, in: sleep)
-        let sleepWindow = asleep.isEmpty
-            ? fallbackWindow(for: day)
-            : DateInterval(start: asleep[0].start, end: asleep[asleep.count - 1].end)
+        let detail = asleep.isEmpty ? nil : NightSleepBuilder(calendar: calendar).night(for: day, sleep: sleep)
+        let sdnnWindows = asleep.isEmpty ? [fallbackWindow(for: day)] : mainBlockAsleepIntervals(of: detail)
 
         return NightSample(
             day: day,
-            sdnnMs: meanSDNN(sdnn, in: sleepWindow),
+            sdnnMs: meanSDNN(sdnn, in: sdnnWindows),
             restingHeartRate: lastRestingHeartRate(restingHeartRate, on: day),
-            sleep: summary(for: day, asleepIntervals: asleep, sleep: sleep)
+            sleep: summary(for: day, asleepIntervals: asleep, sleep: sleep, detail: detail)
         )
     }
 
@@ -47,14 +47,19 @@ public struct NightAggregator: Sendable {
         merge(retainedIntervals(for: day, in: sleep).map { DateInterval(start: $0.start, end: $0.end) })
     }
 
-    /// Le total et le profond gardent leur calcul (ils font le score) ; les autres phases viennent de `NightSleepBuilder`,
-    /// qui compte les mêmes minutes endormies et profondes.
-    private func summary(for day: Date, asleepIntervals: [DateInterval], sleep: [SleepInterval]) -> SleepSummary? {
+    /// Les plages endormies du bloc principal de la nuit, fusionnées : les éveils et les trous sans donnée en sont exclus.
+    private func mainBlockAsleepIntervals(of night: NightSleep?) -> [DateInterval] {
+        merge((night?.segments ?? []).filter { $0.stage.isAsleep }.map { DateInterval(start: $0.start, end: $0.end) })
+    }
+
+    /// Le total et le profond gardent leur calcul (ils font le score) ; les autres phases viennent de `NightSleepBuilder`
+    /// (`detail`), qui compte les mêmes minutes endormies et profondes.
+    private func summary(for day: Date, asleepIntervals: [DateInterval], sleep: [SleepInterval], detail: NightSleep?) -> SleepSummary? {
         guard !asleepIntervals.isEmpty else { return nil }
         let retained = retainedIntervals(for: day, in: sleep)
         let hasStages = retained.contains { [.core, .deep, .rem].contains($0.stage) }
         let deep = merge(retained.filter { $0.stage == .deep }.map { DateInterval(start: $0.start, end: $0.end) })
-        guard hasStages, let night = NightSleepBuilder(calendar: calendar).night(for: day, sleep: sleep) else {
+        guard hasStages, let night = detail else {
             return SleepSummary(asleepMinutes: minutes(asleepIntervals), deepMinutes: hasStages ? minutes(deep) : nil)
         }
         return SleepSummary(asleepMinutes: minutes(asleepIntervals), deepMinutes: minutes(deep), coreMinutes: night.coreMinutes,
@@ -85,9 +90,10 @@ public struct NightAggregator: Sendable {
         DateInterval(start: day, end: hours(Self.fallbackSDNNHours, from: day))
     }
 
-    private func meanSDNN(_ samples: [TimedSample], in window: DateInterval) -> Double? {
+    /// La moyenne des mesures valides qui tombent dans l'une des plages ; `nil` sans aucune.
+    private func meanSDNN(_ samples: [TimedSample], in windows: [DateInterval]) -> Double? {
         let values = samples
-            .filter { window.contains($0.date) && HRVBaseline.isValid(sdnnMs: $0.value) }
+            .filter { sample in HRVBaseline.isValid(sdnnMs: sample.value) && windows.contains { $0.contains(sample.date) } }
             .map(\.value)
         guard !values.isEmpty else { return nil }
         return values.reduce(0, +) / Double(values.count)
