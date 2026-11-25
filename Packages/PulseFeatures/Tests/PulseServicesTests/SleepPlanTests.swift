@@ -75,6 +75,39 @@ struct SleepPlanTests {
         #expect(plan(profile(goal: 2000)).goalMinutes == 600)
     }
 
+    @Test func outOfRangeChosenWakeFallsBackToTheHabitualOne() {
+        let wakes = ["2026-11-16T06:00", "2026-11-17T06:00", "2026-11-18T06:00", "2026-11-19T06:00", "2026-11-20T06:00"]
+            .map { TestClock.date($0) }
+        for wake in [1000, 2000, 100, Int.min] {
+            let withHabit = plan(profile(weekday: wake, weekend: wake), wokeUp: wakes)
+            #expect(withHabit.chosenWeekdayWake == nil && withHabit.chosenWeekendWake == nil)
+            #expect(withHabit.wakeMinutes(weekend: false) == 360)
+            let without = plan(profile(weekday: wake, weekend: wake))
+            #expect(without.bedtimeMinutes(weekend: false) == nil)
+            #expect(without.bedtime(onEvening: TestClock.date("2026-11-18T12:00"), calendar: calendar) == nil)
+        }
+    }
+
+    @Test func leadOutsideTheChoicesDefaultsToThirtyMinutes() {
+        for lead in [-60, 0, 20, Int.min] {
+            #expect(plan(profile(lead: lead)).leadMinutes == 30)
+        }
+        #expect(plan(profile(lead: 45)).leadMinutes == 45)
+    }
+
+    @Test func clockTextWrapsIntoOneDay() {
+        #expect(SleepPlan.clockText(minutes: -5) == "23:55")
+        #expect(SleepPlan.clockText(minutes: 1440 + 80) == "01:20")
+    }
+
+    @Test func bedtimeOnTheDaylightSavingEveningIsRealTimeBeforeTheWake() {
+        let saturday = TestClock.date("2026-10-24T12:00")
+        let sunday = TestClock.date("2026-10-25T12:00")
+        let wake = calendar.date(bySettingHour: 7, minute: 0, second: 0, of: sunday) ?? sunday
+        let bedtime = plan(profile(weekend: 420)).bedtime(onEvening: saturday, calendar: calendar)
+        #expect(bedtime == wake.addingTimeInterval(-495 * 60))
+    }
+
     @Test func missingLeadDefaultsToThirtyMinutes() {
         let sunday = TestClock.date("2026-11-22T12:00")
         let plan = plan(profile(lead: nil))

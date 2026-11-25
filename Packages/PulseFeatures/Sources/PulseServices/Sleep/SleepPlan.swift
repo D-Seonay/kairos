@@ -21,10 +21,13 @@ public struct SleepPlan: Sendable, Equatable {
 
     public init(profile: UserProfile?, wokeUp: [Date], calendar: Calendar) {
         goalMinutes = SleepGoal.minutes(of: profile)
-        leadMinutes = profile?.bedtimeReminderLeadMinutes ?? Self.defaultLeadMinutes
+        // Les valeurs du profil peuvent arriver hors bornes depuis iCloud : un réveil hors plage laisse la place à l'habituel, une
+        // avance hors choix retombe sur la valeur par défaut.
+        leadMinutes = profile?.bedtimeReminderLeadMinutes.flatMap { SettingsService.bedtimeLeadChoices.contains($0) ? $0 : nil }
+            ?? Self.defaultLeadMinutes
         reminderEnabled = profile?.bedtimeReminderEnabled ?? false
-        chosenWeekdayWake = profile?.weekdayWakeMinutes
-        chosenWeekendWake = profile?.weekendWakeMinutes
+        chosenWeekdayWake = profile?.weekdayWakeMinutes.flatMap { SettingsService.wakeRange.contains($0) ? $0 : nil }
+        chosenWeekendWake = profile?.weekendWakeMinutes.flatMap { SettingsService.wakeRange.contains($0) ? $0 : nil }
         habitualWeekdayWake = HabitualWake.minutes(wokeUp: wokeUp, weekend: false, calendar: calendar)
         habitualWeekendWake = HabitualWake.minutes(wokeUp: wokeUp, weekend: true, calendar: calendar)
     }
@@ -70,7 +73,8 @@ public struct SleepPlan: Sendable, Equatable {
 
     /// « 22:45 », « 00:45 », « 07:00 ».
     public static func clockText(minutes: Int) -> String {
-        String(format: "%02d:%02d", minutes / 60, minutes % 60)
+        let day = (minutes % dayMinutes + dayMinutes) % dayMinutes
+        return String(format: "%02d:%02d", day / 60, day % 60)
     }
 
     /// Vrai quand l'un des cinq réglages du sommeil diffère : l'objectif, les deux réveils, le rappel et son avance.
