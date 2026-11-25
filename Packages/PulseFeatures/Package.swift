@@ -138,7 +138,7 @@ let package = Package(
         ),
         .testTarget(
             name: "NightFeatureTests",
-            dependencies: ["NightFeature", "PulseServices", domain],
+            dependencies: ["NightFeature", "PulseServices", designSystem, domain],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(
@@ -148,7 +148,7 @@ let package = Package(
         ),
         .testTarget(
             name: "PhotosFeatureTests",
-            dependencies: ["PhotosFeature", "PulseServices", domain],
+            dependencies: ["PhotosFeature", "PulseServices", designSystem, domain],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(

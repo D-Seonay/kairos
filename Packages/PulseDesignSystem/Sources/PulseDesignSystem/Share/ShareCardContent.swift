@@ -12,6 +12,10 @@ public struct ShareCardContent: Equatable, Sendable {
         case muscles([MuscleMapRegion: Int])
         /// Le tracé ramené dans le carré unité (voir `ShareRoute.normalized`).
         case route([CGPoint])
+        /// Un chiffre en très grand, seul au centre : la valeur d'un record (« 96 kg ») et ce qu'elle mesure (« 1RM estimé »).
+        case hero(value: String, label: String)
+        /// L'hypnogramme d'une nuit, en barres blanches sur ses rangées.
+        case hypnogram(ShareCardHypnogram)
     }
 
     /// La page de Pulse sur l'App Store, ajoutée au texte partagé.
@@ -37,9 +41,12 @@ public struct ShareCardContent: Equatable, Sendable {
         self.visual = visual
     }
 
-    /// « Push · 1 h 05 · 12 séries · 4 250 kg », puis « Suivi avec Pulse : https://apps.apple.com/… » à la ligne.
+    /// « Push · 1 h 05 · 12 séries · 4 250 kg », puis « Suivi avec Pulse : https://apps.apple.com/… » à la ligne. Le chiffre d'un
+    /// record suit le titre : « Développé couché · 96 kg · 85 kg × 5 ».
     public var caption: String {
-        let head = ([title] + metrics.map(\.caption)).filter { !$0.isEmpty }.joined(separator: " · ")
+        var hero: [String] = []
+        if case .hero(let value, _) = visual { hero = [value] }
+        let head = ([title] + hero + metrics.map(\.caption)).filter { !$0.isEmpty }.joined(separator: " · ")
         let link = String(localized: "Suivi avec Pulse : \(Self.appStoreLink)", bundle: .module)
         return head + "\n" + link
     }
@@ -113,5 +120,68 @@ public enum ShareRoute {
         let offsetX = (span - (maxX - minX)) / 2
         let offsetY = (span - (maxY - minY)) / 2
         return raw.map { CGPoint(x: ($0.x - minX + offsetX) / span, y: ($0.y - minY + offsetY) / span) }
+    }
+}
+
+/// L'hypnogramme de la carte : les noms des rangées de haut en bas (« Éveil », « Paradoxal », « Léger », « Profond ») et les
+/// tranches de la nuit, chacune sur sa rangée, entre 0 (l'endormissement) et 1 (le réveil).
+public struct ShareCardHypnogram: Equatable, Sendable {
+    public struct Bar: Equatable, Sendable {
+        public var row: Int
+        public var start: Double
+        public var end: Double
+
+        public init(row: Int, start: Double, end: Double) {
+            self.row = row
+            self.start = start
+            self.end = end
+        }
+    }
+
+    public var rows: [String]
+    public var bars: [Bar]
+
+    public init(rows: [String], bars: [Bar]) {
+        self.rows = rows
+        self.bars = bars
+    }
+
+    /// Une tranche datée de la nuit, sur sa rangée ; `nil` pour une phase que l'hypnogramme ne montre pas.
+    public struct Segment: Sendable {
+        public var row: Int?
+        public var start: Date
+        public var end: Date
+
+        public init(row: Int?, start: Date, end: Date) {
+            self.row = row
+            self.start = start
+            self.end = end
+        }
+    }
+
+    /// Les tranches ramenées entre `from` et `to` ; une tranche hors de la nuit, vide ou sur une rangée inconnue est écartée,
+    /// une tranche qui déborde est coupée.
+    public static func bars(of segments: [Segment], from: Date, to: Date, rowCount: Int) -> [Bar] {
+        let span = to.timeIntervalSince(from)
+        guard span > 0 else { return [] }
+        return segments.compactMap { segment in
+            guard let row = segment.row, (0..<rowCount).contains(row) else { return nil }
+            let start = max(0, segment.start.timeIntervalSince(from) / span)
+            let end = min(1, segment.end.timeIntervalSince(from) / span)
+            return end > start ? Bar(row: row, start: start, end: end) : nil
+        }
+    }
+}
+
+/// Une photo proposée en fond de carte : sa vignette pour le choix, et l'image entière, lue seulement si on la choisit.
+public struct ShareCardPhoto: Identifiable, Sendable {
+    public let id: UUID
+    public let thumbnail: Data
+    public let load: @Sendable () async -> Data?
+
+    public init(id: UUID, thumbnail: Data, load: @escaping @Sendable () async -> Data?) {
+        self.id = id
+        self.thumbnail = thumbnail
+        self.load = load
     }
 }

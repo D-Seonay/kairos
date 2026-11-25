@@ -3,10 +3,12 @@ import SwiftUI
 /// La carte de partage, telle qu'elle part en image : un tirage « Argentique » sur noir. L'étiquette mono et la marque PULSE en
 /// haut, le titre et la date, le dessin (carte musculaire ou tracé) sur une trame de points, les chiffres en grand et fins, les
 /// records en champagne, puis « Suivi avec Pulse ». Toujours sombre, quelle que soit l'apparence : ses couleurs sont fixes.
-/// Elle se dessine à la taille de `format.size` ; `ShareCardRenderer` en tire l'image.
+/// Avec `photo`, l'image remplit la carte et prend la place du dessin. Elle se dessine à la taille de `format.size` ;
+/// `ShareCardRenderer` en tire l'image.
 public struct ShareCardView: View {
     private let content: ShareCardContent
     private let format: ShareCardFormat
+    private let photo: CGImage?
 
     private static let paper = Color(PulsePalette.pageRGBA)
     private static let ink = Color(PulsePalette.textRGBA)
@@ -15,9 +17,10 @@ public struct ShareCardView: View {
     private static let line = Color(PulsePalette.lineRGBA)
     private static let gold = Color(PulsePalette.goldRGBA)
 
-    public init(content: ShareCardContent, format: ShareCardFormat) {
+    public init(content: ShareCardContent, format: ShareCardFormat, photo: CGImage? = nil) {
         self.content = content
         self.format = format
+        self.photo = photo
     }
 
     private var isStory: Bool { format == .story }
@@ -50,7 +53,17 @@ public struct ShareCardView: View {
 
     // MARK: Parties
 
+    @ViewBuilder
     private var background: some View {
+        if let photo {
+            SharePhotoBackground(photo: photo, size: format.size, paper: Self.paper, ink: Self.ink,
+                                 isVeiled: content.visual.isHero)
+        } else {
+            halftoneBackground
+        }
+    }
+
+    private var halftoneBackground: some View {
         ZStack {
             Self.paper
             // Une lumière tramée derrière le dessin, qui s'éteint vers les bords et laisse les chiffres sur du noir.
@@ -94,14 +107,30 @@ public struct ShareCardView: View {
                 .font(.system(size: 14))
                 .foregroundStyle(Self.ink2)
                 .lineLimit(1)
+                .minimumScaleFactor(0.8)
         }
     }
 
     @ViewBuilder
     private var visual: some View {
+        // Sur une photo, le dessin s'efface : la photo est le sujet. Le chiffre d'un record reste, il est la carte.
+        if photo != nil, !content.visual.isHero {
+            Color.clear
+        } else {
+            drawing
+        }
+    }
+
+    @ViewBuilder
+    private var drawing: some View {
         switch content.visual {
         case .none:
             Color.clear
+        case .hero(let value, let label):
+            ShareHeroView(value: value, label: label, ink: Self.ink, muted: Self.muted, isStory: isStory)
+        case .hypnogram(let hypnogram):
+            ShareHypnogramView(hypnogram: hypnogram, ink: Self.ink, muted: Self.muted, line: Self.line)
+                .frame(maxHeight: .infinity, alignment: .center)
         case .muscles(let levels):
             GeometryReader { proxy in
                 MuscleMapView(levels: levels, label: "", height: max(0, proxy.size.height))
@@ -181,6 +210,13 @@ public struct ShareCardView: View {
     }
 }
 
+extension ShareCardContent.Visual {
+    var isHero: Bool {
+        if case .hero = self { return true }
+        return false
+    }
+}
+
 /// Le tracé de `ShareRoute.normalized`, posé au centre du cadre sans le déformer.
 struct ShareRouteShape: Shape {
     let points: [CGPoint]
@@ -246,6 +282,31 @@ extension ShareCardContent {
         visual: .route(ShareRoute.normalized(
             latitudes: (0..<60).map { 48.85 + 0.01 * sin(Double($0) / 9.5) },
             longitudes: (0..<60).map { 2.35 + 0.014 * cos(Double($0) / 9.5) + Double($0) * 0.0002 })))
+}
+
+extension ShareCardContent {
+    static let previewRecord = ShareCardContent(
+        eyebrow: "Record", title: "Développé couché à la barre", subtitle: "mardi 24 novembre",
+        metrics: [ShareCardMetric(value: "85 × 5", label: "Série"), ShareCardMetric(value: "+2,5 kg", label: "Progression")],
+        visual: .hero(value: "96 kg", label: "1RM estimé"))
+
+    static let previewNight = ShareCardContent(
+        eyebrow: "Nuit", title: "Nuit du 23 au 24 nov.", subtitle: "Endormi à 23:10 · Réveillé à 06:50",
+        metrics: [ShareCardMetric(value: "7 h 12", label: "Endormi"), ShareCardMetric(value: "1 h 20", label: "Profond"),
+                  ShareCardMetric(value: "1 h 45", label: "Paradoxal"), ShareCardMetric(value: "1", label: "Réveil")],
+        visual: .hypnogram(ShareCardHypnogram(
+            rows: ["Éveil", "Paradoxal", "Léger", "Profond"],
+            bars: [.init(row: 2, start: 0, end: 0.08), .init(row: 3, start: 0.08, end: 0.22), .init(row: 2, start: 0.22, end: 0.38),
+                   .init(row: 1, start: 0.38, end: 0.46), .init(row: 0, start: 0.46, end: 0.48), .init(row: 2, start: 0.48, end: 0.62),
+                   .init(row: 3, start: 0.62, end: 0.7), .init(row: 2, start: 0.7, end: 0.84), .init(row: 1, start: 0.84, end: 1)])))
+}
+
+#Preview("Record, story") {
+    ShareCardView(content: .previewRecord, format: .story)
+}
+
+#Preview("Nuit, story") {
+    ShareCardView(content: .previewNight, format: .story)
 }
 
 #Preview("Séance, story") {
