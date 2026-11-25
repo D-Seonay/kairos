@@ -40,7 +40,7 @@ struct RunBestEffortIndexTests {
         try await tracks.save(track(for: health, legs: [(8_000, 3)]))
 
         let index = RunBestEffortIndex(workouts: workouts, tracks: tracks, store: store)
-        #expect(await index.refresh() == 1)
+        #expect(await index.refresh(now: start) == 1)
         let cached = await store.all()
         #expect(Set(cached.keys) == [long.id])
         let fiveK = try #require(cached[long.id]?.seconds(for: 5_000))
@@ -50,13 +50,54 @@ struct RunBestEffortIndexTests {
 
         // Un second passage ne relit rien : le cache n'est pas réécrit.
         let saves = await store.saveCount
-        #expect(await index.refresh() == 0)
+        #expect(await index.refresh(now: start) == 0)
         #expect(await store.saveCount == saves)
 
         // Le tracé de la course sans tracé arrive (iCloud) : il entre au passage suivant.
         try await tracks.save(track(for: bare, legs: [(6_000, 3)]))
-        #expect(await index.refresh() == 1)
+        #expect(await index.refresh(now: start) == 1)
         #expect(await store.all()[bare.id]?.seconds(for: 5_000) != nil)
+    }
+
+    @Test("une course sans tracé utilisable est retenue comme traitée, pour ne pas être relue à chaque passage")
+    func runsWithoutAUsableTrackAreRememberedAsDone() async throws {
+        let workouts = InMemoryWorkoutRepository()
+        let tracks = InMemoryRunTrackRepository()
+        let store = InMemoryRunBestEffortStore()
+        // Un tracé d'un seul point ; pas de tracé quatre jours après la course ; pas de tracé la veille.
+        let single = run(meters: 6_000, minutes: 30)
+        let old = run(meters: 6_000, minutes: 30, daysAgo: 4)
+        let recent = run(meters: 6_000, minutes: 30, daysAgo: 1)
+        for session in [single, old, recent] { try await workouts.save(session) }
+        try await tracks.save(RunTrack(id: single.id, points: Array(track(for: single, legs: [(6_000, 3)]).points.prefix(1)),
+                                       splits: [], createdAt: start, updatedAt: start))
+
+        let index = RunBestEffortIndex(workouts: workouts, tracks: tracks, store: store)
+        #expect(await index.refresh(now: start) == 2)
+        let cached = await store.all()
+        #expect(cached[single.id]?.efforts == [] && cached[old.id]?.efforts == [])
+        #expect(cached[recent.id] == nil)
+    }
+
+    @Test("une course finie pendant le passage garde ses segments précis et n'est pas prise pour une séance disparue",
+          arguments: [false, true])
+    func aRunFinishedDuringThePassKeepsItsPreciseSegments(afterRead: Bool) async throws {
+        let base = InMemoryWorkoutRepository()
+        let tracks = InMemoryRunTrackRepository()
+        let store = InMemoryRunBestEffortStore()
+        let finished = run(meters: 6_000, minutes: 30, daysAgo: 0)
+        let precise = RunBestEfforts(id: finished.id, efforts: [RunBestEffort(meters: 5_000, seconds: 1_234)])
+        // La course se termine pendant la lecture des séances : séance, tracé puis segments précis.
+        let finishedTrack = track(for: finished, legs: [(6_000, 3)])
+        let workouts = HookedWorkoutRepository(base: base, afterRead: afterRead) {
+            try? await base.save(finished)
+            try? await tracks.save(finishedTrack)
+            await store.save([precise])
+        }
+
+        let index = RunBestEffortIndex(workouts: workouts, tracks: tracks, store: store)
+        await index.refresh(now: start)
+        #expect(await store.all()[finished.id] == precise)
     }
 
     @Test("le tracé relu n'est jamais rallongé à la distance de la séance, seulement raccourci")
@@ -98,6 +139,36 @@ struct RunBestEffortIndexTests {
         await store.save([faster])
         await store.remove([second.id])
         #expect(await store.all() == [first.id: faster])
+    }
+}
+
+/// Un dépôt de séances qui lance `hook` une fois, pendant la première lecture des séances : avant de lire le dépôt, ou juste
+/// après (`afterRead`), la lecture rendant alors l'état d'avant.
+private actor HookedWorkoutRepository: WorkoutRepository {
+    private let base: InMemoryWorkoutRepository
+    private let afterRead: Bool
+    private var hook: (@Sendable () async -> Void)?
+
+    init(base: InMemoryWorkoutRepository, afterRead: Bool, hook: @escaping @Sendable () async -> Void) {
+        self.base = base
+        self.afterRead = afterRead
+        self.hook = hook
+    }
+
+    func sessions(from: Date, to: Date) async throws -> [WorkoutSession] {
+        guard let hook else { return try await base.sessions(from: from, to: to) }
+        self.hook = nil
+        if !afterRead { await hook() }
+        let read = try await base.sessions(from: from, to: to)
+        if afterRead { await hook() }
+        return read
+    }
+
+    func session(id: UUID) async throws -> WorkoutSession? { try await base.session(id: id) }
+    func save(_ session: WorkoutSession) async throws { try await base.save(session) }
+    func delete(id: UUID) async throws { try await base.delete(id: id) }
+    func lastSets(for exercise: ExerciseReference, startedBefore date: Date) async throws -> [WorkoutSet] {
+        try await base.lastSets(for: exercise, startedBefore: date)
     }
 }
 

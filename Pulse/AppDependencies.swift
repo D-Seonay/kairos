@@ -256,7 +256,7 @@ struct AppDependencies: Sendable {
         let stores = RefresherStores(
             profiles: profiles, programs: programs, recovery: recovery, storedWorkouts: storedWorkouts, scheduledDays: scheduledDays,
             userExercises: userExercises, bodyMeasurements: bodyMeasurements, healthCache: healthCache, activity: activity,
-            planning: planning, container: container)
+            planning: planning, container: container, runBestEfforts: UserDefaultsRunBestEffortStore(suiteName: wiring.defaultsSuite))
         let refresher = makeRefresher(wiring, stores: stores, scores: scores)
         let personalRecords = SwiftDataPersonalRecordRepository(modelContainer: container)
         let records = RecordsService(workouts: workouts, records: personalRecords, userExercises: userExercises,
@@ -283,8 +283,8 @@ struct AppDependencies: Sendable {
                                        library: content, calendar: calendar, now: wiring.now),
             healthCache: healthCache, activity: activity, refresher: refresher, backgroundDelivery: wiring.backgroundDelivery,
             activeSession: activeSession, liveSession: liveSession, sessionActivity: wiring.sessionActivity,
-            run: RunDependencies(wiring, container: container, workouts: workouts, profiles: profiles), photos: photos,
-            inspector: wiring.inspector ?? SwiftDataStoreInspector(container: container, cloudEnabled: mode == .cloud),
+            run: RunDependencies(wiring, container: container, workouts: workouts, profiles: profiles, bestEfforts: stores.runBestEfforts),
+            photos: photos, inspector: wiring.inspector ?? SwiftDataStoreInspector(container: container, cloudEnabled: mode == .cloud),
             exporter: makeExporter(container: container, content: content),
             eraser: makeEraser(wiring, container: container, refresher: refresher),
             seeder: SampleDataSeeder(container: container, calendar: calendar), notificationStatus: wiring.notificationStatus)

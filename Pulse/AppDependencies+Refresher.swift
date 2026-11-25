@@ -20,6 +20,8 @@ extension AppDependencies {
         var planning: PlanningService
         /// Le magasin : le déplacement des valeurs Apple Santé et les tracés des courses Pulse (meilleurs segments) le lisent.
         var container: ModelContainer
+        /// Le cache des meilleurs segments, le même que celui de la course : ses écritures passent par un seul acteur.
+        var runBestEfforts: any RunBestEffortStore
     }
 
     /// Le passage du jour : les nuits, puis les courses et les vélos quand la source Apple Santé sait les lire (spec M6 §3), le
@@ -51,7 +53,7 @@ extension AppDependencies {
             planning: stores.planning, relocation: SwiftDataHealthDataRelocation(modelContainer: stores.container),
             runBestEfforts: RunBestEffortIndex(
                 workouts: stores.storedWorkouts, tracks: SwiftDataRunTrackRepository(modelContainer: stores.container),
-                store: UserDefaultsRunBestEffortStore(suiteName: wiring.defaultsSuite)),
+                store: stores.runBestEfforts),
             calendar: calendar, now: wiring.now)
     }
 }

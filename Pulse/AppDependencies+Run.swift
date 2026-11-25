@@ -50,11 +50,12 @@ extension AppDependencies {
         let healthSession: HealthKitRunRecorder?
 
         /// `workouts` masque les doublons de la montre : une course Pulse enregistrée garde en magasin la FC du direct.
-        init(_ wiring: Wiring, container: ModelContainer, workouts: any WorkoutRepository, profiles: any ProfileRepository) {
+        /// `bestEfforts` : le cache des meilleurs segments, partagé avec le passage du jour.
+        init(_ wiring: Wiring, container: ModelContainer, workouts: any WorkoutRepository, profiles: any ProfileRepository,
+             bestEfforts: any RunBestEffortStore) {
             let adapters = wiring.run
             let tracks = SwiftDataRunTrackRepository(modelContainer: container)
             let preferences = UserDefaultsRunPreferencesStore(suiteName: wiring.defaultsSuite)
-            let bestEfforts = UserDefaultsRunBestEffortStore(suiteName: wiring.defaultsSuite)
             service = RunSessionService(
                 recorder: adapters.recorder, location: adapters.location, announcer: adapters.announcer,
                 activity: adapters.activity, reminders: adapters.reminders,

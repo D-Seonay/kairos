@@ -158,7 +158,7 @@ public final class DayRefresher: Sendable {
         await workoutHistory?.refresh(now: now)
         await bodyHistory?.refresh(now: now)
         // Les records de course lisent ce cache : un tracé arrivé d'iCloud ou une course d'avant le cache y entre ici.
-        await runBestEfforts?.refresh()
+        await runBestEfforts?.refresh(now: now)
         // Une semaine illisible reste telle quelle : la séance du jour suit les lignes déjà écrites.
         try? await antiInterference?.apply(nights: history.nights)
         let plan = await plan(for: profile, readFailed: profileReadFailed, now: now)

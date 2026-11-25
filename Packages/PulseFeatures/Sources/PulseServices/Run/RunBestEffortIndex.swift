@@ -15,13 +15,19 @@ public struct RunBestEffortIndex: Sendable {
         self.store = store
     }
 
+    /// Au-delà de ce délai après la course, un tracé absent n'arrivera plus d'iCloud : la course est retenue comme traitée.
+    public static let missingTrackGrace: TimeInterval = 3 * 86_400
+
     /// Calcule les courses manquantes et rend leur nombre. Une lecture qui échoue laisse le cache tel quel : la course est
-    /// retentée au passage suivant.
+    /// retentée au passage suivant. Une course sans tracé utilisable est retenue avec une liste vide (ses records restent à
+    /// l'allure moyenne), pour ne pas être relue à chaque passage.
     @discardableResult
-    public func refresh() async -> Int {
+    public func refresh(now: Date) async -> Int {
+        // Le cache est lu avant les séances : une course finie entre les deux lectures, déjà rangée dans le cache avec ses points
+        // bruts, n'est pas prise pour une séance disparue.
+        let cached = await store.all()
         guard let sessions = try? await workouts.sessions(from: .distantPast, to: .distantFuture) else { return 0 }
         let runs = sessions.filter { $0.kind == .run && $0.source == .pulse && $0.status == .completed }
-        let cached = await store.all()
         let gone = Set(cached.keys).subtracting(runs.map(\.id))
         if !gone.isEmpty { await store.remove(gone) }
 
@@ -29,10 +35,23 @@ public struct RunBestEffortIndex: Sendable {
         for run in runs where cached[run.id] == nil {
             // Sous 5 km, aucun segment à chercher : le tracé n'est pas lu.
             guard let meters = run.distanceMeters, meters >= Self.distances[0] else { continue }
-            // Pas encore de tracé (iCloud l'apporte parfois après la séance) : rien n'est retenu, il sera relu.
-            guard let track = try? await tracks.track(for: run.id), track.points.count >= 2 else { continue }
-            computed.append(Self.efforts(of: track, session: run))
+            let fetched: RunTrack?
+            do {
+                fetched = try await tracks.track(for: run.id)
+            } catch {
+                continue
+            }
+            if let track = fetched, track.points.count >= 2 {
+                computed.append(Self.efforts(of: track, session: run))
+            } else if fetched != nil || now.timeIntervalSince(run.endedAt ?? run.startedAt) > Self.missingTrackGrace {
+                // Un tracé sans assez de points, ou absent trop longtemps après la course : rien à chercher, une fois pour toutes.
+                computed.append(RunBestEfforts(id: run.id, efforts: []))
+            }
+            // Sinon le tracé n'est pas encore arrivé d'iCloud : la course est relue au passage suivant.
         }
+        // Une course finie pendant le passage a pu ranger entre-temps ses segments, plus justes (points bruts) : ils restent.
+        let latest = computed.isEmpty ? [:] : await store.all()
+        computed.removeAll { latest[$0.id] != nil }
         if !computed.isEmpty { await store.save(computed) }
         return computed.count
     }
