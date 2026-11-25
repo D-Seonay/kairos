@@ -19,7 +19,9 @@ public struct DiagnosticReport: Sendable, Equatable, Identifiable {
 
 /// Les derniers rapports de diagnostic MetricKit (plantages, blocages, lancements lents), gardés dans un dossier de l'iPhone :
 /// jamais dans SwiftData ni dans iCloud, exclus de la sauvegarde, et jamais envoyés. L'utilisateur les lit dans l'écran
-/// Diagnostic et décide de les partager. Au-delà de `limit`, les plus anciens sont supprimés.
+/// Diagnostic et décide de les partager. Au-delà de `limit`, les plus anciens sont supprimés, ceux sans plantage d'abord : un
+/// plantage est le plus utile à l'assistance. Avant l'écriture, les textes libres du rapport sont retirés
+/// (`DiagnosticReportSanitizer`).
 ///
 /// Un fichier par rapport : `pulse-diagnostic-<aaaammjj-hhmmssmmm UTC>-<8 caractères>.json`. Le nom porte l'heure de réception,
 /// et l'ordre des noms est celui des réceptions ; aucune date de fichier n'est lue.
@@ -42,15 +44,14 @@ public actor DiagnosticReportStore {
     /// sans aucun diagnostic : rien n'est écrit.
     @discardableResult
     public func save(_ json: Data) throws -> DiagnosticReport? {
-        guard let summary = DiagnosticReportSummary(json: json), summary.total > 0 else { return nil }
+        guard let cleaned = DiagnosticReportSanitizer.sanitized(json), let summary = DiagnosticReportSummary(json: cleaned),
+              summary.total > 0 else { return nil }
         try prepareDirectory()
         let receivedAt = now()
         let suffix = UUID().uuidString.prefix(8).lowercased()
         let url = directory.appendingPathComponent("\(Self.prefix)\(Self.stamp(receivedAt))-\(suffix)\(Self.suffix)")
-        try json.write(to: url, options: .atomic)
-        for old in reportFiles().dropFirst(limit) {
-            try? FileManager.default.removeItem(at: old)
-        }
+        try cleaned.write(to: url, options: .atomic)
+        prune()
         return DiagnosticReport(fileURL: url, receivedAt: Self.receivedAt(of: url) ?? receivedAt, summary: summary)
     }
 
@@ -71,6 +72,22 @@ public actor DiagnosticReportStore {
     }
 
     // MARK: - Fichiers
+
+    /// Au-delà de la limite, garde les plus récents des rapports avec plantage, puis les plus récents des autres ; un fichier
+    /// illisible part en premier.
+    private func prune() {
+        let files = reportFiles()
+        guard files.count > limit else { return }
+        // `files` va du plus récent au plus ancien : un tri stable par rang garde cet ordre dans chaque rang.
+        let ranked = files.map { url -> (url: URL, rank: Int) in
+            let summary = (try? Data(contentsOf: url)).flatMap(DiagnosticReportSummary.init(json:))
+            return (url, summary.map { $0.crashes > 0 ? 0 : 1 } ?? 2)
+        }
+        let kept = Set([0, 1, 2].flatMap { rank in ranked.filter { $0.rank == rank }.map(\.url) }.prefix(limit))
+        for url in files where !kept.contains(url) {
+            try? FileManager.default.removeItem(at: url)
+        }
+    }
 
     /// Les fichiers de rapport du dossier, du plus récent au plus ancien (ordre inverse des noms).
     private func reportFiles() -> [URL] {

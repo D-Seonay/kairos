@@ -1,3 +1,4 @@
+import PulseDesignSystem
 import PulseDomain
 import PulseHealth
 import PulseRecoveryEngine
@@ -24,6 +25,8 @@ struct HealthDiagnosticsView: View {
         }
         .navigationTitle(String(localized: "Diagnostic"))
         .task { await model.refresh() }
+        .task { await reports.load() }
+        .pulseAnnounceOnce(reports.errorMessage, id: reports.failureCount, isError: true)
     }
 
     // MARK: - Sections

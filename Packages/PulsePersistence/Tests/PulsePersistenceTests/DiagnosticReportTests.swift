@@ -104,7 +104,7 @@ private final class SteppingClock: @unchecked Sendable {
         #expect(reports == [saved])
         #expect(saved.summary.crashes == 1)
         #expect(saved.fileURL.lastPathComponent.hasPrefix("pulse-diagnostic-"))
-        #expect(try Data(contentsOf: saved.fileURL) == json)
+        #expect(try Data(contentsOf: saved.fileURL) == DiagnosticReportSanitizer.sanitized(json))
     }
 
     @Test func onlyTheNewestReportsAreKept() async throws {
@@ -123,6 +123,46 @@ private final class SteppingClock: @unchecked Sendable {
         #expect(reports.map(\.id) == saved.suffix(3).reversed().map(\.id))
         let files = try FileManager.default.contentsOfDirectory(atPath: directory.path)
         #expect(files.count == 3)
+    }
+
+    /// Au-delà de la limite, un plantage reste plus longtemps qu'un blocage ou un lancement lent plus récent.
+    @Test func crashesAreKeptBeforeHangsAndSlowLaunches() async throws {
+        let directory = temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let clock = SteppingClock()
+        let store = DiagnosticReportStore(directory: directory, limit: 3, now: { clock.next() })
+
+        try await store.save(payload(crashes: 1))
+        try await store.save(payload(crashes: 2))
+        try await store.save(payload(hangs: ["2 sec"]))
+        try await store.save(payload(launches: ["6 sec"]))
+        try await store.save(payload(hangs: ["4 sec"]))
+        let reports = await store.reports()
+
+        #expect(reports.map(\.summary.crashes) == [0, 2, 1])
+        #expect(reports.first?.summary.longestHangSeconds == 4)
+    }
+
+    @Test func freeTextIsRemovedBeforeWriting() async throws {
+        let directory = temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let store = DiagnosticReportStore(directory: directory)
+        let json = Data(#"""
+            {"crashDiagnostics":[{"callStackTree":{"callStacks":[]},"diagnosticMetaData":{"signal":6,"appVersion":"1.0.4",
+            "objectiveCexceptionReason":{"composedMessage":"Clé inconnue : Créatine 5 g","formatString":"Clé inconnue : %@",
+            "arguments":["Créatine 5 g"],"exceptionName":"NSInvalidArgumentException"}}}]}
+            """#.utf8)
+
+        let saved = try #require(try await store.save(json))
+        let written = try String(contentsOf: saved.fileURL, encoding: .utf8)
+
+        #expect(!written.contains("Créatine"))
+        #expect(!written.contains("composedMessage"))
+        #expect(!written.contains("arguments"))
+        #expect(written.contains("NSInvalidArgumentException"))
+        #expect(written.contains("formatString"))
+        #expect(saved.summary.crashes == 1)
+        #expect(saved.summary.appVersion == "1.0.4")
     }
 
     @Test func anEmptyOrUnreadableReportIsNotWritten() async throws {

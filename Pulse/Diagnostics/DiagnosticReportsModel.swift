@@ -8,6 +8,8 @@ import PulsePersistence
 final class DiagnosticReportsModel {
     private(set) var reports: [DiagnosticReport] = []
     private(set) var errorMessage: String?
+    /// Change à chaque échec : VoiceOver annonce le message une fois par échec.
+    private(set) var failureCount = 0
 
     private let store: DiagnosticReportStore
 
@@ -25,6 +27,7 @@ final class DiagnosticReportsModel {
             errorMessage = nil
         } catch {
             errorMessage = String(localized: "Les rapports n'ont pas pu être supprimés.")
+            failureCount += 1
         }
         await load()
     }
@@ -34,10 +37,13 @@ final class DiagnosticReportsModel {
     /// « 1 plantage · 2 blocages · 1 lancement lent » ; les exceptions rares ferment la ligne.
     static func title(_ summary: DiagnosticReportSummary) -> String {
         var parts: [String] = []
-        if summary.crashes > 0 { parts.append(String(localized: "\(summary.crashes) plantage(s)")) }
-        if summary.hangs > 0 { parts.append(String(localized: "\(summary.hangs) blocage(s)")) }
-        if summary.slowLaunches > 0 { parts.append(String(localized: "\(summary.slowLaunches) lancement(s) lent(s)")) }
-        if summary.otherExceptions > 0 { parts.append(String(localized: "\(summary.otherExceptions) autre(s) alerte(s)")) }
+        let crashes = summary.crashes, hangs = summary.hangs, launches = summary.slowLaunches, others = summary.otherExceptions
+        if crashes > 0 { parts.append(crashes == 1 ? String(localized: "1 plantage") : String(localized: "\(crashes) plantages")) }
+        if hangs > 0 { parts.append(hangs == 1 ? String(localized: "1 blocage") : String(localized: "\(hangs) blocages")) }
+        if launches > 0 {
+            parts.append(launches == 1 ? String(localized: "1 lancement lent") : String(localized: "\(launches) lancements lents"))
+        }
+        if others > 0 { parts.append(others == 1 ? String(localized: "1 autre alerte") : String(localized: "\(others) autres alertes")) }
         return parts.joined(separator: " · ")
     }
 
