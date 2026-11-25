@@ -540,6 +540,96 @@
           }
         }
       }
+    },
+    "1 semaine": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 semaine"
+          }
+        }
+      }
+    },
+    "%lld semaines": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld semaines"
+          }
+        }
+      }
+    },
+    "Pulse estime ton 1RM avec la formule de Brzycki et garde la meilleure série de chaque séance. Ton meilleur : %@ le %@. Les %lld séances suivantes, sur %@, n'ont pas fait mieux (au mieux %@).": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pulse estime ton 1RM avec la formule de Brzycki et garde la meilleure série de chaque séance. Ton meilleur : %@ le %@. Les %lld séances suivantes, sur %@, n'ont pas fait mieux (au mieux %@)."
+          }
+        }
+      }
+    },
+    "1 séance faite en fatigue ou en décharge n'est pas comptée.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 séance faite en fatigue ou en décharge n'est pas comptée."
+          }
+        }
+      }
+    },
+    "%lld séances faites en fatigue ou en décharge ne sont pas comptées.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld séances faites en fatigue ou en décharge ne sont pas comptées."
+          }
+        }
+      }
+    },
+    "Le remplacer quelques semaines par une variante du même mouvement, comme %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le remplacer quelques semaines par une variante du même mouvement, comme %@."
+          }
+        }
+      }
+    },
+    "Le remplacer quelques semaines par une variante du même plan de mouvement.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le remplacer quelques semaines par une variante du même plan de mouvement."
+          }
+        }
+      }
+    },
+    "Changer de schéma de séries, par exemple de 5 × 5 à 4 × 8.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Changer de schéma de séries, par exemple de 5 × 5 à 4 × 8."
+          }
+        }
+      }
+    },
+    "Décharger cet exercice seul une semaine : charges −10 % et moins de séries, puis repartir.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Décharger cet exercice seul une semaine : charges −10 % et moins de séries, puis repartir."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -34,10 +34,11 @@ extension ActiveSessionService {
                                               userExercises: try await self.userExercises.all(includeArchived: true))
             // Le genre de charge de la séance en cours prime : il a été lu à l'ajout de l'exercice.
             let loadKinds = Dictionary(session.exercises.map { ($0.exercise, $0.loadKind) }, uniquingKeysWith: { first, _ in first })
-            let load = LoadHistory(sessions: history, onboardingCompletedAt: (try? await self.profiles.load())?.onboardingCompletedAt,
+            let profile = try? await self.profiles.load()
+            let load = LoadHistory(sessions: history, onboardingCompletedAt: profile?.onboardingCompletedAt,
                                    endedAt: endedAt, calendar: self.calendar)
             return SessionRecap.make(draft: draft, history: history, directory: directory,
-                                     loadKind: { loadKinds[$0] ?? directory.loadKind(of: $0) }, load: load)
+                                     loadKind: { loadKinds[$0] ?? directory.loadKind(of: $0) }, load: load, profile: profile)
         }
     }
 

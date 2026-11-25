@@ -45,6 +45,8 @@ public struct SessionRecap: Sendable, Equatable {
     public var setsPerGroup: [(MuscleGroup, Int)]
     /// La moyenne arrondie des RPE de série, sinon 7.
     public var suggestedRPE: Int
+    /// Les exercices de la séance sur un plateau que cette séance confirme (elle compte et ne fait pas mieux).
+    public var plateaus: [PlateauNotice] = []
     let load: LoadHistory
 
     static let defaultRPE = 7
@@ -67,7 +69,21 @@ public struct SessionRecap: Sendable, Equatable {
             && lhs.durationMinutes == rhs.durationMinutes && lhs.tonnageKg == rhs.tonnageKg && lhs.workingSets == rhs.workingSets
             && lhs.beatenRecords == rhs.beatenRecords && lhs.muscleWeights == rhs.muscleWeights
             && lhs.setsPerGroup.elementsEqual(rhs.setsPerGroup, by: { $0.0 == $1.0 && $0.1 == $1.1 })
-            && lhs.suggestedRPE == rhs.suggestedRPE && lhs.load == rhs.load
+            && lhs.suggestedRPE == rhs.suggestedRPE && lhs.plateaus == rhs.plateaus && lhs.load == rhs.load
+    }
+}
+
+/// Un plateau signalé au récap : l'exercice, le calcul et une variante du même plan de mouvement à proposer.
+public struct PlateauNotice: Sendable, Equatable {
+    public var exerciseName: String
+    public var plateau: ExercisePlateau
+    /// Une variante faisable avec le matériel du profil (`ReplacementPlanner`), absente de la séance ; `nil` sans variante.
+    public var variantName: String?
+
+    public init(exerciseName: String, plateau: ExercisePlateau, variantName: String?) {
+        self.exerciseName = exerciseName
+        self.plateau = plateau
+        self.variantName = variantName
     }
 }
 
@@ -90,7 +106,7 @@ struct LoadHistory: Sendable, Equatable {
 extension SessionRecap {
     /// Le bilan de `draft`, la séance telle qu'elle serait enregistrée, sur `history` (les autres séances enregistrées).
     static func make(draft: WorkoutSession, history: [WorkoutSession], directory: ExerciseDirectory,
-                     loadKind: (ExerciseReference) -> LoadKind, load: LoadHistory) -> SessionRecap {
+                     loadKind: (ExerciseReference) -> LoadKind, load: LoadHistory, profile: UserProfile? = nil) -> SessionRecap {
         let working = draft.sets.filter { $0.setType != .warmup }
         let rpes = working.compactMap(\.rpe)
         let suggested = rpes.isEmpty ? defaultRPE : Int((rpes.reduce(0, +) / Double(rpes.count)).rounded())
@@ -100,8 +116,33 @@ extension SessionRecap {
             beatenRecords: beatenRecords(of: draft, history: history, loadKind: loadKind),
             muscleWeights: muscleWeights(of: working, directory: directory),
             setsPerGroup: setsPerGroup(of: working, directory: directory),
-            suggestedRPE: min(10, max(1, suggested)), load: load)
+            suggestedRPE: min(10, max(1, suggested)),
+            plateaus: plateaus(of: draft, history: history, directory: directory, loadKind: loadKind, profile: profile, load: load),
+            load: load)
     }
+
+    // swiftlint:disable function_parameter_count
+    /// Les plateaus que la séance confirme : la dernière séance comptée de l'exercice est celle-ci. Un jour de fatigue ou de
+    /// décharge ne compte pas : il ne signale rien.
+    private static func plateaus(of draft: WorkoutSession, history: [WorkoutSession], directory: ExerciseDirectory,
+                                 loadKind: (ExerciseReference) -> LoadKind, profile: UserProfile?,
+                                 load: LoadHistory) -> [PlateauNotice] {
+        let working = draft.sets.filter { $0.setType != .warmup }
+        var exercises: [ExerciseReference] = []
+        for set in working where !exercises.contains(set.exercise) { exercises.append(set.exercise) }
+        let sessions = history + [draft]
+        let now = draft.endedAt ?? draft.updatedAt
+        return exercises.compactMap { reference in
+            guard let plateau = PlateauDetector.plateau(for: reference, in: sessions, loadKind: loadKind(reference), now: now,
+                                                        calendar: load.calendar),
+                  plateau.lastDate == draft.startedAt else { return nil }
+            let name = directory.info(reference)?.name ?? working.first { $0.exercise == reference }?.exerciseName ?? ""
+            let variant = ReplacementPlanner.alternatives(for: reference, directory: directory, profile: profile,
+                                                          excluding: Set(exercises)).first
+            return PlateauNotice(exerciseName: name, plateau: plateau, variantName: variant?.name)
+        }
+    }
+    // swiftlint:enable function_parameter_count
 
     /// Les records de l'historique et de la séance, recalculés ensemble : seules les séries de la séance qui battent un record
     /// déjà établi comptent, pas un premier passage sur un exercice.

@@ -5,6 +5,7 @@ import PulseDomain
 import PulseServices
 import SupplementsFeature
 import SwiftUI
+import TrainFeature
 
 /// Le récap de fin de séance (spec M4 §17, maquette `recap`) : le bilan, les records battus, les muscles travaillés, l'effort
 /// global ressenti, la note, puis « Enregistrer », « Enregistrer sans noter » (l'effort proposé) et « Revenir à la séance ». Il
@@ -33,6 +34,7 @@ public struct RecapView: View {
                     stats(recap)
                     if !recap.beatenRecords.isEmpty { records(recap.beatenRecords) }
                     if !recap.setsPerGroup.isEmpty { muscles(recap) }
+                    if !recap.plateaus.isEmpty { plateaus(recap.plateaus) }
                     if let supplements = model.supplements, !supplements.overview.workoutItems.isEmpty {
                         card(title: String(localized: "Compléments de la séance", bundle: .module),
                              detail: Self.supplementsDetail(supplements.overview)) {
@@ -286,6 +288,21 @@ extension RecapView {
             }
             .accessibilityElement(children: .combine)
             content()
+        }
+        .padding(PulseMetrics.spacing)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(PulsePalette.surface, in: RoundedRectangle(cornerRadius: PulseMetrics.radius, style: .continuous))
+    }
+}
+
+// Le plateau confirmé par la séance : un signal discret, après les muscles, avec le calcul et les pistes.
+extension RecapView {
+    private func plateaus(_ notices: [PlateauNotice]) -> some View {
+        VStack(alignment: .leading, spacing: PulseMetrics.spacing) {
+            ForEach(Array(notices.enumerated()), id: \.offset) { _, notice in
+                ExercisePlateauView(title: String(localized: "Plateau possible : \(notice.exerciseName)", bundle: .module),
+                                    plateau: notice.plateau, variantName: notice.variantName, calendar: calendar)
+            }
         }
         .padding(PulseMetrics.spacing)
         .frame(maxWidth: .infinity, alignment: .leading)
