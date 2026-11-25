@@ -123,6 +123,7 @@ Un nouveau type pur, à côté de `HabitualBedtime`, calcule pour un soir donné
   - avant midi, le score du jour est recalculé au passage suivant ;
   - après midi, le score du jour est figé : l'objectif vaut à partir du lendemain ;
   - les jours passés ne changent jamais.
+- Un changement d'objectif dans les Réglages relance tout de suite le passage du jour : le score bouge sans attendre le prochain retour au premier plan.
 - La règle de repos complet (`needsRestDay`) relit les 7 dernières nuits avec l'objectif courant. C'est voulu : elle décide pour aujourd'hui.
 - **Une seule définition de « nuit courte »** : au moins une heure de moins que l'objectif (7 h pour l'objectif par défaut, comme aujourd'hui). La lecture « Pourquoi » la prend à la place de son seuil en dur, et le rappel de coucher (§6.4) prend la même. Sans cela, une nuit de 6 h 30 vaudrait tous ses points de durée pour un objectif de 6 h tout en étant dite courte.
 - La tuile « Sommeil, 14 jours » d'Aujourd'hui et Stats > Biométrie montrent des durées, pas des scores : elles ne changent pas.
@@ -131,10 +132,12 @@ Un nouveau type pur, à côté de `HabitualBedtime`, calcule pour un soir donné
 
 **Planification.** Un planificateur pur produit les rappels des 7 prochains soirs, à partir du profil, des nuits, du planning et de l'heure courante. Un service les remet à `UserNotificationScheduler` par un nouveau protocole de `PulseDomain` (« remplacer tous les rappels de coucher par ceux-ci », avec sa doublure), sur le modèle de `SupplementReminderScheduling`. Chaque rappel est une notification ponctuelle, identifiée par son soir (« fr.seonay.pulse.bedtime.2026-11-25 »).
 
+Entre minuit et 3 h, le soir de la veille reste planifié tant que son rappel n'est pas parti : une replanification à 00:05 ne retire pas le rappel prévu à 00:15. Il peut donc y avoir huit rappels en attente juste après minuit.
+
 - Rien n'est planifié si `bedtimeReminderEnabled` est faux, si les notifications sont refusées, ou sans coucher conseillé.
 - Un rappel dont l'heure est déjà passée n'est pas planifié.
 - Le service replanifie partout où l'app replanifie déjà les rappels de compléments (les appelants cités au §2). Dans le `onChange` des réglages, il replanifie quand l'un des cinq champs de §6.1 a changé.
-- Sept rappels de coucher portent le pire cas à 48 + 3 + 1 + 1 + 7 = 60 notifications en attente, sous les 64 d'iOS.
+- Huit rappels de coucher au plus portent le pire cas à 48 + 3 + 1 + 1 + 8 = 61 notifications en attente, sous les 64 d'iOS.
 - **Les rappels de compléments « au coucher » ne changent pas.** Ils restent calés sur l'heure habituelle d'endormissement (mesurée), et le rappel de coucher sur le coucher conseillé. Quelqu'un qui a activé les deux reçoit donc deux notifications le soir, pour deux choses différentes. « Un seul par soir » vaut pour le rappel de coucher. Les coordonner est hors de ce lot.
 
 **Texte.** Le titre donne l'heure, le corps donne la raison. Textes de référence :
@@ -144,7 +147,7 @@ Un nouveau type pur, à côté de `HabitualBedtime`, calcule pour un soir donné
 | Nuit courte la veille et séance le lendemain | Au lit avant 22:45 | Nuit courte hier (6 h 10) et séance Jambes demain : vise tes 8 h. |
 | Séance le lendemain | Au lit avant 22:45 | Séance Jambes demain : vise tes 8 h de sommeil. |
 | Nuit courte la veille | Au lit avant 22:45 | Nuit courte hier (6 h 10) : vise tes 8 h cette nuit. |
-| Sinon | Au lit avant 22:45 | Pour tes 8 h de sommeil avant le réveil de 7:00. |
+| Sinon | Au lit avant 22:45 | Pour tes 8 h de sommeil avant le réveil de 07:00. |
 
 - **Nuit courte** : la nuit qui s'est terminée le matin même répond à la définition de §6.3. Seul le rappel du soir même peut le dire ; les six suivants ne connaissent pas encore leur veille.
 - **Séance le lendemain** : la séance prévue par le Planning après déplacements, musculation (le nom du jour de routine) ou course (le nom du type de course). Un jour de repos ne donne pas de séance.
@@ -167,7 +170,7 @@ Coucher conseillé : 22:45 en semaine, 00:45 le week-end.
 L'objectif compte dans le score de sommeil dès le prochain calcul.
 ```
 
-- Chaque réveil propose « Selon mes nuits », suivi de l'heure mesurée quand elle existe, puis les heures à choisir. « Selon mes nuits » laisse le champ à `nil` : l'heure mesurée n'est jamais écrite dans le profil.
+- Chaque réveil propose « Selon mes nuits », suivi de l'heure mesurée quand elle existe, puis les heures à choisir. « Selon mes nuits » laisse le champ à `nil` : l'heure mesurée n'est jamais écrite dans le profil. « Heure choisie » part toujours de 07:00 en semaine et de 09:00 le week-end, jamais de l'heure mesurée.
 - L'interrupteur du rappel demande l'autorisation des notifications comme les autres (`model.notificationBinding`). « Prévenir » n'apparaît que rappel activé.
 - La ligne « Coucher conseillé » est recalculée à chaque changement. Sans coucher conseillé, elle devient : « Choisis une heure de réveil pour obtenir un coucher conseillé. »
 - VoiceOver lit les heures en mots, comme le fait déjà l'heure plafond (`ProfileText.clockSpoken`).
