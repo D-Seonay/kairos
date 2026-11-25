@@ -86,6 +86,16 @@ struct HabitualBedtimeTests {
         #expect(await reader.minutes(now: now) == 23 * 60 + 50)
     }
 
+    @Test func nightsListsTheLastFourteenNights() async throws {
+        let cache = InMemoryHealthSampleCache()
+        try await cache.insert([
+            night("2026-11-13T23:30", wakingOn: "2026-11-14"), night("2026-11-15T00:30", wakingOn: "2026-11-15"),
+            night("2026-11-19T23:50", wakingOn: "2026-11-20")
+        ])
+        let nights = await HabitualBedtimeReader(cache: cache, calendar: calendar).nights(now: now)
+        #expect(nights.map(\.day) == ["2026-11-20T00:00", "2026-11-15T00:00", "2026-11-14T00:00"].map { TestClock.date($0) })
+    }
+
     @Test func readerWithTooFewNightsKeepsTheFixedTime() async throws {
         let cache = InMemoryHealthSampleCache()
         try await cache.insert([night("2026-11-18T23:00", wakingOn: "2026-11-19"),

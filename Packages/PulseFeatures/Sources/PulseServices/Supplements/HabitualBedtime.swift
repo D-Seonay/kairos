@@ -22,18 +22,20 @@ public enum HabitualBedtime {
     /// Les heures sont lues sur un cadran qui commence à midi : 23:30 et 00:30 donnent minuit, pas midi.
     public static func minutes(fellAsleep: [Date], calendar: Calendar) -> Int? {
         guard fellAsleep.count >= minimumNights else { return nil }
-        let unwrapped = fellAsleep.map { date -> Int in
-            let parts = calendar.dateComponents([.hour, .minute], from: date)
-            let minutes = (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
-            return minutes < dayMinutes / 2 ? minutes + dayMinutes : minutes
-        }
-        .sorted()
+        let unwrapped = fellAsleep.map { dialMinutes($0, calendar: calendar) }.sorted()
         let middle = unwrapped.count / 2
         let median = unwrapped.count.isMultiple(of: 2)
             ? Double(unwrapped[middle - 1] + unwrapped[middle]) / 2
             : Double(unwrapped[middle])
         let rounded = Int((median / Double(roundingMinutes)).rounded()) * roundingMinutes
         return rounded % dayMinutes
+    }
+
+    /// L'heure d'une date sur le cadran qui commence à midi : avant midi, on compte un jour de plus (00:30 devient 24:30).
+    static func dialMinutes(_ date: Date, calendar: Calendar) -> Int {
+        let parts = calendar.dateComponents([.hour, .minute], from: date)
+        let minutes = (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
+        return minutes < dayMinutes / 2 ? minutes + dayMinutes : minutes
     }
 
     /// L'heure du rappel « au coucher » qui suit les nuits : `leadMinutes` avant l'heure habituelle, en minutes après minuit. Les
@@ -62,8 +64,9 @@ public struct HabitualBedtimeReader: Sendable {
         self.calendar = calendar
     }
 
-    /// Les débuts des nuits dont le réveil tombe dans les 14 derniers jours ; aucun si la lecture du cache échoue.
-    public func fellAsleepTimes(now: Date) async -> [Date] {
+    /// Les nuits dont le réveil tombe dans les 14 derniers jours, de la plus récente à la plus ancienne ; aucune si la lecture du
+    /// cache échoue.
+    public func nights(now: Date) async -> [NightSleep] {
         let today = calendar.startOfDay(for: now)
         // Une nuit commence la veille de son réveil : un jour de marge avant la plus ancienne.
         guard let start = calendar.date(byAdding: .day, value: -(HabitualBedtime.windowNights + 1), to: today),
@@ -72,8 +75,13 @@ public struct HabitualBedtimeReader: Sendable {
         let sleep = CachedSampleMapping.sleepIntervals(cached)
         let builder = NightSleepBuilder(calendar: calendar)
         return (0..<HabitualBedtime.windowNights).compactMap { offset in
-            calendar.date(byAdding: .day, value: -offset, to: today).flatMap { builder.night(for: $0, sleep: sleep)?.fellAsleep }
+            calendar.date(byAdding: .day, value: -offset, to: today).flatMap { builder.night(for: $0, sleep: sleep) }
         }
+    }
+
+    /// Les débuts des nuits dont le réveil tombe dans les 14 derniers jours ; aucun si la lecture du cache échoue.
+    public func fellAsleepTimes(now: Date) async -> [Date] {
+        await nights(now: now).map(\.fellAsleep)
     }
 
     /// L'heure habituelle d'endormissement, en minutes après minuit ; `nil` sous 5 nuits.
