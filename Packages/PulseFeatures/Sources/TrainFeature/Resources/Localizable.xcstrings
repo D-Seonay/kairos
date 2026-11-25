@@ -3742,6 +3742,16 @@
           }
         }
       }
+    },
+    "Variante possible : %@." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Variante possible : %@."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

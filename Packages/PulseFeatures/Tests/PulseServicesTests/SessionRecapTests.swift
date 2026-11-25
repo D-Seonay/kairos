@@ -127,4 +127,14 @@ struct SessionRecapTests {
         let service = try await fixture.resume(Fix.session([Fix.bench(Fix.benchSets())], applied: [fatigue]))
         #expect(try await service.recap(endedAt: fixture.clock.now).plateaus.isEmpty)
     }
+
+    @Test func anExerciseWithARecordHasNoPlateau() async throws {
+        // 85 × 1 bat le record de charge (80 kg) sans dépasser 90 kg estimés : le récap dit le record, pas le plateau.
+        try await seedStalledBench()
+        let session = Fix.session([Fix.bench([Fix.set(60, 12, at: "2026-11-02T08:10"), Fix.set(85, 1, at: "2026-11-02T08:20")])])
+        let service = try await fixture.resume(session)
+        let recap = try await service.recap(endedAt: fixture.clock.now)
+        #expect(recap.beatenRecords.map(\.kind).contains(.maxWeight))
+        #expect(recap.plateaus.isEmpty)
+    }
 }

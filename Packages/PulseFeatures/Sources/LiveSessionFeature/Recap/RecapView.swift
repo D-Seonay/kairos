@@ -309,15 +309,18 @@ extension RecapView {
 // Le plateau confirmé par la séance : un signal discret, après les muscles, avec le calcul et les pistes.
 extension RecapView {
     private func plateaus(_ notices: [PlateauNotice]) -> some View {
-        VStack(alignment: .leading, spacing: PulseMetrics.spacing) {
-            ForEach(Array(notices.enumerated()), id: \.offset) { _, notice in
-                ExercisePlateauView(title: String(localized: "Plateau possible : \(notice.exerciseName)", bundle: .module),
-                                    plateau: notice.plateau, variantName: notice.variantName, calendar: calendar)
-            }
+        // Un seul exercice : son nom dans le titre. Plusieurs : chacun avec son calcul et sa variante, puis les pistes une fois.
+        let single = notices.count == 1 ? notices.first : nil
+        let title = single.map { String(localized: "Plateau possible : \($0.exerciseName)", bundle: .module) }
+            ?? String(localized: "Plateaux possibles", bundle: .module)
+        let items = notices.map { notice in
+            ExercisePlateauView.Item(name: single == nil ? notice.exerciseName : nil, plateau: notice.plateau, calendar: calendar,
+                                     variant: single == nil ? notice.variantName : nil)
         }
-        .padding(PulseMetrics.spacing)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(PulsePalette.surface, in: RoundedRectangle(cornerRadius: PulseMetrics.radius, style: .continuous))
+        return ExercisePlateauView(title: title, items: items, variantName: single?.variantName)
+            .padding(PulseMetrics.spacing)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(PulsePalette.surface, in: RoundedRectangle(cornerRadius: PulseMetrics.radius, style: .continuous))
     }
 }
 

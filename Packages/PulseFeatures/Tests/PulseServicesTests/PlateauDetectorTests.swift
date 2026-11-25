@@ -87,11 +87,40 @@ struct PlateauDetectorTests {
         #expect(PlateauDetector.counts(session(1, [])))
     }
 
-    @Test func abandonedSessionsAndSetsBeyondTwelveRepsAreIgnored() {
+    @Test func setsBeyondTwelveRepsAndSessionsInProgressAreIgnored() {
         var sessions = stalled
         sessions[3] = session(16, [(60, 15)])                       // pas d'estimation au-delà de 12 répétitions
         #expect(plateau(sessions) == nil)
-        sessions[3] = session(16, [(80, 5)], status: .abandoned)
+        sessions[3] = session(16, [(80, 5)], status: .inProgress)
+        #expect(plateau(sessions) == nil)
+    }
+
+    @Test func abandonedSessionsCountLikeTheSheetCurve() throws {
+        // Comme la courbe et les records de la fiche : les séries faites d'une séance abandonnée comptent.
+        var sessions = stalled
+        sessions[3] = session(16, [(77.5, 6)], status: .abandoned)
+        #expect(try #require(plateau(sessions)).sessionCount == 4)
+    }
+
+    @Test func repeatingTheSameBestDoesNotRestartTheClock() throws {
+        // 80 × 5 trois fois par semaine pendant 6 semaines : le niveau est atteint dès la première séance, il y a 41 jours.
+        let sessions = stride(from: 41, through: 1, by: -2).map { session($0, [(80, 5)]) }
+        let found = try #require(plateau(sessions))
+        #expect(found.bestDate == day(41) && found.lastDate == day(1))
+        #expect(found.sessionCount == sessions.count - 1)
+    }
+
+    @Test func alternatingFiveAndFourRepsIsStillAPlateau() throws {
+        // 80 × 5 puis 80 × 4 en alternance : chaque 80 × 5 bat la séance d'avant, sans jamais dépasser 90 kg estimés.
+        let sessions = [session(30, [(80, 5)]), session(23, [(80, 4)]), session(16, [(80, 5)]), session(9, [(80, 4)]),
+                        session(2, [(80, 5)])]
+        #expect(try #require(plateau(sessions)).sessionCount == 4)
+    }
+
+    @Test func aReboundAfterADipIsNotAPlateau() {
+        // 100 × 5 il y a 45 et 38 jours, une maladie, puis une remontée de 80 à 87,5 kg en 3 semaines, sous l'ancien niveau.
+        let sessions = [session(45, [(100, 5)]), session(38, [(100, 5)]), session(23, [(80, 5)]), session(16, [(82.5, 5)]),
+                        session(9, [(85, 5)]), session(2, [(87.5, 5)])]
         #expect(plateau(sessions) == nil)
     }
 
@@ -120,14 +149,15 @@ struct PlateauDetectorTests {
     @Test func theExplanationSaysHowItIsComputed() throws {
         let found = try #require(plateau(stalled))
         #expect(found.explanation(calendar: TestClock.calendar) == """
-            Pulse estime ton 1RM avec la formule de Brzycki et garde la meilleure série de chaque séance. Ton meilleur : 90 kg le \
-            21 octobre. Les 4 séances suivantes, sur 4 semaines, n'ont pas fait mieux (au mieux 90 kg).
+            Pulse estime ton 1RM avec la formule de Brzycki et garde la meilleure série de chaque séance. Ton meilleur 1RM estimé \
+            des 3 derniers mois : 90 kg le 21 octobre. Les 4 séances suivantes, sur 4 semaines, n'ont pas fait mieux (au mieux \
+            90 kg).
             """)
         var excluded = found
         excluded.excludedCount = 2
         #expect(excluded.explanation(calendar: TestClock.calendar, spoken: true).hasSuffix(
             "(au mieux 90 kilos). 2 séances faites en fatigue ou en décharge ne sont pas comptées."))
         #expect(ExercisePlateau.tips(variant: "Développé haltères").last
-            == "Le remplacer quelques semaines par une variante du même mouvement, comme Développé haltères.")
+            == "Le remplacer quelques semaines par une variante, comme Développé haltères.")
     }
 }
