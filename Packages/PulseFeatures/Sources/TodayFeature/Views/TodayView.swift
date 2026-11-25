@@ -88,7 +88,7 @@ public struct TodayView: View {
             VStack(spacing: PulseMetrics.spacing) {
                 TodayHeader(model: model, onOpenProfile: onOpenProfile)
                 recoveryOrCheckIn
-                SessionCard(model: model, onWhy: model.showWhy, onResume: onResumeSession, onStartRun: onStartRun,
+                SessionCard(model: model, onWhy: model.openWhy, onResume: onResumeSession, onStartRun: onStartRun,
                             onCreateRoutine: onCreateRoutine)
                 if let offer = model.deloadOffer {
                     DeloadOfferCard(offer: offer, errorMessage: model.deloadErrorMessage) { accepted in
@@ -169,7 +169,7 @@ public struct TodayView: View {
             .pulseAnnounceError(model.errorMessage)
         } else {
             RecoveryCard(score: model.score, factors: model.factors, marker: model.marker, spokenMarker: model.spokenMarker,
-                         onWhy: model.showWhy, isLoading: model.isLoading, scoreFailed: model.scoreFailed)
+                         onWhy: model.openWhy, isLoading: model.isLoading, scoreFailed: model.scoreFailed)
         }
     }
 }

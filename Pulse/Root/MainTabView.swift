@@ -97,6 +97,9 @@ struct MainTabView: View {
         .onChange(of: router.todayRootVersion) { today.closeWhy() }
         // Le contrôle « Séance du jour » : traité dès que les onglets sont là, au lancement à froid compris.
         .task(id: router.sessionStartRequests) { await startPendingSession() }
+        // Les raccourcis Siri « Pourquoi » (depuis le score) et « Lancer une course », traités de même.
+        .task(id: router.whyRequests) { await openPendingWhy() }
+        .task(id: router.runStartRequests) { await startPendingRun() }
         .alert(liveSession.errorMessage ?? "", isPresented: isShowingError) {
             Button(String(localized: "OK")) { liveSession.dismissError() }
         }
