@@ -217,14 +217,17 @@ struct SessionTitleLine: View {
 }
 
 /// L'écran verrouillé, sur 160 pt au plus, rangé comme la Dynamic Island étendue : anneau, titre et « 2 / 18 », temps restant ;
-/// la série suivante sur toute la largeur ; puis les boutons pendant un repos, ou la barre des séries hors repos.
+/// la série suivante sur toute la largeur ; puis les boutons pendant un repos, ou la barre des séries hors repos. Hors repos, la
+/// série suivante partage sa ligne avec « Valider » (44 pt) : 16 + 44 + 8 + 44 + 8 + 4 + 16, la hauteur du repos tient encore.
 struct SessionLockScreenView: View {
     let state: SessionActivityModel
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             header
-            if let nextSet = state.nextSet {
+            if let setID = state.validateSetID {
+                SessionValidateRow(setID: setID, nextSet: state.nextSet, lineLimit: 2, height: 44)
+            } else if let nextSet = state.nextSet {
                 SessionNextSetText(nextSet: nextSet, lineLimit: 1)
             }
             if state.restInterval != nil {
@@ -298,13 +301,16 @@ struct SessionIslandCenter: View {
     }
 }
 
-/// Sous la Dynamic Island étendue, qui plafonne à 160 pt de haut : la série suivante sur une ligne, puis les boutons du repos.
+/// Sous la Dynamic Island étendue, qui plafonne à 160 pt de haut : la série suivante sur une ligne, puis les boutons du repos ;
+/// hors repos, la série suivante et « Valider » (36 pt, comme les boutons du repos) sur une seule ligne.
 struct SessionIslandBottom: View {
     let state: SessionActivityModel
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            if let nextSet = state.nextSet {
+            if let setID = state.validateSetID {
+                SessionValidateRow(setID: setID, nextSet: state.nextSet, lineLimit: 1, height: 36)
+            } else if let nextSet = state.nextSet {
                 SessionNextSetText(nextSet: nextSet, lineLimit: 1)
             }
             if state.restInterval != nil {

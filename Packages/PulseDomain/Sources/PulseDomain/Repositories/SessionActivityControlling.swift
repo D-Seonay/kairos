@@ -9,6 +9,9 @@ public struct SessionActivityState: Sendable, Equatable, Codable {
     public var restStartedAt: Date?
     public var restEndsAt: Date?
     public var nextSet: String?
+    /// La série que le bouton « Valider » de l'activité coche : la série suivante, quand elle a ses valeurs. `nil` sans série à
+    /// valider ou pour une valeur manquante, que seule l'app sait saisir.
+    public var nextSetID: UUID?
     /// Les séries de travail validées, échauffement exclu, comme « Séries » en haut de l'écran de séance.
     public var doneSets: Int
     /// Les séries de travail prévues ; 0 pour une séance sans série, qui n'affiche pas de progression.
@@ -21,6 +24,7 @@ public struct SessionActivityState: Sendable, Equatable, Codable {
         restStartedAt: Date? = nil,
         restEndsAt: Date? = nil,
         nextSet: String? = nil,
+        nextSetID: UUID? = nil,
         doneSets: Int = 0,
         plannedSets: Int = 0
     ) {
@@ -30,6 +34,7 @@ public struct SessionActivityState: Sendable, Equatable, Codable {
         self.restStartedAt = restStartedAt
         self.restEndsAt = restEndsAt
         self.nextSet = nextSet
+        self.nextSetID = nextSetID
         self.doneSets = doneSets
         self.plannedSets = plannedSets
     }

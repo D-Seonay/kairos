@@ -11,7 +11,8 @@ private func makeState(title: String = "Push A", restEndsAt: Date? = nil) -> Ses
         startedAt: Date(timeIntervalSince1970: 1_000),
         restStartedAt: restEndsAt.map { $0.addingTimeInterval(-90) },
         restEndsAt: restEndsAt,
-        nextSet: "Développé couché · 70 kg × 5"
+        nextSet: "Développé couché · 70 kg × 5",
+        nextSetID: UUID(uuidString: "00000000-0000-0000-0000-000000000007")
     )
 }
 
@@ -28,6 +29,7 @@ struct SessionActivityStateTests {
     func codableRoundTripWithoutOptionals() throws {
         var state = makeState()
         state.nextSet = nil
+        state.nextSetID = nil
         let data = try JSONEncoder().encode(state)
         #expect(try JSONDecoder().decode(SessionActivityState.self, from: data) == state)
     }

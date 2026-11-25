@@ -1,10 +1,11 @@
 import AppIntents
+import Foundation
 import LiveSessionFeature
 import PulseLiveActivity
 import PulseServices
 import RunFeature
 
-/// Branche les boutons −30 s, +30 s et Passer de la Live Activity sur le seul service de séance de l'app (spec M4 §5.2) : il
+/// Branche les boutons −30 s, +30 s, Passer et Valider de la Live Activity sur le seul service de séance de l'app (spec M4 §5.2) : il
 /// enregistre le repos, met l'activité à jour et replanifie la notification ; l'écran ouvert relit ensuite la séance. Les boutons
 /// Pause et Reprendre de la Live Activity de course passent de même par le seul service de course (spec V2a §4.4).
 @MainActor
@@ -26,6 +27,9 @@ final class SessionIntentWiring {
         SessionIntentBridge.handler = { control in
             await self.handle(control)
         }
+        SessionIntentBridge.validateHandler = { setID in
+            await self.validate(set: setID)
+        }
         RunIntentBridge.handler = { control in
             await self.handle(control)
         }
@@ -43,6 +47,12 @@ final class SessionIntentWiring {
     /// Sans séance en cours, le bouton d'une activité périmée ne change rien.
     func handle(_ control: RestControl) async {
         _ = try? await service.apply(Self.change(for: control))
+        await coordinator?.refresh()
+    }
+
+    /// « Valider » coche la série que l'activité affichait, si elle est encore la suivante ; l'écran ouvert relit la séance.
+    func validate(set setID: UUID) async {
+        _ = try? await service.validateFromActivity(set: setID)
         await coordinator?.refresh()
     }
 

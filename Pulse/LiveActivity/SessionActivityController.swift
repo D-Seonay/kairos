@@ -36,8 +36,8 @@ struct SessionActivityController: SessionActivityControlling {
 
     static func contentState(for state: SessionActivityState) -> PulseSessionAttributes.ContentState {
         PulseSessionAttributes.ContentState(title: state.title, startedAt: state.startedAt, restStartedAt: state.restStartedAt,
-                                            restEndsAt: state.restEndsAt, nextSet: state.nextSet, doneSets: state.doneSets,
-                                            plannedSets: state.plannedSets)
+                                            restEndsAt: state.restEndsAt, nextSet: state.nextSet, nextSetID: state.nextSetID,
+                                            doneSets: state.doneSets, plannedSets: state.plannedSets)
     }
 
     private static func content(for state: SessionActivityState) -> ActivityContent<PulseSessionAttributes.ContentState> {
