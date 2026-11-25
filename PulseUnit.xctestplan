@@ -1,0 +1,197 @@
+{
+  "configurations" : [
+    {
+      "id" : "9BC71F0E-014E-453F-95D7-994D8CC674CF",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "environmentVariableEntries" : [
+      {
+        "key" : "TZ",
+        "value" : "Europe\/Paris"
+      }
+    ],
+    "language" : "fr",
+    "region" : "FR",
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:Pulse.xcodeproj",
+      "identifier" : "CF79B1BAD3D70F54153FE0B3",
+      "name" : "Pulse"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:Pulse.xcodeproj",
+        "identifier" : "26CB5097CD9CC52FD2F253AB",
+        "name" : "PulseTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:Packages/PulseDomain",
+        "identifier" : "PulseDomainTests",
+        "name" : "PulseDomainTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:Packages/PulseRecoveryEngine",
+        "identifier" : "PulseRecoveryEngineTests",
+        "name" : "PulseRecoveryEngineTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:Packages/PulseHealth",
+        "identifier" : "PulseHealthTests",
+        "name" : "PulseHealthTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:Packages/PulseContent",
+        "identifier" : "PulseContentTests",
+        "name" : "PulseContentTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:Packages/PulsePersistence",
+        "identifier" : "PulsePersistenceTests",
+        "name" : "PulsePersistenceTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:Packages/PulseDesignSystem",
+        "identifier" : "PulseDesignSystemTests",
+        "name" : "PulseDesignSystemTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:Packages/PulseFeatures",
+        "identifier" : "PulseServicesTests",
+        "name" : "PulseServicesTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:Packages/PulseFeatures",
+        "identifier" : "CheckInFeatureTests",
+        "name" : "CheckInFeatureTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:Packages/PulseFeatures",
+        "identifier" : "LiveSessionFeatureTests",
+        "name" : "LiveSessionFeatureTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:Packages/PulseFeatures",
+        "identifier" : "OnboardingFeatureTests",
+        "name" : "OnboardingFeatureTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:Packages/PulseFeatures",
+        "identifier" : "TodayFeatureTests",
+        "name" : "TodayFeatureTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:Packages/PulseFeatures",
+        "identifier" : "TrainFeatureTests",
+        "name" : "TrainFeatureTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:Packages/PulseFeatures",
+        "identifier" : "WidgetFeatureTests",
+        "name" : "WidgetFeatureTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:Packages/PulseFeatures",
+        "identifier" : "NightFeatureTests",
+        "name" : "NightFeatureTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:Packages/PulseFeatures",
+        "identifier" : "PhotosFeatureTests",
+        "name" : "PhotosFeatureTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:Packages/PulseFeatures",
+        "identifier" : "PlanningFeatureTests",
+        "name" : "PlanningFeatureTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:Packages/PulseFeatures",
+        "identifier" : "ProfileFeatureTests",
+        "name" : "ProfileFeatureTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:Packages/PulseFeatures",
+        "identifier" : "RunFeatureTests",
+        "name" : "RunFeatureTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:Packages/PulseFeatures",
+        "identifier" : "StatsFeatureTests",
+        "name" : "StatsFeatureTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:Packages/PulseFeatures",
+        "identifier" : "SupplementsFeatureTests",
+        "name" : "SupplementsFeatureTests"
+      }
+    }
+  ],
+  "version" : 1
+}

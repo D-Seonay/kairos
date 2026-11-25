@@ -255,7 +255,7 @@ Relevé des « suivis connus » des PR et des revues. Chaque point est à revér
 ### Hors code
 
 - [ ] Déployer les schémas CloudKit **V5** (tracés de course) et **V6** (photos de séance) en production. V7 (sommeil) est local et n'a rien à déployer.
-- [ ] Lancer les tests jamais exécutés : les tests d'interface `LiveSessionResumeUITests`, `SupplementsUITests`, `AccessibilityAuditUITests`, et dans `PulseTests` les tests de câblage de la course (`SessionIntentWiringTests`, fin d'`AppRootModelTests`), compilés mais lancés seulement sur simulateur.
+- [ ] Créer le workflow Xcode Cloud « Tests » (plan de test `Pulse` sur simulateur iOS 26, étapes dans [docs/ci/xcode-cloud-tests.md](docs/ci/xcode-cloud-tests.md)), puis corriger ou désactiver avec un ticket ce qui est rouge au premier passage. Jamais lancés jusqu'ici : les tests d'interface `LiveSessionResumeUITests`, `SupplementsUITests`, `AccessibilityAuditUITests`, et dans `PulseTests` les tests de câblage de la course (`SessionIntentWiringTests`, fin d'`AppRootModelTests`).
 - [ ] Faire les vérifications sur iPhone listées dans les PR #22 (course), #23 (photos), #24 (passe UI/UX), #26 (Nuit), #40 (Dynamic Island), #43 et #78 (partage) et #79 à #84 (passe « reste à faire »).
 - [ ] Faire pointer les épingles Pinterest vers la fiche App Store au lieu de la page support.
 
@@ -293,7 +293,7 @@ make test
 # Lancer uniquement les tests unitaires ultra-rapides des packages Swift (sans simulateur)
 make test-packages
 
-# Lancer les tests de l'application sur le simulateur iPhone
+# Lancer le plan de test Pulse sur le simulateur iPhone (PulseTests, PulseUITests et tests des packages)
 make test-app
 
 # Vérifier la conformité du code avec SwiftLint en mode strict
@@ -313,7 +313,18 @@ Pour tester le comportement de l'application sur simulateur ou sans capteur rée
 Pulse applique les plus hauts standards de rigueur logicielle :
 - **Swift Testing (`import Testing`)** : Utilisation exclusive du nouveau framework de test natif Swift (`@Test`, `@Suite`, tests paramétrés `#expect`).
 - **Fixtures Physiologiques** : Le moteur est validé contre des jeux de données réels sérialisés au format JSON (`bonne-nuit.json`, `mauvaise-nuit.json`, `vfc-manquante.json`, `huit-nuits.json`, etc.).
-- **Intégration Continue (CI)** : À chaque push, **Xcode Cloud** exécute le script `ci_scripts/ci_post_clone.sh`, installe SwiftLint, exécute `make test` et assure la non-régression avant tout déploiement TestFlight.
+- **Plans de test** : le schéma `Pulse` lance `Pulse.xctestplan` (tous les tests, par défaut) ou `PulseUnit.xctestplan` (les mêmes sans les tests d'interface). Les deux tournent en français, région France, fuseau Europe/Paris.
+- **Intégration Continue (CI)** : **Xcode Cloud** exécute `ci_scripts/ci_post_clone.sh` (SwiftLint en mode strict) après le clonage, avant chaque build. Le workflow « Tests », à créer dans Xcode ou App Store Connect, lance le plan `Pulse` sur simulateur iOS 26 et échoue si un test échoue : voir [docs/ci/xcode-cloud-tests.md](docs/ci/xcode-cloud-tests.md).
+
+Quels tests tournent où :
+
+| Tests | Sur un Mac | Xcode Cloud |
+| :--- | :--- | :--- |
+| SwiftLint `--strict` | `make lint` | `ci_post_clone.sh`, avant chaque build |
+| Packages sous macOS (`swift test`, sans `PulseHealth`) | `make test-packages` | Non |
+| Packages sur simulateur iOS (les 20 cibles de test) | `make test-app` | Workflow « Tests », plans `Pulse` et `PulseUnit` |
+| `PulseTests` (app hôte) | `make test-app` | Workflow « Tests », plans `Pulse` et `PulseUnit` |
+| `PulseUITests` (tests d'interface) | `make test-app` | Workflow « Tests », plan `Pulse` seulement |
 
 ---
 
