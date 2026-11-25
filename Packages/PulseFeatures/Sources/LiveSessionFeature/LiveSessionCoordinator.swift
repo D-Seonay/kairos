@@ -14,6 +14,8 @@ public final class LiveSessionCoordinator {
     public private(set) var errorMessage: String?
     /// Un avertissement affiché une seule fois (notifications refusées).
     public private(set) var notice: String?
+    /// Une demande de note attend la fermeture de l'écran de séance (`takePendingReview()`).
+    public private(set) var isReviewPending = false
 
     @ObservationIgnored private let environment: LiveSessionEnvironment
     @ObservationIgnored private var liveModel: LiveSessionModel?
@@ -122,7 +124,8 @@ public final class LiveSessionCoordinator {
     public func finishFlow() -> FinishFlowModel {
         if let flowModel { return flowModel }
         let flow = FinishFlowModel(live: model(), onFinished: { [weak self] in self?.didFinish() },
-                                   onMinimize: { [weak self] in self?.minimize() })
+                                   onMinimize: { [weak self] in self?.minimize() },
+                                   onReviewWanted: { [weak self] in self?.isReviewPending = true })
         flowModel = flow
         return flow
     }
@@ -144,6 +147,12 @@ public final class LiveSessionCoordinator {
     private func dropModels() {
         liveModel = nil
         flowModel = nil
+    }
+
+    /// Vrai une fois si le récap enregistré a demandé une note : l'appelant la fait, la demande est consommée.
+    public func takePendingReview() -> Bool {
+        defer { isReviewPending = false }
+        return isReviewPending
     }
 
     public func dismissNotice() {

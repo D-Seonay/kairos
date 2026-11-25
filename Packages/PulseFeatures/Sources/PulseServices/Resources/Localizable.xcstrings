@@ -301,182 +301,182 @@
         }
       }
     },
-    "Dernière fois : %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dernière fois : %@"
+    "Dernière fois : %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dernière fois : %@"
           }
         }
       }
     },
-    ", puis " : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ", puis "
+    ", puis ": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ", puis "
           }
         }
       }
     },
-    "lest de %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "lest de %@"
+    "lest de %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "lest de %@"
           }
         }
       }
     },
-    "assistance de %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "assistance de %@"
+    "assistance de %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "assistance de %@"
           }
         }
       }
     },
-    "%lld seconde" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld seconde"
+    "%lld seconde": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld seconde"
           }
         }
       }
     },
-    "%lld secondes" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld secondes"
+    "%lld secondes": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld secondes"
           }
         }
       }
     },
-    "%lld répétition" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld répétition"
+    "%lld répétition": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld répétition"
           }
         }
       }
     },
-    "%lld répétitions" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld répétitions"
+    "%lld répétitions": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld répétitions"
           }
         }
       }
     },
-    "%lld exercice" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld exercice"
+    "%lld exercice": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld exercice"
           }
         }
       }
     },
-    "%lld exercices" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld exercices"
+    "%lld exercices": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld exercices"
           }
         }
       }
     },
-    "%lld série" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld série"
+    "%lld série": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld série"
           }
         }
       }
     },
-    "%lld séries" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld séries"
+    "%lld séries": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld séries"
           }
         }
       }
     },
-    "%@ · %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ · %@"
+    "%@ · %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · %@"
           }
         }
       }
     },
-    "%@, %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@, %@"
+    "%@, %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@"
           }
         }
       }
     },
-    "sans lest" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "sans lest"
+    "sans lest": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sans lest"
           }
         }
       }
     },
-    "sans assistance" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "sans assistance"
+    "sans assistance": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sans assistance"
           }
         }
       }
     },
-    "%@ kilo" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ kilo"
+    "%@ kilo": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kilo"
           }
         }
       }
     },
-    "%@ kilos" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ kilos"
+    "%@ kilos": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kilos"
           }
         }
       }
@@ -607,6 +607,96 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ton score de récupération est de %lld sur 100 : %@, %@."
+          }
+        }
+      }
+    },
+    "1 semaine": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 semaine"
+          }
+        }
+      }
+    },
+    "%lld semaines": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld semaines"
+          }
+        }
+      }
+    },
+    "1 séance faite en fatigue ou en décharge n'est pas comptée.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 séance faite en fatigue ou en décharge n'est pas comptée."
+          }
+        }
+      }
+    },
+    "%lld séances faites en fatigue ou en décharge ne sont pas comptées.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld séances faites en fatigue ou en décharge ne sont pas comptées."
+          }
+        }
+      }
+    },
+    "Changer de schéma de séries, par exemple de 5 × 5 à 4 × 8.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Changer de schéma de séries, par exemple de 5 × 5 à 4 × 8."
+          }
+        }
+      }
+    },
+    "Décharger cet exercice seul une semaine : charges −10 % et moins de séries, puis repartir.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Décharger cet exercice seul une semaine : charges −10 % et moins de séries, puis repartir."
+          }
+        }
+      }
+    },
+    "Pulse estime ton 1RM avec la formule de Brzycki et garde la meilleure série de chaque séance. Ton meilleur 1RM estimé des 3 derniers mois : %@ le %@. Les %lld séances suivantes, sur %@, n'ont pas fait mieux (au mieux %@).": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pulse estime ton 1RM avec la formule de Brzycki et garde la meilleure série de chaque séance. Ton meilleur 1RM estimé des 3 derniers mois : %@ le %@. Les %lld séances suivantes, sur %@, n'ont pas fait mieux (au mieux %@)."
+          }
+        }
+      }
+    },
+    "Le remplacer quelques semaines par une variante, comme %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le remplacer quelques semaines par une variante, comme %@."
+          }
+        }
+      }
+    },
+    "Le remplacer quelques semaines par une variante proche.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le remplacer quelques semaines par une variante proche."
           }
         }
       }

@@ -279,3 +279,22 @@ private func benchFixture() async throws -> TrainFixture {
     #expect(spoken.value.hasSuffix(" kilos") && !spoken.value.contains("kg"))
     #expect(model.pointSpoken(ChartPoint(date: first.date, value: 1)).value == "1 kilo")
 }
+
+@MainActor @Test func sheetFlagsAPlateauWithAVariant() async throws {
+    // 80 × 5 (90 kg estimés) le 1er octobre, puis quatre séances sans mieux jusqu'au 29 octobre : 4 semaines.
+    let fixture = TrainFixture()
+    for (day, reps) in [(1, 5), (8, 4), (15, 5), (22, 4), (29, 5)] {
+        try await fixture.log(on: TrainClock.date(month: 10, day: day, hour: 18), sets: [LoggedSet(weightKg: 80, reps: reps)])
+    }
+    let model = ExerciseSheetModel(environment: fixture.environment, reference: bench)
+    await model.load()
+    let plateau = try #require(model.plateau)
+    #expect(plateau.bestDate == TrainClock.date(month: 10, day: 1, hour: 18) && plateau.sessionCount == 4)
+    #expect(model.plateauVariant != nil && model.plateauVariant?.reference != bench)
+
+    // Une progression à trois semaines du meilleur : pas de plateau.
+    let progressing = try await benchFixture()
+    let other = ExerciseSheetModel(environment: progressing.environment, reference: bench)
+    await other.load()
+    #expect(other.plateau == nil && other.plateauVariant == nil)
+}

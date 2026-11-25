@@ -2250,6 +2250,26 @@
           }
         }
       }
+    },
+    "Noter Pulse" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noter Pulse"
+          }
+        }
+      }
+    },
+    "Ouvre la fiche de Pulse sur l'App Store pour écrire un avis" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvre la fiche de Pulse sur l'App Store pour écrire un avis"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

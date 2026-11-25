@@ -45,6 +45,8 @@ public struct SessionRecap: Sendable, Equatable {
     public var setsPerGroup: [(MuscleGroup, Int)]
     /// La moyenne arrondie des RPE de série, sinon 7.
     public var suggestedRPE: Int
+    /// Les exercices de la séance sur un plateau que cette séance confirme (elle compte et ne fait pas mieux).
+    public var plateaus: [PlateauNotice] = []
     let load: LoadHistory
 
     static let defaultRPE = 7
@@ -67,7 +69,21 @@ public struct SessionRecap: Sendable, Equatable {
             && lhs.durationMinutes == rhs.durationMinutes && lhs.tonnageKg == rhs.tonnageKg && lhs.workingSets == rhs.workingSets
             && lhs.beatenRecords == rhs.beatenRecords && lhs.muscleWeights == rhs.muscleWeights
             && lhs.setsPerGroup.elementsEqual(rhs.setsPerGroup, by: { $0.0 == $1.0 && $0.1 == $1.1 })
-            && lhs.suggestedRPE == rhs.suggestedRPE && lhs.load == rhs.load
+            && lhs.suggestedRPE == rhs.suggestedRPE && lhs.plateaus == rhs.plateaus && lhs.load == rhs.load
+    }
+}
+
+/// Un plateau signalé au récap : l'exercice, le calcul et une variante du même plan de mouvement à proposer.
+public struct PlateauNotice: Sendable, Equatable {
+    public var exerciseName: String
+    public var plateau: ExercisePlateau
+    /// Une variante faisable avec le matériel du profil (`ReplacementPlanner`), absente de la séance ; `nil` sans variante.
+    public var variantName: String?
+
+    public init(exerciseName: String, plateau: ExercisePlateau, variantName: String?) {
+        self.exerciseName = exerciseName
+        self.plateau = plateau
+        self.variantName = variantName
     }
 }
 
@@ -90,31 +106,58 @@ struct LoadHistory: Sendable, Equatable {
 extension SessionRecap {
     /// Le bilan de `draft`, la séance telle qu'elle serait enregistrée, sur `history` (les autres séances enregistrées).
     static func make(draft: WorkoutSession, history: [WorkoutSession], directory: ExerciseDirectory,
-                     loadKind: (ExerciseReference) -> LoadKind, load: LoadHistory) -> SessionRecap {
+                     loadKind: (ExerciseReference) -> LoadKind, load: LoadHistory, profile: UserProfile? = nil) -> SessionRecap {
         let working = draft.sets.filter { $0.setType != .warmup }
         let rpes = working.compactMap(\.rpe)
         let suggested = rpes.isEmpty ? defaultRPE : Int((rpes.reduce(0, +) / Double(rpes.count)).rounded())
+        let beaten = beatenPersonalRecords(of: draft, history: history, loadKind: loadKind)
         return SessionRecap(
             title: draft.title, startedAt: draft.startedAt, endedAt: draft.endedAt ?? draft.updatedAt,
             durationMinutes: Int(draft.durationMinutes ?? 0), tonnageKg: draft.tonnageKg, workingSets: working.count,
-            beatenRecords: beatenRecords(of: draft, history: history, loadKind: loadKind),
-            muscleWeights: muscleWeights(of: working, directory: directory),
-            setsPerGroup: setsPerGroup(of: working, directory: directory),
-            suggestedRPE: min(10, max(1, suggested)), load: load)
-    }
-
-    /// Les records de l'historique et de la séance, recalculés ensemble : seules les séries de la séance qui battent un record
-    /// déjà établi comptent, pas un premier passage sur un exercice.
-    private static func beatenRecords(of draft: WorkoutSession, history: [WorkoutSession],
-                                      loadKind: (ExerciseReference) -> LoadKind) -> [BeatenRecord] {
-        let result = RecordBook.compute(sessions: history + [draft], loadKind: loadKind, now: draft.updatedAt)
-        return result.records
-            .filter { $0.sessionID == draft.id && $0.setID.map(result.recordSetIDs.contains) == true }
-            .map { record in
+            beatenRecords: beaten.map { record in
                 BeatenRecord(exerciseName: record.exerciseName, kind: record.kind,
                              text: text(of: record, loadKind: loadKind(record.exercise)),
                              spokenText: spokenText(of: record, loadKind: loadKind(record.exercise)))
-            }
+            },
+            muscleWeights: muscleWeights(of: working, directory: directory),
+            setsPerGroup: setsPerGroup(of: working, directory: directory),
+            suggestedRPE: min(10, max(1, suggested)),
+            plateaus: plateaus(of: draft, history: history, directory: directory, loadKind: loadKind, profile: profile, load: load,
+                               skipping: Set(beaten.map(\.exercise))),
+            load: load)
+    }
+
+    // swiftlint:disable function_parameter_count
+    /// Les plateaus que la séance confirme : la dernière séance comptée de l'exercice est celle-ci. Un jour de fatigue ou de
+    /// décharge ne compte pas : il ne signale rien. Un exercice qui bat un record dans la séance (`skipping`) n'en a pas : le
+    /// récap ne dit pas « record » et « plateau » pour le même exercice.
+    private static func plateaus(of draft: WorkoutSession, history: [WorkoutSession], directory: ExerciseDirectory,
+                                 loadKind: (ExerciseReference) -> LoadKind, profile: UserProfile?, load: LoadHistory,
+                                 skipping: Set<ExerciseReference>) -> [PlateauNotice] {
+        let working = draft.sets.filter { $0.setType != .warmup }
+        var exercises: [ExerciseReference] = []
+        for set in working where !exercises.contains(set.exercise) { exercises.append(set.exercise) }
+        let sessions = history + [draft]
+        let now = draft.endedAt ?? draft.updatedAt
+        return exercises.compactMap { reference in
+            guard !skipping.contains(reference),
+                  let plateau = PlateauDetector.plateau(for: reference, in: sessions, loadKind: loadKind(reference), now: now,
+                                                        calendar: load.calendar),
+                  plateau.lastDate == draft.startedAt else { return nil }
+            let name = directory.info(reference)?.name ?? working.first { $0.exercise == reference }?.exerciseName ?? ""
+            let variant = ReplacementPlanner.alternatives(for: reference, directory: directory, profile: profile,
+                                                          excluding: Set(exercises)).first
+            return PlateauNotice(exerciseName: name, plateau: plateau, variantName: variant?.name)
+        }
+    }
+    // swiftlint:enable function_parameter_count
+
+    /// Les records de l'historique et de la séance, recalculés ensemble : seules les séries de la séance qui battent un record
+    /// déjà établi comptent, pas un premier passage sur un exercice.
+    private static func beatenPersonalRecords(of draft: WorkoutSession, history: [WorkoutSession],
+                                              loadKind: (ExerciseReference) -> LoadKind) -> [PersonalRecord] {
+        let result = RecordBook.compute(sessions: history + [draft], loadKind: loadKind, now: draft.updatedAt)
+        return result.records.filter { $0.sessionID == draft.id && $0.setID.map(result.recordSetIDs.contains) == true }
     }
 
     /// « … : 72,5 kg, nouveau record de charge », « … : 1RM estimé 84 kg, nouveau record »,

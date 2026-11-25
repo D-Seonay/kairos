@@ -270,3 +270,18 @@ private func counts(_ container: ModelContainer) throws -> (synced: Int, local: 
     #expect(cleared.count == 2 && cleared.allSatisfy { $0.deletedAt != nil && $0.imageData == nil && $0.thumbnailData == nil })
     #expect(rows.filter { $0.sessionID == other.id }.allSatisfy { $0.deletedAt == nil && $0.imageData != nil })
 }
+
+@Test func completedPulseSessionsAreCountedWithoutTheOthers() async throws {
+    let repo = SwiftDataWorkoutRepository(modelContainer: try TestContainer.make())
+    let kept = (0..<3).map { Sample.session(startedAt: Fixed.t0.addingTimeInterval(Double($0) * day), sets: 1) }
+    var run = Sample.session(startedAt: Fixed.t0.addingTimeInterval(4 * day), sets: 0)
+    run.kind = .run
+    var imported = Sample.session(startedAt: Fixed.t0.addingTimeInterval(5 * day), sets: 1)
+    imported.source = .hevy
+    let abandoned = Sample.session(startedAt: Fixed.t0.addingTimeInterval(6 * day), status: .abandoned, sets: 1)
+    let deleted = Sample.session(startedAt: Fixed.t0.addingTimeInterval(7 * day), sets: 1)
+    for session in kept + [run, imported, abandoned, deleted] { try await repo.save(session) }
+    try await repo.delete(id: deleted.id)
+    #expect(try await repo.completedPulseSessionCount(kind: .strength) == 3)
+    #expect(try await repo.completedPulseSessionCount(kind: .run) == 1)
+}

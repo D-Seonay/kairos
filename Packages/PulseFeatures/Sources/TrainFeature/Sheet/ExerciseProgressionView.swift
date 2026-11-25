@@ -1,14 +1,25 @@
 import PulseDesignSystem
+import PulseDomain
+import PulseServices
 import SwiftUI
 
-/// L'onglet « Progression » : 1RM estimé et meilleure série, courbe sur 90 jours, incrément de l'exercice, dernières séances.
+/// L'onglet « Progression » : 1RM estimé et meilleure série, le plateau s'il y en a un, courbe sur 90 jours, incrément de
+/// l'exercice, dernières séances. `onOpen` ouvre la fiche d'un autre exercice (la variante du plateau).
 struct ProgressionPane: View {
     let model: ExerciseSheetModel
+    let onOpen: (ExerciseReference) -> Void
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         VStack(alignment: .leading, spacing: PulseMetrics.spacing) {
             indicators
+            if let plateau = model.plateau {
+                ObsidianCard {
+                    ExercisePlateauView(title: String(localized: "Plateau possible", bundle: .module), plateau: plateau,
+                                        variantName: model.plateauVariant?.name, calendar: model.calendar,
+                                        onVariant: openVariant)
+                }
+            }
             chartCard
             IncrementCard(model: model)
             sessions
@@ -32,6 +43,12 @@ struct ProgressionPane: View {
                                                         value: model.bestSetSpokenText,
                                                         detail: model.bestSet.map { model.dateText($0.date) }))
         }
+    }
+
+    /// Ouvre la fiche de la variante du plateau ; `nil` sans variante.
+    private var openVariant: (() -> Void)? {
+        guard let reference = model.plateauVariant?.reference else { return nil }
+        return { onOpen(reference) }
     }
 
     private var oneRepMaxText: String {

@@ -100,8 +100,8 @@ struct DisplaySettingsSection: View {
 
 // MARK: - À propos
 
-/// La version et le build, les licences, et l'écran Diagnostic (Apple Santé, rapports de plantage et de lenteur), où l'on
-/// vient le chercher pour l'assistance.
+/// La version et le build, le lien pour noter Pulse, les licences, et l'écran Diagnostic (Apple Santé, rapports de plantage
+/// et de lenteur), où l'on vient le chercher pour l'assistance.
 struct AboutSettingsSection: View {
     let appVersion: String
     let screens: ProfileAppScreens
@@ -112,6 +112,14 @@ struct AboutSettingsSection: View {
                 .foregroundStyle(PulsePalette.text)
                 .frame(minHeight: 44)
                 .accessibilityElement(children: .combine)
+            if let url = ReviewPrompt.writeReviewURL {
+                Link(destination: url) {
+                    Label(String(localized: "Noter Pulse", bundle: .module), systemImage: "star")
+                        .foregroundStyle(PulsePalette.text)
+                }
+                .frame(minHeight: 44)
+                .accessibilityHint(String(localized: "Ouvre la fiche de Pulse sur l'App Store pour écrire un avis", bundle: .module))
+            }
             NavigationLink {
                 LicensesView()
             } label: {
