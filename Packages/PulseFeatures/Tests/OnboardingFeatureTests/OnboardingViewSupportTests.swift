@@ -7,23 +7,6 @@ import Testing
 
 @MainActor
 struct OnboardingViewSupportTests {
-    // MARK: - Poids
-
-    @Test func kilogramsAreShownAsIs() {
-        #expect(WeightUnits.displayValue(kilograms: 61.5, unit: .kg) == 61.5)
-        #expect(WeightUnits.kilograms(fromDisplay: 61.5, unit: .kg) == 61.5)
-    }
-
-    @Test func poundsConvertWithTheInternationalFactor() {
-        #expect(abs(WeightUnits.displayValue(kilograms: 45.359237, unit: .lb) - 100) < 1e-9)
-        #expect(abs(WeightUnits.kilograms(fromDisplay: 100, unit: .lb) - 45.359237) < 1e-9)
-    }
-
-    @Test func poundsRoundTripToTheSameKilograms() {
-        let shown = WeightUnits.displayValue(kilograms: 82.3, unit: .lb)
-        #expect(abs(WeightUnits.kilograms(fromDisplay: shown, unit: .lb) - 82.3) < 1e-9)
-    }
-
     // MARK: - Douleurs
 
     @Test func noPainShowsTheNoneChoice() {

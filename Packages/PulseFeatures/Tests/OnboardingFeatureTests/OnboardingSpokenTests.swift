@@ -55,14 +55,11 @@ struct OnboardingSpokenTests {
     @Test func measureLabelSpeaksTheUnit() {
         #expect(OnboardingCopy.measureLabel(title: "Taille", unit: .centimeters) == "Taille, en centimètres")
         #expect(OnboardingCopy.measureLabel(title: "Poids actuel", unit: .kilograms) == "Poids actuel, en kilos")
-        #expect(OnboardingCopy.measureLabel(title: "Poids actuel", unit: .pounds) == "Poids actuel, en livres")
     }
 
-    @Test func measureUnitFollowsTheProfileWeightUnit() {
-        #expect(OnboardingCopy.MeasureUnit(.kg) == .kilograms)
-        #expect(OnboardingCopy.MeasureUnit(.lb) == .pounds)
+    @Test func measureUnitsHaveASpokenName() {
+        #expect(OnboardingCopy.MeasureUnit.centimeters.spokenName == "centimètres")
         #expect(OnboardingCopy.MeasureUnit.kilograms.spokenName == "kilos")
-        #expect(OnboardingCopy.MeasureUnit.pounds.spokenName == "livres")
     }
 
     @Test func sessionsPerWeekLabelCountsTheSessions() {
