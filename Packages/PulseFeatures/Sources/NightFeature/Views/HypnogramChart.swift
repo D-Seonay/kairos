@@ -32,14 +32,13 @@ struct HypnogramChart: View {
     let calendar: Calendar
     @ScaledMetric(relativeTo: .body) private var rowHeight: CGFloat = 40
 
-    /// Les rangées de haut en bas : les quatre phases, ou Éveil et Endormi quand la source n'en donne pas.
+    /// Les rangées de haut en bas (voir `NightText.hypnogramRows`) : chaque segment va dans la rangée de sa phase.
     private var rows: [SleepStage] {
-        night.hasStages ? SleepStage.chartOrder : [.awake, .asleepUnspecified]
+        NightText.hypnogramRows(night)
     }
 
-    /// Le nom de la rangée d'un segment ; un reste « sans phase » d'une nuit à phases va dans la rangée Léger.
-    private func row(of stage: SleepStage) -> SleepStage {
-        night.hasStages && stage == .asleepUnspecified ? .core : stage
+    private func name(of stage: SleepStage) -> String {
+        NightText.stageName(stage, hasStages: night.hasStages)
     }
 
     var body: some View {
@@ -48,7 +47,7 @@ struct HypnogramChart: View {
         HStack(alignment: .top, spacing: 8) {
             VStack(alignment: .leading, spacing: 0) {
                 ForEach(rows, id: \.self) { stage in
-                    Text(stage.displayName)
+                    Text(name(of: stage))
                         .font(.caption)
                         .foregroundStyle(PulsePalette.text2)
                         .lineLimit(1)
@@ -64,14 +63,15 @@ struct HypnogramChart: View {
     private var chart: some View {
         let stageLabel = String(localized: "Phase", bundle: .module)
         let timeLabel = String(localized: "Heure", bundle: .module)
-        let segments = night.segments
+        // Un segment dont la rangée n'est pas affichée (quelques secondes sans phase) n'est pas dessiné.
+        let segments = night.segments.filter { rows.contains($0.stage) }
         return Chart(segments.indices, id: \.self) { index in
             RectangleMark(xStart: .value(timeLabel, segments[index].start), xEnd: .value(timeLabel, segments[index].end),
-                          y: .value(stageLabel, row(of: segments[index].stage).displayName))
+                          y: .value(stageLabel, name(of: segments[index].stage)))
                 .foregroundStyle(segments[index].stage.color)
                 .accessibilityHidden(true)
         }
-        .chartYScale(domain: rows.map(\.displayName))
+        .chartYScale(domain: rows.map(name(of:)))
         .chartXScale(domain: night.fellAsleep...max(night.wokeUp, night.fellAsleep.addingTimeInterval(60)))
         .chartXAxis {
             AxisMarks(values: .automatic(desiredCount: 4)) { _ in

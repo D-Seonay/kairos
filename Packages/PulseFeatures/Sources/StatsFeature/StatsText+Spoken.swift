@@ -229,36 +229,6 @@ extension StatsText {
         return text + "."
     }
 
-    /// « Sommeil, 30 jours : 7 heures 12 minutes en moyenne, profond 19 %, nuit la plus courte 5 heures 30 minutes le 3
-    /// novembre, nuit la plus longue 9 heures le 5 novembre. »
-    static func sleepSummary(points: [SleepPoint], deepShare: Double?, period: StatsPeriod, bucket: StatsBucket,
-                             calendar: Calendar) -> String {
-        let title = period.title
-        let minutes = points.map(\.asleepMinutes)
-        let average = durationSpoken(minutes: minutes.isEmpty ? .nan : minutes.reduce(0, +) / Double(minutes.count))
-        var text = String(localized: "Sommeil, \(title) : \(average) en moyenne", bundle: .module)
-        if let deepShare {
-            text += String(localized: ", profond \(PulseFormat.integer(deepShare * 100, unit: "%"))", bundle: .module)
-        }
-        if points.count > 1, let shortest = points.min(by: { $0.asleepMinutes < $1.asleepMinutes }),
-           let longest = points.max(by: { $0.asleepMinutes < $1.asleepMinutes }) {
-            text += ", " + extreme(shortest, isShortest: true, bucket: bucket, calendar: calendar)
-            text += ", " + extreme(longest, isShortest: false, bucket: bucket, calendar: calendar)
-        }
-        return text + "."
-    }
-
-    private static func extreme(_ point: SleepPoint, isShortest: Bool, bucket: StatsBucket, calendar: Calendar) -> String {
-        let duration = durationSpoken(minutes: point.asleepMinutes)
-        let date = PulseSpoken.date(point.date, calendar: calendar)
-        switch (bucket, isShortest) {
-        case (.day, true): return String(localized: "nuit la plus courte \(duration) le \(date)", bundle: .module)
-        case (.day, false): return String(localized: "nuit la plus longue \(duration) le \(date)", bundle: .module)
-        case (.week, true): return String(localized: "semaine la plus courte \(duration) la semaine du \(date)", bundle: .module)
-        case (.week, false): return String(localized: "semaine la plus longue \(duration) la semaine du \(date)", bundle: .module)
-        }
-    }
-
     /// « 7 heures 12 minutes » : des minutes dites en durée (sommeil, durée totale).
     static func durationSpoken(minutes: Double) -> String {
         guard minutes.isFinite, minutes >= 0, minutes < 1e9 else { return dash }
@@ -363,30 +333,6 @@ extension StatsText {
         var value = measure.spoken(point.value)
         if let baseline = point.baseline {
             value += String(localized: ", ligne de base \(measure.spoken(baseline))", bundle: .module)
-        }
-        return (nightLabel(point.date, bucket: bucket, calendar: calendar), value)
-    }
-
-    /// « Nuit du 12 novembre » et « 7 heures 12 minutes, dont 1 heure 20 minutes de sommeil profond ».
-    static func sleepPointSpoken(point: SleepPoint, bucket: StatsBucket, calendar: Calendar) -> (label: String, value: String) {
-        var value = durationSpoken(minutes: point.asleepMinutes)
-        if point.hasStages {
-            let parts = [(point.deepMinutes, String(localized: "de profond", bundle: .module)),
-                         (point.coreMinutes, String(localized: "de léger", bundle: .module)),
-                         (point.remMinutes, String(localized: "de paradoxal", bundle: .module)),
-                         (point.unspecifiedMinutes, String(localized: "sans phase", bundle: .module))]
-                .compactMap { minutes, name -> String? in
-                    guard let minutes, minutes.rounded() > 0 else { return nil }
-                    return "\(durationSpoken(minutes: minutes)) \(name)"
-                }
-            if !parts.isEmpty {
-                value += String(localized: ", dont \(parts.joined(separator: ", "))", bundle: .module)
-            }
-            return (nightLabel(point.date, bucket: bucket, calendar: calendar), value)
-        }
-        if let deep = point.deepMinutes, deep > 0 {
-            let duration = durationSpoken(minutes: min(deep, point.asleepMinutes))
-            value += String(localized: ", dont \(duration) de sommeil profond", bundle: .module)
         }
         return (nightLabel(point.date, bucket: bucket, calendar: calendar), value)
     }

@@ -93,6 +93,42 @@ private func stagedNight(day: Date, asleep: Int = 420) -> NightSample {
     #expect(read[0].coreMinutes == 200 && read[0].remMinutes == 140 && read[0].awakeMinutes == 5)
 }
 
+/// Toute la plage en une fois : chaque nuit va à sa lecture, une lecture sans nuit, une lecture hors plage, une lecture qui a
+/// déjà ses phases et une nuit sans lecture ne changent rien.
+@Test func backfillFillsEveryMatchingReadingOfTheRange() async throws {
+    let repo = SwiftDataRecoveryRepository(modelContainer: try TestContainer.make(), calendar: Fixed.calendar)
+    let cal = Fixed.calendar
+    let today = cal.startOfDay(for: Fixed.t0)
+    func day(_ offset: Int) -> Date { cal.date(byAdding: .day, value: offset, to: today)! }
+    for offset in [-10, -6, -5, -3, -1, 0] {
+        try await repo.save(Sample.recovery(day: day(offset)))   // 420 min, profond 80, sans phases
+    }
+    var staged = Sample.recovery(day: day(-3))
+    staged.coreMinutes = 200
+    staged.remMinutes = 140
+    staged.unspecifiedMinutes = 0
+    staged.awakeMinutes = 5
+    try await repo.save(staged)
+    // Nuits à phases : -6, -3 (déjà à phases), -1, et -2 sans lecture ; -5 n'a qu'une nuit sans phases ; 0 aucune nuit.
+    let unstaged = NightSample(day: day(-5), sdnnMs: nil, restingHeartRate: nil,
+                               sleep: SleepSummary(asleepMinutes: 420, deepMinutes: nil))
+    try await repo.backfillSleepStages([stagedNight(day: day(-1)), stagedNight(day: day(-6)), stagedNight(day: day(-3)),
+                                        stagedNight(day: day(-2)), unstaged])
+    let read = try await repo.dailyRecoveries(from: day(-10), to: day(1))
+    let core = Dictionary(uniqueKeysWithValues: read.map { (cal.dateComponents([.day], from: day(0), to: $0.day).day!, $0.coreMinutes) })
+    #expect(core == [-10: nil, -6: 250, -5: nil, -3: 200, -1: 250, 0: nil])
+}
+
+@Test func backfillWithoutStagedNightsChangesNothing() async throws {
+    let repo = SwiftDataRecoveryRepository(modelContainer: try TestContainer.make(), calendar: Fixed.calendar)
+    let today = Fixed.calendar.startOfDay(for: Fixed.t0)
+    try await repo.save(Sample.recovery(day: today))
+    try await repo.backfillSleepStages([])
+    try await repo.backfillSleepStages([NightSample(day: today, sdnnMs: nil, restingHeartRate: nil, sleep: nil)])
+    let read = try await repo.dailyRecoveries(from: today, to: Fixed.calendar.date(byAdding: .day, value: 1, to: today)!)
+    #expect(read[0].coreMinutes == nil)
+}
+
 @Test func backfillLeavesTheSyncedRowUntouched() async throws {
     let repo = SwiftDataRecoveryRepository(modelContainer: try TestContainer.make(), calendar: Fixed.calendar)
     let today = Fixed.calendar.startOfDay(for: Fixed.t0)

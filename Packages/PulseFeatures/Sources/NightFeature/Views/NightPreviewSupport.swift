@@ -5,7 +5,8 @@ import PulseServices
 import SwiftUI
 
 // swiftlint:disable force_unwrapping
-/// Des nuits d'aperçu, écrites dans un cache en mémoire : la typique (avec un réveil), une sans phases, une avec sieste.
+/// Des nuits d'aperçu, écrites dans un cache en mémoire : la typique (avec un réveil), une sans phases, une avec sieste, une
+/// à phases dont la fin n'a pas de phase.
 @MainActor
 enum NightPreviewSupport {
     static let calendar: Calendar = {
@@ -21,6 +22,7 @@ enum NightPreviewSupport {
         case typical
         case unstaged
         case nap
+        case partlyUnstaged
     }
 
     private static func at(_ day: Int, _ hour: Int, _ minute: Int = 0) -> Date {
@@ -35,13 +37,13 @@ enum NightPreviewSupport {
         case .unstaged:
             return [sample(at(19, 23, 5), at(20, 3, 10), .asleepUnspecified), sample(at(20, 3, 10), at(20, 3, 25), .awake),
                     sample(at(20, 3, 25), at(20, 6, 55), .asleepUnspecified)]
-        case .typical, .nap:
+        case .typical, .nap, .partlyUnstaged:
             let nap = kind == .nap ? [sample(at(19, 18, 5), at(19, 18, 30), .core)] : []
             return nap + [
                 sample(at(19, 23, 10), at(20, 1, 0), .core), sample(at(20, 1, 0), at(20, 2, 30), .deep),
                 sample(at(20, 2, 30), at(20, 3, 30), .rem), sample(at(20, 3, 30), at(20, 3, 40), .awake),
                 sample(at(20, 3, 40), at(20, 5, 0), .core), sample(at(20, 5, 0), at(20, 5, 50), .rem),
-                sample(at(20, 5, 50), at(20, 6, 50), .core)
+                sample(at(20, 5, 50), at(20, 6, 50), kind == .partlyUnstaged ? .asleepUnspecified : .core)
             ]
         }
     }
@@ -79,6 +81,10 @@ private struct FixedSleepCache: HealthSampleCache {
 
 #Preview("Nuit avec sieste") {
     NavigationStack { NightScreen(model: NightPreviewSupport.model(.nap)) }
+}
+
+#Preview("Nuit en partie sans phase") {
+    NavigationStack { NightScreen(model: NightPreviewSupport.model(.partlyUnstaged)) }
 }
 
 #Preview("Nuit, accessibilité 3") {

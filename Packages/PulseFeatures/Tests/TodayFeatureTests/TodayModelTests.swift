@@ -72,6 +72,19 @@ struct TodayModelTests {
         #expect(!empty.canOpenNight)
     }
 
+    /// Les dernières nuits datent de plus de 14 jours : la tuile n'en montre aucune, mais l'écran Nuit, qui parcourt les 60
+    /// jours du cache, en a ; la tuile l'ouvre donc quand même.
+    @Test func canOpenNightWithOnlyOlderNightsInTheCache() async throws {
+        let fixture = TodayFixture(scenario: .threeNights, at: "2026-11-02T08:00")
+        let model = fixture.makeModel()
+        await model.refresh()
+        fixture.clock.set("2026-11-22T08:00")
+        await model.refresh()
+        let sleep = try #require(model.trends.first { $0.factor == .sleep })
+        #expect(sleep.values.allSatisfy { $0 == nil })
+        #expect(model.canOpenNight)
+    }
+
     @Test func refreshShowsTheLoadRatioAfterFourWeeks() async throws {
         let fixture = TodayFixture()
         let calendar = TodayClock.calendar
