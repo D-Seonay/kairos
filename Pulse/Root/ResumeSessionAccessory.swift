@@ -47,6 +47,9 @@ struct ResumeSessionAccessory: View {
         .contextMenu {
             Button(String(localized: "Abandonner la séance"), systemImage: "xmark", role: .destructive, action: onAbandon)
         }
+        // Conteneur d'accessibilité, comme `ObsidianCard` : sans lui, l'identifiant du bandeau serait recopié sur les boutons
+        // et masquerait `session.resume`, cherché par les tests d'interface.
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier(LiveSessionIdentifiers.resumeBanner)
     }
 
