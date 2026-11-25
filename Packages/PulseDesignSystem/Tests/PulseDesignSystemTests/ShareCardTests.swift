@@ -134,3 +134,55 @@ private func content(title: String = "Push", metrics: [ShareCardMetric] = [], vi
     let image = try #require(ShareCardRenderer.cgImage(content: content(), format: .story, photo: photo))
     #expect(image.width == 1_080)
 }
+
+// MARK: Sticker (sans fond)
+
+/// L'opacité du pixel (`x`, `y`) de `image`, comptée depuis le haut.
+private func alpha(of image: CGImage, x: Int, y: Int) -> UInt8 {
+    var pixel: [UInt8] = [0, 0, 0, 0]
+    pixel.withUnsafeMutableBytes { buffer in
+        guard let context = CGContext(data: buffer.baseAddress, width: 1, height: 1, bitsPerComponent: 8, bytesPerRow: 4,
+                                      space: CGColorSpaceCreateDeviceRGB(),
+                                      bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return }
+        context.draw(image, in: CGRect(x: -x, y: y - image.height + 1, width: image.width, height: image.height))
+    }
+    return pixel[3]
+}
+
+@MainActor
+@Test func stickerIsTenEightyWideWithTransparentEdges() throws {
+    let image = try #require(ShareCardRenderer.stickerImage(content: .previewSession))
+    #expect(image.width == 1_080)
+    #expect(image.height > 0 && image.height < 1_920)
+    #expect(alpha(of: image, x: 0, y: 0) == 0)
+    #expect(alpha(of: image, x: image.width - 1, y: image.height - 1) == 0)
+    let png = try #require(ShareCardRenderer.png(image))
+    #expect(png.starts(with: [0x89, 0x50, 0x4E, 0x47]))
+}
+
+@MainActor
+@Test func everyVisualRendersASticker() throws {
+    for card in [ShareCardContent.previewSession, .previewRun, .previewRecord, .previewNight] {
+        let image = try #require(ShareCardRenderer.stickerImage(content: card))
+        #expect(image.width == 1_080)
+        #expect(alpha(of: image, x: 0, y: 0) == 0)
+        // De l'encre quelque part : une ligne au premier tiers traverse le titre ou les chiffres.
+        let inked = (0..<image.height).contains { y in
+            stride(from: 0, to: image.width, by: 8).contains { alpha(of: image, x: $0, y: y) > 0 }
+        }
+        #expect(inked)
+    }
+}
+
+@MainActor
+@Test func stickerHeightFollowsTheContent() throws {
+    let small = content(metrics: [ShareCardMetric(value: "18", label: "Séries")], visual: .none)
+    let tall = try #require(ShareCardRenderer.stickerImage(content: .previewSession))
+    let short = try #require(ShareCardRenderer.stickerImage(content: small))
+    #expect(short.height < tall.height)
+}
+
+@Test func stickerFileNameSaysSansFond() {
+    #expect(ShareCardContent.previewSession.stickerFileName == "Pulse - Push (sans fond).png")
+    #expect(content(title: "").stickerFileName == "Pulse (sans fond).png")
+}

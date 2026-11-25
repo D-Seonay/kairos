@@ -39,6 +39,20 @@ public enum ShareCardRenderer {
         return renderer.cgImage
     }
 
+    /// L'image sans fond (un sticker à coller sur sa propre photo en story) : le contenu de la carte à l'encre blanche ombrée,
+    /// sur du transparent, à 1 080 pixels de large et à la hauteur de son contenu.
+    public static func stickerImage(content: ShareCardContent, theme: Theme = .amber,
+                                    figure: MuscleMapFigure = .female) -> CGImage? {
+        let sticker = ShareCardView(content: content, format: .story, isSticker: true)
+            .environment(\.pulseTheme, theme)
+            .environment(\.muscleMapFigure, figure)
+        let renderer = ImageRenderer(content: sticker)
+        renderer.scale = ShareCardFormat.scale
+        renderer.proposedSize = ProposedViewSize(width: ShareCardFormat.story.size.width, height: nil)
+        renderer.isOpaque = false
+        return renderer.cgImage
+    }
+
     /// La photo d'un fond de carte, lue depuis son JPEG, redressée selon son orientation et ramenée à `maxPixelSize` pixels sur
     /// son grand côté (assez pour 1 920 pixels de haut) ; `nil` si les données ne sont pas une image.
     nonisolated public static func photo(from data: Data, maxPixelSize: Int = 2_048) -> CGImage? {

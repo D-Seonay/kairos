@@ -4,11 +4,13 @@ import SwiftUI
 /// haut, le titre et la date, le dessin (carte musculaire ou tracé) sur une trame de points, les chiffres en grand et fins, les
 /// records en champagne, puis « Suivi avec Pulse ». Toujours sombre, quelle que soit l'apparence : ses couleurs sont fixes.
 /// Avec `photo`, l'image remplit la carte et prend la place du dessin. Elle se dessine à la taille de `format.size` ;
-/// `ShareCardRenderer` en tire l'image.
+/// `ShareCardRenderer` en tire l'image. Avec `isSticker`, la carte perd son fond : le contenu seul, à l'encre ombrée, à la
+/// hauteur qu'il lui faut (l'image sans fond, à coller sur sa propre photo).
 public struct ShareCardView: View {
     private let content: ShareCardContent
     private let format: ShareCardFormat
     private let photo: CGImage?
+    private let isSticker: Bool
 
     private static let paper = Color(PulsePalette.pageRGBA)
     private static let ink = Color(PulsePalette.textRGBA)
@@ -17,15 +19,31 @@ public struct ShareCardView: View {
     private static let line = Color(PulsePalette.lineRGBA)
     private static let gold = Color(PulsePalette.goldRGBA)
 
-    public init(content: ShareCardContent, format: ShareCardFormat, photo: CGImage? = nil) {
+    public init(content: ShareCardContent, format: ShareCardFormat, photo: CGImage? = nil, isSticker: Bool = false) {
         self.content = content
         self.format = format
         self.photo = photo
+        self.isSticker = isSticker
     }
 
     private var isStory: Bool { format == .story }
 
+    // Sans fond, la photo dessous peut être claire : le gris ne s'y lirait pas, tout passe en blanc et les chiffres s'épaississent.
+    private var secondaryInk: Color { isSticker ? Self.ink.opacity(0.9) : Self.ink2 }
+    private var labelInk: Color { isSticker ? Self.ink.opacity(0.85) : Self.muted }
+    private var numberWeight: Font.Weight { isSticker ? .light : .thin }
+
     public var body: some View {
+        Group {
+            if isSticker { sticker } else { card }
+        }
+        .environment(\.colorScheme, .dark)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(content.caption)
+        .accessibilityAddTraits(.isImage)
+    }
+
+    private var card: some View {
         VStack(alignment: .leading, spacing: 0) {
             topBar
             titleBlock
@@ -45,10 +63,56 @@ public struct ShareCardView: View {
         .padding(.vertical, isStory ? 36 : 26)
         .frame(width: format.size.width, height: format.size.height)
         .background { background }
-        .environment(\.colorScheme, .dark)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(content.caption)
-        .accessibilityAddTraits(.isImage)
+    }
+
+    /// Le contenu sans fond : le dessin à une hauteur fixe, le reste à sa taille, et une ombre (un liseré serré, puis un halo)
+    /// qui garde l'encre blanche lisible sur une photo claire. Pas de pied : la marque PULSE en haut suffit à un sticker. Le groupe est composé avant l'ombre, pour qu'elle ne se double pas là où l'encre se croise.
+    private var sticker: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            topBar
+            titleBlock
+                .padding(.top, 28)
+            stickerDrawing
+            metrics
+            if !content.highlights.isEmpty {
+                highlights
+                    .padding(.top, 16)
+            }
+        }
+        .padding(.horizontal, 28)
+        .padding(.vertical, 28)
+        .frame(width: format.size.width)
+        .fixedSize(horizontal: false, vertical: true)
+        .compositingGroup()
+        .shadow(color: .black.opacity(0.6), radius: 1.5, y: 1)
+        .shadow(color: .black.opacity(0.35), radius: 8)
+    }
+
+    @ViewBuilder
+    private var stickerDrawing: some View {
+        if let height = Self.stickerDrawingHeight(content.visual) {
+            drawing
+                .frame(maxWidth: .infinity)
+                .frame(height: height)
+                .padding(.vertical, 20)
+        } else if content.visual.isHero {
+            drawing
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.vertical, 20)
+        } else {
+            Spacer().frame(height: 20)
+        }
+    }
+
+    /// La hauteur du dessin sur l'image sans fond ; `nil` pour un dessin qui prend sa propre hauteur (le chiffre d'un record)
+    /// ou pour l'absence de dessin.
+    static func stickerDrawingHeight(_ visual: ShareCardContent.Visual) -> CGFloat? {
+        switch visual {
+        case .muscles: 200
+        case .route: 200
+        case .hypnogram: 160
+        case .hero, .none: nil
+        }
     }
 
     // MARK: Parties
@@ -79,7 +143,7 @@ public struct ShareCardView: View {
                 .font(.system(size: 11, weight: .medium, design: .monospaced))
                 .tracking(1.6)
                 .textCase(.uppercase)
-                .foregroundStyle(Self.ink2)
+                .foregroundStyle(secondaryInk)
             Spacer(minLength: 12)
             wordmark
         }
@@ -105,7 +169,7 @@ public struct ShareCardView: View {
                 .minimumScaleFactor(0.7)
             Text(content.subtitle)
                 .font(.system(size: 14))
-                .foregroundStyle(Self.ink2)
+                .foregroundStyle(secondaryInk)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
         }
@@ -127,9 +191,9 @@ public struct ShareCardView: View {
         case .none:
             Color.clear
         case .hero(let value, let label):
-            ShareHeroView(value: value, label: label, ink: Self.ink, muted: Self.muted, isStory: isStory)
+            ShareHeroView(value: value, label: label, ink: Self.ink, muted: labelInk, isStory: isStory, weight: numberWeight)
         case .hypnogram(let hypnogram):
-            ShareHypnogramView(hypnogram: hypnogram, ink: Self.ink, muted: Self.muted, line: Self.line)
+            ShareHypnogramView(hypnogram: hypnogram, ink: Self.ink, muted: labelInk, line: Self.line)
                 .frame(maxHeight: .infinity, alignment: .center)
         case .muscles(let levels):
             GeometryReader { proxy in
@@ -161,7 +225,7 @@ public struct ShareCardView: View {
     private func metricView(_ metric: ShareCardMetric) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(metric.value)
-                .font(.system(size: isStory ? 46 : 38, weight: .thin).monospacedDigit())
+                .font(.system(size: isStory ? 46 : 38, weight: numberWeight).monospacedDigit())
                 .foregroundStyle(Self.ink)
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
@@ -169,7 +233,7 @@ public struct ShareCardView: View {
                 .font(.system(size: 10, weight: .medium, design: .monospaced))
                 .tracking(1.4)
                 .textCase(.uppercase)
-                .foregroundStyle(Self.muted)
+                .foregroundStyle(labelInk)
                 .lineLimit(1)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -205,7 +269,7 @@ public struct ShareCardView: View {
                 Text(verbatim: "pulserecovery.app")
             }
             .font(.system(size: 11, weight: .medium, design: .monospaced))
-            .foregroundStyle(Self.muted)
+            .foregroundStyle(labelInk)
         }
     }
 }
@@ -311,6 +375,11 @@ extension ShareCardContent {
 
 #Preview("Séance, story") {
     ShareCardView(content: .previewSession, format: .story)
+}
+
+#Preview("Sticker, séance") {
+    ShareCardView(content: .previewSession, format: .story, isSticker: true)
+        .background(Color.gray)
 }
 
 #Preview("Course, publication") {

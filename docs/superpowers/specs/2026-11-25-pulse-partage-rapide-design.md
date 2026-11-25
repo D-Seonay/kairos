@@ -63,7 +63,7 @@
   - **Écartée** : l'API « Share to Stories » d'Instagram (`stickerImage`), qui demande un identifiant d'app Meta.
 - **Conception** :
   - La rangée « Fond » gagne une tuile « Sans fond » (damier), toujours là, même sans photos de séance. La rangée s'affiche donc toujours.
-  - Le rendu reprend le titre, le dessin, les chiffres, les records et la marque, à l'encre blanche avec une ombre douce pour rester lisible sur une photo claire. L'étiquette, la date et le pied « Suivi avec Pulse » restent, la marque discrète aussi.
+  - Le rendu reprend l'étiquette, la marque PULSE, le titre, la date, le dessin, les chiffres et les records. Tout passe à l'encre blanche (plus de gris), les chiffres un peu plus épais, avec un liseré sombre serré et un halo, pour rester lisible sur une photo claire. Le pied « Suivi avec Pulse » saute : la marque en haut suffit et l'image reste plus basse qu'une story.
   - L'image est recadrée au contenu (1 080 px de large, hauteur selon le contenu), sans le vide d'une story ; le choix story / publication est masqué dans ce mode.
   - L'aperçu pose l'image sur un damier.
   - « Copier » met le PNG dans le presse-papiers (`UIPasteboard`, type PNG) et confirme « Copiée, colle-la dans ta story ». « Partager » reste à côté.
