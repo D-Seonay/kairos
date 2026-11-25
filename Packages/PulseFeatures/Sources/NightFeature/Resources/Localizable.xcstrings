@@ -1,5 +1,356 @@
 {
   "sourceLanguage": "fr",
-  "strings": {},
+  "strings": {
+    "%@ vs ta moyenne": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ vs ta moyenne"
+          }
+        }
+      }
+    },
+    "%lld réveils": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld réveils"
+          }
+        }
+      }
+    },
+    ", %@ par rapport à ta moyenne": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ", %@ par rapport à ta moyenne"
+          }
+        }
+      }
+    },
+    ", dont %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ", dont %@"
+          }
+        }
+      }
+    },
+    ", phases non fournies par ta source": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ", phases non fournies par ta source"
+          }
+        }
+      }
+    },
+    "1 réveil": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 réveil"
+          }
+        }
+      }
+    },
+    "Aucune nuit enregistrée ces 60 derniers jours.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune nuit enregistrée ces 60 derniers jours."
+          }
+        }
+      }
+    },
+    "Aucune nuit précédente": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune nuit précédente"
+          }
+        }
+      }
+    },
+    "Aucune nuit suivante": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune nuit suivante"
+          }
+        }
+      }
+    },
+    "Aussi compté : %@–%@, %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aussi compté : %@–%@, %@"
+          }
+        }
+      }
+    },
+    "Chargement des nuits": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chargement des nuits"
+          }
+        }
+      }
+    },
+    "Durée de la phase": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Durée de la phase"
+          }
+        }
+      }
+    },
+    "Début de la phase": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Début de la phase"
+          }
+        }
+      }
+    },
+    "Endormi": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Endormi"
+          }
+        }
+      }
+    },
+    "Endormi à %@ · Réveillé à %@ · %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Endormi à %@ · Réveillé à %@ · %@"
+          }
+        }
+      }
+    },
+    "Endormi à %@, réveillé à %@, %@, %@ de sommeil": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Endormi à %@, réveillé à %@, %@, %@ de sommeil"
+          }
+        }
+      }
+    },
+    "Heure": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heure"
+          }
+        }
+      }
+    },
+    "La nuit du %@ au %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La nuit du %@ au %@"
+          }
+        }
+      }
+    },
+    "Nuit": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nuit"
+          }
+        }
+      }
+    },
+    "Nuit du %@ au %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nuit du %@ au %@"
+          }
+        }
+      }
+    },
+    "Nuit précédente, %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nuit précédente, %@"
+          }
+        }
+      }
+    },
+    "Nuit suivante, %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nuit suivante, %@"
+          }
+        }
+      }
+    },
+    "Phase": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phase"
+          }
+        }
+      }
+    },
+    "Phases de la nuit": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phases de la nuit"
+          }
+        }
+      }
+    },
+    "Répartition": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Répartition"
+          }
+        }
+      }
+    },
+    "Réveils": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réveils"
+          }
+        }
+      }
+    },
+    "Sans phase": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sans phase"
+          }
+        }
+      }
+    },
+    "Ta source n'envoie pas les phases de sommeil à Apple Santé : seuls l'endormissement, le réveil et la durée sont connus.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta source n'envoie pas les phases de sommeil à Apple Santé : seuls l'endormissement, le réveil et la durée sont connus."
+          }
+        }
+      }
+    },
+    "Temps endormi": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Temps endormi"
+          }
+        }
+      }
+    },
+    "aucun réveil": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aucun réveil"
+          }
+        }
+      }
+    },
+    "d'éveil": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "d'éveil"
+          }
+        }
+      }
+    },
+    "de léger": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "de léger"
+          }
+        }
+      }
+    },
+    "de paradoxal": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "de paradoxal"
+          }
+        }
+      }
+    },
+    "de profond": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "de profond"
+          }
+        }
+      }
+    },
+    "sans phase": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sans phase"
+          }
+        }
+      }
+    }
+  },
   "version": "1.0"
 }

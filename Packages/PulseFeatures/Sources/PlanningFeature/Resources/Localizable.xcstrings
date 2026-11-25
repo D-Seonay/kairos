@@ -1,5 +1,1016 @@
 {
   "sourceLanguage": "fr",
-  "strings": {},
+  "strings": {
+    " et ": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " et "
+          }
+        }
+      }
+    },
+    "%@ déplacée à %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ déplacée à %@"
+          }
+        }
+      }
+    },
+    "%@ km": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ km"
+          }
+        }
+      }
+    },
+    "%@ sur les %lld dernières": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ sur les %lld dernières"
+          }
+        }
+      }
+    },
+    "%@ · %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · %@"
+          }
+        }
+      }
+    },
+    "%@ à %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ à %@"
+          }
+        }
+      }
+    },
+    "%@, %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@"
+          }
+        }
+      }
+    },
+    "%lld": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld"
+          }
+        }
+      }
+    },
+    "%lld battements par minute": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld battements par minute"
+          }
+        }
+      }
+    },
+    "%lld min": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld min"
+          }
+        }
+      }
+    },
+    "%lld sur %lld cette semaine": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld sur %lld cette semaine"
+          }
+        }
+      }
+    },
+    "Abandonner": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abandonner"
+          }
+        }
+      }
+    },
+    "Abandonner les modifications ?": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abandonner les modifications ?"
+          }
+        }
+      }
+    },
+    "Ajustée": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajustée"
+          }
+        }
+      }
+    },
+    "Allure": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allure"
+          }
+        }
+      }
+    },
+    "Annuler": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Annuler"
+          }
+        }
+      }
+    },
+    "Au moins 6 h entre les deux, la plus technique le matin.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Au moins 6 h entre les deux, la plus technique le matin."
+          }
+        }
+      }
+    },
+    "Aujourd'hui · %@ %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aujourd'hui · %@ %@"
+          }
+        }
+      }
+    },
+    "Aujourd'hui, %@ %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aujourd'hui, %@ %@"
+          }
+        }
+      }
+    },
+    "Cet entraînement est introuvable. Il a peut-être été supprimé d'Apple Santé.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cet entraînement est introuvable. Il a peut-être été supprimé d'Apple Santé."
+          }
+        }
+      }
+    },
+    "Cet entraînement vient d'Apple Santé. Pour le supprimer, supprime-le dans l'app Santé.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cet entraînement vient d'Apple Santé. Pour le supprimer, supprime-le dans l'app Santé."
+          }
+        }
+      }
+    },
+    "Cette course a été enregistrée avec Pulse.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette course a été enregistrée avec Pulse."
+          }
+        }
+      }
+    },
+    "Cette semaine": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette semaine"
+          }
+        }
+      }
+    },
+    "Chargement du planning": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chargement du planning"
+          }
+        }
+      }
+    },
+    "Choisi à l'inscription": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisi à l'inscription"
+          }
+        }
+      }
+    },
+    "Continuer à modifier": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuer à modifier"
+          }
+        }
+      }
+    },
+    "Courir": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Courir"
+          }
+        }
+      }
+    },
+    "Courir : %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Courir : %@"
+          }
+        }
+      }
+    },
+    "Course": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Course"
+          }
+        }
+      }
+    },
+    "D": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "D"
+          }
+        }
+      }
+    },
+    "Deux séances ou record": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deux séances ou record"
+          }
+        }
+      }
+    },
+    "Distance": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Distance"
+          }
+        }
+      }
+    },
+    "Durée": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Durée"
+          }
+        }
+      }
+    },
+    "Déplacer": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déplacer"
+          }
+        }
+      }
+    },
+    "Déplacer « %@ »": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déplacer « %@ »"
+          }
+        }
+      }
+    },
+    "Déplacer à…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déplacer à…"
+          }
+        }
+      }
+    },
+    "Déplacée de %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déplacée de %@"
+          }
+        }
+      }
+    },
+    "En plus · %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En plus · %@"
+          }
+        }
+      }
+    },
+    "En plus, %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En plus, %@"
+          }
+        }
+      }
+    },
+    "Enregistrer": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enregistrer"
+          }
+        }
+      }
+    },
+    "FC moyenne": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "FC moyenne"
+          }
+        }
+      }
+    },
+    "Garder le jour prévu": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Garder le jour prévu"
+          }
+        }
+      }
+    },
+    "J": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "J"
+          }
+        }
+      }
+    },
+    "L": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L"
+          }
+        }
+      }
+    },
+    "Lancer la séance": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lancer la séance"
+          }
+        }
+      }
+    },
+    "Le RPE ressenti remplace le RPE estimé dans ta charge d'entraînement.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le RPE ressenti remplace le RPE estimé dans ta charge d'entraînement."
+          }
+        }
+      }
+    },
+    "Les deux jours échangent leur séance.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les deux jours échangent leur séance."
+          }
+        }
+      }
+    },
+    "M": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "M"
+          }
+        }
+      }
+    },
+    "Manquée": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manquée"
+          }
+        }
+      }
+    },
+    "Mois et série": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mois et série"
+          }
+        }
+      }
+    },
+    "Mois précédent": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mois précédent"
+          }
+        }
+      }
+    },
+    "Mois suivant": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mois suivant"
+          }
+        }
+      }
+    },
+    "Montre ce jour dans la semaine": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Montre ce jour dans la semaine"
+          }
+        }
+      }
+    },
+    "Non renseigné": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non renseigné"
+          }
+        }
+      }
+    },
+    "Note": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Note"
+          }
+        }
+      }
+    },
+    "Ouvre l'activité": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvre l'activité"
+          }
+        }
+      }
+    },
+    "Ouvre la séance": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvre la séance"
+          }
+        }
+      }
+    },
+    "Planning": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Planning"
+          }
+        }
+      }
+    },
+    "Prévue": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prévue"
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu déplacer cette séance.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pulse n'a pas pu déplacer cette séance."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu enregistrer tes corrections.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pulse n'a pas pu enregistrer tes corrections."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu garder le jour prévu.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pulse n'a pas pu garder le jour prévu."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu lire ce mois.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pulse n'a pas pu lire ce mois."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu lire cette séance.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pulse n'a pas pu lire cette séance."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu lire ton planning.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pulse n'a pas pu lire ton planning."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu rétablir la semaine.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pulse n'a pas pu rétablir la semaine."
+          }
+        }
+      }
+    },
+    "RPE estimé": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "RPE estimé"
+          }
+        }
+      }
+    },
+    "RPE ressenti": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "RPE ressenti"
+          }
+        }
+      }
+    },
+    "Repos": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repos"
+          }
+        }
+      }
+    },
+    "Repos obligatoire": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repos obligatoire"
+          }
+        }
+      }
+    },
+    "Reprendre « %@ »": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reprendre « %@ »"
+          }
+        }
+      }
+    },
+    "Ressenti": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ressenti"
+          }
+        }
+      }
+    },
+    "Récupération": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Récupération"
+          }
+        }
+      }
+    },
+    "Rétablir la semaine type": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rétablir la semaine type"
+          }
+        }
+      }
+    },
+    "S": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "S"
+          }
+        }
+      }
+    },
+    "Semaine du %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Semaine du %@"
+          }
+        }
+      }
+    },
+    "Séance faite": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Séance faite"
+          }
+        }
+      }
+    },
+    "Séance validée": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Séance validée"
+          }
+        }
+      }
+    },
+    "Série de %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Série de %@"
+          }
+        }
+      }
+    },
+    "Touche longue sur un jour à venir pour le déplacer.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Touche longue sur un jour à venir pour le déplacer."
+          }
+        }
+      }
+    },
+    "Tracé": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tracé"
+          }
+        }
+      }
+    },
+    "Une semaine est réussie quand tu fais toutes les séances prévues, courses comprises.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une semaine est réussie quand tu fais toutes les séances prévues, courses comprises."
+          }
+        }
+      }
+    },
+    "V": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "V"
+          }
+        }
+      }
+    },
+    "Validée · %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Validée · %@"
+          }
+        }
+      }
+    },
+    "Validée, %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Validée, %@"
+          }
+        }
+      }
+    },
+    "aujourd'hui": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aujourd'hui"
+          }
+        }
+      }
+    },
+    "course faite": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "course faite"
+          }
+        }
+      }
+    },
+    "course prévue": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "course prévue"
+          }
+        }
+      }
+    },
+    "deux séances ou record": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "deux séances ou record"
+          }
+        }
+      }
+    },
+    "musculation faite": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "musculation faite"
+          }
+        }
+      }
+    },
+    "musculation prévue": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "musculation prévue"
+          }
+        }
+      }
+    },
+    "semaine": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "semaine"
+          }
+        }
+      }
+    },
+    "semaine d'affilée": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "semaine d'affilée"
+          }
+        }
+      }
+    },
+    "semaine réussie": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "semaine réussie"
+          }
+        }
+      }
+    },
+    "semaines": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "semaines"
+          }
+        }
+      }
+    },
+    "semaines d'affilée": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "semaines d'affilée"
+          }
+        }
+      }
+    },
+    "semaines réussies": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "semaines réussies"
+          }
+        }
+      }
+    },
+    "série": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "série"
+          }
+        }
+      }
+    },
+    "séries": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "séries"
+          }
+        }
+      }
+    },
+    "vélo fait": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "vélo fait"
+          }
+        }
+      }
+    },
+    "—": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "—"
+          }
+        }
+      }
+    }
+  },
   "version": "1.0"
 }
