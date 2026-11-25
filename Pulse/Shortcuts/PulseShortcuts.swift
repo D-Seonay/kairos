@@ -1,7 +1,8 @@
 import AppIntents
 
-/// Les raccourcis de Pulse, proposés par Siri, Spotlight et l'app Raccourcis. Les phrases sont en français (traduites dans
-/// `AppShortcuts.xcstrings`, la langue de développement du projet étant l'anglais) et portent toutes le nom de l'app.
+/// Les raccourcis de Pulse, proposés par Siri, Spotlight et l'app Raccourcis. Les phrases sont en français, la langue de l'app
+/// (`CFBundleDevelopmentRegion` à `fr`) ; `AppShortcuts.xcstrings`, en français lui aussi, les reprend telles quelles pour que
+/// la table française existe quel que soit le réglage de langue du projet. Elles portent toutes le nom de l'app.
 struct PulseShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(

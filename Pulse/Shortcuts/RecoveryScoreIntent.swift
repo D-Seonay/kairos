@@ -1,7 +1,9 @@
 import AppIntents
+import PulseDesignSystem
 import PulseDomain
 import PulseServices
 import SwiftUI
+import TodayFeature
 
 /// « Quel est mon score de récupération ? » : lit le score du jour déjà calculé et enregistré par Pulse, sans ouvrir l'app, et
 /// le dit avec son état. Le score vient de données Apple Santé : comme pour le reste de l'app, rien ne s'affiche ni ne se dit
@@ -20,12 +22,15 @@ struct RecoveryScoreIntent: AppIntent {
         let dayEnd = calendar.date(byAdding: .day, value: 1, to: dayStart) ?? now
         let recoveries = try await dependencies.recovery.dailyRecoveries(from: dayStart, to: dayEnd)
         let recovery = ShortcutText.todaysRecovery(recoveries, now: now, calendar: calendar)
-        let reply = ShortcutText.recoveryScore(recovery)
+        // Le marqueur de calibration tel que l'accueil le dit à VoiceOver (« en calibration, 9 nuits »).
+        let calibration = recovery.flatMap(FactorFormatter.spokenMarker(for:))
+        let reply = ShortcutText.recoveryScore(recovery, calibration: calibration)
         return .result(dialog: IntentDialog("\(reply)"), view: RecoveryScoreSnippet(recovery: recovery, reply: reply))
     }
 }
 
-/// Sous la réponse de Siri : le score, son état, et « Voir pourquoi » qui ouvre l'écran « Pourquoi » de l'app.
+/// Sous la réponse de Siri : le score, son état et son marqueur comme sur l'accueil, et « Voir pourquoi » qui ouvre l'écran
+/// « Pourquoi » de l'app.
 private struct RecoveryScoreSnippet: View {
     let recovery: DailyRecovery?
     let reply: String
@@ -36,9 +41,16 @@ private struct RecoveryScoreSnippet: View {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
                     Text("\(Int(recovery.score.rounded()))")
                         .font(.system(.largeTitle, design: .rounded, weight: .bold).monospacedDigit())
-                    Text(recovery.isEstimated ? String(localized: "\(recovery.category.sentenceName) · estimé")
-                        : recovery.category.sentenceName)
-                        .font(.headline)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(recovery.category.localizedName)
+                            .font(.headline)
+                        // « Estimé » ou « En calibration (9 nuits) », comme sur la carte de l'accueil.
+                        if let marker = FactorFormatter.marker(for: recovery) {
+                            Text(marker)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
                 }
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(reply)

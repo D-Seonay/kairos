@@ -600,6 +600,16 @@
           }
         }
       }
+    },
+    "Ton score de récupération est de %lld sur 100 : %@, %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ton score de récupération est de %lld sur 100 : %@, %@."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

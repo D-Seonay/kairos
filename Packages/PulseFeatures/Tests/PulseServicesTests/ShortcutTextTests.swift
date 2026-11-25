@@ -22,6 +22,16 @@ struct ShortcutTextTests {
             == "Ton score de récupération est estimé à 58 sur 100 : fatigue modérée.")
     }
 
+    /// Le marqueur de calibration de l'accueil suit l'état ; un score estimé ne le dit pas.
+    @Test func calibrationIsSaidWhenTheHomeScreenShowsIt() {
+        #expect(ShortcutText.recoveryScore(recovery(64, .normal), calibration: "en calibration, 9 nuits")
+            == "Ton score de récupération est de 64 sur 100 : forme normale, en calibration, 9 nuits.")
+        #expect(ShortcutText.recoveryScore(recovery(58, .moderateFatigue, estimated: true), calibration: "en calibration, 9 nuits")
+            == "Ton score de récupération est estimé à 58 sur 100 : fatigue modérée.")
+        #expect(ShortcutText.recoveryScore(recovery(64, .normal), calibration: nil)
+            == "Ton score de récupération est de 64 sur 100 : forme normale.")
+    }
+
     @Test func noScoreYetIsSaidPlainly() {
         #expect(ShortcutText.recoveryScore(nil) == "Ton score de récupération n'est pas encore prêt. Ouvre Pulse pour le calculer.")
     }
@@ -68,6 +78,29 @@ struct ShortcutTextTests {
         #expect(SupplementShortcut.matching("MAGNÉ", in: supplements).map(\.name) == ["Magnésium"])
         #expect(SupplementShortcut.matching("zinc", in: supplements).isEmpty)
         #expect(SupplementShortcut.matching("  ", in: supplements).count == 3)
+    }
+
+    /// Un nom très court n'est pas cherché dans la phrase entière : « D » ne répond pas à « magnésium ».
+    @Test func aVeryShortNameIsOnlyMatchedByItsOwnLetters() {
+        let supplements = [Fixture.supplement("D"), Fixture.supplement("B6"), Fixture.supplement("Magnésium")]
+
+        #expect(SupplementShortcut.matching("magnésium du soir", in: supplements).map(\.name) == ["Magnésium"])
+        #expect(SupplementShortcut.matching("d", in: supplements).map(\.name) == ["D"])
+        #expect(SupplementShortcut.matching("b6", in: supplements).map(\.name) == ["B6"])
+    }
+
+    /// Un raccourci enregistré avant l'archivage se résout encore, puis refuse la prise.
+    @Test func anArchivedSupplementResolvesButIsRefused() {
+        let creatine = Fixture.supplement("Créatine")
+        var zinc = Fixture.supplement("Zinc")
+        zinc.isArchived = true
+        let overview = SupplementOverview(day: morning, items: [], supplements: [creatine], regularity: [:], advice: [],
+                                          archived: [zinc])
+
+        #expect(SupplementShortcut.entities(for: [zinc.id, creatine.id, UUID()], in: overview).map(\.name) == ["Créatine", "Zinc"])
+        #expect(SupplementShortcut.refusal(supplementID: zinc.id, in: overview) == .unknown)
+        #expect(SupplementShortcut.refusal(supplementID: UUID(), in: overview) == .unknown)
+        #expect(SupplementShortcut.refusal(supplementID: creatine.id, in: overview) == nil)
     }
 
     @Test func aRefusedIntakeIsAlreadyTakenOrGone() {

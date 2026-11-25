@@ -25,13 +25,15 @@ struct SupplementEntity: AppEntity {
     }
 }
 
-/// Les compléments non archivés, ceux du jour encore à prendre en premier (`SupplementShortcut`).
+/// Les compléments proposés et cherchés : non archivés, ceux du jour encore à prendre en premier (`SupplementShortcut`).
 struct SupplementEntityQuery: EntityStringQuery {
     @Dependency private var dependencies: AppDependencies
 
+    /// Archivés compris : un raccourci enregistré avant l'archivage se résout, et l'intention dit que le complément n'est plus
+    /// dans Pulse plutôt qu'une erreur.
     func entities(for identifiers: [UUID]) async throws -> [SupplementEntity] {
-        let wanted = Set(identifiers)
-        return try await supplements().filter { wanted.contains($0.id) }.map(SupplementEntity.init)
+        let overview = try await dependencies.supplementService.overview()
+        return SupplementShortcut.entities(for: identifiers, in: overview).map(SupplementEntity.init)
     }
 
     func suggestedEntities() async throws -> [SupplementEntity] {
@@ -63,6 +65,10 @@ struct TakeSupplementIntent: AppIntent {
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
         let service = dependencies.supplementService
+        // Un complément archivé depuis l'enregistrement du raccourci n'est pas coché : le service accepterait la prise.
+        if let refusal = SupplementShortcut.refusal(supplementID: supplement.id, in: try await service.overview()) {
+            return .result(dialog: IntentDialog("\(ShortcutText.supplement(refusal, name: supplement.name))"))
+        }
         let recorded = try await service.take(supplementID: supplement.id)
         let known = recorded ? [] : try await service.overview().supplements
         let outcome = SupplementShortcut.outcome(recorded: recorded, supplementID: supplement.id, known: known)
