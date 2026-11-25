@@ -12,6 +12,8 @@ public enum HabitualBedtime {
     public static let minimumNights = 5
     /// L'avance du rappel « au coucher » sur l'heure habituelle d'endormissement.
     public static let leadMinutes = 30
+    /// La dernière heure de prise d'un coucher tardif : avant minuit, pour que la prise reste dans la journée du soir.
+    public static let latestReminderMinutes = 23 * 60 + 55
     /// La médiane est arrondie à 5 minutes.
     static let roundingMinutes = 5
     private static let dayMinutes = 24 * 60
@@ -34,9 +36,18 @@ public enum HabitualBedtime {
         return rounded % dayMinutes
     }
 
-    /// L'heure du rappel « au coucher » qui suit les nuits : `leadMinutes` avant l'heure habituelle, en minutes après minuit.
+    /// L'heure du rappel « au coucher » qui suit les nuits : `leadMinutes` avant l'heure habituelle, en minutes après minuit. Les
+    /// prises se rangent par jour civil : un rappel qui tomberait entre minuit et midi (coucher vers 00:30 ou plus tard) est
+    /// borné à 23:55, sinon il passerait au début de la journée, pendant la nuit d'avant.
     public static func reminderMinutes(habitual: Int) -> Int {
-        ((habitual - leadMinutes) % dayMinutes + dayMinutes) % dayMinutes
+        let minutes = ((habitual - leadMinutes) % dayMinutes + dayMinutes) % dayMinutes
+        return minutes < dayMinutes / 2 ? latestReminderMinutes : minutes
+    }
+
+    /// Vrai quand le rappel est borné à 23:55 au lieu de tomber `leadMinutes` avant l'heure habituelle.
+    public static func isCapped(habitual: Int) -> Bool {
+        let minutes = ((habitual - leadMinutes) % dayMinutes + dayMinutes) % dayMinutes
+        return minutes < dayMinutes / 2
     }
 }
 

@@ -129,12 +129,13 @@ public final class SupplementService: Sendable {
     /// Enregistre le complément, créé ou modifié, et replanifie les rappels. `followsNights` règle « Suivre mes nuits » sur cet
     /// appareil (vrai seulement pour un complément « au coucher ») ; `nil` le laisse tel quel.
     public func save(_ supplement: Supplement, followsNights: Bool? = nil) async throws {
-        if let followsNights {
-            bedtimeStore?.setFollowsNights(followsNights && supplement.timing == .bedtime, for: supplement.id)
-        }
         var stamped = supplement
         stamped.updatedAt = now()
         try await supplements.save(stamped)
+        // Après l'enregistrement : un échec ne laisse pas le réglage changé pour un complément resté tel quel.
+        if let followsNights {
+            bedtimeStore?.setFollowsNights(followsNights && supplement.timing == .bedtime, for: supplement.id)
+        }
         await rescheduleReminders()
     }
 

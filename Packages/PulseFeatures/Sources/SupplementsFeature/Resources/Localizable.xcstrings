@@ -821,12 +821,22 @@
         }
       }
     },
-    "Tu t'endors vers %@ d'après tes nuits : prise prévue 30 min avant, à %@.": {
+    "Tu t'endors vers %@ d'après tes nuits : prise prévue %lld min avant, à %@.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tu t'endors vers %@ d'après tes nuits : prise prévue 30 min avant, à %@."
+            "value": "Tu t'endors vers %@ d'après tes nuits : prise prévue %lld min avant, à %@."
+          }
+        }
+      }
+    },
+    "Tu t'endors vers %@ d'après tes nuits : prise prévue à %@, au plus tard avant minuit.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu t'endors vers %@ d'après tes nuits : prise prévue à %@, au plus tard avant minuit."
           }
         }
       }

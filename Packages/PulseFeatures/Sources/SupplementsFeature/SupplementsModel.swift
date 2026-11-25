@@ -120,7 +120,13 @@ public final class SupplementsModel {
         }
         let asleep = SupplementText.time(minutes: habitual)
         let reminder = SupplementText.time(minutes: HabitualBedtime.reminderMinutes(habitual: habitual))
-        return String(localized: "Tu t'endors vers \(asleep) d'après tes nuits : prise prévue 30 min avant, à \(reminder).",
+        if HabitualBedtime.isCapped(habitual: habitual) {
+            return String(localized: """
+                Tu t'endors vers \(asleep) d'après tes nuits : prise prévue à \(reminder), au plus tard avant minuit.
+                """, bundle: .module)
+        }
+        let lead = HabitualBedtime.leadMinutes
+        return String(localized: "Tu t'endors vers \(asleep) d'après tes nuits : prise prévue \(lead) min avant, à \(reminder).",
                       bundle: .module)
     }
 

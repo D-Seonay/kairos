@@ -47,6 +47,26 @@ struct HabitualBedtimeTests {
         #expect(HabitualBedtime.reminderMinutes(habitual: 23 * 60 + 10) == 22 * 60 + 40)
         #expect(HabitualBedtime.reminderMinutes(habitual: 15) == 23 * 60 + 45)
         #expect(HabitualBedtime.reminderMinutes(habitual: 0) == 23 * 60 + 30)
+        #expect(!HabitualBedtime.isCapped(habitual: 15))
+    }
+
+    /// Un coucher vers 00:45 ou 01:30 : le rappel reste le soir, à 23:55, au lieu de passer au début de la journée.
+    @Test func lateBedtimesAreCappedBeforeMidnight() {
+        #expect(HabitualBedtime.reminderMinutes(habitual: 45) == 23 * 60 + 55)
+        #expect(HabitualBedtime.reminderMinutes(habitual: 90) == 23 * 60 + 55)
+        #expect(HabitualBedtime.reminderMinutes(habitual: 30) == 23 * 60 + 55)
+        #expect(HabitualBedtime.isCapped(habitual: 45) && HabitualBedtime.isCapped(habitual: 90))
+    }
+
+    @Test func aLateBedtimeIsPlannedTheSameEveningAndRemindedOncePerDay() {
+        let magnesium = Fixture.supplement("Magnésium", timing: .bedtime, minutes: 22 * 60 + 30)
+        var schedule = Fixture.schedule([magnesium])
+        schedule.habitualBedtimeMinutes = 45
+        schedule.followingNights = [magnesium.id]
+        #expect(schedule.plannedMinutes(of: magnesium, on: TestClock.date("2026-11-20T00:00")) == 23 * 60 + 55)
+        let reminders = SupplementReminderPlanner.reminders(schedule: schedule, now: now, enabled: true)
+        #expect(reminders.first?.fireDate == TestClock.date("2026-11-20T23:55"))
+        #expect(reminders.count == 14)
     }
 
     // MARK: Cache
@@ -107,7 +127,7 @@ struct HabitualBedtimeTests {
         })
         let store = InMemorySupplementBedtimeStore()
         let reminders = StubSupplementReminderScheduler()
-        let repository = InMemorySupplementRepository()
+        let repository = FailingSaveSupplementRepository()
         let now = now
         let service = SupplementService(
             supplements: repository, programs: InMemoryProgramRepository(), profiles: InMemoryProfileRepository(),
@@ -130,6 +150,38 @@ struct HabitualBedtimeTests {
 
         try await service.save(magnesium, followsNights: false)
         #expect(store.followingNights.isEmpty)
+
+        // Un enregistrement qui échoue ne change pas le réglage.
+        await repository.setFailing(true)
+        await #expect(throws: (any Error).self) { try await service.save(magnesium, followsNights: true) }
+        #expect(store.followingNights.isEmpty)
+        await repository.setFailing(false)
         #expect(try await service.overview().items.first { $0.supplement.id == magnesium.id }?.plannedMinutes == 22 * 60 + 30)
     }
+}
+
+/// Le dépôt en mémoire, dont l'enregistrement d'un complément peut échouer.
+private actor FailingSaveSupplementRepository: SupplementRepository {
+    private struct Failure: Error {}
+    private let base = InMemorySupplementRepository()
+    private var failing = false
+
+    func setFailing(_ failing: Bool) { self.failing = failing }
+
+    func supplements(includeArchived: Bool) async throws -> [Supplement] {
+        try await base.supplements(includeArchived: includeArchived)
+    }
+
+    func save(_ supplement: Supplement) async throws {
+        if failing { throw Failure() }
+        try await base.save(supplement)
+    }
+
+    func delete(id: UUID) async throws { try await base.delete(id: id) }
+
+    func intakes(from: Date, to: Date) async throws -> [SupplementIntake] { try await base.intakes(from: from, to: to) }
+
+    func save(_ intake: SupplementIntake) async throws { try await base.save(intake) }
+
+    func delete(intakeID: UUID) async throws { try await base.delete(intakeID: intakeID) }
 }
