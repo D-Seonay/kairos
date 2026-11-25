@@ -6,25 +6,34 @@ import PulseDomain
 /// avec `.completeFileProtection`) et exclu des sauvegardes. Disposition : `index.json` (`[BodyPhoto]`, dates ISO 8601),
 /// `<id>.jpg` et `<id>-thumb.jpg`. L'index évite de lire les dates des fichiers (pas de raison `C617.1` à déclarer).
 /// À n'appeler qu'au premier plan : un fichier protégé ne se lit pas en arrière-plan, iPhone verrouillé.
+///
+/// Deux index illisibles ne se traitent pas pareil. Un index dont les octets ne se lisent pas (iPhone verrouillé, protection
+/// `complete`) est passager : rien n'est écrit ni balayé, et tout revient au déverrouillage. Un index dont les octets se lisent
+/// mais ne se décodent pas est abîmé : il est reconstruit à partir des images présentes, sans jamais en supprimer une.
 public actor FileBodyPhotoStore: BodyPhotoStore {
-    /// L'index existe mais ne se lit pas (iPhone verrouillé, fichier abîmé) : aucune écriture, sinon l'index réécrit sans les
+    /// L'index existe mais ses octets ne se lisent pas (iPhone verrouillé) : aucune écriture, sinon l'index réécrit sans les
     /// photos existantes les ferait balayer comme orphelines. « Tout supprimer » reste possible.
     public struct UnreadableIndexError: Error {}
 
     /// Préfixe des dossiers de travail de l'export ; ce ne sont jamais des photos, le balayage les ignore.
     private static let stagingPrefix = ".export-"
     private static let writeOptions: Data.WritingOptions = [.atomic, .completeFileProtection]
+    /// La copie de l'index abîmé, gardée à côté de l'index reconstruit : les dates qu'on n'a pas su relire n'y sont pas perdues.
+    static let damagedIndexName = "index-abime.json"
 
     private let directory: URL
+    private let now: @Sendable () -> Date
 
-    public init(directory: URL) {
+    /// `now` date les photos reconstruites dont l'index abîmé ne disait rien.
+    public init(directory: URL, now: @escaping @Sendable () -> Date = { Date() }) {
         self.directory = directory
+        self.now = now
     }
 
     public func photos() async throws -> [BodyPhoto] {
-        let state = readIndex()
-        // Index illisible (iPhone verrouillé, fichier abîmé) : rien n'est ni rendu ni nettoyé, sinon un échec de lecture
-        // passager viderait le dossier.
+        let state = try readIndex()
+        // Index illisible (iPhone verrouillé) : rien n'est ni rendu ni nettoyé, sinon un échec de lecture passager viderait le
+        // dossier.
         if case .unreadable = state { return [] }
         let entries = state.entries
         let present = entries.filter { FileManager.default.fileExists(atPath: imageURL($0.id).path) }
@@ -174,16 +183,62 @@ public actor FileBodyPhotoStore: BodyPhotoStore {
 
     /// Les entrées de l'index avant une écriture ; jette `UnreadableIndexError` si l'index existe sans se lire.
     private func writableEntries() throws -> [BodyPhoto] {
-        let state = readIndex()
+        let state = try readIndex()
         if case .unreadable = state { throw UnreadableIndexError() }
         return state.entries
     }
 
-    private func readIndex() -> IndexState {
+    /// Octets illisibles : `unreadable` (passager). Octets lus mais non décodables : l'index est reconstruit et réécrit.
+    private func readIndex() throws -> IndexState {
         guard FileManager.default.fileExists(atPath: indexURL.path) else { return .absent }
-        guard let data = try? Data(contentsOf: indexURL),
-              let entries = try? Self.decoder.decode([BodyPhoto].self, from: data) else { return .unreadable }
-        return .decoded(entries)
+        guard let data = try? Data(contentsOf: indexURL) else { return .unreadable }
+        if let entries = try? Self.decoder.decode([BodyPhoto].self, from: data) { return .decoded(entries) }
+        return .decoded(try rebuildIndex(from: data))
+    }
+
+    // MARK: - Reconstruction d'un index abîmé
+
+    /// Un élément de l'index lu seul : une entrée abîmée n'emporte pas les autres.
+    private struct SalvagedEntry: Decodable {
+        let photo: BodyPhoto?
+
+        init(from decoder: any Decoder) throws {
+            photo = try? BodyPhoto(from: decoder)
+        }
+    }
+
+    /// Garde une copie de l'index abîmé, reprend les entrées encore lisibles, puis ajoute une entrée pour chaque image qui n'en a
+    /// plus. Ces dernières n'ont ni pose ni date connues (les dates des fichiers ne sont pas lues) : elles sont datées de
+    /// maintenant et reçoivent face, profil, dos tour à tour, pour rester visibles, supprimables et exportées. Aucune image n'est
+    /// supprimée ; une vignette manquante est remplacée par une copie de l'image.
+    private func rebuildIndex(from damaged: Data) throws -> [BodyPhoto] {
+        let backup = directory.appendingPathComponent(Self.damagedIndexName)
+        if !FileManager.default.fileExists(atPath: backup.path) {
+            try? damaged.write(to: backup, options: Self.writeOptions)
+        }
+        var entries: [BodyPhoto] = []
+        let salvaged = (try? Self.decoder.decode([SalvagedEntry].self, from: damaged))?.compactMap(\.photo) ?? []
+        for photo in salvaged where !entries.contains(where: { $0.id == photo.id }) {
+            entries.append(photo)
+        }
+        let known = Set(entries.map(\.id))
+        let date = now()
+        let names = (try? FileManager.default.contentsOfDirectory(atPath: directory.path)) ?? []
+        let unindexed = names.compactMap { name -> UUID? in
+            guard name.hasSuffix(".jpg"), !name.hasSuffix("-thumb.jpg") else { return nil }
+            return UUID(uuidString: String(name.dropLast(".jpg".count)))
+        }
+        .filter { !known.contains($0) }
+        .sorted { $0.uuidString < $1.uuidString }
+        for (offset, id) in unindexed.enumerated() {
+            let pose = BodyPose.allCases[offset % BodyPose.allCases.count]
+            entries.append(BodyPhoto(id: id, pose: pose, takenAt: date, createdAt: date))
+        }
+        for photo in entries where !FileManager.default.fileExists(atPath: thumbnailURL(photo.id).path) {
+            try? FileManager.default.copyItem(at: imageURL(photo.id), to: thumbnailURL(photo.id))
+        }
+        try writeIndex(entries)
+        return entries
     }
 
     /// Supprime les `<id>.jpg` et `<id>-thumb.jpg` dont l'identifiant n'est pas dans l'index. Seulement quand l'index a été

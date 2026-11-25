@@ -22,6 +22,15 @@ private func files(in directory: URL) -> [String] {
     ((try? FileManager.default.contentsOfDirectory(atPath: directory.path)) ?? []).sorted()
 }
 
+/// Rend l'index illisible comme le fait la protection `complete` quand l'iPhone est verrouillé : les octets ne se lisent plus.
+private func lockIndex(in directory: URL) throws {
+    try FileManager.default.setAttributes([.posixPermissions: 0], ofItemAtPath: directory.appendingPathComponent("index.json").path)
+}
+
+private func unlockIndex(in directory: URL) throws {
+    try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: directory.appendingPathComponent("index.json").path)
+}
+
 private func indexEntries(in directory: URL) throws -> [BodyPhoto] {
     let decoder = JSONDecoder()
     decoder.dateDecodingStrategy = .iso8601
@@ -140,10 +149,8 @@ private func indexEntries(in directory: URL) throws -> [BodyPhoto] {
         let store = FileBodyPhotoStore(directory: directory)
         let old = bodyPhoto(.front)
         try await store.save(old, image: Sample.photoImage(seed: 1))
-        let indexURL = directory.appendingPathComponent("index.json")
-        let goodIndex = try Data(contentsOf: indexURL)
-        try "x".write(to: indexURL, atomically: true, encoding: .utf8)
-        // Index illisible : rien n'est balayé, les fichiers restent là.
+        try lockIndex(in: directory)
+        // Index illisible (iPhone verrouillé) : rien n'est balayé ni reconstruit, les fichiers restent là.
         #expect(try await store.photos().isEmpty)
         #expect(files(in: directory).contains("\(old.id.uuidString).jpg"))
         // Un `save` ou un `delete` réécrirait l'index sans l'ancienne photo, que le balayage suivant effacerait : ils échouent.
@@ -154,8 +161,9 @@ private func indexEntries(in directory: URL) throws -> [BodyPhoto] {
         let remaining = files(in: directory)
         #expect(remaining.contains("\(old.id.uuidString).jpg") && remaining.contains("\(old.id.uuidString)-thumb.jpg"))
         #expect(!remaining.contains { $0.hasPrefix(fresh.id.uuidString) })
+        #expect(!remaining.contains(FileBodyPhotoStore.damagedIndexName))
         // L'index redevenu lisible (iPhone déverrouillé), l'ancienne photo revient intacte.
-        try goodIndex.write(to: indexURL)
+        try unlockIndex(in: directory)
         #expect(try await store.photos() == [old])
         #expect(try await store.image(of: old.id) == Sample.photoImage(seed: 1))
     }
@@ -163,7 +171,8 @@ private func indexEntries(in directory: URL) throws -> [BodyPhoto] {
     @Test func unreadableIndexWithoutPhotosStillRefusesASave() async throws {
         let directory = temporaryDirectory()
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        try "x".write(to: directory.appendingPathComponent("index.json"), atomically: true, encoding: .utf8)
+        try "[]".write(to: directory.appendingPathComponent("index.json"), atomically: true, encoding: .utf8)
+        try lockIndex(in: directory)
         let store = FileBodyPhotoStore(directory: directory)
         #expect(try await store.photos().isEmpty)
         await #expect(throws: (any Error).self) { try await store.save(bodyPhoto(), image: Sample.photoImage(seed: 3)) }
