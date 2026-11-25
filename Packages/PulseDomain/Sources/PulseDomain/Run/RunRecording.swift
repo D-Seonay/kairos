@@ -82,6 +82,12 @@ public struct RunWorkoutEntry: Sendable, Equatable {
     }
 }
 
+/// HealthKit a accepté l'entraînement sans l'écrire tout de suite (iPhone verrouillé) : il l'écrira de lui-même au déverrouillage.
+/// L'entraînement ne doit donc pas être écrit une seconde fois.
+public struct RunWorkoutWriteDeferred: Error, Equatable {
+    public init() {}
+}
+
 /// La séance HealthKit de la course, derrière un protocole pour les tests. Implémenté par PulseHealth.
 public protocol RunWorkoutRecording: Sendable {
     func writeAccess() async -> HealthWriteAccess
@@ -91,9 +97,11 @@ public protocol RunWorkoutRecording: Sendable {
     func start(sessionID: UUID, at date: Date) async throws -> AsyncStream<Double>
     func pause(at date: Date) async
     func resume(at date: Date) async
-    /// Termine la séance en cours et écrit l'entraînement ; `nil` s'il n'y a pas de séance vivante.
+    /// Termine la séance en cours et écrit l'entraînement ; `nil` s'il n'y a pas de séance vivante. Lance
+    /// `RunWorkoutWriteDeferred` si HealthKit écrira l'entraînement plus tard.
     func finish(_ entry: RunWorkoutEntry) async throws -> UUID?
-    /// Écrit un entraînement sans séance vivante (course interrompue).
+    /// Écrit un entraînement sans séance vivante (course interrompue) ; rend celui déjà écrit pour la même course s'il existe.
+    /// Lance `RunWorkoutWriteDeferred` si HealthKit l'écrira plus tard.
     func save(_ entry: RunWorkoutEntry) async throws -> UUID
     /// Supprime l'entraînement écrit par Pulse et son tracé ; sans effet s'il n'existe plus.
     func deleteWorkout(id: UUID) async throws
@@ -114,19 +122,22 @@ public actor StubRunWorkoutRecorder: RunWorkoutRecording {
     public private(set) var saved: [UUID: RunWorkoutEntry] = [:]
     public private(set) var deletedWorkouts: [UUID] = []
     public private(set) var discardCount = 0
+    /// Les entraînements laissés à HealthKit pour plus tard, par `finish` ou `save`.
+    public private(set) var deferred: [RunWorkoutEntry] = []
     /// Vrai entre `start` et `finish` / `discard`, ou après une reprise réussie.
     public private(set) var hasLiveSession: Bool
     private let recoverable: Bool
     private let failsOnStart: Bool
     private let failsOnWrite: Bool
     private let failsOnFinish: Bool
+    private let defersWrite: Bool
     private var heartRates: AsyncStream<Double>.Continuation?
 
     public struct Failure: Error {}
 
     public init(access: HealthWriteAccess = .authorized, grantedOnRequest: HealthWriteAccess = .authorized,
                 hasLiveSession: Bool = false, recoverable: Bool = false, failsOnStart: Bool = false,
-                failsOnWrite: Bool = false, failsOnFinish: Bool = false) {
+                failsOnWrite: Bool = false, failsOnFinish: Bool = false, defersWrite: Bool = false) {
         self.access = access
         self.grantedOnRequest = grantedOnRequest
         self.hasLiveSession = hasLiveSession
@@ -134,6 +145,7 @@ public actor StubRunWorkoutRecorder: RunWorkoutRecording {
         self.failsOnStart = failsOnStart
         self.failsOnWrite = failsOnWrite
         self.failsOnFinish = failsOnFinish
+        self.defersWrite = defersWrite
     }
 
     public func writeAccess() async -> HealthWriteAccess {
@@ -170,12 +182,20 @@ public actor StubRunWorkoutRecorder: RunWorkoutRecording {
         hasLiveSession = false
         heartRates?.finish()
         heartRates = nil
+        if defersWrite {
+            deferred.append(entry)
+            throw RunWorkoutWriteDeferred()
+        }
         finished.append(entry)
         return UUID()
     }
 
     public func save(_ entry: RunWorkoutEntry) async throws -> UUID {
         if failsOnWrite { throw Failure() }
+        if defersWrite {
+            deferred.append(entry)
+            throw RunWorkoutWriteDeferred()
+        }
         let id = UUID()
         saved[id] = entry
         return id

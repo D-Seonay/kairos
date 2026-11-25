@@ -23,18 +23,21 @@ extension RunSessionService {
             : active.builder
         // Un échec de l'écriture dans Santé n'empêche pas d'enregistrer la course dans Pulse.
         let entry = Self.healthEntry(draft, builder: builder, end: end)
-        var healthKitID: UUID?
-        if active.recordsHealth { healthKitID = try? await recorder.finish(entry) }
+        var health = RunHealthWrite.none
+        if active.recordsHealth { health = await healthWrite { try await self.recorder.finish(entry) } }
         // Sans séance vivante à terminer (arrêtée par le système, en échec ou jamais partie), l'entraînement est écrit sans elle.
-        if healthKitID == nil, await recorder.writeAccess() == .authorized { healthKitID = try? await recorder.save(entry) }
-        if let healthKitID {
+        // Un entraînement que HealthKit écrira au déverrouillage ne l'est pas une seconde fois.
+        if health == .none, await recorder.writeAccess() == .authorized {
+            health = await healthWrite { try await self.recorder.save(entry) }
+        }
+        if health != .none {
             // Gardé avant d'enregistrer la séance : si l'enregistrement échoue, la reprise réutilise cet entraînement.
-            draft.healthKitUUID = healthKitID
+            draft.healthWrite = health
             try? await drafts.save(draft)
         }
         await activity.end()
         await reminders.cancelForgotten()
-        let recap = try await persist(draft, builder: builder, end: end, healthKitID: healthKitID)
+        let recap = try await persist(draft, builder: builder, end: end, healthKitID: health.workoutID)
         try? await drafts.clear()
         endSnapshots()
         return recap
@@ -62,15 +65,18 @@ extension RunSessionService {
         draft.pauses = Self.pauses(stored.pauses, closedAt: end)
         let builder = RunTrackBuilder.replay(
             startedAt: draft.startedAt, points: draft.points.filter { $0.timestamp <= end }, pauses: draft.pauses)
-        // Une fin dont l'enregistrement a échoué a déjà écrit l'entraînement : il n'est pas écrit une seconde fois.
-        var healthKitID = draft.healthKitUUID
-        if healthKitID == nil, await recorder.writeAccess() == .authorized {
-            healthKitID = try? await recorder.save(Self.healthEntry(draft, builder: builder, end: end))
+        // Une fin dont l'enregistrement a échoué a déjà écrit l'entraînement, ou l'a laissé à HealthKit pour le déverrouillage :
+        // il n'est pas écrit une seconde fois.
+        if draft.healthWrite == .none, await recorder.writeAccess() == .authorized {
+            let entry = Self.healthEntry(draft, builder: builder, end: end)
+            draft.healthWrite = await healthWrite { try await self.recorder.save(entry) }
+            // Gardé avant d'enregistrer la séance, comme à la fin : un nouvel essai ne réécrit pas l'entraînement.
+            if draft.healthWrite != .none { try? await drafts.save(draft) }
         }
         // La Live Activity du processus interrompu peut encore être affichée.
         await activity.endAll()
         await reminders.cancelForgotten()
-        let recap = try await persist(draft, builder: builder, end: end, healthKitID: healthKitID)
+        let recap = try await persist(draft, builder: builder, end: end, healthKitID: draft.healthWrite.workoutID)
         try? await drafts.clear()
         endSnapshots()
         return recap
@@ -152,9 +158,47 @@ extension RunSessionService {
         }
     }
 
+    /// Une écriture dans Santé : un échec ou l'absence de séance vivante ne donnent rien, et le repli peut écrire l'entraînement.
+    func healthWrite(_ write: () async throws -> UUID?) async -> RunHealthWrite {
+        do {
+            return try await write().map(RunHealthWrite.written) ?? .none
+        } catch is RunWorkoutWriteDeferred {
+            return .deferred
+        } catch {
+            return .none
+        }
+    }
+
     static func healthEntry(_ draft: RunDraft, builder: RunTrackBuilder, end: Date) -> RunWorkoutEntry {
         RunWorkoutEntry(
             sessionID: draft.sessionID, start: draft.startedAt, end: end, pauses: draft.pauses,
             distanceMeters: draft.locationDenied ? nil : builder.distanceMeters, route: builder.accepted)
+    }
+}
+
+/// Ce qu'a donné l'écriture de la course dans Santé.
+enum RunHealthWrite: Equatable {
+    /// Rien d'écrit : pas d'accès, pas de séance vivante ou un échec.
+    case none
+    case written(UUID)
+    /// HealthKit l'écrira au déverrouillage de l'iPhone, sans identifiant connu pour l'instant.
+    case deferred
+
+    var workoutID: UUID? {
+        if case .written(let id) = self { id } else { nil }
+    }
+}
+
+extension RunDraft {
+    /// L'écriture dans Santé déjà faite pour cette course, gardée dans le brouillon pour ne jamais la refaire.
+    var healthWrite: RunHealthWrite {
+        get {
+            if let healthKitUUID { return .written(healthKitUUID) }
+            return healthWriteDeferred ? .deferred : .none
+        }
+        set {
+            healthKitUUID = newValue.workoutID
+            healthWriteDeferred = newValue == .deferred
+        }
     }
 }
