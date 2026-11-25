@@ -40,6 +40,11 @@ private func damageIndex(in directory: URL) throws {
     try "x".write(to: directory.appendingPathComponent("index.json"), atomically: true, encoding: .utf8)
 }
 
+/// Les copies de l'index abîmé, triées par nom.
+private func damagedCopies(in directory: URL) -> [String] {
+    files(in: directory).filter { $0.hasPrefix(FileBodyPhotoStore.damagedIndexPrefix) && $0.hasSuffix(".json") }
+}
+
 /// Midi UTC du jour donné plus `minutes` minutes.
 private func utc(_ month: Int, _ day: Int, minutes: Int = 0) -> Date {
     noonUTC(2026, month, day).addingTimeInterval(TimeInterval(minutes * 60))
@@ -67,14 +72,52 @@ private func utc(_ month: Int, _ day: Int, minutes: Int = 0) -> Date {
         #expect(try await store.image(of: second.id) == Sample.photoImage(seed: 2))
         #expect(try Set(indexEntries(in: directory).map(\.id)) == [first.id, second.id])
         // La copie de l'index abîmé est gardée telle quelle, et le balayage ne la touche pas.
-        let backup = directory.appendingPathComponent(FileBodyPhotoStore.damagedIndexName)
+        let copies = damagedCopies(in: directory)
+        #expect(copies.count == 1)
+        let backup = directory.appendingPathComponent(try #require(copies.first))
         #expect(try String(contentsOf: backup, encoding: .utf8) == "x")
 
         try await store.delete(photoID: first.id)
         let added = bodyPhoto(.side)
         try await store.save(added, image: Sample.photoImage(seed: 3))
         #expect(Set(try await store.photos().map(\.id)) == [second.id, added.id])
-        #expect(files(in: directory).contains(FileBodyPhotoStore.damagedIndexName))
+        #expect(damagedCopies(in: directory) == copies)
+    }
+
+    /// Une seconde corruption garde sa propre copie, sans écraser la première.
+    @Test func eachCorruptionKeepsItsOwnCopy() async throws {
+        let directory = temporaryDirectory()
+        let store = FileBodyPhotoStore(directory: directory, calendar: Fixed.calendar, now: { Fixed.t0 })
+        try await store.save(bodyPhoto(.front), image: Sample.photoImage(seed: 1))
+        try damageIndex(in: directory)
+        _ = try await store.photos()
+        try "y".write(to: directory.appendingPathComponent("index.json"), atomically: true, encoding: .utf8)
+        _ = try await store.photos()
+        let contents = try damagedCopies(in: directory).map {
+            try String(contentsOf: directory.appendingPathComponent($0), encoding: .utf8)
+        }
+        #expect(contents.sorted() == ["x", "y"])
+    }
+
+    /// Une copie qui ne s'écrit pas abandonne la reconstruction : l'index abîmé reste tel quel, aucune image n'est touchée.
+    @Test func aFailedCopyLeavesTheDamagedIndexUntouched() async throws {
+        let directory = temporaryDirectory()
+        let store = FileBodyPhotoStore(directory: directory, calendar: Fixed.calendar, now: { Fixed.t0 })
+        let photo = bodyPhoto(.front)
+        try await store.save(photo, image: Sample.photoImage(seed: 1))
+        try damageIndex(in: directory)
+        let before = files(in: directory)
+        // Un dossier en lecture seule : la copie ne peut pas s'y écrire.
+        try FileManager.default.setAttributes([.posixPermissions: 0o500], ofItemAtPath: directory.path)
+        defer { try? FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: directory.path) }
+        await #expect(throws: (any Error).self) { _ = try await store.photos() }
+        await #expect(throws: (any Error).self) { try await store.save(bodyPhoto(.side), image: Sample.photoImage(seed: 2)) }
+        #expect(files(in: directory) == before)
+        #expect(try String(contentsOf: directory.appendingPathComponent("index.json"), encoding: .utf8) == "x")
+        // Le dossier redevenu inscriptible, la reconstruction se fait.
+        try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: directory.path)
+        #expect(try await store.photos().map(\.id) == [photo.id])
+        #expect(damagedCopies(in: directory).count == 1)
     }
 
     /// Douze images retrouvées, trois par jour : aucune ne partage sa pose et son jour avec une autre, donc toutes sont visibles.

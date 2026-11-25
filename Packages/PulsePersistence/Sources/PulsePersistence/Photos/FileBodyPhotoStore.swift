@@ -19,8 +19,9 @@ public actor FileBodyPhotoStore: BodyPhotoStore {
     /// Préfixe des dossiers de travail de l'export ; ce ne sont jamais des photos, le balayage les ignore.
     private static let stagingPrefix = ".export-"
     private static let writeOptions: Data.WritingOptions = [.atomic, .completeFileProtection]
-    /// La copie de l'index abîmé, gardée à côté de l'index reconstruit : les dates qu'on n'a pas su relire n'y sont pas perdues.
-    static let damagedIndexName = "index-abime.json"
+    /// Le début du nom des copies de l'index abîmé, gardées à côté de l'index reconstruit (les dates qu'on n'a pas su relire n'y
+    /// sont pas perdues). Suivi de l'heure et d'un identifiant : chaque corruption garde sa propre copie.
+    static let damagedIndexPrefix = "index-abime-"
 
     private let directory: URL
     private let calendar: Calendar
@@ -224,11 +225,11 @@ public actor FileBodyPhotoStore: BodyPhotoStore {
     /// Garde une copie de l'index abîmé, reprend les entrées encore lisibles, puis ajoute une entrée pour chaque image qui n'en a
     /// plus, datée et posée par `BodyPhotoIndexRepair` pour rester visible, supprimable et exportée. Aucune image n'est
     /// supprimée ; une vignette manquante est remplacée par une copie de l'image.
+    /// Si la copie ne s'écrit pas, la reconstruction est abandonnée et l'erreur remonte : l'index abîmé n'est jamais écrasé
+    /// sans copie.
     private func rebuildIndex(from damaged: Data) throws -> [BodyPhoto] {
-        let backup = directory.appendingPathComponent(Self.damagedIndexName)
-        if !FileManager.default.fileExists(atPath: backup.path) {
-            try? damaged.write(to: backup, options: Self.writeOptions)
-        }
+        let name = "\(Self.damagedIndexPrefix)\(Int(now().timeIntervalSince1970))-\(UUID().uuidString.prefix(8)).json"
+        try damaged.write(to: directory.appendingPathComponent(name), options: [.withoutOverwriting, .completeFileProtection])
         var entries: [BodyPhoto] = []
         let salvaged = (try? Self.decoder.decode([SalvagedEntry].self, from: damaged))?.compactMap(\.photo) ?? []
         for photo in salvaged where !entries.contains(where: { $0.id == photo.id }) {

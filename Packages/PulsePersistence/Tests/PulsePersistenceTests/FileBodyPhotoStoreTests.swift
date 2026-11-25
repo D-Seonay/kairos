@@ -161,7 +161,7 @@ private func indexEntries(in directory: URL) throws -> [BodyPhoto] {
         let remaining = files(in: directory)
         #expect(remaining.contains("\(old.id.uuidString).jpg") && remaining.contains("\(old.id.uuidString)-thumb.jpg"))
         #expect(!remaining.contains { $0.hasPrefix(fresh.id.uuidString) })
-        #expect(!remaining.contains(FileBodyPhotoStore.damagedIndexName))
+        #expect(!remaining.contains { $0.hasPrefix(FileBodyPhotoStore.damagedIndexPrefix) })
         // L'index redevenu lisible (iPhone déverrouillé), l'ancienne photo revient intacte.
         try unlockIndex(in: directory)
         #expect(try await store.photos() == [old])
