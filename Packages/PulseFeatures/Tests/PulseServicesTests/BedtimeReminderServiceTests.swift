@@ -29,10 +29,9 @@ struct BedtimeReminderServiceTests {
                            fetchedAt: now)
     }
 
-    private func service(profiles: any ProfileRepository, cache: InMemoryHealthSampleCache = InMemoryHealthSampleCache(),
-                         scheduledDays: [ScheduledDay] = [], reminders: StubBedtimeReminderScheduler) async throws
-        -> BedtimeReminderService {
-        let programs = InMemoryProgramRepository()
+    private func service(profiles: any ProfileRepository, programs: FailingProgramRepository = FailingProgramRepository(),
+                         cache: InMemoryHealthSampleCache = InMemoryHealthSampleCache(), scheduledDays: [ScheduledDay] = [],
+                         reminders: StubBedtimeReminderScheduler) async throws -> BedtimeReminderService {
         try await programs.save(program)
         let now = now
         return BedtimeReminderService(profiles: profiles, programs: programs,
@@ -95,6 +94,17 @@ struct BedtimeReminderServiceTests {
         await service.reschedule()
         #expect(await reminders.replaceCount == 0)
         #expect(await service.plan() == nil)
+    }
+
+    @Test func unreadableProgramStillPlansRemindersWithoutASession() async throws {
+        let programs = FailingProgramRepository()
+        let reminders = StubBedtimeReminderScheduler()
+        let service = try await service(profiles: profiles(profile()), programs: programs, reminders: reminders)
+        await programs.setFails(true)
+        await service.reschedule()
+        let planned = await reminders.reminders
+        #expect(planned.count == 7)
+        #expect(planned.allSatisfy { !$0.body.contains("Séance") && !$0.body.contains("séance") })
     }
 
     @Test func lastNightShortensTonightsBody() async throws {

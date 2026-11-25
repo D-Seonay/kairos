@@ -14,11 +14,15 @@ struct BedtimeReminderPlannerTests {
         return SleepPlan(profile: profile, wokeUp: [], calendar: calendar)
     }
 
-    private func reminders(_ plan: SleepPlan? = nil, lastNight: Int? = nil, sessions: [String: String] = [:],
-                           now: Date? = nil) -> [BedtimeReminder] {
-        BedtimeReminderPlanner.reminders(plan: plan ?? self.plan(), lastNightAsleepMinutes: lastNight,
-                                         sessionName: { day in sessions[Self.dayKey(day)] }, now: now ?? self.now,
-                                         calendar: calendar)
+    /// `nights` : les minutes endormies par jour de réveil (« 2026-11-20 ») ; `lastNight` : la nuit qui finit le jour de `now`.
+    private func reminders(_ plan: SleepPlan? = nil, lastNight: Int? = nil, nights: [String: Int] = [:],
+                           sessions: [String: String] = [:], now: Date? = nil) -> [BedtimeReminder] {
+        let now = now ?? self.now
+        var nights = nights
+        if let lastNight { nights[Self.dayKey(now)] = lastNight }
+        return BedtimeReminderPlanner.reminders(plan: plan ?? self.plan(), nightAsleepMinutes: { nights[Self.dayKey($0)] },
+                                                sessionName: { day in sessions[Self.dayKey(day)] }, now: now,
+                                                calendar: calendar)
     }
 
     /// « 2026-11-23 » pour le jour donné, en heure de Paris.
@@ -100,6 +104,31 @@ struct BedtimeReminderPlannerTests {
         #expect(Set(evenings).count == evenings.count)
         // Le rappel du vendredi sonne le samedi à 00:15 et reste celui du vendredi.
         #expect(reminders().first?.evening == evening("2026-11-20"))
+    }
+
+    @Test func rescheduleAfterMidnightKeepsTheEveningStillPending() {
+        let planned = reminders(now: TestClock.date("2026-11-21T00:05"))
+        #expect(planned.count == 8)
+        #expect(planned.first?.evening == evening("2026-11-20"))
+        #expect(planned.first?.fireDate == TestClock.date("2026-11-21T00:15"))
+        #expect(planned.dropFirst().first?.evening == evening("2026-11-21"))
+        #expect(planned.dropFirst().first?.fireDate == TestClock.date("2026-11-22T00:15"))
+        #expect(Set(planned.map(\.evening)).count == planned.count)
+    }
+
+    @Test func rescheduleAfterTheLateReminderDropsYesterday() {
+        let planned = reminders(now: TestClock.date("2026-11-21T00:20"))
+        #expect(planned.first?.evening == evening("2026-11-21"))
+        #expect(planned.count == 7)
+    }
+
+    @Test func shortNightBelongsToTheEveningOfItsWakeDay() {
+        let planned = reminders(nights: ["2026-11-20": 370], now: TestClock.date("2026-11-21T00:05"))
+        #expect(planned.first { $0.evening == evening("2026-11-20") }?.body
+            == "Nuit courte hier (6 h 10) : vise tes 8 h cette nuit.")
+        let saturday = planned.first { $0.evening == evening("2026-11-21") }
+        #expect(saturday != nil)
+        #expect(saturday?.body.contains("Nuit courte") == false)
     }
 
     @Test func durationsAreWrittenLikeTheApp() {

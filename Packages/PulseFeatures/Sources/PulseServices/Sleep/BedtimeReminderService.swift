@@ -24,17 +24,17 @@ public struct BedtimeReminderService: Sendable {
         self.now = now
     }
 
-    /// Recalcule les rappels des sept prochains soirs. Un profil illisible laisse les rappels en attente en place ; un rappel
-    /// désactivé ou sans coucher conseillé les retire (remplacement par une liste vide).
+    /// Recalcule les rappels des sept prochains soirs, et celui de la veille tant qu'il n'a pas sonné. Un profil illisible laisse
+    /// les rappels en attente en place ; un rappel désactivé ou sans coucher conseillé les retire (remplacement par une liste vide).
     public func reschedule() async {
         let now = now()
         guard let (profile, nights) = await load(now: now) else { return }
         let plan = SleepPlan(profile: profile, wokeUp: nights.map(\.wokeUp), calendar: calendar)
         let today = calendar.startOfDay(for: now)
-        let lastNight = nights.first { calendar.isDate($0.day, inSameDayAs: today) }?.asleepMinutes
         let routine = plan.reminderEnabled ? await routine(of: profile, today: today) : nil
         let planned = BedtimeReminderPlanner.reminders(
-            plan: plan, lastNightAsleepMinutes: lastNight,
+            plan: plan,
+            nightAsleepMinutes: { day in nights.first { calendar.isDate($0.day, inSameDayAs: day) }?.asleepMinutes },
             sessionName: { day in
                 routine.flatMap { TodayPlanner.routineDay(of: $0.program, on: day, calendar: calendar, overrides: $0.overrides) }?
                     .name
@@ -62,7 +62,7 @@ public struct BedtimeReminderService: Sendable {
         return (profile, await bedtime.nights(now: now))
     }
 
-    /// Le programme actif et les lignes de la semaine datée d'aujourd'hui à J+8 (les lendemains des sept soirs). Un programme ou
+    /// Le programme actif et les lignes de la semaine datée d'aujourd'hui à J+8 (les lendemains des soirs planifiés). Un programme ou
     /// des lignes illisibles donnent des rappels sans séance.
     private func routine(of profile: UserProfile?, today: Date) async -> (program: Program, overrides: [ScheduledDay])? {
         guard let id = profile?.activeProgramID, let program = try? await programs.program(id: id) else { return nil }
