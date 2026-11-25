@@ -72,6 +72,16 @@ struct TodayModelTests {
         #expect(!empty.canOpenNight)
     }
 
+    /// Un rappel de coucher touché demande l'écran Nuit : chaque demande change le compteur que la vue suit.
+    @Test func requestNightBumpsTheCounter() {
+        let model = TodayFixture().makeModel()
+        #expect(model.nightRequests == 0)
+        model.requestNight()
+        #expect(model.nightRequests == 1)
+        model.requestNight()
+        #expect(model.nightRequests == 2)
+    }
+
     /// Les dernières nuits datent de plus de 14 jours : la tuile n'en montre aucune, mais l'écran Nuit, qui parcourt les 60
     /// jours du cache, en a ; la tuile l'ouvre donc quand même.
     @Test func canOpenNightWithOnlyOlderNightsInTheCache() async throws {

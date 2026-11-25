@@ -7,9 +7,10 @@ import SwiftData
 public enum PulseSchemaV5: VersionedSchema {
     public static let versionIdentifier = Schema.Version(5, 0, 0)
 
-    /// Les 16 modèles synchronisés, figés en V2b : `StoredSessionPhoto`, ajouté en V6, n'en fait pas partie.
+    /// Les 16 modèles synchronisés, figés en V2b : `StoredSessionPhoto`, ajouté en V6, n'en fait pas partie ; `StoredProfile`,
+    /// qui gagne les réglages de sommeil en V8, par sa copie figée.
     static let syncedModels: [any PersistentModel.Type] = [
-        StoredProfile.self, StoredProgram.self, StoredRoutineDay.self, StoredRoutineExercise.self, StoredUserExercise.self,
+        PulseSchemaV7.StoredProfile.self, StoredProgram.self, StoredRoutineDay.self, StoredRoutineExercise.self, StoredUserExercise.self,
         StoredWorkoutSession.self, StoredWorkoutSet.self, StoredScheduledDay.self, StoredDailyRecovery.self, StoredCheckIn.self,
         StoredSupplement.self, StoredSupplementIntake.self, StoredBodyMeasurement.self, StoredPersonalRecord.self,
         StoredExerciseSettings.self, StoredRunTrack.self

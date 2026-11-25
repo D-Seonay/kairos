@@ -21,8 +21,12 @@ public final class DailyScoreService: Sendable {
     }
 
     /// `plannedDay` à `nil` veut dire « programme illisible » : le score est calculé, les ajustements déjà enregistrés sont gardés.
-    public func update(nights: [NightSample], plannedDay: PlannedDay?, now: Date) async throws -> TodayScore {
-        try await queue.run { try await self.score(nights: nights, plannedDay: plannedDay, now: now) }
+    /// `sleepGoalMinutes` est l'objectif de sommeil du profil ; à `nil`, « profil illisible » : le score déjà enregistré pour le jour
+    /// est gardé tel quel, et sans score enregistré le calcul prend l'objectif par défaut.
+    public func update(nights: [NightSample], plannedDay: PlannedDay?, sleepGoalMinutes: Int?, now: Date) async throws -> TodayScore {
+        try await queue.run {
+            try await self.score(nights: nights, plannedDay: plannedDay, sleepGoalMinutes: sleepGoalMinutes, now: now)
+        }
     }
 
     /// Enregistre le check-in et le score estimé qu'il produit ; il sera remplacé par un score mesuré avant midi.
@@ -47,7 +51,7 @@ public final class DailyScoreService: Sendable {
 
     // MARK: - Interne
 
-    private func score(nights: [NightSample], plannedDay: PlannedDay?, now: Date) async throws -> TodayScore {
+    private func score(nights: [NightSample], plannedDay: PlannedDay?, sleepGoalMinutes: Int?, now: Date) async throws -> TodayScore {
         let day = calendar.startOfDay(for: now)
         let hour = calendar.component(.hour, from: now)
         let isAfterFreeze = hour >= Self.freezeHour
@@ -62,12 +66,17 @@ public final class DailyScoreService: Sendable {
         let tonight = nights.first { calendar.isDate($0.day, inSameDayAs: day) }
             ?? NightSample(day: day, sdnnMs: nil, restingHeartRate: nil, sleep: nil)
         let history = nights.filter { !calendar.isDate($0.day, inSameDayAs: day) }
-        let outcome = RecoveryCalculator(calendar: calendar).compute(day: day, today: tonight, history: history)
+        let outcome = RecoveryCalculator(calendar: calendar).compute(
+            day: day, today: tonight, history: history, sleepGoalMinutes: sleepGoalMinutes ?? SleepGoal.defaultMinutes)
 
         if isAfterFreeze, var existing {
             existing.frozenAt = now
             existing.updatedAt = now
             try await recovery.save(existing)
+            return .scored(existing)
+        }
+        // Un profil illisible ne fait pas retomber le score du jour sur l'objectif par défaut.
+        if sleepGoalMinutes == nil, let existing {
             return .scored(existing)
         }
         switch outcome {

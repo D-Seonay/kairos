@@ -94,15 +94,28 @@ import Testing
     #expect(try await photos.image(of: photo.id) == Sample.photoImage(seed: 7))
 }
 
+@Test func v7StoreOpensAsV8KeepingProfile() async throws {
+    let directory = try makeStoreDirectory()
+    defer { try? FileManager.default.removeItem(at: directory) }
+    let knownID = UUID()
+    try writeV7Store(in: directory, profileID: knownID)
+
+    let container = try PersistenceStack.makeContainer(directory: directory)
+    let profile = try #require(try await SwiftDataProfileRepository(modelContainer: container).load())
+    #expect(profile.id == knownID && profile.firstName == "Mathéo")
+    #expect(profile.sleepGoalMinutes == nil && profile.weekdayWakeMinutes == nil && profile.weekendWakeMinutes == nil)
+    #expect(profile.bedtimeReminderEnabled == false && profile.bedtimeReminderLeadMinutes == nil)
+}
+
 private func makeStoreDirectory() throws -> URL {
     let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
     try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
     return directory
 }
 
-/// Les modèles synchronisés de la V2, avec les copies figées des six modèles modifiés en V3.
+/// Les modèles synchronisés de la V2, avec les copies figées des six modèles modifiés en V3 et du profil modifié en V8.
 private let v2SyncedModels: [any PersistentModel.Type] = [
-    StoredProfile.self, PulseSchemaV2.StoredProgram.self, PulseSchemaV2.StoredRoutineDay.self,
+    PulseSchemaV7.StoredProfile.self, PulseSchemaV2.StoredProgram.self, PulseSchemaV2.StoredRoutineDay.self,
     PulseSchemaV2.StoredRoutineExercise.self, PulseSchemaV2.StoredUserExercise.self, PulseSchemaV2.StoredWorkoutSession.self,
     PulseSchemaV2.StoredWorkoutSet.self, StoredScheduledDay.self, StoredDailyRecovery.self, StoredCheckIn.self,
     StoredSupplement.self, StoredSupplementIntake.self, StoredBodyMeasurement.self, StoredPersonalRecord.self
@@ -231,4 +244,17 @@ private func writeV5Store(in directory: URL) throws -> UUID {
     context.insert(StoredRunTrack(Sample.runTrack(sessionID: run.id)))
     try context.save()
     return run.id
+}
+
+/// Écrit un magasin V7 : un profil figé avec un prénom, sans réglage de sommeil.
+private func writeV7Store(in directory: URL, profileID: UUID) throws {
+    let container = try makeFrozenContainer(PulseSchemaV7.self, synced: PulseSchemaV7.syncedModels,
+                                            local: PersistenceStack.localModels, in: directory)
+    let context = ModelContext(container)
+    let profile = PulseSchemaV7.StoredProfile()
+    profile.id = profileID
+    profile.firstName = "Mathéo"
+    profile.createdAt = Fixed.t0
+    context.insert(profile)
+    try context.save()
 }

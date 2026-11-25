@@ -23,12 +23,16 @@ public struct StageAverages: Sendable, Equatable {
 public struct NightDetail: Sendable, Equatable, Identifiable {
     public var night: NightSleep
     public var averages: StageAverages?
+    /// L'écart moyen des heures d'endormissement des `BedtimeRegularity.windowNights` jours qui finissent à cette nuit, en minutes ;
+    /// nul sous `BedtimeRegularity.minimumNights` nuits. Recalculé à chaque lecture du cache, jamais enregistré.
+    public var bedtimeRegularityMinutes: Int?
 
     public var id: Date { night.day }
 
-    public init(night: NightSleep, averages: StageAverages?) {
+    public init(night: NightSleep, averages: StageAverages?, bedtimeRegularityMinutes: Int? = nil) {
         self.night = night
         self.averages = averages
+        self.bedtimeRegularityMinutes = bedtimeRegularityMinutes
     }
 }
 
@@ -39,11 +43,15 @@ public struct NightDetailService: Sendable {
     public static let averagedNights = 14
 
     private let cache: any HealthSampleCache
+    private let profiles: (any ProfileRepository)?
     private let calendar: Calendar
     private let now: @Sendable () -> Date
 
-    public init(cache: any HealthSampleCache, calendar: Calendar, now: @escaping @Sendable () -> Date) {
+    /// `profiles` : d'où lire l'objectif de sommeil ; sans dépôt, l'objectif par défaut.
+    public init(cache: any HealthSampleCache, profiles: (any ProfileRepository)? = nil, calendar: Calendar,
+                now: @escaping @Sendable () -> Date) {
         self.cache = cache
+        self.profiles = profiles
         self.calendar = calendar
         self.now = now
     }
@@ -62,8 +70,23 @@ public struct NightDetailService: Sendable {
             return builder.night(for: day, sleep: sleep)
         }
         return nights.indices.map { index in
-            NightDetail(night: nights[index], averages: averages(before: index, in: nights))
+            NightDetail(night: nights[index], averages: averages(before: index, in: nights),
+                        bedtimeRegularityMinutes: regularity(endingAt: index, in: nights))
         }
+    }
+
+    /// L'objectif de sommeil du profil, `SleepGoal.defaultMinutes` sans dépôt ou si la lecture échoue. L'objectif n'a pas
+    /// d'historique : chaque nuit s'y compare tel qu'il est aujourd'hui.
+    public func sleepGoalMinutes() async -> Int {
+        guard let profiles else { return SleepGoal.defaultMinutes }
+        return SleepGoal.minutes(of: try? await profiles.load())
+    }
+
+    private func regularity(endingAt index: Int, in nights: [NightSleep]) -> Int? {
+        let day = nights[index].day
+        guard let first = calendar.date(byAdding: .day, value: -(BedtimeRegularity.windowNights - 1), to: day) else { return nil }
+        let window = nights[...index].filter { $0.day >= first }
+        return BedtimeRegularity.minutes(fellAsleep: window.map(\.fellAsleep), calendar: calendar)
     }
 
     private func averages(before index: Int, in nights: [NightSleep]) -> StageAverages? {

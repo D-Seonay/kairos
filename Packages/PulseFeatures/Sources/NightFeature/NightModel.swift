@@ -11,6 +11,8 @@ public final class NightModel {
     private(set) var details: [NightDetail] = []
     private(set) var index: Int?
     private(set) var hasLoaded = false
+    /// L'objectif de sommeil du profil, lu à chaque `load()` ; l'objectif par défaut avant.
+    private(set) var goalMinutes = SleepGoal.defaultMinutes
 
     @ObservationIgnored private let service: NightDetailService
     @ObservationIgnored private let initialDay: Date?
@@ -49,6 +51,7 @@ public final class NightModel {
 
     public func load() async {
         details = await service.nights()
+        goalMinutes = await service.sleepGoalMinutes()
         let wanted = initialDay.map { calendar.startOfDay(for: $0) }
         index = details.firstIndex { $0.night.day == wanted } ?? (details.isEmpty ? nil : details.count - 1)
         hasLoaded = true

@@ -99,12 +99,14 @@ final class AppRootModel {
     }
 
     /// Les rappels de compléments couvrent 14 jours : chaque lancement et chaque retour au premier plan les recalculent, et
-    /// réécrivent dans Apple Santé les prises faites iPhone verrouillé (spec M5 §5, §7). Le rappel de photos de corps, dont
-    /// les trois échéances sont peut-être passées, repart de maintenant s'il est actif et que plus rien n'est en attente.
+    /// réécrivent dans Apple Santé les prises faites iPhone verrouillé (spec M5 §5, §7). Les rappels du coucher, sur sept soirs,
+    /// sont recalculés au même moment. Le rappel de photos de corps, dont les trois échéances sont peut-être passées, repart de
+    /// maintenant s'il est actif et que plus rien n'est en attente.
     func refreshSupplementReminders() async {
         guard destination == .main else { return }
         await dependencies.supplementService.retryHealthWrites()
         await dependencies.supplementService.rescheduleReminders()
+        await dependencies.bedtimeReminderService.reschedule()
         await dependencies.photos.reminders.resumeIfIdle(now: dependencies.now())
     }
 
@@ -157,8 +159,24 @@ final class AppRootModel {
                 train = TrainModel(environment: dependencies.trainEnvironment())
                 planning = PlanningModel(environment: dependencies.planningEnvironment())
                 stats = StatsModel(environment: dependencies.statsEnvironment())
-                // Un réglage enregistré (ambiance, prénom) s'applique tout de suite à la racine.
-                profileModel = ProfileModel(environment: dependencies.profileEnvironment()) { [weak self] in self?.profile = $0 }
+                // Un réglage enregistré (ambiance, prénom) s'applique tout de suite à la racine ; un nouvel objectif de sommeil
+                // recalcule tout de suite le score du jour pas encore figé.
+                profileModel = ProfileModel(environment: dependencies.profileEnvironment()) { [weak self] saved in
+                    guard let self else { return }
+                    let goalChanged = saved.sleepGoalMinutes != profile?.sleepGoalMinutes
+                    profile = saved
+                    guard goalChanged, let today else { return }
+                    // Une lecture déjà en cours fait revenir `refresh()` tout de suite, peut-être sur l'ancien objectif : on
+                    // l'attend, quelques secondes au plus, comme `MainTabView`, puis on relit.
+                    Task {
+                        var waits = 0
+                        while today.isLoading, waits < 50 {
+                            try? await Task.sleep(for: .milliseconds(100))
+                            waits += 1
+                        }
+                        await today.refresh()
+                    }
+                }
                 let liveSession = LiveSessionCoordinator(environment: dependencies.liveSessionEnvironment())
                 self.liveSession = liveSession
                 let run = RunCoordinator(environment: dependencies.runEnvironment { [weak liveSession] in

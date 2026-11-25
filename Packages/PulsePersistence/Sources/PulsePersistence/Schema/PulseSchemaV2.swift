@@ -15,7 +15,7 @@ public enum PulseSchemaV2: VersionedSchema {
 
     /// Les modèles actuels, sauf ceux qui ont changé depuis la V2, remplacés par leur copie figée.
     public static var models: [any PersistentModel.Type] {
-        [PulsePersistence.StoredProfile.self, StoredProgram.self, StoredRoutineDay.self, StoredRoutineExercise.self,
+        [PulseSchemaV7.StoredProfile.self, StoredProgram.self, StoredRoutineDay.self, StoredRoutineExercise.self,
          StoredUserExercise.self, StoredWorkoutSession.self, StoredWorkoutSet.self, PulsePersistence.StoredScheduledDay.self,
          PulsePersistence.StoredDailyRecovery.self, PulsePersistence.StoredCheckIn.self, PulsePersistence.StoredSupplement.self,
          PulsePersistence.StoredSupplementIntake.self, PulsePersistence.StoredBodyMeasurement.self,

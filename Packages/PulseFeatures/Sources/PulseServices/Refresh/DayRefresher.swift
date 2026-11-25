@@ -161,7 +161,9 @@ public final class DayRefresher: Sendable {
         try? await antiInterference?.apply(nights: history.nights)
         let plan = await plan(for: profile, readFailed: profileReadFailed, now: now)
         let plannedDay = plan.display
-        let score = try? await scores.update(nights: history.nights, plannedDay: plan.forScore, now: now)
+        // Un profil absent prend l'objectif par défaut ; un profil illisible garde le score déjà enregistré.
+        let sleepGoal = profileReadFailed ? nil : SleepGoal.minutes(of: profile)
+        let score = try? await scores.update(nights: history.nights, plannedDay: plan.forScore, sleepGoalMinutes: sleepGoal, now: now)
         let scored: DailyRecovery? = if case .scored(let recovery)? = score { recovery } else { nil }
         let session = TodaySession(plannedDay: plannedDay, recovery: scored, deload: plan.deload)
         // L'ambiance des widgets suit le profil lu, même sans score ; un profil illisible laisse celle déjà partagée.

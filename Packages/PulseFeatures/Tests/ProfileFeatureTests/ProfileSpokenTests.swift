@@ -240,6 +240,14 @@ struct SettingsSpokenTests {
         #expect(ProfileText.clockSpoken(minutes: 10 * 60 + 30) == "10 heures 30")
     }
 
+    @Test func sleepSettingsAreSpokenInWords() {
+        #expect(ProfileText.clockSpoken(minutes: 420) == "7 heures", "Un réveil choisi à 07:00")
+        #expect(ProfileText.followsNightsSpoken(habitual: 420) == "Selon mes nuits, 7 heures")
+        #expect(ProfileText.followsNightsSpoken(habitual: nil) == "Selon mes nuits")
+        #expect(ProfileText.sleepGoalSpoken(minutes: 450) == "7 heures 30 minutes")
+        #expect(ProfileText.bedtimeLeadSpoken(minutes: 30) == "30 minutes avant")
+    }
+
     @Test func fieldLabelsCarryTheUnit() {
         #expect(ProfileText.heightFieldLabel == "Taille, en centimètres")
         #expect(ProfileText.weightFieldLabel == "Poids, en kilos")

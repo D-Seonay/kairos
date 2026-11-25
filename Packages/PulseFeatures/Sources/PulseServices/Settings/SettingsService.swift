@@ -8,6 +8,9 @@ public enum SettingsError: Error, Equatable {
     case invalidRest
     case invalidDeadline
     case invalidPlates
+    case invalidSleepGoal
+    case invalidWakeTime
+    case invalidBedtimeLead
 }
 
 /// Le seul point d'écriture des réglages du profil (spec M7 §15) : normalise, valide, n'écrit que si le profil a changé, puis prévient
@@ -17,6 +20,14 @@ public struct SettingsService: Sendable {
     public static let heightRange = 100.0...250.0
     /// Minutes après minuit : de 6 h à 12 h.
     public static let deadlineRange = 360...720
+    /// Heure de réveil habituelle, en minutes après minuit : de 4 h à 12 h, par pas de 5 min.
+    public static let wakeRange = 240...720
+    public static let wakeStepMinutes = 5
+    /// Avance du rappel de coucher sur l'heure de coucher visée, en minutes.
+    public static let bedtimeLeadChoices = [15, 30, 45, 60]
+    /// Durées d'objectif de sommeil proposées : de 6 h à 10 h par quarts d'heure.
+    public static let sleepGoalChoices = Array(stride(from: SleepGoal.range.lowerBound, through: SleepGoal.range.upperBound,
+                                                      by: SleepGoal.stepMinutes))
 
     private let profiles: any ProfileRepository
     private let now: @Sendable () -> Date
@@ -84,8 +95,30 @@ public struct SettingsService: Sendable {
            let deadline = profile.morningScoreDeadlineMinutes, !deadlineRange.contains(deadline) {
             throw SettingsError.invalidDeadline
         }
+        try validateSleep(profile, against: old)
         if profile.barWeightKg != old.barWeightKg || profile.availablePlatesKg != old.availablePlatesKg {
             guard profile.barWeightKg > 0, !profile.availablePlatesKg.isEmpty else { throw SettingsError.invalidPlates }
         }
+    }
+
+    private static func validateSleep(_ profile: UserProfile, against old: UserProfile) throws {
+        if profile.sleepGoalMinutes != old.sleepGoalMinutes, let goal = profile.sleepGoalMinutes,
+           !sleepGoalChoices.contains(goal) {
+            throw SettingsError.invalidSleepGoal
+        }
+        if profile.weekdayWakeMinutes != old.weekdayWakeMinutes, let wake = profile.weekdayWakeMinutes, !isValidWake(wake) {
+            throw SettingsError.invalidWakeTime
+        }
+        if profile.weekendWakeMinutes != old.weekendWakeMinutes, let wake = profile.weekendWakeMinutes, !isValidWake(wake) {
+            throw SettingsError.invalidWakeTime
+        }
+        if profile.bedtimeReminderLeadMinutes != old.bedtimeReminderLeadMinutes,
+           let lead = profile.bedtimeReminderLeadMinutes, !bedtimeLeadChoices.contains(lead) {
+            throw SettingsError.invalidBedtimeLead
+        }
+    }
+
+    private static func isValidWake(_ minutes: Int) -> Bool {
+        wakeRange.contains(minutes) && minutes % wakeStepMinutes == 0
     }
 }

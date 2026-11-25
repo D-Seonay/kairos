@@ -54,13 +54,14 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         Task { await Self.refreshInBackground(dependencies) }
     }
 
-    /// Le passage du jour en arrière-plan, puis les rappels de compléments : les règles anti-interférence du passage ont pu
-    /// déplacer une séance, et avec elle les rappels des jours d'entraînement. Un passage qui n'a pas tourné (onboarding pas
+    /// Le passage du jour en arrière-plan, puis les rappels de compléments et du coucher : les règles anti-interférence du passage
+    /// ont pu déplacer une séance, et avec elle les rappels des jours d'entraînement. Un passage qui n'a pas tourné (onboarding pas
     /// terminé) ne touche pas aux rappels.
     private static func refreshInBackground(_ dependencies: AppDependencies) async {
         let refresh = await dependencies.refresher.refresh(origin: .background)
         guard refresh.profile?.onboardingCompletedAt != nil else { return }
         await dependencies.supplementService.rescheduleReminders()
+        await dependencies.bedtimeReminderService.reschedule()
     }
 
     /// Les raccourcis Siri lisent les dépendances et le routeur de l'app, posés avant qu'une intention ne s'exécute ; les noms

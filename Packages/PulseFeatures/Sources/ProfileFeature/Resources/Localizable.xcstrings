@@ -61,6 +61,16 @@
         }
       }
     },
+    "%@ avant" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ avant"
+          }
+        }
+      }
+    },
     "%@ en 30 jours" : {
       "localizations" : {
         "fr" : {
@@ -571,6 +581,16 @@
         }
       }
     },
+    "Choisis une heure de réveil pour obtenir un coucher conseillé." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisis une heure de réveil pour obtenir un coucher conseillé."
+          }
+        }
+      }
+    },
     "Choisis une heure entre 6 heures et 12 heures." : {
       "localizations" : {
         "fr" : {
@@ -587,6 +607,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Compléments"
+          }
+        }
+      }
+    },
+    "Coucher conseillé : %@ en semaine, %@ le week-end." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coucher conseillé : %1$@ en semaine, %2$@ le week-end."
+          }
+        }
+      }
+    },
+    "Coucher conseillé : %@ en semaine." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coucher conseillé : %@ en semaine."
+          }
+        }
+      }
+    },
+    "Coucher conseillé : %@ le week-end." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coucher conseillé : %@ le week-end."
           }
         }
       }
@@ -861,6 +911,26 @@
         }
       }
     },
+    "Heure choisie" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heure choisie"
+          }
+        }
+      }
+    },
+    "Heure de réveil" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heure de réveil"
+          }
+        }
+      }
+    },
     "Heure plafond" : {
       "localizations" : {
         "fr" : {
@@ -917,6 +987,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "L'incrément doit être positif."
+          }
+        }
+      }
+    },
+    "L'objectif compte dans le score de sommeil dès le prochain calcul." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'objectif compte dans le score de sommeil dès le prochain calcul."
           }
         }
       }
@@ -1087,6 +1167,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nouvelle pesée"
+          }
+        }
+      }
+    },
+    "Objectif de sommeil" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Objectif de sommeil"
           }
         }
       }
@@ -1391,6 +1481,16 @@
         }
       }
     },
+    "Prévenir" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prévenir"
+          }
+        }
+      }
+    },
     "Pulse n'a pas pu enregistrer ce réglage." : {
       "localizations" : {
         "fr" : {
@@ -1491,6 +1591,16 @@
         }
       }
     },
+    "Rappel de coucher" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rappel de coucher"
+          }
+        }
+      }
+    },
     "Rappels de compléments" : {
       "localizations" : {
         "fr" : {
@@ -1551,6 +1661,26 @@
         }
       }
     },
+    "Réveil en semaine" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réveil en semaine"
+          }
+        }
+      }
+    },
+    "Réveil le week-end" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réveil le week-end"
+          }
+        }
+      }
+    },
     "S'applique aux exercices sans repos conseillé. Les exercices de ton programme gardent leur propre repos." : {
       "localizations" : {
         "fr" : {
@@ -1587,6 +1717,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Scores"
+          }
+        }
+      }
+    },
+    "Selon mes nuits" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selon mes nuits"
+          }
+        }
+      }
+    },
+    "Selon mes nuits (%@)" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selon mes nuits (%@)"
+          }
+        }
+      }
+    },
+    "Selon mes nuits, %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selon mes nuits, %@"
           }
         }
       }

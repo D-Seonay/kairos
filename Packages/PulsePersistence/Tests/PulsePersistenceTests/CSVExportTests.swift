@@ -44,6 +44,8 @@ import Testing
     let folder = try #require(exporter.lastCSVDirectory(in: directory))
     let profile = try String(contentsOf: folder.appendingPathComponent("profile.csv"), encoding: .utf8)
     #expect(profile.hasPrefix("id,first_name,"))
+    #expect(profile.contains("rest_timer_notification_enabled,sleep_goal_minutes,weekday_wake_minutes,weekend_wake_minutes,"
+        + "bedtime_reminder_enabled,bedtime_reminder_lead_minutes,"))
     let recoveries = try String(contentsOf: folder.appendingPathComponent("daily_recoveries.csv"), encoding: .utf8)
     #expect(recoveries.contains("frozen_at,original_session_chosen"))
 }

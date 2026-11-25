@@ -73,6 +73,21 @@ import UserNotifications
         #expect(router.whyRequests == 1)
     }
 
+    /// Un rappel de coucher touché : l'accueil sans l'écran Compléments, puis l'écran Nuit demandé ; la demande s'oublie avec
+    /// les autres.
+    @Test func nightLinkOpensTodayAndAsksForTheNightScreen() {
+        let router = AppRouter()
+        router.open(.supplements)
+        router.selectedTab = .stats
+        router.open(.night)
+        #expect(router.selectedTab == .today)
+        #expect(!router.isShowingSupplements)
+        #expect(router.pendingNight)
+        #expect(router.nightRequests == 1)
+        router.dropPendingRequests()
+        #expect(!router.pendingNight)
+    }
+
     /// « Lancer une course » laisse une demande de course aux onglets, sans changer d'onglet.
     @Test func runLinkAsksForTheRun() {
         let router = AppRouter()

@@ -103,6 +103,8 @@ struct MainTabView: View {
         // Les raccourcis Siri « Pourquoi » (depuis le score) et « Lancer une course », traités de même.
         .task(id: router.whyRequests) { await openPendingWhy() }
         .task(id: router.runStartRequests) { await startPendingRun() }
+        // Un rappel de coucher touché ouvre l'écran Nuit, traité de même.
+        .task(id: router.nightRequests) { await openPendingNight() }
         .alert(liveSession.errorMessage ?? "", isPresented: isShowingError) {
             Button(String(localized: "OK")) { liveSession.dismissError() }
         }
@@ -218,13 +220,14 @@ struct MainTabView: View {
         Task { await liveSession.resume() }
     }
 
-    /// Un déplacement dans le planning change la séance du jour et les jours d'entraînement : l'accueil et les rappels de
-    /// compléments suivent (le planning et la séance se relisent eux-mêmes).
+    /// Un déplacement dans le planning change la séance du jour et les jours d'entraînement : l'accueil, les rappels de
+    /// compléments et ceux du coucher suivent (le planning et la séance se relisent eux-mêmes).
     private func planChanged() {
         Task {
             await today.refresh()
             await supplements.load()
             await dependencies.supplementService.rescheduleReminders()
+            await dependencies.bedtimeReminderService.reschedule()
         }
     }
 
@@ -248,6 +251,7 @@ struct MainTabView: View {
             // Une séance finie place le rappel « après la séance » et peut changer les jours d'entraînement.
             await supplements.load()
             await dependencies.supplementService.rescheduleReminders()
+            await dependencies.bedtimeReminderService.reschedule()
             // Les statistiques relisent tout l'historique : seulement une fois l'onglet ouvert (son `.task` charge la première fois).
             if stats.hasLoaded { await stats.load() }
             // Une séance finie change la série, le nombre de séances, les records et les badges du profil.

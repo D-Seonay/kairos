@@ -27,7 +27,7 @@ extension AppDependencies {
     func todayEnvironment() -> TodayEnvironment {
         TodayEnvironment(refresher: refresher, workouts: workouts, userExercises: userExercises, exerciseSettings: exerciseSettings,
                          activeSession: liveSession, library: content, calendar: calendar, now: now,
-                         nights: NightDetailService(cache: healthCache, calendar: calendar, now: now))
+                         nights: NightDetailService(cache: healthCache, profiles: profiles, calendar: calendar, now: now))
     }
 
     func trainEnvironment() -> TrainEnvironment {
@@ -47,7 +47,7 @@ extension AppDependencies {
                                    records: personalRecords, userExercises: userExercises, library: content, calendar: calendar,
                                    now: now, runEfforts: run.bestEfforts)
         return StatsEnvironment(service: service, train: trainEnvironment(), calendar: calendar, now: now,
-                                nights: NightDetailService(cache: healthCache, calendar: calendar, now: now))
+                                nights: NightDetailService(cache: healthCache, profiles: profiles, calendar: calendar, now: now))
     }
 
     /// L'onglet Profil : le résumé et les pesées relisent les dépôts à chaque lecture, les réglages passent par le service partagé,
@@ -59,6 +59,7 @@ extension AppDependencies {
                                      now: now, runEfforts: run.bestEfforts)
         let refresher = refresher
         let notifications = notifications
+        let bedtime = bedtimeReminderService
         return ProfileEnvironment(
             profile: profile, body: BodyService(measurements: bodyMeasurements, profiles: profiles, calendar: calendar, now: now),
             settings: settings, healthCache: healthCache, inspector: inspector, exporter: exporter, eraser: eraser,
@@ -67,7 +68,8 @@ extension AppDependencies {
             refreshHealth: { _ = await refresher.refresh(origin: .foreground) },
             appVersion: Self.appVersion, privacyPolicyURL: Self.privacyPolicyURL, calendar: calendar, now: now,
             runPreferences: run.preferences, bodyPhotos: photos.body, ownerAuthentication: photos.ownerAuthentication,
-            bodyPhotoLock: photos.bodyLock, bodyPhotoReminders: photos.reminders, train: trainEnvironment())
+            bodyPhotoLock: photos.bodyLock, bodyPhotoReminders: photos.reminders, train: trainEnvironment(),
+            sleepPlan: { await bedtime.plan() })
     }
 
     /// La politique de confidentialité, lue dans l'Info.plist (`PulsePrivacyPolicyURL`) ; `nil` tant que la clé est vide ou

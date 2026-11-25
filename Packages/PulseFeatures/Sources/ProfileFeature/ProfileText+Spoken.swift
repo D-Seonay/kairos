@@ -288,6 +288,22 @@ extension ProfileText {
         return PulseSpoken.clock(hour: clamped / 60, minute: clamped % 60)
     }
 
+    /// « 7 heures 30 minutes » : un objectif de sommeil.
+    static func sleepGoalSpoken(minutes: Int) -> String {
+        PulseSpoken.duration(seconds: minutes * 60)
+    }
+
+    /// « Selon mes nuits, 7 heures » ; « Selon mes nuits » sans réveil habituel.
+    static func followsNightsSpoken(habitual: Int?) -> String {
+        guard let habitual else { return String(localized: "Selon mes nuits", bundle: .module) }
+        return String(localized: "Selon mes nuits, \(clockSpoken(minutes: habitual))", bundle: .module)
+    }
+
+    /// « 30 minutes avant », « 1 heure avant » : l'avance du rappel de coucher.
+    static func bedtimeLeadSpoken(minutes: Int) -> String {
+        String(localized: "\(PulseSpoken.duration(seconds: minutes * 60)) avant", bundle: .module)
+    }
+
     static var birthDateHint: String {
         String(localized: "Sert à calculer la fréquence cardiaque maximale des courses", bundle: .module)
     }

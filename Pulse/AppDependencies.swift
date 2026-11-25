@@ -53,8 +53,12 @@ struct AppDependencies: Sendable {
     let supplements: any SupplementRepository
     /// Le seul chemin vers les compléments : l'écran, les cartes de l'accueil et du récap, et l'action « Pris » des rappels.
     let supplementService: SupplementService
-    /// Le seul point d'écriture des réglages du profil (spec M7 §15) : il replanifie les rappels de compléments quand ils changent.
+    /// Le seul point d'écriture des réglages du profil (spec M7 §15) : il replanifie les rappels de compléments et ceux du coucher
+    /// quand leurs réglages changent.
     let settings: SettingsService
+    /// Les rappels de coucher, replanifiés aux mêmes moments que les rappels de compléments et quand les réglages du sommeil
+    /// changent.
+    let bedtimeReminderService: BedtimeReminderService
     let bodyMeasurements: any BodyMeasurementRepository
     let personalRecords: any PersonalRecordRepository
     let exerciseSettings: any ExerciseSettingsRepository
@@ -105,6 +109,8 @@ struct AppDependencies: Sendable {
         var restNotifier: any RestTimerNotifying
         /// Les rappels de compléments ; une doublure en mode mémoire et dans les tests.
         var supplementReminders: any SupplementReminderScheduling
+        /// Les rappels de coucher ; une doublure en mode mémoire et dans les tests.
+        var bedtimeReminders: any BedtimeReminderScheduling
         /// Le rappel de reprendre des photos de corps ; une doublure en mode mémoire et dans les tests.
         var bodyPhotoReminders: any BodyPhotoReminderScheduling
         /// L'écriture des prises dans Apple Santé ; `nil` dans les mêmes cas que `healthWriter`.
@@ -161,7 +167,7 @@ struct AppDependencies: Sendable {
                             notifications: authorizer, liveSessionNotifications: authorizer,
                             healthEraser: writer ?? StubHealthEraser(), healthWriter: writer,
                             widgets: AppGroupWidgetPublisher(file: WidgetSnapshotFile.appGroup()),
-                            morningScore: scheduler, restNotifier: scheduler, supplementReminders: scheduler,
+                            morningScore: scheduler, restNotifier: scheduler, supplementReminders: scheduler, bedtimeReminders: scheduler,
                             bodyPhotoReminders: scheduler, supplementHealth: writer, sessionActivity: SessionActivityController(),
                             run: .live(healthSession: writer != nil ? HealthKitRunRecorder() : nil, reminders: scheduler),
                             bodyPhotos: FileBodyPhotoStore(directory: bodyPhotosDirectory), notificationCanceling: scheduler,
@@ -200,7 +206,8 @@ struct AppDependencies: Sendable {
             notifications: StubNotificationAuthorizer(granted: false),
             liveSessionNotifications: StubNotificationAuthorizer(granted: false), healthEraser: healthEraser, healthWriter: nil,
             widgets: StubWidgetPublisher(), morningScore: StubNotificationScheduler(), restNotifier: StubRestTimerNotifier(),
-            supplementReminders: StubSupplementReminderScheduler(), bodyPhotoReminders: StubBodyPhotoReminderScheduler(),
+            supplementReminders: StubSupplementReminderScheduler(), bedtimeReminders: StubBedtimeReminderScheduler(),
+            bodyPhotoReminders: StubBodyPhotoReminderScheduler(),
             supplementHealth: nil,
             sessionActivity: StubSessionActivityController(), run: .stubs, bodyPhotos: InMemoryBodyPhotoStore(),
             notificationCanceling: nil,
@@ -240,10 +247,11 @@ struct AppDependencies: Sendable {
         let personalRecords = SwiftDataPersonalRecordRepository(modelContainer: container)
         let records = RecordsService(workouts: workouts, records: personalRecords, userExercises: userExercises,
                                      library: content, now: wiring.now)
-        let hevyMappings = UserDefaultsHevyMappingStore(suiteName: wiring.defaultsSuite)
+        let (hevyMappings, hevyImporter) = makeHevy(wiring, stores: stores, records: records, library: content)
         let activeSession = SwiftDataActiveSessionStore(modelContainer: container)
         let exerciseSettings = SwiftDataExerciseSettingsRepository(modelContainer: container)
         let (supplements, supplementService) = makeSupplements(wiring, container: container, stores: stores, workouts: workouts)
+        let (settings, bedtimeReminderService) = makeSettings(wiring, stores: stores, supplementService: supplementService)
         let photos = PhotoDependencies(wiring, container: container, measurements: bodyMeasurements)
         let liveSession = ActiveSessionService(
             store: activeSession, workouts: workouts, profiles: profiles, settings: exerciseSettings, userExercises: userExercises,
@@ -256,10 +264,9 @@ struct AppDependencies: Sendable {
             calendar: calendar, content: content, container: container, storeMode: mode, storeError: error,
             profiles: profiles, programs: programs, userExercises: userExercises, workouts: workouts, scheduledDays: scheduledDays,
             planning: planning, recovery: recovery, scores: scores, supplements: supplements, supplementService: supplementService,
-            settings: makeSettings(wiring, profiles: profiles, supplementService: supplementService), bodyMeasurements: bodyMeasurements,
+            settings: settings, bedtimeReminderService: bedtimeReminderService, bodyMeasurements: bodyMeasurements,
             personalRecords: personalRecords, exerciseSettings: exerciseSettings, records: records, hevyMappings: hevyMappings,
-            hevyImporter: HevyImporter(workouts: workouts, userExercises: userExercises, records: records, mappings: hevyMappings,
-                                       library: content, calendar: calendar, now: wiring.now),
+            hevyImporter: hevyImporter,
             healthCache: healthCache, activity: activity, refresher: refresher, backgroundDelivery: wiring.backgroundDelivery,
             activeSession: activeSession, liveSession: liveSession, sessionActivity: wiring.sessionActivity,
             run: RunDependencies(wiring, container: container, workouts: workouts, profiles: profiles, bestEfforts: stores.runBestEfforts),
@@ -319,6 +326,17 @@ extension AppDependencies {
                           exerciseNames: { content.exercise(id: $0)?.name.fr })
     }
 
+    /// Les correspondances Hevy retenues, dans la suite de préférences que la suppression totale vide, et l'import qui les lit :
+    /// il écrit les séances sans les doublons de la montre et recalcule les records par le seul service des records.
+    private static func makeHevy(_ wiring: Wiring, stores: RefresherStores, records: RecordsService,
+                                 library: ContentLibrary) -> (UserDefaultsHevyMappingStore, HevyImporter) {
+        let mappings = UserDefaultsHevyMappingStore(suiteName: wiring.defaultsSuite)
+        let importer = HevyImporter(workouts: DeduplicatingWorkoutRepository(base: stores.storedWorkouts),
+                                    userExercises: stores.userExercises, records: records, mappings: mappings, library: library,
+                                    calendar: wiring.calendar, now: wiring.now)
+        return (mappings, importer)
+    }
+
     /// Efface le magasin, les photos de corps et leur export, les préférences, les notifications, l'instantané du widget, les
     /// exports, le fichier GPX à partager et les rapports de diagnostic. Elle attend la fin d'un rafraîchissement en cours,
     /// qui republierait l'instantané effacé. Le dépôt des photos de corps est celui du câblage, que lit aussi leur service :
@@ -331,37 +349,6 @@ extension AppDependencies {
                                     bodyPhotos: wiring.bodyPhotos, bodyPhotoExportDirectory: BodyPhotoService.exportDirectory,
                                     runGPXDirectory: RunGPXFile.directory)
         return DiagnosticReportsEraser(inner: SerializedDataEraser(refresher: refresher, inner: store), reports: diagnosticReports)
-    }
-}
-
-// MARK: - Compléments
-
-extension AppDependencies {
-    /// Le dépôt des compléments et leur service, avec les rappels et l'écriture Apple Santé du câblage. Le service lit le profil,
-    /// le programme et la semaine datée du passage du jour, les séances sans doublons, et les nuits du cache local d'Apple Santé
-    /// pour les compléments « au coucher » qui les suivent (réglage gardé dans la suite de préférences que la suppression vide).
-    private static func makeSupplements(_ wiring: Wiring, container: ModelContainer, stores: RefresherStores,
-                                        workouts: any WorkoutRepository) -> (SwiftDataSupplementRepository, SupplementService) {
-        let supplements = SwiftDataSupplementRepository(modelContainer: container)
-        let service = SupplementService(
-            supplements: supplements, programs: stores.programs, profiles: stores.profiles, workouts: workouts,
-            reminders: wiring.supplementReminders, health: wiring.supplementHealth, scheduledDays: stores.scheduledDays,
-            bedtime: HabitualBedtimeReader(cache: stores.healthCache, calendar: wiring.calendar),
-            bedtimeStore: UserDefaultsSupplementBedtimeStore(suiteName: wiring.defaultsSuite),
-            calendar: wiring.calendar, now: wiring.now)
-        return (supplements, service)
-    }
-
-    /// Les réglages du profil. Les rappels de compléments et l'ambiance des widgets dépendent d'un réglage enregistré : le score du
-    /// matin, la fin du repos et le moteur relisent le profil à chaque fois.
-    private static func makeSettings(_ wiring: Wiring, profiles: any ProfileRepository,
-                                     supplementService: SupplementService) -> SettingsService {
-        let widgets = wiring.widgets
-        return SettingsService(profiles: profiles, now: wiring.now) { old, new in
-            if old.theme != new.theme { await widgets.publishTheme(new.theme) }
-            guard old.supplementRemindersEnabled != new.supplementRemindersEnabled else { return }
-            await supplementService.rescheduleReminders()
-        }
     }
 }
 
@@ -380,6 +367,7 @@ extension AppDependencies.Wiring {
         morningScore = StubNotificationScheduler()
         restNotifier = StubRestTimerNotifier()
         supplementReminders = StubSupplementReminderScheduler()
+        bedtimeReminders = StubBedtimeReminderScheduler()
         bodyPhotoReminders = StubBodyPhotoReminderScheduler()
         sessionActivity = StubSessionActivityController()
         run = .stubs

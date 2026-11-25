@@ -2,10 +2,10 @@ import Foundation
 import PulseDomain
 import UserNotifications
 
-/// La notification du score du matin, envoyée tout de suite, celle de la fin du repos, les rappels de compléments, celui d'une
-/// course oubliée, celui des photos de corps, et la suppression des notifications de Pulse.
+/// La notification du score du matin, envoyée tout de suite, celle de la fin du repos, les rappels de compléments, ceux du
+/// coucher, celui d'une course oubliée, celui des photos de corps, et la suppression des notifications de Pulse.
 struct UserNotificationScheduler: NotificationScheduling, NotificationCanceling, RestTimerNotifying, SupplementReminderScheduling,
-    RunReminderScheduling, BodyPhotoReminderScheduling {
+    BedtimeReminderScheduling, RunReminderScheduling, BodyPhotoReminderScheduling {
     static let morningScoreIdentifier = "fr.seonay.pulse.morning-score"
     /// Un seul identifiant : chaque nouveau repos remplace la notification du précédent.
     static let restTimerIdentifier = "fr.seonay.pulse.rest-timer"
@@ -16,6 +16,8 @@ struct UserNotificationScheduler: NotificationScheduling, NotificationCanceling,
     static let supplementTakeAction = "fr.seonay.pulse.supplement.take"
     static let supplementIDKey = "supplementID"
     static let supplementDayKey = "day"
+    /// Le début de l'identifiant d'un rappel de coucher, suivi du jour du soir concerné.
+    static let bedtimePrefix = "fr.seonay.pulse.bedtime."
     /// Un seul identifiant : chaque report du rappel remplace le précédent.
     static let runForgottenIdentifier = "fr.seonay.pulse.run-forgotten"
     /// Le début de l'identifiant d'un rappel de photos de corps, suivi de son rang.
@@ -119,6 +121,41 @@ struct UserNotificationScheduler: NotificationScheduling, NotificationCanceling,
             supplementIDKey: reminder.supplementID.uuidString,
             supplementDayKey: reminder.day.timeIntervalSince1970
         ]
+        return content
+    }
+
+    // MARK: - Coucher
+
+    /// Retire les rappels de coucher en attente, puis planifie ceux-ci, à l'heure locale de chacun. Juste après minuit, celui de
+    /// la veille peut encore attendre : jusqu'à huit à la fois.
+    func replaceBedtimeReminders(with reminders: [BedtimeReminder]) async {
+        let center = UNUserNotificationCenter.current()
+        let pending = await center.pendingNotificationRequests().map(\.identifier).filter { $0.hasPrefix(Self.bedtimePrefix) }
+        center.removePendingNotificationRequests(withIdentifiers: pending)
+        let calendar = Calendar.current
+        for reminder in reminders {
+            let components = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: reminder.fireDate)
+            let request = UNNotificationRequest(identifier: Self.bedtimeIdentifier(reminder, calendar: calendar),
+                                                content: Self.bedtimeContent(reminder),
+                                                trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: false))
+            try? await center.add(request)
+        }
+    }
+
+    /// « fr.seonay.pulse.bedtime.2026-11-20 » : le jour du soir, même pour un rappel qui sonne après minuit.
+    static func bedtimeIdentifier(_ reminder: BedtimeReminder, calendar: Calendar) -> String {
+        let parts = calendar.dateComponents([.year, .month, .day], from: reminder.evening)
+        let day = String(format: "%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
+        return "\(bedtimePrefix)\(day)"
+    }
+
+    /// Sans catégorie ni bouton : touché, il ouvre l'écran Nuit.
+    static func bedtimeContent(_ reminder: BedtimeReminder) -> UNMutableNotificationContent {
+        let content = UNMutableNotificationContent()
+        content.title = reminder.title
+        content.body = reminder.body
+        content.sound = .default
+        content.userInfo = [NotificationRouter.linkKey: AppLink.night.rawValue]
         return content
     }
 

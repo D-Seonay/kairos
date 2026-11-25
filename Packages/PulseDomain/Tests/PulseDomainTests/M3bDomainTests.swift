@@ -20,7 +20,8 @@ import Testing
     #expect(AppLink.why.url?.absoluteString == "fr.seonay.pulse://why")
     #expect(AppLink.run.url?.absoluteString == "fr.seonay.pulse://run")
     #expect(AppLink.bodyPhotos.url?.absoluteString == "fr.seonay.pulse://body-photos")
-    for link in [AppLink.today, .supplements, .planning, .startSession, .why, .run, .bodyPhotos] {
+    #expect(AppLink.night.url?.absoluteString == "fr.seonay.pulse://night")
+    for link in [AppLink.today, .supplements, .planning, .startSession, .why, .run, .bodyPhotos, .night] {
         let url = try #require(link.url)
         #expect(AppLink(url: url) == link)
     }

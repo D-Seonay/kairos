@@ -41,6 +41,9 @@ public struct ProfileEnvironment: Sendable {
     /// L'environnement de l'onglet Séance, pour ouvrir la progression d'un levé depuis le mur des records, comme Stats → Records ;
     /// `nil` : les lignes du mur ne s'ouvrent pas.
     public var train: TrainEnvironment?
+    /// Le plan du sommeil d'aujourd'hui (objectif, réveils, coucher conseillé) ; `nil` : le pied de la section « Sommeil » invite à
+    /// choisir un réveil.
+    public var sleepPlan: @Sendable () async -> SleepPlan?
 
     /// Les photos de corps ne s'offrent qu'avec leur service et leur authentificateur : jamais d'écran ouvert sans verrou.
     public var offersBodyPhotos: Bool {
@@ -56,7 +59,8 @@ public struct ProfileEnvironment: Sendable {
                 runPreferences: any RunPreferencesStore = InMemoryRunPreferencesStore(), bodyPhotos: BodyPhotoService? = nil,
                 ownerAuthentication: (any DeviceOwnerAuthenticating)? = nil,
                 bodyPhotoLock: any BodyPhotoLockStore = InMemoryBodyPhotoLockStore(),
-                bodyPhotoReminders: BodyPhotoReminders? = nil, train: TrainEnvironment? = nil) {
+                bodyPhotoReminders: BodyPhotoReminders? = nil, train: TrainEnvironment? = nil,
+                sleepPlan: @escaping @Sendable () async -> SleepPlan? = { nil }) {
         self.profile = profile
         self.body = body
         self.settings = settings
@@ -77,6 +81,7 @@ public struct ProfileEnvironment: Sendable {
         self.bodyPhotoLock = bodyPhotoLock
         self.bodyPhotoReminders = bodyPhotoReminders
         self.train = train
+        self.sleepPlan = sleepPlan
     }
 }
 
