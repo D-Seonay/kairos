@@ -76,6 +76,10 @@ public struct TodayView: View {
                 PulseAnnouncement.post(announcement)
             }
         }
+        // Un rappel de coucher touché ouvre l'écran Nuit ; sans nuit dans le cache, l'accueil reste affiché.
+        .onChange(of: model.nightRequests) {
+            if model.canOpenNight { openNight() }
+        }
         // Le retour au premier plan est rafraîchi par la racine de l'app, quel que soit l'onglet affiché.
         .task {
             await model.refresh()

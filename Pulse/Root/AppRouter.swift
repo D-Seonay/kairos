@@ -5,7 +5,7 @@ import PulseDomain
 /// rappel touché ; l'écran Photos de corps, qu'ouvre le rappel de photos ; et un compteur qui change quand l'action « Pris »
 /// d'un rappel a enregistré une prise. Un lien vers l'accueil referme l'écran qui y était poussé ; le contrôle « Séance du
 /// jour » demande en plus de lancer la séance du jour. Les raccourcis Siri demandent aussi l'écran « Pourquoi » du score et
-/// le départ de la course du jour.
+/// le départ de la course du jour ; un rappel de coucher touché demande l'écran Nuit.
 @MainActor
 @Observable
 final class AppRouter {
@@ -23,6 +23,10 @@ final class AppRouter {
     private(set) var whyRequests = 0
     /// Vrai tant que la demande de l'écran « Pourquoi » n'a pas été traitée par les onglets.
     var pendingWhy = false
+    /// Change à chaque demande de l'écran Nuit ; `pendingNight` dit si elle reste à traiter.
+    private(set) var nightRequests = 0
+    /// Vrai tant que la demande de l'écran Nuit (un rappel de coucher touché) n'a pas été traitée par les onglets.
+    var pendingNight = false
     /// Change à chaque demande de course ; `pendingRunStart` dit si elle reste à traiter.
     private(set) var runStartRequests = 0
     /// Vrai tant que la demande « Lancer une course » n'a pas été traitée par les onglets.
@@ -50,6 +54,12 @@ final class AppRouter {
             isShowingSupplements = false
             pendingWhy = true
             whyRequests += 1
+        case .night:
+            // Comme « Pourquoi » : sans `showTodayRoot`, qui refermerait l'écran poussé.
+            selectedTab = .today
+            isShowingSupplements = false
+            pendingNight = true
+            nightRequests += 1
         case .run:
             pendingRunStart = true
             runStartRequests += 1
@@ -60,6 +70,7 @@ final class AppRouter {
     func dropPendingRequests() {
         pendingSessionStart = false
         pendingWhy = false
+        pendingNight = false
         pendingRunStart = false
     }
 

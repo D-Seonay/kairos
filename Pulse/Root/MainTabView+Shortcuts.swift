@@ -1,8 +1,8 @@
 import SwiftUI
 
 /// Les demandes des raccourcis Siri que les onglets traitent dès qu'ils sont là, au lancement à froid compris : l'écran
-/// « Pourquoi » du score du jour et le départ de la course du jour. Une demande remplacée par une autre (`task(id:)` annule la
-/// précédente) n'ouvre plus rien.
+/// « Pourquoi » du score du jour et le départ de la course du jour ; de même l'écran Nuit d'un rappel de coucher touché. Une
+/// demande remplacée par une autre (`task(id:)` annule la précédente) n'ouvre plus rien.
 extension MainTabView {
     /// « Pourquoi » depuis le score lu par Siri : l'accueil relu, puis son écran « Pourquoi ». Sans score du jour à expliquer,
     /// l'accueil reste simplement affiché.
@@ -12,6 +12,16 @@ extension MainTabView {
         await refreshToday()
         guard !Task.isCancelled else { return }
         today.openWhy()
+    }
+
+    /// L'écran Nuit depuis un rappel de coucher : l'accueil relu (il sait alors si une nuit du cache a de quoi l'ouvrir), puis
+    /// l'écran Nuit. Sans nuit, l'accueil reste simplement affiché.
+    func openPendingNight() async {
+        guard router.pendingNight else { return }
+        router.pendingNight = false
+        await refreshToday()
+        guard !Task.isCancelled else { return }
+        today.requestNight()
     }
 
     /// « Lancer une course » : comme le contrôle « Séance du jour », l'accueil d'abord relu (il calcule le score du jour et ses

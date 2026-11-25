@@ -33,6 +33,8 @@ public final class TodayModel {
     var isShowingWhy = false
     /// Vrai quand l'écran Nuit est poussé depuis la tuile Sommeil.
     var isShowingNight = false
+    /// Change à chaque demande de l'écran Nuit (un rappel de coucher touché) : la vue l'ouvre s'il a une nuit à montrer.
+    private(set) var nightRequests = 0
 
     /// Vrai quand une nuit du cache (60 jours, `NightHistory.historyDays`) a du sommeil : l'écran Nuit a de quoi s'ouvrir.
     private(set) var hasNightInCache = false
@@ -71,6 +73,12 @@ public final class TodayModel {
         directory = ExerciseDirectory(library: environment.library, userExercises: [])
         greeting = Self.greeting(firstName: nil)
         dateText = Self.dateText(environment.now(), calendar: environment.calendar)
+    }
+
+    /// Demande l'écran Nuit : un rappel de coucher touché. La vue le pousse seulement quand une nuit du cache a de quoi
+    /// l'ouvrir ; sinon l'accueil reste affiché.
+    public func requestNight() {
+        nightRequests += 1
     }
 
     /// L'heure de la dernière lecture d'Apple Santé réussie, « 08:00 » ; précédée du jour quand ce n'est pas aujourd'hui,
