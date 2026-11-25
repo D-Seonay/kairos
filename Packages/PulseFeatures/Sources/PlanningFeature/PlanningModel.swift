@@ -96,8 +96,7 @@ public final class PlanningModel {
 
     /// L'écran qu'ouvre un jour : la séance de musculation faite, sinon la course ou le vélo ; `nil` sans séance faite.
     public func destination(for day: PlanningDay) -> PlanningDestination? {
-        if let strength = day.sessions.last(where: { $0.kind == .strength }) { return .session(strength.id) }
-        return day.sessions.last.map { .activity($0.id) }
+        PlanningDestination.detail(of: day.sessions.map { ($0.id, $0.kind) })
     }
 
     public func sessionDetailModel(sessionID: UUID) -> SessionDetailModel {
