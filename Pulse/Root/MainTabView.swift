@@ -97,6 +97,9 @@ struct MainTabView: View {
         .onChange(of: router.todayRootVersion) { today.closeWhy() }
         // Le contrôle « Séance du jour » : traité dès que les onglets sont là, au lancement à froid compris.
         .task(id: router.sessionStartRequests) { await startPendingSession() }
+        // Les raccourcis Siri « Pourquoi » (depuis le score) et « Lancer une course », traités de même.
+        .task(id: router.whyRequests) { await openPendingWhy() }
+        .task(id: router.runStartRequests) { await startPendingRun() }
         .alert(liveSession.errorMessage ?? "", isPresented: isShowingError) {
             Button(String(localized: "OK")) { liveSession.dismissError() }
         }
@@ -142,7 +145,8 @@ struct MainTabView: View {
             }
             Tab(String(localized: "Profil"), systemImage: "person.crop.circle", value: Item.profile) {
                 ProfileScreen(model: profile, supplements: supplements, screens: profileScreens,
-                              onOpenStats: { router.selectedTab = .stats }, onOpenRecords: openRecords, onErased: onErased)
+                              opensBodyPhotos: $router.opensBodyPhotos, onOpenStats: { router.selectedTab = .stats },
+                              onOpenRecords: openRecords, onErased: onErased)
             }
         }
         // La barre d'onglets se replie quand on descend : le contenu et l'action ancrée de l'accueil gagnent de la place.

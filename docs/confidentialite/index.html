@@ -45,7 +45,7 @@
   <h2>Ce que Pulse lit dans Apple Santé</h2>
   <p>Pulse ne lit que ce que tu l'autorises à lire, et seulement pour ces usages :</p>
   <ul>
-    <li><strong>Sommeil</strong> (durée et phases) : pour le facteur sommeil de ton score de récupération du matin.</li>
+    <li><strong>Sommeil</strong> (durée et phases) : pour le facteur sommeil de ton score de récupération du matin, et, si tu choisis « Suivre mes nuits », pour placer le rappel d'un complément au coucher. Cette heure est recalculée sur l'iPhone et n'est jamais enregistrée.</li>
     <li><strong>Variabilité cardiaque (VFC, mesure SDNN)</strong> : pour construire ta ligne de base et situer ta nuit par rapport à elle.</li>
     <li><strong>Fréquence cardiaque au repos</strong> : pour comparer ta nuit à tes jours précédents.</li>
     <li><strong>Fréquence cardiaque</strong> : pour en tirer la fréquence moyenne de tes courses et sorties à vélo, y compris celle que mesure la séance d'entraînement d'une course lancée avec Pulse.</li>
@@ -85,7 +85,7 @@
   <p>Pulse utilise l'appareil photo seulement quand tu prends une photo. Pour importer une image, il passe par le sélecteur de photos d'iOS : il ne reçoit que les images que tu choisis, et n'a pas accès au reste de ta photothèque.</p>
   <ul>
     <li><strong>Photos de séance</strong> : jusqu'à 6 par séance, sur tes séances de musculation et tes courses faites avec Pulse ou importées de Hevy. Elles se synchronisent par ton iCloud privé, avec la séance, et font partie de l'export CSV (archive zip). L'export JSON les liste sans les images.</li>
-    <li><strong>Photos de corps</strong> : elles ne quittent jamais ton iPhone. Elles ne vont ni dans iCloud, ni dans la sauvegarde de l'iPhone, ni dans l'export général de Pulse. Elles sont chiffrées dès qu'un code protège ton iPhone, et illisibles tant qu'il est verrouillé ; sans code, iOS ne les chiffre pas et le verrou n'est pas disponible. Tu peux les verrouiller avec Face ID (ou le code), et les exporter toi-même dans une archive enregistrée dans Fichiers, à l'emplacement que tu choisis.</li>
+    <li><strong>Photos de corps</strong> : elles ne quittent jamais ton iPhone. Elles ne vont ni dans iCloud, ni dans la sauvegarde de l'iPhone, ni dans l'export général de Pulse. Elles sont chiffrées dès qu'un code protège ton iPhone, et illisibles tant qu'il est verrouillé ; sans code, iOS ne les chiffre pas et le verrou n'est pas disponible. Tu peux les verrouiller avec Face ID (ou le code), et les exporter toi-même dans une archive enregistrée dans Fichiers, à l'emplacement que tu choisis. Le rappel de photo, si tu l'actives, est une notification locale sans image ni mot sur le sujet ; son réglage reste sur l'iPhone.</li>
     <li><strong>Rien dans Photos sans toi</strong> : les photos prises dans Pulse ne sont pas enregistrées dans l'app Photos. Pulse n'y enregistre une photo de séance que si tu le demandes, depuis la feuille de partage. Les photos de corps n'ont pas de feuille de partage.</li>
     <li><strong>Position retirée</strong> : avant d'enregistrer une image, Pulse en retire les métadonnées (position GPS, appareil, date de prise de vue).</li>
     <li>Aucune image n'est envoyée au développeur ni à un tiers.</li>
@@ -102,7 +102,7 @@
     <li><strong>Seulement sur ton iPhone, hors sauvegarde</strong> : tes photos de corps et leur liste de dates, dans un dossier protégé de l'app, exclu de la sauvegarde de l'iPhone et de l'export général.</li>
   </ul>
   <p class="note">Une exception à connaître : les valeurs proposées depuis Apple Santé à la création de ton profil (taille, poids, date de naissance, sexe) ne sont enregistrées, et synchronisées, qu'une fois l'étape du profil validée. Elles deviennent alors une saisie de ton profil Pulse, qui se synchronise comme le reste. Le RPE et la note que tu ajoutes à une course venue d'Apple Santé restent aussi sur l'iPhone.</p>
-  <p>Les widgets et la Live Activity de séance lisent un résumé enregistré sur ton iPhone (score du jour, séance prévue, titre et durées de la séance en cours). La Live Activity de course affiche le titre, le temps, la distance et l'allure de la course en cours. Les rappels sont des notifications locales, programmées par l'iPhone. Les annonces vocales de la course sont dites par l'iPhone lui-même.</p>
+  <p>Les widgets et la Live Activity de séance lisent un résumé enregistré sur ton iPhone (score du jour, séance prévue, titre et durées de la séance en cours). La Live Activity de course affiche le titre, le temps, la distance et l'allure de la course en cours. Les rappels sont des notifications locales, programmées par l'iPhone. Les annonces vocales de la course sont dites par l'iPhone lui-même. Siri et l'app Raccourcis ne lisent ton score du jour, et ne cochent un complément, qu'une fois l'iPhone déverrouillé ; la réponse est préparée par Pulse sur l'iPhone.</p>
 </section>
 
 <section id="ne-fait-pas">
@@ -118,7 +118,12 @@
 
 <section id="plantages">
   <h2>Rapports de plantage</h2>
-  <p>Pulse ne collecte aucun rapport lui-même. Si tu as accepté de partager tes données d'analyse avec les développeurs dans les réglages d'iOS, Apple peut transmettre au développeur des rapports de plantage anonymes. Sinon, il n'en reçoit aucun.</p>
+  <p>Pulse n'envoie aucun rapport lui-même. Si tu as accepté de partager tes données d'analyse avec les développeurs dans les réglages d'iOS, Apple peut transmettre au développeur des rapports de plantage anonymes. Sinon, il n'en reçoit aucun.</p>
+  <ul>
+    <li>iOS remet aussi à Pulse, au lancement qui suit, un rapport sur chaque plantage, blocage ou lancement lent. Pulse garde les dix derniers sur ton iPhone (les plantages en priorité), hors iCloud et hors sauvegarde, et te les montre dans <strong>Profil, Paramètres, À propos, puis Diagnostic</strong>.</li>
+    <li>Ces rapports décrivent le fonctionnement de l'app : version de Pulse et d'iOS, modèle d'iPhone, région, durée du blocage ou du lancement, et l'endroit du code où le problème est survenu. Pulse en retire le texte libre qu'une erreur peut porter avant de les garder. Ils ne contiennent aucune donnée Santé.</li>
+    <li>Ils ne partent que si tu touches <strong>Partager le rapport</strong> et choisis toi-même où l'envoyer (un mail au développeur, par exemple). Tu peux les supprimer au même endroit.</li>
+  </ul>
 </section>
 
 <section id="exporter-supprimer">
@@ -127,7 +132,7 @@
   <ul>
     <li><strong>Exporter</strong> une course faite avec Pulse en GPX, depuis son détail dans le Planning (voir plus haut, Ta position pendant une course).</li>
     <li><strong>Exporter</strong> tout en JSON ou en CSV (archive zip), valeurs d'Apple Santé comprises. L'archive CSV contient aussi tes photos de séance. Les photos de corps n'y sont jamais : elles s'exportent à part, depuis <strong>Profil, puis Photos de corps</strong>.</li>
-    <li><strong>Tout supprimer</strong> : les données de Pulse sont effacées sur l'iPhone et dans iCloud (la suppression dans iCloud se termine dès que l'iPhone est en ligne), photos de séance comprises, ainsi que les photos de corps de l'iPhone et un fichier GPX resté dans le dossier temporaire. Tu peux demander d'effacer aussi ce que Pulse a écrit dans Apple Santé. Ce que d'autres apps ou ta montre y ont écrit n'est pas touché.</li>
+    <li><strong>Tout supprimer</strong> : les données de Pulse sont effacées sur l'iPhone et dans iCloud (la suppression dans iCloud se termine dès que l'iPhone est en ligne), photos de séance comprises, ainsi que les photos de corps et les rapports de diagnostic de l'iPhone, et un fichier GPX resté dans le dossier temporaire. Tu peux demander d'effacer aussi ce que Pulse a écrit dans Apple Santé. Ce que d'autres apps ou ta montre y ont écrit n'est pas touché.</li>
   </ul>
   <p>Désinstaller Pulse efface les données de l'iPhone, pas celles d'iCloud. Les photos de corps, qui ne vivent que sur l'iPhone, sont alors perdues si tu ne les as pas exportées ; c'est aussi le cas en changeant d'iPhone.</p>
 </section>

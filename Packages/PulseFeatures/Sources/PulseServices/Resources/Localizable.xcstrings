@@ -540,6 +540,76 @@
           }
         }
       }
+    },
+    "Ton score de récupération n'est pas encore prêt. Ouvre Pulse pour le calculer.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ton score de récupération n'est pas encore prêt. Ouvre Pulse pour le calculer."
+          }
+        }
+      }
+    },
+    "Ton score de récupération est estimé à %lld sur 100 : %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ton score de récupération est estimé à %lld sur 100 : %@."
+          }
+        }
+      }
+    },
+    "Ton score de récupération est de %lld sur 100 : %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ton score de récupération est de %lld sur 100 : %@."
+          }
+        }
+      }
+    },
+    "C'est noté : prise de %@ cochée pour aujourd'hui.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "C'est noté : prise de %@ cochée pour aujourd'hui."
+          }
+        }
+      }
+    },
+    "La prise de %@ est déjà cochée aujourd'hui.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La prise de %@ est déjà cochée aujourd'hui."
+          }
+        }
+      }
+    },
+    "Ce complément n'est plus dans Pulse.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce complément n'est plus dans Pulse."
+          }
+        }
+      }
+    },
+    "Ton score de récupération est de %lld sur 100 : %@, %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ton score de récupération est de %lld sur 100 : %@, %@."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

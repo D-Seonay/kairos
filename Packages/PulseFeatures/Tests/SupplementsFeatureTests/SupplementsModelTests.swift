@@ -157,5 +157,22 @@ struct SupplementDraftTests {
         draft.setTiming(.fixedTime)
         #expect(draft.minutes == 8 * 60)
     }
+
+    @Test func followingNightsIsProposedForBedtimeAndHidesTheTimeOnlyWithAHabitualTime() {
+        var draft = SupplementDraft()
+        #expect(!draft.savesFollowingNights)
+        draft.setTiming(.bedtime)
+        #expect(draft.savesFollowingNights)
+        #expect(!draft.showsTimePicker(habitualBedtime: 23 * 60))
+        #expect(draft.showsTimePicker(habitualBedtime: nil))
+        draft.followsNights = false
+        #expect(draft.showsTimePicker(habitualBedtime: 23 * 60))
+
+        var supplement = draft.supplement(existing: nil, order: 0, now: .now)
+        #expect(!SupplementDraft(supplement).followsNights)
+        #expect(SupplementDraft(supplement, followsNights: true).followsNights)
+        supplement.timing = .fixedTime
+        #expect(!SupplementDraft(supplement, followsNights: true).followsNights)
+    }
 }
 // swiftlint:enable force_unwrapping

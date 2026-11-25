@@ -36,6 +36,8 @@ public struct ProfileEnvironment: Sendable {
     public var ownerAuthentication: (any DeviceOwnerAuthenticating)?
     /// Le réglage « Verrouiller avec Face ID », par appareil.
     public var bodyPhotoLock: any BodyPhotoLockStore
+    /// Le rappel de reprendre des photos de corps, par appareil ; `nil` : l'écran n'offre pas de rappel.
+    public var bodyPhotoReminders: BodyPhotoReminders?
     /// L'environnement de l'onglet Séance, pour ouvrir la progression d'un levé depuis le mur des records, comme Stats → Records ;
     /// `nil` : les lignes du mur ne s'ouvrent pas.
     public var train: TrainEnvironment?
@@ -53,7 +55,8 @@ public struct ProfileEnvironment: Sendable {
                 appVersion: String, privacyPolicyURL: URL?, calendar: Calendar, now: @escaping @Sendable () -> Date,
                 runPreferences: any RunPreferencesStore = InMemoryRunPreferencesStore(), bodyPhotos: BodyPhotoService? = nil,
                 ownerAuthentication: (any DeviceOwnerAuthenticating)? = nil,
-                bodyPhotoLock: any BodyPhotoLockStore = InMemoryBodyPhotoLockStore(), train: TrainEnvironment? = nil) {
+                bodyPhotoLock: any BodyPhotoLockStore = InMemoryBodyPhotoLockStore(),
+                bodyPhotoReminders: BodyPhotoReminders? = nil, train: TrainEnvironment? = nil) {
         self.profile = profile
         self.body = body
         self.settings = settings
@@ -72,6 +75,7 @@ public struct ProfileEnvironment: Sendable {
         self.bodyPhotos = bodyPhotos
         self.ownerAuthentication = ownerAuthentication
         self.bodyPhotoLock = bodyPhotoLock
+        self.bodyPhotoReminders = bodyPhotoReminders
         self.train = train
     }
 }
