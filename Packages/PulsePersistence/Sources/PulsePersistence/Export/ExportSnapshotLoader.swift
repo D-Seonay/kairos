@@ -93,12 +93,15 @@ public actor ExportSnapshotLoader {
     }
 
     /// Les octets de l'image d'une photo vivante, lus un par un pour ne jamais tenir toutes les photos en mémoire.
-    /// Nil si la photo est supprimée ou si son image n'est pas encore descendue d'iCloud.
+    /// Nil si la photo est supprimée ou si son image n'est pas encore descendue d'iCloud. Les objets temporaires de la lecture
+    /// sont rendus aussitôt (`autoreleasepool`) : seule la copie des octets sort.
     public func imageData(ofPhoto photoID: UUID) throws -> Data? {
         var descriptor = FetchDescriptor<StoredSessionPhoto>(predicate: #Predicate { $0.id == photoID && $0.deletedAt == nil },
                                                              sortBy: [SortDescriptor(\.updatedAt, order: .reverse)])
         descriptor.fetchLimit = 1
-        return try modelContext.fetch(descriptor).first?.imageData
+        return try autoreleasepool {
+            try modelContext.fetch(descriptor).first?.imageData
+        }
     }
 
     private func fetch<T: PersistentModel>(_ type: T.Type, _ predicate: Predicate<T>, _ sort: [SortDescriptor<T>]) throws -> [T] {
