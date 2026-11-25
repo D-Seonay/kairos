@@ -43,12 +43,16 @@ extension AppDependencies {
         let tracks: any RunTrackRepository
         /// Les annonces vocales, dans la suite de préférences que la suppression totale vide.
         let preferences: any RunPreferencesStore
+        /// Les meilleurs segments des courses Pulse (records 5 km, 10 km, semi), en local dans la suite de préférences.
+        let bestEfforts: any RunBestEffortStore
         /// La séance HealthKit de la course, que `AppDelegate` charge de reprendre celle que le système a gardée après un crash ;
         /// `nil` sans Apple Santé, avec un scénario de lancement, en mode mémoire et dans les tests.
         let healthSession: HealthKitRunRecorder?
 
         /// `workouts` masque les doublons de la montre : une course Pulse enregistrée garde en magasin la FC du direct.
-        init(_ wiring: Wiring, container: ModelContainer, workouts: any WorkoutRepository, profiles: any ProfileRepository) {
+        /// `bestEfforts` : le cache des meilleurs segments, partagé avec le passage du jour.
+        init(_ wiring: Wiring, container: ModelContainer, workouts: any WorkoutRepository, profiles: any ProfileRepository,
+             bestEfforts: any RunBestEffortStore) {
             let adapters = wiring.run
             let tracks = SwiftDataRunTrackRepository(modelContainer: container)
             let preferences = UserDefaultsRunPreferencesStore(suiteName: wiring.defaultsSuite)
@@ -57,9 +61,10 @@ extension AppDependencies {
                 activity: adapters.activity, reminders: adapters.reminders,
                 drafts: SwiftDataRunDraftStore(modelContainer: container), workouts: workouts, tracks: tracks,
                 profiles: profiles, preferences: preferences, spokenText: RunText.spokenText(for:), now: wiring.now,
-                calendar: wiring.calendar)
+                calendar: wiring.calendar, bestEfforts: bestEfforts)
             self.tracks = tracks
             self.preferences = preferences
+            self.bestEfforts = bestEfforts
             healthSession = adapters.healthSession
         }
     }

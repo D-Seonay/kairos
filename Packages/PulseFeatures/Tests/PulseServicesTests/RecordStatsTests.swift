@@ -42,8 +42,10 @@ struct RecordStatsTests {
                               durationMinutes: minutes, distanceMeters: distance, sets: sets, createdAt: start, updatedAt: start)
     }
 
-    private func stats(records: [PersonalRecord] = [], sessions: [WorkoutSession] = [], period: StatsPeriod = .month) -> RecordStats {
-        RecordStats.make(records: records, sessions: sessions, directory: directory, period: period, now: now, calendar: calendar)
+    private func stats(records: [PersonalRecord] = [], sessions: [WorkoutSession] = [], period: StatsPeriod = .month,
+                       efforts: [RunBestEfforts] = []) -> RecordStats {
+        RecordStats.make(records: records, sessions: sessions, directory: directory, period: period, now: now, calendar: calendar,
+                         runEfforts: Dictionary(uniqueKeysWithValues: efforts.map { ($0.id, $0) }))
     }
 
     @Test func mainLiftsComeFirstInOrder() {
@@ -139,6 +141,35 @@ struct RecordStatsTests {
         #expect(result.runs[1].seconds == 3_000)
         #expect(result.runs[2].seconds == nil)
         #expect(result.runs[2].date == nil)
+    }
+
+    @Test func runSegmentBeatsTheAveragePaceOfItsRun() {
+        // 12 km en 66 min : 27:30 au 5 km à l'allure moyenne, mais un 5 km en 22:30 au milieu.
+        let long = session(kind: .run, distance: 12_000, minutes: 66)
+        let result = stats(sessions: [long], efforts: [
+            RunBestEfforts(id: long.id, efforts: [RunBestEffort(meters: 5_000, seconds: 1_350),
+                                                  RunBestEffort(meters: 10_000, seconds: 3_000)])])
+        #expect(result.runs[0].seconds == 1_350 && result.runs[0].isSegment)
+        #expect(result.runs[1].seconds == 3_000 && result.runs[1].isSegment)
+        #expect(result.runs[2].seconds == nil && !result.runs[2].isSegment)
+        // Sans segment connu, l'allure moyenne de la sortie, marquée comme telle.
+        let average = stats(sessions: [long]).runs[0]
+        #expect(average.seconds == 1_650 && !average.isSegment)
+    }
+
+    @Test func aSegmentSlowerThanTheAveragePaceGivesWayToIt() {
+        // Un segment lu sur un tracé sans pauses peut en traverser une : l'allure moyenne en mouvement reste plus juste.
+        let run = session(kind: .run, distance: 10_000, minutes: 50)
+        let result = stats(sessions: [run], efforts: [RunBestEfforts(id: run.id, efforts: [RunBestEffort(meters: 5_000, seconds: 1_600)])])
+        #expect(result.runs[0].seconds == 1_500 && !result.runs[0].isSegment)
+    }
+
+    @Test func aSegmentRunCanBeatAFasterAverageElsewhere() {
+        let steady = session(daysAgo: 10, kind: .run, distance: 5_000, minutes: 24)
+        let long = session(daysAgo: 3, kind: .run, distance: 15_000, minutes: 84)
+        let result = stats(sessions: [steady, long], efforts: [
+            RunBestEfforts(id: long.id, efforts: [RunBestEffort(meters: 5_000, seconds: 1_380)])])
+        #expect(result.runs[0].seconds == 1_380 && result.runs[0].date == day(3) && result.runs[0].isSegment)
     }
 
     @Test func fastestRunWinsAndNewMeansInsideThePeriod() {

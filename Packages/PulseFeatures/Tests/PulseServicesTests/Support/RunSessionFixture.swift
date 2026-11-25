@@ -101,6 +101,7 @@ struct RunSessionFixture {
     let tracks = InMemoryRunTrackRepository()
     let profiles = InMemoryProfileRepository()
     let preferences = InMemoryRunPreferencesStore()
+    let bestEfforts = InMemoryRunBestEffortStore()
     let ticks = RunTickSource()
     let service: RunSessionService
 
@@ -113,7 +114,7 @@ struct RunSessionFixture {
         drafts = CountingRunDraftStore(draft)
         service = Self.makeService(recorder: recorder, location: location, announcer: announcer, activity: activity,
                                    reminders: reminders, drafts: drafts, workouts: workouts, tracks: tracks, profiles: profiles,
-                                   preferences: preferences, ticks: ticks, clock: clock)
+                                   preferences: preferences, bestEfforts: bestEfforts, ticks: ticks, clock: clock)
     }
 
     // swiftlint:disable:next function_parameter_count
@@ -121,13 +122,13 @@ struct RunSessionFixture {
                                     activity: StubRunActivityController, reminders: OrderedRunReminderScheduler,
                                     drafts: CountingRunDraftStore, workouts: any WorkoutRepository,
                                     tracks: InMemoryRunTrackRepository, profiles: InMemoryProfileRepository,
-                                    preferences: InMemoryRunPreferencesStore, ticks: RunTickSource,
-                                    clock: MutableClock) -> RunSessionService {
+                                    preferences: InMemoryRunPreferencesStore, bestEfforts: InMemoryRunBestEffortStore,
+                                    ticks: RunTickSource, clock: MutableClock) -> RunSessionService {
         RunSessionService(
             recorder: recorder, location: location, announcer: announcer, activity: activity, reminders: reminders,
             drafts: drafts, workouts: workouts, tracks: tracks, profiles: profiles, preferences: preferences,
             spokenText: Self.spokenText, now: { clock.now }, calendar: TestClock.calendar,
-            keepAliveTicks: { ticks.stream(every: $0) })
+            keepAliveTicks: { ticks.stream(every: $0) }, bestEfforts: bestEfforts)
     }
 
     /// Le service d'un nouveau lancement de l'app, sur les mêmes magasins, après la mort du processus : la séance HealthKit
@@ -136,7 +137,7 @@ struct RunSessionFixture {
         Self.makeService(recorder: recorder, location: StubRunLocationTracker(), announcer: StubRunAnnouncer(),
                          activity: StubRunActivityController(), reminders: OrderedRunReminderScheduler(), drafts: drafts,
                          workouts: workouts, tracks: tracks, profiles: profiles, preferences: preferences,
-                         ticks: RunTickSource(), clock: clock)
+                         bestEfforts: bestEfforts, ticks: RunTickSource(), clock: clock)
     }
 
     var start: Date { Self.start }

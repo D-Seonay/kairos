@@ -21,6 +21,20 @@ struct StatsServiceTests {
         #expect(snapshot.muscles.strengthSessions > 0)
     }
 
+    @Test func runRecordsReadTheBestSegmentCache() async throws {
+        let repositories = StatsRepositories()
+        let start = StatsFixtures.now.addingTimeInterval(-3 * 86_400)
+        let run = WorkoutSession(startedAt: start, kind: .run, source: .pulse, status: .completed, title: "Course",
+                                 durationMinutes: 66, distanceMeters: 12_000, createdAt: start, updatedAt: start)
+        try await repositories.workouts.save(run)
+        await repositories.runEfforts.save([RunBestEfforts(id: run.id, efforts: [RunBestEffort(meters: 5_000, seconds: 1_350)])])
+
+        let snapshot = try await repositories.service().snapshot(for: .month)
+        #expect(snapshot.records.runs[0].seconds == 1_350 && snapshot.records.runs[0].isSegment)
+        let summary = try await repositories.profileService().summary()
+        #expect(summary.runs[0].seconds == 1_350)
+    }
+
     @Test func emptyHistoryGivesEmptyViews() async throws {
         let snapshot = try await StatsRepositories().service().snapshot(for: .month)
 

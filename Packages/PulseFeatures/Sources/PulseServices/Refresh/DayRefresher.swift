@@ -31,6 +31,8 @@ public final class DayRefresher: Sendable {
     private let planning: PlanningService?
     /// Le déplacement des valeurs Apple Santé laissées dans le magasin synchronisé, avant toute lecture (spec M8 §5.2).
     private let relocation: (any HealthDataRelocating)?
+    /// Les meilleurs segments des courses Pulse, calculés une fois par course pour les records (5 km, 10 km, semi).
+    private let runBestEfforts: RunBestEffortIndex?
     private let calendar: Calendar
     private let now: @Sendable () -> Date
     /// La file des opérations du passage. C'est celle des écritures de `planning` quand il est fourni : un déplacement ou un
@@ -54,8 +56,8 @@ public final class DayRefresher: Sendable {
                 notifications: any NotificationScheduling, activity: any DayActivityLog,
                 scheduledDays: (any ScheduledDayRepository)? = nil, workoutHistory: WorkoutHistory? = nil,
                 bodyHistory: BodyHistory? = nil, antiInterference: AntiInterferenceService? = nil,
-                planning: PlanningService? = nil, relocation: (any HealthDataRelocating)? = nil, calendar: Calendar,
-                now: @escaping @Sendable () -> Date) {
+                planning: PlanningService? = nil, relocation: (any HealthDataRelocating)? = nil,
+                runBestEfforts: RunBestEffortIndex? = nil, calendar: Calendar, now: @escaping @Sendable () -> Date) {
         self.profiles = profiles
         self.programs = programs
         self.recovery = recovery
@@ -71,6 +73,7 @@ public final class DayRefresher: Sendable {
         self.planning = planning
         self.queue = planning?.writes ?? SerialTaskQueue()
         self.relocation = relocation
+        self.runBestEfforts = runBestEfforts
         self.calendar = calendar
         self.now = now
     }
@@ -169,6 +172,9 @@ public final class DayRefresher: Sendable {
                 await notifyIfDue(scored, session: session, profile: profile, now: now)
             }
         }
+        // Les records de course lisent ce cache : un tracé arrivé d'iCloud ou une course d'avant le cache y entre ici, après le
+        // score et le widget, qui n'attendent pas ce calcul.
+        await runBestEfforts?.refresh(now: now)
         return DayRefresh(profile: profile, nights: history.nights, readAt: history.readAt, plannedDay: plannedDay, score: score,
                           session: session, checkIn: await checkIn(of: scored, now: now))
     }

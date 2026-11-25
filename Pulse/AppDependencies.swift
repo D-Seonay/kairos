@@ -235,7 +235,7 @@ struct AppDependencies: Sendable {
         let stores = RefresherStores(
             profiles: profiles, programs: programs, recovery: recovery, storedWorkouts: storedWorkouts, scheduledDays: scheduledDays,
             userExercises: userExercises, bodyMeasurements: bodyMeasurements, healthCache: healthCache, activity: activity,
-            planning: planning, relocation: SwiftDataHealthDataRelocation(modelContainer: container))
+            planning: planning, container: container, runBestEfforts: UserDefaultsRunBestEffortStore(suiteName: wiring.defaultsSuite))
         let refresher = makeRefresher(wiring, stores: stores, scores: scores)
         let personalRecords = SwiftDataPersonalRecordRepository(modelContainer: container)
         let records = RecordsService(workouts: workouts, records: personalRecords, userExercises: userExercises,
@@ -262,8 +262,8 @@ struct AppDependencies: Sendable {
                                        library: content, calendar: calendar, now: wiring.now),
             healthCache: healthCache, activity: activity, refresher: refresher, backgroundDelivery: wiring.backgroundDelivery,
             activeSession: activeSession, liveSession: liveSession, sessionActivity: wiring.sessionActivity,
-            run: RunDependencies(wiring, container: container, workouts: workouts, profiles: profiles), photos: photos,
-            inspector: wiring.inspector ?? SwiftDataStoreInspector(container: container, cloudEnabled: mode == .cloud),
+            run: RunDependencies(wiring, container: container, workouts: workouts, profiles: profiles, bestEfforts: stores.runBestEfforts),
+            photos: photos, inspector: wiring.inspector ?? SwiftDataStoreInspector(container: container, cloudEnabled: mode == .cloud),
             exporter: makeExporter(container: container, content: content),
             eraser: makeEraser(wiring, container: container, refresher: refresher),
             seeder: SampleDataSeeder(container: container, calendar: calendar), notificationStatus: wiring.notificationStatus)
@@ -320,15 +320,16 @@ extension AppDependencies {
     }
 
     /// Efface le magasin, les photos de corps et leur export, les préférences, les notifications, l'instantané du widget, les
-    /// exports et les rapports de diagnostic. Elle attend la fin d'un rafraîchissement en cours, qui republierait l'instantané
-    /// effacé. Le dépôt des photos de corps est celui du câblage, que lit aussi leur service : jamais un second sur le même
+    /// exports, le fichier GPX à partager et les rapports de diagnostic. Elle attend la fin d'un rafraîchissement en cours,
+    /// qui republierait l'instantané effacé. Le dépôt des photos de corps est celui du câblage, que lit aussi leur service : jamais un second sur le même
     /// dossier.
     private static func makeEraser(_ wiring: Wiring, container: ModelContainer, refresher: DayRefresher) -> any DataEraser {
         let store = SwiftDataEraser(container: container, defaultsSuite: wiring.defaultsSuite,
                                     defaultsDomain: wiring.defaultsSuite ?? Bundle.main.bundleIdentifier ?? "fr.seonay.pulse",
                                     healthEraser: wiring.healthEraser, notifications: wiring.notificationCanceling,
                                     widgets: wiring.widgets, exportsDirectory: SwiftDataExporter.exportsDirectory,
-                                    bodyPhotos: wiring.bodyPhotos, bodyPhotoExportDirectory: BodyPhotoService.exportDirectory)
+                                    bodyPhotos: wiring.bodyPhotos, bodyPhotoExportDirectory: BodyPhotoService.exportDirectory,
+                                    runGPXDirectory: RunGPXFile.directory)
         return DiagnosticReportsEraser(inner: SerializedDataEraser(refresher: refresher, inner: store), reports: diagnosticReports)
     }
 }

@@ -15,6 +15,8 @@ public final class ActivityDetailModel {
     public private(set) var hasLoaded = false
     /// Le tracé d'une course Pulse, quand il a des points ou des kilomètres à montrer ; `nil` sinon.
     public private(set) var routeTrack: RunTrack?
+    /// Le GPX du tracé, écrit dans un fichier temporaire pour « Exporter en GPX » ; `nil` sans points ou si l'écriture échoue.
+    public private(set) var gpxFileURL: URL?
     public private(set) var errorMessage: String?
     /// La section Photos ; `nil` sans service des photos, ou pour un entraînement d'Apple Santé, qui n'en accepte pas.
     public private(set) var photos: SessionPhotosModel?
@@ -35,6 +37,7 @@ public final class ActivityDetailModel {
             rpe = session?.overallRPE
             note = session?.note ?? ""
             routeTrack = await track(of: session)
+            gpxFileURL = await gpxFile(of: routeTrack, session: session)
             photos = makePhotos(for: session)
             errorMessage = nil
         } catch {
@@ -49,6 +52,24 @@ public final class ActivityDetailModel {
         guard let session, session.source == .pulse, session.kind == .run, let tracks = environment.tracks,
               let track = try? await tracks.track(for: session.id), !track.points.isEmpty || !track.splits.isEmpty else { return nil }
         return track
+    }
+
+    /// Le fichier GPX du tracé, réécrit à chaque affichage du détail, hors du fil principal ; rien sans point à exporter. Un
+    /// échec d'écriture retire seulement le bouton d'export.
+    private func gpxFile(of track: RunTrack?, session: WorkoutSession?) async -> URL? {
+        guard let track, let session, !track.points.isEmpty else { return nil }
+        let calendar = environment.calendar
+        return await Task.detached(priority: .userInitiated) {
+            try? RunGPXFile.write(track, session: session, calendar: calendar)
+        }.value
+    }
+
+    /// Le détail se ferme : le fichier GPX (le tracé, donc des positions) ne reste pas dans le dossier temporaire. Il est réécrit
+    /// au prochain affichage.
+    public func discardGPXFile() {
+        guard gpxFileURL != nil else { return }
+        gpxFileURL = nil
+        RunGPXFile.remove(sessionID: sessionID)
     }
 
     /// Le modèle de la section Photos de `session`, gardé s'il existe déjà ; `nil` sans service ou pour une séance qui n'accepte

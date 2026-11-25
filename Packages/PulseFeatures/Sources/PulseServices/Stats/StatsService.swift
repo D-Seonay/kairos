@@ -35,10 +35,14 @@ public struct StatsService: Sendable {
     let library: ContentLibrary
     let calendar: Calendar
     let now: @Sendable () -> Date
+    /// Les meilleurs segments des courses Pulse, calculés au passage du jour ; sans cache, les records restent à l'allure moyenne.
+    let runEfforts: (any RunBestEffortStore)?
 
     public init(profiles: any ProfileRepository, programs: any ProgramRepository, workouts: any WorkoutRepository,
                 recoveries: any RecoveryRepository, records: any PersonalRecordRepository, userExercises: any UserExerciseRepository,
-                library: ContentLibrary, calendar: Calendar, now: @escaping @Sendable () -> Date) {
+                library: ContentLibrary, calendar: Calendar, now: @escaping @Sendable () -> Date,
+                runEfforts: (any RunBestEffortStore)? = nil) {
+        self.runEfforts = runEfforts
         self.profiles = profiles
         self.programs = programs
         self.workouts = workouts
@@ -64,6 +68,7 @@ public struct StatsService: Sendable {
         // Les exercices archivés restent connus : une ancienne séance peut encore les nommer.
         let directory = ExerciseDirectory(library: library, userExercises: try await userExercises.all(includeArchived: true))
 
+        let efforts = await runEfforts?.all() ?? [:]
         let onboardingCompletedAt = profile?.onboardingCompletedAt
         let historyStart = ([onboardingCompletedAt] + [sessions.map(\.startedAt).min()]).compactMap { $0 }.min()
         let target = WeekStreak.target(program: program, profile: profile)
@@ -80,7 +85,7 @@ public struct StatsService: Sendable {
             attendance: AttendanceStats.make(sessions: sessions, target: target, historyStart: historyStart, period: period,
                                              now: now, calendar: calendar),
             records: RecordStats.make(records: personalRecords, sessions: sessions, directory: directory, period: period,
-                                      now: now, calendar: calendar))
+                                      now: now, calendar: calendar, runEfforts: efforts))
     }
 
     /// Le programme actif du profil, comme `PlanningService`.

@@ -112,6 +112,15 @@ struct PlanningModelTests {
         let model = PlanningModel(environment: fixture.environment).activityDetailModel(sessionID: run.id)
         await model.load()
         #expect(model.routeTrack == saved)
+        // Le tracé s'exporte en GPX : un fichier temporaire avec un point par point du tracé.
+        let url = try #require(model.gpxFileURL)
+        #expect(url.pathExtension == "gpx")
+        let gpx = try String(contentsOf: url, encoding: .utf8)
+        #expect(gpx.components(separatedBy: "<trkpt ").count - 1 == saved.points.count)
+        // Le détail se ferme : le fichier (des positions) ne reste pas dans le dossier temporaire.
+        model.discardGPXFile()
+        #expect(model.gpxFileURL == nil)
+        #expect(!FileManager.default.fileExists(atPath: url.path(percentEncoded: false)))
     }
 
     @Test func runDetailHasNoRouteWithoutAUsableTrack() async throws {
@@ -133,6 +142,8 @@ struct PlanningModelTests {
             let model = planning.activityDetailModel(sessionID: session.id)
             await model.load()
             routes.append(model.routeTrack != nil)
+            // Sans point, rien à exporter en GPX.
+            #expect(model.gpxFileURL == nil)
         }
         #expect(routes == [false, false, false, true])
 

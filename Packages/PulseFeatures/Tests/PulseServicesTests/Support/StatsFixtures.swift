@@ -12,17 +12,20 @@ struct StatsRepositories: Sendable {
     let recoveries = InMemoryRecoveryRepository(calendar: TestClock.calendar)
     let records = InMemoryPersonalRecordRepository()
     let userExercises = InMemoryUserExerciseRepository()
+    let runEfforts = InMemoryRunBestEffortStore()
 
     func service(now: Date = StatsFixtures.now) -> StatsService {
         StatsService(profiles: profiles, programs: programs, workouts: workouts, recoveries: recoveries, records: records,
-                     userExercises: userExercises, library: .bundled, calendar: TestClock.calendar, now: { now })
+                     userExercises: userExercises, library: .bundled, calendar: TestClock.calendar, now: { now },
+                     runEfforts: runEfforts)
     }
 }
 
 extension StatsRepositories {
     func profileService(now: Date = StatsFixtures.now) -> ProfileService {
         ProfileService(profiles: profiles, programs: programs, workouts: workouts, recoveries: recoveries, records: records,
-                       userExercises: userExercises, library: .bundled, calendar: TestClock.calendar, now: { now })
+                       userExercises: userExercises, library: .bundled, calendar: TestClock.calendar, now: { now },
+                       runEfforts: runEfforts)
     }
 }
 
