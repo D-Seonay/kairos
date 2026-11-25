@@ -4,7 +4,8 @@ import PulseDomain
 /// Les photos de corps : la donnée la plus sensible de l'app, donc ni SwiftData, ni iCloud, ni export général (spec V2b §6).
 /// Tout vit dans un dossier dédié, illisible quand l'iPhone est verrouillé (protection `complete`, chaque fichier écrit
 /// avec `.completeFileProtection`) et exclu des sauvegardes. Disposition : `index.json` (`[BodyPhoto]`, dates ISO 8601),
-/// `<id>.jpg` et `<id>-thumb.jpg`. L'index évite de lire les dates des fichiers (pas de raison `C617.1` à déclarer).
+/// `<id>.jpg` et `<id>-thumb.jpg`. L'index porte les dates ; celles des fichiers ne sont lues que pour reconstruire un index
+/// abîmé (raison `C617.1` déclarée dans le `PrivacyInfo.xcprivacy` de l'app).
 /// À n'appeler qu'au premier plan : un fichier protégé ne se lit pas en arrière-plan, iPhone verrouillé.
 ///
 /// Deux index illisibles ne se traitent pas pareil. Un index dont les octets ne se lisent pas (iPhone verrouillé, protection
@@ -22,12 +23,25 @@ public actor FileBodyPhotoStore: BodyPhotoStore {
     static let damagedIndexName = "index-abime.json"
 
     private let directory: URL
+    private let calendar: Calendar
     private let now: @Sendable () -> Date
+    private let fileDate: @Sendable (URL) -> Date?
 
-    /// `now` date les photos reconstruites dont l'index abîmé ne disait rien.
-    public init(directory: URL, now: @escaping @Sendable () -> Date = { Date() }) {
+    /// `calendar`, `now` et `fileDate` ne servent qu'à dater les images retrouvées par la reconstruction d'un index abîmé
+    /// (`BodyPhotoIndexRepair`).
+    public init(directory: URL, calendar: Calendar = .current, now: @escaping @Sendable () -> Date = { Date() },
+                fileDate: @escaping @Sendable (URL) -> Date? = FileBodyPhotoStore.fileDate) {
         self.directory = directory
+        self.calendar = calendar
         self.now = now
+        self.fileDate = fileDate
+    }
+
+    /// La date de création du fichier, sinon celle de sa dernière modification (API à raison requise `C617.1` : fichiers du
+    /// conteneur de l'app).
+    public static func fileDate(_ url: URL) -> Date? {
+        let values = try? url.resourceValues(forKeys: [.creationDateKey, .contentModificationDateKey])
+        return values?.creationDate ?? values?.contentModificationDate
     }
 
     public func photos() async throws -> [BodyPhoto] {
@@ -208,8 +222,7 @@ public actor FileBodyPhotoStore: BodyPhotoStore {
     }
 
     /// Garde une copie de l'index abîmé, reprend les entrées encore lisibles, puis ajoute une entrée pour chaque image qui n'en a
-    /// plus. Ces dernières n'ont ni pose ni date connues (les dates des fichiers ne sont pas lues) : elles sont datées de
-    /// maintenant et reçoivent face, profil, dos tour à tour, pour rester visibles, supprimables et exportées. Aucune image n'est
+    /// plus, datée et posée par `BodyPhotoIndexRepair` pour rester visible, supprimable et exportée. Aucune image n'est
     /// supprimée ; une vignette manquante est remplacée par une copie de l'image.
     private func rebuildIndex(from damaged: Data) throws -> [BodyPhoto] {
         let backup = directory.appendingPathComponent(Self.damagedIndexName)
@@ -222,18 +235,14 @@ public actor FileBodyPhotoStore: BodyPhotoStore {
             entries.append(photo)
         }
         let known = Set(entries.map(\.id))
-        let date = now()
         let names = (try? FileManager.default.contentsOfDirectory(atPath: directory.path)) ?? []
         let unindexed = names.compactMap { name -> UUID? in
             guard name.hasSuffix(".jpg"), !name.hasSuffix("-thumb.jpg") else { return nil }
             return UUID(uuidString: String(name.dropLast(".jpg".count)))
         }
         .filter { !known.contains($0) }
-        .sorted { $0.uuidString < $1.uuidString }
-        for (offset, id) in unindexed.enumerated() {
-            let pose = BodyPose.allCases[offset % BodyPose.allCases.count]
-            entries.append(BodyPhoto(id: id, pose: pose, takenAt: date, createdAt: date))
-        }
+        let images = unindexed.map { BodyPhotoIndexRepair.Image(id: $0, fileDate: fileDate(imageURL($0))) }
+        entries += BodyPhotoIndexRepair.entries(for: images, existing: entries, now: now(), calendar: calendar)
         for photo in entries where !FileManager.default.fileExists(atPath: thumbnailURL(photo.id).path) {
             try? FileManager.default.copyItem(at: imageURL(photo.id), to: thumbnailURL(photo.id))
         }
