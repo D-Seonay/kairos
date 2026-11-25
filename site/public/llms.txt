@@ -26,6 +26,6 @@
 ## Liens
 - Site : https://pulserecovery.app
 - App Store : https://apps.apple.com/fr/app/pulse-r%C3%A9cup%C3%A9ration-muscu/id6829265826
-- Politique de confidentialité : https://d-seonay.github.io/kairos/confidentialite/
-- Support : https://d-seonay.github.io/kairos/support/
+- Politique de confidentialité : https://pulserecovery.app/confidentialite
+- Support : https://pulserecovery.app/support
 - Contact : contact@seonay.com

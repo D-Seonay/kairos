@@ -7,8 +7,17 @@ export const APP_STORE_LIVE = true;
 // À renseigner avant la mise en production : le build Vercel de production échoue tant que c'est null.
 export const CONTACT_EMAIL: string | null = "contact@seonay.com";
 
-export const PRIVACY_URL = "https://d-seonay.github.io/kairos/confidentialite/";
-export const SUPPORT_URL = "https://d-seonay.github.io/kairos/support/";
+// Les pages publiques (docs/) sont servies par GitHub Pages, sous le nom du dépôt : le renommer casse ces adresses.
+export const PAGES_BASE_URL = "https://d-seonay.github.io/pulse";
+export const PRIVACY_URL = `${PAGES_BASE_URL}/confidentialite/`;
+export const SUPPORT_URL = `${PAGES_BASE_URL}/support/`;
+
+// Les adresses stables, inscrites dans l'app et dans la fiche App Store : le site y redirige vers les pages ci-dessus
+// (next.config.ts). Si le dépôt change encore de nom, seule PAGES_BASE_URL est à corriger.
+export const PUBLIC_PAGE_REDIRECTS = [
+  { source: "/confidentialite", destination: PRIVACY_URL },
+  { source: "/support", destination: SUPPORT_URL },
+] as const;
 export const STUDIO_URL = "https://seonay.com";
 
 type Env = Record<string, string | undefined>;
