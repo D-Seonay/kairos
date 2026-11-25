@@ -106,6 +106,16 @@ public struct RunTrackBuilder: Sendable, Equatable {
         return splits
     }
 
+    // MARK: Meilleurs segments
+
+    /// Le temps en mouvement et la distance cumulée à chaque point retenu, pour chercher les meilleurs segments : les pauses ne
+    /// comptent ni en temps ni en distance.
+    public func segmentSamples(pauses: [RunPause]) -> [RunSegmentSample] {
+        zip(accepted, cumulative).map { point, meters in
+            RunSegmentSample(seconds: RunClock.movingSeconds(from: startedAt, pauses: pauses, at: point.timestamp), meters: meters)
+        }
+    }
+
     // MARK: Allures
 
     /// Allure du km en cours (s/km). Sous 100 m dans le km, celle des 30 dernières secondes en mouvement.

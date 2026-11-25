@@ -1,6 +1,8 @@
 import Foundation
 import PulseDomain
+import PulsePersistence
 import PulseServices
+import SwiftData
 
 extension AppDependencies {
     /// Les dépôts que lit le passage du jour.
@@ -16,12 +18,13 @@ extension AppDependencies {
         var healthCache: any HealthSampleCache
         var activity: any DayActivityLog
         var planning: PlanningService
-        var relocation: any HealthDataRelocating
+        /// Le magasin : le déplacement des valeurs Apple Santé et les tracés des courses Pulse (meilleurs segments) le lisent.
+        var container: ModelContainer
     }
 
     /// Le passage du jour : les nuits, puis les courses et les vélos quand la source Apple Santé sait les lire (spec M6 §3), le
-    /// poids et la masse grasse (spec M7 §14), les règles anti-interférence (§9), et la série et la semaine publiées avec
-    /// l'instantané du widget (§11).
+    /// poids et la masse grasse (spec M7 §14), les meilleurs segments des courses Pulse, les règles anti-interférence (§9), et la
+    /// série et la semaine publiées avec l'instantané du widget (§11).
     static func makeRefresher(_ wiring: Wiring, stores: RefresherStores, scores: DailyScoreService) -> DayRefresher {
         let calendar = wiring.calendar
         let workouts = DeduplicatingWorkoutRepository(base: stores.storedWorkouts)
@@ -45,6 +48,10 @@ extension AppDependencies {
             antiInterference: AntiInterferenceService(
                 profiles: stores.profiles, programs: stores.programs, workouts: workouts, scheduledDays: stores.scheduledDays,
                 userExercises: stores.userExercises, library: .bundled, calendar: calendar, now: wiring.now),
-            planning: stores.planning, relocation: stores.relocation, calendar: calendar, now: wiring.now)
+            planning: stores.planning, relocation: SwiftDataHealthDataRelocation(modelContainer: stores.container),
+            runBestEfforts: RunBestEffortIndex(
+                workouts: stores.storedWorkouts, tracks: SwiftDataRunTrackRepository(modelContainer: stores.container),
+                store: UserDefaultsRunBestEffortStore(suiteName: wiring.defaultsSuite)),
+            calendar: calendar, now: wiring.now)
     }
 }

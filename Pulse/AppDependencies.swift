@@ -256,7 +256,7 @@ struct AppDependencies: Sendable {
         let stores = RefresherStores(
             profiles: profiles, programs: programs, recovery: recovery, storedWorkouts: storedWorkouts, scheduledDays: scheduledDays,
             userExercises: userExercises, bodyMeasurements: bodyMeasurements, healthCache: healthCache, activity: activity,
-            planning: planning, relocation: SwiftDataHealthDataRelocation(modelContainer: container))
+            planning: planning, container: container)
         let refresher = makeRefresher(wiring, stores: stores, scores: scores)
         let personalRecords = SwiftDataPersonalRecordRepository(modelContainer: container)
         let records = RecordsService(workouts: workouts, records: personalRecords, userExercises: userExercises,

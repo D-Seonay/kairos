@@ -43,6 +43,8 @@ extension AppDependencies {
         let tracks: any RunTrackRepository
         /// Les annonces vocales, dans la suite de préférences que la suppression totale vide.
         let preferences: any RunPreferencesStore
+        /// Les meilleurs segments des courses Pulse (records 5 km, 10 km, semi), en local dans la suite de préférences.
+        let bestEfforts: any RunBestEffortStore
         /// La séance HealthKit de la course, que `AppDelegate` charge de reprendre celle que le système a gardée après un crash ;
         /// `nil` sans Apple Santé, avec un scénario de lancement, en mode mémoire et dans les tests.
         let healthSession: HealthKitRunRecorder?
@@ -52,14 +54,16 @@ extension AppDependencies {
             let adapters = wiring.run
             let tracks = SwiftDataRunTrackRepository(modelContainer: container)
             let preferences = UserDefaultsRunPreferencesStore(suiteName: wiring.defaultsSuite)
+            let bestEfforts = UserDefaultsRunBestEffortStore(suiteName: wiring.defaultsSuite)
             service = RunSessionService(
                 recorder: adapters.recorder, location: adapters.location, announcer: adapters.announcer,
                 activity: adapters.activity, reminders: adapters.reminders,
                 drafts: SwiftDataRunDraftStore(modelContainer: container), workouts: workouts, tracks: tracks,
                 profiles: profiles, preferences: preferences, spokenText: RunText.spokenText(for:), now: wiring.now,
-                calendar: wiring.calendar)
+                calendar: wiring.calendar, bestEfforts: bestEfforts)
             self.tracks = tracks
             self.preferences = preferences
+            self.bestEfforts = bestEfforts
             healthSession = adapters.healthSession
         }
     }

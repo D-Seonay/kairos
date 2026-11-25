@@ -155,7 +155,8 @@ private struct StrengthRecordsCard: View {
 
 // MARK: - Course
 
-/// Les meilleurs temps sur 5 km, 10 km et semi-marathon, ramenés à l'allure moyenne de la sortie (spec M7 §10).
+/// Les meilleurs temps sur 5 km, 10 km et semi-marathon : le meilleur segment d'une course Pulse, sinon le temps ramené à
+/// l'allure moyenne de la sortie (spec M7 §10).
 private struct RunRecordsCard: View {
     let runs: [RunBest]
     let window: StatsWindow
@@ -214,11 +215,13 @@ private struct RunRecordsCard: View {
         .recordShareMenu(RecordShareCard.run(run, calendar: window.calendar), share: share)
     }
 
-    /// « allure moyenne de la sortie du 14 sept. ».
+    /// « meilleur segment de la sortie du 14 sept. » quand le tracé l'a donné, sinon « allure moyenne de la sortie du 14 sept. ».
     private func detail(_ run: RunBest) -> String? {
         guard run.seconds != nil, let date = run.date else { return nil }
         let day = StatsText.shortDate(date, calendar: window.calendar, today: window.today)
-        return String(localized: "allure moyenne de la sortie du \(day)", bundle: .module)
+        return run.isSegment
+            ? String(localized: "meilleur segment de la sortie du \(day)", bundle: .module)
+            : String(localized: "allure moyenne de la sortie du \(day)", bundle: .module)
     }
 
     static func title(_ distance: RunDistance) -> String {

@@ -44,10 +44,14 @@ public struct ProfileService: Sendable {
     let library: ContentLibrary
     let calendar: Calendar
     let now: @Sendable () -> Date
+    /// Les meilleurs segments des courses Pulse, calculés au passage du jour ; sans cache, les records restent à l'allure moyenne.
+    let runEfforts: (any RunBestEffortStore)?
 
     public init(profiles: any ProfileRepository, programs: any ProgramRepository, workouts: any WorkoutRepository,
                 recoveries: any RecoveryRepository, records: any PersonalRecordRepository, userExercises: any UserExerciseRepository,
-                library: ContentLibrary, calendar: Calendar, now: @escaping @Sendable () -> Date) {
+                library: ContentLibrary, calendar: Calendar, now: @escaping @Sendable () -> Date,
+                runEfforts: (any RunBestEffortStore)? = nil) {
+        self.runEfforts = runEfforts
         self.profiles = profiles
         self.programs = programs
         self.workouts = workouts
@@ -74,8 +78,9 @@ public struct ProfileService: Sendable {
         let historyStart = ([profile?.onboardingCompletedAt] + [sessions.map(\.startedAt).min()]).compactMap { $0 }.min()
         let target = WeekStreak.target(program: program, profile: profile)
         let counted = sessions.filter(WeekStreak.counts)
+        let efforts = await runEfforts?.all() ?? [:]
         let recordStats = RecordStats.make(records: personalRecords, sessions: sessions, directory: directory, period: .year,
-                                       now: now, calendar: calendar)
+                                           now: now, calendar: calendar, runEfforts: efforts)
         return ProfileSummary(
             firstName: profile?.firstName,
             sessionsTotal: counted.count,

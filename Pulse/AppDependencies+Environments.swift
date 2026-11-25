@@ -45,7 +45,7 @@ extension AppDependencies {
     func statsEnvironment() -> StatsEnvironment {
         let service = StatsService(profiles: profiles, programs: programs, workouts: workouts, recoveries: recovery,
                                    records: personalRecords, userExercises: userExercises, library: content, calendar: calendar,
-                                   now: now)
+                                   now: now, runEfforts: run.bestEfforts)
         return StatsEnvironment(service: service, train: trainEnvironment(), calendar: calendar, now: now,
                                 nights: NightDetailService(cache: healthCache, calendar: calendar, now: now))
     }
@@ -56,7 +56,7 @@ extension AppDependencies {
     func profileEnvironment() -> ProfileEnvironment {
         let profile = ProfileService(profiles: profiles, programs: programs, workouts: workouts, recoveries: recovery,
                                      records: personalRecords, userExercises: userExercises, library: content, calendar: calendar,
-                                     now: now)
+                                     now: now, runEfforts: run.bestEfforts)
         let refresher = refresher
         let notifications = notifications
         return ProfileEnvironment(

@@ -104,7 +104,8 @@ extension StatsText {
         return String(localized: "\(line.name) : \(details).", bundle: .module)
     }
 
-    /// « 5 kilomètres : 24 minutes 31, nouveau, allure moyenne de la sortie du 14 septembre. » ; « … : pas encore couru. »
+    /// « 5 kilomètres : 24 minutes 31, nouveau, meilleur segment de la sortie du 14 septembre. » (ou « allure moyenne de la
+    /// sortie du … » sans tracé) ; « … : pas encore couru. »
     static func runRecordSpoken(_ run: RunBest, calendar: Calendar, today: Date) -> String {
         let title = distanceSpoken(run.distance)
         guard let seconds = run.seconds else {
@@ -114,7 +115,9 @@ extension StatsText {
         if run.isNew { parts.append(String(localized: "nouveau", bundle: .module)) }
         if let date = run.date {
             let day = spokenDate(date, calendar: calendar, today: today)
-            parts.append(String(localized: "allure moyenne de la sortie du \(day)", bundle: .module))
+            parts.append(run.isSegment
+                ? String(localized: "meilleur segment de la sortie du \(day)", bundle: .module)
+                : String(localized: "allure moyenne de la sortie du \(day)", bundle: .module))
         }
         let details = parts.joined(separator: ", ")
         return String(localized: "\(title) : \(details).", bundle: .module)

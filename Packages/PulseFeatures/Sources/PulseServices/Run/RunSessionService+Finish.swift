@@ -129,6 +129,7 @@ extension RunSessionService {
         let session = try await workouts.session(id: sessionID)
         try await tracks.delete(sessionID: sessionID)
         try await workouts.delete(id: sessionID)
+        await bestEfforts?.remove([sessionID])
         if let healthKitID = session?.healthKitUUID.flatMap(UUID.init(uuidString:)) {
             try? await recorder.deleteWorkout(id: healthKitID)
         } else if session != nil {
@@ -160,6 +161,9 @@ extension RunSessionService {
             splits: builder.splits(pauses: draft.pauses, end: end), elevationGainMeters: builder.elevationGainMeters(),
             createdAt: date, updatedAt: date)
         try await tracks.save(track)
+        // Les meilleurs segments viennent des points bruts en temps de mouvement : plus justes que ceux relus sur le tracé simplifié.
+        await bestEfforts?.save([RunBestEffortIndex.efforts(sessionID: draft.sessionID,
+                                                             samples: builder.segmentSamples(pauses: draft.pauses))])
         return RunRecapData(session: session, track: track)
     }
 
