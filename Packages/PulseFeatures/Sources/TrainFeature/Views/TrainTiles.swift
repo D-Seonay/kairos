@@ -21,7 +21,7 @@ struct TrainTiles: View {
         layout {
             StrengthTile(subtitle: model.strengthSubtitle, spokenSubtitle: model.strengthSubtitleSpoken,
                          onOpenToday: onOpenToday, onStart: onStart)
-            RunTile(nextRun: model.nextRun, daysUntil: model.nextRun.flatMap { model.daysUntil($0.weekday) },
+            RunTile(nextRun: model.nextRun, daysUntil: model.nextRunDaysAhead,
                      startLabel: model.runStartLabel, onStart: onStartRun)
         }
     }
@@ -67,11 +67,11 @@ private struct StrengthTile: View {
     }
 }
 
-/// La course du jour ou la prochaine de la semaine type. « Courir » lance celle d'aujourd'hui, ou une course libre quand elle
+/// La course du jour ou la prochaine, d'après la semaine datée. « Courir » lance celle d'aujourd'hui, ou une course libre quand elle
 /// tombe un autre jour : la tuile informe, le bouton à part lance.
 private struct RunTile: View {
     let nextRun: NextSession?
-    /// Les jours d'ici la prochaine course : 0 aujourd'hui, 1 demain.
+    /// Les jours d'ici la prochaine course : 0 aujourd'hui, 1 demain, 7 le même jour la semaine prochaine.
     let daysUntil: Int?
     /// Ce que le bouton lance, dit à VoiceOver.
     let startLabel: String
