@@ -2,9 +2,10 @@ import Observation
 import PulseDomain
 
 /// L'onglet affiché, que choisissent l'utilisateur, un lien du widget ou une notification ; l'écran Compléments, qu'ouvre un
-/// rappel touché ; et un compteur qui change quand l'action « Pris » d'un rappel a enregistré une prise. Un lien vers l'accueil
-/// referme l'écran qui y était poussé ; le contrôle « Séance du jour » demande en plus de lancer la séance du jour. Les raccourcis
-/// Siri demandent aussi l'écran « Pourquoi » du score et le départ de la course du jour.
+/// rappel touché ; l'écran Photos de corps, qu'ouvre le rappel de photos ; et un compteur qui change quand l'action « Pris »
+/// d'un rappel a enregistré une prise. Un lien vers l'accueil referme l'écran qui y était poussé ; le contrôle « Séance du
+/// jour » demande en plus de lancer la séance du jour. Les raccourcis Siri demandent aussi l'écran « Pourquoi » du score et
+/// le départ de la course du jour.
 @MainActor
 @Observable
 final class AppRouter {
@@ -26,6 +27,8 @@ final class AppRouter {
     private(set) var runStartRequests = 0
     /// Vrai tant que la demande « Lancer une course » n'a pas été traitée par les onglets.
     var pendingRunStart = false
+    /// Vrai quand un rappel de photos touché demande l'écran Photos de corps : l'onglet Profil y va, puis le remet à faux.
+    var opensBodyPhotos = false
 
     func open(_ link: AppLink) {
         switch link {
@@ -34,6 +37,9 @@ final class AppRouter {
             selectedTab = .today
             isShowingSupplements = true
         case .planning: selectedTab = .planning
+        case .bodyPhotos:
+            selectedTab = .profile
+            opensBodyPhotos = true
         case .startSession:
             showTodayRoot()
             pendingSessionStart = true

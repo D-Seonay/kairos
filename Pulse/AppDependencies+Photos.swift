@@ -24,6 +24,9 @@ extension AppDependencies {
         /// « Verrouiller avec Face ID », dans la suite de préférences que la suppression totale vide.
         let bodyLock: any BodyPhotoLockStore
         let ownerAuthentication: any DeviceOwnerAuthenticating
+        /// Le rappel de reprendre des photos de corps : son réglage dans la suite de préférences que la suppression totale vide,
+        /// et ses notifications locales neutres.
+        let reminders: BodyPhotoReminders
 
         init(_ wiring: Wiring, container: ModelContainer, measurements: any BodyMeasurementRepository) {
             let timeZone = wiring.calendar.timeZone
@@ -32,6 +35,9 @@ extension AppDependencies {
             body = BodyPhotoService(store: wiring.bodyPhotos, measurements: measurements, calendar: wiring.calendar,
                                     timeZone: timeZone, now: wiring.now)
             bodyLock = UserDefaultsBodyPhotoLockStore(suiteName: wiring.defaultsSuite)
+            reminders = BodyPhotoReminders(store: UserDefaultsBodyPhotoReminderStore(suiteName: wiring.defaultsSuite),
+                                           scheduler: wiring.bodyPhotoReminders, notifications: wiring.notifications,
+                                           notificationStatus: wiring.notificationStatus, calendar: wiring.calendar)
             ownerAuthentication = Self.ownerAuthentication(for: wiring.launch)
         }
 

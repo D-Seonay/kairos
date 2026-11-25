@@ -145,7 +145,8 @@ struct MainTabView: View {
             }
             Tab(String(localized: "Profil"), systemImage: "person.crop.circle", value: Item.profile) {
                 ProfileScreen(model: profile, supplements: supplements, screens: profileScreens,
-                              onOpenStats: { router.selectedTab = .stats }, onOpenRecords: openRecords, onErased: onErased)
+                              opensBodyPhotos: $router.opensBodyPhotos, onOpenStats: { router.selectedTab = .stats },
+                              onOpenRecords: openRecords, onErased: onErased)
             }
         }
         // La barre d'onglets se replie quand on descend : le contenu et l'action ancrée de l'accueil gagnent de la place.

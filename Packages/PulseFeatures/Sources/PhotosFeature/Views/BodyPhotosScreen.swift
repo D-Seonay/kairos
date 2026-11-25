@@ -5,9 +5,9 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 /// L'écran Photos de corps, poussé depuis Profil : l'en-tête (« Sur cet iPhone seulement… », la dernière prise), une rangée par
-/// jour avec les cases face, profil et dos, « Comparer avant / après », puis les réglages (verrou, export, tout supprimer). C'est la
-/// racine de la section : il porte le verrou, le cache et les présentations (ajout, visionneuse, comparaison, export), qu'il ferme
-/// toutes au reverrouillage.
+/// jour avec les cases face, profil et dos, « Comparer avant / après », puis les réglages (verrou, rappel, export, tout
+/// supprimer). C'est la racine de la section : il porte le verrou, le cache et les présentations (ajout, visionneuse,
+/// comparaison, export), qu'il ferme toutes au reverrouillage.
 public struct BodyPhotosScreen: View {
     @State private var model: BodyPhotosModel
     @State private var adding: BodyPhotoAddRequest?
@@ -20,8 +20,9 @@ public struct BodyPhotosScreen: View {
     @Environment(\.dynamicTypeSize) private var typeSize
 
     public init(service: BodyPhotoService, authentication: (any DeviceOwnerAuthenticating)?, lock: any BodyPhotoLockStore,
-                calendar: Calendar, now: @escaping @Sendable () -> Date) {
-        self.init(model: BodyPhotosModel(service: service, authentication: authentication, lock: lock, calendar: calendar, now: now))
+                reminders: BodyPhotoReminders? = nil, calendar: Calendar, now: @escaping @Sendable () -> Date) {
+        self.init(model: BodyPhotosModel(service: service, authentication: authentication, lock: lock, reminders: reminders,
+                                         calendar: calendar, now: now))
     }
 
     init(model: BodyPhotosModel) {
@@ -174,6 +175,10 @@ public struct BodyPhotosScreen: View {
                         .frame(minHeight: 44)
                     if !model.hasPasscode {
                         note(PhotoText.lockNeedsPasscode)
+                    }
+                    if model.offersReminder {
+                        Divider().overlay(PulsePalette.line)
+                        BodyPhotoReminderPicker(model: model)
                     }
                     Divider().overlay(PulsePalette.line)
                     Button(action: startExport) {

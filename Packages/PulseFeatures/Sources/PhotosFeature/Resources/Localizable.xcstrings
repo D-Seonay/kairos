@@ -351,6 +351,16 @@
         }
       }
     },
+    "Désactivé" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Désactivé"
+          }
+        }
+      }
+    },
     "Déverrouille tes photos de corps." : {
       "localizations" : {
         "fr" : {
@@ -527,6 +537,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Le verrou demande un code sur cet iPhone."
+          }
+        }
+      }
+    },
+    "Les notifications de Pulse sont coupées dans les réglages d'iOS : le rappel n'apparaîtra pas." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les notifications de Pulse sont coupées dans les réglages d'iOS : le rappel n'apparaîtra pas."
           }
         }
       }
@@ -771,6 +791,16 @@
         }
       }
     },
+    "Rappel de photo" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rappel de photo"
+          }
+        }
+      }
+    },
     "Remplacer" : {
       "localizations" : {
         "fr" : {
@@ -891,12 +921,32 @@
         }
       }
     },
+    "Tous les mois" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tous les mois"
+          }
+        }
+      }
+    },
     "Tout supprimer" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tout supprimer"
+          }
+        }
+      }
+    },
+    "Toutes les 2 semaines" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toutes les 2 semaines"
           }
         }
       }
@@ -917,6 +967,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Une image n'a pas pu être lue."
+          }
+        }
+      }
+    },
+    "Une notification à 9 h, sans image ni mot sur le sujet. Chaque nouvelle photo repousse la suivante." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une notification à 9 h, sans image ni mot sur le sujet. Chaque nouvelle photo repousse la suivante."
           }
         }
       }

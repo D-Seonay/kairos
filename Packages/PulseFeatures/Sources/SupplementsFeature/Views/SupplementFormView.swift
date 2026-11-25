@@ -20,7 +20,7 @@ struct SupplementFormView: View {
     init(model: SupplementsModel, editing: Supplement?) {
         self.model = model
         self.editing = editing
-        let initial = editing.map(SupplementDraft.init) ?? SupplementDraft()
+        let initial = model.draft(for: editing)
         _initialDraft = State(initialValue: initial)
         _draft = State(initialValue: initial)
     }
@@ -188,7 +188,10 @@ struct SupplementFormView: View {
                 .buttonStyle(.plain)
                 .accessibilityAddTraits(draft.timing == timing ? .isSelected : [])
             }
-            if draft.usesTime {
+            if draft.timing == .bedtime {
+                followNights
+            }
+            if draft.showsTimePicker(habitualBedtime: model.overview.habitualBedtimeMinutes) {
                 DatePicker(String(localized: "Heure", bundle: .module), selection: timeBinding, displayedComponents: .hourAndMinute)
                     .frame(minHeight: 44)
             }
@@ -201,6 +204,20 @@ struct SupplementFormView: View {
             }
         }
         .listRowBackground(PulsePalette.surface)
+    }
+
+    /// « Suivre mes nuits », et l'heure qu'il donne ou pourquoi l'heure fixe s'applique.
+    private var followNights: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Toggle(String(localized: "Suivre mes nuits", bundle: .module), isOn: $draft.followsNights)
+                .frame(minHeight: 44)
+            if draft.followsNights {
+                Text(model.followNightsNote)
+                    .font(.footnote)
+                    .foregroundStyle(PulsePalette.text2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
     }
 
     private var health: some View {
