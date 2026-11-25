@@ -66,6 +66,7 @@ struct SettingsScreen: View {
                 SessionSettingsSection(model: model, profile: profile)
                 RunSettingsSection(model: model)
                 DisplaySettingsSection(model: model, profile: profile)
+                SleepSettingsSection(model: model, profile: profile)
                 NotificationSettingsSection(model: model, profile: profile)
             } else if !model.hasLoaded {
                 ProgressView()

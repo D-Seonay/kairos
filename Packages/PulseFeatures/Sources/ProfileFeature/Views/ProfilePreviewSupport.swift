@@ -52,6 +52,8 @@ enum ProfilePreviewSupport {
         let service = ProfileService(profiles: profiles, programs: programs, workouts: workouts, recoveries: recoveries,
                                      records: personalRecords, userExercises: userExercises, library: library, calendar: calendar,
                                      now: clock)
+        // Deux semaines de réveils à 7 h : la section « Sommeil » montre « Selon mes nuits (07:00) » et un coucher conseillé.
+        let wokeUp = withHistory ? (0..<14).map { day(-$0, hour: 7) } : []
         return ProfileEnvironment(
             profile: service, body: BodyService(measurements: measurements, profiles: profiles, calendar: calendar, now: clock),
             settings: SettingsService(profiles: profiles, now: clock) { _, _ in }, healthCache: InMemoryHealthSampleCache(),
@@ -59,7 +61,8 @@ enum ProfilePreviewSupport {
             notificationStatus: { .authorized }, requestNotificationAuthorization: { true }, refreshHealth: {},
             appVersion: "1.0.2 (14)", privacyPolicyURL: nil, calendar: calendar, now: clock,
             bodyPhotos: BodyPhotoService(store: InMemoryBodyPhotoStore(), measurements: measurements, calendar: calendar, now: clock),
-            ownerAuthentication: PreviewOwnerAuthentication())
+            ownerAuthentication: PreviewOwnerAuthentication(),
+            sleepPlan: { SleepPlan(profile: try? await profiles.load(), wokeUp: wokeUp, calendar: calendar) })
     }
 
     /// Le jour `offset` (0 = aujourd'hui, négatif = passé) à l'heure donnée.

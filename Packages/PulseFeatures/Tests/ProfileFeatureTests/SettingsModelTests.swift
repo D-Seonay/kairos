@@ -13,7 +13,8 @@ struct SettingsModelTests {
     private func environment(notifications: NotificationAuthorizationStatus = .authorized,
                              permission: StubNotificationAuthorizer = StubNotificationAuthorizer(granted: true),
                              refreshHealth: @escaping @Sendable () async -> Void = {},
-                             runPreferences: any RunPreferencesStore = InMemoryRunPreferencesStore()) -> ProfileEnvironment {
+                             runPreferences: any RunPreferencesStore = InMemoryRunPreferencesStore(),
+                             sleepPlan: @escaping @Sendable () async -> SleepPlan? = { nil }) -> ProfileEnvironment {
         let calendar = ProfileTestClock.calendar
         let clock: @Sendable () -> Date = { ProfileTestClock.now }
         let service = ProfileService(profiles: profiles, programs: InMemoryProgramRepository(), workouts: InMemoryWorkoutRepository(),
@@ -27,7 +28,7 @@ struct SettingsModelTests {
             inspector: SilentInspector(), exporter: SilentExporter(), eraser: SilentEraser(),
             notificationStatus: { notifications }, requestNotificationAuthorization: { await permission.requestAuthorization() },
             refreshHealth: refreshHealth, appVersion: "1.0.2 (14)",
-            privacyPolicyURL: nil, calendar: calendar, now: clock, runPreferences: runPreferences)
+            privacyPolicyURL: nil, calendar: calendar, now: clock, runPreferences: runPreferences, sleepPlan: sleepPlan)
     }
 
     private func storeProfile() async throws -> UserProfile {
@@ -266,6 +267,82 @@ struct SettingsModelTests {
         #expect(model.health?.lastRead == ran)
         #expect(model.health?.kinds.first { $0.kind == .run }?.latest == run.start)
         #expect(!model.isRefreshingHealth)
+    }
+}
+
+// MARK: - Sommeil
+
+extension SettingsModelTests {
+    /// Le plan relu dans le dépôt des profils, avec des réveils à `wakeHour` du lundi 16 au vendredi 20 novembre (aucun : pas
+    /// d'heure habituelle).
+    private func sleepPlan(wakeHour: Int? = nil) -> @Sendable () async -> SleepPlan? {
+        let profiles = profiles
+        let wokeUp = wakeHour.map { hour in (16...20).map { ProfileTestClock.date(2026, 11, $0, hour: hour) } } ?? []
+        return { SleepPlan(profile: try? await profiles.load(), wokeUp: wokeUp, calendar: ProfileTestClock.calendar) }
+    }
+
+    @Test func sleepPlanIsReloadedAfterAChange() async throws {
+        _ = try await storeProfile()
+        let model = SettingsModel(environment: environment(sleepPlan: sleepPlan())) { _ in }
+        await model.load()
+        #expect(model.sleepPlan?.goalMinutes == SleepGoal.defaultMinutes)
+
+        await model.update { $0.sleepGoalMinutes = 450 }
+
+        #expect(model.sleepPlan?.goalMinutes == 450, "Le footer suit le nouvel objectif")
+    }
+
+    @Test func followingNightsWritesNothingInTheProfile() async throws {
+        var stored = try await storeProfile()
+        stored.weekdayWakeMinutes = 450
+        try await profiles.save(stored)
+        let model = SettingsModel(environment: environment(sleepPlan: sleepPlan(wakeHour: 7))) { _ in }
+        await model.load()
+        #expect(model.sleepPlan?.habitualWeekdayWake == 420)
+
+        await model.chooseWake(false, weekend: false)
+
+        let saved = try #require(try await profiles.load())
+        #expect(saved.weekdayWakeMinutes == nil, "L'heure mesurée n'est jamais écrite")
+        #expect(model.sleepPlan?.wakeMinutes(weekend: false) == 420)
+    }
+
+    @Test func choosingATimeStartsFromTheHabitualWakeOrTheDefault() async throws {
+        _ = try await storeProfile()
+        let habitual = SettingsModel(environment: environment(sleepPlan: sleepPlan(wakeHour: 7))) { _ in }
+        await habitual.load()
+        #expect(habitual.startingWake(weekend: false) == 420)
+
+        let model = SettingsModel(environment: environment(sleepPlan: sleepPlan())) { _ in }
+        await model.load()
+        #expect(model.startingWake(weekend: false) == 420 && model.startingWake(weekend: true) == 540)
+
+        await model.chooseWake(true, weekend: true)
+        #expect(try await profiles.load()?.weekendWakeMinutes == 540)
+        await model.setWake(553, weekend: true)
+        #expect(try await profiles.load()?.weekendWakeMinutes == 555, "Arrondi à 5 minutes")
+        await model.chooseWake(true, weekend: true)
+        #expect(try await profiles.load()?.weekendWakeMinutes == 555, "Déjà choisie : l'heure reste")
+    }
+
+    @Test func aHabitualWakeOutsideTheRangeStartsInsideIt() async throws {
+        _ = try await storeProfile()
+        let model = SettingsModel(environment: environment(sleepPlan: sleepPlan(wakeHour: 13))) { _ in }
+        await model.load()
+        #expect(model.startingWake(weekend: false) == SettingsService.wakeRange.upperBound)
+    }
+
+    @Test func deniedNotificationsTurnTheBedtimeReminderBackOff() async throws {
+        _ = try await storeProfile()
+        let permission = StubNotificationAuthorizer(granted: false)
+        let model = SettingsModel(environment: environment(notifications: .notDetermined, permission: permission)) { _ in }
+        await model.load()
+
+        await model.setNotification(true) { $0.bedtimeReminderEnabled = $1 }
+
+        #expect(try await profiles.load()?.bedtimeReminderEnabled == false)
+        #expect(model.profile?.bedtimeReminderEnabled == false)
+        #expect(model.notificationsDenied)
     }
 }
 

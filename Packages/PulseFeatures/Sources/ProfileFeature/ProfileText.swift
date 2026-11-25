@@ -174,6 +174,34 @@ enum ProfileText {
         }
     }
 
+    /// « 8 h », « 7 h 30 » : un objectif de sommeil.
+    static func sleepGoal(minutes: Int) -> String {
+        PulseFormat.duration(minutes: minutes)
+    }
+
+    /// « Selon mes nuits (07:00) » avec le réveil habituel mesuré, « Selon mes nuits » sans lui. L'heure est affichée, jamais
+    /// écrite.
+    static func followsNights(habitual: Int?) -> String {
+        guard let habitual else { return String(localized: "Selon mes nuits", bundle: .module) }
+        return String(localized: "Selon mes nuits (\(SleepPlan.clockText(minutes: habitual)))", bundle: .module)
+    }
+
+    /// « Coucher conseillé : 22:45 en semaine, 00:45 le week-end. », avec le seul jour connu, ou l'invitation à choisir un réveil.
+    static func advisedBedtime(weekday: Int?, weekend: Int?) -> String {
+        switch (weekday.map(SleepPlan.clockText), weekend.map(SleepPlan.clockText)) {
+        case let (weekday?, weekend?):
+            String(localized: "Coucher conseillé : \(weekday) en semaine, \(weekend) le week-end.", bundle: .module)
+        case let (weekday?, nil): String(localized: "Coucher conseillé : \(weekday) en semaine.", bundle: .module)
+        case let (nil, weekend?): String(localized: "Coucher conseillé : \(weekend) le week-end.", bundle: .module)
+        case (nil, nil): String(localized: "Choisis une heure de réveil pour obtenir un coucher conseillé.", bundle: .module)
+        }
+    }
+
+    /// « 30 min avant » : l'avance du rappel de coucher.
+    static func bedtimeLead(minutes: Int) -> String {
+        String(localized: "\(minutes) min avant", bundle: .module)
+    }
+
     static func sex(_ sex: Sex) -> String {
         switch sex {
         case .female: String(localized: "Femme", bundle: .module)

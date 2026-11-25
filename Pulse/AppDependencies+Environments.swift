@@ -59,6 +59,7 @@ extension AppDependencies {
                                      now: now, runEfforts: run.bestEfforts)
         let refresher = refresher
         let notifications = notifications
+        let bedtime = bedtimeReminderService
         return ProfileEnvironment(
             profile: profile, body: BodyService(measurements: bodyMeasurements, profiles: profiles, calendar: calendar, now: now),
             settings: settings, healthCache: healthCache, inspector: inspector, exporter: exporter, eraser: eraser,
@@ -67,7 +68,8 @@ extension AppDependencies {
             refreshHealth: { _ = await refresher.refresh(origin: .foreground) },
             appVersion: Self.appVersion, privacyPolicyURL: Self.privacyPolicyURL, calendar: calendar, now: now,
             runPreferences: run.preferences, bodyPhotos: photos.body, ownerAuthentication: photos.ownerAuthentication,
-            bodyPhotoLock: photos.bodyLock, bodyPhotoReminders: photos.reminders, train: trainEnvironment())
+            bodyPhotoLock: photos.bodyLock, bodyPhotoReminders: photos.reminders, train: trainEnvironment(),
+            sleepPlan: { await bedtime.plan() })
     }
 
     /// La politique de confidentialité, lue dans l'Info.plist (`PulsePrivacyPolicyURL`) ; `nil` tant que la clé est vide ou
