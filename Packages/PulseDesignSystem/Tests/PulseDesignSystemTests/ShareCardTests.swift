@@ -137,8 +137,8 @@ private func content(title: String = "Push", metrics: [ShareCardMetric] = [], vi
 
 // MARK: Sticker (sans fond)
 
-/// L'opacité du pixel (`x`, `y`) de `image`, comptée depuis le haut.
-private func alpha(of image: CGImage, x: Int, y: Int) -> UInt8 {
+/// Le pixel (`x`, `y`) de `image`, compté depuis le haut, en RGBA prémultiplié.
+private func pixel(of image: CGImage, x: Int, y: Int) -> [UInt8] {
     var pixel: [UInt8] = [0, 0, 0, 0]
     pixel.withUnsafeMutableBytes { buffer in
         guard let context = CGContext(data: buffer.baseAddress, width: 1, height: 1, bitsPerComponent: 8, bytesPerRow: 4,
@@ -146,7 +146,12 @@ private func alpha(of image: CGImage, x: Int, y: Int) -> UInt8 {
                                       bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return }
         context.draw(image, in: CGRect(x: -x, y: y - image.height + 1, width: image.width, height: image.height))
     }
-    return pixel[3]
+    return pixel
+}
+
+/// L'opacité du pixel (`x`, `y`) de `image`, comptée depuis le haut.
+private func alpha(of image: CGImage, x: Int, y: Int) -> UInt8 {
+    pixel(of: image, x: x, y: y)[3]
 }
 
 @MainActor
@@ -190,4 +195,34 @@ private func alpha(of image: CGImage, x: Int, y: Int) -> UInt8 {
 @Test func stickerKeyIgnoresTheFormat() {
     #expect(RenderKey(format: .story, background: .transparent) == RenderKey(format: .post, background: .transparent))
     #expect(RenderKey(format: .story, background: .pattern) != RenderKey(format: .post, background: .pattern))
+}
+
+@MainActor
+@Test func stickerMuscleMapIsDrawnInLightInk() throws {
+    let card = content(visual: .muscles([.chest: 4]))
+    let image = try #require(ShareCardRenderer.stickerImage(content: card))
+    // La silhouette occupe le milieu de l'image : la moyenne de ses pixels pleins doit être claire, pas noire.
+    var total = 0, count = 0
+    for y in stride(from: image.height * 35 / 100, to: image.height * 65 / 100, by: 6) {
+        for x in stride(from: 0, to: image.width, by: 6) {
+            let rgba = pixel(of: image, x: x, y: y)
+            guard rgba[3] == 255 else { continue }
+            total += (Int(rgba[0]) + Int(rgba[1]) + Int(rgba[2])) / 3
+            count += 1
+        }
+    }
+    #expect(count > 0)
+    #expect(total / max(count, 1) > 128)
+}
+
+@MainActor
+@Test func aCrowdedStickerStaysShorterThanAStory() throws {
+    let card = ShareCardContent(
+        eyebrow: "Séance", title: "Pectoraux, épaules et triceps lourds", subtitle: "mardi 24 novembre",
+        metrics: ShareCardContent.previewSession.metrics,
+        highlights: ["Développé couché à la barre : 82,5 kg", "Dips : 12 répétitions", "Développé militaire : 50 kg",
+                     "Écarté à la poulie : 25 kg", "Extension triceps : 30 kg"],
+        visual: .muscles([.chest: 4, .triceps: 3]))
+    let image = try #require(ShareCardRenderer.stickerImage(content: card))
+    #expect(image.height < 1_920, "\(image.height)")
 }

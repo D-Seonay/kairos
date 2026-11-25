@@ -32,6 +32,9 @@ public struct ShareCardView: View {
     private var secondaryInk: Color { isSticker ? Self.ink.opacity(0.9) : Self.ink2 }
     private var labelInk: Color { isSticker ? Self.ink.opacity(0.85) : Self.muted }
     private var numberWeight: Font.Weight { isSticker ? .light : .thin }
+    /// Les records écrits en toutes lettres : trois sur la story, un sur la publication, deux sur le sticker, qui doit rester
+    /// plus bas qu'une story pour ne pas couvrir la photo.
+    private var highlightLimit: Int { isSticker ? 2 : (isStory ? 3 : 1) }
 
     public var body: some View {
         Group {
@@ -109,9 +112,9 @@ public struct ShareCardView: View {
     /// ou pour l'absence de dessin.
     static func stickerDrawingHeight(_ visual: ShareCardContent.Visual) -> CGFloat? {
         switch visual {
-        case .muscles: 200
-        case .route: 200
-        case .hypnogram: 160
+        case .muscles: 180
+        case .route: 180
+        case .hypnogram: 150
         case .hero, .none: nil
         }
     }
@@ -164,7 +167,7 @@ public struct ShareCardView: View {
     private var titleBlock: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(content.title)
-                .font(.system(size: isStory ? 34 : 28, weight: .bold))
+                .font(.system(size: isSticker ? 30 : (isStory ? 34 : 28), weight: .bold))
                 .foregroundStyle(Self.ink)
                 .lineLimit(2)
                 .minimumScaleFactor(0.7)
@@ -200,6 +203,9 @@ public struct ShareCardView: View {
             GeometryReader { proxy in
                 MuscleMapView(levels: levels, label: "", height: max(0, proxy.size.height))
                     .frame(width: proxy.size.width, height: proxy.size.height)
+                    // Sans fond, la silhouette prend sa palette claire (corps clair, muscles travaillés à l'encre) : une
+                    // silhouette noire écraserait une photo claire et disparaîtrait sur une photo sombre.
+                    .environment(\.colorScheme, isSticker ? .light : .dark)
             }
         case .route(let points):
             ShareRouteShape(points: points)
@@ -211,7 +217,7 @@ public struct ShareCardView: View {
 
     private var metrics: some View {
         let rows = stride(from: 0, to: content.metrics.count, by: 2).map { Array(content.metrics[$0..<min($0 + 2, content.metrics.count)]) }
-        return VStack(alignment: .leading, spacing: isStory ? 18 : 12) {
+        return VStack(alignment: .leading, spacing: isSticker ? 12 : (isStory ? 18 : 12)) {
             ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
                 HStack(alignment: .top, spacing: 16) {
                     ForEach(Array(row.enumerated()), id: \.offset) { _, metric in
@@ -242,7 +248,7 @@ public struct ShareCardView: View {
 
     private var highlights: some View {
         VStack(alignment: .leading, spacing: 6) {
-            ForEach(Array(content.highlights.prefix(isStory ? 3 : 1).enumerated()), id: \.offset) { _, text in
+            ForEach(Array(content.highlights.prefix(highlightLimit).enumerated()), id: \.offset) { _, text in
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
                     Image(systemName: "trophy.fill")
                         .font(.system(size: 12))
@@ -253,8 +259,8 @@ public struct ShareCardView: View {
                 .foregroundStyle(Self.gold)
             }
             // La publication, plus basse, garde sa place au dessin : le reste des records n'y est pas compté.
-            if isStory, content.highlights.count > 3 {
-                Text(ShareCardText.moreRecords(content.highlights.count - 3))
+            if isStory, content.highlights.count > highlightLimit {
+                Text(ShareCardText.moreRecords(content.highlights.count - highlightLimit))
                     .font(.system(size: 12))
                     .foregroundStyle(Self.gold.opacity(0.7))
             }
