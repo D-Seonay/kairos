@@ -2,6 +2,7 @@ import Foundation
 @testable import PhotosFeature
 import PulseDomain
 import PulseServices
+import PulseTestSupport
 import Testing
 
 /// Une séance abandonnée sans être enregistrée pendant un ajout de photos : rien ne doit rester dans iCloud.
