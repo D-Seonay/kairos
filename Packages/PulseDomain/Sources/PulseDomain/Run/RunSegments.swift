@@ -57,21 +57,29 @@ public enum RunSegments {
     }
 
     /// Les instants d'un tracé enregistré : le temps depuis le premier point et la distance cumulée (haversine) point à point.
-    /// `totalMeters`, s'il est connu, recale la distance sur celle de la séance : le tracé simplifié est un peu plus court que la
-    /// distance filtrée mesurée pendant la course.
-    public static func samples(from points: [RunTrackPoint], totalMeters: Double? = nil) -> [RunSegmentSample] {
+    /// La relecture ne doit jamais rendre un segment plus rapide que la réalité :
+    /// - un pas plus rapide que `maxSpeed` (m/s) ne compte pas en distance : c'est un saut par-dessus une pause (en bus, en
+    ///   voiture) ou un point aberrant ;
+    /// - `totalMeters`, s'il est connu et plus court que le tracé, raccourcit la distance à celle de la séance (la distance
+    ///   parcourue pendant une pause n'y est pas) ; un tracé plus court que la séance n'est jamais rallongé.
+    public static func samples(from points: [RunTrackPoint], totalMeters: Double? = nil,
+                               maxSpeed: Double = .infinity) -> [RunSegmentSample] {
         guard let origin = points.first?.timestamp else { return [] }
         var cumulative = 0.0
         var raw: [RunSegmentSample] = []
         raw.reserveCapacity(points.count)
         for (index, point) in points.enumerated() {
-            if index > 0 { cumulative += meters(from: points[index - 1], to: point) }
+            if index > 0 {
+                let step = meters(from: points[index - 1], to: point)
+                let elapsed = point.timestamp.timeIntervalSince(points[index - 1].timestamp)
+                if elapsed > 0, step / elapsed <= maxSpeed { cumulative += step }
+            }
             raw.append(RunSegmentSample(seconds: point.timestamp.timeIntervalSince(origin), meters: cumulative))
         }
-        guard let total = totalMeters, total > 0, cumulative > 0 else { return raw }
+        guard let total = totalMeters, total > 0, cumulative > total else { return raw }
         let scale = total / cumulative
         var scaled = raw.map { RunSegmentSample(seconds: $0.seconds, meters: $0.meters * scale) }
-        // Le dernier instant vaut exactement la distance de la séance : un arrondi ne fait pas manquer un 5 km tout juste couvert.
+        // Raccourci, le dernier instant vaut exactement la distance de la séance : un arrondi ne la dépasse pas.
         scaled[scaled.count - 1].meters = total
         return scaled
     }

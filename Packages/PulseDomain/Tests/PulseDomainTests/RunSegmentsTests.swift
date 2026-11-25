@@ -86,10 +86,39 @@ struct RunSegmentsTests {
         #expect(raw.map(\.seconds) == [0, 30, 60])
         #expect(abs(raw[2].meters - 222.4) < 0.5)
 
-        let scaled = RunSegments.samples(from: points, totalMeters: 250)
-        #expect(scaled[2].meters == 250)
-        #expect(abs(scaled[1].meters - 125) < 0.1)
+        // Une séance plus courte que le tracé le raccourcit, le dernier instant pile sur sa distance.
+        let shortened = RunSegments.samples(from: points, totalMeters: 200)
+        #expect(shortened[2].meters == 200)
+        #expect(abs(shortened[1].meters - 100) < 0.1)
         #expect(RunSegments.samples(from: []).isEmpty)
+    }
+
+    @Test("une séance plus longue que le tracé ne le rallonge jamais : un segment relu n'est pas plus rapide que la réalité")
+    func longerSessionNeverStretchesTheTrack() {
+        let start = Date(timeIntervalSince1970: 1_000)
+        let points = (0..<3).map {
+            RunTrackPoint(timestamp: start.addingTimeInterval(Double($0) * 30), latitude: 48.0 + Double($0) * 0.001,
+                          longitude: 2.0, horizontalAccuracy: 5)
+        }
+        #expect(RunSegments.samples(from: points, totalMeters: 250) == RunSegments.samples(from: points))
+    }
+
+    @Test("un saut trop rapide pour une course (en bus pendant une pause) ne compte pas en distance")
+    func jumpsFasterThanRunningAreIgnored() throws {
+        let start = Date(timeIntervalSince1970: 1_000)
+        // 2 km en 600 s, puis 3 km en 300 s (36 km/h, en bus pendant une pause), puis 2 km en 600 s.
+        let degree = 1_000 / 111_195.0
+        let marks: [(seconds: Double, kilometres: Double)] = [(0, 0), (600, 2), (900, 5), (1_500, 7)]
+        let points = marks.map {
+            RunTrackPoint(timestamp: start.addingTimeInterval($0.seconds), latitude: 48.0 + $0.kilometres * degree, longitude: 2.0,
+                          horizontalAccuracy: 5)
+        }
+        let samples = RunSegments.samples(from: points, maxSpeed: 25 / 3.6)
+        #expect(abs(samples[3].meters - 4_000) < 5)
+        #expect(abs(samples[2].meters - samples[1].meters) < 0.001)
+        // Sans le filtre, le saut ferait un 5 km en 900 s ; avec lui, il n'y a même pas 5 km.
+        #expect(RunSegments.fastest(meters: 5_000, in: RunSegments.samples(from: points)) != nil)
+        #expect(RunSegments.fastest(meters: 5_000, in: samples) == nil)
     }
 
     /// Chaque instant comme début et comme fin, avec interpolation : la référence lente.

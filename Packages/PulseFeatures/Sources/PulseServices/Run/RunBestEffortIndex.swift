@@ -47,10 +47,12 @@ public struct RunBestEffortIndex: Sendable {
         })
     }
 
-    /// Les meilleurs segments d'un tracé enregistré, recalé sur la distance de la séance. Le tracé ne garde pas les pauses : un
-    /// segment qui en traverse une les compte, il est donc au pire plus lent que la réalité, jamais plus rapide.
+    /// Les meilleurs segments d'un tracé enregistré. Le tracé ne garde pas les pauses : un segment qui en traverse une compte
+    /// leur durée, et la distance parcourue pendant une pause est écartée (pas trop rapide pour une course, tracé raccourci à la
+    /// distance de la séance). Le segment est donc au pire plus lent que la réalité, jamais plus rapide.
     public static func efforts(of track: RunTrack, session: WorkoutSession) -> RunBestEfforts {
-        efforts(sessionID: session.id, samples: RunSegments.samples(from: track.points, totalMeters: session.distanceMeters))
+        efforts(sessionID: session.id, samples: RunSegments.samples(from: track.points, totalMeters: session.distanceMeters,
+                                                                     maxSpeed: RunTrackBuilder.maxSpeed))
     }
 }
 

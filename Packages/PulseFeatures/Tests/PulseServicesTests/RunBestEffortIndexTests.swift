@@ -59,13 +59,16 @@ struct RunBestEffortIndexTests {
         #expect(await store.all()[bare.id]?.seconds(for: 5_000) != nil)
     }
 
-    @Test("le tracé est recalé sur la distance de la séance : un 5 km tout juste couvert compte")
-    func trackIsScaledToTheSessionDistance() throws {
+    @Test("le tracé relu n'est jamais rallongé à la distance de la séance, seulement raccourci")
+    func trackIsNeverStretchedToTheSessionDistance() throws {
+        // Le tracé simplifié mesure un peu moins que la séance : pas de 5 km relu, le record garde l'allure moyenne.
         let session = run(meters: 5_000, minutes: 25)
-        // Le tracé simplifié mesure un peu moins que la distance filtrée enregistrée.
-        let efforts = RunBestEffortIndex.efforts(of: track(for: session, legs: [(4_950, 3.3)]), session: session)
-        let seconds = try #require(efforts.seconds(for: 5_000))
-        #expect(abs(seconds - 4_950 / 3.3) < 10)
+        let short = RunBestEffortIndex.efforts(of: track(for: session, legs: [(4_950, 3.3)]), session: session)
+        #expect(short.seconds(for: 5_000) == nil)
+        // Un tracé plus long que la séance (distance parcourue pendant une pause) est raccourci à la séance.
+        let long = RunBestEffortIndex.efforts(of: track(for: session, legs: [(5_500, 3.3)]), session: session)
+        let seconds = try #require(long.seconds(for: 5_000))
+        #expect(abs(seconds - 5_500 / 3.3) < 10)
     }
 
     @Test("à la fin d'une course, les pauses ne comptent ni en temps ni en distance")
