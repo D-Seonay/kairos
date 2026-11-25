@@ -79,11 +79,14 @@ public struct ReviewPrompt: Sendable {
     }
 
     /// Vrai quand la règle demande une note : la version est alors retenue, pour ne plus redemander avant la suivante, même
-    /// si iOS choisit de ne rien afficher.
-    public func claim(completedSessions: Int, hasNewRecord: Bool) -> Bool {
-        guard let appVersion, ReviewRequestRule.shouldAsk(completedSessions: completedSessions, hasNewRecord: hasNewRecord,
-                                                          appVersion: appVersion,
-                                                          lastRequestedVersion: store.lastRequestedVersion) else { return false }
+    /// si iOS choisit de ne rien afficher. Le moins cher d'abord : une version déjà servie s'arrête là, un record suffit, et
+    /// les séances ne sont comptées (`completedSessions`) qu'en dernier recours.
+    public func claim(hasNewRecord: Bool, completedSessions: @Sendable () async -> Int) async -> Bool {
+        let last = store.lastRequestedVersion
+        guard let appVersion, !appVersion.isEmpty, appVersion != last else { return false }
+        let count = hasNewRecord ? 0 : await completedSessions()
+        guard ReviewRequestRule.shouldAsk(completedSessions: count, hasNewRecord: hasNewRecord, appVersion: appVersion,
+                                          lastRequestedVersion: last) else { return false }
         store.setLastRequestedVersion(appVersion)
         return true
     }

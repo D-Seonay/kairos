@@ -18,6 +18,11 @@ public struct DeduplicatingWorkoutRepository: WorkoutRepository {
         return RunDuplicates.resolve(wide).filter { $0.startedAt >= from && $0.startedAt < to }
     }
 
+    /// Les doublons masqués sont des séances de la montre : le compte des séances Pulse est celui du dépôt brut.
+    public func completedPulseSessionCount(kind: SessionKind) async throws -> Int {
+        try await base.completedPulseSessionCount(kind: kind)
+    }
+
     /// Une course Pulse se lit avec la FC et le RPE estimé de son doublon, comme dans les listes.
     public func session(id: UUID) async throws -> WorkoutSession? {
         guard let session = try await base.session(id: id), RunDuplicates.isPulseRun(session) else {

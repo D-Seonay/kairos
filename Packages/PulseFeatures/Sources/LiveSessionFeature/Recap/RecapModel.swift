@@ -141,8 +141,10 @@ extension RecapModel {
     /// version (`ReviewRequestRule`).
     private func claimReview() async {
         guard let reviewPrompt, let recap else { return }
-        let completed = await service.completedSessionCount()
-        shouldRequestReview = reviewPrompt.claim(completedSessions: completed, hasNewRecord: !recap.beatenRecords.isEmpty)
+        let service = service
+        shouldRequestReview = await reviewPrompt.claim(hasNewRecord: !recap.beatenRecords.isEmpty) {
+            await service.completedSessionCount()
+        }
     }
 
     /// Le libellé d'un RPE global : 1 « très facile », 10 « maximal ».
