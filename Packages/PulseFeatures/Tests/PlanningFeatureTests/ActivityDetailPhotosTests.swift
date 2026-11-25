@@ -3,6 +3,7 @@ import PhotosFeature
 @testable import PlanningFeature
 import PulseDomain
 import PulseServices
+import PulseTestSupport
 import Testing
 
 /// La section Photos du détail d'une activité : une course Pulse en a une, un entraînement d'Apple Santé non.
