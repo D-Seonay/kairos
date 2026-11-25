@@ -135,7 +135,8 @@ public final class SettingsModel {
         case .invalidDeadline: String(localized: "Choisis une heure entre 6 heures et 12 heures.", bundle: .module)
         case .invalidPlates: String(localized: "Garde au moins un disque et une barre de plus de 0 kilo.", bundle: .module)
         case .noProfile: String(localized: "Ton profil est introuvable.", bundle: .module)
-        case nil: String(localized: "Pulse n'a pas pu enregistrer ce réglage.", bundle: .module)
+        case .invalidSleepGoal, .invalidWakeTime, .invalidBedtimeLead, nil:
+            String(localized: "Pulse n'a pas pu enregistrer ce réglage.", bundle: .module)
         }
     }
 }

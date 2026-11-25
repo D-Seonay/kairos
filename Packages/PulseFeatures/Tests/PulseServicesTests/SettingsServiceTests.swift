@@ -131,4 +131,57 @@ struct SettingsServiceTests {
         await #expect(throws: SettingsError.invalidHeight) { try await service.update { $0.heightCm = 96 } }
         #expect(try await profiles.load()?.heightCm == 95)
     }
+
+    @Test func sleepGoalMustBeAQuarterHourBetweenSixAndTenHours() async throws {
+        let original = try await seed()
+        for bad in [345, 615, 367] {
+            await #expect(throws: SettingsError.invalidSleepGoal) { try await service.update { $0.sleepGoalMinutes = bad } }
+            #expect(try await profiles.load() == original)
+        }
+        #expect(await log.calls.isEmpty)
+
+        for good in [360, 600, 450] {
+            let result = try await service.update { $0.sleepGoalMinutes = good }
+            #expect(result.sleepGoalMinutes == good)
+        }
+        let cleared = try await service.update { $0.sleepGoalMinutes = nil }
+        #expect(cleared.sleepGoalMinutes == nil)
+    }
+
+    @Test func wakeTimeMustBeAFiveMinuteStepBetweenFourAndNoon() async throws {
+        let original = try await seed()
+        for bad in [235, 725, 422] {
+            await #expect(throws: SettingsError.invalidWakeTime) { try await service.update { $0.weekdayWakeMinutes = bad } }
+            await #expect(throws: SettingsError.invalidWakeTime) { try await service.update { $0.weekendWakeMinutes = bad } }
+            #expect(try await profiles.load() == original)
+        }
+        #expect(await log.calls.isEmpty)
+
+        for good in [240, 720, 425] {
+            let result = try await service.update { $0.weekdayWakeMinutes = good; $0.weekendWakeMinutes = good }
+            #expect(result.weekdayWakeMinutes == good && result.weekendWakeMinutes == good)
+        }
+        let cleared = try await service.update { $0.weekdayWakeMinutes = nil; $0.weekendWakeMinutes = nil }
+        #expect(cleared.weekdayWakeMinutes == nil && cleared.weekendWakeMinutes == nil)
+    }
+
+    @Test func bedtimeLeadMustBeOneOfTheChoices() async throws {
+        let original = try await seed()
+        await #expect(throws: SettingsError.invalidBedtimeLead) { try await service.update { $0.bedtimeReminderLeadMinutes = 20 } }
+        #expect(try await profiles.load() == original)
+
+        for good in [15, 30, 45, 60] {
+            let result = try await service.update { $0.bedtimeReminderLeadMinutes = good }
+            #expect(result.bedtimeReminderLeadMinutes == good)
+        }
+        let cleared = try await service.update { $0.bedtimeReminderLeadMinutes = nil }
+        #expect(cleared.bedtimeReminderLeadMinutes == nil)
+    }
+
+    @Test func storedOutOfRangeGoalDoesNotBlockAnotherSetting() async throws {
+        try await seed(UserProfile(sleepGoalMinutes: 2000, createdAt: earlier, updatedAt: earlier))
+
+        let result = try await service.update { $0.theme = .amethyst }
+        #expect(result.theme == .amethyst && result.sleepGoalMinutes == 2000)
+    }
 }
