@@ -81,6 +81,24 @@ struct RunHealthWriteTests {
         #expect(recap.session.healthKitUUID == kept.uuidString)
     }
 
+    /// Une fin en pause dont l'enregistrement échoue : le brouillon gardé pour la reprise est celui d'origine, avec sa pause
+    /// encore ouverte, et ne porte en plus que l'entraînement écrit.
+    @Test func failedFinishKeepsTheOriginalDraft() async throws {
+        let workouts = CountingWorkoutRepository(failingAtSave: 1)
+        let fixture = RunSessionFixture(workouts: workouts)
+        _ = try await fixture.service.start(.free())
+        await fixture.push(Array(trace(meters: 300)[1...]))
+        await fixture.service.pause()
+        let original = try #require(await fixture.drafts.load())
+        fixture.advance(minutes: 5)
+        await #expect(throws: CountingWorkoutRepository.Failure.interrupted) { try await fixture.service.finish() }
+        let stored = try #require(try await fixture.drafts.load())
+        #expect(stored.pauses == original.pauses)
+        #expect(stored.pauses.last?.end == nil)
+        #expect(stored.points == original.points)
+        #expect(stored.healthKitUUID != nil)
+    }
+
     /// Une pause ouverte après le dernier déplacement : le nouvel essai garde le brouillon d'origine, pas ses pauses bornées à
     /// la fin, et retrouve la fin et la distance de l'entraînement écrit dans Santé.
     @Test func retriedInterruptedSaveKeepsTheOriginalDraft() async throws {

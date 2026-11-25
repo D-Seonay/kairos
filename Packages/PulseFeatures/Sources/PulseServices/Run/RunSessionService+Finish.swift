@@ -31,9 +31,12 @@ extension RunSessionService {
             health = await healthWrite { try await self.recorder.save(entry) }
         }
         if health != .none {
-            // Gardé avant d'enregistrer la séance : si l'enregistrement échoue, la reprise réutilise cet entraînement.
+            // Gardé avant d'enregistrer la séance : si l'enregistrement échoue, la reprise réutilise cet entraînement. Seule
+            // l'écriture est reportée sur le brouillon d'origine, dont les pauses ne sont pas bornées à la fin.
             draft.healthWrite = health
-            try? await drafts.save(draft)
+            var kept = active.draft
+            kept.healthWrite = health
+            try? await drafts.save(kept)
         }
         await activity.end()
         await reminders.cancelForgotten()
