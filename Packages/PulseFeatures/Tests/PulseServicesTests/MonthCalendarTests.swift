@@ -40,6 +40,16 @@ struct MonthCalendarTests {
         #expect(day(result, "2026-11-14")?.done == [])
     }
 
+    @Test func doneSessionsKeepTheirIDsFromOldestToNewest() {
+        let evening = Fixture.session("2026-11-10T18:00")
+        let morning = Fixture.session("2026-11-10T07:00", kind: .run)
+        let abandoned = Fixture.session("2026-11-10T20:00", status: .abandoned)
+        let result = grid(sessions: [evening, abandoned, morning])
+        #expect(day(result, "2026-11-10")?.sessions == [MonthDaySession(id: morning.id, kind: .run),
+                                                       MonthDaySession(id: evening.id, kind: .strength)])
+        #expect(day(result, "2026-11-11")?.sessions == [])
+    }
+
     @Test func plannedShowsFromTodayOnlyAndFollowsOverrides() {
         let result = grid(sessions: [Fixture.session("2026-11-18T08:00")],
                           overrides: [Fixture.moved(nil, on: "2026-11-20", from: nil)])

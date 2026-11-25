@@ -12,6 +12,9 @@ public struct PulseSessionAttributes: ActivityAttributes, Sendable {
         public var restEndsAt: Date?
         /// « Développé couché à la barre · série 2 · 70 kg × 5 » ; `nil` après la dernière série.
         public var nextSet: String?
+        /// La série que « Valider » coche, hors repos ; `nil` sans série à valider. Optionnel : une activité lancée par une version
+        /// d'avant ce bouton se relit sans lui.
+        public var nextSetID: UUID?
         /// Les séries de travail validées, échauffement exclu. Optionnel : une activité lancée par une version d'avant le compte
         /// des séries se relit sans lui.
         public var doneSets: Int?
@@ -19,12 +22,13 @@ public struct PulseSessionAttributes: ActivityAttributes, Sendable {
         public var plannedSets: Int?
 
         public init(title: String, startedAt: Date, restStartedAt: Date? = nil, restEndsAt: Date? = nil, nextSet: String? = nil,
-                    doneSets: Int? = nil, plannedSets: Int? = nil) {
+                    nextSetID: UUID? = nil, doneSets: Int? = nil, plannedSets: Int? = nil) {
             self.title = title
             self.startedAt = startedAt
             self.restStartedAt = restStartedAt
             self.restEndsAt = restEndsAt
             self.nextSet = nextSet
+            self.nextSetID = nextSetID
             self.doneSets = doneSets
             self.plannedSets = plannedSets
         }

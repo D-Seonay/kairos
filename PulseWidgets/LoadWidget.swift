@@ -9,6 +9,7 @@ struct LoadWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: LoadWidgetContent.kind, provider: LoadTimelineProvider()) { entry in
             LoadWidgetEntryView(entry: entry)
+                .environment(\.pulseTheme, entry.theme)
         }
         .configurationDisplayName(LoadWidgetContent.displayName)
         .description(LoadWidgetContent.summary)

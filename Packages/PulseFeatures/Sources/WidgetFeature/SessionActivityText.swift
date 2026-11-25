@@ -15,6 +15,15 @@ public enum SessionActivityText {
     public static var plus30Label: String { String(localized: "Ajouter 30 secondes de repos", bundle: .module) }
     public static var skipLabel: String { String(localized: "Passer le repos", bundle: .module) }
 
+    public static var validateTitle: String { String(localized: "Valider", bundle: .module) }
+
+    /// « Valider la série suivante : Développé couché à la barre, série 2, 70 kilos, 5 répétitions », dit par VoiceOver sur le
+    /// bouton « Valider » : la série suivante n'est pas lue à part hors du titre.
+    public static func validateLabel(nextSet: String?) -> String {
+        guard let nextSet else { return String(localized: "Valider la série suivante", bundle: .module) }
+        return String(localized: "Valider la série suivante : \(spokenNextSet(nextSet))", bundle: .module)
+    }
+
     /// « 4 / 15 », comme « Séries » en haut de l'écran de séance.
     public static func progressText(done: Int, planned: Int) -> String {
         "\(done) / \(planned)"

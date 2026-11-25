@@ -9,6 +9,7 @@ struct WeekWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: WeekWidgetContent.kind, provider: WeekTimelineProvider()) { entry in
             WeekWidgetEntryView(entry: entry)
+                .environment(\.pulseTheme, entry.theme)
         }
         .configurationDisplayName(WeekWidgetContent.displayName)
         .description(WeekWidgetContent.summary)

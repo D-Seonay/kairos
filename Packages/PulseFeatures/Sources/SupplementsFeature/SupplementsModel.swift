@@ -153,6 +153,22 @@ public final class SupplementsModel {
         await load()
     }
 
+    /// Remet un complément archivé dans la liste. Avec un rappel, demande l'autorisation des notifications comme à la création
+    /// (sans effet si elle a déjà été donnée ou refusée) ; le service replanifie les rappels.
+    public func unarchive(_ supplement: Supplement) async {
+        do {
+            if supplement.reminderEnabled {
+                _ = await environment.notifications.requestAuthorization()
+            }
+            try await environment.service.unarchive(id: supplement.id)
+            errorMessage = nil
+            announce(Self.unarchivedAnnouncement(supplement.name), false)
+        } catch {
+            fail(String(localized: "Pulse n'a pas pu désarchiver le complément.", bundle: .module))
+        }
+        await load()
+    }
+
     /// Affiche l'erreur et l'annonce, chaque fois : la même erreur deux fois de suite est dite deux fois.
     private func fail(_ message: String, announces: Bool = true) {
         errorMessage = message
@@ -223,6 +239,11 @@ public final class SupplementsModel {
     /// « Whey archivé. »
     static func archivedAnnouncement(_ name: String) -> String {
         String(localized: "\(name) archivé.", bundle: .module)
+    }
+
+    /// « Whey de retour dans tes compléments. »
+    static func unarchivedAnnouncement(_ name: String) -> String {
+        String(localized: "\(name) de retour dans tes compléments.", bundle: .module)
     }
 
     /// « 85 pour cent », ou « pas encore de jour prévu » : la régularité dite.

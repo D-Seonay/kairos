@@ -13,17 +13,32 @@ public struct MonthDay: Sendable, Equatable, Identifiable {
     public var hasMark: Bool
     /// La discipline prévue, aujourd'hui ou plus tard, quand rien n'est encore fait.
     public var planned: RoutineDayKind?
+    /// Les séances faites ce jour-là, de la plus ancienne à la plus récente : de quoi ouvrir leur détail.
+    public var sessions: [MonthDaySession]
 
-    public init(date: Date, isInMonth: Bool, isToday: Bool, done: [SessionKind], hasMark: Bool, planned: RoutineDayKind?) {
+    public init(date: Date, isInMonth: Bool, isToday: Bool, done: [SessionKind], hasMark: Bool, planned: RoutineDayKind?,
+                sessions: [MonthDaySession] = []) {
         self.date = date
         self.isInMonth = isInMonth
         self.isToday = isToday
         self.done = done
         self.hasMark = hasMark
         self.planned = planned
+        self.sessions = sessions
     }
 
     public var id: Date { date }
+}
+
+/// Une séance faite un jour du calendrier : son identifiant et sa discipline.
+public struct MonthDaySession: Sendable, Equatable {
+    public var id: UUID
+    public var kind: SessionKind
+
+    public init(id: UUID, kind: SessionKind) {
+        self.id = id
+        self.kind = kind
+    }
 }
 
 /// Un mois en semaines entières, du lundi au dimanche.
@@ -82,6 +97,7 @@ public enum MonthCalendar {
         }
         return MonthDay(date: date, isInMonth: calendar.isDate(date, equalTo: month, toGranularity: .month),
                         isToday: calendar.isDate(date, inSameDayAs: today), done: kinds, hasMark: done.count >= 2 || hasRecord,
-                        planned: planned)
+                        planned: planned,
+                        sessions: done.sorted { $0.startedAt < $1.startedAt }.map { MonthDaySession(id: $0.id, kind: $0.kind) })
     }
 }

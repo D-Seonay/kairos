@@ -9,6 +9,7 @@ struct TodaySessionWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: TodaySessionWidgetContent.kind, provider: TodaySessionTimelineProvider()) { entry in
             TodaySessionWidgetEntryView(entry: entry)
+                .environment(\.pulseTheme, entry.theme)
         }
         .configurationDisplayName(TodaySessionWidgetContent.displayName)
         .description(TodaySessionWidgetContent.summary)

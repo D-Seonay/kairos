@@ -11,12 +11,19 @@ struct SessionActivityTextTests {
         #expect(SessionActivityText.minus30Title == "−30 s")
         #expect(SessionActivityText.plus30Title == "+30 s")
         #expect(SessionActivityText.skipTitle == "Passer")
+        #expect(SessionActivityText.validateTitle == "Valider")
     }
 
     @Test func buttonsAreSpokenInFull() {
         #expect(SessionActivityText.minus30Label == "Retirer 30 secondes de repos")
         #expect(SessionActivityText.plus30Label == "Ajouter 30 secondes de repos")
         #expect(SessionActivityText.skipLabel == "Passer le repos")
+    }
+
+    @Test func validateSaysWhichSetItChecks() {
+        #expect(SessionActivityText.validateLabel(nextSet: nextSet)
+            == "Valider la série suivante : Développé couché à la barre, série 2, 70 kilos, 5 répétitions")
+        #expect(SessionActivityText.validateLabel(nextSet: nil) == "Valider la série suivante")
     }
 
     @Test func restReadsRestAndNextSet() {

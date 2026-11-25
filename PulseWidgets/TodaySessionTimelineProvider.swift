@@ -5,6 +5,8 @@ import WidgetKit
 struct TodaySessionEntry: TimelineEntry {
     let date: Date
     let content: TodaySessionWidgetContent
+    /// L'ambiance choisie dans l'app (Ivoire ou Acier), partagée par le groupe d'apps.
+    var theme: Theme = .amber
 }
 
 /// Lit l'instantané pour alimenter le widget Séance du jour sur l'écran d'accueil et l'écran verrouillé.
@@ -24,8 +26,9 @@ struct TodaySessionTimelineProvider: TimelineProvider {
     private func entries(now: Date) -> [TodaySessionEntry] {
         let calendar = Calendar.current
         let snapshot = WidgetSnapshotFile.appGroup()?.read()
+        let theme = WidgetThemeStore.appGroup().read()
         return RecoveryWidgetTimeline.entryDates(now: now, calendar: calendar).map { date in
-            TodaySessionEntry(date: date, content: .make(snapshot: snapshot, at: date, calendar: calendar))
+            TodaySessionEntry(date: date, content: .make(snapshot: snapshot, at: date, calendar: calendar), theme: theme)
         }
     }
 
