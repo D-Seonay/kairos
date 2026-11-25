@@ -11,6 +11,9 @@ final class LiveSessionResumeUITests: XCTestCase {
     @MainActor
     func testCompleteSessionSurvivesAForcedQuit() {
         let app = XCUIApplication()
+        // L'horloge figée par `-PulseNow` est lue avec le fuseau du simulateur : celui de Paris garde le même jour, quel que
+        // soit le fuseau du Mac qui lance les tests (Xcode Cloud compris).
+        app.launchEnvironment["TZ"] = "Europe/Paris"
         // Magasin sur disque et profil PPL créé au premier lancement : le second lancement retrouve la séance en cours.
         let arguments = [
             "-PulseStore", "disk",

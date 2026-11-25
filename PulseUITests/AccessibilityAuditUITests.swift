@@ -14,6 +14,9 @@ final class AccessibilityAuditUITests: XCTestCase {
     @MainActor
     func testEveryMainScreenPassesTheAccessibilityAudit() throws {
         let app = XCUIApplication()
+        // L'horloge figée par `-PulseNow` est lue avec le fuseau du simulateur : celui de Paris garde le même jour, quel que
+        // soit le fuseau du Mac qui lance les tests (Xcode Cloud compris).
+        app.launchEnvironment["TZ"] = "Europe/Paris"
         // Mêmes arguments que `OnboardingFlowUITests` : magasin en mémoire, Santé simulée (nuit « goodNight »), horloge figée
         // au lundi 2 novembre 2026.
         app.launchArguments = [

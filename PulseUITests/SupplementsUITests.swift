@@ -12,6 +12,9 @@ final class SupplementsUITests: XCTestCase {
     @MainActor
     func testCreateASupplementThenTakeIt() {
         let app = XCUIApplication()
+        // L'horloge figée par `-PulseNow` est lue avec le fuseau du simulateur : celui de Paris garde le même jour, quel que
+        // soit le fuseau du Mac qui lance les tests (Xcode Cloud compris).
+        app.launchEnvironment["TZ"] = "Europe/Paris"
         app.launchArguments = [
             "-PulseStore", "inMemory",
             "-PulseSeed", "onboardedPPL",
