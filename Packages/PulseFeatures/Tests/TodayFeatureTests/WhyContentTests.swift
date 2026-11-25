@@ -40,6 +40,17 @@ struct WhyContentTests {
             + "ta fréquence au repos est stable et tu as dormi 7 h. "))
     }
 
+    /// 6 h 30 reste plus d'une heure sous l'objectif par défaut de 8 h, pas sous un objectif de 7 h.
+    @Test func shortSleepSentenceFollowsTheGoal() throws {
+        let night = WhyFixture.recovery { $0.asleepMinutes = 390 }
+        let byDefault = try WhyFixture.content(night)
+        #expect(byDefault.reading.contains("tu n'as dormi que 6 h 30"))
+        #expect(byDefault.spokenReading.contains("tu n'as dormi que"))
+        let toGoal = try WhyFixture.content(night, sleepGoalMinutes: 420)
+        #expect(toGoal.reading.contains("tu as dormi 6 h 30"))
+        #expect(toGoal.spokenReading.contains("tu as dormi"))
+    }
+
     /// L'écart est arrondi avant d'être comparé : −5 % est « sous », −4 % est « proche », +2 bpm est « pris ».
     @Test(arguments: [
         (47.5, "ta variabilité cardiaque est 5 % sous ta moyenne de 14 jours"),

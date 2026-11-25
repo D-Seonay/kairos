@@ -96,7 +96,8 @@ public enum AntiInterference {
         return day.sessions.contains { $0.kind == other }
     }
 
-    /// Les 7 jours d'avant ont tous eu une séance, et le sommeil des 7 dernières nuits est en moyenne sous la fatigue modérée.
+    /// Les 7 jours d'avant ont tous eu une séance, et le sommeil des 7 dernières nuits, noté contre l'objectif du profil, est en
+    /// moyenne sous la fatigue modérée.
     static func needsRestDay(_ input: AntiInterferenceInput, today: Date) -> Bool {
         let calendar = input.calendar
         let completed = input.sessions.filter(WeekSchedule.shows)
@@ -105,9 +106,10 @@ public enum AntiInterference {
             return completed.contains { calendar.isDate($0.startedAt, inSameDayAs: day) }
         }
         guard busy, let since = calendar.date(byAdding: .day, value: -(daysWithoutRest - 1), to: today) else { return false }
+        let goal = SleepGoal.minutes(of: input.profile)
         let scores = input.nights.filter { $0.day >= since && $0.day <= today }.compactMap { night -> Double? in
             guard let sleep = night.sleep, sleep.asleepMinutes > 0 else { return nil }
-            return SleepScorer.score(asleepMinutes: sleep.asleepMinutes, deepMinutes: sleep.deepMinutes)
+            return SleepScorer.score(asleepMinutes: sleep.asleepMinutes, deepMinutes: sleep.deepMinutes, targetMinutes: goal)
         }
         guard scores.count >= minimumNights else { return false }
         return scores.reduce(0, +) / Double(scores.count) < sleepThreshold

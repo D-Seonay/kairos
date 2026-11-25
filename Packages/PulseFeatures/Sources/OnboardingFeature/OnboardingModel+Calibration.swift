@@ -37,7 +37,8 @@ extension OnboardingModel {
         var failure: String?
         do {
             let plannedDay = await plannedDay(at: now)
-            switch try await environment.scores.update(nights: snapshot.nights, plannedDay: plannedDay, now: now) {
+            switch try await environment.scores.update(nights: snapshot.nights, plannedDay: plannedDay,
+                                                       sleepGoalMinutes: SleepGoal.minutes(of: profile), now: now) {
             case .scored(let recovery):
                 phase = .scored(recovery, baseline)
             case .needsCheckIn(let missing):

@@ -64,12 +64,14 @@ struct WhyContent: Equatable, Sendable {
     /// `checkIn` : le check-in du jour, qui sert à lire un score estimé. `loadAdjustments` : les hausses de charge du jour, vides
     /// si aucune série n'a atteint le haut de sa fourchette, `nil` quand elles ne se calculent pas (voir `LoadPreview`).
     /// `progress` : la séance faite n'a plus de bouton de départ ni de charges du jour ; celle en cours se reprend.
+    /// `sleepGoalMinutes` : l'objectif de sommeil du profil, qui décide si la lecture dit la nuit courte.
     static func make(recovery: DailyRecovery, session: TodaySession, checkIn: CheckIn?, directory: ExerciseDirectory,
-                     loadAdjustments: [SessionAdjustment]?, progress: Progress = .toStart) -> WhyContent {
+                     loadAdjustments: [SessionAdjustment]?, progress: Progress = .toStart,
+                     sleepGoalMinutes: Int = SleepGoal.defaultMinutes) -> WhyContent {
         let signals = WhySignals.make(recovery: recovery, checkIn: checkIn)
         return WhyContent(
-            reading: WhyReading.make(recovery: recovery, session: session),
-            spokenReading: WhyReading.spokenText(recovery: recovery, session: session),
+            reading: WhyReading.make(recovery: recovery, session: session, sleepGoalMinutes: sleepGoalMinutes),
+            spokenReading: WhyReading.spokenText(recovery: recovery, session: session, sleepGoalMinutes: sleepGoalMinutes),
             changes: WhyChanges.make(recovery: recovery, session: session, directory: directory,
                                      loadAdjustments: progress == .done ? nil : loadAdjustments, listsLoads: progress != .done),
             signals: signals.signals,

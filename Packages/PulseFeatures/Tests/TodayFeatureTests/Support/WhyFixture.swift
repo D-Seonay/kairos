@@ -69,11 +69,12 @@ enum WhyFixture {
 
     /// Le contenu de l'écran pour un score et un jour prévu.
     static func content(_ recovery: DailyRecovery, plannedDay: PlannedDay? = nil, checkIn: CheckIn? = nil,
-                        userExercises: [UserExercise] = [], loadAdjustments: [SessionAdjustment]? = nil) throws -> WhyContent {
+                        userExercises: [UserExercise] = [], loadAdjustments: [SessionAdjustment]? = nil,
+                        sleepGoalMinutes: Int = SleepGoal.defaultMinutes) throws -> WhyContent {
         let planned = try plannedDay ?? Self.plannedDay()
         let directory = ExerciseDirectory(library: library, userExercises: userExercises)
         return WhyContent.make(recovery: recovery, session: session(planned, for: recovery), checkIn: checkIn, directory: directory,
-                               loadAdjustments: loadAdjustments)
+                               loadAdjustments: loadAdjustments, sleepGoalMinutes: sleepGoalMinutes)
     }
 
     /// Le nom français d'un exercice du contenu embarqué.

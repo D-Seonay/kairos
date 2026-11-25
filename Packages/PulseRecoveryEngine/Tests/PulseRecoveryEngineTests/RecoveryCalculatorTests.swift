@@ -110,4 +110,12 @@ import Testing
         let r = try measured(calculator.compute(day: day, today: today, history: fourteenNights))
         #expect(r.missing.contains(.hrv))
     }
+
+    @Test func sleepGoalChangesTheSleepFactor() throws {
+        let today = NightSample(day: day, sdnnMs: 50, restingHeartRate: 50, sleep: .init(asleepMinutes: 420, deepMinutes: nil))
+        let byDefault = try measured(calculator.compute(day: day, today: today, history: fourteenNights))
+        #expect(byDefault.factors.first { $0.factor == .sleep }?.score == 87.5)
+        let toGoal = try measured(calculator.compute(day: day, today: today, history: fourteenNights, sleepGoalMinutes: 420))
+        #expect(toGoal.factors.first { $0.factor == .sleep }?.score == 100)
+    }
 }

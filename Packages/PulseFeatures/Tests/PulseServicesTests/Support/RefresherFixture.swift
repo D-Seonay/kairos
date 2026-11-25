@@ -136,16 +136,18 @@ struct RefresherFixture {
     /// Sans `adopt`, il n'y a ni profil ni programme. Avec `gate`, chaque notification planifiée attend que la porte s'ouvre ;
     /// avec `publishGate`, chaque publication de l'instantané. Avec `planning`, le passage applique les règles anti-interférence
     /// et publie la série et la semaine ; avec `planningGate` en plus, chaque écriture du service du Planning attend la porte.
-    /// `relocation` est le déplacement des valeurs Apple Santé lancé avant les lectures.
+    /// `relocation` est le déplacement des valeurs Apple Santé lancé avant les lectures. `nightSource` remplace le scénario pour
+    /// les nuits seulement : les séances et le corps le lisent toujours.
     init(scenario: HealthScenario, at start: String = "2026-11-02T08:00", holdingNotificationsAt gate: Gate? = nil,
          holdingPublishesAt publishGate: Gate? = nil, holdingPlanningWritesAt planningGate: Gate? = nil, planning: Bool = false,
-         bodySamples: [BodySignal: [CachedHealthSample]] = [:], relocation: (any HealthDataRelocating)? = nil) {
+         bodySamples: [BodySignal: [CachedHealthSample]] = [:], relocation: (any HealthDataRelocating)? = nil,
+         nightSource: (any HealthSampleSource)? = nil) {
         let calendar = TestClock.calendar
         let clock = MutableClock(start)
         let recovery = InMemoryRecoveryRepository(calendar: calendar)
         var scenarioSource = ScenarioHealthSource(scenario: scenario, now: clock.now, calendar: calendar)
         scenarioSource.bodySamples = bodySamples
-        let source = SwitchableHealthSource(scenarioSource)
+        let source = SwitchableHealthSource(nightSource ?? scenarioSource)
         let notifications = StubNotificationScheduler()
         let scheduler: any NotificationScheduling = gate.map { HoldingNotificationScheduler(inner: notifications, gate: $0) }
             ?? notifications
@@ -182,15 +184,16 @@ struct RefresherFixture {
             now: { clock.now })
     }
 
-    /// PPL 3 adopté (lundi Push, mardi repos), et un profil dont l'onboarding est terminé, sauf si `onboarded` est faux.
-    func adopt(onboarded: Bool = true) async throws {
+    /// PPL 3 adopté (lundi Push, mardi repos), et un profil dont l'onboarding est terminé, sauf si `onboarded` est faux,
+    /// avec l'objectif de sommeil `sleepGoalMinutes`.
+    func adopt(onboarded: Bool = true, sleepGoalMinutes: Int? = nil) async throws {
         let library = ContentLibrary.bundled
         let template = try #require(library.programTemplate(id: "ppl-3"))
         let program = ProgramAdopter(library: library).adopt(
             template, equipment: .fullGym, painAreas: [], restWeekdays: [], now: clock.now)
         try await programs.save(program)
         try await profiles.save(UserProfile(
-            onboardingCompletedAt: onboarded ? clock.now : nil, activeProgramID: program.id,
+            sleepGoalMinutes: sleepGoalMinutes, onboardingCompletedAt: onboarded ? clock.now : nil, activeProgramID: program.id,
             createdAt: clock.now, updatedAt: clock.now))
     }
 

@@ -6,8 +6,6 @@ import PulseServices
 /// La lecture de la nuit en français : ce que chaque facteur a dit, ce qui manque, la ligne de base, puis la conclusion de la catégorie,
 /// accordée à la séance du jour.
 enum WhyReading {
-    /// Sous ce sommeil, la phrase dit « tu n'as dormi que ».
-    private static let shortSleepMinutes = 420
     /// À partir de cet écart arrondi, la VFC est dite au-dessus ou sous sa moyenne.
     private static let hrvThresholdPercent = 5
     /// À partir de cet écart arrondi, la FC au repos est dite en hausse ou en baisse.
@@ -18,21 +16,23 @@ enum WhyReading {
         case written, spoken
     }
 
-    static func make(recovery: DailyRecovery, session: TodaySession) -> String {
-        make(recovery: recovery, session: session, style: .written)
+    /// `sleepGoalMinutes` : l'objectif de sommeil du profil ; plus d'une heure en dessous, la phrase dit « tu n'as dormi que ».
+    static func make(recovery: DailyRecovery, session: TodaySession, sleepGoalMinutes: Int = SleepGoal.defaultMinutes) -> String {
+        make(recovery: recovery, session: session, sleepGoalMinutes: sleepGoalMinutes, style: .written)
     }
 
     /// La même lecture, avec les unités dites en toutes lettres : sans « bpm » ni « 5 h 10 ».
-    static func spokenText(recovery: DailyRecovery, session: TodaySession) -> String {
-        make(recovery: recovery, session: session, style: .spoken)
+    static func spokenText(recovery: DailyRecovery, session: TodaySession,
+                           sleepGoalMinutes: Int = SleepGoal.defaultMinutes) -> String {
+        make(recovery: recovery, session: session, sleepGoalMinutes: sleepGoalMinutes, style: .spoken)
     }
 
-    private static func make(recovery: DailyRecovery, session: TodaySession, style: Style) -> String {
+    private static func make(recovery: DailyRecovery, session: TodaySession, sleepGoalMinutes: Int, style: Style) -> String {
         var sentences: [String]
         if recovery.isEstimated {
             sentences = [String(localized: "Pas de données de nuit : ce score vient de ton check-in.", bundle: .module)]
         } else {
-            sentences = measured(recovery, style: style)
+            sentences = measured(recovery, sleepGoalMinutes: sleepGoalMinutes, style: style)
         }
         sentences.append(contentsOf: conclusion(recovery.category, session: session))
         return sentences.joined(separator: " ")
@@ -40,11 +40,11 @@ enum WhyReading {
 
     // MARK: - Nuit mesurée
 
-    private static func measured(_ recovery: DailyRecovery, style: Style) -> [String] {
+    private static func measured(_ recovery: DailyRecovery, sleepGoalMinutes: Int, style: Style) -> [String] {
         let present = recovery.presentFactors
         var sentences: [String] = []
-        let clauses = [hrv(recovery, present), restingHeartRate(recovery, present, style), sleep(recovery, present, style)]
-            .compactMap { $0 }
+        let clauses = [hrv(recovery, present), restingHeartRate(recovery, present, style),
+                       sleep(recovery, present, sleepGoalMinutes, style)].compactMap { $0 }
         if !clauses.isEmpty {
             sentences.append(sentence(from: clauses))
         }
@@ -97,13 +97,13 @@ enum WhyReading {
         return String(localized: "ta fréquence au repos est stable", bundle: .module)
     }
 
-    private static func sleep(_ recovery: DailyRecovery, _ present: [Factor], _ style: Style) -> String? {
+    private static func sleep(_ recovery: DailyRecovery, _ present: [Factor], _ goalMinutes: Int, _ style: Style) -> String? {
         guard present.contains(.sleep), let minutes = recovery.asleepMinutes else { return nil }
         let duration = switch style {
         case .written: PulseFormat.duration(minutes: minutes)
         case .spoken: PulseSpoken.duration(seconds: minutes * 60)
         }
-        if minutes < shortSleepMinutes {
+        if SleepGoal.isShortNight(asleepMinutes: minutes, goalMinutes: goalMinutes) {
             return String(localized: "tu n'as dormi que \(duration)", bundle: .module)
         }
         return String(localized: "tu as dormi \(duration)", bundle: .module)

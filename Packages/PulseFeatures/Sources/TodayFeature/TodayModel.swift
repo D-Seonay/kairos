@@ -213,7 +213,8 @@ public final class TodayModel {
         let loads = LoadPreview.adjustments(session: session, recovery: recovery, profile: profile, reading: live,
                                             directory: directory, now: environment.now())
         why = WhyContent.make(recovery: recovery, session: session, checkIn: recovery.isEstimated ? todayCheckIn : nil,
-                               directory: directory, loadAdjustments: loads, progress: whyProgress)
+                               directory: directory, loadAdjustments: loads, progress: whyProgress,
+                               sleepGoalMinutes: SleepGoal.minutes(of: profile))
     }
 
     /// La séance de la carte vue par l'écran « Pourquoi ».

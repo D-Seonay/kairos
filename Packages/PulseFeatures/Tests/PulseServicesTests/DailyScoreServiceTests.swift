@@ -220,3 +220,70 @@ struct DailyScoreServiceTests: DailyScoreTesting {
         #expect(result == .scored(stored))
     }
 }
+
+/// L'objectif de sommeil du profil : il entre dans le score du jour tant que celui-ci n'est pas figé.
+extension DailyScoreServiceTests {
+    /// Sept nuits de fréquence au repos à 50, puis la nuit du jour : 50 bpm et 420 min sans phases.
+    /// Le facteur sommeil vaut 87,5 contre l'objectif par défaut, 100 contre un objectif de 7 h.
+    private func plainNights() -> [NightSample] {
+        let today = TestClock.date("2026-11-02T00:00")
+        let history = (1...7).map { offset in
+            NightSample(day: calendar.date(byAdding: .day, value: -offset, to: today) ?? today, sdnnMs: nil, restingHeartRate: 50,
+                        sleep: nil)
+        }
+        return history + [NightSample(day: today, sdnnMs: nil, restingHeartRate: 50,
+                                      sleep: SleepSummary(asleepMinutes: 420, deepMinutes: nil))]
+    }
+
+    @Test func goalChangeRecomputesBeforeNoon() async throws {
+        let repository = CountingRecoveryRepository(calendar: calendar)
+        let service = DailyScoreService(recovery: repository, calendar: calendar)
+        let first = try scored(try await service.update(nights: plainNights(), sleepGoalMinutes: 480,
+                                                        now: TestClock.date("2026-11-02T09:00")))
+        #expect(first.sleepScore == 87.5)
+        let second = try scored(try await service.update(nights: plainNights(), sleepGoalMinutes: 420,
+                                                         now: TestClock.date("2026-11-02T09:30")))
+        #expect(second.sleepScore == 100)
+        #expect(second.id == first.id)
+        #expect(await repository.recoverySaves == 2)
+    }
+
+    @Test func sameGoalDoesNotRewriteTheScore() async throws {
+        let repository = CountingRecoveryRepository(calendar: calendar)
+        let service = DailyScoreService(recovery: repository, calendar: calendar)
+        let first = try scored(try await service.update(nights: plainNights(), sleepGoalMinutes: 420,
+                                                        now: TestClock.date("2026-11-02T09:00")))
+        let second = try scored(try await service.update(nights: plainNights(), sleepGoalMinutes: 420,
+                                                         now: TestClock.date("2026-11-02T09:30")))
+        #expect(second == first)
+        #expect(await repository.recoverySaves == 1)
+    }
+
+    @Test func goalChangeIsIgnoredOnceFrozen() async throws {
+        let fixture = fixture()
+        let first = try scored(try await fixture.service.update(nights: plainNights(), sleepGoalMinutes: 480,
+                                                                now: TestClock.date("2026-11-02T09:00")))
+        let afterNoon = TestClock.date("2026-11-02T13:00")
+        let frozen = try scored(try await fixture.service.update(nights: plainNights(), sleepGoalMinutes: 420, now: afterNoon))
+        #expect(frozen.sleepScore == 87.5 && frozen.score == first.score)
+        #expect(frozen.frozenAt == afterNoon)
+        #expect(try await records(fixture, on: "2026-11-02T00:00").first?.sleepScore == 87.5)
+    }
+
+    @Test func unreadableProfileKeepsTheStoredScore() async throws {
+        let repository = CountingRecoveryRepository(calendar: calendar)
+        let service = DailyScoreService(recovery: repository, calendar: calendar)
+        let stored = try scored(try await service.update(nights: plainNights(), sleepGoalMinutes: 420,
+                                                         now: TestClock.date("2026-11-02T09:00")))
+        let result = try await service.update(nights: plainNights(), sleepGoalMinutes: nil, now: TestClock.date("2026-11-02T10:00"))
+        #expect(result == .scored(stored))
+        #expect(await repository.recoverySaves == 1)
+    }
+
+    @Test func unreadableProfileWithoutScoreUsesTheDefault() async throws {
+        let fixture = fixture()
+        let recovery = try scored(try await fixture.service.update(nights: plainNights(), sleepGoalMinutes: nil,
+                                                                   now: TestClock.date("2026-11-02T09:00")))
+        #expect(recovery.sleepScore == 87.5)
+    }
+}

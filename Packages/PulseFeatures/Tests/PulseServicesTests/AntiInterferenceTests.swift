@@ -96,6 +96,17 @@ struct AntiInterferenceTests {
         #expect(!placesRest(Fixture.input(sessions: rested, nights: short)))
     }
 
+    /// 7 nuits de 5 h sans phases : 62,5 contre l'objectif par défaut (sous 65), 83,3 contre un objectif de 6 h.
+    @Test func restDayRuleFollowsTheSleepGoal() {
+        let sessions = (9...15).map { Fixture.session("2026-11-\($0)T18:00") }
+        let short = (10...16).map { Fixture.night("2026-11-\($0)", asleepMinutes: 300) }
+        var input = Fixture.input(sessions: sessions, nights: short)
+        #expect(input.profile.sleepGoalMinutes == nil)
+        #expect(placesRest(input))
+        input.profile.sleepGoalMinutes = 360
+        #expect(!placesRest(input))
+    }
+
     @Test func aRestDayOnHeavyLegsDayCancelsTheRunMove() {
         let sessions = (12...18).map { Fixture.session("2026-11-\($0)T18:00") }
         let short = (13...19).map { Fixture.night("2026-11-\($0)", asleepMinutes: 300) }

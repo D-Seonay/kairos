@@ -23,12 +23,14 @@ public struct RecoveryCalculator: Sendable {
         self.calendar = calendar
     }
 
-    public func compute(day: Date, today: NightSample, history: [NightSample]) -> RecoveryOutcome {
+    /// `sleepGoalMinutes` : l'objectif de sommeil du profil, contre lequel le facteur sommeil mesure la durée.
+    public func compute(day: Date, today: NightSample, history: [NightSample],
+                        sleepGoalMinutes: Int = SleepGoal.defaultMinutes) -> RecoveryOutcome {
         let hrv = hrvFactor(day: day, today: today, history: history)
         let present = [
             hrv.score,
             restingHeartRateFactor(day: day, today: today, history: history),
-            sleepFactor(today: today)
+            sleepFactor(today: today, goalMinutes: sleepGoalMinutes)
         ].compactMap { $0 }
 
         let missing = Factor.allCases.filter { factor in !present.contains { $0.factor == factor } }
@@ -83,10 +85,10 @@ public struct RecoveryCalculator: Sendable {
                              todayValue: bpm, baselineValue: mean)
     }
 
-    private func sleepFactor(today: NightSample) -> PartialFactor? {
+    private func sleepFactor(today: NightSample, goalMinutes: Int) -> PartialFactor? {
         guard let sleep = today.sleep else { return nil }
-        return PartialFactor(factor: .sleep, score: SleepScorer.score(asleepMinutes: sleep.asleepMinutes, deepMinutes: sleep.deepMinutes),
-                             todayValue: Double(sleep.asleepMinutes), baselineValue: nil)
+        let score = SleepScorer.score(asleepMinutes: sleep.asleepMinutes, deepMinutes: sleep.deepMinutes, targetMinutes: goalMinutes)
+        return PartialFactor(factor: .sleep, score: score, todayValue: Double(sleep.asleepMinutes), baselineValue: nil)
     }
 
     /// Nombre de jours calendaires entre la nuit et le jour calculé.

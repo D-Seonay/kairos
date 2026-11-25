@@ -4,10 +4,18 @@ import PulseDomain
 import PulseServices
 import Testing
 
-/// Les tests du cycle de vie du score se passent de programme : aucune séance à ajuster.
+/// Les tests du cycle de vie du score se passent de programme : aucune séance à ajuster. Sans objectif donné, celui par défaut.
 extension DailyScoreService {
     func update(nights: [NightSample], now: Date) async throws -> TodayScore {
         try await update(nights: nights, plannedDay: .noProgram, now: now)
+    }
+
+    func update(nights: [NightSample], plannedDay: PlannedDay?, now: Date) async throws -> TodayScore {
+        try await update(nights: nights, plannedDay: plannedDay, sleepGoalMinutes: SleepGoal.defaultMinutes, now: now)
+    }
+
+    func update(nights: [NightSample], sleepGoalMinutes: Int?, now: Date) async throws -> TodayScore {
+        try await update(nights: nights, plannedDay: .noProgram, sleepGoalMinutes: sleepGoalMinutes, now: now)
     }
 
     func saveCheckIn(_ answers: CheckInAnswers, now: Date) async throws -> DailyRecovery {

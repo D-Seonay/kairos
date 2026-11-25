@@ -346,6 +346,46 @@ extension DayRefresherTests {
     }
 }
 
+extension DayRefresherTests {
+    /// Couché à minuit au lieu de 23 h : 420 min dont 96 de profond. Le facteur sommeil vaut 91,25 contre l'objectif par défaut,
+    /// 100 contre l'objectif de 7 h du profil.
+    @Test func refreshScoresAgainstTheProfileGoal() async throws {
+        let start = "2026-11-02T08:00"
+        let scenario = ScenarioHealthSource(scenario: .goodNight, now: TestClock.date(start), calendar: TestClock.calendar)
+        let fixture = RefresherFixture(scenario: .goodNight, at: start,
+                                       nightSource: LateBedtimeSource(inner: scenario, bedtime: TestClock.date("2026-11-01T23:00")))
+        try await fixture.adopt(sleepGoalMinutes: 420)
+
+        let refresh = await fixture.refresher.refresh(origin: .foreground)
+
+        let scored = try recovery(refresh)
+        #expect(scored.asleepMinutes == 420)
+        #expect(scored.sleepScore == 100)
+    }
+}
+
+/// Une source Apple Santé dont la nuit qui commence à `bedtime` commence une heure plus tard.
+private struct LateBedtimeSource: HealthSampleSource {
+    let inner: ScenarioHealthSource
+    let bedtime: Date
+
+    func requestAuthorization() async throws {}
+
+    func changes(of signal: NightSignal, since anchor: Data?, from start: Date) async throws -> HealthSampleChanges {
+        var changes = try await inner.changes(of: signal, since: anchor, from: start)
+        changes.added = changes.added.map { sample in
+            var sample = sample
+            if sample.kind == .sleep, sample.start == bedtime { sample.start = bedtime.addingTimeInterval(3_600) }
+            return sample
+        }
+        return changes
+    }
+
+    func profileHints() async throws -> HealthProfileHints {
+        try await inner.profileHints()
+    }
+}
+
 /// Une suppression totale sur des dépôts déjà vides.
 private struct NothingLeftEraser: DataEraser {
     func eraseEverything(options: EraseOptions) async throws {}
