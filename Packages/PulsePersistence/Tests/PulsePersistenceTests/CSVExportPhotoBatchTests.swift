@@ -35,6 +35,8 @@ struct CSVExportPhotoBatchTests {
         var exporter = SwiftDataExporter(container: box.container, appVersion: "1.0 (1)", contentVersion: "1.0.0",
                                          exerciseNames: { _ in nil }, directory: directory, timeZone: Fixed.calendar.timeZone)
         exporter.photoBatchSize = batchSize
+        // L'heure d'export est écrite dans le README : figée, deux exports à des secondes différentes restent identiques.
+        exporter.now = { Fixed.t0 }
         _ = try await exporter.exportCSVArchive()
         let folder = try #require(exporter.lastCSVDirectory(in: directory))
         let enumerator = try #require(FileManager.default.enumerator(at: folder, includingPropertiesForKeys: [.isRegularFileKey]))

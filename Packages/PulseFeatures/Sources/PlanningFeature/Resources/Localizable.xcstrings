@@ -401,6 +401,16 @@
         }
       }
     },
+    "Exporter en GPX": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exporter en GPX"
+          }
+        }
+      }
+    },
     "FC moyenne": {
       "localizations": {
         "fr": {
@@ -457,6 +467,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Le RPE ressenti remplace le RPE estimé dans ta charge d'entraînement."
+          }
+        }
+      }
+    },
+    "Le fichier GPX contient la position de chaque point du parcours. Tu choisis où il va.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le fichier GPX contient la position de chaque point du parcours. Tu choisis où il va."
           }
         }
       }
@@ -557,6 +577,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ouvre l'activité"
+          }
+        }
+      }
+    },
+    "Ouvre la feuille de partage avec le fichier du parcours.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvre la feuille de partage avec le fichier du parcours."
           }
         }
       }

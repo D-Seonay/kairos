@@ -26,6 +26,8 @@ public actor RunSessionService {
     let tracks: any RunTrackRepository
     let profiles: any ProfileRepository
     let preferences: any RunPreferencesStore
+    /// Le cache des meilleurs segments, rempli dès la fin de la course depuis les points bruts et les pauses.
+    let bestEfforts: (any RunBestEffortStore)?
     let spokenText: @Sendable (RunAnnouncementEvent) -> String
     let now: @Sendable () -> Date
     let calendar: Calendar
@@ -55,7 +57,9 @@ public actor RunSessionService {
                 workouts: any WorkoutRepository, tracks: any RunTrackRepository, profiles: any ProfileRepository,
                 preferences: any RunPreferencesStore, spokenText: @escaping @Sendable (RunAnnouncementEvent) -> String,
                 now: @escaping @Sendable () -> Date, calendar: Calendar,
-                keepAliveTicks: @escaping @Sendable (TimeInterval) -> AsyncStream<Void> = RunSessionService.periodicTicks(every:)) {
+                keepAliveTicks: @escaping @Sendable (TimeInterval) -> AsyncStream<Void> = RunSessionService.periodicTicks(every:),
+                bestEfforts: (any RunBestEffortStore)? = nil) {
+        self.bestEfforts = bestEfforts
         self.recorder = recorder
         self.location = location
         self.announcer = announcer

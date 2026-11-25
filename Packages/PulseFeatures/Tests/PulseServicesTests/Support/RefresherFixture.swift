@@ -126,6 +126,8 @@ struct RefresherFixture {
     let scheduled = InMemoryScheduledDayRepository()
     let workouts = InMemoryWorkoutRepository()
     let measurements = InMemoryBodyMeasurementRepository()
+    let runTracks = InMemoryRunTrackRepository()
+    let runBestEfforts = InMemoryRunBestEffortStore()
     let clock: MutableClock
     let refresher: DayRefresher
     /// Le service du Planning donné au passage, avec `planning` : ses écritures passent par la file du passage.
@@ -175,7 +177,9 @@ struct RefresherFixture {
                                            calendar: calendar),
             bodyHistory: BodyHistory(source: scenarioSource, cache: InMemoryHealthSampleCache(), measurements: measurements,
                                      profiles: profiles, windows: InMemoryHealthReadWindowStore(), calendar: calendar),
-            antiInterference: rules, planning: planningService, relocation: relocation, calendar: calendar, now: { clock.now })
+            antiInterference: rules, planning: planningService, relocation: relocation,
+            runBestEfforts: RunBestEffortIndex(workouts: workouts, tracks: runTracks, store: runBestEfforts), calendar: calendar,
+            now: { clock.now })
     }
 
     /// PPL 3 adopté (lundi Push, mardi repos), et un profil dont l'onboarding est terminé, sauf si `onboarded` est faux.

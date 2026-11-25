@@ -36,7 +36,7 @@ const ROUTE: Stop[] = [
     id: "export",
     where: "Quand tu veux",
     title: "Tout emporter, ou tout effacer",
-    body: "Tu exportes tes données en JSON ou CSV, ou tu supprimes tout, directement depuis l'app.",
+    body: "Tu exportes tes données en JSON ou CSV, une course en GPX, ou tu supprimes tout, directement depuis l'app.",
   },
 ];
 
