@@ -106,6 +106,30 @@ public final class SupplementsModel {
         editor = Editor(supplement: nil)
     }
 
+    /// Le brouillon du formulaire : un nouveau complément, ou celui à modifier avec son réglage « Suivre mes nuits ».
+    public func draft(for supplement: Supplement?) -> SupplementDraft {
+        guard let supplement else { return SupplementDraft() }
+        return SupplementDraft(supplement, followsNights: overview.followingNights.contains(supplement.id))
+    }
+
+    /// La ligne sous « Suivre mes nuits » : l'heure habituelle et celle du rappel, ou pourquoi l'heure fixe s'applique.
+    public var followNightsNote: String {
+        guard let habitual = overview.habitualBedtimeMinutes else {
+            return String(localized: "Moins de 5 nuits dans Apple Santé ces 14 derniers jours : Pulse garde l'heure ci-dessous.",
+                          bundle: .module)
+        }
+        let asleep = SupplementText.time(minutes: habitual)
+        let reminder = SupplementText.time(minutes: HabitualBedtime.reminderMinutes(habitual: habitual))
+        if HabitualBedtime.isCapped(habitual: habitual) {
+            return String(localized: """
+                Tu t'endors vers \(asleep) d'après tes nuits : prise prévue à \(reminder), au plus tard avant minuit.
+                """, bundle: .module)
+        }
+        let lead = HabitualBedtime.leadMinutes
+        return String(localized: "Tu t'endors vers \(asleep) d'après tes nuits : prise prévue \(lead) min avant, à \(reminder).",
+                      bundle: .module)
+    }
+
     public func edit(_ supplement: Supplement) {
         editorError = nil
         editor = Editor(supplement: supplement)
@@ -126,7 +150,7 @@ public final class SupplementsModel {
             if supplement.healthType != nil, await environment.service.healthAccess() == .notDetermined {
                 _ = await environment.service.requestHealthAccess()
             }
-            try await environment.service.save(supplement)
+            try await environment.service.save(supplement, followsNights: draft.savesFollowingNights)
             errorMessage = nil
         } catch {
             let message = String(localized: "Pulse n'a pas pu enregistrer le complément.", bundle: .module)

@@ -23,6 +23,24 @@ import UserNotifications
         #expect(router.todayRootVersion == version + 1)
     }
 
+    /// Le rappel de photos ouvre l'onglet Profil et demande l'écran Photos de corps, qui garde son verrou.
+    @Test func bodyPhotosLinkOpensProfileAndAsksForThePhotos() {
+        let router = AppRouter()
+        router.open(.bodyPhotos)
+        #expect(router.selectedTab == .profile)
+        #expect(router.opensBodyPhotos)
+        #expect(!router.isShowingSupplements)
+    }
+
+    /// Le rappel de photos ne dit rien du sujet sur l'écran verrouillé et n'a pas d'image.
+    @Test func bodyPhotoReminderIsNeutral() {
+        let content = UserNotificationScheduler.bodyPhotoContent()
+        #expect(content.attachments.isEmpty)
+        #expect(content.body.isEmpty && content.subtitle.isEmpty)
+        #expect(!content.title.localizedCaseInsensitiveContains("corps"))
+        #expect(NotificationRouter.link(from: content.userInfo) == .bodyPhotos)
+    }
+
     @Test func planningLinkSelectsThePlanningTab() {
         let router = AppRouter()
         router.open(.planning)

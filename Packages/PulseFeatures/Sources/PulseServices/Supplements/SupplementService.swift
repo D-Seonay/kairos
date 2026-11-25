@@ -13,15 +13,22 @@ public struct SupplementOverview: Sendable, Equatable {
     public var advice: [SupplementAdvice]
     /// Les compléments archivés, par ordre : ils peuvent revenir dans la liste.
     public var archived: [Supplement]
+    /// L'heure habituelle d'endormissement, en minutes après minuit ; `nil` sous 5 nuits dans les 14 derniers jours.
+    public var habitualBedtimeMinutes: Int?
+    /// Les compléments « au coucher » qui suivent les nuits, pour l'interrupteur du formulaire.
+    public var followingNights: Set<UUID>
 
     public init(day: Date, items: [SupplementDueItem], supplements: [Supplement], regularity: [UUID: SupplementRegularity],
-                advice: [SupplementAdvice], archived: [Supplement] = []) {
+                advice: [SupplementAdvice], archived: [Supplement] = [], habitualBedtimeMinutes: Int? = nil,
+                followingNights: Set<UUID> = []) {
         self.day = day
         self.items = items
         self.supplements = supplements
         self.regularity = regularity
         self.advice = advice
         self.archived = archived
+        self.habitualBedtimeMinutes = habitualBedtimeMinutes
+        self.followingNights = followingNights
     }
 
     public static func empty(day: Date) -> SupplementOverview {
@@ -73,13 +80,19 @@ public final class SupplementService: Sendable {
     private let scheduledDays: (any ScheduledDayRepository)?
     private let reminders: (any SupplementReminderScheduling)?
     private let health: (any SupplementHealthWriting)?
+    /// L'heure habituelle d'endormissement, lue dans le cache local d'Apple Santé ; `nil` : les compléments « au coucher » gardent
+    /// leur heure fixe.
+    private let bedtime: HabitualBedtimeReader?
+    /// « Suivre mes nuits », par complément et par appareil.
+    private let bedtimeStore: (any SupplementBedtimeStore)?
     private let calendar: Calendar
     private let now: @Sendable () -> Date
     private let queue = SerialTaskQueue()
 
     public init(supplements: any SupplementRepository, programs: any ProgramRepository, profiles: any ProfileRepository,
                 workouts: any WorkoutRepository, reminders: (any SupplementReminderScheduling)?,
-                health: (any SupplementHealthWriting)?, scheduledDays: (any ScheduledDayRepository)? = nil, calendar: Calendar,
+                health: (any SupplementHealthWriting)?, scheduledDays: (any ScheduledDayRepository)? = nil,
+                bedtime: HabitualBedtimeReader? = nil, bedtimeStore: (any SupplementBedtimeStore)? = nil, calendar: Calendar,
                 now: @escaping @Sendable () -> Date) {
         self.supplements = supplements
         self.programs = programs
@@ -88,6 +101,8 @@ public final class SupplementService: Sendable {
         self.scheduledDays = scheduledDays
         self.reminders = reminders
         self.health = health
+        self.bedtime = bedtime
+        self.bedtimeStore = bedtimeStore
         self.calendar = calendar
         self.now = now
     }
@@ -104,16 +119,23 @@ public final class SupplementService: Sendable {
         })
         let archived = try await supplements.supplements(includeArchived: true).filter(\.isArchived)
         return SupplementOverview(day: today, items: items, supplements: schedule.supplements, regularity: regularity,
-                                  advice: SupplementCatalog.advice(for: items), archived: archived)
+                                  advice: SupplementCatalog.advice(for: items), archived: archived,
+                                  habitualBedtimeMinutes: schedule.habitualBedtimeMinutes,
+                                  followingNights: schedule.followingNights)
     }
 
     // MARK: - Enregistrement
 
-    /// Enregistre le complément, créé ou modifié, et replanifie les rappels.
-    public func save(_ supplement: Supplement) async throws {
+    /// Enregistre le complément, créé ou modifié, et replanifie les rappels. `followsNights` règle « Suivre mes nuits » sur cet
+    /// appareil (vrai seulement pour un complément « au coucher ») ; `nil` le laisse tel quel.
+    public func save(_ supplement: Supplement, followsNights: Bool? = nil) async throws {
         var stamped = supplement
         stamped.updatedAt = now()
         try await supplements.save(stamped)
+        // Après l'enregistrement : un échec ne laisse pas le réglage changé pour un complément resté tel quel.
+        if let followsNights {
+            bedtimeStore?.setFollowsNights(followsNights && supplement.timing == .bedtime, for: supplement.id)
+        }
         await rescheduleReminders()
     }
 
@@ -257,7 +279,8 @@ public final class SupplementService: Sendable {
     // MARK: - Interne
 
     /// Les compléments, les prises des 30 derniers jours, les jours d'entraînement du programme actif avec les déplacements de la
-    /// semaine datée sur la régularité et les rappels, et les séances des 60 derniers jours.
+    /// semaine datée sur la régularité et les rappels, les séances des 60 derniers jours, et l'heure habituelle d'endormissement
+    /// des 14 dernières nuits (recalculée à chaque fois, jamais enregistrée).
     private func loadSchedule() async throws -> SupplementSchedule {
         let now = now()
         let today = calendar.startOfDay(for: now)
@@ -272,7 +295,8 @@ public final class SupplementService: Sendable {
                                   plannedTrainingDays: SupplementSchedule.plannedTrainingDays(
                                       of: program, overrides: await overrides(from: intakesStart, today: today), calendar: calendar),
                                   sessions: try await workouts.sessions(from: sessionsStart, to: tomorrow),
-                                  calendar: calendar)
+                                  habitualBedtimeMinutes: await bedtime?.minutes(now: now),
+                                  followingNights: bedtimeStore?.followingNights ?? [], calendar: calendar)
     }
 }
 
