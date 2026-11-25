@@ -186,3 +186,8 @@ private func alpha(of image: CGImage, x: Int, y: Int) -> UInt8 {
     #expect(ShareCardContent.previewSession.stickerFileName == "Pulse - Push (sans fond).png")
     #expect(content(title: "").stickerFileName == "Pulse (sans fond).png")
 }
+
+@Test func stickerKeyIgnoresTheFormat() {
+    #expect(RenderKey(format: .story, background: .transparent) == RenderKey(format: .post, background: .transparent))
+    #expect(RenderKey(format: .story, background: .pattern) != RenderKey(format: .post, background: .pattern))
+}

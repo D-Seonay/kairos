@@ -66,7 +66,8 @@ public struct ShareCardView: View {
     }
 
     /// Le contenu sans fond : le dessin à une hauteur fixe, le reste à sa taille, et une ombre (un liseré serré, puis un halo)
-    /// qui garde l'encre blanche lisible sur une photo claire. Pas de pied : la marque PULSE en haut suffit à un sticker. Le groupe est composé avant l'ombre, pour qu'elle ne se double pas là où l'encre se croise.
+    /// qui garde l'encre blanche lisible sur une photo claire. Pas de pied : la marque PULSE en haut suffit à un sticker. Le
+    /// groupe est composé avant l'ombre, pour qu'elle ne se double pas là où l'encre se croise.
     private var sticker: some View {
         VStack(alignment: .leading, spacing: 0) {
             topBar
