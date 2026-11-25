@@ -364,11 +364,13 @@ extension AppDependencies {
                           now: wiring.now)
     }
 
-    /// Les réglages du profil. Seuls les rappels de compléments dépendent d'un réglage enregistré : le score du matin, la fin du
-    /// repos et le moteur relisent le profil à chaque fois, les widgets ne lisent aucun réglage.
+    /// Les réglages du profil. Les rappels de compléments et l'ambiance des widgets dépendent d'un réglage enregistré : le score du
+    /// matin, la fin du repos et le moteur relisent le profil à chaque fois.
     private static func makeSettings(_ wiring: Wiring, profiles: any ProfileRepository,
                                      supplementService: SupplementService) -> SettingsService {
-        SettingsService(profiles: profiles, now: wiring.now) { old, new in
+        let widgets = wiring.widgets
+        return SettingsService(profiles: profiles, now: wiring.now) { old, new in
+            if old.theme != new.theme { await widgets.publishTheme(new.theme) }
             guard old.supplementRemindersEnabled != new.supplementRemindersEnabled else { return }
             await supplementService.rescheduleReminders()
         }

@@ -85,6 +85,10 @@ struct HoldingWidgetPublisher: WidgetPublishing {
         await inner.publish(snapshot)
     }
 
+    func publishTheme(_ theme: Theme) async {
+        await inner.publishTheme(theme)
+    }
+
     func clear() async {
         await inner.clear()
     }

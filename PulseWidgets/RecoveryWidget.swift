@@ -9,6 +9,7 @@ struct RecoveryWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: RecoveryWidgetContent.kind, provider: RecoveryTimelineProvider()) { entry in
             RecoveryWidgetEntryView(entry: entry)
+                .environment(\.pulseTheme, entry.theme)
         }
         .configurationDisplayName(RecoveryWidgetContent.displayName)
         .description(RecoveryWidgetContent.summary)

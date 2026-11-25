@@ -158,6 +158,8 @@ public final class DayRefresher: Sendable {
         let score = try? await scores.update(nights: history.nights, plannedDay: plan.forScore, now: now)
         let scored: DailyRecovery? = if case .scored(let recovery)? = score { recovery } else { nil }
         let session = TodaySession(plannedDay: plannedDay, recovery: scored, deload: plan.deload)
+        // L'ambiance des widgets suit le profil lu, même sans score ; un profil illisible laisse celle déjà partagée.
+        if let profile { await widgets.publishTheme(profile.theme) }
         if let scored {
             await widgets.publish(await snapshot(scored, session: session, profile: profile))
             if origin == .background, let profile {

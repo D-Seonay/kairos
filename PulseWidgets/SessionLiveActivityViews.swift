@@ -4,7 +4,8 @@ import PulseLiveActivity
 import SwiftUI
 import WidgetFeature
 
-/// Les couleurs de la Live Activity. L'extension ne lit pas le thème du profil : elle prend l'accent par défaut (Ivoire).
+/// Les couleurs de la Live Activity. Les widgets suivent l'ambiance du profil (`WidgetThemeStore`), pas la Live Activity : elle
+/// prend l'accent par défaut (Ivoire), dont le tirage sombre se distingue à peine de celui d'Acier.
 /// La séance est toujours sombre (fond noir) : l'accent et son encre sont fixés à leurs tirages sombres. Avec le tirage dynamique,
 /// l'apparence claire du système rendrait l'accent en encre noire sur le noir de l'activité (1,1:1).
 enum SessionActivityStyle {
