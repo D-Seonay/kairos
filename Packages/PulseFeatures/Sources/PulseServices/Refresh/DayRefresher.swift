@@ -157,8 +157,6 @@ public final class DayRefresher: Sendable {
         try? await recovery.backfillSleepStages(history.nights)
         await workoutHistory?.refresh(now: now)
         await bodyHistory?.refresh(now: now)
-        // Les records de course lisent ce cache : un tracé arrivé d'iCloud ou une course d'avant le cache y entre ici.
-        await runBestEfforts?.refresh(now: now)
         // Une semaine illisible reste telle quelle : la séance du jour suit les lignes déjà écrites.
         try? await antiInterference?.apply(nights: history.nights)
         let plan = await plan(for: profile, readFailed: profileReadFailed, now: now)
@@ -174,6 +172,9 @@ public final class DayRefresher: Sendable {
                 await notifyIfDue(scored, session: session, profile: profile, now: now)
             }
         }
+        // Les records de course lisent ce cache : un tracé arrivé d'iCloud ou une course d'avant le cache y entre ici, après le
+        // score et le widget, qui n'attendent pas ce calcul.
+        await runBestEfforts?.refresh(now: now)
         return DayRefresh(profile: profile, nights: history.nights, readAt: history.readAt, plannedDay: plannedDay, score: score,
                           session: session, checkIn: await checkIn(of: scored, now: now))
     }
