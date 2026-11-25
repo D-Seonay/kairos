@@ -10,20 +10,25 @@ public actor BodyPhotoService {
     private let calendar: Calendar
     private let timeZone: TimeZone
     private let now: @Sendable () -> Date
+    /// Le dossier de l'archive d'export : `exportDirectory` dans l'app, un dossier propre à chaque test (les tests tournent en
+    /// parallèle, et l'un supprimerait le dossier d'un autre pendant qu'il écrit).
+    private let archiveDirectory: URL
     /// Les enregistrements passent l'un après l'autre : « enregistrer, puis supprimer la photo du jour » se libère à chaque
     /// `await`, et deux enregistrements concurrents laisseraient deux photos de même pose et de même jour.
     private let queue = SerialTaskQueue()
 
     public init(store: any BodyPhotoStore, measurements: any BodyMeasurementRepository, calendar: Calendar,
-                timeZone: TimeZone = .current, now: @escaping @Sendable () -> Date) {
+                timeZone: TimeZone = .current, exportDirectory: URL = BodyPhotoService.exportDirectory,
+                now: @escaping @Sendable () -> Date) {
         self.store = store
         self.measurements = measurements
         self.calendar = calendar
         self.timeZone = timeZone
+        archiveDirectory = exportDirectory
         self.now = now
     }
 
-    /// Le dossier de l'archive d'export, dans les fichiers temporaires. L'effaceur le supprime aussi.
+    /// Le dossier de l'archive d'export de l'app, dans les fichiers temporaires. L'effaceur le supprime aussi.
     public static var exportDirectory: URL {
         FileManager.default.temporaryDirectory.appendingPathComponent("PulseBodyPhotoExport", isDirectory: true)
     }
@@ -84,15 +89,15 @@ public actor BodyPhotoService {
         try await queue.run { try await self.store.deleteAll() }
     }
 
-    /// Écrit l'archive dans `exportDirectory` (le dépôt protège le zip et retire les archives précédentes). L'écran la propose au
-    /// sélecteur de Fichiers, puis appelle `discardExport`.
+    /// Écrit l'archive dans le dossier d'export (le dépôt protège le zip et retire les archives précédentes). L'écran la propose
+    /// au sélecteur de Fichiers, puis appelle `discardExport`.
     public func exportArchive() async throws -> URL {
-        try await store.exportArchive(to: Self.exportDirectory)
+        try await store.exportArchive(to: archiveDirectory)
     }
 
     /// Supprime le dossier de l'archive. Au mieux : un dossier absent ou déjà vidé n'est pas une erreur.
     public func discardExport() async {
-        try? FileManager.default.removeItem(at: Self.exportDirectory)
+        try? FileManager.default.removeItem(at: archiveDirectory)
     }
 
     /// Variation de la tendance du poids entre deux dates, toutes sources de pesées confondues, ou `nil` si l'une des deux n'a pas

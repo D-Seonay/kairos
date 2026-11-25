@@ -6,10 +6,13 @@ import Testing
 struct BodyPhotoServiceTests {
     private let store = InMemoryBodyPhotoStore()
     private let measurements = InMemoryBodyMeasurementRepository()
+    /// Propre au test : les tests tournent en parallèle et `discardExport` supprime tout le dossier.
+    private let exportDirectory = FileManager.default.temporaryDirectory
+        .appendingPathComponent("PulseBodyPhotoExport-\(UUID().uuidString)", isDirectory: true)
 
     private func makeService() -> BodyPhotoService {
         BodyPhotoService(store: store, measurements: measurements, calendar: TestClock.calendar, timeZone: .gmt,
-                         now: { TestClock.date("2026-11-20T12:00") })
+                         exportDirectory: exportDirectory, now: { TestClock.date("2026-11-20T12:00") })
     }
 
     private func processed() throws -> ProcessedPhoto {
@@ -159,10 +162,10 @@ struct BodyPhotoServiceTests {
     @Test func exportWritesIntoTheExportFolderAndDiscardRemovesIt() async throws {
         let service = makeService()
         let url = try await service.exportArchive()
-        #expect(url.deletingLastPathComponent().standardizedFileURL == BodyPhotoService.exportDirectory.standardizedFileURL)
+        #expect(url.deletingLastPathComponent().standardizedFileURL == exportDirectory.standardizedFileURL)
         #expect(FileManager.default.fileExists(atPath: url.path))
         await service.discardExport()
-        #expect(!FileManager.default.fileExists(atPath: BodyPhotoService.exportDirectory.path))
+        #expect(!FileManager.default.fileExists(atPath: exportDirectory.path))
         await service.discardExport()
     }
 

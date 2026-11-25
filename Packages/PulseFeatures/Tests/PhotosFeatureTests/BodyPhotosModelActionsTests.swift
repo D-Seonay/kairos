@@ -61,6 +61,7 @@ struct BodyPhotosModelActionsTests: BodyPhotosModelTesting {
         let store = GatedExportBodyPhotoStore()
         let service = BodyPhotoService(store: store, measurements: InMemoryBodyMeasurementRepository(),
                                        calendar: PhotosTestClock.calendar, timeZone: PhotosTestClock.calendar.timeZone,
+                                       exportDirectory: Self.uniqueExportDirectory(),
                                        now: { PhotosTestClock.date("2026-11-20T12:00") })
         _ = try await service.save(service.process(TestImages.jpeg()), pose: .front,
                                    takenAt: PhotosTestClock.date("2026-11-01T08:00"))
