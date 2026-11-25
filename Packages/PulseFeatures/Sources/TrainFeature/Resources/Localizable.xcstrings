@@ -3702,6 +3702,56 @@
           }
         }
       }
+    },
+    "Plateau possible" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plateau possible"
+          }
+        }
+      }
+    },
+    "Pistes, une à la fois" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pistes, une à la fois"
+          }
+        }
+      }
+    },
+    "Piste %lld : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Piste %lld : %@"
+          }
+        }
+      }
+    },
+    "Voir une variante : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir une variante : %@"
+          }
+        }
+      }
+    },
+    "Variante possible : %@." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Variante possible : %@."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

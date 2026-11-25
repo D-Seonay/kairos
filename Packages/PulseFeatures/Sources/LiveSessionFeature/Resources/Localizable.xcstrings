@@ -1766,6 +1766,26 @@
           }
         }
       }
+    },
+    "Plateau possible : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plateau possible : %@"
+          }
+        }
+      }
+    },
+    "Plateaux possibles" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plateaux possibles"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

@@ -27,6 +27,8 @@ public final class RecapModel {
     /// La section Photos : le modèle de la séance live, pour que les photos prises pendant la séance y soient ; `nil` sans service
     /// des photos et pour une saisie après coup.
     public let photos: SessionPhotosModel?
+    /// Vrai une fois la séance enregistrée quand la règle demande une note : la vue appelle alors `requestReview`.
+    public private(set) var shouldRequestReview = false
 
     /// La même échelle que la correction d'une séance enregistrée.
     public static let rpeRange = RoutineRules.overallRPE
@@ -34,14 +36,17 @@ public final class RecapModel {
     private static let initialRPE = 7
 
     @ObservationIgnored private let service: ActiveSessionService
+    @ObservationIgnored private let reviewPrompt: ReviewPrompt?
     @ObservationIgnored private let endedAt: Date
     @ObservationIgnored private var isSaved = false
     /// Le RPE à enregistrer une fois l'écran d'explication passé.
     @ObservationIgnored private var pendingRPE: Int?
 
+    /// `reviewPrompt` : la demande de note après l'enregistrement ; `nil` pour ne jamais en faire (saisie après coup, tests).
     public init(service: ActiveSessionService, endedAt: Date, supplements: SupplementsModel? = nil,
-                photos: SessionPhotosModel? = nil) {
+                photos: SessionPhotosModel? = nil, reviewPrompt: ReviewPrompt? = nil) {
         self.service = service
+        self.reviewPrompt = reviewPrompt
         self.endedAt = endedAt
         self.supplements = supplements
         self.photos = photos
@@ -121,6 +126,7 @@ public final class RecapModel {
             _ = try await service.finish(overallRPE: overallRPE, note: note, endedAt: endedAt)
             isSaved = true
             errorMessage = nil
+            await claimReview()
             return true
         } catch {
             errorMessage = String(localized: "Pulse n'a pas pu enregistrer la séance. Elle est gardée : tu peux réessayer.",
@@ -131,6 +137,16 @@ public final class RecapModel {
 }
 
 extension RecapModel {
+    /// Une fois la séance écrite : la 5e séance terminée au moins, ou un record battu, et pas encore de demande pour cette
+    /// version (`ReviewRequestRule`).
+    private func claimReview() async {
+        guard let reviewPrompt, let recap else { return }
+        let service = service
+        shouldRequestReview = await reviewPrompt.claim(hasNewRecord: !recap.beatenRecords.isEmpty) {
+            await service.completedSessionCount()
+        }
+    }
+
     /// Le libellé d'un RPE global : 1 « très facile », 10 « maximal ».
     nonisolated static func effortWord(_ rpe: Int) -> String {
         switch rpe {

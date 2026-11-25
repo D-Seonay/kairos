@@ -5,6 +5,7 @@ import PulseDomain
 import PulseServices
 import SupplementsFeature
 import SwiftUI
+import TrainFeature
 
 /// Le récap de fin de séance (spec M4 §17, maquette `recap`) : le bilan, les records battus, les muscles travaillés, l'effort
 /// global ressenti, la note, puis « Enregistrer », « Enregistrer sans noter » (l'effort proposé) et « Revenir à la séance ». Il
@@ -33,6 +34,7 @@ public struct RecapView: View {
                     stats(recap)
                     if !recap.beatenRecords.isEmpty { records(recap.beatenRecords) }
                     if !recap.setsPerGroup.isEmpty { muscles(recap) }
+                    if !recap.plateaus.isEmpty { plateaus(recap.plateaus) }
                     if let supplements = model.supplements, !supplements.overview.workoutItems.isEmpty {
                         card(title: String(localized: "Compléments de la séance", bundle: .module),
                              detail: Self.supplementsDetail(supplements.overview)) {
@@ -290,6 +292,24 @@ extension RecapView {
         .padding(PulseMetrics.spacing)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(PulsePalette.surface, in: RoundedRectangle(cornerRadius: PulseMetrics.radius, style: .continuous))
+    }
+}
+
+// Le plateau confirmé par la séance : un signal discret, après les muscles, avec le calcul et les pistes.
+extension RecapView {
+    private func plateaus(_ notices: [PlateauNotice]) -> some View {
+        // Un seul exercice : son nom dans le titre. Plusieurs : chacun avec son calcul et sa variante, puis les pistes une fois.
+        let single = notices.count == 1 ? notices.first : nil
+        let title = single.map { String(localized: "Plateau possible : \($0.exerciseName)", bundle: .module) }
+            ?? String(localized: "Plateaux possibles", bundle: .module)
+        let items = notices.map { notice in
+            ExercisePlateauView.Item(name: single == nil ? notice.exerciseName : nil, plateau: notice.plateau, calendar: calendar,
+                                     variant: single == nil ? notice.variantName : nil)
+        }
+        return ExercisePlateauView(title: title, items: items, variantName: single?.variantName)
+            .padding(PulseMetrics.spacing)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(PulsePalette.surface, in: RoundedRectangle(cornerRadius: PulseMetrics.radius, style: .continuous))
     }
 }
 

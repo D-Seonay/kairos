@@ -84,7 +84,15 @@ extension AppDependencies {
     /// par l'autorisateur de l'app (une doublure accordée dans les modes des tests d'interface, refusée dans les tests).
     func liveSessionEnvironment() -> LiveSessionEnvironment {
         LiveSessionEnvironment(service: liveSession, train: trainEnvironment(), notifications: liveSessionNotifications,
-                               supplements: supplementsEnvironment(), calendar: calendar, now: now)
+                               supplements: supplementsEnvironment(), calendar: calendar, now: now, reviewPrompt: reviewPrompt)
+    }
+
+    /// La demande de note au récap (au plus une par version, gardée dans `UserDefaults`) ; aucune dans les modes des tests
+    /// d'interface (`-PulseStore`), où la fenêtre système gênerait.
+    var reviewPrompt: ReviewPrompt? {
+        guard !launch.storeInMemory, !launch.storeOnDisk else { return nil }
+        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+        return ReviewPrompt(store: UserDefaultsReviewRequestStore(suiteName: nil), appVersion: version)
     }
 
     /// La course passe par le seul service de course de l'app. Elle ne démarre pas pendant une séance de musculation, que la

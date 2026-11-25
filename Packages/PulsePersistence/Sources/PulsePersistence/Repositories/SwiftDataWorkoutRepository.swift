@@ -22,6 +22,16 @@ public actor SwiftDataWorkoutRepository: WorkoutRepository {
         return try modelContext.first(StoredImportedWorkout.self, where: #Predicate { $0.id == id && $0.deletedAt == nil })?.toDomain()
     }
 
+    /// Une requête de comptage sur le magasin synchronisé, où vivent toutes les séances Pulse.
+    public func completedPulseSessionCount(kind: SessionKind) throws -> Int {
+        let completed = SessionStatus.completed.rawValue
+        let pulse = SessionSource.pulse.rawValue
+        let kindValue = kind.rawValue
+        return try modelContext.fetchCount(FetchDescriptor<StoredWorkoutSession>(predicate: #Predicate {
+            $0.deletedAt == nil && $0.status == completed && $0.source == pulse && $0.kind == kindValue
+        }))
+    }
+
     /// Une séance importée d'Apple Health (`source == .appleHealth`) va dans le magasin local, les autres dans le magasin synchronisé.
     /// Si la même séance existe dans l'autre magasin (changement de source), elle y est supprimée dans le même `save()`.
     /// Une course Pulse écrit sa FC et son RPE estimé dans le résumé local et `nil` dans le magasin synchronisé (frontière M8).

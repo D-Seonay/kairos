@@ -77,7 +77,7 @@ public struct ExerciseSheetView: View {
         case .technique:
             TechniquePane(model: model)
         case .progression:
-            ProgressionPane(model: model)
+            ProgressionPane(model: model) { opened = $0 }
         case .alternatives:
             AlternativesPane(alternatives: model.alternatives) { opened = $0 }
         }

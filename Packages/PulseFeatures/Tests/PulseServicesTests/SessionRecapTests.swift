@@ -97,4 +97,44 @@ struct SessionRecapTests {
         let service = fixture.makeService()
         await #expect(throws: ActiveSessionError.noSession) { try await service.recap(endedAt: fixture.clock.now) }
     }
+
+    /// Bench 80 × 5 (90 kg estimés) le 5 octobre, puis 80 × 4 les 12, 19 et 26 octobre : la séance du 2 novembre (au mieux
+    /// 60 × 12, 86,4 kg) est la 4e sans progrès, à 4 semaines du meilleur.
+    private func seedStalledBench() async throws {
+        for (date, reps) in [("2026-09-28T08:00", 4), ("2026-10-05T08:00", 5), ("2026-10-12T08:00", 4), ("2026-10-19T08:00", 4),
+                             ("2026-10-26T08:00", 4)] {
+            let day = TestClock.date(date)
+            try await fixture.workouts.save(WorkoutSession(
+                startedAt: day, kind: .strength, source: .pulse, status: .completed, title: "Push",
+                sets: [LiveFixtures.done(LiveFixtures.bench, 80, reps)], createdAt: day, updatedAt: day))
+        }
+    }
+
+    @Test func recapNamesAPlateauThisSessionConfirms() async throws {
+        try await seedStalledBench()
+        let service = try await fixture.resume(Fix.session([Fix.bench(Fix.benchSets())]))
+        let recap = try await service.recap(endedAt: fixture.clock.now)
+        let notice = try #require(recap.plateaus.first)
+        #expect(recap.plateaus.count == 1 && notice.exerciseName == "Développé couché à la barre")
+        #expect(notice.plateau.bestKg == 90 && notice.plateau.bestDate == TestClock.date("2026-10-05T08:00"))
+        #expect(notice.plateau.sessionCount == 4 && notice.plateau.lastDate == Fix.start)
+        #expect(notice.variantName != nil && notice.variantName != notice.exerciseName)
+    }
+
+    @Test func aFatigueDayConfirmsNoPlateau() async throws {
+        try await seedStalledBench()
+        let fatigue = SessionAdjustment(kind: .rest, reason: "Repos rallongés de 45 secondes", value: 45)
+        let service = try await fixture.resume(Fix.session([Fix.bench(Fix.benchSets())], applied: [fatigue]))
+        #expect(try await service.recap(endedAt: fixture.clock.now).plateaus.isEmpty)
+    }
+
+    @Test func anExerciseWithARecordHasNoPlateau() async throws {
+        // 85 × 1 bat le record de charge (80 kg) sans dépasser 90 kg estimés : le récap dit le record, pas le plateau.
+        try await seedStalledBench()
+        let session = Fix.session([Fix.bench([Fix.set(60, 12, at: "2026-11-02T08:10"), Fix.set(85, 1, at: "2026-11-02T08:20")])])
+        let service = try await fixture.resume(session)
+        let recap = try await service.recap(endedAt: fixture.clock.now)
+        #expect(recap.beatenRecords.map(\.kind).contains(.maxWeight))
+        #expect(recap.plateaus.isEmpty)
+    }
 }

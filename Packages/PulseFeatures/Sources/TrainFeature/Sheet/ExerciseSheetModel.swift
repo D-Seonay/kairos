@@ -36,6 +36,10 @@ public final class ExerciseSheetModel {
     public private(set) var chart: [ChartPoint] = []
     public private(set) var recentSessions: [ExerciseHistoryLine] = []
     public private(set) var alternatives: [ExerciseInfo] = []
+    /// Le plateau de l'exercice, s'il y en a un (fatigue et décharge écartées) ; `nil` sinon.
+    public private(set) var plateau: ExercisePlateau?
+    /// Une variante du même plan de mouvement faisable avec le matériel du profil, pour la piste du plateau.
+    public private(set) var plateauVariant: ExerciseInfo?
     public private(set) var increment: Double = 2.5
     public private(set) var errorMessage: String?
 
@@ -63,6 +67,10 @@ public final class ExerciseSheetModel {
             increment = info.map { IncrementResolver.increment(for: $0, settings: settings, profile: profile) } ?? increment
             currentOneRepMax = records.filter { $0.kind == .estimatedOneRepMax }.map(\.value).max()
             applyHistory(of: sessions)
+            plateau = PlateauDetector.plateau(for: reference, in: sessions, loadKind: info?.loadKind ?? .external,
+                                              now: environment.now(), calendar: environment.calendar)
+            plateauVariant = plateau == nil ? nil
+                : ReplacementPlanner.alternatives(for: reference, directory: directory, profile: profile, excluding: []).first
             errorMessage = nil
         } catch {
             errorMessage = String(localized: "Pulse n'a pas pu lire cette fiche.", bundle: .module)
@@ -159,6 +167,9 @@ public final class ExerciseSheetModel {
                                      calendar: environment.calendar, timeZone: environment.calendar.timeZone)
         return date.formatted(style.day().month(.wide))
     }
+
+    /// Le calendrier de l'environnement, pour les dates du texte du plateau.
+    var calendar: Calendar { environment.calendar }
 
     /// Le modèle de la fiche d'un autre exercice, par exemple une alternative.
     public func sheet(for reference: ExerciseReference) -> ExerciseSheetModel {
