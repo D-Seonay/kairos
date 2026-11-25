@@ -201,7 +201,7 @@ private struct SleepChartCard: View {
         let hoursLabel = String(localized: "Heures de sommeil", bundle: .module)
         return Chart(points) { point in
             let spoken = StatsText.sleepPointSpoken(point: point, bucket: bucket, calendar: window.calendar)
-            let layers = SleepChartLayers.layers(of: point)
+            let layers = SleepChartLayers.marks(of: point)
             // La barre entière est lue une fois, sur sa première tranche, avec le total et les phases ; les autres sont tues.
             ForEach(layers) { layer in
                 BarMark(x: .value(dateLabel, point.date, unit: unit), yStart: .value(hoursLabel, layer.start),

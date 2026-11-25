@@ -59,6 +59,14 @@ enum SleepChartLayers {
         }
     }
 
+    /// Les tranches à poser dans le graphique : celles de `layers(of:)`, ou une tranche vide quand la barre n'en a aucune (une
+    /// nuit à 0 min). Elle ne se voit pas et n'entre pas dans la légende, mais garde à VoiceOver un élément pour ce point, que
+    /// le résumé peut citer (« nuit la plus courte 0 minute »).
+    static func marks(of point: SleepPoint) -> [SleepLayer] {
+        let layers = layers(of: point)
+        return layers.isEmpty ? [SleepLayer(kind: .otherInk, start: 0, end: 0)] : layers
+    }
+
     /// Vrai si la tranche dure au moins une minute une fois arrondie.
     private static func lastsAMinute(_ layer: SleepLayer) -> Bool {
         ((layer.end - layer.start) * 60).rounded() > 0

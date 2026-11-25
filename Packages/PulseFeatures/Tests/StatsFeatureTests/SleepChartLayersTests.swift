@@ -65,6 +65,16 @@ struct SleepChartLayersTests {
         #expect(labels([point(0, asleep: 420, deep: 60)]) == ["Profond", "Autres phases"])
     }
 
+    /// Une nuit à 0 min ne dessine rien et n'entre pas dans la légende, mais garde une marque vide pour VoiceOver.
+    @Test func emptyBarKeepsOneAccessibleMarkOutOfTheLegend() {
+        let empty = point(0, asleep: 0, deep: nil)
+        #expect(SleepChartLayers.layers(of: empty).isEmpty)
+        #expect(SleepChartLayers.marks(of: empty) == [SleepLayer(kind: .otherInk, start: 0, end: 0)])
+        #expect(labels([empty]).isEmpty)
+        let full = point(1, asleep: 420, deep: 60)
+        #expect(SleepChartLayers.marks(of: full) == SleepChartLayers.layers(of: full))
+    }
+
     @Test func emptyPeriodHasNoLegend() {
         #expect(labels([]).isEmpty)
     }
