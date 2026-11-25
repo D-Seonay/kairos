@@ -138,13 +138,13 @@ let package = Package(
         ),
         .testTarget(
             name: "LiveSessionFeatureTests",
-            dependencies: ["PulseTestSupport", "LiveSessionFeature", "TrainFeature", "PhotosFeature", "PulseServices", domain,
-                           recoveryEngine, content],
+            dependencies: ["PulseTestSupport", "LiveSessionFeature", "TrainFeature", "PhotosFeature", "PulseServices", designSystem,
+                           domain, recoveryEngine, content],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(
             name: "NightFeatureTests",
-            dependencies: ["NightFeature", "PulseServices", domain],
+            dependencies: ["NightFeature", "PulseServices", designSystem, domain],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(
@@ -154,7 +154,7 @@ let package = Package(
         ),
         .testTarget(
             name: "PhotosFeatureTests",
-            dependencies: ["PulseTestSupport", "PhotosFeature", "PulseServices", domain],
+            dependencies: ["PulseTestSupport", "PhotosFeature", "PulseServices", designSystem, domain],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(

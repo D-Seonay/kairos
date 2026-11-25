@@ -50,6 +50,10 @@ public struct SessionDetailView: View {
         .toolbar {
             if model.session != nil {
                 ToolbarItem(placement: .primaryAction) {
+                    ShareCardButton(content: model.shareContent, photos: model.photos?.shareCardPhotos ?? [])
+                        .disabled(isWorking)
+                }
+                ToolbarItem(placement: .primaryAction) {
                     Button(String(localized: "Modifier", bundle: .module)) { correction = model.correction().map(CorrectionDraft.init) }
                         .disabled(isWorking)
                         .accessibilityIdentifier(TrainIdentifiers.sessionEdit)

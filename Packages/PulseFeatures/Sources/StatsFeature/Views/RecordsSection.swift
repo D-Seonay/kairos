@@ -11,20 +11,39 @@ struct RecordsSection: View {
     let window: StatsWindow
     /// Ouvre la fiche de l'exercice sur l'onglet Progression.
     let open: (ExerciseReference) -> Void
+    /// Le record dont la feuille de partage est ouverte (appui long › « Partager ce record »).
+    @State private var sharing: ShareCardContent?
 
     var body: some View {
         VStack(alignment: .leading, spacing: PulseMetrics.spacing) {
-            StrengthRecordsCard(lines: records.strength, window: window, open: open)
-            RunRecordsCard(runs: records.runs, window: window)
+            StrengthRecordsCard(lines: records.strength, window: window, open: open) { sharing = $0 }
+            RunRecordsCard(runs: records.runs, window: window) { sharing = $0 }
             Text(String(localized: "Records de tout l'historique ; « nouveau » marque ceux battus dans la période choisie.",
                         bundle: .module))
                 .font(.caption)
                 .foregroundStyle(PulsePalette.muted)
                 .fixedSize(horizontal: false, vertical: true)
         }
+        .shareCardSheet(content: $sharing)
     }
 
     static var newMark: String { String(localized: "nouveau", bundle: .module) }
+
+    static var shareTitle: String { String(localized: "Partager ce record", bundle: .module) }
+}
+
+public extension View {
+    /// L'appui long › « Partager ce record », et la même action pour VoiceOver. Sans contenu (aucun record), rien.
+    func recordShareMenu(_ content: ShareCardContent?, share: @escaping (ShareCardContent) -> Void) -> some View {
+        contextMenu {
+            if let content {
+                Button { share(content) } label: { Label(RecordsSection.shareTitle, systemImage: "square.and.arrow.up") }
+            }
+        }
+        .accessibilityAction(named: RecordsSection.shareTitle) {
+            if let content { share(content) }
+        }
+    }
 }
 
 // MARK: - Force
@@ -34,6 +53,7 @@ private struct StrengthRecordsCard: View {
     let lines: [StrengthRecordLine]
     let window: StatsWindow
     let open: (ExerciseReference) -> Void
+    let share: (ShareCardContent) -> Void
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
@@ -100,6 +120,7 @@ private struct StrengthRecordsCard: View {
         .accessibilityLabel(StatsText.strengthRecordSpoken(line, calendar: window.calendar, today: window.today))
         .accessibilityHint(String(localized: "Ouvre la progression de l'exercice", bundle: .module))
         .accessibilityAddTraits(.isButton)
+        .recordShareMenu(RecordShareCard.strength(line, calendar: window.calendar), share: share)
     }
 
     /// « 96 kg » pour un 1RM estimé, « 14 reps » pour un record de répétitions.
@@ -138,6 +159,7 @@ private struct StrengthRecordsCard: View {
 private struct RunRecordsCard: View {
     let runs: [RunBest]
     let window: StatsWindow
+    let share: (ShareCardContent) -> Void
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
@@ -188,6 +210,8 @@ private struct RunRecordsCard: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(StatsText.runRecordSpoken(run, calendar: window.calendar, today: window.today))
+        .contentShape(Rectangle())
+        .recordShareMenu(RecordShareCard.run(run, calendar: window.calendar), share: share)
     }
 
     /// « allure moyenne de la sortie du 14 sept. ».
