@@ -1,3 +1,4 @@
+import AppIntents
 import HealthKit
 import HealthKitUI
 import PulseServices
@@ -14,6 +15,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
                                                                runService: dependencies.run.service)
     /// Le centre de notifications ne retient pas son délégué : c'est l'app qui le garde.
     private var notificationRouter: NotificationRouter?
+    /// Les rapports de plantage et de lenteur de MetricKit, gardés sur l'iPhone pour l'écran Diagnostic.
+    private let metricKitReports = MetricKitReportCollector()
 
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
@@ -22,6 +25,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         UNUserNotificationCenter.current().setNotificationCategories(UserNotificationScheduler.supplementCategories)
         self.notificationRouter = notificationRouter
         sessionIntents.install()
+        metricKitReports.start()
+        installShortcuts()
         let dependencies = dependencies
         dependencies.backgroundDelivery?.start {
             // L'app ouverte lit elle-même au premier plan : une lecture d'arrière-plan l'annoncerait pendant qu'on la regarde.
@@ -56,6 +61,16 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         let refresh = await dependencies.refresher.refresh(origin: .background)
         guard refresh.profile?.onboardingCompletedAt != nil else { return }
         await dependencies.supplementService.rescheduleReminders()
+    }
+
+    /// Les raccourcis Siri lisent les dépendances et le routeur de l'app, posés avant qu'une intention ne s'exécute ; les noms
+    /// des compléments sont donnés à Siri pour les phrases « J'ai pris ma créatine ».
+    private func installShortcuts() {
+        let dependencies = dependencies
+        let router = router
+        AppDependencyManager.shared.add(dependency: { dependencies })
+        AppDependencyManager.shared.add(dependency: { router })
+        PulseShortcuts.updateAppShortcutParameters()
     }
 
     private static func isInBackground() -> Bool {

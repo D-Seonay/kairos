@@ -25,6 +25,8 @@ struct LaunchSessionControlWidget: ControlWidget {
 struct LaunchTodaySessionIntent: AppIntent {
     static let title: LocalizedStringResource = "Démarrer la séance"
     static let description = IntentDescription("Ouvre Pulse et lance la séance du jour.")
+    /// Le bouton du contrôle seulement : Raccourcis et Spotlight proposent déjà le raccourci de l'app, qui fait la même chose.
+    static let isDiscoverable = false
 
     func perform() async throws -> some IntentResult & OpensIntent {
         guard let url = AppLink.startSession.url else { throw URLError(.badURL) }

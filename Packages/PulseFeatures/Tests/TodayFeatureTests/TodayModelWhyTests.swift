@@ -115,7 +115,7 @@ struct TodayModelWhyTests {
         try await fixture.adopt("ppl-3")
         let model = fixture.makeModel()
         await model.refresh()
-        model.showWhy()
+        model.openWhy()
         #expect(model.isShowingWhy)
 
         fixture.clock.set("2026-11-03T03:00")
@@ -129,13 +129,13 @@ struct TodayModelWhyTests {
         try await fixture.adopt("ppl-3")
         let model = fixture.makeModel()
         await model.refresh()
-        model.showWhy()
+        model.openWhy()
 
         await model.toggleOriginalSessionFromWhy()
         #expect(model.session?.status == .restored)
         #expect(!model.isShowingWhy)
 
-        model.showWhy()
+        model.openWhy()
         await model.toggleOriginalSessionFromWhy()
         #expect(model.session?.status == .adjusted)
         #expect(!model.isShowingWhy)
