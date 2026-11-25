@@ -357,13 +357,16 @@ extension AppDependencies {
 
 extension AppDependencies {
     /// Le dépôt des compléments et leur service, avec les rappels et l'écriture Apple Santé du câblage. Le service lit le profil,
-    /// le programme et la semaine datée du passage du jour, et les séances sans doublons.
+    /// le programme et la semaine datée du passage du jour, les séances sans doublons, et les nuits du cache local d'Apple Santé
+    /// pour les compléments « au coucher » qui les suivent (réglage gardé dans la suite de préférences que la suppression vide).
     private static func makeSupplements(_ wiring: Wiring, container: ModelContainer, stores: RefresherStores,
                                         workouts: any WorkoutRepository) -> (SwiftDataSupplementRepository, SupplementService) {
         let supplements = SwiftDataSupplementRepository(modelContainer: container)
         let service = SupplementService(
             supplements: supplements, programs: stores.programs, profiles: stores.profiles, workouts: workouts,
             reminders: wiring.supplementReminders, health: wiring.supplementHealth, scheduledDays: stores.scheduledDays,
+            bedtime: HabitualBedtimeReader(cache: stores.healthCache, calendar: wiring.calendar),
+            bedtimeStore: UserDefaultsSupplementBedtimeStore(suiteName: wiring.defaultsSuite),
             calendar: wiring.calendar, now: wiring.now)
         return (supplements, service)
     }

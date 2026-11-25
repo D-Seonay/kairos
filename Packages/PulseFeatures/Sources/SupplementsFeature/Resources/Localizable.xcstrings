@@ -511,6 +511,16 @@
         }
       }
     },
+    "Moins de 5 nuits dans Apple Santé ces 14 derniers jours : Pulse garde l'heure ci-dessous.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moins de 5 nuits dans Apple Santé ces 14 derniers jours : Pulse garde l'heure ci-dessous."
+          }
+        }
+      }
+    },
     "Moment": {
       "localizations": {
         "fr": {
@@ -771,6 +781,16 @@
         }
       }
     },
+    "Suivre mes nuits": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suivre mes nuits"
+          }
+        }
+      }
+    },
     "Tes compléments, cochés en une touche": {
       "localizations": {
         "fr": {
@@ -797,6 +817,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tout est pris pour aujourd'hui."
+          }
+        }
+      }
+    },
+    "Tu t'endors vers %@ d'après tes nuits : prise prévue 30 min avant, à %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu t'endors vers %@ d'après tes nuits : prise prévue 30 min avant, à %@."
           }
         }
       }
