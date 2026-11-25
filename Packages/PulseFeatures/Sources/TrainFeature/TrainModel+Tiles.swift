@@ -43,6 +43,20 @@ extension TrainModel {
         }
     }
 
+    /// La tuile Course : « Sortie facile · aujourd'hui », « Fractionné · prévue demain », « Sortie longue · prévue samedi », et
+    /// « prévue mercredi prochain » pour la course du même jour la semaine suivante.
+    public var runSubtitle: String {
+        guard let nextRun else { return String(localized: "Aucune course au programme", bundle: .module) }
+        let title = nextRun.day.runType?.localizedName ?? nextRun.day.name
+        let day = nextRun.weekday.trainName
+        switch nextRunDaysAhead {
+        case 0: return String(localized: "\(title) · aujourd'hui", bundle: .module)
+        case 1: return String(localized: "\(title) · prévue demain", bundle: .module)
+        case Weekday.allCases.count: return String(localized: "\(title) · prévue \(day) prochain", bundle: .module)
+        default: return String(localized: "\(title) · prévue \(day)", bundle: .module)
+        }
+    }
+
     /// Ce que dit le bouton « Courir » à VoiceOver : la course du jour ou une course libre, d'après ce que `runLaunch()` lance.
     var runStartLabel: String {
         runLaunchIsPlanned

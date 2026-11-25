@@ -83,6 +83,7 @@ func pplProgram(withRun run: Bool = false) -> Program {
     #expect(model.nextRun?.day.name == "Footing")
     #expect(model.nextRun?.weekday == .saturday)
     #expect(model.nextRunDaysAhead == 5)
+    #expect(model.runSubtitle.hasSuffix(" · prévue samedi"))
     #expect(model.routines.last?.estimatedMinutes == 40)
 }
 
