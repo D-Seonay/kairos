@@ -186,25 +186,6 @@ struct SessionPhotosModelTests {
     }
 }
 
-/// Un chargeur suspendu jusqu'à ce que le test l'ouvre.
-private actor LoaderGate {
-    private var isOpen = false
-    private var waiter: CheckedContinuation<Void, Never>?
-    private(set) var isWaiting = false
-
-    func wait() async {
-        guard !isOpen else { return }
-        isWaiting = true
-        await withCheckedContinuation { waiter = $0 }
-    }
-
-    func open() {
-        isOpen = true
-        waiter?.resume()
-        waiter = nil
-    }
-}
-
 private actor CallCounter {
     private(set) var count = 0
 

@@ -99,7 +99,8 @@ public final class LiveSessionCoordinator {
         guard current != nil else { return }
         let endedAt = await environment.service.suggestedEnd() ?? environment.now()
         do {
-            _ = try await environment.service.abandon(endedAt: endedAt)
+            let abandoned = try await environment.service.abandon(endedAt: endedAt)
+            await liveModel?.discardPhotosIfUnsaved(after: abandoned)
             didFinish()
             errorMessage = nil
         } catch {

@@ -32,7 +32,19 @@ extension AppDependencies {
             body = BodyPhotoService(store: wiring.bodyPhotos, measurements: measurements, calendar: wiring.calendar,
                                     timeZone: timeZone, now: wiring.now)
             bodyLock = UserDefaultsBodyPhotoLockStore(suiteName: wiring.defaultsSuite)
-            ownerAuthentication = LocalAuthenticationOwnerAuthenticator()
+            ownerAuthentication = Self.ownerAuthentication(for: wiring.launch)
+        }
+
+        /// Face ID ou le code de l'iPhone. Dans les modes des tests d'interface (`-PulseStore inMemory|disk`, Debug seulement), une
+        /// doublure qui ne présente jamais la demande système. En Release, les options de lancement ne sont pas lues et la
+        /// doublure n'est pas compilée : le vrai Face ID, toujours.
+        static func ownerAuthentication(for launch: LaunchOptions) -> any DeviceOwnerAuthenticating {
+            #if DEBUG
+            if launch.storeInMemory || launch.storeOnDisk {
+                return UITestOwnerAuthenticator(scenario: launch.ownerAuthentication)
+            }
+            #endif
+            return LocalAuthenticationOwnerAuthenticator()
         }
     }
 }
