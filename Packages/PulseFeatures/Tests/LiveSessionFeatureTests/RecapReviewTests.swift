@@ -63,3 +63,23 @@ private func seedFourSessions(_ fixture: LiveFixture) async throws {
     #expect(await repeated.save())
     #expect(!repeated.shouldRequestReview)
 }
+
+@MainActor @Test func aWantedReviewIsHandedToTheScreenThatStays() async throws {
+    // La demande ne part pas du récap, qui se ferme : la suite la signale avant de fermer la séance.
+    let fixture = LiveFixture()
+    try await seedFourSessions(fixture)
+    var environment = fixture.environment
+    environment.reviewPrompt = ReviewPrompt(store: InMemoryReviewRequestStore(), appVersion: "1.0.4")
+    let session = try await fixture.service.start(LiveFixture.pushLaunch)
+    let live = LiveSessionModel(session: session, environment: environment, haptics: fixture.haptics.haptics)
+    await validateBench(live, rpes: [8])
+    var wanted = 0
+    var finished = 0
+    let flow = FinishFlowModel(live: live, onFinished: { finished += 1 }, onReviewWanted: { wanted += 1 })
+    await flow.finishTapped()
+    await flow.confirm()?.value
+    let recap = try #require(flow.recap)
+    #expect(await recap.save())
+    flow.recapSaved()
+    #expect(wanted == 1 && finished == 1)
+}

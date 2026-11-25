@@ -42,14 +42,18 @@ public final class FinishFlowModel {
     @ObservationIgnored private var continued: (lastActionAt: Date, answeredAt: Date)?
     @ObservationIgnored private let onFinished: @MainActor () -> Void
     @ObservationIgnored private let onMinimize: (@MainActor () -> Void)?
+    @ObservationIgnored private let onReviewWanted: (@MainActor () -> Void)?
 
     /// `onMinimize` ferme l'écran sans finir la séance (`LiveSessionCoordinator.minimize`) ; `nil` sans bandeau pour la
     /// reprendre, comme une saisie après coup.
+    /// `onReviewWanted` est appelé avant `onFinished` quand le récap enregistré veut une demande de note : l'écran qui reste
+    /// affiché la fait une fois le plein écran fermé.
     public init(live: LiveSessionModel, onFinished: @escaping @MainActor () -> Void,
-                onMinimize: (@MainActor () -> Void)? = nil) {
+                onMinimize: (@MainActor () -> Void)? = nil, onReviewWanted: (@MainActor () -> Void)? = nil) {
         self.live = live
         self.onFinished = onFinished
         self.onMinimize = onMinimize
+        self.onReviewWanted = onReviewWanted
     }
 
     var calendar: Calendar { live.environment.calendar }
@@ -134,6 +138,7 @@ public final class FinishFlowModel {
 
     /// « Enregistrer » ou « Enregistrer sans noter » du récap, une fois la séance écrite.
     public func recapSaved() {
+        if recap?.shouldRequestReview == true { onReviewWanted?() }
         recap = nil
         onFinished()
     }

@@ -6,6 +6,7 @@ import PulseDomain
 import PulseServices
 import RunFeature
 import StatsFeature
+import StoreKit
 import SupplementsFeature
 import SwiftUI
 import TodayFeature
@@ -43,6 +44,8 @@ struct MainTabView: View {
     @State private var isAnsweringRecovery = false
     /// « Abandonner » de l'accessoire « Reprendre la séance », en attente de confirmation.
     @State private var confirmsAbandon = false
+    /// La demande de note, faite une fois l'écran de séance fermé.
+    @Environment(\.requestReview) private var requestReview
 
     var body: some View {
         // La course a son plein écran sur une vue à part : deux plein écrans sur la même vue se gênent.
@@ -83,7 +86,7 @@ struct MainTabView: View {
             tabs
         }
         .background(PulsePalette.background)
-        .fullScreenCover(isPresented: $liveSession.isPresented, onDismiss: refreshTabs) {
+        .fullScreenCover(isPresented: $liveSession.isPresented, onDismiss: liveSessionClosed) {
             FinishFlow(model: liveSession.model(), flow: liveSession.finishFlow())
                 .alert(liveSession.notice ?? "", isPresented: isShowingNotice) {
                     Button(String(localized: "OK")) { liveSession.dismissNotice() }
@@ -241,6 +244,18 @@ struct MainTabView: View {
             await today.refresh()
             await supplements.load()
             await dependencies.supplementService.rescheduleReminders()
+        }
+    }
+
+    /// L'écran de séance s'est fermé : les onglets se relisent, puis la demande de note du récap, s'il en a voulu une, une
+    /// seconde plus tard, quand plus rien ne s'anime (StoreKit ignore une demande faite pendant la fermeture d'un plein écran).
+    /// iOS décide encore d'afficher ou non la fenêtre : jamais sur TestFlight, trois fois par an au plus sur l'App Store.
+    private func liveSessionClosed() {
+        refreshTabs()
+        guard liveSession.takePendingReview() else { return }
+        Task {
+            try? await Task.sleep(for: .seconds(1))
+            requestReview()
         }
     }
 
