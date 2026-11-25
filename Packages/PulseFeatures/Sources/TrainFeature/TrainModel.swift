@@ -31,8 +31,10 @@ public final class TrainModel {
     public private(set) var today: TodaySession?
     public private(set) var program: Program?
     public private(set) var routines: [RoutineSummary] = []
-    /// La course du jour, ou la prochaine de la semaine type.
+    /// La course du jour, ou la prochaine, d'après la semaine datée : les déplacements du Planning comptent.
     public private(set) var nextRun: NextSession?
+    /// Les jours d'ici `nextRun`, de 0 (aujourd'hui) à 7 (même jour la semaine prochaine).
+    private(set) var nextRunDaysAhead: Int?
     public private(set) var directory: ExerciseDirectory
     public private(set) var errorMessage: String?
     /// Le titre de la séance en cours, relu à chaque `refresh()` ; `nil` sans séance en cours.
@@ -65,8 +67,8 @@ public final class TrainModel {
             let profile = try await environment.profiles.load()
             let program = try await activeProgram(of: profile)
             let recovery = try await todaysRecovery(now: now)
-            let planned = TodayPlanner.plan(program: program, on: now, calendar: environment.calendar,
-                                            overrides: try await overrides(now: now))
+            let overrides = try await overrides(now: now)
+            let planned = TodayPlanner.plan(program: program, on: now, calendar: environment.calendar, overrides: overrides)
             self.profile = profile
             scoredToday = recovery
             self.program = program
@@ -74,7 +76,9 @@ public final class TrainModel {
             today = TodaySession(plannedDay: planned, recovery: recovery,
                                  deload: Deload.status(profile: profile, now: now, calendar: environment.calendar).isActive)
             routines = program.map(summaries(of:)) ?? []
-            nextRun = program.flatMap { nextRun(in: $0, now: now) }
+            let upcoming = program.flatMap { nextRun(in: $0, now: now, overrides: overrides) }
+            nextRun = upcoming?.session
+            nextRunDaysAhead = upcoming?.daysAhead
             errorMessage = nil
         } catch {
             errorMessage = String(localized: "Pulse n'a pas pu lire ton programme.", bundle: .module)
@@ -217,14 +221,15 @@ public final class TrainModel {
         }
     }
 
-    /// La course du jour, sinon la première de la semaine type après aujourd'hui (en bouclant sur la semaine).
-    private func nextRun(in program: Program, now: Date) -> NextSession? {
-        let today = Weekday(date: now, calendar: environment.calendar)
-        for offset in 0..<Weekday.allCases.count {
-            let weekday = Weekday.allCases[(today.index + offset) % Weekday.allCases.count]
-            guard program.weekLayout.indices.contains(weekday.index), let id = program.weekLayout[weekday.index],
-                  let day = program.days.first(where: { $0.id == id }), day.kind == .run else { continue }
-            return NextSession(day: day, weekday: weekday)
+    /// La course du jour, sinon la première des 7 jours suivants, comme la carte du jour : la ligne de la semaine datée d'un jour
+    /// (course déplacée, ajoutée, retirée ou rendue facile) l'emporte, et un jour sans ligne suit la semaine type.
+    private func nextRun(in program: Program, now: Date, overrides: [ScheduledDay]) -> (session: NextSession, daysAhead: Int)? {
+        let calendar = environment.calendar
+        for offset in 0...Weekday.allCases.count {
+            guard let date = calendar.date(byAdding: .day, value: offset, to: now),
+                  let day = TodayPlanner.routineDay(of: program, on: date, calendar: calendar, overrides: overrides),
+                  day.kind == .run else { continue }
+            return (NextSession(day: day, weekday: Weekday(date: date, calendar: calendar)), offset)
         }
         return nil
     }

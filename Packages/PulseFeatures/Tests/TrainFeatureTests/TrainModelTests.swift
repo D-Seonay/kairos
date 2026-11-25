@@ -82,6 +82,8 @@ func pplProgram(withRun run: Bool = false) -> Program {
     await model.refresh()
     #expect(model.nextRun?.day.name == "Footing")
     #expect(model.nextRun?.weekday == .saturday)
+    #expect(model.nextRunDaysAhead == 5)
+    #expect(model.runSubtitle.hasSuffix(" · prévue samedi"))
     #expect(model.routines.last?.estimatedMinutes == 40)
 }
 
@@ -91,6 +93,7 @@ func pplProgram(withRun run: Bool = false) -> Program {
     let model = TrainModel(environment: fixture.environment)
     await model.refresh()
     #expect(model.nextRun?.weekday == .saturday)
+    #expect(model.nextRunDaysAhead == 0)
     #expect(model.today?.plannedDay == .run(model.nextRun!.day))
 }
 

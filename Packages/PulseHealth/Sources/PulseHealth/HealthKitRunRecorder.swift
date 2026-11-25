@@ -81,25 +81,32 @@ public final class HealthKitRunRecorder: NSObject, RunWorkoutRecording, @uncheck
 
     /// Ajoute la distance GPS et l'identifiant de la course, termine la séance puis écrit le tracé. Un échec termine quand même
     /// la séance : elle ne tourne jamais sans course.
+    ///
+    /// Sans entraînement ni erreur (iPhone verrouillé), HealthKit garde l'entraînement et l'écrit au déverrouillage : il n'est pas
+    /// jeté, et `RunWorkoutWriteDeferred` empêche le repli de l'écrire une seconde fois. Le tracé est alors perdu.
     public func finish(_ entry: RunWorkoutEntry) async throws -> UUID? {
         guard let (session, builder) = takeLiveSession() else { return nil }
+        let finished: HKWorkout?
         do {
             if let distance = distanceSample(entry) { try await builder.addSamples([distance]) }
             try await builder.addMetadata([HKMetadataKeyExternalUUID: entry.sessionID.uuidString])
             session.end()
             try await builder.endCollection(at: entry.end)
-            guard let workout = try await builder.finishWorkout() else { throw WriteError.notSaved }
-            await saveRoute(entry.route, for: workout)
-            return workout.uuid
+            finished = try await builder.finishWorkout()
         } catch {
             session.end()
             builder.discardWorkout()
             throw error
         }
+        guard let workout = finished else { throw RunWorkoutWriteDeferred() }
+        await saveRoute(entry.route, for: workout)
+        return workout.uuid
     }
 
-    /// La course interrompue, sans séance vivante : le même entraînement, avec ses pauses en événements.
+    /// La course interrompue, sans séance vivante : le même entraînement, avec ses pauses en événements. Un entraînement déjà
+    /// écrit pour la même course (fin laissée à HealthKit puis écrite au déverrouillage) est rendu au lieu d'en écrire un second.
     public func save(_ entry: RunWorkoutEntry) async throws -> UUID {
+        if let existing = await savedWorkout(for: entry.sessionID) { return existing }
         let configuration = HKWorkoutConfiguration()
         configuration.activityType = .running
         configuration.locationType = .outdoor
@@ -110,9 +117,20 @@ public final class HealthKitRunRecorder: NSObject, RunWorkoutRecording, @uncheck
         if let distance = distanceSample(entry) { try await builder.addSamples([distance]) }
         try await builder.addMetadata([HKMetadataKeyExternalUUID: entry.sessionID.uuidString])
         try await builder.endCollection(at: entry.end)
-        guard let workout = try await builder.finishWorkout() else { throw WriteError.notSaved }
+        guard let workout = try await builder.finishWorkout() else { throw RunWorkoutWriteDeferred() }
         await saveRoute(entry.route, for: workout)
         return workout.uuid
+    }
+
+    /// L'entraînement que Pulse a déjà écrit pour la course `sessionID`, repéré par son identifiant externe ; `nil` si la lecture
+    /// échoue (iPhone verrouillé) ou ne trouve rien.
+    private func savedWorkout(for sessionID: UUID) async -> UUID? {
+        let ownWorkout = NSCompoundPredicate(andPredicateWithSubpredicates: [
+            HKQuery.predicateForObjects(withMetadataKey: HKMetadataKeyExternalUUID, allowedValues: [sessionID.uuidString]),
+            HKQuery.predicateForObjects(from: HKSource.default())
+        ])
+        let descriptor = HKSampleQueryDescriptor(predicates: [.workout(ownWorkout)], sortDescriptors: [], limit: 1)
+        return (try? await descriptor.result(for: store))?.first?.uuid
     }
 
     /// Supprime l'entraînement écrit par Pulse, sa distance, son énergie et son tracé.
@@ -135,6 +153,12 @@ public final class HealthKitRunRecorder: NSObject, RunWorkoutRecording, @uncheck
             }
             try await store.delete(workout)
         }
+    }
+
+    /// L'entraînement écrit par HealthKit au déverrouillage, sans identifiant connu de Pulse, retrouvé par celui de la course.
+    public func deleteWorkout(forRun sessionID: UUID) async throws {
+        guard let id = await savedWorkout(for: sessionID) else { return }
+        try await deleteWorkout(id: id)
     }
 
     /// Une reprise en cours est attendue d'abord : la séance qu'elle rattache est terminée avec le reste.
@@ -194,10 +218,6 @@ public final class HealthKitRunRecorder: NSObject, RunWorkoutRecording, @uncheck
     }
 
     // MARK: - Interne
-
-    enum WriteError: Error {
-        case notSaved
-    }
 
     private func attach(_ session: HKWorkoutSession, builder: HKLiveWorkoutBuilder) {
         let source = HKLiveWorkoutDataSource(healthStore: store, workoutConfiguration: session.workoutConfiguration)

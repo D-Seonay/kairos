@@ -22,16 +22,18 @@ extension RunSessionService {
         isTransitioning = true
         defer { isTransitioning = false }
         guard let draft = try? await drafts.load(), await recorder.recoverActiveSession() else { return nil }
+        // Un aperçu encore ouvert lâche la localisation, que la course reprend : sa fermeture ne l'arrêtera plus.
+        await stopPreview()
         let date = now()
         let builder = RunTrackBuilder.replay(startedAt: draft.startedAt, points: draft.points, pauses: draft.pauses)
         let active = ActiveRun(draft: draft, builder: builder, recordsHealth: true, at: date)
         var points: AsyncStream<RunTrackPoint>?
-        if !draft.locationDenied { points = await location.start() }
+        if !draft.locationDenied { points = await location.start(keepsRunningInBackground: true) }
         run = active
         consume(points: points, heartRates: nil)
         // La Live Activity a survécu au processus : elle est retrouvée par l'identifiant de la séance.
         await activity.update(activityState(of: active, at: date))
-        if !active.isPaused, !draft.locationDenied {
+        if !active.isPaused, active.watchesForgetting {
             await reminders.scheduleForgotten(at: active.reminderReference.addingTimeInterval(Self.forgottenAfter))
         }
         publish()
@@ -41,11 +43,15 @@ extension RunSessionService {
     // MARK: Internes
 
     /// La fin d'une course interrompue, même règle que l'oubli : son dernier déplacement, sa dernière reprise ou son départ, s'il
-    /// précède le dernier point, car les points à l'arrêt ne prolongent pas la course. Sans point (localisation refusée, pas de
-    /// signal), la dernière écriture du brouillon. Rend aussi la course rejouée avec tous ses points.
+    /// précède le dernier point, car les points à l'arrêt ne prolongent pas la course. Sans point retenu (localisation refusée,
+    /// pas de signal, positions toutes trop imprécises), le GPS ne dit rien du déplacement : la course va jusqu'à sa dernière
+    /// activité connue, la dernière écriture du brouillon, tenue à jour au fil du temps. Rend aussi la course rejouée avec tous
+    /// ses points.
     static func interruptedEnd(of draft: RunDraft) -> (end: Date, builder: RunTrackBuilder) {
         let builder = RunTrackBuilder.replay(startedAt: draft.startedAt, points: draft.points, pauses: draft.pauses)
-        guard let last = draft.points.last?.timestamp else { return (draft.updatedAt, builder) }
+        guard let last = draft.points.last?.timestamp, !builder.accepted.isEmpty else {
+            return (max(draft.updatedAt, draft.startedAt), builder)
+        }
         let lastResume = draft.pauses.compactMap(\.end).max() ?? draft.startedAt
         let movement = max(builder.lastMovementAt ?? draft.startedAt, lastResume, draft.startedAt)
         return (min(movement, max(last, draft.startedAt)), builder)

@@ -49,6 +49,18 @@ public enum RunText {
         String(localized: "Localisation refusée : seul le temps est enregistré.", bundle: .module)
     }
 
+    /// La position approximative ne mesure pas la distance : seul le temps compte, et le réglage qui la rétablit.
+    static var locationApproximate: String {
+        // swiftlint:disable:next line_length
+        String(localized: "Position précise désactivée : seul le temps est enregistré. Active « Position exacte » pour Pulse dans les réglages d'iOS pour mesurer la distance.",
+               bundle: .module)
+    }
+
+    /// L'état du GPS quand seule la position approximative est permise.
+    static var approximateStatus: String {
+        String(localized: "Position approximative", bundle: .module)
+    }
+
     static var strengthSessionActive: String {
         String(localized: "Une séance de musculation est en cours.", bundle: .module)
     }

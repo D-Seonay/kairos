@@ -25,6 +25,31 @@ struct RunSessionInterleavingTests {
         #expect(recap.session.distanceMeters == nil)
     }
 
+    /// Des positions toutes trop imprécises pour être retenues (localisation approximative, pas de signal) : la course
+    /// interrompue dure jusqu'à sa dernière activité connue, pas 0 minute.
+    @Test func interruptedRunWithoutRetainedPointKeepsItsDuration() async throws {
+        let fixture = RunSessionFixture()
+        let snapshot = try await fixture.service.start(.free())
+        let blurred = (1...20).map { second in
+            RunTraceFactory.point(northMeters: Double(second) * 3, second: second * 15, start: fixture.start, accuracy: 1_500)
+        }
+        await fixture.push(blurred)
+        for _ in 0..<6 { await fixture.tick(after: 10) }
+        let draft = try #require(try await fixture.drafts.load())
+        #expect(!draft.points.isEmpty)
+        let lastActivity = fixture.start.addingTimeInterval(360)
+        #expect(draft.updatedAt == lastActivity)
+
+        let relaunched = fixture.relaunched()
+        let offer = try #require(await relaunched.recoveryOffer())
+        #expect(offer.lastPointAt == lastActivity)
+        let recap = try await relaunched.saveInterrupted()
+        #expect(recap.session.id == snapshot.sessionID)
+        #expect(recap.session.endedAt == lastActivity)
+        #expect(abs((recap.session.durationMinutes ?? 0) - 6) < 0.01)
+        #expect(recap.track == nil)
+    }
+
     @Test func pausedRunKeepsItsDraftStill() async throws {
         let fixture = RunSessionFixture(location: StubRunLocationTracker(state: .denied))
         _ = try await fixture.service.start(.free())

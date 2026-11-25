@@ -40,9 +40,18 @@ struct ActiveRun {
     /// `nil` sans localisation : la course n'a que son temps.
     var distance: Double? { draft.locationDenied ? nil : builder.distanceMeters }
 
-    /// Le dernier déplacement, la dernière reprise ou le départ : le builder ne compte pas le point qui ouvre un segment.
+    /// Le dernier déplacement, la dernière reprise ou le premier point retenu (à défaut le départ) : le builder ne compte pas le
+    /// point qui ouvre un segment.
     var movementReference: Date {
-        max(builder.lastMovementAt ?? draft.startedAt, lastResumeAt ?? draft.startedAt, draft.startedAt)
+        let firstFix = builder.accepted.first?.timestamp ?? draft.startedAt
+        return max(builder.lastMovementAt ?? firstFix, lastResumeAt ?? draft.startedAt, draft.startedAt)
+    }
+
+    /// L'oubli n'est surveillé (rappel, alerte « Terminer ») qu'avec la localisation et au moins un point retenu : sans point assez
+    /// précis (position approximative, pas de signal), rien ne dit que le coureur ne bouge plus, et la course ne s'arrêterait
+    /// qu'à son départ.
+    var watchesForgetting: Bool {
+        !draft.locationDenied && !builder.accepted.isEmpty
     }
 
     /// Le brouillon est écrit maintenant : il est daté et le repère de la cadence revient à `date`.
