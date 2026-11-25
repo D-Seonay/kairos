@@ -52,8 +52,9 @@ extension ActiveSessionService {
                                     session: LiveSession, directory: ExerciseDirectory,
                                     profile: UserProfile?) async throws -> LiveExercise? {
         ReplacementPlanner.replacement(of: exercise, with: reference, reason: reason, directory: directory,
-                                       history: try await workouts.lastSets(for: reference, startedBefore: session.historyLimit),
+                                       history: try await workouts.lastSets(for: reference,
+                                                                            startedBefore: session.proposalHistoryLimit),
                                        settings: try await settings.settings(for: reference), profile: profile,
-                                       policy: session.policy)
+                                       policy: session.policy, loadFactor: session.addedLoadFactor)
     }
 }
