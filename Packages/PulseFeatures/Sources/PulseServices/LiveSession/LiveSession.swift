@@ -23,12 +23,18 @@ public struct LiveSession: Sendable, Equatable, Codable, Identifiable {
     /// La fin d'une séance passée saisie après coup (spec M4 §19.4) : ni repos, ni notification, ni Live Activity, et
     /// l'historique lu est celui d'avant `startedAt`. `nil` en direct ; optionnel, une séance enregistrée avant M4c se relit sans.
     public var pastEndedAt: Date?
+    /// Le facteur des charges externes proposées au lancement : 0,9 pendant une semaine de décharge (spec M6 §10). Il vaut
+    /// aussi pour les exercices ajoutés ou remplacés en séance. `nil` vaut 1 ; optionnel, une séance enregistrée avant se relit.
+    public var loadFactor: Double?
+    /// Pendant une décharge, son début : les charges des exercices ajoutés ou remplacés partent des séances d'avant, comme
+    /// celles du lancement, pour que la baisse de 10 % ne se cumule pas. `nil` hors décharge.
+    public var deloadStartedAt: Date?
 
     public init(formatVersion: Int = LiveSession.currentFormat, id: UUID = UUID(), title: String, startedAt: Date,
                 lastActionAt: Date, programID: UUID? = nil, routineDayID: UUID? = nil,
                 appliedAdjustments: [SessionAdjustment] = [], refusedAdjustments: [SessionAdjustment] = [],
                 policy: ProgressionPolicy = ProgressionPolicy(allowsIncrease: true), exercises: [LiveExercise] = [],
-                rest: LiveRest? = nil, pastEndedAt: Date? = nil) {
+                rest: LiveRest? = nil, pastEndedAt: Date? = nil, loadFactor: Double? = nil, deloadStartedAt: Date? = nil) {
         self.formatVersion = formatVersion
         self.id = id
         self.title = title
@@ -42,6 +48,8 @@ public struct LiveSession: Sendable, Equatable, Codable, Identifiable {
         self.exercises = exercises
         self.rest = rest
         self.pastEndedAt = pastEndedAt
+        self.loadFactor = loadFactor
+        self.deloadStartedAt = deloadStartedAt
     }
 
     /// Vrai pour une séance passée saisie après coup.
@@ -49,6 +57,13 @@ public struct LiveSession: Sendable, Equatable, Codable, Identifiable {
 
     /// L'historique que la séance lit : celui d'avant son début pour une séance passée, tout l'historique en direct.
     public var historyLimit: Date { isPastEntry ? startedAt : .distantFuture }
+
+    /// L'historique d'où partent les charges proposées aux exercices ajoutés ou remplacés : `historyLimit`, ramené au début de
+    /// la décharge pendant une décharge.
+    public var proposalHistoryLimit: Date { min(historyLimit, deloadStartedAt ?? .distantFuture) }
+
+    /// Le facteur des charges proposées aux exercices ajoutés ou remplacés : celui du lancement.
+    public var addedLoadFactor: Double { loadFactor ?? 1 }
 
     /// Les séries de travail prévues, échauffement exclu.
     public var plannedWorkingSets: Int {

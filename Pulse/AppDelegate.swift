@@ -22,11 +22,11 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         UNUserNotificationCenter.current().setNotificationCategories(UserNotificationScheduler.supplementCategories)
         self.notificationRouter = notificationRouter
         sessionIntents.install()
-        let refresher = dependencies.refresher
+        let dependencies = dependencies
         dependencies.backgroundDelivery?.start {
             // L'app ouverte lit elle-même au premier plan : une lecture d'arrière-plan l'annoncerait pendant qu'on la regarde.
             guard await Self.isInBackground() else { return }
-            _ = await refresher.refresh(origin: .background)
+            await Self.refreshInBackground(dependencies)
         }
         return true
     }
@@ -45,8 +45,17 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     /// Une livraison reçue iPhone verrouillé n'a rien pu lire : la lecture est refaite au déverrouillage.
     func applicationProtectedDataDidBecomeAvailable(_ application: UIApplication) {
         guard Self.isInBackground() else { return }
-        let refresher = dependencies.refresher
-        Task { _ = await refresher.refresh(origin: .background) }
+        let dependencies = dependencies
+        Task { await Self.refreshInBackground(dependencies) }
+    }
+
+    /// Le passage du jour en arrière-plan, puis les rappels de compléments : les règles anti-interférence du passage ont pu
+    /// déplacer une séance, et avec elle les rappels des jours d'entraînement. Un passage qui n'a pas tourné (onboarding pas
+    /// terminé) ne touche pas aux rappels.
+    private static func refreshInBackground(_ dependencies: AppDependencies) async {
+        let refresh = await dependencies.refresher.refresh(origin: .background)
+        guard refresh.profile?.onboardingCompletedAt != nil else { return }
+        await dependencies.supplementService.rescheduleReminders()
     }
 
     private static func isInBackground() -> Bool {

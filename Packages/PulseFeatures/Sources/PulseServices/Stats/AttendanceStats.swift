@@ -1,7 +1,7 @@
 import Foundation
 import PulseDomain
 
-/// Une case de la matrice d'assiduité : un jour et son niveau d'intensité, de 0 (aucune séance) à 4.
+/// Une case de la matrice d'assiduité : un jour et son niveau d'intensité, de 0 (aucune séance ni sortie à vélo) à 4.
 public struct AttendanceDay: Sendable, Equatable, Identifiable {
     public var date: Date
     public var level: Int
@@ -37,14 +37,15 @@ public struct AttendanceStats: Sendable, Equatable {
     // swiftlint:disable:next function_parameter_count
     public static func make(sessions: [WorkoutSession], target: Int, historyStart: Date?, period: StatsPeriod, now: Date,
                             calendar: Calendar) -> AttendanceStats {
-        // Les mêmes séances que la série : la matrice et les tuiles ne divergent pas.
+        // Les tuiles comptent les mêmes séances que la série. La matrice montre en plus les vélos terminés : le vélo ne compte
+        // pas pour la série (spec M6 §5), mais une sortie reste un jour d'activité.
         let counted = sessions.filter(WeekStreak.counts)
         let interval = period.interval(now: now, calendar: calendar)
         let inPeriod = counted.filter { interval.start <= $0.startedAt && $0.startedAt < interval.end }
         let minutes = inPeriod.compactMap { TrainingLoad.loadSession($0)?.minutes }
 
         return AttendanceStats(
-            weeks: matrix(counted, now: now, calendar: calendar),
+            weeks: matrix(sessions.filter(showsInMatrix), now: now, calendar: calendar),
             streak: WeekStreak.summary(sessions: sessions, target: target, historyStart: historyStart, now: now, calendar: calendar),
             best: WeekStreak.best(sessions: sessions, target: target, historyStart: historyStart, now: now, calendar: calendar),
             sessionsInPeriod: inPeriod.count,
@@ -54,6 +55,12 @@ public struct AttendanceStats: Sendable, Equatable {
             usualHour: usualHour(of: inPeriod, calendar: calendar),
             regularity: regularity(sessions: sessions, target: target, historyStart: historyStart, interval: interval, now: now,
                                    calendar: calendar))
+    }
+
+    /// Une case de la matrice : une séance qui compte pour la série, ou un vélo terminé (lu d'Apple Santé). Les abandons restent
+    /// hors de la matrice.
+    public static func showsInMatrix(_ session: WorkoutSession) -> Bool {
+        WeekStreak.counts(session) || (session.status == .completed && session.kind == .ride)
     }
 
     /// L'heure de début la plus fréquente, la plus tôt à égalité.
@@ -90,8 +97,8 @@ public struct AttendanceStats: Sendable, Equatable {
     }
     // swiftlint:enable function_parameter_count
 
-    /// Les 16 semaines qui finissent par la semaine en cours, de la plus ancienne à la plus récente.
-    private static func matrix(_ counted: [WorkoutSession], now: Date, calendar: Calendar) -> [[AttendanceDay]] {
+    /// Les 16 semaines qui finissent par la semaine en cours, de la plus ancienne à la plus récente, sur les séances `shown`.
+    private static func matrix(_ shown: [WorkoutSession], now: Date, calendar: Calendar) -> [[AttendanceDay]] {
         let today = calendar.startOfDay(for: now)
         let current = WeekSchedule.weekStart(of: now, calendar: calendar)
         let mondays = (0..<matrixWeeks).reversed().compactMap { calendar.date(byAdding: .weekOfYear, value: -$0, to: current) }
@@ -101,7 +108,7 @@ public struct AttendanceStats: Sendable, Equatable {
 
         var loads = [Date: Double]()
         var trained = Set<Date>()
-        for session in counted {
+        for session in shown {
             let day = calendar.startOfDay(for: session.startedAt)
             trained.insert(day)
             loads[day, default: 0] += TrainingLoad.loadSession(session)?.load ?? 0

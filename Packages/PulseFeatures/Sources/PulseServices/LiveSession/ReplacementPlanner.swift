@@ -35,10 +35,11 @@ public enum ReplacementPlanner {
     /// Les séries restantes de `exercise` passées à `reference` : autant de séries de travail que celles qui n'étaient pas
     /// validées, la même fourchette de répétitions, le même repos et le même plafond de RPE. Avec un historique, les valeurs
     /// proposées viennent de lui (§8.1) ; sans, de la charge équivalente au 1RM estimé de l'exercice remplacé, affichée comme
-    /// une proposition à ajuster. `nil` quand il ne reste aucune série à remplacer.
+    /// une proposition à ajuster. `nil` quand il ne reste aucune série à remplacer. `loadFactor` baisse les charges venues de
+    /// l'historique comme au lancement (0,9 en décharge) ; la charge équivalente part de l'exercice remplacé, déjà baissé.
     public static func replacement(of exercise: LiveExercise, with reference: ExerciseReference, reason: ReplacementReason,
                                    directory: ExerciseDirectory, history: [WorkoutSet], settings: ExerciseSettings?,
-                                   profile: UserProfile?, policy: ProgressionPolicy) -> LiveExercise? {
+                                   profile: UserProfile?, policy: ProgressionPolicy, loadFactor: Double = 1) -> LiveExercise? {
         let remaining = exercise.sets.filter { $0.setType != .warmup && $0.completedAt == nil }
         guard !remaining.isEmpty else { return nil }
         let reps = remaining.compactMap { $0.proposed.reps ?? $0.reps }
@@ -48,7 +49,8 @@ public enum ReplacementPlanner {
                                               restSeconds: exercise.restSeconds)
         var replacement = LiveSessionPlanner.exercise(
             reference, directory: directory, history: history, settings: settings, profile: profile, policy: policy,
-            workedMuscles: Set(directory.info(exercise.exercise)?.primaryMuscles ?? []), routineExercise: routineExercise)
+            workedMuscles: Set(directory.info(exercise.exercise)?.primaryMuscles ?? []), routineExercise: routineExercise,
+            loadFactor: loadFactor)
         replacement.restSeconds = exercise.restSeconds
         replacement.rpeCap = exercise.rpeCap
         replacement.supersetGroup = exercise.supersetGroup

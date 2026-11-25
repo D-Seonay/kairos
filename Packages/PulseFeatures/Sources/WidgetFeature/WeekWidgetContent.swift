@@ -36,6 +36,8 @@ public struct WeekWidgetContent: Sendable, Equatable {
     public var todayMuscleLevels: [MuscleMapRegion: Int]
     public var acwrRatio: Double
     public var acwrZoneText: String
+    /// La zone du ratio, qui colore son texte ; `nil` sans ratio (moins de 28 jours, pas d'instantané).
+    public var acwrZone: WidgetLoadZone?
     public var tomorrowText: String
     public var accessibilityLabel: String
     /// La silhouette de la carte, celle du profil quand l'instantané la donne.
@@ -49,6 +51,7 @@ public struct WeekWidgetContent: Sendable, Equatable {
         todayMuscleLevels: [MuscleMapRegion: Int],
         acwrRatio: Double,
         acwrZoneText: String,
+        acwrZone: WidgetLoadZone? = nil,
         tomorrowText: String,
         accessibilityLabel: String,
         muscleMapFigure: MuscleMapFigure = .female
@@ -60,6 +63,7 @@ public struct WeekWidgetContent: Sendable, Equatable {
         self.todayMuscleLevels = todayMuscleLevels
         self.acwrRatio = acwrRatio
         self.acwrZoneText = acwrZoneText
+        self.acwrZone = acwrZone
         self.tomorrowText = tomorrowText
         self.accessibilityLabel = accessibilityLabel
         self.muscleMapFigure = muscleMapFigure
@@ -116,7 +120,8 @@ public struct WeekWidgetContent: Sendable, Equatable {
         return WeekWidgetContent(
             badgeText: String(localized: "\(completed) sur \(target)", bundle: .module), days: days, todayTitle: title,
             todayMeta: meta, todayMuscleLevels: snapshot.sessionTitle.map(TodaySessionWidgetContent.defaultMuscleLevels(for:)) ?? [:],
-            acwrRatio: snapshot.loadRatio ?? 1, acwrZoneText: load, tomorrowText: next, accessibilityLabel: spoken,
+            acwrRatio: snapshot.loadRatio ?? 1, acwrZoneText: load, acwrZone: snapshot.loadRatio.map(WidgetPlanningText.zone(of:)),
+            tomorrowText: next, accessibilityLabel: spoken,
             muscleMapFigure: snapshot.muscleMapFigure ?? .female)
     }
 
@@ -168,6 +173,7 @@ public struct WeekWidgetContent: Sendable, Equatable {
             todayMuscleLevels: [.chest: 4, .triceps: 3, .frontDeltoid: 2],
             acwrRatio: 1.12,
             acwrZoneText: acwr,
+            acwrZone: .optimal,
             tomorrowText: tomorrow,
             accessibilityLabel: spoken
         )
