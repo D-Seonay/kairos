@@ -61,18 +61,33 @@ struct DailyScoreServiceTests: DailyScoreTesting {
         #expect(try await records(fixture, on: "2026-11-02T00:00").first?.isEstimated == false)
     }
 
-    @Test func noonFreezesTheExistingScore() async throws {
+    /// Un score écrit à 8 h sur une nuit partielle : la passe de midi applique d'abord la mesure fraîche, puis fige. Les
+    /// passes suivantes ne changent plus rien.
+    @Test func noonFreezesTheUpToDateScore() async throws {
         let fixture = fixture()
         let morning = TestClock.date("2026-11-02T08:00")
-        _ = try await fixture.service.update(nights: await nights(.badNight, at: morning), now: morning)
+        let first = try scored(try await fixture.service.update(nights: await nights(.badNight, at: morning), now: morning))
+        #expect(first.category == .moderateFatigue)
         let noon = TestClock.date("2026-11-02T12:00")
         let frozen = try scored(try await fixture.service.update(nights: await nights(.goodNight, at: noon), now: noon))
-        #expect(frozen.category == .moderateFatigue)
+        #expect(frozen.category == .optimal && frozen.sdnnMs == 56)
         #expect(frozen.frozenAt == noon)
+        #expect(frozen.id == first.id && frozen.createdAt == morning)
+        #expect(try await records(fixture, on: "2026-11-02T00:00") == [frozen])
         let again = TestClock.date("2026-11-02T15:00")
-        let unchanged = try scored(try await fixture.service.update(nights: await nights(.goodNight, at: again), now: again))
-        #expect(unchanged.category == .moderateFatigue)
-        #expect(unchanged.frozenAt == noon)
+        let unchanged = try scored(try await fixture.service.update(nights: await nights(.badNight, at: again), now: again))
+        #expect(unchanged == frozen)
+    }
+
+    /// À la passe qui fige, des données qui ne suffisent plus (lecture vide) gardent le score enregistré, et le figent.
+    @Test func noonFreezesTheStoredScoreWhenTheFreshDataFallShort() async throws {
+        let fixture = fixture()
+        let morning = TestClock.date("2026-11-02T08:00")
+        let first = try scored(try await fixture.service.update(nights: await nights(.goodNight, at: morning), now: morning))
+        let noon = TestClock.date("2026-11-02T12:10")
+        let frozen = try scored(try await fixture.service.update(nights: await nights(.noData, at: noon), now: noon))
+        #expect(frozen.score == first.score && frozen.category == first.category && frozen.frozenAt == noon)
+        #expect(try await records(fixture, on: "2026-11-02T00:00") == [frozen])
     }
 
     @Test func afterNoonWithoutScoreSavesAFrozenMeasure() async throws {
@@ -259,15 +274,30 @@ extension DailyScoreServiceTests {
         #expect(await repository.recoverySaves == 1)
     }
 
-    @Test func goalChangeIsIgnoredOnceFrozen() async throws {
+    /// La passe qui fige compte encore l'objectif du moment ; une fois le score figé, un nouvel objectif n'y change rien.
+    @Test func goalChangeIsAppliedByTheFreezingPassThenIgnored() async throws {
         let fixture = fixture()
         let first = try scored(try await fixture.service.update(nights: plainNights(), sleepGoalMinutes: 480,
                                                                 now: TestClock.date("2026-11-02T09:00")))
+        #expect(first.sleepScore == 87.5)
         let afterNoon = TestClock.date("2026-11-02T13:00")
         let frozen = try scored(try await fixture.service.update(nights: plainNights(), sleepGoalMinutes: 420, now: afterNoon))
-        #expect(frozen.sleepScore == 87.5 && frozen.score == first.score)
+        #expect(frozen.sleepScore == 100 && frozen.score > first.score)
         #expect(frozen.frozenAt == afterNoon)
-        #expect(try await records(fixture, on: "2026-11-02T00:00").first?.sleepScore == 87.5)
+        let later = try scored(try await fixture.service.update(nights: plainNights(), sleepGoalMinutes: 480,
+                                                                now: TestClock.date("2026-11-02T14:00")))
+        #expect(later == frozen)
+        #expect(try await records(fixture, on: "2026-11-02T00:00").first?.sleepScore == 100)
+    }
+
+    /// Un profil illisible à la passe qui fige : le score enregistré est figé tel quel, sans retomber sur l'objectif par défaut.
+    @Test func unreadableProfileFreezesTheStoredScoreAsIs() async throws {
+        let fixture = fixture()
+        let stored = try scored(try await fixture.service.update(nights: plainNights(), sleepGoalMinutes: 420,
+                                                                 now: TestClock.date("2026-11-02T09:00")))
+        let afterNoon = TestClock.date("2026-11-02T13:00")
+        let frozen = try scored(try await fixture.service.update(nights: plainNights(), sleepGoalMinutes: nil, now: afterNoon))
+        #expect(frozen.sleepScore == 100 && frozen.score == stored.score && frozen.frozenAt == afterNoon)
     }
 
     @Test func unreadableProfileKeepsTheStoredScore() async throws {
