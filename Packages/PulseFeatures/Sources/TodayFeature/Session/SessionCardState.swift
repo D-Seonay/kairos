@@ -36,6 +36,8 @@ struct RunCard: Equatable {
 
 /// Ce que la carte « Séance du jour » montre, d'après la séance du jour et le score.
 enum SessionCardState: Equatable {
+    /// Avant la première lecture du programme : la carte dit qu'elle lit, jamais « Aucune séance prévue » à tort.
+    case loading
     case strength(StrengthCard)
     /// Surmenage un jour de musculation : 20 min de mobilité ou repos complet, au choix ; la séance prévue reste disponible.
     case mobilityOrRest(dayName: String)

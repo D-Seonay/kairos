@@ -58,7 +58,10 @@ actor SwitchableHealthSource: HealthSampleSource {
         if fails { throw UnavailableHealthSource.Failure.unavailable }
     }
 
-    func requestAuthorization() async throws { try check() }
+    func requestAuthorization() async throws {
+        try check()
+        try await inner.requestAuthorization()
+    }
 
     func changes(of signal: NightSignal, since anchor: Data?, from start: Date) async throws -> HealthSampleChanges {
         try check()
@@ -83,6 +86,8 @@ struct TodayFixture {
     let liveSession: ActiveSessionService
     let source: SwitchableHealthSource
     let clock: MutableClock
+    /// Ce que l'appareil retient d'une fois sur l'autre : la demande d'accès à Apple Santé.
+    let once = InMemoryOnceLog()
     let environment: TodayEnvironment
 
     /// `health` remplace la source du scénario (par exemple une source qui compte ses lectures) ; `recovery` le dépôt des scores.
@@ -111,7 +116,8 @@ struct TodayFixture {
         environment = TodayEnvironment(
             refresher: refresher, workouts: workouts, userExercises: userExercises, exerciseSettings: exerciseSettings,
             activeSession: liveSession, library: .bundled, calendar: calendar, now: { clock.now },
-            nights: NightDetailService(cache: healthCache, calendar: calendar, now: { clock.now }))
+            nights: NightDetailService(cache: healthCache, calendar: calendar, now: { clock.now }),
+            healthAccess: HealthAccess(source: source, cache: healthCache, once: once))
     }
 
     func makeModel() -> TodayModel {

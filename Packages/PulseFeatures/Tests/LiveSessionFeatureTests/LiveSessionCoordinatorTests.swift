@@ -300,6 +300,42 @@ private func leftOpenSession(_ fixture: LiveFixture, until time: String) async t
     #expect(await fixture.authorizer.requestCount == 1)
 }
 
+@MainActor @Test func deniedNotificationsAreNotSaidAgainAfterARelaunch() async throws {
+    let fixture = LiveFixture(notificationsGranted: false)
+    let first = fixture.coordinator()
+    await first.start(LiveFixture.pushLaunch)
+    #expect(first.notice != nil)
+    _ = try await fixture.service.abandon(endedAt: LiveClock.date("2026-11-02T08:30"))
+    // Un coordinateur neuf sur les mêmes préférences : l'app relancée. L'autorisation est redemandée, l'avis ne revient pas.
+    let relaunched = fixture.coordinator()
+    await relaunched.start(LiveFixture.plankLaunch)
+    #expect(relaunched.isPresented)
+    #expect(relaunched.notice == nil)
+    #expect(await fixture.authorizer.requestCount == 2)
+}
+
+@MainActor @Test func noNoticeWhileTheRestEndNotificationIsOff() async throws {
+    let fixture = LiveFixture(notificationsGranted: false)
+    let profiles = fixture.environment.train.profiles
+    try await profiles.save(UserProfile(restTimerNotificationEnabled: false, createdAt: fixture.clock.now,
+                                        updatedAt: fixture.clock.now))
+    let coordinator = fixture.coordinator()
+    await coordinator.start(LiveFixture.pushLaunch)
+    // « Fin de repos » est coupée dans Pulse : rien ne sonnerait de toute façon, donc ni demande ni avis.
+    #expect(coordinator.isPresented)
+    #expect(coordinator.notice == nil)
+    #expect(await fixture.authorizer.requestCount == 0)
+    #expect(!fixture.environment.once.hasHappened(.notificationsDisabledNotice))
+    // Le réglage rallumé, la séance suivante demande et prévient, une fois.
+    _ = try await fixture.service.abandon(endedAt: LiveClock.date("2026-11-02T08:30"))
+    coordinator.didFinish()
+    _ = try await profiles.update { $0.restTimerNotificationEnabled = true }
+    await coordinator.start(LiveFixture.plankLaunch)
+    #expect(coordinator.notice != nil)
+    #expect(await fixture.authorizer.requestCount == 1)
+    #expect(fixture.environment.once.hasHappened(.notificationsDisabledNotice))
+}
+
 @MainActor @Test func presentingAnExistingSessionNeitherAsksNorWarnsAboutNotifications() async throws {
     let fixture = LiveFixture(notificationsGranted: false)
     _ = try await fixture.service.start(LiveFixture.pushLaunch)

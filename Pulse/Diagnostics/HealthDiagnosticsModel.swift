@@ -3,6 +3,7 @@ import Observation
 import PulseDomain
 import PulseHealth
 import PulseRecoveryEngine
+import PulseServices
 
 /// Une ligne de l'écran de diagnostic : dernier échantillon d'un type et volume sur 60 jours.
 struct DiagnosticRow: Identifiable, Equatable {
@@ -51,6 +52,8 @@ final class HealthDiagnosticsModel {
 
         do {
             try await health.requestReadAuthorization()
+            // La demande d'accès vient d'être faite : les Paramètres n'ont plus à offrir « Connecter Apple Santé ».
+            dependencies.once.record(.healthAccessRequest)
 
             let sdnn = try await health.sdnnSamples(from: from, to: to)
             let restingHeartRate = try await health.restingHeartRateSamples(from: from, to: to)

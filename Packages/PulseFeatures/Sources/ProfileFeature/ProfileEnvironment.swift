@@ -44,6 +44,9 @@ public struct ProfileEnvironment: Sendable {
     /// Le plan du sommeil d'aujourd'hui (objectif, réveils, coucher conseillé) ; `nil` : le pied de la section « Sommeil » invite à
     /// choisir un réveil.
     public var sleepPlan: @Sendable () async -> SleepPlan?
+    /// La demande d'accès à Apple Santé, pour « Connecter Apple Santé » dans la section Apple Santé ; `nil` : la section ne
+    /// l'offre pas.
+    public var healthAccess: HealthAccess?
 
     /// Les photos de corps ne s'offrent qu'avec leur service et leur authentificateur : jamais d'écran ouvert sans verrou.
     public var offersBodyPhotos: Bool {
@@ -60,7 +63,7 @@ public struct ProfileEnvironment: Sendable {
                 ownerAuthentication: (any DeviceOwnerAuthenticating)? = nil,
                 bodyPhotoLock: any BodyPhotoLockStore = InMemoryBodyPhotoLockStore(),
                 bodyPhotoReminders: BodyPhotoReminders? = nil, train: TrainEnvironment? = nil,
-                sleepPlan: @escaping @Sendable () async -> SleepPlan? = { nil }) {
+                sleepPlan: @escaping @Sendable () async -> SleepPlan? = { nil }, healthAccess: HealthAccess? = nil) {
         self.profile = profile
         self.body = body
         self.settings = settings
@@ -82,6 +85,7 @@ public struct ProfileEnvironment: Sendable {
         self.bodyPhotoReminders = bodyPhotoReminders
         self.train = train
         self.sleepPlan = sleepPlan
+        self.healthAccess = healthAccess
     }
 }
 

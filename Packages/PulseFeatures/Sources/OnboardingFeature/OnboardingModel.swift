@@ -103,6 +103,8 @@ public final class OnboardingModel {
         var hints: HealthProfileHints?
         do {
             try await environment.health.requestAuthorization()
+            // La demande est faite : iOS liste désormais Pulse dans Réglages › Santé, quoi que la personne ait répondu.
+            environment.once.record(.healthAccessRequest)
             hints = try? await environment.health.profileHints()
         } catch {
             errorMessage = String(localized: "Pulse n'a pas pu accéder à Apple Santé. Tu peux continuer sans.", bundle: .module)

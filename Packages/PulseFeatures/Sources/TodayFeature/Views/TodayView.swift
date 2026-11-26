@@ -93,7 +93,7 @@ public struct TodayView: View {
                 TodayHeader(model: model, onOpenProfile: onOpenProfile)
                 recoveryOrCheckIn
                 SessionCard(model: model, onWhy: model.openWhy, onResume: onResumeSession, onStartRun: onStartRun,
-                            onCreateRoutine: onCreateRoutine)
+                            onCreateRoutine: onCreateRoutine, onStartWithoutCheckIn: startSession)
                 if let offer = model.deloadOffer {
                     DeloadOfferCard(offer: offer, errorMessage: model.deloadErrorMessage) { accepted in
                         Task { await model.decideDeload(accepted) }
@@ -133,7 +133,8 @@ public struct TodayView: View {
     }
 
     /// Le libellé du bouton ancré, `nil` quand la séance du jour n'est pas une musculation à lancer, ou tant que le check-in
-    /// attend ses réponses : « Démarrer » ne se superpose pas au formulaire et à son propre bouton.
+    /// attend ses réponses : « Démarrer » ne se superpose pas au formulaire et à son propre bouton. La carte de la séance offre
+    /// alors « Démarrer sans check-in ».
     private var startTitle: String? {
         if case .needsCheckIn = model.score { return nil }
         guard case .strength(let card) = model.card else { return nil }
@@ -158,6 +159,14 @@ public struct TodayView: View {
         onResumeSession()
     }
 
+    /// L'accès à Apple Santé n'a jamais été demandé (étape passée à l'onboarding) : la bannière du check-in offre de le
+    /// connecter ; `nil` sinon, la bannière parle des données de nuit qui manquent.
+    private var healthOffer: CheckInHealthOffer? {
+        guard !model.healthAccessRequested else { return nil }
+        return CheckInHealthOffer(connect: { Task { await model.connectHealth() } }, isConnecting: model.isConnectingHealth,
+                                  errorMessage: model.healthAccessError)
+    }
+
     /// Les données ne suffisent pas : le check-in prend la place de la carte de récupération, la séance reste dessous. L'erreur
     /// d'enregistrement s'affiche juste au-dessus du bouton du check-in.
     @ViewBuilder
@@ -165,12 +174,13 @@ public struct TodayView: View {
         if case .needsCheckIn = model.score {
             VStack(spacing: 12) {
                 CheckInView(form: model.checkIn, scrollable: false, errorMessage: model.errorMessage,
-                            isSubmitting: model.isSubmittingCheckIn) { _ in
+                            isSubmitting: model.isSubmittingCheckIn, healthOffer: healthOffer) { _ in
                     Task { await model.submitCheckIn() }
                 }
             }
             // Le message apparaît sous le focus, sur un conteneur qui reste là : l'annonce suit son changement.
             .pulseAnnounceError(model.errorMessage)
+            .pulseAnnounceError(model.healthAccessError)
         } else {
             RecoveryCard(score: model.score, factors: model.factors, marker: model.marker, spokenMarker: model.spokenMarker,
                          onWhy: model.openWhy, isLoading: model.isLoading, scoreFailed: model.scoreFailed)

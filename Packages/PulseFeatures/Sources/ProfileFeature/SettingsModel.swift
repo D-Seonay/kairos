@@ -16,6 +16,11 @@ public final class SettingsModel {
     /// Un échec de plus : la même erreur revue est annoncée à nouveau.
     public private(set) var failureCount = 0
     public private(set) var isRefreshingHealth = false
+    /// Faux tant que l'accès à Apple Santé n'a jamais été demandé sur cet appareil (étape passée à l'onboarding) : la section
+    /// offre « Connecter Apple Santé ». HealthKit ne dit pas si la lecture est accordée : ce n'est pas un état « connecté ».
+    public private(set) var healthAccessRequested = true
+    /// Vrai pendant la demande d'accès : le bouton reste inactif.
+    public private(set) var isConnectingHealth = false
     public private(set) var hasLoaded = false
     /// Les annonces vocales à chaque kilomètre de la course ; un réglage par appareil, hors du profil.
     public private(set) var announcesKilometres = true
@@ -43,6 +48,7 @@ public final class SettingsModel {
         }
         sleepPlan = await environment.sleepPlan()
         await readHealth()
+        healthAccessRequested = await environment.healthAccess?.wasRequested() ?? true
         await refreshNotificationStatus()
         hasLoaded = true
     }
@@ -98,6 +104,24 @@ public final class SettingsModel {
         defer { isRefreshingHealth = false }
         await environment.refreshHealth()
         await readHealth()
+    }
+
+    /// « Connecter Apple Santé » : la demande d'accès de l'onboarding, puis le passage du jour comme au retour au premier plan,
+    /// pour qu'un score mesuré arrive sans relancer l'app. Un appel pendant une demande est ignoré ; une demande qui échoue
+    /// (Apple Santé indisponible) affiche son message et garde l'offre.
+    public func connectHealth() async {
+        guard let access = environment.healthAccess, !isConnectingHealth else { return }
+        isConnectingHealth = true
+        defer { isConnectingHealth = false }
+        do {
+            try await access.request()
+        } catch {
+            fail(String(localized: "Pulse n'a pas pu accéder à Apple Santé.", bundle: .module))
+            return
+        }
+        healthAccessRequested = true
+        errorMessage = nil
+        await refreshHealth()
     }
 
     /// Relit l'autorisation des notifications : au retour des réglages d'iOS, le message suit. Pas encore demandée, elle n'affiche

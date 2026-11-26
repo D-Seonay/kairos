@@ -186,12 +186,14 @@ enum OnboardingCopy {
     }
 
     /// Pourquoi le check-in remplace le score mesuré : Apple Santé ignoré à l'écran 2, ou pas assez de nuits pour la ligne de base.
+    /// Apple Santé ignoré, l'accès se demandera depuis Pulse (« Connecter Apple Santé », dans les Paramètres) : iOS ne liste pas
+    /// l'app dans Réglages › Santé tant qu'elle ne l'a jamais demandé.
     static func calibrationExplanation(healthSkipped: Bool) -> String {
         if healthSkipped {
             return String(
                 localized: """
-                    Sans Apple Santé, Pulse estime ta récupération avec trois questions. Tu pourras autoriser l'accès plus tard \
-                    dans Réglages › Santé.
+                    Sans Apple Santé, Pulse estime ta récupération avec trois questions. Tu pourras connecter Apple Santé plus tard \
+                    dans Profil › Paramètres.
                     """,
                 bundle: .module)
         }

@@ -12,7 +12,7 @@ public final class LiveSessionCoordinator {
     public private(set) var current: LiveSession?
     public var isPresented = false
     public private(set) var errorMessage: String?
-    /// Un avertissement affiché une seule fois (notifications refusées).
+    /// Un avertissement affiché une seule fois par appareil (notifications refusées).
     public private(set) var notice: String?
     /// Une demande de note attend la fermeture de l'écran de séance (`takePendingReview()`).
     public private(set) var isReviewPending = false
@@ -44,8 +44,8 @@ public final class LiveSessionCoordinator {
     }
 
     /// Présente la séance en cours si elle existe, sinon en démarre une. Un second appel pendant un démarrage est ignoré. Une
-    /// séance neuve demande l'autorisation des notifications (une fois par lancement) et signale un refus une fois ; présenter
-    /// une séance déjà en cours n'y touche pas.
+    /// séance neuve demande l'autorisation des notifications (une fois par lancement) et signale un refus une seule fois par
+    /// appareil, tant que le réglage « Fin de repos » est allumé ; présenter une séance déjà en cours n'y touche pas.
     public func start(_ launch: SessionLaunch) async {
         guard !isStarting else { return }
         isStarting = true
@@ -164,10 +164,15 @@ public final class LiveSessionCoordinator {
         errorMessage = nil
     }
 
+    /// L'autorisation ne sert ici qu'à la notification de fin de repos : « Fin de repos » coupée dans Pulse, rien n'est demandé
+    /// ni signalé, et la demande reste à faire pour le jour où le réglage revient. L'avis d'un refus est retenu dans les
+    /// préférences : il ne revient pas à chaque lancement.
     private func requestNotificationsOnce() async {
-        guard !hasRequestedAuthorization else { return }
+        guard !hasRequestedAuthorization, await environment.service.restNotificationsEnabled() else { return }
         hasRequestedAuthorization = true
-        guard !(await environment.notifications.requestAuthorization()) else { return }
+        guard !(await environment.notifications.requestAuthorization()),
+              !environment.once.hasHappened(.notificationsDisabledNotice) else { return }
+        environment.once.record(.notificationsDisabledNotice)
         notice = String(localized: """
             Notifications désactivées : la fin du repos ne sonnera pas écran verrouillé. Tu peux les activer dans Réglages.
             """, bundle: .module)

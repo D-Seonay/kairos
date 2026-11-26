@@ -11,7 +11,9 @@ public enum LiveSessionChange: Sendable, Equatable {
     case validate(exercise: UUID, set: UUID)
     case unvalidate(exercise: UUID, set: UUID)
     /// `nil` laisse une valeur telle quelle, `.some(nil)` l'efface. Changer la charge, les répétitions ou la durée marque la
-    /// série modifiée ; le RPE, qui n'est jamais proposé, non.
+    /// série modifiée ; le RPE, qui n'est jamais proposé, non. La charge d'une série de travail devient aussi la proposition
+    /// des séries de travail suivantes qui portaient la même charge qu'elle, tant qu'elles ne sont ni validées ni modifiées ;
+    /// les répétitions et la durée ne se reportent jamais.
     case edit(exercise: UUID, set: UUID, weightKg: Double?? = nil, reps: Int?? = nil, durationSeconds: Int?? = nil,
               rpe: Double?? = nil)
     case setType(exercise: UUID, set: UUID, SetType)
@@ -61,8 +63,13 @@ extension LiveSession {
         case let .unvalidate(exercise, set):
             updateSet(set, of: exercise) { $0.completedAt = nil }
         case let .edit(exercise, set, weightKg, reps, durationSeconds, rpe):
+            let previousWeight = self.set(set, of: exercise)?.weightKg
             updateSet(set, of: exercise) { $0.edit(weightKg: weightKg, reps: reps, durationSeconds: durationSeconds, rpe: rpe) }
-            if weightKg != nil { updateExercise(exercise) { $0.refreshWarmups(afterEditing: set) } }
+            guard let weightKg else { return }
+            updateExercise(exercise) {
+                $0.carryLoad(weightKg, from: set, replacing: previousWeight)
+                $0.refreshWarmups(afterEditing: set)
+            }
         case let .setType(exercise, set, type):
             updateSet(set, of: exercise) { $0.setType = type }
         case let .addSet(exercise):
@@ -131,14 +138,7 @@ extension LiveSession {
         exercise.sets[setIndex] = set
         if seeds {
             let proposal = ProposedSet(weightKg: set.weightKg, reps: set.reps, durationSeconds: set.durationSeconds)
-            for index in exercise.sets.indices.dropFirst(setIndex + 1) {
-                let next = exercise.sets[index]
-                guard !next.isEdited, next.completedAt == nil, next.setType != .warmup else { continue }
-                exercise.sets[index] = LiveSet(id: next.id, setType: next.setType, previous: next.previous,
-                                               previousSpoken: next.previousSpoken, proposed: proposal,
-                                               weightKg: proposal.weightKg, reps: proposal.reps,
-                                               durationSeconds: proposal.durationSeconds, rpe: next.rpe)
-            }
+            for index in exercise.proposableSets(after: setIndex) { exercise.propose(proposal, at: index) }
         }
         exercises[exerciseIndex] = exercise
     }
@@ -183,6 +183,35 @@ extension LiveSession {
 }
 
 private extension LiveExercise {
+    /// Les séries de travail après `index` dont Pulse peut encore changer la proposition : ni validées, ni modifiées à la main.
+    func proposableSets(after index: Int) -> [Int] {
+        sets.indices.dropFirst(index + 1).filter {
+            !sets[$0].isEdited && sets[$0].completedAt == nil && sets[$0].setType != .warmup
+        }
+    }
+
+    /// Remplace la proposition d'une série non modifiée : ses valeurs la suivent, elle reste non modifiée.
+    mutating func propose(_ proposal: ProposedSet, at index: Int) {
+        let set = sets[index]
+        sets[index] = LiveSet(id: set.id, setType: set.setType, previous: set.previous, previousSpoken: set.previousSpoken,
+                              proposed: proposal, weightKg: proposal.weightKg, reps: proposal.reps,
+                              durationSeconds: proposal.durationSeconds, rpe: set.rpe)
+    }
+
+    /// Reporte la charge saisie sur la série de travail `setID` (« la machine est légère aujourd'hui, +5 kg ») : les séries de
+    /// travail suivantes qui portaient `previous`, sa charge d'avant, la prennent pour proposition. Une série validée, modifiée
+    /// à la main ou d'échauffement n'est jamais touchée, ni une série qui portait une autre charge (une montée en charge garde
+    /// ses paliers). Les répétitions et la durée restent celles de chaque série.
+    mutating func carryLoad(_ weightKg: Double?, from setID: UUID, replacing previous: Double?) {
+        guard weightKg != previous, let index = sets.firstIndex(where: { $0.id == setID }),
+              sets[index].setType != .warmup else { return }
+        for next in proposableSets(after: index) where sets[next].weightKg == previous {
+            var proposal = sets[next].proposed
+            proposal.weightKg = weightKg
+            propose(proposal, at: next)
+        }
+    }
+
     /// Change le nombre de séries d'échauffement et les recalcule, tant qu'aucune n'est validée et que la première série de
     /// travail ne l'est pas non plus. Sans plan d'échauffement (exercice que Pulse n'échauffe pas aujourd'hui), le réglage
     /// vaudra pour les prochaines séances.

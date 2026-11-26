@@ -41,6 +41,8 @@ public final class TrainModel {
     public private(set) var activeSessionTitle: String?
     /// Le jour de la semaine de la dernière lecture, pour dire « aujourd'hui » ou « demain » de la prochaine course.
     private(set) var weekday: Weekday?
+    /// Vrai une fois le programme lu : avant, l'onglet ne dit ni « Aucun programme actif » ni « Aucune course au programme ».
+    public private(set) var hasLoaded = false
 
     @ObservationIgnored let environment: TrainEnvironment
     /// Le profil et le score du jour de la dernière lecture : ils règlent ce qu'une séance lancée applique.
@@ -80,6 +82,7 @@ public final class TrainModel {
             let upcoming = program.flatMap { nextRun(in: $0, now: now, overrides: overrides) }
             nextRun = upcoming?.session
             nextRunDaysAhead = upcoming?.daysAhead
+            hasLoaded = true
             errorMessage = nil
         } catch {
             errorMessage = String(localized: "Pulse n'a pas pu lire ton programme.", bundle: .module)
