@@ -101,6 +101,11 @@ public final class TrainModel {
         RoutineEditorModel(environment: environment, programID: programID, dayID: dayID)
     }
 
+    /// Le modèle de l'éditeur de la course `dayID` du programme `programID`.
+    public func runDayEditorModel(programID: UUID, dayID: UUID) -> RunDayEditorModel {
+        RunDayEditorModel(environment: environment, programID: programID, dayID: dayID)
+    }
+
     /// Le modèle de l'historique des séances, sur le même environnement que l'onglet.
     public func historyModel() -> HistoryModel {
         HistoryModel(environment: environment)

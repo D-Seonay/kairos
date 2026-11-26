@@ -33,4 +33,9 @@ public enum TrainIdentifiers {
     public static let sessionDelete = "session.delete"
     public static let routineSave = "routine.save"
     public static let routineAddExercises = "routine.add"
+    public static let runDayAdd = "program.run.add"
+    public static let runDayPrefix = "program.run."
+    public static let runDayType = "run.type"
+    public static let runDayGoal = "run.goal"
+    public static let runDaySave = "run.save"
 }

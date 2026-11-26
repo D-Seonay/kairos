@@ -9,6 +9,23 @@ public enum RunGoal: Sendable, Equatable {
     case kilometres(Double)
 }
 
+/// La forme d'un objectif de course, sans sa valeur : ce que l'éditeur fait choisir d'abord.
+public enum RunGoalKind: Sendable, Equatable, CaseIterable {
+    case none
+    case duration
+    case distance
+}
+
+extension RunGoal {
+    public var kind: RunGoalKind {
+        switch self {
+        case .none: .none
+        case .minutes: .duration
+        case .kilometres: .distance
+        }
+    }
+}
+
 /// Les bornes que l'éditeur impose à l'objectif d'un jour de course, et ses valeurs de départ.
 public enum RunDayRules {
     public static let minutes = 10...240

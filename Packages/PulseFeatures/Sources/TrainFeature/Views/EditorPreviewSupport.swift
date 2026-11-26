@@ -14,6 +14,8 @@ struct ProgramEditorPreviewHost: View {
                     .navigationDestination(for: TrainDestination.self) { destination in
                         if case .routine(let program, let day) = destination {
                             RoutineEditorView(model: train.routineEditorModel(programID: program, dayID: day))
+                        } else if case .run(let program, let day) = destination {
+                            RunDayEditorView(model: train.runDayEditorModel(programID: program, dayID: day))
                         }
                     }
             } else {
@@ -50,6 +52,29 @@ struct RoutineEditorPreviewHost: View {
             await train.refresh()
             if let programID = train.program?.id, let dayID = train.routines.first?.day.id {
                 editor = train.routineEditorModel(programID: programID, dayID: dayID)
+            }
+        }
+        .preferredColorScheme(.light)
+    }
+}
+
+/// Affiche l'éditeur de la première course du programme « Renforcement coureur » en mémoire.
+struct RunDayEditorPreviewHost: View {
+    @State private var editor: RunDayEditorModel?
+
+    var body: some View {
+        NavigationStack {
+            if let editor {
+                RunDayEditorView(model: editor)
+            } else {
+                ProgressView()
+            }
+        }
+        .task {
+            let train = await TrainPreviewSupport.model(now: TrainPreviewSupport.date(day: 2, hour: 9), templateID: "runner-strength")
+            await train.refresh()
+            if let programID = train.program?.id, let dayID = train.routines.first(where: { $0.day.kind == .run })?.day.id {
+                editor = train.runDayEditorModel(programID: programID, dayID: dayID)
             }
         }
         .preferredColorScheme(.light)
