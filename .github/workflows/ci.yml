@@ -32,7 +32,8 @@ jobs:
       - name: Lint
         run: make lint
       - name: Tests des packages
-        run: make test-packages
+        # -k : un package en échec n'empêche pas de tester les suivants.
+        run: make -k test-packages
 
   app:
     name: Compilation Release de l'app
