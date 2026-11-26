@@ -101,3 +101,17 @@ public struct WorkoutSession: Sendable, Equatable, Codable, Identifiable {
         self.updatedAt = updatedAt
     }
 }
+
+extension WorkoutSession {
+    /// Vrai pour une séance faite pendant une décharge appliquée (spec M6 §10) : ses charges, baissées de 10 %, ne sont ni un
+    /// niveau atteint (plateau) ni une référence pour les charges proposées ensuite. Une décharge refusée ne compte pas : la
+    /// séance a été faite aux charges habituelles.
+    public var isDeloaded: Bool {
+        Self.isDeloaded(applied: appliedAdjustments)
+    }
+
+    /// La même lecture sur les seuls ajustements appliqués, pour qui ne charge pas la séance entière.
+    public static func isDeloaded(applied adjustments: [SessionAdjustment]) -> Bool {
+        adjustments.contains { $0.kind == .deload }
+    }
+}

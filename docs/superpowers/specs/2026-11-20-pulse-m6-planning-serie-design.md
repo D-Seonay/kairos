@@ -165,7 +165,7 @@ Chaque ligne de règle porte le `moveReason` de la règle et un `moveReasonText`
 
 **Pendant une décharge acceptée**, chaque séance de routine lancée :
 - perd 40 % de ses séries, avant les ajustements du score du jour ;
-- reçoit des charges proposées 10 % plus basses, arrondies comme d'habitude, calculées sur les séances d'avant la décharge pour que la baisse ne se cumule pas. Après la décharge, la progression repart des charges de la décharge **(choix du constructeur)** ;
+- reçoit des charges proposées 10 % plus basses, arrondies comme d'habitude, calculées sur les séances d'avant la décharge pour que la baisse ne se cumule pas. Après la décharge, la progression repart des charges d'avant la décharge : une séance qui porte `.deload` dans `appliedAdjustments` n'est jamais « la dernière fois » d'une séance suivante, en décharge ou non (une décharge refusée, faite aux charges habituelles, le reste). La première version repartait des charges de la décharge, et il fallait remonter les 10 % ;
 - ne peut pas monter en charge ;
 - porte l'ajustement `.deload` dans `appliedAdjustments`.
 

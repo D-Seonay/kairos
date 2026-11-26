@@ -166,7 +166,7 @@ public actor InMemoryWorkoutRepository: WorkoutRepository {
     /// Séries hors échauffement de la dernière séance terminée ou abandonnée contenant l'exercice et commencée avant `date`,
     /// dans l'ordre.
     public func lastSets(for exercise: ExerciseReference, startedBefore date: Date) async throws -> [WorkoutSet] {
-        let finished = stored.values.filter { $0.status != .inProgress && $0.startedAt < date }.sorted { lhs, rhs in
+        let finished = stored.values.filter { $0.status != .inProgress && $0.startedAt < date && !$0.isDeloaded }.sorted { lhs, rhs in
             lhs.startedAt != rhs.startedAt ? lhs.startedAt > rhs.startedAt : lhs.createdAt > rhs.createdAt
         }
         for session in finished {

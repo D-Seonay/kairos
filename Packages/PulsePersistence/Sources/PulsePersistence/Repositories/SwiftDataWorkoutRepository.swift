@@ -84,7 +84,8 @@ public actor SwiftDataWorkoutRepository: WorkoutRepository {
     }
 
     /// Séries hors échauffement de la dernière séance terminée ou abandonnée contenant l'exercice et commencée avant `date`,
-    /// dans l'ordre. Une séance qui ne contient que des échauffements de l'exercice est ignorée.
+    /// dans l'ordre. Une séance qui ne contient que des échauffements de l'exercice est ignorée, une séance faite en décharge
+    /// appliquée aussi : ses charges baissées ne sont pas une référence.
     /// Lit les séries de l'exercice (et non chaque séance) : seules les séries à retenir deviennent des valeurs du domaine.
     public func lastSets(for exercise: ExerciseReference, startedBefore date: Date) throws -> [WorkoutSet] {
         let contentID = exercise.contentID
@@ -99,8 +100,16 @@ public actor SwiftDataWorkoutRepository: WorkoutRepository {
         let candidates = try modelContext.fetch(descriptor).compactMap { stored in
             stored.session.flatMap { $0.startedAt < date ? (session: $0, set: stored) : nil }
         }
-        guard let latest = candidates.map(\.session).max(by: Self.isEarlier) else { return [] }
+        // De la plus récente à la plus ancienne : les ajustements ne sont décodés que jusqu'à la première séance hors décharge.
+        let sessions = candidates.map(\.session).sorted { Self.isEarlier($1, $0) }
+        guard let latest = sessions.first(where: { !Self.isDeloaded($0) }) else { return [] }
         return candidates.filter { $0.session === latest }.map { $0.set.toDomain() }.sorted { $0.order < $1.order }
+    }
+
+    /// Vrai pour une séance faite en décharge appliquée, lue sur la colonne des ajustements sans charger la séance.
+    private static func isDeloaded(_ session: StoredWorkoutSession) -> Bool {
+        WorkoutSession.isDeloaded(
+            applied: CodableColumn.decode([SessionAdjustment].self, from: session.appliedAdjustments, default: []))
     }
 
     private static func isEarlier(_ lhs: StoredWorkoutSession, _ rhs: StoredWorkoutSession) -> Bool {

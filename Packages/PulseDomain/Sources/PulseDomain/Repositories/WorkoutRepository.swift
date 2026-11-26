@@ -9,7 +9,9 @@ public protocol WorkoutRepository: Sendable {
     func delete(id: UUID) async throws
     /// Séries hors échauffement (travail, dégressives, échec) de la dernière séance terminée ou abandonnée, non supprimée,
     /// contenant l'exercice et commencée avant `date`, triées par ordre. Une séance en cours n'est pas « la dernière fois ».
-    /// Une séance saisie après coup (spec M4 §19.4) lit ainsi l'historique antérieur à son début.
+    /// Une séance saisie après coup (spec M4 §19.4) lit ainsi l'historique antérieur à son début. Une séance faite en décharge
+    /// appliquée (`WorkoutSession.isDeloaded`) n'est jamais « la dernière fois » : les charges proposées repartent de la séance
+    /// d'avant la décharge.
     func lastSets(for exercise: ExerciseReference, startedBefore date: Date) async throws -> [WorkoutSet]
     /// Le nombre de séances Pulse (`source == .pulse`) de ce genre, terminées et non supprimées : la demande de note.
     func completedPulseSessionCount(kind: SessionKind) async throws -> Int

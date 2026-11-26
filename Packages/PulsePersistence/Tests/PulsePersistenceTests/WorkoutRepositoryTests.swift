@@ -118,6 +118,27 @@ private func benchSession(day offset: Int, status: SessionStatus, sets: [Workout
     #expect(try await repo.lastSets(for: .content(id: "bench-press-barbell")).map(\.actualReps) == [9, 7])
 }
 
+/// Une séance faite en décharge appliquée n'est pas « la dernière fois » ; refusée, elle a été faite aux charges habituelles
+/// et compte.
+@Test func lastSetsSkipASessionDoneUnderAnAppliedDeload() async throws {
+    let repo = SwiftDataWorkoutRepository(modelContainer: try TestContainer.make())
+    let deload = SessionAdjustment(kind: .deload, reason: "Semaine de décharge", value: 0.4)
+    let before = benchSession(day: 1, status: .completed, sets: [benchSet(order: 1, reps: 9), benchSet(order: 2, reps: 7)])
+    var deloaded = benchSession(day: 9, status: .completed, sets: [benchSet(order: 1, reps: 11), benchSet(order: 2, reps: 11)])
+    deloaded.appliedAdjustments = [SessionAdjustment(kind: .rest, reason: "Repos +15 s", value: 15), deload]
+    for session in [before, deloaded] { try await repo.save(session) }
+    let bench = ExerciseReference.content(id: "bench-press-barbell")
+    #expect(try await repo.lastSets(for: bench).map(\.actualReps) == [9, 7])
+
+    var refused = benchSession(day: 11, status: .completed, sets: [benchSet(order: 1, reps: 6)])
+    refused.refusedAdjustments = [deload]
+    try await repo.save(refused)
+    #expect(try await repo.lastSets(for: bench).map(\.actualReps) == [6])
+    try await repo.delete(id: before.id)
+    try await repo.delete(id: refused.id)
+    #expect(try await repo.lastSets(for: bench).isEmpty, "Sans séance hors décharge, pas de référence")
+}
+
 // MARK: - Séances importées d'Apple Health : magasin local
 
 private func counts(_ container: ModelContainer) throws -> (synced: Int, local: Int) {
