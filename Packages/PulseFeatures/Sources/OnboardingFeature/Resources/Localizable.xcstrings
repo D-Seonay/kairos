@@ -1426,6 +1426,16 @@
           }
         }
       }
+    },
+    "Les sorties que demande ton curseur sont déjà placées dans chaque semaine." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les sorties que demande ton curseur sont déjà placées dans chaque semaine."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

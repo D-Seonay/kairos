@@ -1,4 +1,5 @@
 import Foundation
+import PulseContent
 import PulseDomain
 import PulseServices
 import Testing
@@ -99,6 +100,28 @@ struct RunDayEditorTests {
         let run = try #require(replaced.days.first { $0.id == runID })
         #expect(run.kind == .run && run.runType == .intervals)
         #expect(run.runTargetMinutes == 240 && run.runTargetKm == nil && run.exercises.isEmpty)
+    }
+
+    /// Une course créée dans l'éditeur se lit comme celle d'un modèle : prévue le jour où elle est placée, titrée par son type,
+    /// lancée avec son objectif, et jamais « jambes lourdes ».
+    @Test func aCreatedRunDayIsPlannedAndLaunchedLikeATemplateRun() throws {
+        let (base, push) = program()
+        var (result, runID) = ProgramEditor.addRunDay(type: .intervals, goal: .kilometres(8), to: base, now: .t1)
+        result = ProgramEditor.assign(push, to: .monday, in: result, now: .t1)
+        result = ProgramEditor.assign(runID, to: .tuesday, in: result, now: .t1)
+        // Le mardi 17 novembre 2026.
+        let tuesday = TestClock.date("2026-11-17T09:00")
+        guard case .run(let planned) = TodayPlanner.plan(program: result, on: tuesday, calendar: TestClock.calendar) else {
+            Issue.record("expected a run on Tuesday")
+            return
+        }
+        #expect(planned.id == runID)
+        let launch = RunLaunch.planned(planned, programID: result.id, adjusted: nil)
+        #expect(launch.title == "Fractionné" && launch.runType == .intervals && launch.routineDayID == runID)
+        #expect(launch.targetKm == 8 && launch.targetMinutes == nil)
+        #expect(!HeavyLegs.isHeavy(planned, directory: ExerciseDirectory(library: .bundled, userExercises: [])))
+        let free = RunLaunch.planned(RunDayEditor.setGoal(.none, in: planned), programID: result.id, adjusted: nil)
+        #expect(free.targetKm == nil && free.targetMinutes == nil && free.title == "Fractionné")
     }
 
     @Test func duplicatingARunDayCopiesItsTypeAndGoal() throws {

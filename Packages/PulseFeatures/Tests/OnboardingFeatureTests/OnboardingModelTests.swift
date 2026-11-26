@@ -229,12 +229,14 @@ struct OnboardingModelTests {
         }
     }
 
-    @Test func weekProposalSplitsDays() async {
+    /// 5 séances, curseur à 0,4 : 2 sorties demandées, ajoutées aux 4 séances de Haut / Bas, le modèle recommandé.
+    @Test func weekProposalCountsTheRecommendedTemplateAndTheRequestedRuns() async {
         let model = OnboardingFixture().makeModel()
         await model.start()
         model.profile.trainingDaysPerWeek = 5
         model.profile.focus = 0.4
-        #expect(model.weekProposal.strength == 3)
+        #expect(model.requestedRuns == 2)
+        #expect(model.weekProposal.strength == 4)
         #expect(model.weekProposal.runs == 2)
     }
 

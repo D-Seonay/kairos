@@ -19,10 +19,17 @@ struct ProgramStepView: View {
                         """,
                     bundle: .module))
             WeekPreviewLegend()
+            if model.requestedRuns > 0 {
+                Text(String(localized: "Les sorties que demande ton curseur sont déjà placées dans chaque semaine.", bundle: .module))
+                    .font(.footnote)
+                    .foregroundStyle(PulsePalette.text2)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
             VStack(spacing: 10) {
                 ForEach(model.templates) { template in
                     ProgramTemplateCard(
-                        template: template, restWeekdays: model.profile.restWeekdays,
+                        template: template, week: model.weekPreview(for: template),
                         isRecommended: template.id == model.recommendedTemplateID,
                         isSelected: !model.choseCustomProgram && model.selectedTemplateID == template.id
                     ) {
@@ -53,10 +60,11 @@ struct ProgramStepView: View {
     }
 }
 
-/// La carte d'un modèle : nom, badge « Recommandé », résumé, séances par semaine, focus et aperçu de la semaine L à D.
+/// La carte d'un modèle : nom, badge « Recommandé », résumé, séances par semaine, focus et aperçu de la semaine L à D telle que
+/// l'adoption la donnera, sorties du curseur comprises.
 struct ProgramTemplateCard: View {
     let template: ProgramTemplate
-    let restWeekdays: [Weekday]
+    let week: [WeekPreviewDay]
     let isRecommended: Bool
     let isSelected: Bool
     let onSelect: () -> Void
@@ -66,7 +74,6 @@ struct ProgramTemplateCard: View {
     var body: some View {
         let palette = PulsePalette.accent(for: theme)
         let shape = RoundedRectangle(cornerRadius: PulseMetrics.radius, style: .continuous)
-        let week = ProgramWeekPreview.days(for: template, restWeekdays: restWeekdays)
         Button {
             guard !isSelected else { return }
             onSelect()
