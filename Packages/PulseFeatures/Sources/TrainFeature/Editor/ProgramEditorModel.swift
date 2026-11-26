@@ -53,7 +53,7 @@ public final class ProgramEditorModel {
         try await update { ProgramEditor.rename($0, to: name, now: $1) }
     }
 
-    /// Place la routine `dayID` (ou un repos, si `nil`) sur `weekday`.
+    /// Place la routine ou la course `dayID` (ou un repos, si `nil`) sur `weekday`.
     public func assign(_ dayID: UUID?, to weekday: Weekday) async throws {
         try await update { ProgramEditor.assign(dayID, to: weekday, in: $0, now: $1) }
     }
@@ -71,12 +71,25 @@ public final class ProgramEditorModel {
         return added
     }
 
-    /// Copie la routine en fin de programme, nommée « … (copie) ».
+    /// Ajoute une course en fin de programme, prête à courir (une sortie facile de 30 min), et rend son identifiant.
+    @discardableResult
+    public func addRun() async throws -> UUID {
+        var added: UUID?
+        try await update { current, now in
+            let result = ProgramEditor.addRunDay(to: current, now: now)
+            added = result.dayID
+            return result.program
+        }
+        guard let added else { throw ProgramEditorError.noProgram }
+        return added
+    }
+
+    /// Copie la routine ou la course en fin de programme, nommée « … (copie) ».
     public func duplicate(_ dayID: UUID) async throws {
         try await update { ProgramEditor.duplicateDay(id: dayID, in: $0, now: $1) }
     }
 
-    /// Retire la routine du programme et de la semaine type.
+    /// Retire la routine ou la course du programme et de la semaine type.
     public func remove(_ dayID: UUID) async throws {
         try await update { ProgramEditor.removeDay(id: dayID, from: $0, now: $1) }
     }

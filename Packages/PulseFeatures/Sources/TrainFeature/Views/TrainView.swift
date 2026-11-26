@@ -7,6 +7,8 @@ import SwiftUI
 enum TrainDestination: Hashable {
     /// L'éditeur de la routine `day` du programme `program`.
     case routine(program: UUID, day: UUID)
+    /// L'éditeur de la course `day` du programme `program`.
+    case run(program: UUID, day: UUID)
     case programEditor
     case library
     case history
@@ -171,7 +173,7 @@ public struct TrainView: View {
     private func routineRow(_ routine: RoutineSummary) -> some View {
         let dayID = routine.day.id
         let isStrength = routine.day.kind == .strength
-        return RoutineRow(routine: routine, programID: isStrength ? model.program?.id : nil, onLaunch: {
+        return RoutineRow(routine: routine, programID: model.program?.id, onLaunch: {
             if isStrength {
                 start(model.launch(routine: dayID))
             } else {
@@ -241,6 +243,8 @@ public struct TrainView: View {
         switch destination {
         case .routine(let program, let day):
             RoutineEditorView(model: model.routineEditorModel(programID: program, dayID: day))
+        case .run(let program, let day):
+            RunDayEditorView(model: model.runDayEditorModel(programID: program, dayID: day))
         case .programEditor:
             ProgramEditorView(model: model.programEditorModel())
         case .library:

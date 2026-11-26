@@ -27,11 +27,20 @@ public enum ProgramEditor {
         return (finished(result, now: now), day.id)
     }
 
+    /// Ajoute un jour de course en fin de programme : sans autre précision, une sortie facile de 30 min, prête à courir.
+    public static func addRunDay(type: RunType = RunDayRules.defaultType, goal: RunGoal? = nil, to program: Program,
+                                 now: Date) -> (program: Program, dayID: UUID) {
+        var result = program
+        let day = RunDayEditor.make(type: type, goal: goal, order: program.days.count)
+        result.days.append(day)
+        return (finished(result, now: now), day.id)
+    }
+
     /// Remplace le jour de même identifiant, à sa place. Un jour inconnu laisse tout inchangé.
     public static func replaceDay(_ day: RoutineDay, in program: Program, now: Date) -> Program {
         guard let index = program.days.firstIndex(where: { $0.id == day.id }) else { return program }
         var result = program
-        result.days[index] = RoutineEditor.normalized(day)
+        result.days[index] = day.kind == .run ? RunDayEditor.normalized(day) : RoutineEditor.normalized(day)
         return finished(result, now: now)
     }
 

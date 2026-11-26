@@ -11,16 +11,6 @@
         }
       }
     },
-    "%@ : %@, course" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ : %@, course"
-          }
-        }
-      }
-    },
     "%@ km" : {
       "localizations" : {
         "fr" : {
@@ -733,16 +723,6 @@
         }
       }
     },
-    "Choisir une routine ou le repos" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choisir une routine ou le repos"
-          }
-        }
-      }
-    },
     "Choisis « Exporter les données » et garde le format CSV." : {
       "localizations" : {
         "fr" : {
@@ -1429,16 +1409,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lecture du fichier…"
-          }
-        }
-      }
-    },
-    "Les courses ne se modifient pas encore" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Les courses ne se modifient pas encore"
           }
         }
       }
@@ -2299,16 +2269,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Routine"
-          }
-        }
-      }
-    },
-    "Routines" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Routines"
           }
         }
       }
@@ -3759,6 +3719,156 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Variante possible : %@."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu enregistrer la course." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu enregistrer la course."
+          }
+        }
+      }
+    },
+    "Cette course est introuvable ou ne peut pas être modifiée ici." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette course est introuvable ou ne peut pas être modifiée ici."
+          }
+        }
+      }
+    },
+    "Choisir une routine, une course ou le repos" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir une routine, une course ou le repos"
+          }
+        }
+      }
+    },
+    "Chargement de la course" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chargement de la course"
+          }
+        }
+      }
+    },
+    "Ajouter une course" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter une course"
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu lire cette course." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu lire cette course."
+          }
+        }
+      }
+    },
+    "Ajoute une sortie facile de 30 minutes, à régler ensuite" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajoute une sortie facile de 30 minutes, à régler ensuite"
+          }
+        }
+      }
+    },
+    "Objectif" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Objectif"
+          }
+        }
+      }
+    },
+    "Routines et courses" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Routines et courses"
+          }
+        }
+      }
+    },
+    "Une durée ou une distance, au choix. Sans objectif, tu cours comme tu le sens." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une durée ou une distance, au choix. Sans objectif, tu cours comme tu le sens."
+          }
+        }
+      }
+    },
+    "Type de course" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type de course"
+          }
+        }
+      }
+    },
+    "Ouvre l'éditeur de la course" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvre l'éditeur de la course"
+          }
+        }
+      }
+    },
+    "Distance" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Distance"
+          }
+        }
+      }
+    },
+    "Durée : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Durée : %@"
+          }
+        }
+      }
+    },
+    "Distance : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Distance : %@"
           }
         }
       }

@@ -18,13 +18,22 @@ public enum HeavyLegs {
         return isHeavy(session.sets.filter { $0.setType != .warmup }.map { ($0.exercise, 1) }, directory: directory)
     }
 
+    /// Les séries de la routine qui visent les jambes ; 0 pour un jour de course. Départage deux séances de jambes lourdes.
+    public static func legSets(_ day: RoutineDay, directory: ExerciseDirectory) -> Int {
+        guard day.kind == .strength else { return 0 }
+        return legSets(day.exercises.map { ($0.exercise, max(0, $0.sets)) }, directory: directory)
+    }
+
     private static func isHeavy(_ sets: [(ExerciseReference, Int)], directory: ExerciseDirectory) -> Bool {
         let total = sets.reduce(0) { $0 + $1.1 }
         guard total > 0 else { return false }
-        let legs = sets.reduce(0) { count, entry in
+        return legSets(sets, directory: directory) * 2 > total
+    }
+
+    private static func legSets(_ sets: [(ExerciseReference, Int)], directory: ExerciseDirectory) -> Int {
+        sets.reduce(0) { count, entry in
             let muscles = directory.info(entry.0)?.primaryMuscles ?? []
             return legMuscles.isDisjoint(with: muscles) ? count : count + entry.1
         }
-        return legs * 2 > total
     }
 }

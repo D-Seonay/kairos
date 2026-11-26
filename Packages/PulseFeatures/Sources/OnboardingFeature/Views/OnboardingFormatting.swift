@@ -33,22 +33,14 @@ struct WeekPreviewDay: Equatable {
 }
 
 enum ProgramWeekPreview {
-    /// Sept jours, du lundi au dimanche, tels que l'adoption les placera : les séances glissent hors des jours de repos
-    /// imposés (`WeekLayoutArranger`) et une séance sans place disparaît. Un jour sans séance ou à l'identifiant inconnu
-    /// est un repos.
-    static func days(for template: ProgramTemplate, restWeekdays: [Weekday]) -> [WeekPreviewDay] {
-        let kindsByID = Dictionary(template.days.map { ($0.id, $0.kind) }, uniquingKeysWith: { first, _ in first })
-        var kindsBySlot: [UUID: WeekPreviewDay.Kind] = [:]
-        let layout: [UUID?] = Weekday.allCases.indices.map { index in
-            guard template.suggestedWeek.indices.contains(index), let dayID = template.suggestedWeek[index],
-                  let kind = kindsByID[dayID] else { return nil }
-            let slot = UUID()
-            kindsBySlot[slot] = kind == .strength ? .strength : .run
-            return slot
-        }
-        let arranged = WeekLayoutArranger.arrange(layout, restWeekdays: restWeekdays)
-        return zip(Weekday.allCases, arranged).map { weekday, slot in
-            WeekPreviewDay(weekday: weekday, kind: slot.flatMap { kindsBySlot[$0] } ?? .rest)
+    /// Sept jours, du lundi au dimanche, lus sur le programme tel que l'adoption le donne : séances glissées hors des repos
+    /// imposés, sorties du curseur ajoutées. Un jour sans séance ou à l'identifiant inconnu est un repos.
+    static func days(of program: Program) -> [WeekPreviewDay] {
+        let kindsByID = Dictionary(program.days.map { ($0.id, $0.kind) }, uniquingKeysWith: { first, _ in first })
+        return Weekday.allCases.map { weekday in
+            guard program.weekLayout.indices.contains(weekday.index), let dayID = program.weekLayout[weekday.index],
+                  let kind = kindsByID[dayID] else { return WeekPreviewDay(weekday: weekday, kind: .rest) }
+            return WeekPreviewDay(weekday: weekday, kind: kind == .strength ? .strength : .run)
         }
     }
 
@@ -173,7 +165,8 @@ struct BaselineRow: Equatable {
 }
 
 enum OnboardingCopy {
-    /// « Proposition : 3 séances de musculation et 2 sorties par semaine. » ; une part à zéro n'est pas écrite.
+    /// « Proposition : 3 séances de musculation et 2 sorties par semaine. » ; une part à zéro n'est pas écrite. Les nombres
+    /// sont ceux de `OnboardingModel.weekProposal` : la semaine que l'adoption du modèle recommandé donnera.
     static func proposal(strength: Int, runs: Int) -> String {
         let strengthPart = String(localized: "\(strength) séances de musculation", bundle: .module)
         let runsPart = String(localized: "\(runs) sorties", bundle: .module)
@@ -182,6 +175,22 @@ enum OnboardingCopy {
         case (true, false): return String(localized: "Proposition : \(strengthPart) par semaine.", bundle: .module)
         case (false, true): return String(localized: "Proposition : \(runsPart) par semaine.", bundle: .module)
         case (false, false): return ""
+        }
+    }
+
+    /// Sous la légende de l'étape du programme, quand le curseur demande des sorties : elles ne sont posées que sur un jour
+    /// libre, et jamais au-delà des séances par semaine choisies.
+    static func runsPlacement(sessions: Int) -> String {
+        String(localized: "Tes sorties sont placées quand il reste un jour libre, sans dépasser tes \(sessions) séances par semaine.",
+               bundle: .module)
+    }
+
+    /// « 1 routine reste hors de la semaine : tu pourras la placer plus tard. » ; `nil` quand toutes les routines sont placées.
+    static func unplacedRoutines(_ count: Int) -> String? {
+        switch count {
+        case ...0: nil
+        case 1: String(localized: "1 routine reste hors de la semaine : tu pourras la placer plus tard.", bundle: .module)
+        default: String(localized: "\(count) routines restent hors de la semaine : tu pourras les placer plus tard.", bundle: .module)
         }
     }
 

@@ -2,22 +2,23 @@ import PulseDesignSystem
 import PulseDomain
 import SwiftUI
 
-/// La semaine type de lundi à dimanche : sur chaque ligne, un menu « routine ou Repos ». Une journée de course d'un modèle
-/// adopté s'affiche avec son type et son objectif, mais ne se change pas ici.
+/// La semaine type de lundi à dimanche : sur chaque ligne, un menu « routine, course ou Repos ». Une course s'y place comme
+/// une routine ; elle s'affiche avec son objectif.
 struct WeekAssignmentView: View {
     let program: Program
     let onAssign: (UUID?, Weekday) -> Void
 
     var body: some View {
         ForEach(Weekday.allCases, id: \.self) { weekday in
-            WeekdayRow(weekday: weekday, assigned: assigned(on: weekday), routines: strengthRoutines) { dayID in
+            WeekdayRow(weekday: weekday, assigned: assigned(on: weekday), days: days) { dayID in
                 onAssign(dayID, weekday)
             }
         }
     }
 
-    private var strengthRoutines: [RoutineDay] {
-        program.days.filter { $0.kind == .strength }.sorted { $0.order < $1.order }
+    /// Les routines et les courses du programme, dans son ordre.
+    private var days: [RoutineDay] {
+        program.days.sorted { $0.order < $1.order }
     }
 
     private func assigned(on weekday: Weekday) -> RoutineDay? {
@@ -29,7 +30,7 @@ struct WeekAssignmentView: View {
 private struct WeekdayRow: View {
     let weekday: Weekday
     let assigned: RoutineDay?
-    let routines: [RoutineDay]
+    let days: [RoutineDay]
     let onAssign: (UUID?) -> Void
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
@@ -42,11 +43,7 @@ private struct WeekdayRow: View {
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(PulsePalette.text2)
                 .frame(minWidth: dynamicTypeSize.isAccessibilitySize ? nil : 84, alignment: .leading)
-            if assigned?.kind == .run {
-                lockedRun
-            } else {
-                menu
-            }
+            menu
         }
         .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
         .accessibilityElement(children: .contain)
@@ -56,12 +53,12 @@ private struct WeekdayRow: View {
     private var menu: some View {
         Menu {
             Button(String(localized: "Repos", bundle: .module)) { onAssign(nil) }
-            ForEach(routines) { routine in
-                Button { onAssign(routine.id) } label: {
-                    if routine.id == assigned?.id {
-                        Label(routine.name, systemImage: "checkmark")
+            ForEach(days) { day in
+                Button { onAssign(day.id) } label: {
+                    if day.id == assigned?.id {
+                        Label(menuTitle(day), systemImage: "checkmark")
                     } else {
-                        Text(routine.name)
+                        Text(menuTitle(day))
                     }
                 }
             }
@@ -84,39 +81,30 @@ private struct WeekdayRow: View {
             }
             .contentShape(Rectangle())
         }
-        .accessibilityLabel(String(localized: "\(weekday.trainName) : \(assignedName)", bundle: .module))
-        .accessibilityHint(String(localized: "Choisir une routine ou le repos", bundle: .module))
+        .accessibilityLabel(spokenLabel)
+        .accessibilityHint(String(localized: "Choisir une routine, une course ou le repos", bundle: .module))
     }
 
-    private var lockedRun: some View {
-        HStack(spacing: 6) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(assignedName)
-                    .font(.body.weight(.semibold))
-                    .foregroundStyle(PulsePalette.text)
-                Text(assigned.map(TrainText.runSummary) ?? String(localized: "Course", bundle: .module))
-                    .font(.footnote)
-                    .foregroundStyle(PulsePalette.text2)
-            }
-            Spacer(minLength: 0)
-            Image(systemName: "lock.fill")
-                .font(.footnote)
-                .foregroundStyle(PulsePalette.muted)
-                .accessibilityHidden(true)
-        }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(String(localized: "\(weekday.trainName) : \(assignedName), course", bundle: .module))
-        .accessibilityHint(String(localized: "Les courses ne se modifient pas encore", bundle: .module))
-    }
-
-    /// Le nom de la routine du jour, ou « Repos ».
+    /// Le nom de la routine ou de la course du jour, ou « Repos ».
     private var assignedName: String {
         assigned?.name ?? String(localized: "Repos", bundle: .module)
     }
 
-    /// « 5 exercices » pour une routine, « Jour de repos » sinon.
+    /// « 5 exercices » pour une routine, « 30 min » ou « Sortie facile · 40 min » pour une course, « Jour de repos » sinon.
     private var detail: String {
         guard let assigned else { return String(localized: "Jour de repos", bundle: .module) }
-        return TrainText.exercises(assigned.exercises.count)
+        return assigned.kind == .run ? TrainText.runSummary(assigned) : TrainText.exercises(assigned.exercises.count)
+    }
+
+    /// « lundi : Push », « lundi : Repos » ; une course ajoute son objectif en mots : « lundi : Sortie facile, 30 minutes ».
+    private var spokenLabel: String {
+        let label = String(localized: "\(weekday.trainName) : \(assignedName)", bundle: .module)
+        guard let assigned, assigned.kind == .run else { return label }
+        return TrainText.rowSpoken(title: label, detail: TrainText.runSummarySpoken(assigned))
+    }
+
+    /// Une routine par son nom ; une course par son nom et son objectif, pour distinguer deux sorties du même type.
+    private func menuTitle(_ day: RoutineDay) -> String {
+        day.kind == .run ? TrainText.runMenuTitle(day) : day.name
     }
 }

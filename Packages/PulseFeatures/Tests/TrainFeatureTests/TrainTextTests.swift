@@ -240,6 +240,31 @@ import Testing
         #expect(TrainText.runSummary(RoutineDay(order: 0, name: "Course", kind: .run)) == "Course")
     }
 
+    /// Une course créée dans l'éditeur porte le nom de son type : le résumé ne le répète pas sous son titre.
+    @Test func aRunNamedAfterItsTypeDoesNotRepeatIt() {
+        let easy = RunDayEditor.make(order: 0)
+        #expect(TrainText.runSummary(easy) == "30 min")
+        #expect(TrainText.runSummarySpoken(easy) == "30 minutes")
+        #expect(TrainText.runSummary(RunDayEditor.setGoal(.none, in: easy)) == "Course")
+        let summary = RoutineSummary(day: RunDayEditor.setGoal(.kilometres(10), in: easy), exerciseCount: 0, estimatedMinutes: 0,
+                                     weekdays: [.tuesday])
+        #expect(TrainText.routineSubtitle(summary) == "10 km · mardi")
+        #expect(TrainText.routineSubtitleSpoken(summary) == "10 kilomètres, mardi")
+        let free = RoutineSummary(day: RunDayEditor.setGoal(.none, in: easy), exerciseCount: 0, estimatedMinutes: 0, weekdays: [])
+        #expect(TrainText.routineSubtitle(free) == "Course · hors semaine type")
+    }
+
+    @Test func aRunInTheWeekMenuSaysItsNameAndGoal() {
+        #expect(TrainText.runMenuTitle(RunDayEditor.make(type: .long, order: 0)) == "Sortie longue · 60 min")
+        #expect(TrainText.runMenuTitle(RunDayEditor.setGoal(.none, in: RunDayEditor.make(order: 0))) == "Sortie facile")
+    }
+
+    @Test func theRunGoalStepperShowsAndSaysItsValue() {
+        #expect(TrainText.runGoalValue(.minutes(45)) == "45 min" && TrainText.runGoalSpoken(.minutes(45)) == "45 minutes")
+        #expect(TrainText.runGoalValue(.kilometres(7.5)) == "7,5 km" && TrainText.runGoalSpoken(.kilometres(1)) == "1 kilomètre")
+        #expect(TrainText.runGoalValue(.none) == nil && TrainText.runGoalSpoken(.none) == nil)
+    }
+
     /// La correction reprend les échelles de la séance : RPE de série de 6 à 10 par demi-point, effort global de 1 à 10.
     @MainActor @Test func correctionPickersUseTheLiveScalesAndKeepAStoredValue() {
         #expect(RPEPicker.setValues == [6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10])

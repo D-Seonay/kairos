@@ -32,6 +32,8 @@ public final class OnboardingModel {
     public private(set) var hasStarted = false
 
     @ObservationIgnored let environment: OnboardingEnvironment
+    /// Copie les modèles en programmes ; gardé parce que la proposition se recalcule à chaque geste sur le curseur.
+    @ObservationIgnored let adopter: ProgramAdopter
     /// Apple Santé ignoré : la calibration passe directement par le check-in.
     @ObservationIgnored var healthSkipped = false
     /// Numéro de la calibration en cours : une lecture périmée (retour arrière, nouvelle lecture) n'écrit plus rien.
@@ -44,14 +46,8 @@ public final class OnboardingModel {
 
     public init(environment: OnboardingEnvironment) {
         self.environment = environment
+        adopter = ProgramAdopter(library: environment.library)
         profile = UserProfile(createdAt: environment.now())
-    }
-
-    /// Les séances de la semaine : musculation `round(jours × (1 − focus))`, le reste en sorties de course.
-    public var weekProposal: (strength: Int, runs: Int) {
-        let days = profile.trainingDaysPerWeek
-        let strength = min(days, max(0, Int((Double(days) * (1 - profile.focus)).rounded())))
-        return (strength, days - strength)
     }
 
     // MARK: - Reprise
@@ -228,7 +224,7 @@ public final class OnboardingModel {
         String(localized: "Pulse n'a pas pu enregistrer ta progression.", bundle: .module)
     }
 
-    private func recommendation() -> String? {
+    func recommendation() -> String? {
         TemplateRecommender.recommendedID(
             focus: profile.focus, daysPerWeek: profile.trainingDaysPerWeek, templates: environment.library.programTemplates)
     }
@@ -284,9 +280,7 @@ public final class OnboardingModel {
     private func adoptSelectedTemplate() async throws -> UUID? {
         guard !choseCustomProgram,
               let template = environment.library.programTemplates.first(where: { $0.id == selectedTemplateID }) else { return nil }
-        let program = ProgramAdopter(library: environment.library).adopt(
-            template, equipment: profile.equipmentAccess, painAreas: profile.painAreas,
-            restWeekdays: profile.restWeekdays, now: environment.now())
+        let program = plannedProgram(for: template)
         try await environment.programs.save(program)
         return program.id
     }
