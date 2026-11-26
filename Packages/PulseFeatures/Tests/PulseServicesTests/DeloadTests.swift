@@ -39,21 +39,60 @@ struct DeloadTests {
         #expect(Deload.status(profile: nil, now: now, calendar: calendar) == .none)
     }
 
+    /// La proposition sur `sessions` (tout l'historique), le début de l'historique lu comme l'accueil le lit.
+    private func offer(_ sessions: [WorkoutSession], profile: UserProfile, now: String = "2026-11-19T20:00") -> DeloadOffer? {
+        let start = TrainingLoad.historyStart(sessions: sessions, onboardingCompletedAt: profile.onboardingCompletedAt)
+        return Deload.offer(sessions: sessions, historyStart: start, profile: profile, now: TestClock.date(now), calendar: calendar)
+    }
+
     @Test func offeredWhenTheRatioStaysHighTwoDaysInARow() throws {
         // Trois semaines calmes de 30 min, puis huit jours de 120 min.
         let history = sessions(from: "2026-10-22", count: 21, minutes: 30) + sessions(from: "2026-11-12", count: 8, minutes: 120)
-        let now = TestClock.date("2026-11-19T20:00")
-        let offer = try #require(Deload.offer(sessions: history, profile: profile(), now: now, calendar: calendar))
+        let offer = try #require(offer(history, profile: profile()))
         #expect(offer.ratio >= 1.5)
-        #expect(Deload.offer(sessions: history, profile: profile(declined: "2026-11-18T08:00"), now: now, calendar: calendar) == nil)
+        #expect(self.offer(history, profile: profile(declined: "2026-11-18T08:00")) == nil)
         let oneDay = sessions(from: "2026-10-22", count: 28, minutes: 30) + sessions(from: "2026-11-19", count: 1, minutes: 900)
-        #expect(Deload.offer(sessions: oneDay, profile: profile(), now: now, calendar: calendar) == nil, "Un seul jour au-dessus")
+        #expect(self.offer(oneDay, profile: profile()) == nil, "Un seul jour au-dessus")
     }
 
     @Test func notOfferedWithoutTwentyEightDaysOfHistory() {
         let recent = UserProfile(onboardingCompletedAt: TestClock.date("2026-11-05T08:00"))
         let history = sessions(from: "2026-11-05", count: 7, minutes: 30) + sessions(from: "2026-11-12", count: 8, minutes: 120)
-        #expect(Deload.offer(sessions: history, profile: recent, now: TestClock.date("2026-11-19T20:00"), calendar: calendar) == nil)
+        #expect(offer(history, profile: recent) == nil)
+    }
+
+    /// Trois semaines sans séance, puis une semaine normale : le ratio vaut 4 hier et aujourd'hui, mais les trois semaines
+    /// d'avant la semaine aiguë n'ont pas trois séances. C'est une reprise, pas une surcharge : rien n'est proposé.
+    @Test func notOfferedWhenComingBackFromABreak() throws {
+        let before = sessions(from: "2026-09-01", count: 30, minutes: 60)
+        let comeback = sessions(from: "2026-11-13", count: 7, minutes: 60)
+        let start = TrainingLoad.historyStart(sessions: before + comeback, onboardingCompletedAt: profile().onboardingCompletedAt)
+        let ratio = try #require(TrainingLoad.acwr(sessions: before + comeback, historyStart: start,
+                                                   now: TestClock.date("2026-11-19T20:00"), calendar: calendar))
+        #expect(ratio.ratio == 4, "Le ratio reste affiché tel quel")
+        #expect(offer(before + comeback, profile: profile()) == nil)
+        // Deux séances seulement dans les trois semaines d'avant : toujours pas de base.
+        let twoBefore = sessions(from: "2026-10-23", count: 2, minutes: 60)
+        #expect(offer(before + twoBefore + comeback, profile: profile()) == nil)
+        // Trois séances : la base existe, la surcharge est réelle.
+        let threeBefore = sessions(from: "2026-10-23", count: 3, minutes: 60)
+        #expect(offer(before + threeBefore + comeback, profile: profile()) != nil)
+    }
+
+    /// Un nouvel utilisateur dont Apple Santé apporte des courses d'avant Pulse : sa charge chronique ne tient que d'elles,
+    /// son historique commence à la fin de l'onboarding. Rien n'est proposé avant 28 jours.
+    @Test func notOfferedToANewUserWhoseHistoryIsOnlyImportedRuns() {
+        let recent = UserProfile(onboardingCompletedAt: TestClock.date("2026-11-10T08:00"))
+        let runs = sessions(from: "2026-09-20", count: 50, minutes: 20).map { run -> WorkoutSession in
+            var run = run
+            run.kind = .run
+            run.source = .appleHealth
+            return run
+        }
+        let strength = sessions(from: "2026-11-10", count: 10, minutes: 90)
+        #expect(offer(runs + strength, profile: recent) == nil)
+        let later = UserProfile(onboardingCompletedAt: TestClock.date("2026-10-20T08:00"))
+        #expect(offer(runs + strength, profile: later) != nil, "Avec 28 jours d'historique, la proposition revient")
     }
 
     @Test func anActiveDeloadLightensTheLaunch() {

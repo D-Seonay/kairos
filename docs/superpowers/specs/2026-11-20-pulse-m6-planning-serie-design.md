@@ -159,6 +159,10 @@ Chaque ligne de règle porte le `moveReason` de la règle et un `moveReasonText`
 
 **Quand.** L'ACWR est ≥ 1,5 aujourd'hui et hier, avec 28 jours d'historique. Aucune décharge ni aucun refus n'est en cours.
 
+Deux garde-fous, ajoutés après coup :
+- **Une vraie base d'entraînement.** Les trois semaines d'avant la semaine aiguë (jours −27 à −7) comptent au moins 3 séances avec une charge (`LoadCalculator.minimumBaseSessions`). En dessous, le ratio élevé est celui d'une reprise après une pause : il reste affiché, mais rien n'est proposé.
+- **Un seul début d'historique.** Il se lit sur toutes les séances (`TrainingLoad.historyStart`) : la fin de l'onboarding ou la plus ancienne séance enregistrée, la plus ancienne des deux. L'accueil, les Stats, le récap et les widgets partent de ce même jour et montrent le même ratio. Une course ou un vélo importé d'Apple Santé ne fait pas reculer ce début : la charge chronique d'un nouvel utilisateur ne tiendrait que de ces sorties d'avant Pulse, et son ratio serait gonflé **(choix du constructeur)**. Un import Hevy, qui apporte les séances de musculation, compte.
+
 **Proposition.** L'accueil montre une carte « Semaine de décharge » avec le ratio, et deux boutons : « Commencer la décharge » et « Pas cette fois ».
 
 **Fenêtre.** Une décision vaut du jour où elle est prise jusqu'au dimanche suivant compris. Un dimanche, c'est le dimanche d'après **(choix du constructeur)**. Accepter écrit `profile.deloadWeekStartedAt`, refuser écrit `profile.deloadDeclinedAt`. Pendant la fenêtre, rien n'est reproposé.

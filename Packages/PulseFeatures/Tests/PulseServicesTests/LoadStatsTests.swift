@@ -47,9 +47,18 @@ struct LoadStatsTests {
     @Test func todayMatchesTrainingLoad() {
         let sessions = fiveWeeks
         let result = stats(sessions, historyDays: 40)
-        let expected = TrainingLoad.acwr(sessions: sessions, onboardingCompletedAt: day(39), now: now, calendar: calendar)
+        let expected = TrainingLoad.acwr(sessions: sessions, historyStart: day(39), now: now, calendar: calendar)
         #expect(result.today != nil)
         #expect(result.today == expected)
+    }
+
+    /// Des courses importées d'Apple Santé, plus anciennes que l'onboarding, n'ouvrent pas le ratio : les Stats comptent les
+    /// 28 jours depuis le même début d'historique que l'accueil.
+    @Test func importedRunsDoNotOpenTheRatio() {
+        let runs = [50, 40, 30, 20].map { session(daysAgo: $0, kind: .run, minutes: 45, rpe: 6, distance: 8_000) }
+        let result = stats(runs + daily(days: 10), historyDays: 10)
+        #expect(result.today == nil && result.ratioPoints.isEmpty)
+        #expect(result.daysUntilRatio == 18)
     }
 
     @Test func ratioPointsOnePerDayFromDay28() {
