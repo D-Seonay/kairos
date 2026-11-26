@@ -15,9 +15,17 @@ public protocol WorkoutRepository: Sendable {
     func lastSets(for exercise: ExerciseReference, startedBefore date: Date) async throws -> [WorkoutSet]
     /// Le nombre de séances Pulse (`source == .pulse`) de ce genre, terminées et non supprimées : la demande de note.
     func completedPulseSessionCount(kind: SessionKind) async throws -> Int
+    /// Le début de la plus ancienne séance non supprimée qui ne vient pas d'Apple Santé, ou `nil` sans aucune : le début de
+    /// l'historique d'entraînement, que l'accueil lit à chaque passage.
+    func oldestRecordedStart() async throws -> Date?
 }
 
 extension WorkoutRepository {
+    /// Par défaut, lit toutes les séances ; le magasin SwiftData ne lit que la plus ancienne.
+    public func oldestRecordedStart() async throws -> Date? {
+        try await sessions(from: .distantPast, to: .distantFuture).lazy.filter { $0.source != .appleHealth }.map(\.startedAt).min()
+    }
+
     /// Par défaut, compte les séances lues ; le magasin SwiftData compte sans les charger.
     public func completedPulseSessionCount(kind: SessionKind) async throws -> Int {
         try await sessions(from: .distantPast, to: .distantFuture)

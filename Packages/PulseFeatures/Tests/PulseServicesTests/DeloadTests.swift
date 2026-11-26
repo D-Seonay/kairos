@@ -61,7 +61,7 @@ struct DeloadTests {
         #expect(offer(history, profile: recent) == nil)
     }
 
-    /// Trois semaines sans séance, puis une semaine normale : le ratio vaut 4 hier et aujourd'hui, mais les trois semaines
+    /// Trois semaines sans séance, puis une semaine normale : le ratio vaut 4 hier et aujourd'hui, mais les deux semaines
     /// d'avant la semaine aiguë n'ont pas trois séances. C'est une reprise, pas une surcharge : rien n'est proposé.
     @Test func notOfferedWhenComingBackFromABreak() throws {
         let before = sessions(from: "2026-09-01", count: 30, minutes: 60)
@@ -71,11 +71,14 @@ struct DeloadTests {
                                                    now: TestClock.date("2026-11-19T20:00"), calendar: calendar))
         #expect(ratio.ratio == 4, "Le ratio reste affiché tel quel")
         #expect(offer(before + comeback, profile: profile()) == nil)
-        // Deux séances seulement dans les trois semaines d'avant : toujours pas de base.
-        let twoBefore = sessions(from: "2026-10-23", count: 2, minutes: 60)
+        // Une semaine pleine, deux semaines de pause, puis la reprise : le ratio vaut 2, et rien n'est proposé non plus.
+        let weekBeforeTheBreak = sessions(from: "2026-10-23", count: 7, minutes: 60)
+        #expect(offer(before + weekBeforeTheBreak + comeback, profile: profile()) == nil)
+        // Deux séances seulement dans les deux semaines d'avant : toujours pas de base.
+        let twoBefore = sessions(from: "2026-11-05", count: 2, minutes: 60)
         #expect(offer(before + twoBefore + comeback, profile: profile()) == nil)
         // Trois séances : la base existe, la surcharge est réelle.
-        let threeBefore = sessions(from: "2026-10-23", count: 3, minutes: 60)
+        let threeBefore = sessions(from: "2026-11-05", count: 3, minutes: 60)
         #expect(offer(before + threeBefore + comeback, profile: profile()) != nil)
     }
 

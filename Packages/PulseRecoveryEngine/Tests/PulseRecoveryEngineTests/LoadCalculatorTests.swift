@@ -54,21 +54,23 @@ import Testing
         offsets.map { LoadSession(date: TestCalendar.shift(day, by: -$0), minutes: minutes, rpe: 7) }
     }
 
-    /// La base se lit sur les trois semaines d'avant la semaine aiguë, des jours −27 à −7 : il y faut 3 séances.
+    /// La base se lit sur les deux semaines d'avant la semaine aiguë, des jours −20 à −7 : il y faut 3 séances.
     @Test func trainingBaseNeedsThreeSessionsBeforeTheAcuteWeek() {
         #expect(LoadCalculator.minimumBaseSessions == 3)
-        #expect(calculator.hasTrainingBase(sessions: sessions(daysAgo: [7, 14, 27]), asOf: day))
-        #expect(!calculator.hasTrainingBase(sessions: sessions(daysAgo: [7, 27]), asOf: day))
+        #expect(calculator.hasTrainingBase(sessions: sessions(daysAgo: [7, 14, 20]), asOf: day))
+        #expect(!calculator.hasTrainingBase(sessions: sessions(daysAgo: [7, 20]), asOf: day))
+        #expect(!calculator.hasTrainingBase(sessions: sessions(daysAgo: [7, 14, 21]), asOf: day), "Le jour −21 est hors de la base")
         #expect(!calculator.hasTrainingBase(sessions: [], asOf: day))
     }
 
-    /// Trois semaines de pause puis une semaine normale : la semaine aiguë ne fait pas une base, les séances d'avant les
-    /// 28 jours non plus.
+    /// Une pause puis une semaine normale : la semaine aiguë ne fait pas une base, les séances d'avant la pause non plus.
     @Test func aComebackWeekIsNotATrainingBase() {
         let comeback = sessions(daysAgo: [0, 1, 3, 5, 6])
         #expect(!calculator.hasTrainingBase(sessions: comeback + sessions(daysAgo: [28, 30, 35, 40]), asOf: day))
+        // Deux semaines de pause après une semaine pleine : le ratio vaut 2, et ce n'est toujours pas une surcharge.
+        #expect(!calculator.hasTrainingBase(sessions: comeback + sessions(daysAgo: [21, 23, 25, 27]), asOf: day))
         #expect(!calculator.hasTrainingBase(sessions: comeback + sessions(daysAgo: [8, 28]), asOf: day))
-        #expect(calculator.hasTrainingBase(sessions: comeback + sessions(daysAgo: [8, 15, 22]), asOf: day))
+        #expect(calculator.hasTrainingBase(sessions: comeback + sessions(daysAgo: [8, 15, 20]), asOf: day))
     }
 
     /// Une séance sans charge (durée nulle) ne porte rien : elle ne compte pas dans la base.
@@ -76,8 +78,8 @@ import Testing
         let empty = sessions(daysAgo: [10], minutes: 0)
         #expect(!calculator.hasTrainingBase(sessions: sessions(daysAgo: [8, 20]) + empty, asOf: day))
         let lateInTheDay = [LoadSession(date: TestCalendar.date(2026, 11, 21, 21, 30), minutes: 60, rpe: 7),
-                            LoadSession(date: TestCalendar.date(2026, 11, 1, 6, 0), minutes: 60, rpe: 7)]
+                            LoadSession(date: TestCalendar.date(2026, 11, 8, 6, 0), minutes: 60, rpe: 7)]
         #expect(calculator.hasTrainingBase(sessions: sessions(daysAgo: [14]) + lateInTheDay, asOf: day),
-                "Les bornes se comptent en jours calendaires : le 21 au soir est le jour −7, le 1er au matin le jour −27")
+                "Les bornes se comptent en jours calendaires : le 21 au soir est le jour −7, le 8 au matin le jour −20")
     }
 }

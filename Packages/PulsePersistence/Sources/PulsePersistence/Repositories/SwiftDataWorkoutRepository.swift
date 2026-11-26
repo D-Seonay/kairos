@@ -32,6 +32,16 @@ public actor SwiftDataWorkoutRepository: WorkoutRepository {
         }))
     }
 
+    /// Une seule ligne lue, la plus ancienne du magasin synchronisé : les séances importées d'Apple Health vivent dans le
+    /// magasin local et ne comptent pas.
+    public func oldestRecordedStart() throws -> Date? {
+        let health = SessionSource.appleHealth.rawValue
+        var descriptor = FetchDescriptor<StoredWorkoutSession>(
+            predicate: #Predicate { $0.deletedAt == nil && $0.source != health }, sortBy: [SortDescriptor(\.startedAt)])
+        descriptor.fetchLimit = 1
+        return try modelContext.fetch(descriptor).first?.startedAt
+    }
+
     /// Une séance importée d'Apple Health (`source == .appleHealth`) va dans le magasin local, les autres dans le magasin synchronisé.
     /// Si la même séance existe dans l'autre magasin (changement de source), elle y est supprimée dans le même `save()`.
     /// Une course Pulse écrit sa FC et son RPE estimé dans le résumé local et `nil` dans le magasin synchronisé (frontière M8).

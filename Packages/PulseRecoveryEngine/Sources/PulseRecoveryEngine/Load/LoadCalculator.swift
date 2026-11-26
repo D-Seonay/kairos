@@ -55,9 +55,10 @@ public struct LoadCalculator: Sendable {
     public static let requiredHistoryDays = 28
     static let acuteWindow = 0...6
     static let chronicWindow = 0...27
-    /// Les trois semaines d'avant la semaine aiguë, en jours avant le jour : la base à laquelle la semaine aiguë se compare.
-    static let baseWindow = 7...27
-    /// Le nombre de séances porteuses de charge qu'il faut dans ces trois semaines. En dessous, un ratio élevé dit une reprise
+    /// Les deux semaines d'avant la semaine aiguë, en jours avant le jour : la base à laquelle la semaine aiguë se compare.
+    /// Deux semaines et non trois : après deux semaines de pause, une semaine pleine juste avant la pause ne fait pas une base.
+    static let baseWindow = 7...20
+    /// Le nombre de séances porteuses de charge qu'il faut dans ces deux semaines. En dessous, un ratio élevé dit une reprise
     /// après une pause, pas une surcharge : il ne justifie pas une décharge.
     public static let minimumBaseSessions = 3
 
@@ -86,7 +87,7 @@ public struct LoadCalculator: Sendable {
         return ACWRResult(acute: acute, chronic: chronic, ratio: ratio, zone: ACWRZone(ratio: ratio))
     }
 
-    /// Vrai si les trois semaines d'avant la semaine aiguë (jours −27 à −7 avant `day`) comptent au moins
+    /// Vrai si les deux semaines d'avant la semaine aiguë (jours −20 à −7 avant `day`) comptent au moins
     /// `minimumBaseSessions` séances avec une charge. Le ratio lui-même ne change pas : la règle ne sert qu'à la proposition
     /// de décharge.
     public func hasTrainingBase(sessions: [LoadSession], asOf day: Date) -> Bool {

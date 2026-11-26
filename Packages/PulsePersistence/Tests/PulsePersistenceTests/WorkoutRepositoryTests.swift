@@ -306,3 +306,23 @@ private func counts(_ container: ModelContainer) throws -> (synced: Int, local: 
     #expect(try await repo.completedPulseSessionCount(kind: .strength) == 3)
     #expect(try await repo.completedPulseSessionCount(kind: .run) == 1)
 }
+
+/// Le début de l'historique d'entraînement : la plus ancienne séance enregistrée, sans les imports d'Apple Santé ni les
+/// séances supprimées.
+@Test func oldestRecordedStartIgnoresAppleHealthImportsAndDeletedSessions() async throws {
+    let repo = SwiftDataWorkoutRepository(modelContainer: try TestContainer.make())
+    #expect(try await repo.oldestRecordedStart() == nil)
+    var importedRun = Sample.session(startedAt: Fixed.t0.addingTimeInterval(-90 * day), sets: 0)
+    importedRun.kind = .run
+    importedRun.source = .appleHealth
+    let deleted = Sample.session(startedAt: Fixed.t0.addingTimeInterval(-30 * day), sets: 1)
+    var hevy = Sample.session(startedAt: Fixed.t0.addingTimeInterval(-10 * day), sets: 1)
+    hevy.source = .hevy
+    let recent = Sample.session(startedAt: Fixed.t0, sets: 1)
+    for session in [importedRun, deleted, hevy, recent] { try await repo.save(session) }
+    try await repo.delete(id: deleted.id)
+    #expect(try await repo.oldestRecordedStart() == hevy.startedAt)
+    // La lecture par défaut du protocole, celle des doublures, donne le même jour.
+    let all = try await repo.sessions(from: .distantPast, to: .distantFuture)
+    #expect(all.filter { $0.source != .appleHealth }.map(\.startedAt).min() == hevy.startedAt)
+}

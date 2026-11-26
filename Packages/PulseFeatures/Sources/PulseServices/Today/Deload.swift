@@ -50,7 +50,7 @@ public enum Deload {
     }
 
     /// La décharge à proposer : ratio ≥ 1,5 aujourd'hui et hier, avec 28 jours d'historique, sans décision en cours.
-    /// `historyStart` vient de `TrainingLoad.historyStart`, lu sur tout l'historique. Sans trois séances dans les trois
+    /// `historyStart` vient de `TrainingLoad.historyStart`, lu sur tout l'historique. Sans trois séances dans les deux
     /// semaines d'avant la semaine aiguë, le ratio élevé est celui d'une reprise après une pause : rien n'est proposé.
     public static func offer(sessions: [WorkoutSession], historyStart: Date?, profile: UserProfile?, now: Date,
                              calendar: Calendar) -> DeloadOffer? {

@@ -16,7 +16,13 @@ public enum TrainingLoad {
     /// import Hevy, lui, apporte les séances de musculation et compte).
     public static func historyStart(sessions: [WorkoutSession], onboardingCompletedAt: Date?) -> Date? {
         let oldestRecorded = sessions.lazy.filter { $0.source != .appleHealth }.map(\.startedAt).min()
-        return [onboardingCompletedAt, oldestRecorded].compactMap { $0 }.min()
+        return historyStart(oldestRecorded: oldestRecorded, onboardingCompletedAt: onboardingCompletedAt)
+    }
+
+    /// Le même début, pour qui lit la plus ancienne séance enregistrée au dépôt (`WorkoutRepository.oldestRecordedStart`)
+    /// sans charger l'historique.
+    public static func historyStart(oldestRecorded: Date?, onboardingCompletedAt: Date?) -> Date? {
+        [onboardingCompletedAt, oldestRecorded].compactMap { $0 }.min()
     }
 
     /// Les séances terminées et abandonnées comptent (spec M4 §14.6), jamais une séance encore en cours. `historyStart` vient
@@ -27,7 +33,7 @@ public enum TrainingLoad {
         return LoadCalculator(calendar: calendar).acwr(sessions: counted(sessions), asOf: now, historyStart: historyStart)
     }
 
-    /// Vrai si les trois semaines d'avant la semaine aiguë portent assez de séances pour qu'un ratio élevé dise une surcharge
+    /// Vrai si les deux semaines d'avant la semaine aiguë portent assez de séances pour qu'un ratio élevé dise une surcharge
     /// (`LoadCalculator.hasTrainingBase`) : sans cette base, c'est une reprise après une pause.
     public static func hasTrainingBase(sessions: [WorkoutSession], now: Date, calendar: Calendar) -> Bool {
         LoadCalculator(calendar: calendar).hasTrainingBase(sessions: counted(sessions), asOf: now)

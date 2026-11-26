@@ -174,18 +174,29 @@ public final class TodayModel {
         }
     }
 
-    /// Les nuits lues font les tendances ; les séances font le ratio de charge et la proposition de décharge. Toutes les
-    /// séances sont lues, pour que le début de l'historique soit celui des Stats : les deux écrans montrent le même ratio.
-    /// Si les séances ne se lisent pas, la carte garde son dernier contenu.
+    /// Les nuits lues font les tendances ; les séances des 28 derniers jours font le ratio de charge, et celles de la veille la
+    /// proposition de décharge. Le début de l'historique est celui des Stats, pour que les deux écrans montrent le même
+    /// ratio : il vient de la plus ancienne séance enregistrée, lue sans charger l'historique. Si les séances ne se lisent
+    /// pas, la carte garde son dernier contenu.
     private func updateLoadAndTrends(day: DayRefresh, now: Date) async {
         let calendar = environment.calendar
         let today = calendar.startOfDay(for: now)
         trends = TrendTile.make(nights: day.nights, day: today, calendar: calendar)
         hasNightInCache = day.nights.contains { $0.sleep != nil }
-        guard let end = calendar.date(byAdding: .day, value: 1, to: today),
-              let sessions = try? await environment.workouts.sessions(from: .distantPast, to: end) else { return }
-        let historyStart = TrainingLoad.historyStart(sessions: sessions, onboardingCompletedAt: day.profile?.onboardingCompletedAt)
-        load = LoadCardContent.make(TrainingLoad.acwr(sessions: sessions, historyStart: historyStart, now: now, calendar: calendar))
+        guard let start = calendar.date(byAdding: .day, value: -LoadCalculator.requiredHistoryDays, to: today),
+              let loadStart = calendar.date(byAdding: .day, value: 1, to: start),
+              let end = calendar.date(byAdding: .day, value: 1, to: today),
+              let sessions = try? await environment.workouts.sessions(from: start, to: end) else { return }
+        // Aucune séance enregistrée donne `nil`, qui n'est pas un échec de lecture.
+        let oldest: Date?
+        do {
+            oldest = try await environment.workouts.oldestRecordedStart()
+        } catch {
+            return
+        }
+        let historyStart = TrainingLoad.historyStart(oldestRecorded: oldest, onboardingCompletedAt: day.profile?.onboardingCompletedAt)
+        load = LoadCardContent.make(TrainingLoad.acwr(
+            sessions: sessions.filter { $0.startedAt >= loadStart }, historyStart: historyStart, now: now, calendar: calendar))
         deloadOffer = Deload.offer(sessions: sessions, historyStart: historyStart, profile: day.profile, now: now,
                                    calendar: calendar)
     }
