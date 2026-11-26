@@ -31,8 +31,24 @@ extension OnboardingModel {
                       split: WeekSplit(focus: profile.focus, daysPerWeek: profile.trainingDaysPerWeek), now: environment.now())
     }
 
-    /// L'aperçu L à D de la carte de `template` : la semaine de `plannedProgram(for:)`.
-    func weekPreview(for template: ProgramTemplate) -> [WeekPreviewDay] {
-        ProgramWeekPreview.days(of: plannedProgram(for: template))
+    /// Ce que la carte de `template` montre : la semaine de `plannedProgram(for:)` et les routines qu'elle laisse de côté.
+    func weekPlan(for template: ProgramTemplate) -> TemplateWeekPlan {
+        let program = plannedProgram(for: template)
+        let placed = Set(program.weekLayout.compactMap { $0 })
+        return TemplateWeekPlan(week: ProgramWeekPreview.days(of: program),
+                                unplacedRoutines: program.days.filter { $0.kind == .strength && !placed.contains($0.id) }.count)
     }
+
+    /// L'aperçu L à D de la carte de `template`.
+    func weekPreview(for template: ProgramTemplate) -> [WeekPreviewDay] {
+        weekPlan(for: template).week
+    }
+}
+
+/// La semaine que l'adoption d'un modèle donnera, pour sa carte.
+struct TemplateWeekPlan: Equatable {
+    let week: [WeekPreviewDay]
+    /// Les routines de musculation du programme qui ne tombent sur aucun jour : celles qu'un modèle raccourci garde de côté,
+    /// ou celles que les repos obligatoires n'ont pas laissé placer.
+    let unplacedRoutines: Int
 }

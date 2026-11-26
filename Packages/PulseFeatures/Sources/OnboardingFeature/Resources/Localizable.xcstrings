@@ -1427,12 +1427,32 @@
         }
       }
     },
-    "Les sorties que demande ton curseur sont déjà placées dans chaque semaine." : {
+    "Tes sorties sont placées quand il reste un jour libre, sans dépasser tes %lld séances par semaine." : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les sorties que demande ton curseur sont déjà placées dans chaque semaine."
+            "value" : "Tes sorties sont placées quand il reste un jour libre, sans dépasser tes %lld séances par semaine."
+          }
+        }
+      }
+    },
+    "1 routine reste hors de la semaine : tu pourras la placer plus tard." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 routine reste hors de la semaine : tu pourras la placer plus tard."
+          }
+        }
+      }
+    },
+    "%lld routines restent hors de la semaine : tu pourras les placer plus tard." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld routines restent hors de la semaine : tu pourras les placer plus tard."
           }
         }
       }

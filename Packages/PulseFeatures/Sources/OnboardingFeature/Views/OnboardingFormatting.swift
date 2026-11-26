@@ -191,6 +191,22 @@ enum OnboardingCopy {
         }
     }
 
+    /// Sous la légende de l'étape du programme, quand le curseur demande des sorties : elles ne sont posées que sur un jour
+    /// libre, et jamais au-delà des séances par semaine choisies.
+    static func runsPlacement(sessions: Int) -> String {
+        String(localized: "Tes sorties sont placées quand il reste un jour libre, sans dépasser tes \(sessions) séances par semaine.",
+               bundle: .module)
+    }
+
+    /// « 1 routine reste hors de la semaine : tu pourras la placer plus tard. » ; `nil` quand toutes les routines sont placées.
+    static func unplacedRoutines(_ count: Int) -> String? {
+        switch count {
+        case ...0: nil
+        case 1: String(localized: "1 routine reste hors de la semaine : tu pourras la placer plus tard.", bundle: .module)
+        default: String(localized: "\(count) routines restent hors de la semaine : tu pourras les placer plus tard.", bundle: .module)
+        }
+    }
+
     /// Pourquoi le check-in remplace le score mesuré : Apple Santé ignoré à l'écran 2, ou pas assez de nuits pour la ligne de base.
     static func calibrationExplanation(healthSkipped: Bool) -> String {
         if healthSkipped {

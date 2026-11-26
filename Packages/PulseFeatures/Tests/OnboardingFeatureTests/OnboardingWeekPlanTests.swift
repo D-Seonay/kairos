@@ -239,6 +239,21 @@ struct OnboardingWeekPlanTests {
         }
     }
 
+    /// La carte d'un modèle raccourci dit ce qui reste de côté ; celle d'un modèle entier ne dit rien.
+    @Test func aShortenedTemplateSaysWhatStaysOutOfTheWeek() async throws {
+        let model = await modelAtGoals(OnboardingFixture())
+        let templates = ContentLibrary.bundled.programTemplates
+        let fullBody = try #require(templates.first { $0.id == "full-body" })
+        let split = try #require(templates.first { $0.id == "ppl-3" })
+        #expect(model.weekPlan(for: fullBody).unplacedRoutines == 1)
+        #expect(model.weekPlan(for: split).unplacedRoutines == 0)
+        #expect(OnboardingCopy.unplacedRoutines(0) == nil)
+        #expect(OnboardingCopy.unplacedRoutines(1) == "1 routine reste hors de la semaine : tu pourras la placer plus tard.")
+        #expect(OnboardingCopy.unplacedRoutines(2) == "2 routines restent hors de la semaine : tu pourras les placer plus tard.")
+        #expect(OnboardingCopy.runsPlacement(sessions: 3)
+            == "Tes sorties sont placées quand il reste un jour libre, sans dépasser tes 3 séances par semaine.")
+    }
+
     @Test func aCustomProgramAdoptsNothingWhateverTheProposal() async throws {
         let fixture = OnboardingFixture()
         let model = await modelAtGoals(fixture)
