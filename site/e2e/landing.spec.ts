@@ -17,6 +17,7 @@ async function scrollToBottom(page: Page) {
 }
 
 test.describe("privacy", () => {
+  // Umami loads on the Vercel production build only (analyticsEnabled): local builds stay first-party.
   for (const path of ["/", "/mentions-legales"]) {
     test(`no third-party requests on ${path}`, async ({ page }) => {
       const urls: string[] = [];

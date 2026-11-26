@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
 import { Archivo, Inter, JetBrains_Mono } from "next/font/google";
-import { APP_STORE_LIVE, SITE_URL } from "@/lib/config";
+import Script from "next/script";
+import {
+  analyticsEnabled,
+  APP_STORE_LIVE,
+  SITE_URL,
+  UMAMI_SCRIPT_URL,
+  UMAMI_WEBSITE_ID,
+} from "@/lib/config";
 import { appleItunesMeta, PAGE_DESCRIPTION, PAGE_TITLE } from "@/lib/seo";
 import "./globals.css";
 
@@ -42,7 +49,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="fr"
       className={`${sans.variable} ${display.variable} ${mono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        {analyticsEnabled(process.env) && (
+          <Script
+            src={UMAMI_SCRIPT_URL}
+            data-website-id={UMAMI_WEBSITE_ID}
+            data-domains={new URL(SITE_URL).hostname}
+            strategy="afterInteractive"
+          />
+        )}
+      </body>
     </html>
   );
 }

@@ -119,8 +119,13 @@ export default function MentionsLegales() {
 
           <Rubrique id="donnees" number={4} title="Données personnelles et cookies">
             <p>
-              Ce site ne dépose aucun cookie et ne mesure pas son audience : aucun outil d&apos;analyse, aucune publicité,
-              aucun suivi.
+              Ce site ne dépose aucun cookie et n&apos;affiche aucune publicité.
+            </p>
+            <p>
+              Il mesure son audience avec <ExternalLink href="https://umami.is">Umami Cloud</ExternalLink> (Umami Software,
+              Inc.), un outil sans cookie qui ne crée aucun identifiant durable et ne suit pas d&apos;un site à l&apos;autre.
+              Seuls des chiffres agrégés en sortent : pages vues, site d&apos;origine, pays, type d&apos;appareil et de
+              navigateur. Ils servent uniquement à savoir combien de personnes découvrent Pulse et par où elles arrivent.
             </p>
             <p>
               Comme tout hébergeur, Vercel peut conserver des journaux techniques de connexion, nécessaires au

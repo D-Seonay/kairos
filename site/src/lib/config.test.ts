@@ -1,7 +1,14 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { assertPublishable, PRIVACY_URL, PUBLIC_PAGE_REDIRECTS, resolveSiteUrl, SUPPORT_URL } from "./config";
+import {
+  analyticsEnabled,
+  assertPublishable,
+  PRIVACY_URL,
+  PUBLIC_PAGE_REDIRECTS,
+  resolveSiteUrl,
+  SUPPORT_URL,
+} from "./config";
 
 describe("public page redirects", () => {
   it("serves the privacy and support addresses the app and the App Store listing know", () => {
@@ -41,5 +48,13 @@ describe("assertPublishable", () => {
   });
   it("accepts production with an e-mail", () => {
     expect(() => assertPublishable({ VERCEL_ENV: "production" }, "contact@example.com")).not.toThrow();
+  });
+});
+
+describe("analyticsEnabled", () => {
+  it("loads Umami on the Vercel production build only", () => {
+    expect(analyticsEnabled({ VERCEL_ENV: "production" })).toBe(true);
+    expect(analyticsEnabled({ VERCEL_ENV: "preview" })).toBe(false);
+    expect(analyticsEnabled({})).toBe(false);
   });
 });
