@@ -126,7 +126,9 @@ struct OnboardingViewSupportTests {
     @Test func calibrationExplanationNamesTheSkippedHealthAccess() {
         let skipped = OnboardingCopy.calibrationExplanation(healthSkipped: true)
         #expect(skipped.contains("Sans Apple Santé"))
-        #expect(skipped.contains("Réglages › Santé"))
+        // L'action est dans Pulse : iOS ne liste pas Pulse dans Réglages › Santé tant que l'accès n'a pas été demandé.
+        #expect(skipped.contains("Profil › Paramètres"))
+        #expect(!skipped.contains("Réglages › Santé"))
         #expect(!skipped.contains("pas assez de nuits"))
     }
 

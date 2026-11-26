@@ -236,6 +236,16 @@
         }
       }
     },
+    "Pulse n'a pas pu accéder à Apple Santé." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu accéder à Apple Santé."
+          }
+        }
+      }
+    },
     "Pulse n'a pas pu calculer ton score. Tire l'écran vers le bas pour réessayer." : {
       "localizations" : {
         "fr" : {

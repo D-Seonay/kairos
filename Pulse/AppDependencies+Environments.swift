@@ -21,13 +21,21 @@ extension AppDependencies {
     func onboardingEnvironment() -> OnboardingEnvironment {
         OnboardingEnvironment(profiles: profiles, programs: programs, health: healthSource, nightHistory: nightHistory,
                               scores: scores, notifications: notifications, library: content, stepStore: onboardingSteps,
-                              calendar: calendar, now: now)
+                              calendar: calendar, now: now, once: once)
+    }
+
+    /// « Connecter Apple Santé » (Paramètres, bannière du check-in) : la demande d'accès de l'onboarding, retenue dans les mêmes
+    /// préférences. Comme à la fin de l'onboarding, les observateurs lancés au démarrage, avant l'accès, sont relancés.
+    var healthAccess: HealthAccess {
+        let delivery = backgroundDelivery
+        return HealthAccess(source: healthSource, cache: healthCache, once: once, afterRequest: { delivery?.restart() })
     }
 
     func todayEnvironment() -> TodayEnvironment {
         TodayEnvironment(refresher: refresher, workouts: workouts, userExercises: userExercises, exerciseSettings: exerciseSettings,
                          activeSession: liveSession, library: content, calendar: calendar, now: now,
-                         nights: NightDetailService(cache: healthCache, profiles: profiles, calendar: calendar, now: now))
+                         nights: NightDetailService(cache: healthCache, profiles: profiles, calendar: calendar, now: now),
+                         healthAccess: healthAccess)
     }
 
     func trainEnvironment() -> TrainEnvironment {
@@ -69,7 +77,7 @@ extension AppDependencies {
             appVersion: Self.appVersion, privacyPolicyURL: Self.privacyPolicyURL, calendar: calendar, now: now,
             runPreferences: run.preferences, bodyPhotos: photos.body, ownerAuthentication: photos.ownerAuthentication,
             bodyPhotoLock: photos.bodyLock, bodyPhotoReminders: photos.reminders, train: trainEnvironment(),
-            sleepPlan: { await bedtime.plan() })
+            sleepPlan: { await bedtime.plan() }, healthAccess: healthAccess)
     }
 
     /// La politique de confidentialité, lue dans l'Info.plist (`PulsePrivacyPolicyURL`) ; `nil` tant que la clé est vide ou

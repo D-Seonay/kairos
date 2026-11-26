@@ -70,7 +70,8 @@ struct AppDependencies: Sendable {
     let healthCache: any HealthSampleCache
     /// Dernière ouverture et dernier jour annoncé, dans la suite de préférences que la suppression totale vide.
     let activity: any DayActivityLog
-    /// Ce qui ne se fait qu'une fois par appareil (l'avis « notifications désactivées »), dans la même suite de préférences.
+    /// Ce qui ne se fait qu'une fois par appareil (l'avis « notifications désactivées », la demande d'accès à Apple Santé), dans
+    /// la même suite de préférences.
     let once: any OnceLog
     /// Le seul passage qui lit Apple Santé et met le score du jour à jour, au premier plan comme en arrière-plan.
     let refresher: DayRefresher

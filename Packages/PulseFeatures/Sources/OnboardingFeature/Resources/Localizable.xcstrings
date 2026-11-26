@@ -1076,12 +1076,12 @@
         }
       }
     },
-    "Sans Apple Santé, Pulse estime ta récupération avec trois questions. Tu pourras autoriser l'accès plus tard dans Réglages › Santé." : {
+    "Sans Apple Santé, Pulse estime ta récupération avec trois questions. Tu pourras connecter Apple Santé plus tard dans Profil › Paramètres." : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sans Apple Santé, Pulse estime ta récupération avec trois questions. Tu pourras autoriser l'accès plus tard dans Réglages › Santé."
+            "value" : "Sans Apple Santé, Pulse estime ta récupération avec trois questions. Tu pourras connecter Apple Santé plus tard dans Profil › Paramètres."
           }
         }
       }

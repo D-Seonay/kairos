@@ -5,6 +5,8 @@ import Synchronization
 public enum OnceEvent: String, Sendable, CaseIterable {
     /// L'avis « notifications désactivées » au démarrage d'une séance, quand iOS refuse la notification de fin de repos.
     case notificationsDisabledNotice
+    /// La demande d'accès à Apple Santé : à l'onboarding (« Autoriser »), dans les Paramètres ou depuis la bannière du check-in.
+    case healthAccessRequest
 }
 
 /// Retient ce qui a déjà eu lieu une fois, d'un lancement à l'autre.

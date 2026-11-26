@@ -159,6 +159,14 @@ public struct TodayView: View {
         onResumeSession()
     }
 
+    /// L'accès à Apple Santé n'a jamais été demandé (étape passée à l'onboarding) : la bannière du check-in offre de le
+    /// connecter ; `nil` sinon, la bannière parle des données de nuit qui manquent.
+    private var healthOffer: CheckInHealthOffer? {
+        guard !model.healthAccessRequested else { return nil }
+        return CheckInHealthOffer(connect: { Task { await model.connectHealth() } }, isConnecting: model.isConnectingHealth,
+                                  errorMessage: model.healthAccessError)
+    }
+
     /// Les données ne suffisent pas : le check-in prend la place de la carte de récupération, la séance reste dessous. L'erreur
     /// d'enregistrement s'affiche juste au-dessus du bouton du check-in.
     @ViewBuilder
@@ -166,12 +174,13 @@ public struct TodayView: View {
         if case .needsCheckIn = model.score {
             VStack(spacing: 12) {
                 CheckInView(form: model.checkIn, scrollable: false, errorMessage: model.errorMessage,
-                            isSubmitting: model.isSubmittingCheckIn) { _ in
+                            isSubmitting: model.isSubmittingCheckIn, healthOffer: healthOffer) { _ in
                     Task { await model.submitCheckIn() }
                 }
             }
             // Le message apparaît sous le focus, sur un conteneur qui reste là : l'annonce suit son changement.
             .pulseAnnounceError(model.errorMessage)
+            .pulseAnnounceError(model.healthAccessError)
         } else {
             RecoveryCard(score: model.score, factors: model.factors, marker: model.marker, spokenMarker: model.spokenMarker,
                          onWhy: model.openWhy, isLoading: model.isLoading, scoreFailed: model.scoreFailed)
