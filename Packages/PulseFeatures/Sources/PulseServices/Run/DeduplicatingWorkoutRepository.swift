@@ -23,6 +23,11 @@ public struct DeduplicatingWorkoutRepository: WorkoutRepository {
         try await base.completedPulseSessionCount(kind: kind)
     }
 
+    /// Les doublons masqués viennent d'Apple Santé : ils ne font jamais le début de l'historique, lu au dépôt brut.
+    public func oldestRecordedStart() async throws -> Date? {
+        try await base.oldestRecordedStart()
+    }
+
     /// Une course Pulse se lit avec la FC et le RPE estimé de son doublon, comme dans les listes.
     public func session(id: UUID) async throws -> WorkoutSession? {
         guard let session = try await base.session(id: id), RunDuplicates.isPulseRun(session) else {

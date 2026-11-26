@@ -19,15 +19,18 @@ public struct PlanningOverview: Sendable, Equatable {
     public var hasUserMoves: Bool
     /// Le premier jour d'activité connu (fin de l'onboarding ou première séance) : le mois le plus ancien qu'on peut ouvrir.
     public var historyStart: Date?
+    /// Le début de l'historique pour le ratio de charge (`TrainingLoad.historyStart`), lu sur les mêmes séances.
+    public var loadHistoryStart: Date?
 
     public init(profile: UserProfile?, program: Program?, days: [PlanningDay], streak: StreakSummary, hasUserMoves: Bool,
-                historyStart: Date?) {
+                historyStart: Date?, loadHistoryStart: Date? = nil) {
         self.profile = profile
         self.program = program
         self.days = days
         self.streak = streak
         self.hasUserMoves = hasUserMoves
         self.historyStart = historyStart
+        self.loadHistoryStart = loadHistoryStart
     }
 }
 
@@ -69,8 +72,9 @@ public struct PlanningService: Sendable {
         let streak = WeekStreak.summary(sessions: sessions, target: WeekStreak.target(program: program, profile: profile),
                                         historyStart: historyStart, now: now, calendar: calendar)
         let moved = program.map { program in overrides.contains { $0.moveReason == .user && ($0.programID ?? program.id) == program.id } }
+        let loadStart = TrainingLoad.historyStart(sessions: sessions, onboardingCompletedAt: profile?.onboardingCompletedAt)
         return PlanningOverview(profile: profile, program: program, days: days, streak: streak, hasUserMoves: moved ?? false,
-                                historyStart: historyStart)
+                                historyStart: historyStart, loadHistoryStart: loadStart)
     }
 
     /// La grille du mois de `month`.

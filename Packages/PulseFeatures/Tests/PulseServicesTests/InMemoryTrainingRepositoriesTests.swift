@@ -131,4 +131,25 @@ struct InMemoryTrainingRepositoriesTests {
         #expect(try await repository.lastSets(for: bench, startedBefore: newer.startedAt).map(\.actualReps) == [9, 7])
         #expect(try await repository.lastSets(for: bench, startedBefore: older.startedAt).isEmpty)
     }
+
+    /// Une séance faite en décharge appliquée n'est pas « la dernière fois » ; refusée, elle a été faite aux charges
+    /// habituelles et compte.
+    @Test func lastSetsSkipASessionDoneUnderAnAppliedDeload() async throws {
+        let repository = InMemoryWorkoutRepository()
+        let deload = SessionAdjustment(kind: .deload, reason: "Semaine de décharge", value: 0.4)
+        let before = benchSession("2026-10-12T07:00", status: .completed, sets: [benchSet(1, reps: 9), benchSet(2, reps: 7)])
+        var deloaded = benchSession("2026-10-20T07:00", status: .completed, sets: [benchSet(1, reps: 11)])
+        deloaded.appliedAdjustments = [SessionAdjustment(kind: .rest, reason: "Repos +15 s", value: 15), deload]
+        for session in [before, deloaded] { try await repository.save(session) }
+        let bench = ExerciseReference.content(id: "bench-press-barbell")
+        #expect(try await repository.lastSets(for: bench).map(\.actualReps) == [9, 7])
+
+        var refused = benchSession("2026-10-22T07:00", status: .completed, sets: [benchSet(1, reps: 6)])
+        refused.refusedAdjustments = [deload]
+        try await repository.save(refused)
+        #expect(try await repository.lastSets(for: bench).map(\.actualReps) == [6])
+        try await repository.delete(id: before.id)
+        try await repository.delete(id: refused.id)
+        #expect(try await repository.lastSets(for: bench).isEmpty, "Sans séance hors décharge, pas de référence")
+    }
 }

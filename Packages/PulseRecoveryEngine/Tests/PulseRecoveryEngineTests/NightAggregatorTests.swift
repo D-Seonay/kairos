@@ -38,6 +38,47 @@ import Testing
         #expect(n.restingHeartRate == nil)
     }
 
+    /// Un assoupissement devant la télé à 19 h, la nuit à 23 h 10 : ni la mesure prise pendant l'assoupissement, ni celle de
+    /// la soirée éveillée n'entrent dans la moyenne de la nuit.
+    @Test func eveningDozeAndWakingEveningStayOutOfTheMean() {
+        let doze = SleepInterval(start: d(2026, 11, 19, 19, 0), end: d(2026, 11, 19, 19, 30), stage: .core)
+        let sdnn = typicalSDNN + [TimedSample(date: d(2026, 11, 19, 19, 15), value: 80), .init(date: d(2026, 11, 19, 21, 0), value: 90)]
+        let n = aggregator.night(for: day, sdnn: sdnn, restingHeartRate: [], sleep: typicalSleep + [doze])
+        #expect(n.sdnnMs == 50)
+        #expect(n.sleep?.asleepMinutes == 480, "L'assoupissement reste compté dans le sommeil")
+    }
+
+    /// Une sieste à 10 h : la mesure de la matinée éveillée et celle de la sieste restent hors de la moyenne.
+    @Test func morningNapAndWakingMorningStayOutOfTheMean() {
+        let nap = SleepInterval(start: d(2026, 11, 20, 10, 0), end: d(2026, 11, 20, 10, 40), stage: .core)
+        let sdnn = typicalSDNN + [TimedSample(date: d(2026, 11, 20, 10, 20), value: 95)]
+        let n = aggregator.night(for: day, sdnn: sdnn, restingHeartRate: [], sleep: typicalSleep + [nap])
+        #expect(n.sdnnMs == 50)
+    }
+
+    /// Une mesure prise pendant l'éveil de 3 h 30, ou dans un trou sans donnée du bloc principal, n'est pas une mesure endormie.
+    @Test func samplesWhileAwakeInsideTheMainBlockAreIgnored() {
+        let awake = TimedSample(date: d(2026, 11, 20, 3, 35), value: 100)
+        let n = aggregator.night(for: day, sdnn: typicalSDNN + [awake], restingHeartRate: [], sleep: typicalSleep)
+        #expect(n.sdnnMs == 50)
+
+        let withGap = [SleepInterval(start: d(2026, 11, 19, 23, 0), end: d(2026, 11, 20, 2, 0), stage: .asleepUnspecified),
+                       .init(start: d(2026, 11, 20, 2, 30), end: d(2026, 11, 20, 7, 0), stage: .asleepUnspecified)]
+        let sdnn = [TimedSample(date: d(2026, 11, 20, 1, 0), value: 44), .init(date: d(2026, 11, 20, 2, 15), value: 100),
+                    .init(date: d(2026, 11, 20, 4, 0), value: 56)]
+        #expect(aggregator.night(for: day, sdnn: sdnn, restingHeartRate: [], sleep: withGap).sdnnMs == 50)
+    }
+
+    /// Aucune mesure pendant le sommeil du bloc principal : la nuit n'a pas de SDNN, même avec des mesures autour.
+    @Test func noSampleWhileAsleepInTheMainBlockGivesNoSDNN() {
+        let doze = SleepInterval(start: d(2026, 11, 19, 19, 0), end: d(2026, 11, 19, 19, 30), stage: .core)
+        let sdnn = [TimedSample(date: d(2026, 11, 19, 19, 15), value: 80), .init(date: d(2026, 11, 19, 21, 0), value: 90),
+                    .init(date: d(2026, 11, 20, 3, 35), value: 100), .init(date: d(2026, 11, 20, 7, 30), value: 70)]
+        let n = aggregator.night(for: day, sdnn: sdnn, restingHeartRate: [], sleep: typicalSleep + [doze])
+        #expect(n.sdnnMs == nil)
+        #expect(n.sleep != nil)
+    }
+
     @Test func unspecifiedSleepHasNoDeepMinutes() {
         let sleep = [SleepInterval(start: d(2026, 11, 19, 23, 0), end: d(2026, 11, 20, 7, 0), stage: .asleepUnspecified)]
         let n = aggregator.night(for: day, sdnn: [], restingHeartRate: [], sleep: sleep)

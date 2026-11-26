@@ -72,14 +72,15 @@ public struct LoadStats: Sendable, Equatable {
     // swiftlint:disable:next function_parameter_count
     public static func make(sessions: [WorkoutSession], onboardingCompletedAt: Date?, deloadUntil: Date?, period: StatsPeriod,
                             now: Date, calendar: Calendar) -> LoadStats {
-        // Mêmes séances et même début d'historique que `TrainingLoad.acwr`.
-        let historyStart = ([onboardingCompletedAt] + sessions.map(\.startedAt)).compactMap { $0 }.min() ?? now
+        // Mêmes séances et même début d'historique que l'accueil : `sessions` est tout l'historique.
+        let start = TrainingLoad.historyStart(sessions: sessions, onboardingCompletedAt: onboardingCompletedAt)
+        let historyStart = start ?? now
         let counted = sessions
             .filter { $0.status == .completed || $0.status == .abandoned }
             .map { CountedSession(session: $0, load: TrainingLoad.loadSession($0)) }
         let ratios = DailyRatios(loads: counted.compactMap(\.load), historyStart: historyStart, calendar: calendar)
 
-        let today = TrainingLoad.acwr(sessions: sessions, onboardingCompletedAt: onboardingCompletedAt, now: now, calendar: calendar)
+        let today = TrainingLoad.acwr(sessions: sessions, historyStart: start, now: now, calendar: calendar)
         let weekBefore = calendar.date(byAdding: .day, value: -7, to: now) ?? now
         let interval = period.interval(now: now, calendar: calendar)
         let inPeriod = counted.filter { interval.start <= $0.session.startedAt && $0.session.startedAt < interval.end }

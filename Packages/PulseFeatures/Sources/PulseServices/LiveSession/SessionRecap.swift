@@ -58,7 +58,7 @@ public struct SessionRecap: Sendable, Equatable {
         let draft = WorkoutSession(startedAt: startedAt, endedAt: endedAt, kind: .strength, source: .pulse, status: .completed,
                                    title: title, overallRPE: Double(rpe), durationMinutes: Double(durationMinutes),
                                    createdAt: endedAt, updatedAt: endedAt)
-        guard let acwr = TrainingLoad.acwr(sessions: load.sessions + [draft], onboardingCompletedAt: load.historyStart,
+        guard let acwr = TrainingLoad.acwr(sessions: load.sessions + [draft], historyStart: load.historyStart,
                                            now: endedAt, calendar: load.calendar) else { return sentence }
         let ratio = LiveSessionText.decimal(acwr.ratio)
         return sentence + " " + String(localized: "Ratio aigu / chronique après la séance : \(ratio).", bundle: .module)
@@ -87,8 +87,8 @@ public struct PlateauNotice: Sendable, Equatable {
     }
 }
 
-/// Ce que le ratio aigu / chronique lit : les séances des 28 derniers jours, et le début de l'historique (fin de l'onboarding
-/// ou plus ancienne séance), qui décide s'il y a assez de recul.
+/// Ce que le ratio aigu / chronique lit : les séances des 28 derniers jours, et le début de l'historique
+/// (`TrainingLoad.historyStart`, lu sur toutes les séances), qui décide s'il y a assez de recul.
 struct LoadHistory: Sendable, Equatable {
     var sessions: [WorkoutSession]
     var historyStart: Date?
@@ -98,7 +98,7 @@ struct LoadHistory: Sendable, Equatable {
         let windowStart = calendar.date(byAdding: .day, value: -LoadCalculator.requiredHistoryDays,
                                         to: calendar.startOfDay(for: endedAt)) ?? endedAt
         self.sessions = sessions.filter { $0.startedAt >= windowStart }
-        historyStart = ([onboardingCompletedAt] + sessions.map(\.startedAt)).compactMap { $0 }.min()
+        historyStart = TrainingLoad.historyStart(sessions: sessions, onboardingCompletedAt: onboardingCompletedAt)
         self.calendar = calendar
     }
 }
