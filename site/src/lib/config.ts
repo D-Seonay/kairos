@@ -20,7 +20,19 @@ export const PUBLIC_PAGE_REDIRECTS = [
 ] as const;
 export const STUDIO_URL = "https://seonay.com";
 
+// Mesure d'audience Umami Cloud : sans cookie, chargée seulement sur le site de production.
+export const UMAMI_WEBSITE_ID = "f388ea38-0747-4e48-8082-887e7f149352";
+export const UMAMI_SCRIPT_ORIGIN = "https://cloud.umami.is";
+export const UMAMI_SCRIPT_URL = `${UMAMI_SCRIPT_ORIGIN}/script.js`;
+/** Where the Umami script posts page views (read in its source: gateway.umami.is/api/send). */
+export const UMAMI_COLLECT_ORIGIN = "https://gateway.umami.is";
+
 type Env = Record<string, string | undefined>;
+
+/** Previews, local builds and e2e runs load no analytics: only Vercel production counts visits. */
+export function analyticsEnabled(env: Env): boolean {
+  return env.VERCEL_ENV === "production";
+}
 
 export function resolveSiteUrl(env: Env): string {
   if (env.NEXT_PUBLIC_SITE_URL) {
