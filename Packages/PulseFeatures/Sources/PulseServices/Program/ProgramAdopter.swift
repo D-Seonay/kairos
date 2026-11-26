@@ -14,10 +14,15 @@ public struct ProgramAdopter: Sendable {
         directory = ExerciseDirectory(library: library, userExercises: [])
     }
 
-    /// `runs` : le nombre de sorties que la semaine adoptée doit compter (l'onboarding le tire du curseur). Celles du modèle
-    /// comptent ; les manquantes sont placées par `RunDayPlanner`, une fois la semaine glissée hors des repos obligatoires.
+    /// Sans `split`, le modèle est copié tel quel (l'éditeur de programme). Avec le partage de la semaine que demande
+    /// l'onboarding :
+    /// - un modèle qui se raccourcit (`canBeShortened`) ne place que ses premières routines de musculation, autant que le
+    ///   partage en demande et au moins une ; les autres restent dans le programme, hors semaine. Les autres modèles sont
+    ///   adoptés entiers ;
+    /// - les sorties qui manquent sont posées par `RunDayPlanner`, une fois la semaine glissée hors des repos obligatoires,
+    ///   sans jamais dépasser les séances par semaine demandées ni déplacer une séance de musculation.
     public func adopt(_ template: ProgramTemplate, equipment: EquipmentAccess, painAreas: [PainArea],
-                      restWeekdays: [Weekday], runs: Int = 0, now: Date) -> Program {
+                      restWeekdays: [Weekday], split: WeekSplit? = nil, now: Date) -> Program {
         var program = Program(template: template, now: now)
         program.days = program.days.map { day in
             var day = day
@@ -34,9 +39,15 @@ public struct ProgramAdopter: Sendable {
             }
             return day
         }
+        if let split, template.canBeShortened {
+            // Au moins une séance : un modèle de musculation choisi à la main garde de la musculation, même curseur à fond.
+            program.weekLayout = WeekLayoutArranger.keeping(strengthDays: max(1, split.strength), of: program)
+        }
         program.weekLayout = WeekLayoutArranger.arrange(program.weekLayout, restWeekdays: restWeekdays)
         program.sessionsPerWeek = program.weekLayout.compactMap { $0 }.count
-        return RunDayPlanner.adding(runs: runs, to: program, restWeekdays: restWeekdays, directory: directory)
+        guard let split else { return program }
+        return RunDayPlanner.adding(runs: split.runs, upTo: split.sessions, to: program, restWeekdays: restWeekdays,
+                                    directory: directory)
     }
 
     /// L'exercice lui-même s'il convient ; sinon le premier remplaçant acceptable (ses alternatives, puis les exercices actifs

@@ -112,8 +112,8 @@ struct OnboardingViewSupportTests {
 
     @Test func weekPreviewShowsTheRunsAddedAtAdoption() throws {
         let adopted = ProgramAdopter(library: .bundled).adopt(
-            try bundled("ppl-3"), equipment: .fullGym, painAreas: [], restWeekdays: [], runs: 2,
-            now: Date(timeIntervalSince1970: 0))
+            try bundled("ppl-3"), equipment: .fullGym, painAreas: [], restWeekdays: [],
+            split: WeekSplit(sessions: 5, runs: 2), now: Date(timeIntervalSince1970: 0))
         let preview = ProgramWeekPreview.days(of: adopted)
         #expect(preview.map(\.kind) == [.strength, .rest, .strength, .run, .strength, .rest, .run])
         #expect(ProgramWeekPreview.sessionCount(preview) == 5)

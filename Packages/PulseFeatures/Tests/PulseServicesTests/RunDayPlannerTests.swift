@@ -31,25 +31,32 @@ struct RunDayPlannerTests {
         #expect(RunDayPlanner.requestedRuns(focus: 3, daysPerWeek: 4) == 4, "Un curseur hors bornes ne demande pas plus que les jours")
     }
 
+    @Test func theWeekSplitSharesTheSessionsBetweenStrengthAndRuns() {
+        let split = WeekSplit(focus: 0.5, daysPerWeek: 3)
+        #expect(split.sessions == 3 && split.runs == 1 && split.strength == 2)
+        #expect(WeekSplit(focus: 0.2, daysPerWeek: 6) == WeekSplit(sessions: 6, runs: 1))
+        #expect(WeekSplit(sessions: 3, runs: 9) == WeekSplit(sessions: 3, runs: 3), "Pas plus de sorties que de séances")
+        #expect(WeekSplit(sessions: 3, runs: 9).strength == 0)
+    }
+
     // MARK: Jours libres
 
     @Test func aSingleRunIsEasyOnTheFirstFreeDay() {
         let week = [push, nil, pull, nil, push, nil, nil]
-        #expect(place(1, in: week) == [Placement(weekdayIndex: 1, type: .easy, replacesStrength: false)])
+        #expect(place(1, in: week) == [Placement(weekdayIndex: 1, type: .easy)])
         #expect(place(0, in: week).isEmpty)
     }
 
     @Test func twoRunsAreOneLongAtTheEndOfTheWeekAndOneEasyAwayFromIt() {
         let placements = place(2, in: [push, nil, pull, nil, push, nil, nil])
-        #expect(placements == [Placement(weekdayIndex: 6, type: .long, replacesStrength: false),
-                               Placement(weekdayIndex: 3, type: .easy, replacesStrength: false)])
+        #expect(placements == [Placement(weekdayIndex: 6, type: .long),
+                               Placement(weekdayIndex: 3, type: .easy)])
     }
 
     @Test func threeRunsKeepASingleLongRun() {
         let placements = place(3, in: [push, nil, pull, nil, push, nil, nil])
         #expect(placements.map(\.type) == [.long, .easy, .easy])
         #expect(placements.map(\.weekdayIndex) == [6, 3, 1])
-        #expect(placements.allSatisfy { !$0.replacesStrength })
     }
 
     @Test func aWeekThatAlreadyHasALongRunOnlyGetsEasyRuns() {
@@ -59,7 +66,7 @@ struct RunDayPlannerTests {
     }
 
     @Test func aShortWeekIsReadAsSevenDays() {
-        #expect(place(1, in: [push]) == [Placement(weekdayIndex: 1, type: .easy, replacesStrength: false)])
+        #expect(place(1, in: [push]) == [Placement(weekdayIndex: 1, type: .easy)])
     }
 
     // MARK: Jambes lourdes
@@ -72,7 +79,7 @@ struct RunDayPlannerTests {
 
     @Test func theOnlyFreeDayIsUsedEvenAfterHeavyLegs() {
         let placements = place(1, in: [push, pull, legs, nil, push, pull, push])
-        #expect(placements == [Placement(weekdayIndex: 3, type: .easy, replacesStrength: false)])
+        #expect(placements == [Placement(weekdayIndex: 3, type: .easy)])
     }
 
     @Test func betweenTwoHeavyLegDaysTheHeaviestIsAvoidedFirst() {
@@ -85,22 +92,18 @@ struct RunDayPlannerTests {
 
     // MARK: Semaine pleine
 
-    @Test func withoutAFreeDayTheRunTakesTheLightestStrengthDay() {
+    @Test func withoutAFreeDayNoRunIsPlaced() {
         let rest: [Weekday] = [.tuesday, .thursday, .saturday, .sunday]
-        let placements = place(1, in: [push, nil, pull, nil, push, nil, nil], rest: rest)
-        #expect(placements == [Placement(weekdayIndex: 2, type: .easy, replacesStrength: true)], "Pull : 4 séries contre 7")
+        #expect(place(1, in: [push, nil, pull, nil, push, nil, nil], rest: rest).isEmpty, "Une séance de musculation ne cède pas sa place")
+        #expect(place(2, in: [push, pull, legs, push, pull, push, pull]).isEmpty)
+        #expect(place(2, in: [nil, nil, nil, nil, nil, nil, nil], rest: Weekday.allCases).isEmpty)
     }
 
-    @Test func aFullWeekGivesUpItsLightestSessionsOneByOne() {
-        let placements = place(2, in: [push, pull, legs, push, pull, push, pull])
-        #expect(placements.map(\.weekdayIndex) == [1, 4])
-        #expect(placements.allSatisfy { $0.replacesStrength && $0.type == .easy })
-    }
-
-    @Test func mandatoryRestDaysNeverGetARun() {
+    @Test func runsBeyondTheFreeDaysAreLeftOut() {
         let placements = place(3, in: [push, nil, pull, nil, push, nil, nil], rest: [.thursday, .saturday, .sunday])
-        #expect(placements.map(\.weekdayIndex) == [1, 2, 0], "Mardi libre, puis les séances les plus légères")
-        #expect(place(2, in: [nil, nil, nil, nil, nil, nil, nil], rest: Weekday.allCases).isEmpty, "Aucune place : rien n'est posé")
+        #expect(placements == [Placement(weekdayIndex: 1, type: .easy)], "Un seul jour libre : une seule sortie, donc facile")
+        let two = place(5, in: [push, nil, pull, nil, push, nil, nil], rest: [.saturday, .sunday])
+        #expect(two.map(\.weekdayIndex) == [3, 1] && two.map(\.type) == [.long, .easy])
     }
 
     // MARK: Dans le programme
@@ -118,7 +121,7 @@ struct RunDayPlannerTests {
 
     @Test func theProgramGetsOneLongRunAndASharedEasyRun() throws {
         let base = program([push, nil, pull, nil, push, nil, nil])
-        let result = RunDayPlanner.adding(runs: 3, to: base, restWeekdays: [], directory: Fixture.directory)
+        let result = RunDayPlanner.adding(runs: 3, upTo: 6, to: base, restWeekdays: [], directory: Fixture.directory)
         #expect(kinds(result) == [.strength, .run, .strength, .run, .strength, nil, .run])
         #expect(result.sessionsPerWeek == 6)
         let runs = result.days.filter { $0.kind == .run }
@@ -127,44 +130,86 @@ struct RunDayPlannerTests {
         #expect(result.days.map(\.order) == Array(0..<result.days.count))
         let easy = try #require(runs.last)
         #expect(result.weekLayout[1] == easy.id && result.weekLayout[3] == easy.id && result.weekLayout[6] == runs.first?.id)
-        #expect(RunDayPlanner.adding(runs: 0, to: base, restWeekdays: [], directory: Fixture.directory) == base)
+        #expect(RunDayPlanner.adding(runs: 0, upTo: 6, to: base, restWeekdays: [], directory: Fixture.directory) == base)
     }
 
-    @Test func aReplacedStrengthDayStaysInTheProgramOutsideTheWeek() {
+    @Test func theWeekNeverGoesBeyondTheSessionsAsked() {
+        let base = program([push, nil, pull, nil, push, nil, nil])
+        let five = RunDayPlanner.adding(runs: 3, upTo: 5, to: base, restWeekdays: [], directory: Fixture.directory)
+        #expect(kinds(five) == [.strength, nil, .strength, .run, .strength, nil, .run], "3 sorties demandées, 2 places sous 5 séances")
+        #expect(five.sessionsPerWeek == 5)
+        #expect(RunDayPlanner.adding(runs: 3, upTo: 3, to: base, restWeekdays: [], directory: Fixture.directory) == base)
+        #expect(RunDayPlanner.adding(runs: 3, upTo: 2, to: base, restWeekdays: [], directory: Fixture.directory) == base,
+                "Un programme déjà au-dessus de la demande reste tel quel")
+    }
+
+    @Test func aFullWeekKeepsEveryStrengthDay() {
         let base = program([push, pull, legs, push, legs, push, legs])
-        let result = RunDayPlanner.adding(runs: 1, to: base, restWeekdays: [], directory: Fixture.directory)
-        #expect(kinds(result) == [.strength, .run, .strength, .strength, .strength, .strength, .strength])
-        #expect(result.days.contains { $0.id == pull.id }, "Pull reste une routine du programme")
-        #expect(!result.weekLayout.contains(pull.id))
-        #expect(result.sessionsPerWeek == 7)
+        #expect(RunDayPlanner.adding(runs: 2, upTo: 9, to: base, restWeekdays: [], directory: Fixture.directory) == base)
+    }
+
+    // MARK: À l'adoption
+
+    private let library = ContentLibrary.bundled
+    private var adopter: ProgramAdopter { ProgramAdopter(library: library) }
+
+    private func adopt(_ id: String, split: WeekSplit?, rest: [Weekday] = []) throws -> Program {
+        let template = try #require(library.programTemplate(id: id))
+        return adopter.adopt(template, equipment: .fullGym, painAreas: [], restWeekdays: rest, split: split, now: .t0)
+    }
+
+    private func names(_ program: Program) -> [String?] {
+        program.weekLayout.map { id in id.flatMap { id in program.days.first { $0.id == id }?.name } }
     }
 
     @Test func theRunsOfTheTemplateCountAndAreNeverRemoved() throws {
-        let library = ContentLibrary.bundled
-        let template = try #require(library.programTemplate(id: "runner-strength"))
-        let adopter = ProgramAdopter(library: library)
-        let plain = adopter.adopt(template, equipment: .fullGym, painAreas: [], restWeekdays: [], now: .t0)
-        for runs in [0, 2, 3] {
-            let adopted = adopter.adopt(template, equipment: .fullGym, painAreas: [], restWeekdays: [], runs: runs, now: .t0)
-            #expect(kinds(adopted) == kinds(plain), "\(runs) sorties demandées : les trois du modèle restent")
+        let plain = try adopt("runner-strength", split: nil)
+        for split in [WeekSplit(sessions: 3, runs: 0), WeekSplit(sessions: 3, runs: 2), WeekSplit(sessions: 5, runs: 3),
+                      WeekSplit(sessions: 6, runs: 3), WeekSplit(sessions: 5, runs: 5)] {
+            let adopted = try adopt("runner-strength", split: split)
+            #expect(names(adopted) == names(plain), "\(split) : le modèle reste entier, rien n'est ajouté")
             #expect(adopted.days.count == plain.days.count)
         }
-        let five = adopter.adopt(template, equipment: .fullGym, painAreas: [], restWeekdays: [], runs: 5, now: .t0)
-        #expect(kinds(five) == [.run, .strength, .run, .run, .strength, .run, .run])
-        #expect(five.days.count == plain.days.count, "Les sorties ajoutées reprennent la course facile du modèle")
-        let easy = try #require(five.days.first { $0.runType == .easy })
-        #expect(five.weekLayout.filter { $0 == easy.id }.count == 3)
-        #expect(five.sessionsPerWeek == 7)
+        let six = try adopt("runner-strength", split: WeekSplit(sessions: 6, runs: 5))
+        #expect(kinds(six).filter { $0 == .run }.count == 4 && kinds(six).filter { $0 == .strength }.count == 2,
+                "5 sorties demandées, une seule place sous 6 séances")
+        #expect(six.sessionsPerWeek == 6)
+        #expect(six.days.count == plain.days.count, "La sortie ajoutée reprend la course facile du modèle")
     }
 
-    @Test func adoptingWithRunsKeepsTheStrengthDaysOfTheTemplate() throws {
-        let library = ContentLibrary.bundled
-        let template = try #require(library.programTemplate(id: "full-body"))
-        let adopted = ProgramAdopter(library: library).adopt(template, equipment: .fullGym, painAreas: [],
-                                                             restWeekdays: [.tuesday], runs: 1, now: .t0)
-        #expect(kinds(adopted) == [.strength, nil, .strength, .run, .strength, nil, nil])
-        #expect(adopted.sessionsPerWeek == 4 && adopted.templateID == "full-body")
+    @Test func aBalancedTemplateKeepsItsFirstRoutinesAndGetsTheRuns() throws {
+        let adopted = try adopt("full-body", split: WeekSplit(sessions: 3, runs: 1), rest: [.tuesday])
+        #expect(names(adopted) == ["Full Body A", nil, "Full Body B", "Sortie facile", nil, nil, nil])
+        #expect(adopted.sessionsPerWeek == 3 && adopted.templateID == "full-body")
+        #expect(adopted.days.map(\.name) == ["Full Body A", "Full Body B", "Full Body C", "Sortie facile"],
+                "Full Body C reste dans le programme, hors semaine")
         let run = try #require(adopted.days.last)
         #expect(run.kind == .run && run.runType == .easy && run.runTargetMinutes == 30)
+
+        let upperLower = try adopt("upper-lower", split: WeekSplit(sessions: 4, runs: 1))
+        #expect(names(upperLower) == ["Haut A", "Bas A", nil, "Haut B", "Sortie facile", nil, nil])
+        #expect(upperLower.days.contains { $0.name == "Bas B" } && !names(upperLower).contains("Bas B"))
+    }
+
+    @Test func aBalancedTemplateAlwaysKeepsOneStrengthDay() throws {
+        let adopted = try adopt("full-body", split: WeekSplit(sessions: 3, runs: 3))
+        #expect(kinds(adopted).filter { $0 == .strength }.count == 1 && names(adopted).first == "Full Body A")
+        #expect(kinds(adopted).filter { $0 == .run }.count == 2 && adopted.sessionsPerWeek == 3)
+    }
+
+    @Test func aSplitIsAdoptedWholeAndOnlyGetsTheRunsThatFit() throws {
+        let plain = try adopt("ppl-3", split: nil)
+        let three = try adopt("ppl-3", split: WeekSplit(sessions: 3, runs: 1))
+        #expect(names(three) == names(plain) && three.days.count == plain.days.count, "3 séances : pas de place pour la sortie")
+        let two = try adopt("ppl-3", split: WeekSplit(sessions: 2, runs: 1))
+        #expect(names(two) == names(plain), "Le modèle seul dépasse la demande : rien ne s'ajoute, rien ne se retire")
+        let four = try adopt("ppl-3", split: WeekSplit(sessions: 4, runs: 1))
+        #expect(names(four) == ["Push", "Sortie facile", "Pull", nil, "Legs", nil, nil])
+        let six = try adopt("ppl-6", split: WeekSplit(sessions: 6, runs: 1))
+        #expect(names(six) == names(try adopt("ppl-6", split: nil)))
+    }
+
+    @Test func adoptingWithoutASplitCopiesTheTemplate() throws {
+        #expect(kinds(try adopt("full-body", split: nil)) == [.strength, nil, .strength, nil, .strength, nil, nil])
     }
 }

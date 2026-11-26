@@ -10,9 +10,10 @@ extension OnboardingModel {
         RunDayPlanner.requestedRuns(focus: profile.focus, daysPerWeek: profile.trainingDaysPerWeek)
     }
 
-    /// Les séances de la semaine qu'adopter le modèle recommandé donnera : ses séances de musculation, et les sorties du
-    /// curseur placées autour (celles du modèle comptent). Suit le curseur, les séances par semaine et les jours de repos.
-    /// Sans modèle, le partage que demande le curseur.
+    /// Les séances de la semaine qu'adopter le modèle recommandé donnera, jamais plus que les séances par semaine choisies
+    /// (sauf si le modèle seul en compte plus) : les séances de musculation que le modèle garde, et les sorties du curseur
+    /// qui trouvent un jour libre (celles du modèle comptent). Une sortie sans place n'est pas annoncée. Suit le curseur, les
+    /// séances par semaine et les jours de repos. Sans modèle, le partage que demande le curseur.
     public var weekProposal: (strength: Int, runs: Int) {
         let recommendedID = recommendation()
         guard let template = environment.library.programTemplates.first(where: { $0.id == recommendedID }) else {
@@ -22,11 +23,12 @@ extension OnboardingModel {
         return (week.filter { $0.kind == .strength }.count, week.filter { $0.kind == .run }.count)
     }
 
-    /// Le programme que l'adoption de `template` enregistre : adapté au matériel, aux douleurs et aux repos du brouillon, avec
-    /// les sorties que le curseur demande.
+    /// Le programme que l'adoption de `template` enregistre : adapté au matériel, aux douleurs et aux repos du brouillon, et
+    /// au partage de la semaine que demande le curseur (`WeekSplit`, appliqué par `ProgramAdopter`).
     func plannedProgram(for template: ProgramTemplate) -> Program {
         adopter.adopt(template, equipment: profile.equipmentAccess, painAreas: profile.painAreas,
-                      restWeekdays: profile.restWeekdays, runs: requestedRuns, now: environment.now())
+                      restWeekdays: profile.restWeekdays,
+                      split: WeekSplit(focus: profile.focus, daysPerWeek: profile.trainingDaysPerWeek), now: environment.now())
     }
 
     /// L'aperçu L à D de la carte de `template` : la semaine de `plannedProgram(for:)`.

@@ -1,19 +1,18 @@
 import Foundation
 import PulseDomain
 
-/// Place dans la semaine type les sorties que l'onboarding propose (« 3 séances de musculation et 1 sortie »), pour que le
+/// Place dans la semaine type les sorties que l'onboarding propose (« 2 séances de musculation et 1 sortie »), pour que le
 /// programme adopté les contienne vraiment. Tout est pur : la même semaine et la même demande donnent le même résultat.
+/// Une sortie ne prend jamais la place d'une séance de musculation : sans jour libre, elle n'est pas posée.
 public enum RunDayPlanner {
-    /// Une sortie à poser : son jour (0 = lundi), son type, et si elle prend la place d'une séance de musculation.
+    /// Une sortie à poser : son jour (0 = lundi) et son type.
     public struct Placement: Sendable, Equatable {
         public var weekdayIndex: Int
         public var type: RunType
-        public var replacesStrength: Bool
 
-        public init(weekdayIndex: Int, type: RunType, replacesStrength: Bool) {
+        public init(weekdayIndex: Int, type: RunType) {
             self.weekdayIndex = weekdayIndex
             self.type = type
-            self.replacesStrength = replacesStrength
         }
     }
 
@@ -24,50 +23,46 @@ public enum RunDayPlanner {
         return days - strength
     }
 
-    /// Où poser `count` sorties de plus dans `week` (lundi à dimanche, `nil` pour un repos).
+    /// Où poser jusqu'à `count` sorties de plus dans `week` (lundi à dimanche, `nil` pour un repos).
     ///
-    /// - Un jour libre d'abord, jamais un repos obligatoire. Parmi les jours libres, ceux qui ne suivent pas une séance de
-    ///   jambes lourde (`HeavyLegs`, comme la règle anti-interférence) ; à défaut ceux qui suivent une séance de jambes moins
-    ///   chargée ; le lendemain de la plus lourde seulement s'il ne reste que lui. La semaine se répète : lundi suit dimanche.
+    /// - Seulement sur un jour libre qui n'est pas un repos obligatoire. Quand il y a moins de jours libres que de sorties,
+    ///   les sorties en trop ne sont pas posées : aucune séance ne cède sa place.
+    /// - Parmi les jours libres, d'abord ceux qui ne suivent pas une séance de jambes lourde (`HeavyLegs`, comme la règle
+    ///   anti-interférence) ; à défaut ceux qui suivent une séance de jambes moins chargée ; le lendemain de la plus lourde
+    ///   seulement s'il ne reste que lui. La semaine se répète : lundi suit dimanche.
     /// - Avec deux sorties ou plus dans la semaine, une seule est longue, le plus tard possible dans la semaine, et seulement
     ///   un jour qui ne suit pas des jambes lourdes : la règle anti-interférence la déplacerait sinon chaque semaine. Les
     ///   autres sont faciles, le plus loin possible des courses déjà là. Une sortie seule est facile.
-    /// - Sans jour libre, la sortie prend le jour de la séance de musculation la plus légère (le moins de séries) plutôt que
-    ///   de disparaître. Quand il ne reste ni jour libre ni séance à remplacer, plus rien n'est posé.
     public static func placements(adding count: Int, to week: [RoutineDay?], restWeekdays: [Weekday],
                                   directory: ExerciseDirectory) -> [Placement] {
-        guard count > 0 else { return [] }
         var draft = Draft(week: week, restWeekdays: restWeekdays, directory: directory)
-        let total = draft.runIndices.count + count
+        let placeable = min(count, draft.freeCount)
+        guard placeable > 0 else { return [] }
         var placements: [Placement] = []
-        if total >= 2, !draft.hasLongRun, let index = draft.longRunDay() {
+        if draft.runCount + placeable >= 2, !draft.hasLongRun, let index = draft.longRunDay() {
             draft.markRun(at: index)
-            placements.append(Placement(weekdayIndex: index, type: .long, replacesStrength: false))
+            placements.append(Placement(weekdayIndex: index, type: .long))
         }
-        while placements.count < count {
-            if let index = draft.easyRunDay() {
-                draft.markRun(at: index)
-                placements.append(Placement(weekdayIndex: index, type: .easy, replacesStrength: false))
-            } else if let index = draft.lightestStrengthDay() {
-                draft.markRun(at: index)
-                placements.append(Placement(weekdayIndex: index, type: .easy, replacesStrength: true))
-            } else {
-                break
-            }
+        while placements.count < placeable, let index = draft.easyRunDay() {
+            draft.markRun(at: index)
+            placements.append(Placement(weekdayIndex: index, type: .easy))
         }
         return placements
     }
 
-    /// Le programme dont la semaine compte `runs` sorties : celles qu'il a déjà comptent et ne sont jamais retirées, les
-    /// manquantes sont posées par `placements`. Les sorties faciles ajoutées partagent un même jour de course (celui du
-    /// programme s'il en a un), comme une routine placée deux fois dans la semaine. Une séance de musculation remplacée
-    /// quitte la semaine mais reste une routine du programme.
-    public static func adding(runs: Int, to program: Program, restWeekdays: [Weekday], directory: ExerciseDirectory) -> Program {
+    /// Le programme avec les sorties qui lui manquent pour en compter `runs`, tant que sa semaine ne dépasse pas `sessions`
+    /// séances : il en reçoit `min(runs − celles qu'il a déjà, sessions − ses séances)`, jamais moins de zéro. Les sorties du
+    /// programme comptent et ne sont jamais retirées ; un programme qui dépasse déjà `sessions` reste tel quel.
+    /// Les sorties faciles ajoutées partagent un même jour de course (celui du programme s'il en a un), comme une routine
+    /// placée deux fois dans la semaine.
+    public static func adding(runs: Int, upTo sessions: Int, to program: Program, restWeekdays: [Weekday],
+                              directory: ExerciseDirectory) -> Program {
         let count = Weekday.allCases.count
         let layout = Array((program.weekLayout + [UUID?](repeating: nil, count: count)).prefix(count))
         let week = layout.map { id in id.flatMap { id in program.days.first { $0.id == id } } }
-        let existing = week.compactMap { $0 }.filter { $0.kind == .run }.count
-        let placements = placements(adding: runs - existing, to: week, restWeekdays: restWeekdays, directory: directory)
+        let placed = week.compactMap { $0 }
+        let missing = min(runs - placed.filter { $0.kind == .run }.count, sessions - placed.count)
+        let placements = placements(adding: missing, to: week, restWeekdays: restWeekdays, directory: directory)
         guard !placements.isEmpty else { return program }
         var result = program
         result.weekLayout = layout
@@ -94,9 +89,9 @@ public enum RunDayPlanner {
 private struct Draft {
     private enum Slot {
         case free
-        case rest
+        /// Un repos obligatoire ou une séance de musculation : rien ne s'y pose.
+        case taken
         case run
-        case strength(sets: Int)
     }
 
     private var slots: [Slot]
@@ -110,8 +105,8 @@ private struct Draft {
         let days = Array((week + [RoutineDay?](repeating: nil, count: count)).prefix(count))
         let rest = Set(restWeekdays.map(\.index))
         slots = days.enumerated().map { index, day in
-            guard let day else { return rest.contains(index) ? .rest : .free }
-            return day.kind == .run ? .run : .strength(sets: day.exercises.reduce(0) { $0 + max(0, $1.sets) })
+            guard let day else { return rest.contains(index) ? .taken : .free }
+            return day.kind == .run ? .run : .taken
         }
         hasLongRun = days.contains { $0?.kind == .run && $0?.runType == .long }
         let legSets = days.map { day -> Int in
@@ -126,12 +121,20 @@ private struct Draft {
         }
     }
 
-    var runIndices: [Int] {
+    private var runIndices: [Int] {
         slots.indices.filter { if case .run = slots[$0] { true } else { false } }
     }
 
     private var freeIndices: [Int] {
         slots.indices.filter { if case .free = slots[$0] { true } else { false } }
+    }
+
+    var runCount: Int {
+        runIndices.count
+    }
+
+    var freeCount: Int {
+        freeIndices.count
     }
 
     mutating func markRun(at index: Int) {
@@ -156,18 +159,6 @@ private struct Draft {
                 best = index
                 bestDistance = distance
             }
-        }
-        return best
-    }
-
-    /// Le jour de la séance de musculation qui compte le moins de séries ; à égalité, le plus tôt dans la semaine.
-    func lightestStrengthDay() -> Int? {
-        var best: Int?
-        var bestSets = Int.max
-        for index in slots.indices {
-            guard case .strength(let sets) = slots[index], sets < bestSets else { continue }
-            best = index
-            bestSets = sets
         }
         return best
     }
