@@ -42,26 +42,32 @@ struct OnboardingViewSupportTests {
             days: days, suggestedWeek: week)
     }
 
+    /// L'aperçu de la semaine que l'adoption de `template` donne, sans sortie ajoutée.
+    private func preview(_ template: ProgramTemplate, rest: [Weekday] = []) -> [WeekPreviewDay] {
+        ProgramWeekPreview.days(of: ProgramAdopter(library: .bundled).adopt(
+            template, equipment: .fullGym, painAreas: [], restWeekdays: rest, now: Date(timeIntervalSince1970: 0)))
+    }
+
     @Test func weekPreviewMapsDaysToKinds() {
         let days = [
             TemplateDay(id: "a", name: LocalizedText(fr: "A"), kind: .strength),
             TemplateDay(id: "r", name: LocalizedText(fr: "R"), kind: .run)
         ]
-        let preview = ProgramWeekPreview.days(
-            for: template(week: ["a", nil, "r", nil, "a", nil, nil], days: days), restWeekdays: [])
+        let preview = preview(template(week: ["a", nil, "r", nil, "a", nil, nil], days: days))
         #expect(preview.map(\.weekday) == Weekday.allCases)
         #expect(preview.map(\.kind) == [.strength, .rest, .run, .rest, .strength, .rest, .rest])
     }
 
     @Test func weekPreviewPadsAShortWeekAndIgnoresUnknownDays() {
-        let preview = ProgramWeekPreview.days(for: template(week: ["ghost"], days: []), restWeekdays: [])
+        let short = Program(template: template(week: ["ghost"], days: []), now: Date(timeIntervalSince1970: 0))
+        let preview = ProgramWeekPreview.days(of: short)
         #expect(preview.count == 7)
         #expect(preview.allSatisfy { $0.kind == .rest })
     }
 
     @Test func everyBundledTemplatePreviewsItsSessions() {
         for template in ContentLibrary.bundled.programTemplates {
-            let preview = ProgramWeekPreview.days(for: template, restWeekdays: [])
+            let preview = preview(template)
             #expect(preview.count == 7)
             #expect(preview.filter { $0.kind != .rest }.count == template.sessionsPerWeek, "\(template.id)")
         }
@@ -76,29 +82,28 @@ struct OnboardingViewSupportTests {
     }
 
     @Test func weekPreviewMovesSessionsOffAnImposedRestDay() throws {
-        let preview = ProgramWeekPreview.days(for: try bundled("ppl-3"), restWeekdays: [.wednesday])
+        let preview = preview(try bundled("ppl-3"), rest: [.wednesday])
         #expect(sessionWeekdays(preview) == [.monday, .thursday, .friday])
         #expect(ProgramWeekPreview.sessionCount(preview) == 3)
     }
 
     @Test func weekPreviewDropsSessionsThatFindNoRoom() throws {
-        let preview = ProgramWeekPreview.days(for: try bundled("ppl-6"), restWeekdays: [.saturday, .sunday])
+        let preview = preview(try bundled("ppl-6"), rest: [.saturday, .sunday])
         #expect(sessionWeekdays(preview) == [.monday, .tuesday, .wednesday, .thursday, .friday])
         #expect(ProgramWeekPreview.sessionCount(preview) == 5)
     }
 
-    @Test func weekPreviewMatchesTheAdoptedWeek() throws {
-        let template = try bundled("ppl-3")
-        let rest: [Weekday] = [.wednesday, .friday]
+    @Test func weekPreviewShowsTheRunsAddedAtAdoption() throws {
         let adopted = ProgramAdopter(library: .bundled).adopt(
-            template, equipment: .fullGym, painAreas: [], restWeekdays: rest, now: Date(timeIntervalSince1970: 0))
-        let preview = ProgramWeekPreview.days(for: template, restWeekdays: rest)
-        #expect(preview.map { $0.kind != .rest } == adopted.weekLayout.map { $0 != nil })
+            try bundled("ppl-3"), equipment: .fullGym, painAreas: [], restWeekdays: [],
+            split: WeekSplit(sessions: 5, runs: 2), now: Date(timeIntervalSince1970: 0))
+        let preview = ProgramWeekPreview.days(of: adopted)
+        #expect(preview.map(\.kind) == [.strength, .rest, .strength, .run, .strength, .rest, .run])
+        #expect(ProgramWeekPreview.sessionCount(preview) == 5)
     }
 
     @Test func weekPreviewReadsOutEveryDay() {
-        let days = ProgramWeekPreview.days(
-            for: template(week: [nil, nil, nil, nil, nil, nil, nil], days: []), restWeekdays: [])
+        let days = preview(template(week: [nil, nil, nil, nil, nil, nil, nil], days: []))
         let label = ProgramWeekPreview.accessibilityLabel(for: days)
         #expect(label.hasPrefix("Lundi : repos, Mardi : repos"))
         #expect(label.hasSuffix("Dimanche : repos"))

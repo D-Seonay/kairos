@@ -8,7 +8,7 @@ import SwiftUI
 /// et « Lancer » (musculation) ou « Courir » (course), une pastille à part de la touche qui ouvre l'éditeur.
 struct RoutineRow: View {
     let routine: RoutineSummary
-    /// Le programme dont la routine s'ouvre dans l'éditeur ; `nil` pour une course, qui n'a pas encore d'éditeur.
+    /// Le programme dont la routine ou la course s'ouvre dans son éditeur ; `nil` sans éditeur à ouvrir.
     let programID: UUID?
     /// Lance la routine : la séance de musculation, ou la course ; `nil` sans pastille.
     let onLaunch: (() -> Void)?
@@ -41,13 +41,16 @@ struct RoutineRow: View {
     @ViewBuilder
     private var summary: some View {
         if let programID {
-            NavigationLink(value: TrainDestination.routine(program: programID, day: routine.day.id)) {
+            let isRun = routine.day.kind == .run
+            NavigationLink(value: isRun ? TrainDestination.run(program: programID, day: routine.day.id)
+                               : TrainDestination.routine(program: programID, day: routine.day.id)) {
                 summaryContent
             }
             .buttonStyle(PressableButtonStyle())
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(String(localized: "\(routine.day.name), \(spokenSubtitle)", bundle: .module))
-            .accessibilityHint(String(localized: "Ouvre l'éditeur de la routine", bundle: .module))
+            .accessibilityHint(isRun ? String(localized: "Ouvre l'éditeur de la course", bundle: .module)
+                                : String(localized: "Ouvre l'éditeur de la routine", bundle: .module))
             .accessibilityAddTraits(.isButton)
             .accessibilityIdentifier(TrainIdentifiers.routinePrefix + routine.day.id.uuidString)
         } else {

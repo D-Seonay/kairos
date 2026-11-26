@@ -2,6 +2,7 @@ import Foundation
 import PulseContent
 import PulseDesignSystem
 import PulseDomain
+import PulseServices
 
 /// Les textes des routines et de leurs exercices, de la correction d'une séance et de la période d'un import.
 extension TrainText {
@@ -11,8 +12,7 @@ extension TrainText {
     static func routineSubtitle(_ routine: RoutineSummary) -> String {
         var parts: [String] = []
         if routine.day.kind == .run {
-            parts.append(routine.day.runType?.localizedName ?? String(localized: "Course", bundle: .module))
-            if let target = runTarget(routine.day) { parts.append(target) }
+            parts.append(runSummary(routine.day))
         } else {
             parts.append(exercises(routine.exerciseCount))
             parts.append(String(localized: "~ \(routine.estimatedMinutes) min", bundle: .module))
@@ -25,8 +25,7 @@ extension TrainText {
     static func routineSubtitleSpoken(_ routine: RoutineSummary) -> String {
         var parts: [String] = []
         if routine.day.kind == .run {
-            parts.append(routine.day.runType?.localizedName ?? String(localized: "Course", bundle: .module))
-            if let target = runTargetSpoken(routine.day) { parts.append(target) }
+            parts.append(runSummarySpoken(routine.day))
         } else {
             parts.append(exercises(routine.exerciseCount))
             parts.append(approximateMinutes(routine.estimatedMinutes))
@@ -35,18 +34,43 @@ extension TrainText {
         return parts.joined(separator: ", ")
     }
 
-    /// « Sortie facile · 40 min » : le type et l'objectif d'une course, sans ses jours.
+    /// « Sortie facile · 40 min » : le type et l'objectif d'une course, sans ses jours. Une course qui porte le nom de son type
+    /// (celles de l'éditeur) ne le répète pas sous son titre : « 40 min », ou « Course » sans objectif.
     static func runSummary(_ day: RoutineDay) -> String {
-        var parts = [day.runType?.localizedName ?? String(localized: "Course", bundle: .module)]
-        if let target = runTarget(day) { parts.append(target) }
-        return parts.joined(separator: " · ")
+        runParts(day, goal: runGoalValue(RunDayEditor.goal(of: day))).joined(separator: " · ")
     }
 
     /// « Sortie facile, 40 minutes » : `runSummary` dit en mots.
     static func runSummarySpoken(_ day: RoutineDay) -> String {
-        var parts = [day.runType?.localizedName ?? String(localized: "Course", bundle: .module)]
-        if let target = runTargetSpoken(day) { parts.append(target) }
-        return parts.joined(separator: ", ")
+        runParts(day, goal: runGoalSpoken(RunDayEditor.goal(of: day))).joined(separator: ", ")
+    }
+
+    /// « Sortie longue · 60 min » : une course dans le menu de la semaine, où deux sorties du même type se distinguent par
+    /// leur objectif.
+    static func runMenuTitle(_ day: RoutineDay) -> String {
+        ([day.name] + [runGoalValue(RunDayEditor.goal(of: day))].compactMap { $0 }).joined(separator: " · ")
+    }
+
+    /// « 45 min », « 7,5 km » ; `nil` sans objectif.
+    static func runGoalValue(_ goal: RunGoal) -> String? {
+        switch goal {
+        case .none:
+            return nil
+        case .minutes(let minutes):
+            return String(localized: "\(minutes) min", bundle: .module)
+        case .kilometres(let kilometres):
+            let distance = kilometres.formatted(.number.precision(.fractionLength(0...1)).locale(Locale(identifier: "fr_FR")))
+            return String(localized: "\(distance) km", bundle: .module)
+        }
+    }
+
+    /// « 45 minutes », « 7,5 kilomètres » ; `nil` sans objectif.
+    static func runGoalSpoken(_ goal: RunGoal) -> String? {
+        switch goal {
+        case .none: nil
+        case .minutes(let minutes): PulseSpoken.duration(seconds: minutes * 60)
+        case .kilometres(let kilometres): PulseSpoken.kilometres(kilometres)
+        }
     }
 
     /// « environ 55 minutes », « environ 1 heure 5 minutes » : la durée estimée d'une séance.
@@ -175,16 +199,13 @@ extension TrainText {
         count <= 1 ? String(localized: "seconde", bundle: .module) : String(localized: "secondes", bundle: .module)
     }
 
-    private static func runTarget(_ day: RoutineDay) -> String? {
-        if let minutes = day.runTargetMinutes { return String(localized: "\(minutes) min", bundle: .module) }
-        guard let km = day.runTargetKm else { return nil }
-        let distance = km.formatted(.number.precision(.fractionLength(0...1)).locale(Locale(identifier: "fr_FR")))
-        return String(localized: "\(distance) km", bundle: .module)
-    }
-
-    private static func runTargetSpoken(_ day: RoutineDay) -> String? {
-        if let minutes = day.runTargetMinutes { return PulseSpoken.duration(seconds: minutes * 60) }
-        return day.runTargetKm.map(PulseSpoken.kilometres)
+    /// Le type puis l'objectif d'une course ; le type est omis quand le jour porte déjà son nom, et « Course » tient lieu de
+    /// résumé quand il ne reste rien.
+    private static func runParts(_ day: RoutineDay, goal: String?) -> [String] {
+        let fallback = String(localized: "Course", bundle: .module)
+        let type = day.runType?.localizedName ?? fallback
+        let parts = (type == day.name ? [] : [type]) + [goal].compactMap { $0 }
+        return parts.isEmpty ? [fallback] : parts
     }
 
     /// « lundi, jeudi » ; « hors semaine type » pour une routine qu'aucun jour ne planifie.
