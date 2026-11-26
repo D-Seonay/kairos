@@ -49,4 +49,35 @@ import Testing
     @Test func sessionLoadIsMinutesTimesRPE() {
         #expect(LoadSession(date: day, minutes: 45, rpe: 6).load == 270)
     }
+
+    private func sessions(daysAgo offsets: [Int], minutes: Double = 60) -> [LoadSession] {
+        offsets.map { LoadSession(date: TestCalendar.shift(day, by: -$0), minutes: minutes, rpe: 7) }
+    }
+
+    /// La base se lit sur les trois semaines d'avant la semaine aiguë, des jours −27 à −7 : il y faut 3 séances.
+    @Test func trainingBaseNeedsThreeSessionsBeforeTheAcuteWeek() {
+        #expect(LoadCalculator.minimumBaseSessions == 3)
+        #expect(calculator.hasTrainingBase(sessions: sessions(daysAgo: [7, 14, 27]), asOf: day))
+        #expect(!calculator.hasTrainingBase(sessions: sessions(daysAgo: [7, 27]), asOf: day))
+        #expect(!calculator.hasTrainingBase(sessions: [], asOf: day))
+    }
+
+    /// Trois semaines de pause puis une semaine normale : la semaine aiguë ne fait pas une base, les séances d'avant les
+    /// 28 jours non plus.
+    @Test func aComebackWeekIsNotATrainingBase() {
+        let comeback = sessions(daysAgo: [0, 1, 3, 5, 6])
+        #expect(!calculator.hasTrainingBase(sessions: comeback + sessions(daysAgo: [28, 30, 35, 40]), asOf: day))
+        #expect(!calculator.hasTrainingBase(sessions: comeback + sessions(daysAgo: [8, 28]), asOf: day))
+        #expect(calculator.hasTrainingBase(sessions: comeback + sessions(daysAgo: [8, 15, 22]), asOf: day))
+    }
+
+    /// Une séance sans charge (durée nulle) ne porte rien : elle ne compte pas dans la base.
+    @Test func sessionsWithoutLoadDoNotMakeABase() {
+        let empty = sessions(daysAgo: [10], minutes: 0)
+        #expect(!calculator.hasTrainingBase(sessions: sessions(daysAgo: [8, 20]) + empty, asOf: day))
+        let lateInTheDay = [LoadSession(date: TestCalendar.date(2026, 11, 21, 21, 30), minutes: 60, rpe: 7),
+                            LoadSession(date: TestCalendar.date(2026, 11, 1, 6, 0), minutes: 60, rpe: 7)]
+        #expect(calculator.hasTrainingBase(sessions: sessions(daysAgo: [14]) + lateInTheDay, asOf: day),
+                "Les bornes se comptent en jours calendaires : le 21 au soir est le jour −7, le 1er au matin le jour −27")
+    }
 }
