@@ -118,6 +118,27 @@ private func benchSession(day offset: Int, status: SessionStatus, sets: [Workout
     #expect(try await repo.lastSets(for: .content(id: "bench-press-barbell")).map(\.actualReps) == [9, 7])
 }
 
+/// Une séance faite en décharge appliquée n'est pas « la dernière fois » ; refusée, elle a été faite aux charges habituelles
+/// et compte.
+@Test func lastSetsSkipASessionDoneUnderAnAppliedDeload() async throws {
+    let repo = SwiftDataWorkoutRepository(modelContainer: try TestContainer.make())
+    let deload = SessionAdjustment(kind: .deload, reason: "Semaine de décharge", value: 0.4)
+    let before = benchSession(day: 1, status: .completed, sets: [benchSet(order: 1, reps: 9), benchSet(order: 2, reps: 7)])
+    var deloaded = benchSession(day: 9, status: .completed, sets: [benchSet(order: 1, reps: 11), benchSet(order: 2, reps: 11)])
+    deloaded.appliedAdjustments = [SessionAdjustment(kind: .rest, reason: "Repos +15 s", value: 15), deload]
+    for session in [before, deloaded] { try await repo.save(session) }
+    let bench = ExerciseReference.content(id: "bench-press-barbell")
+    #expect(try await repo.lastSets(for: bench).map(\.actualReps) == [9, 7])
+
+    var refused = benchSession(day: 11, status: .completed, sets: [benchSet(order: 1, reps: 6)])
+    refused.refusedAdjustments = [deload]
+    try await repo.save(refused)
+    #expect(try await repo.lastSets(for: bench).map(\.actualReps) == [6])
+    try await repo.delete(id: before.id)
+    try await repo.delete(id: refused.id)
+    #expect(try await repo.lastSets(for: bench).isEmpty, "Sans séance hors décharge, pas de référence")
+}
+
 // MARK: - Séances importées d'Apple Health : magasin local
 
 private func counts(_ container: ModelContainer) throws -> (synced: Int, local: Int) {
@@ -284,4 +305,24 @@ private func counts(_ container: ModelContainer) throws -> (synced: Int, local: 
     try await repo.delete(id: deleted.id)
     #expect(try await repo.completedPulseSessionCount(kind: .strength) == 3)
     #expect(try await repo.completedPulseSessionCount(kind: .run) == 1)
+}
+
+/// Le début de l'historique d'entraînement : la plus ancienne séance enregistrée, sans les imports d'Apple Santé ni les
+/// séances supprimées.
+@Test func oldestRecordedStartIgnoresAppleHealthImportsAndDeletedSessions() async throws {
+    let repo = SwiftDataWorkoutRepository(modelContainer: try TestContainer.make())
+    #expect(try await repo.oldestRecordedStart() == nil)
+    var importedRun = Sample.session(startedAt: Fixed.t0.addingTimeInterval(-90 * day), sets: 0)
+    importedRun.kind = .run
+    importedRun.source = .appleHealth
+    let deleted = Sample.session(startedAt: Fixed.t0.addingTimeInterval(-30 * day), sets: 1)
+    var hevy = Sample.session(startedAt: Fixed.t0.addingTimeInterval(-10 * day), sets: 1)
+    hevy.source = .hevy
+    let recent = Sample.session(startedAt: Fixed.t0, sets: 1)
+    for session in [importedRun, deleted, hevy, recent] { try await repo.save(session) }
+    try await repo.delete(id: deleted.id)
+    #expect(try await repo.oldestRecordedStart() == hevy.startedAt)
+    // La lecture par défaut du protocole, celle des doublures, donne le même jour.
+    let all = try await repo.sessions(from: .distantPast, to: .distantFuture)
+    #expect(all.filter { $0.source != .appleHealth }.map(\.startedAt).min() == hevy.startedAt)
 }

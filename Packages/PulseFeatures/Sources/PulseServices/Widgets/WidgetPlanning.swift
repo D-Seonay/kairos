@@ -111,7 +111,7 @@ extension PlanningService {
         let start = calendar.date(byAdding: .day, value: -28, to: today) ?? today
         let end = calendar.date(byAdding: .day, value: 1, to: today) ?? now
         let sessions = try await workouts.sessions(from: start, to: end)
-        let ratio = TrainingLoad.acwr(sessions: sessions, onboardingCompletedAt: overview.profile?.onboardingCompletedAt, now: now,
+        let ratio = TrainingLoad.acwr(sessions: sessions, historyStart: overview.loadHistoryStart, now: now,
                                       calendar: calendar)?.ratio
         return WidgetPlanning.make(overview: overview, loadRatio: ratio, now: now, calendar: calendar)
     }

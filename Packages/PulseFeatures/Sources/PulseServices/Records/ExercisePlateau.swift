@@ -104,7 +104,7 @@ public enum PlateauDetector {
     ///   jour de fatigue reste un jour de fatigue, même quand on choisit la séance d'origine.
     /// Une séance sans ajustement (sans score, adaptation coupée, importée) compte : rien ne dit qu'elle a été faite fatigué.
     public static func counts(_ session: WorkoutSession) -> Bool {
-        if session.appliedAdjustments.contains(where: { $0.kind == .deload }) { return false }
+        if session.isDeloaded { return false }
         return !(session.appliedAdjustments + session.refusedAdjustments).contains(where: isFatigueMark)
     }
 

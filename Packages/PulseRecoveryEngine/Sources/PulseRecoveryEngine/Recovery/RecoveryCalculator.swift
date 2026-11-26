@@ -3,7 +3,13 @@ import PulseDomain
 
 /// Calcule le score de récupération d'un jour à partir de la nuit du jour et des nuits précédentes (spec §6.2, §6.3).
 public struct RecoveryCalculator: Sendable {
+    /// La fenêtre de la ligne de base VFC (moyenne et écart-type), en jours avant le jour calculé.
     public static let hrvWindowDays = 14
+    /// La fenêtre où se compte la calibration : plus large que la ligne de base, pour qu'une nuit sans montre dans la
+    /// quinzaine ne fasse pas repartir la calibration.
+    public static let calibrationWindowDays = 28
+    /// Le nombre de nuits valides qu'il faut dans la fenêtre de calibration pour que la ligne de base soit dite prête.
+    public static let calibrationNights = 14
     public static let restingHeartRateWindowDays = 7
     public static let restingHeartRateMinimumValues = 3
     /// Poids nominaux VFC 0,50 / FC repos 0,25 / sommeil 0,25 (spec §6.2).
@@ -58,13 +64,13 @@ public struct RecoveryCalculator: Sendable {
         let baselineValue: Double?
     }
 
+    /// La ligne de base vient des nuits valides des 14 jours d'avant ; la calibration, de celles des 28 jours d'avant :
+    /// prête dès 14 nuits valides, sinon en cours avec ce nombre de nuits (13 au plus).
     private func hrvFactor(day: Date, today: NightSample,
                            history: [NightSample]) -> (score: PartialFactor?, calibration: CalibrationState) {
-        let values = history
-            .filter { offset(from: $0, to: day).map { (1...Self.hrvWindowDays).contains($0) } ?? false }
-            .compactMap(\.sdnnMs)
-            .filter { HRVBaseline.isValid(sdnnMs: $0) }
-        let calibration: CalibrationState = values.count < Self.hrvWindowDays ? .calibrating(nights: values.count) : .ready
+        let values = validSDNN(of: history, before: day, days: Self.hrvWindowDays)
+        let nights = validSDNN(of: history, before: day, days: Self.calibrationWindowDays).count
+        let calibration: CalibrationState = nights < Self.calibrationNights ? .calibrating(nights: nights) : .ready
 
         guard let baseline = HRVBaseline(sdnnValuesMs: values),
               let sdnn = today.sdnnMs, HRVBaseline.isValid(sdnnMs: sdnn) else {
@@ -73,6 +79,14 @@ public struct RecoveryCalculator: Sendable {
         let factor = PartialFactor(factor: .hrv, score: HRVScorer.score(zScore: baseline.zScore(sdnnMs: sdnn)),
                                    todayValue: sdnn, baselineValue: exp(baseline.mean))
         return (factor, calibration)
+    }
+
+    /// Les SDNN valides des nuits des `days` jours calendaires d'avant `day`, le jour lui-même exclu.
+    private func validSDNN(of history: [NightSample], before day: Date, days: Int) -> [Double] {
+        history
+            .filter { offset(from: $0, to: day).map { (1...days).contains($0) } ?? false }
+            .compactMap(\.sdnnMs)
+            .filter { HRVBaseline.isValid(sdnnMs: $0) }
     }
 
     private func restingHeartRateFactor(day: Date, today: NightSample, history: [NightSample]) -> PartialFactor? {

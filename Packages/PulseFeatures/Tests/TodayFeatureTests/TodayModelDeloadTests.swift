@@ -61,4 +61,46 @@ struct TodayModelDeloadTests {
         #expect(model.deloadOffer == nil && model.session?.isDeload == false)
         #expect(model.sessionLaunch(startsOriginal: false)?.refused.first?.kind == .deload)
     }
+
+    /// L'onboarding date d'aujourd'hui (`adopt`), l'historique de deux mois : la plus ancienne séance est hors des 28 jours,
+    /// mais l'accueil lit le début de l'historique sur toutes les séances, comme les Stats, et montre le ratio.
+    @Test func theRatioReadsTheHistoryStartFromEverySession() async throws {
+        let fixture = TodayFixture()
+        try await fixture.adopt("ppl-3")
+        let calendar = TodayClock.calendar
+        for offset in [1, 8, 15, 22, 60] {
+            let start = try #require(calendar.date(byAdding: .day, value: -offset, to: fixture.clock.now))
+            try await fixture.workouts.save(WorkoutSession(
+                startedAt: start, endedAt: start.addingTimeInterval(3_600), kind: .strength, source: .pulse, status: .completed,
+                title: "Push", overallRPE: 7, durationMinutes: 60, createdAt: start, updatedAt: start))
+        }
+        let model = fixture.makeModel()
+        await model.refresh()
+        guard case .ratio(let value, _, _, _) = model.load else {
+            Issue.record("Un ratio était attendu, obtenu \(model.load)")
+            return
+        }
+        #expect(value == 1)
+    }
+
+    /// Trois semaines sans séance puis une semaine normale : le ratio vaut 4, mais c'est une reprise. Rien n'est proposé.
+    @Test func aComebackWeekOffersNoDeload() async throws {
+        let fixture = TodayFixture()
+        try await fixture.adopt("ppl-3")
+        let calendar = TodayClock.calendar
+        for offset in Array(1...7) + [60] {
+            let start = try #require(calendar.date(byAdding: .day, value: -offset, to: fixture.clock.now))
+            try await fixture.workouts.save(WorkoutSession(
+                startedAt: start, kind: .strength, source: .pulse, status: .completed, title: "Séance", overallRPE: 6,
+                durationMinutes: 60, createdAt: start, updatedAt: start))
+        }
+        let model = fixture.makeModel()
+        await model.refresh()
+        #expect(model.deloadOffer == nil)
+        guard case .ratio(let value, _, _, _) = model.load else {
+            Issue.record("Un ratio était attendu, obtenu \(model.load)")
+            return
+        }
+        #expect(value > 1.5, "Le ratio reste affiché")
+    }
 }

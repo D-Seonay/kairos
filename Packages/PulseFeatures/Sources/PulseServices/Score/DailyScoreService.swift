@@ -4,6 +4,7 @@ import PulseRecoveryEngine
 
 /// Décide le score de récupération du jour à partir des nuits fraîchement lues (spec M3 §9.2) :
 /// rien avant 4 h, calculé et recalculé jusqu'à midi, figé à midi, check-in quand les données ne suffisent pas.
+/// La première passe après midi recalcule une dernière fois, puis fige : le score figé est celui des données du moment.
 /// Chaque score enregistré porte les ajustements de la séance prévue et garde le choix « Séance d'origine ».
 /// Une seule instance est partagée par l'app : ses opérations passent l'une après l'autre par la même file,
 /// pour qu'aucune ne lise le score du jour pendant qu'une autre l'écrit.
@@ -69,18 +70,13 @@ public final class DailyScoreService: Sendable {
         let outcome = RecoveryCalculator(calendar: calendar).compute(
             day: day, today: tonight, history: history, sleepGoalMinutes: sleepGoalMinutes ?? SleepGoal.defaultMinutes)
 
-        if isAfterFreeze, var existing {
-            existing.frozenAt = now
-            existing.updatedAt = now
-            try await recovery.save(existing)
-            return .scored(existing)
-        }
-        // Un profil illisible ne fait pas retomber le score du jour sur l'objectif par défaut.
+        // Un profil illisible ne fait pas retomber le score du jour sur l'objectif par défaut : le score enregistré reste.
         if sleepGoalMinutes == nil, let existing {
-            return .scored(existing)
+            return .scored(isAfterFreeze ? try await freeze(existing, at: now) : existing)
         }
         switch outcome {
         case .measured(let result):
+            // La passe qui fige applique d'abord la mesure fraîche : un score écrit tôt sur une nuit partielle ne reste pas.
             var measured = DailyRecovery(result: result, night: tonight, now: now)
             measured.id = existing?.id ?? measured.id
             measured.createdAt = existing?.createdAt ?? now
@@ -91,8 +87,18 @@ public final class DailyScoreService: Sendable {
             try await recovery.save(measured)
             return .scored(measured)
         case .needsCheckIn(let missing):
-            return existing.map(TodayScore.scored) ?? .needsCheckIn(missing: missing)
+            guard let existing else { return .needsCheckIn(missing: missing) }
+            return .scored(isAfterFreeze ? try await freeze(existing, at: now) : existing)
         }
+    }
+
+    /// Fige le score enregistré tel quel : la passe de midi n'a rien de plus frais à lui appliquer.
+    private func freeze(_ existing: DailyRecovery, at now: Date) async throws -> DailyRecovery {
+        var frozen = existing
+        frozen.frozenAt = now
+        frozen.updatedAt = now
+        try await recovery.save(frozen)
+        return frozen
     }
 
     private func estimate(_ answers: CheckInAnswers, plannedDay: PlannedDay?, now: Date) async throws -> DailyRecovery {

@@ -214,7 +214,7 @@ Règles de la spec V1 §6.3, précisées **(choix du constructeur)** :
 
 - **Avant 4 h** : pas de score du jour ; l'accueil montre celui de la veille, marqué « Score d'hier », avec « Le score du jour se calcule après 4 h ».
 - **Entre 4 h et midi** : le score est calculé à l'ouverture et à chaque livraison en arrière-plan, et **recalculé** si de nouvelles données arrivent. Un check-in fait le matin est remplacé par un score mesuré dès qu'au moins deux facteurs arrivent (pas de score hybride, spec V1 §5.2).
-- **À partir de midi** : le score du jour est figé (`frozenAt`). S'il n'existait pas encore, le premier score obtenu après midi, mesuré à une ouverture ou issu d'un check-in, est enregistré et figé immédiatement ; tant qu'aucun score n'existe, le check-in reste proposé, sans limite d'heure. Après le figement, plus aucun recalcul ni check-in pour ce jour. Aucun état « figé sans score » n'est stocké.
+- **À partir de midi** : le score du jour est figé (`frozenAt`). La passe qui le fige applique d'abord les données du moment : un score écrit tôt sur une nuit partielle est recalculé une dernière fois, puis figé (si les données ne suffisent plus, ou si le profil ne se lit pas, le score enregistré est figé tel quel). S'il n'existait pas encore, le premier score obtenu après midi, mesuré à une ouverture ou issu d'un check-in, est enregistré et figé immédiatement ; tant qu'aucun score n'existe, le check-in reste proposé, sans limite d'heure. Après le figement, plus aucun recalcul ni check-in pour ce jour. Aucun état « figé sans score » n'est stocké.
 - Toutes les heures viennent d'une horloge injectée (`now`) et du calendrier injecté, jamais de `Date()` ni de `Calendar.current` dans la logique.
 
 ### 9.3 Ajustements de séance par catégorie (M3b)

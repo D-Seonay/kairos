@@ -175,7 +175,9 @@ public final class TodayModel {
     }
 
     /// Les nuits lues font les tendances ; les séances des 28 derniers jours font le ratio de charge, et celles de la veille la
-    /// proposition de décharge. Si les séances ne se lisent pas, la carte garde son dernier contenu.
+    /// proposition de décharge. Le début de l'historique est celui des Stats, pour que les deux écrans montrent le même
+    /// ratio : il vient de la plus ancienne séance enregistrée, lue sans charger l'historique. Si les séances ne se lisent
+    /// pas, la carte garde son dernier contenu.
     private func updateLoadAndTrends(day: DayRefresh, now: Date) async {
         let calendar = environment.calendar
         let today = calendar.startOfDay(for: now)
@@ -185,10 +187,18 @@ public final class TodayModel {
               let loadStart = calendar.date(byAdding: .day, value: 1, to: start),
               let end = calendar.date(byAdding: .day, value: 1, to: today),
               let sessions = try? await environment.workouts.sessions(from: start, to: end) else { return }
+        // Aucune séance enregistrée donne `nil`, qui n'est pas un échec de lecture.
+        let oldest: Date?
+        do {
+            oldest = try await environment.workouts.oldestRecordedStart()
+        } catch {
+            return
+        }
+        let historyStart = TrainingLoad.historyStart(oldestRecorded: oldest, onboardingCompletedAt: day.profile?.onboardingCompletedAt)
         load = LoadCardContent.make(TrainingLoad.acwr(
-            sessions: sessions.filter { $0.startedAt >= loadStart }, onboardingCompletedAt: day.profile?.onboardingCompletedAt,
-            now: now, calendar: calendar))
-        deloadOffer = Deload.offer(sessions: sessions, profile: day.profile, now: now, calendar: calendar)
+            sessions: sessions.filter { $0.startedAt >= loadStart }, historyStart: historyStart, now: now, calendar: calendar))
+        deloadOffer = Deload.offer(sessions: sessions, historyStart: historyStart, profile: day.profile, now: now,
+                                   calendar: calendar)
     }
 
     /// Affiche un score que l'accueil vient d'écrire, et la séance qu'il ajuste.
