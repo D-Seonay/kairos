@@ -93,7 +93,7 @@ public struct TodayView: View {
                 TodayHeader(model: model, onOpenProfile: onOpenProfile)
                 recoveryOrCheckIn
                 SessionCard(model: model, onWhy: model.openWhy, onResume: onResumeSession, onStartRun: onStartRun,
-                            onCreateRoutine: onCreateRoutine)
+                            onCreateRoutine: onCreateRoutine, onStartWithoutCheckIn: startSession)
                 if let offer = model.deloadOffer {
                     DeloadOfferCard(offer: offer, errorMessage: model.deloadErrorMessage) { accepted in
                         Task { await model.decideDeload(accepted) }
@@ -133,7 +133,8 @@ public struct TodayView: View {
     }
 
     /// Le libellé du bouton ancré, `nil` quand la séance du jour n'est pas une musculation à lancer, ou tant que le check-in
-    /// attend ses réponses : « Démarrer » ne se superpose pas au formulaire et à son propre bouton.
+    /// attend ses réponses : « Démarrer » ne se superpose pas au formulaire et à son propre bouton. La carte de la séance offre
+    /// alors « Démarrer sans check-in ».
     private var startTitle: String? {
         if case .needsCheckIn = model.score { return nil }
         guard case .strength(let card) = model.card else { return nil }

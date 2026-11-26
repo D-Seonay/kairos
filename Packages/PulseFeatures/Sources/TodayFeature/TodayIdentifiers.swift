@@ -3,6 +3,7 @@ public enum TodayIdentifiers {
     public static let score = "today.score"
     public static let sessionTitle = "today.session.title"
     public static let sessionStart = "today.session.start"
+    public static let sessionStartWithoutCheckIn = "today.session.startWithoutCheckIn"
     public static let runStart = "today.run.start"
     public static let sessionOrigin = "today.session.origin"
     public static let sessionWhy = "today.session.why"

@@ -146,6 +146,16 @@
         }
       }
     },
+    "Démarrer sans check-in" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Démarrer sans check-in"
+          }
+        }
+      }
+    },
     "Exercice inconnu" : {
       "localizations" : {
         "fr" : {
@@ -172,6 +182,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "La séance prévue reste disponible avec « Rétablir la séance d'origine »."
+          }
+        }
+      }
+    },
+    "Lance la séance prévue, sans l'ajuster à ta récupération" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lance la séance prévue, sans l'ajuster à ta récupération"
           }
         }
       }
