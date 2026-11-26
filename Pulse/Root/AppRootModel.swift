@@ -20,6 +20,8 @@ final class AppRootModel {
         case loading
         case onboarding
         case main
+        /// Le stockage n'a pas pu être ouvert ou lu : un écran qui le dit, à la place de l'onboarding.
+        case storageUnavailable
     }
 
     private(set) var destination: Destination = .loading
@@ -66,7 +68,24 @@ final class AppRootModel {
         #if DEBUG
         await dependencies.applyLaunchSeed()
         #endif
+        await start()
+    }
+
+    /// Vrai quand le magasin est ouvert mais que la lecture a échoué : relire peut suffire. Faux quand l'app tourne sur le
+    /// magasin de secours en mémoire, que seule une relance de l'app remplace.
+    var canRetryStorage: Bool {
+        dependencies.storeError == nil
+    }
+
+    /// « Réessayer » de l'écran de stockage indisponible.
+    func retryStorage() async {
+        await start()
+    }
+
+    private func start() async {
         await resolve()
+        // Sans stockage, aucune séance en cours n'est lisible : fermer les Live Activities « orphelines » couperait une vraie séance.
+        guard destination != .storageUnavailable else { return }
         await refreshLiveSession()
         await run?.refresh()
         await refreshSupplementReminders()
@@ -136,8 +155,18 @@ final class AppRootModel {
     }
 
     private func resolve() async {
-        await reloadProfile()
-        show(LaunchDestination.resolve(profile: profile) == .main ? .main : .onboarding)
+        let loaded: Result<UserProfile?, any Error>
+        do {
+            loaded = .success(try await dependencies.profiles.load())
+        } catch {
+            loaded = .failure(error)
+        }
+        profile = try? loaded.get()
+        switch LaunchDestination.resolve(storeOpened: dependencies.storeError == nil, profile: loaded) {
+        case .main: show(.main)
+        case .onboarding: show(.onboarding)
+        case .storageUnavailable: show(.storageUnavailable)
+        }
     }
 
     private func reloadProfile() async {
@@ -146,7 +175,7 @@ final class AppRootModel {
 
     private func show(_ next: Destination) {
         switch next {
-        case .loading:
+        case .loading, .storageUnavailable:
             onboarding = nil
             dropMainModels()
         case .onboarding:

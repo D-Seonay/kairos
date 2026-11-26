@@ -6,7 +6,8 @@ import SwiftUI
 import TodayFeature
 import TrainFeature
 
-/// La racine : écran de chargement, onboarding tant que le profil n'est pas terminé, puis les onglets. Toujours en sombre.
+/// La racine : écran de chargement, onboarding tant que le profil n'est pas terminé, puis les onglets ; un écran à part quand
+/// le stockage est indisponible. Sur papier clair, sauf la séance en direct.
 struct AppRootView: View {
     @State private var model: AppRootModel
     let router: AppRouter
@@ -40,6 +41,10 @@ struct AppRootView: View {
         switch model.destination {
         case .loading:
             LoadingView()
+        case .storageUnavailable:
+            StorageUnavailableView(canRetry: model.canRetryStorage) {
+                await model.retryStorage()
+            }
         case .onboarding:
             if let onboarding = model.onboarding {
                 OnboardingFlowView(model: onboarding)

@@ -4,19 +4,6 @@ import PulseDesignSystem
 import PulseDomain
 import PulseServices
 
-/// Conversions entre le poids stocké (toujours en kg) et le poids affiché dans l'unité du profil.
-enum WeightUnits {
-    static let kilogramsPerPound = 0.45359237
-
-    static func displayValue(kilograms: Double, unit: WeightUnit) -> Double {
-        unit == .lb ? kilograms / kilogramsPerPound : kilograms
-    }
-
-    static func kilograms(fromDisplay value: Double, unit: WeightUnit) -> Double {
-        unit == .lb ? value * kilogramsPerPound : value
-    }
-}
-
 /// Le choix « Aucune » des douleurs : une pilule de plus que les zones du domaine, qui les efface.
 enum PainChoice: Hashable {
     case area(PainArea)
@@ -231,18 +218,12 @@ enum OnboardingCopy {
     enum MeasureUnit: Equatable {
         case centimeters
         case kilograms
-        case pounds
 
-        init(_ weightUnit: WeightUnit) {
-            self = weightUnit == .lb ? .pounds : .kilograms
-        }
-
-        /// « centimètres », « kilos », « livres ».
+        /// « centimètres », « kilos ».
         var spokenName: String {
             switch self {
             case .centimeters: String(localized: "centimètres", bundle: .module)
             case .kilograms: String(localized: "kilos", bundle: .module)
-            case .pounds: String(localized: "livres", bundle: .module)
             }
         }
     }

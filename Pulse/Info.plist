@@ -48,7 +48,7 @@
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>PulsePrivacyPolicyURL</key>
-	<string>https://d-seonay.github.io/kairos/confidentialite/</string>
+	<string>https://pulserecovery.app/confidentialite</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>

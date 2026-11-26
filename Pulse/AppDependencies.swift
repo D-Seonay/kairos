@@ -198,7 +198,7 @@ struct AppDependencies: Sendable {
     /// Conteneur en mémoire, doublures et suite de préférences dédiée, pour les tests et les aperçus.
     static func testing(health: any HealthReading = StubHealthReader(), healthSource: (any HealthSampleSource)? = nil,
                         healthEraser: any HealthErasing = StubHealthEraser(), calendar: Calendar = .current,
-                        inspector: (any StoreInspector)? = nil) -> AppDependencies {
+                        inspector: (any StoreInspector)? = nil, storeError: String? = nil) -> AppDependencies {
         let now: @Sendable () -> Date = { Date.now }
         let wiring = Wiring(
             health: health,
@@ -213,7 +213,7 @@ struct AppDependencies: Sendable {
             notificationCanceling: nil,
             backgroundDelivery: nil, inspector: inspector, notificationStatus: { .authorized }, defaultsSuite: testingDefaultsSuite,
             calendar: calendar, now: now, launch: LaunchOptions())
-        guard let dependencies = try? make(wiring, mode: .inMemory, error: nil) else { crash(nil) }
+        guard let dependencies = try? make(wiring, mode: .inMemory, error: storeError) else { crash(nil) }
         return dependencies
     }
 

@@ -1,0 +1,45 @@
+# Ce qui se vérifie sans simulateur : le lint, les tests des packages et la compilation Release de l'app.
+# Les tests de la cible app et les tests d'interface demandent un simulateur : ils restent à Xcode Cloud (issue #97).
+name: CI
+
+on:
+  pull_request:
+    paths-ignore: ["site/**", "docs/**", "assets/**", "**/*.md", "*.html"]
+  push:
+    branches: [master]
+    paths-ignore: ["site/**", "docs/**", "assets/**", "**/*.md", "*.html"]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Le Xcode du poste de développement (27.0) : le même compilateur que les builds envoyés à TestFlight.
+  DEVELOPER_DIR: /Applications/Xcode_27.0.app/Contents/Developer
+
+jobs:
+  packages:
+    name: Lint et tests des packages
+    runs-on: xcode-27
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+      - name: Installer SwiftLint
+        run: brew install swiftlint
+      - name: Lint
+        run: make lint
+      - name: Tests des packages
+        # -k : un package en échec n'empêche pas de tester les suivants.
+        run: make -k test-packages
+
+  app:
+    name: Compilation Release de l'app
+    runs-on: xcode-27
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+      - name: Compiler en Release
+        run: make build-release

@@ -13,3 +13,5 @@ Packages/*/.build/
 # Secrets
 *.p8
 *.mobileprovision
+# Worktrees des sessions Claude
+.claude/worktrees/

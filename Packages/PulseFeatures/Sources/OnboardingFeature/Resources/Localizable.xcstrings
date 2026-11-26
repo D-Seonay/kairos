@@ -604,16 +604,6 @@
         }
       }
     },
-    "lb" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "lb"
-          }
-        }
-      }
-    },
     "Le planificateur espace les jambes lourdes et le fractionné." : {
       "localizations" : {
         "fr" : {
@@ -1196,16 +1186,6 @@
         }
       }
     },
-    "Unités" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unités"
-          }
-        }
-      }
-    },
     "V" : {
       "comment" : "Initiale de vendredi",
       "localizations" : {
@@ -1403,16 +1383,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "kilos"
-          }
-        }
-      }
-    },
-    "livres" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "livres"
           }
         }
       }

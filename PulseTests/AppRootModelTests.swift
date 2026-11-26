@@ -85,6 +85,21 @@ import Testing
         #expect(await dependencies.liveSession.current() == nil)
         #expect(await activity.endAllCalls.last == .some(nil))
     }
+    // MARK: Stockage indisponible
+
+    @Test func aStoreThatDidNotOpenShowsItsOwnScreenInsteadOfOnboarding() async throws {
+        let dependencies = AppDependencies.testing(storeError: "Le stockage n'a pas pu être ouvert")
+        let model = AppRootModel(dependencies: dependencies)
+        await model.load()
+        #expect(model.destination == .storageUnavailable)
+        #expect(model.onboarding == nil && model.today == nil)
+        // Seule une relance rouvre le magasin : pas de « Réessayer ».
+        #expect(!model.canRetryStorage)
+        // La Live Activity d'une séance que l'app ne peut pas lire n'est pas fermée.
+        let activity = try #require(dependencies.sessionActivity as? StubSessionActivityController)
+        #expect(await activity.endAllCalls.isEmpty)
+    }
+
     // MARK: Course (revue V2a : câblage côté app)
 
     @Test func tabsCreateTheRunAndHandItToTheLiveActivityButtons() async throws {

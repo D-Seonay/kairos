@@ -19,7 +19,7 @@
   <img src="https://img.shields.io/badge/HealthKit-Biom%C3%A9trie-red?style=flat-square" alt="HealthKit">
   <img src="https://img.shields.io/badge/Storage-SwiftData%20%2B%20CloudKit-34C759?style=flat-square" alt="SwiftData">
   <img src="https://img.shields.io/badge/Privacy-100%25%20Local--First-8E8E93?style=flat-square" alt="Privacy First">
-  <img src="https://img.shields.io/badge/CI-Xcode%20Cloud-grey?style=flat-square" alt="Xcode Cloud">
+  <a href="https://github.com/D-Seonay/pulse/actions/workflows/ci.yml"><img src="https://github.com/D-Seonay/pulse/actions/workflows/ci.yml/badge.svg?branch=master" alt="CI"></a>
 </p>
 
 <p align="center">
@@ -313,7 +313,7 @@ Pour tester le comportement de l'application sur simulateur ou sans capteur rée
 Pulse applique les plus hauts standards de rigueur logicielle :
 - **Swift Testing (`import Testing`)** : Utilisation exclusive du nouveau framework de test natif Swift (`@Test`, `@Suite`, tests paramétrés `#expect`).
 - **Fixtures Physiologiques** : Le moteur est validé contre des jeux de données réels sérialisés au format JSON (`bonne-nuit.json`, `mauvaise-nuit.json`, `vfc-manquante.json`, `huit-nuits.json`, etc.).
-- **Intégration Continue (CI)** : À chaque push, **Xcode Cloud** exécute le script `ci_scripts/ci_post_clone.sh`, installe SwiftLint, exécute `make test` et assure la non-régression avant tout déploiement TestFlight.
+- **Intégration Continue (CI)** : À chaque pull request et à chaque push sur `master`, **GitHub Actions** (`.github/workflows/ci.yml`) lance `make lint`, `make test-packages` et `make build-release`, sur le même Xcode que les builds envoyés à TestFlight. Les tests de la cible app et les tests d'interface demandent un simulateur : ils ne tournent pas encore en CI (issue #97). Les builds TestFlight sont archivés et envoyés depuis le poste de développement.
 
 ---
 

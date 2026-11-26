@@ -133,8 +133,20 @@ public actor FileBodyPhotoStore: BodyPhotoStore {
         removePreviousArchives(in: destination, stem: stem)
         let archive = destination.appendingPathComponent("\(stem)-\(ExportNaming.dayStamp(Date(), timeZone: .current)).zip")
         try ZipArchiver.zip(directory: folder, to: archive)
-        try FileManager.default.setAttributes([.protectionKey: FileProtectionType.complete], ofItemAtPath: archive.path)
+        try protect(archive)
         return archive
+    }
+
+    /// L'archive reçoit la protection complète. Sur l'iPhone, un échec fait échouer l'export : une archive sans protection ne
+    /// sort pas. Sur le Mac, où seuls les tests tournent, le volume d'une machine de CI ne connaît pas la protection des
+    /// fichiers et refuse l'attribut : il est posé au mieux.
+    private func protect(_ archive: URL) throws {
+        let attributes: [FileAttributeKey: Any] = [.protectionKey: FileProtectionType.complete]
+        #if os(iOS)
+        try FileManager.default.setAttributes(attributes, ofItemAtPath: archive.path)
+        #else
+        try? FileManager.default.setAttributes(attributes, ofItemAtPath: archive.path)
+        #endif
     }
 
     private func removePreviousArchives(in destination: URL, stem: String) {

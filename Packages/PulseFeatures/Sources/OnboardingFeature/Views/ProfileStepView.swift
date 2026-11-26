@@ -22,15 +22,11 @@ struct ProfileStepView: View {
             VStack(spacing: 14) {
                 nameField
                 sexField
+                birthDateField
                 pair {
-                    birthDateField
-                } second: {
                     heightField
-                }
-                pair {
-                    weightField
                 } second: {
-                    unitField
+                    weightField
                 }
                 levelField(
                     title: String(localized: "Expérience en musculation", bundle: .module),
@@ -140,25 +136,8 @@ struct ProfileStepView: View {
     private var weightField: some View {
         OnboardingField(title: String(localized: "Poids actuel", bundle: .module)) {
             measureInput(
-                title: String(localized: "Poids actuel", bundle: .module), value: weightBinding,
-                unit: model.profile.weightUnit.rawValue, spokenUnit: OnboardingCopy.MeasureUnit(model.profile.weightUnit),
-                field: .weight)
-        }
-    }
-
-    private var unitField: some View {
-        OnboardingField(title: String(localized: "Unités", bundle: .module)) {
-            Picker(String(localized: "Unités", bundle: .module), selection: $model.profile.weightUnit) {
-                Text(String(localized: "kg", bundle: .module))
-                    .accessibilityLabel(OnboardingCopy.MeasureUnit.kilograms.spokenName)
-                    .tag(WeightUnit.kg)
-                Text(String(localized: "lb", bundle: .module))
-                    .accessibilityLabel(OnboardingCopy.MeasureUnit.pounds.spokenName)
-                    .tag(WeightUnit.lb)
-            }
-            .adaptiveSegmentedPicker()
-            .labelsHidden()
-            .frame(minHeight: 48)
+                title: String(localized: "Poids actuel", bundle: .module), value: $model.profile.weightKg,
+                unit: String(localized: "kg", bundle: .module), spokenUnit: .kilograms, field: .weight)
         }
     }
 
@@ -212,18 +191,6 @@ struct ProfileStepView: View {
         Binding(
             get: { model.profile.birthDate ?? model.suggestedBirthDate },
             set: { model.profile.birthDate = $0 }
-        )
-    }
-
-    /// Le poids est enregistré en kg ; il se lit et se saisit dans l'unité du profil.
-    private var weightBinding: Binding<Double?> {
-        Binding(
-            get: {
-                model.profile.weightKg.map { WeightUnits.displayValue(kilograms: $0, unit: model.profile.weightUnit) }
-            },
-            set: { newValue in
-                model.profile.weightKg = newValue.map { WeightUnits.kilograms(fromDisplay: $0, unit: model.profile.weightUnit) }
-            }
         )
     }
 }
