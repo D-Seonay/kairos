@@ -74,7 +74,8 @@ struct OnboardingWeekPlanTests {
         await model.adoptProgram()
         let program = try await adopted(fixture)
         #expect(program.templateID == "full-body")
-        #expect(names(program) == ["Full Body A", "Sortie facile", "Full Body B", nil, nil, nil, nil])
+        // Lundi, mercredi, vendredi : la semaine raccourcie reste étalée.
+        #expect(names(program) == ["Full Body A", nil, "Sortie facile", nil, "Full Body B", nil, nil])
         #expect(program.days.map(\.name) == ["Full Body A", "Full Body B", "Full Body C", "Sortie facile"],
                 "Full Body C reste dans le programme, à placer plus tard")
         let run = try #require(program.days.first { $0.kind == .run })

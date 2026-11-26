@@ -66,13 +66,15 @@ struct RunDayPlannerTests {
     }
 
     @Test func aShortWeekIsReadAsSevenDays() {
-        #expect(place(1, in: [push]) == [Placement(weekdayIndex: 1, type: .easy)])
+        // Le plus loin de la séance du lundi : le jeudi (le vendredi est aussi loin, le plus tôt l'emporte).
+        #expect(place(1, in: [push]) == [Placement(weekdayIndex: 3, type: .easy)])
     }
 
     // MARK: Jambes lourdes
 
     @Test func aRunAvoidsTheDayAfterHeavyLegsWhenAnotherDayIsFree() {
-        #expect(place(1, in: [legs, nil, push, nil, nil, nil, nil]).map(\.weekdayIndex) == [3])
+        // Pas le mardi, lendemain des jambes ; parmi les autres, le vendredi est le plus loin des deux séances.
+        #expect(place(1, in: [legs, nil, push, nil, nil, nil, nil]).map(\.weekdayIndex) == [4])
         // La semaine se répète : le lundi suit les jambes du dimanche.
         #expect(place(1, in: [nil, push, nil, pull, nil, nil, legs]).map(\.weekdayIndex) == [2])
     }
@@ -179,7 +181,8 @@ struct RunDayPlannerTests {
 
     @Test func aBalancedTemplateKeepsItsFirstRoutinesAndGetsTheRuns() throws {
         let adopted = try adopt("full-body", split: WeekSplit(sessions: 3, runs: 1), rest: [.tuesday])
-        #expect(names(adopted) == ["Full Body A", nil, "Full Body B", "Sortie facile", nil, nil, nil])
+        // Les deux routines gardées s'étalent sur les jours du modèle (lundi, vendredi), la sortie se pose entre elles.
+        #expect(names(adopted) == ["Full Body A", nil, "Sortie facile", nil, "Full Body B", nil, nil])
         #expect(adopted.sessionsPerWeek == 3 && adopted.templateID == "full-body")
         #expect(adopted.days.map(\.name) == ["Full Body A", "Full Body B", "Full Body C", "Sortie facile"],
                 "Full Body C reste dans le programme, hors semaine")
@@ -187,7 +190,7 @@ struct RunDayPlannerTests {
         #expect(run.kind == .run && run.runType == .easy && run.runTargetMinutes == 30)
 
         let upperLower = try adopt("upper-lower", split: WeekSplit(sessions: 4, runs: 1))
-        #expect(names(upperLower) == ["Haut A", "Bas A", nil, "Haut B", "Sortie facile", nil, nil])
+        #expect(names(upperLower) == ["Haut A", "Sortie facile", nil, "Bas A", "Haut B", nil, nil])
         #expect(upperLower.days.contains { $0.name == "Bas B" } && !names(upperLower).contains("Bas B"))
     }
 

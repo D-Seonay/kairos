@@ -49,7 +49,9 @@ struct WeekShorteningTests {
         // La semaine ne suit pas l'ordre du programme : ce sont les premières routines du programme qui restent.
         let program = Program(name: "Semaine", sessionsPerWeek: 4, weekLayout: [third.id, nil, first.id, run.id, second.id, nil, nil],
                               days: [first, second, third, run], createdAt: .t0, updatedAt: .t0)
-        #expect(names(WeekLayoutArranger.keeping(strengthDays: 2, of: program), in: program) == [nil, nil, "A", "Footing", "B", nil, nil])
+        // Elles se répartissent sur les jours de la musculation, du premier au dernier ; la course ne bouge pas.
+        #expect(names(WeekLayoutArranger.keeping(strengthDays: 2, of: program), in: program) == ["A", nil, nil, "Footing", "B", nil, nil])
+        #expect(names(WeekLayoutArranger.keeping(strengthDays: 1, of: program), in: program) == ["A", nil, nil, "Footing", nil, nil, nil])
         #expect(names(WeekLayoutArranger.keeping(strengthDays: 0, of: program), in: program) == [nil, nil, nil, "Footing", nil, nil, nil])
         #expect(WeekLayoutArranger.keeping(strengthDays: 3, of: program) == program.weekLayout)
         #expect(WeekLayoutArranger.keeping(strengthDays: 9, of: program) == program.weekLayout)

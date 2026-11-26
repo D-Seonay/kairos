@@ -32,7 +32,8 @@ public enum RunDayPlanner {
     ///   seulement s'il ne reste que lui. La semaine se répète : lundi suit dimanche.
     /// - Avec deux sorties ou plus dans la semaine, une seule est longue, le plus tard possible dans la semaine, et seulement
     ///   un jour qui ne suit pas des jambes lourdes : la règle anti-interférence la déplacerait sinon chaque semaine. Les
-    ///   autres sont faciles, le plus loin possible des courses déjà là. Une sortie seule est facile.
+    ///   autres sont faciles, le plus loin possible des courses déjà là, puis des séances de musculation : la semaine reste
+    ///   étalée. Une sortie seule est facile.
     public static func placements(adding count: Int, to week: [RoutineDay?], restWeekdays: [Weekday],
                                   directory: ExerciseDirectory) -> [Placement] {
         var draft = Draft(week: week, restWeekdays: restWeekdays, directory: directory)
@@ -89,8 +90,10 @@ public enum RunDayPlanner {
 private struct Draft {
     private enum Slot {
         case free
-        /// Un repos obligatoire ou une séance de musculation : rien ne s'y pose.
-        case taken
+        /// Un repos obligatoire : rien ne s'y pose.
+        case rest
+        /// Une séance de musculation : rien ne s'y pose, et une course s'en tient loin quand elle a le choix.
+        case strength
         case run
     }
 
@@ -105,8 +108,8 @@ private struct Draft {
         let days = Array((week + [RoutineDay?](repeating: nil, count: count)).prefix(count))
         let rest = Set(restWeekdays.map(\.index))
         slots = days.enumerated().map { index, day in
-            guard let day else { return rest.contains(index) ? .taken : .free }
-            return day.kind == .run ? .run : .taken
+            guard let day else { return rest.contains(index) ? .rest : .free }
+            return day.kind == .run ? .run : .strength
         }
         hasLongRun = days.contains { $0?.kind == .run && $0?.runType == .long }
         let legSets = days.map { day -> Int in
@@ -123,6 +126,10 @@ private struct Draft {
 
     private var runIndices: [Int] {
         slots.indices.filter { if case .run = slots[$0] { true } else { false } }
+    }
+
+    private var strengthIndices: [Int] {
+        slots.indices.filter { if case .strength = slots[$0] { true } else { false } }
     }
 
     private var freeIndices: [Int] {
@@ -146,21 +153,24 @@ private struct Draft {
         freeIndices.last { penalties[$0] == 0 }
     }
 
-    /// Le jour libre le moins exposé aux jambes lourdes, puis le plus loin des courses déjà posées, puis le plus tôt.
+    /// Le jour libre le moins exposé aux jambes lourdes, puis le plus loin des courses déjà posées, puis le plus loin des
+    /// séances de musculation, puis le plus tôt.
     func easyRunDay() -> Int? {
         let free = freeIndices
         guard let lowest = free.map({ penalties[$0] }).min() else { return nil }
         let runs = runIndices
-        var best: Int?
-        var bestDistance = -1
-        for index in free where penalties[index] == lowest {
-            let distance = runs.map { circularDistance($0, index) }.min() ?? Int.max
-            if distance > bestDistance {
-                best = index
-                bestDistance = distance
-            }
+        let strength = strengthIndices
+        return free.filter { penalties[$0] == lowest }.max { lhs, rhs in
+            let left = (distance(from: lhs, to: runs), distance(from: lhs, to: strength))
+            let right = (distance(from: rhs, to: runs), distance(from: rhs, to: strength))
+            // À distances égales, le jour le plus tôt l'emporte.
+            return left != right ? left < right : lhs > rhs
         }
-        return best
+    }
+
+    /// La distance au plus proche de `others`, la semaine se répétant ; sans aucun, le jour est aussi loin qu'on veut.
+    private func distance(from index: Int, to others: [Int]) -> Int {
+        others.map { circularDistance($0, index) }.min() ?? Int.max
     }
 
     private func circularDistance(_ first: Int, _ second: Int) -> Int {
