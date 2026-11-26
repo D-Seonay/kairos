@@ -186,6 +186,16 @@
         }
       }
     },
+    "Lecture de ton programme…" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lecture de ton programme…"
+          }
+        }
+      }
+    },
     "Lecture en cours" : {
       "localizations" : {
         "fr" : {

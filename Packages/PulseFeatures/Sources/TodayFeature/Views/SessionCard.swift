@@ -22,6 +22,7 @@ struct SessionCard: View {
         ObsidianCard {
             VStack(alignment: .leading, spacing: 12) {
                 switch model.card {
+                case .loading: loading
                 case .strength(let card):
                     StrengthSessionCard(
                         card: card, onWhy: onWhy,
@@ -40,6 +41,22 @@ struct SessionCard: View {
 
     private func choose(original: Bool) {
         Task { await model.chooseOriginalSession(original) }
+    }
+
+    // MARK: - Avant la première lecture
+
+    /// Le programme n'est pas encore lu : la carte le dit, comme la carte de récupération, plutôt que d'inviter à créer une
+    /// routine quelqu'un qui en a déjà.
+    @ViewBuilder
+    private var loading: some View {
+        Text(String(localized: "Séance du jour", bundle: .module))
+            .pulseEyebrow()
+            .accessibilityAddTraits(.isHeader)
+        HStack(spacing: 8) {
+            ProgressView()
+            detail(String(localized: "Lecture de ton programme…", bundle: .module))
+        }
+        .accessibilityElement(children: .combine)
     }
 
     // MARK: - Mobilité ou repos

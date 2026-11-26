@@ -3,9 +3,10 @@ import PulseDomain
 import PulseServices
 
 extension TrainModel {
-    /// « Aucun programme actif » sous « Mes routines » : pas quand la lecture a échoué, l'erreur s'affiche à la place.
+    /// « Aucun programme actif » sous « Mes routines » : pas avant la première lecture, qui n'en sait encore rien, ni quand la
+    /// lecture a échoué, l'erreur s'affiche à la place.
     var showsNoProgram: Bool {
-        routines.isEmpty && errorMessage == nil
+        hasLoaded && routines.isEmpty && errorMessage == nil
     }
 
     /// La tuile Musculation : « Push · ajustée · ~ 55 min », « Repos · prochaine : Pull, mardi », « Course aujourd'hui »,
@@ -44,8 +45,10 @@ extension TrainModel {
     }
 
     /// La tuile Course : « Sortie facile · aujourd'hui », « Fractionné · prévue demain », « Sortie longue · prévue samedi », et
-    /// « prévue mercredi prochain » pour la course du même jour la semaine suivante.
+    /// « prévue mercredi prochain » pour la course du même jour la semaine suivante. « Course du jour » avant la première lecture,
+    /// comme « Séance du jour » sur la tuile Musculation.
     public var runSubtitle: String {
+        guard hasLoaded else { return String(localized: "Course du jour", bundle: .module) }
         guard let nextRun else { return String(localized: "Aucune course au programme", bundle: .module) }
         let title = nextRun.day.runType?.localizedName ?? nextRun.day.name
         let day = nextRun.weekday.trainName

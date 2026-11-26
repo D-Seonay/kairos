@@ -18,7 +18,8 @@ public final class TodayModel {
     public private(set) var factors: [FactorDisplay] = []
     public private(set) var marker: String?
     public private(set) var session: TodaySession?
-    private(set) var card: SessionCardState = .noProgram
+    /// La carte de la séance du jour ; en lecture tant que la première actualisation n'a pas lu le programme.
+    private(set) var card: SessionCardState = .loading
     /// La carte de charge d'entraînement : cachée tant que l'historique ne couvre pas 28 jours.
     private(set) var load: LoadCardContent = .hidden
     /// La semaine de décharge à proposer : l'ACWR est resté ≥ 1,5 deux jours de suite (spec M6 §10).
