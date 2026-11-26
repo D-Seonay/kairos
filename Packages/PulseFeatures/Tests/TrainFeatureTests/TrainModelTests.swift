@@ -115,9 +115,24 @@ func pplProgram(withRun run: Bool = false) -> Program {
     let fixture = TrainFixture()
     try await fixture.profiles.save(UserProfile(onboardingCompletedAt: fixture.now, createdAt: fixture.now, updatedAt: fixture.now))
     let model = TrainModel(environment: fixture.environment)
+    // Avant la première lecture, rien ne dit qu'il n'y a pas de programme.
+    #expect(!model.hasLoaded && !model.showsNoProgram)
     await model.refresh()
-    #expect(model.showsNoProgram)
+    #expect(model.hasLoaded && model.showsNoProgram)
     #expect(model.strengthSubtitle == "Aucun programme actif")
+    #expect(model.runSubtitle == "Aucune course au programme")
+}
+
+@MainActor @Test func trainModelSaysNothingAboutTheProgramBeforeTheFirstRead() async throws {
+    let fixture = TrainFixture()
+    try await fixture.activate(pplProgram(withRun: true))
+    let model = TrainModel(environment: fixture.environment)
+    #expect(!model.showsNoProgram)
+    #expect(model.strengthSubtitle == "Séance du jour")
+    #expect(model.runSubtitle == "Course du jour")
+    await model.refresh()
+    #expect(!model.showsNoProgram)
+    #expect(model.runSubtitle.hasSuffix(" · prévue samedi"))
 }
 
 /// Samedi et dimanche sont des jours de repos : la tuile annonce la prochaine séance, Push le lundi.

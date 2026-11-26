@@ -823,6 +823,16 @@
         }
       }
     },
+    "Course du jour" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Course du jour"
+          }
+        }
+      }
+    },
     "Créer" : {
       "localizations" : {
         "fr" : {

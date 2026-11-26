@@ -24,10 +24,17 @@ extension TodayModel {
     }
 
     /// La séance telle que la carte la montre : l'originale si elle a été rétablie, l'ajustée sinon. L'app la lance aussi depuis le
-    /// contrôle « Séance du jour ». Rien tant que le check-in du jour attend : la séance part ajustée, une fois le score connu.
+    /// contrôle « Séance du jour ». Tant que le check-in du jour attend, c'est la séance prévue, sans ajustement faute de score :
+    /// ce que l'onglet Séance lance aussi. Le check-in reste proposé, il n'est pas un passage obligé.
     public func shownSessionLaunch() -> SessionLaunch? {
-        if case .needsCheckIn = score { return nil }
-        return sessionLaunch(startsOriginal: session?.status == .restored)
+        sessionLaunch(startsOriginal: session?.status == .restored)
+    }
+
+    /// Vrai tant que le check-in du jour attend et que la carte montre une musculation à lancer : la carte offre alors
+    /// « Démarrer sans check-in », qui lance `shownSessionLaunch()`.
+    var canStartWithoutCheckIn: Bool {
+        guard case .needsCheckIn = score, case .strength = card else { return false }
+        return true
     }
 
     /// Ouvre les 20 min de mobilité. Rien n'est enregistré.

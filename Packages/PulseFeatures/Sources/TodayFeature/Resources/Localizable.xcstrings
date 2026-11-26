@@ -146,6 +146,16 @@
         }
       }
     },
+    "Démarrer sans check-in" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Démarrer sans check-in"
+          }
+        }
+      }
+    },
     "Exercice inconnu" : {
       "localizations" : {
         "fr" : {
@@ -176,12 +186,32 @@
         }
       }
     },
+    "Lance la séance prévue, sans l'ajuster à ta récupération" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lance la séance prévue, sans l'ajuster à ta récupération"
+          }
+        }
+      }
+    },
     "Lecture d'Apple Santé…" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lecture d'Apple Santé…"
+          }
+        }
+      }
+    },
+    "Lecture de ton programme…" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lecture de ton programme…"
           }
         }
       }
@@ -202,6 +232,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ouvre l'onglet Séance"
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu accéder à Apple Santé." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu accéder à Apple Santé."
           }
         }
       }

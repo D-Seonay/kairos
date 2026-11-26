@@ -2,6 +2,23 @@ import PulseDesignSystem
 import PulseDomain
 import SwiftUI
 
+/// Ce que la bannière du check-in propose quand l'accès à Apple Santé n'a jamais été demandé sur cet appareil.
+public struct CheckInHealthOffer {
+    /// « Connecter Apple Santé » ; `nil` : la bannière le dit sans offrir l'action (l'onboarding, dont l'étape Apple Santé
+    /// vient d'être passée).
+    public var connect: (() -> Void)?
+    /// Vrai pendant la demande : le bouton reste inactif.
+    public var isConnecting: Bool
+    /// L'échec de la demande, affiché au-dessus du bouton.
+    public var errorMessage: String?
+
+    public init(connect: (() -> Void)? = nil, isConnecting: Bool = false, errorMessage: String? = nil) {
+        self.connect = connect
+        self.isConnecting = isConnecting
+        self.errorMessage = errorMessage
+    }
+}
+
 /// Le check-in sans montre : trois questions, l'estimation en direct, puis la validation.
 @MainActor
 public struct CheckInView: View {
@@ -9,19 +26,22 @@ public struct CheckInView: View {
     private let scrollable: Bool
     private let errorMessage: String?
     private let isSubmitting: Bool
+    private let healthOffer: CheckInHealthOffer?
     private let onSubmit: (CheckInAnswers) -> Void
     /// La taille de l'estimation suit Dynamic Type : un grand chiffre reste lisible au réglage du texte choisi.
     @ScaledMetric(relativeTo: .largeTitle) private var scoreSize: CGFloat = 64
 
     /// `scrollable: false` : le check-in s'intègre à une page qui défile déjà (l'accueil), sans défilement, marge ni fond propres.
     /// `errorMessage` : l'échec de l'enregistrement, affiché juste au-dessus du bouton. `isSubmitting` : le bouton reste inactif
-    /// pendant l'enregistrement.
+    /// pendant l'enregistrement. `healthOffer` : l'accès à Apple Santé n'a jamais été demandé, la bannière le dit (et offre de
+    /// le connecter) au lieu de parler de montre ; `nil` : la bannière « Pas de données de nuit ».
     public init(form: CheckInForm, scrollable: Bool = true, errorMessage: String? = nil, isSubmitting: Bool = false,
-                onSubmit: @escaping (CheckInAnswers) -> Void) {
+                healthOffer: CheckInHealthOffer? = nil, onSubmit: @escaping (CheckInAnswers) -> Void) {
         self.form = form
         self.scrollable = scrollable
         self.errorMessage = errorMessage
         self.isSubmitting = isSubmitting
+        self.healthOffer = healthOffer
         self.onSubmit = onSubmit
     }
 
@@ -64,24 +84,43 @@ public struct CheckInView: View {
     }
 
     private var banner: some View {
-        ObsidianCard {
-            HStack(spacing: 12) {
-                Image(systemName: "applewatch.slash")
-                    .font(.title2)
-                    .foregroundStyle(PulsePalette.warn)
-                    .accessibilityHidden(true)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(String(localized: "Pas de données de nuit", bundle: .module))
-                        .font(.subheadline.weight(.bold))
-                    Text(String(
-                        localized: "Montre déchargée ou non portée ? Trois questions suffisent pour estimer ta récupération.",
-                        bundle: .module
-                    ))
-                    .font(.subheadline)
-                    .foregroundStyle(PulsePalette.text2)
+        let text = CheckInText.banner(healthRequested: healthOffer == nil)
+        return ObsidianCard {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 12) {
+                    Image(systemName: healthOffer == nil ? "applewatch.slash" : "heart.text.square")
+                        .font(.title2)
+                        .foregroundStyle(PulsePalette.warn)
+                        .accessibilityHidden(true)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(text.title)
+                            .font(.subheadline.weight(.bold))
+                        Text(text.message)
+                            .font(.subheadline)
+                            .foregroundStyle(PulsePalette.text2)
+                    }
+                }
+                if let healthOffer, let connect = healthOffer.connect {
+                    connectButton(healthOffer, action: connect)
                 }
             }
         }
+    }
+
+    /// « Connecter Apple Santé » : secondaire, le check-in garde son bouton principal. L'échec de la demande s'affiche juste
+    /// au-dessus.
+    @ViewBuilder
+    private func connectButton(_ offer: CheckInHealthOffer, action: @escaping () -> Void) -> some View {
+        if let message = offer.errorMessage {
+            Text(message)
+                .font(.footnote)
+                .foregroundStyle(PulsePalette.bad)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        Button(String(localized: "Connecter Apple Santé", bundle: .module), action: action)
+            .buttonStyle(SecondaryButtonStyle())
+            .disabled(offer.isConnecting)
+            .accessibilityHint(String(localized: "Ouvre la demande d'accès d'Apple Santé", bundle: .module))
     }
 
     private func questionBlock(_ question: CheckInQuestion) -> some View {
@@ -154,6 +193,10 @@ public struct CheckInView: View {
 
 #Preview("Vide") {
     CheckInView(form: CheckInForm(), onSubmit: { _ in })
+}
+
+#Preview("Apple Santé jamais demandé") {
+    CheckInView(form: CheckInForm(), healthOffer: CheckInHealthOffer(connect: {}), onSubmit: { _ in })
 }
 
 #Preview("Vide, accessibilité 3") {

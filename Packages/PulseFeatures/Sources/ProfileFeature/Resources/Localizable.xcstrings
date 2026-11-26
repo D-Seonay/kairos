@@ -611,6 +611,16 @@
         }
       }
     },
+    "Connecter Apple Santé" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connecter Apple Santé"
+          }
+        }
+      }
+    },
     "Coucher conseillé : %@ en semaine, %@ le week-end." : {
       "localizations" : {
         "fr" : {
@@ -1211,6 +1221,16 @@
         }
       }
     },
+    "Ouvre la demande d'accès d'Apple Santé" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvre la demande d'accès d'Apple Santé"
+          }
+        }
+      }
+    },
     "Ouvre la progression de l'exercice" : {
       "localizations" : {
         "fr" : {
@@ -1487,6 +1507,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Prévenir"
+          }
+        }
+      }
+    },
+    "Pulse n'a pas encore demandé l'accès à Apple Santé. Connecte-le pour mesurer ta récupération chaque matin." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas encore demandé l'accès à Apple Santé. Connecte-le pour mesurer ta récupération chaque matin."
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu accéder à Apple Santé." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulse n'a pas pu accéder à Apple Santé."
           }
         }
       }

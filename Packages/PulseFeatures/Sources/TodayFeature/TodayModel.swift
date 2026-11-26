@@ -18,7 +18,8 @@ public final class TodayModel {
     public private(set) var factors: [FactorDisplay] = []
     public private(set) var marker: String?
     public private(set) var session: TodaySession?
-    private(set) var card: SessionCardState = .noProgram
+    /// La carte de la séance du jour ; en lecture tant que la première actualisation n'a pas lu le programme.
+    private(set) var card: SessionCardState = .loading
     /// La carte de charge d'entraînement : cachée tant que l'historique ne couvre pas 28 jours.
     private(set) var load: LoadCardContent = .hidden
     /// La semaine de décharge à proposer : l'ACWR est resté ≥ 1,5 deux jours de suite (spec M6 §10).
@@ -48,6 +49,13 @@ public final class TodayModel {
     public internal(set) var errorMessage: String?
     /// L'échec de l'enregistrement du choix de décharge, montré sur la carte de la proposition.
     public internal(set) var deloadErrorMessage: String?
+    /// Faux tant que l'accès à Apple Santé n'a jamais été demandé sur cet appareil : la bannière du check-in offre alors
+    /// « Connecter Apple Santé » au lieu de parler de montre. Vrai sans service d'accès.
+    var healthAccessRequested = true
+    /// Vrai pendant la demande d'accès : le bouton de la bannière reste inactif.
+    var isConnectingHealth = false
+    /// L'échec de la demande d'accès, montré sur la bannière.
+    var healthAccessError: String?
     public let checkIn = CheckInForm()
     /// Vrai pendant l'enregistrement du check-in : son bouton reste inactif.
     public private(set) var isSubmittingCheckIn = false
@@ -105,6 +113,7 @@ public final class TodayModel {
         resetCheckInOnNewDay(now)
 
         let day = await environment.refresher.refresh(origin: .foreground)
+        healthAccessRequested = await environment.healthAccess?.wasRequested() ?? true
         await refreshDirectory()
         profile = day.profile
         live = await environment.readLive(plannedDay: day.plannedDay, previous: live)

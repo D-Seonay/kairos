@@ -32,10 +32,25 @@ struct TodayModelTests {
         #expect(!model.isLoading)
     }
 
+    @Test func theSessionCardLoadsUntilTheFirstRead() async throws {
+        let fixture = TodayFixture()
+        try await fixture.adopt("ppl-3")
+        let model = fixture.makeModel()
+        // Avant la première lecture, la carte ne dit pas « Aucune séance prévue » à quelqu'un qui a un programme.
+        #expect(model.card == .loading)
+        #expect(model.sessionLaunch(startsOriginal: false) == nil)
+        await model.refresh()
+        guard case .strength = model.card else {
+            Issue.record("Une carte de musculation était attendue, obtenu \(model.card)")
+            return
+        }
+    }
+
     @Test func refreshWithoutProgramPlansNothing() async throws {
         let fixture = TodayFixture()
         try await fixture.profiles.save(UserProfile(createdAt: fixture.clock.now))
         let model = fixture.makeModel()
+        #expect(model.card == .loading)
         await model.refresh()
         #expect(model.session?.plannedDay == .noProgram)
         #expect(model.card == .noProgram)

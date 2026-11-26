@@ -16,10 +16,14 @@ public struct TodayEnvironment: Sendable {
     public var now: @Sendable () -> Date
     /// Les nuits du cache, pour l'écran Nuit ouvert depuis la tuile Sommeil.
     public var nights: NightDetailService
+    /// La demande d'accès à Apple Santé, pour « Connecter Apple Santé » sur la bannière du check-in ; `nil` : la bannière ne
+    /// l'offre pas.
+    public var healthAccess: HealthAccess?
 
     public init(refresher: DayRefresher, workouts: any WorkoutRepository, userExercises: any UserExerciseRepository,
                 exerciseSettings: any ExerciseSettingsRepository, activeSession: ActiveSessionService, library: ContentLibrary,
-                calendar: Calendar, now: @escaping @Sendable () -> Date, nights: NightDetailService) {
+                calendar: Calendar, now: @escaping @Sendable () -> Date, nights: NightDetailService,
+                healthAccess: HealthAccess? = nil) {
         self.refresher = refresher
         self.workouts = workouts
         self.userExercises = userExercises
@@ -29,5 +33,6 @@ public struct TodayEnvironment: Sendable {
         self.calendar = calendar
         self.now = now
         self.nights = nights
+        self.healthAccess = healthAccess
     }
 }

@@ -30,7 +30,7 @@ struct CalibrationView: View {
                     .padding(.bottom, 20)
                 // L'erreur d'enregistrement s'affiche juste au-dessus du bouton du check-in, pas en haut de l'écran.
                 CheckInView(form: model.checkIn, scrollable: false, errorMessage: model.errorMessage,
-                            isSubmitting: model.isSubmittingCheckIn) { _ in
+                            isSubmitting: model.isSubmittingCheckIn, healthOffer: healthOffer) { _ in
                     Task { await model.submitCheckIn() }
                 }
             }
@@ -42,6 +42,12 @@ struct CalibrationView: View {
 
     private var explanation: String {
         OnboardingCopy.calibrationExplanation(healthSkipped: model.healthSkipped)
+    }
+
+    /// Apple Santé ignoré à l'écran 2 : la bannière du check-in ne parle pas de montre. Elle n'offre pas l'action ici, l'étape
+    /// vient d'être passée : l'explication dit où la trouver.
+    private var healthOffer: CheckInHealthOffer? {
+        model.healthSkipped ? CheckInHealthOffer() : nil
     }
 }
 

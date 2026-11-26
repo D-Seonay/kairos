@@ -215,7 +215,9 @@ struct SettingsTextField: View {
 // MARK: - Apple Santé
 
 /// Une ligne par type lu, la dernière lecture et « Relire maintenant » ; le diagnostic est dans « À propos ». HealthKit ne dit
-/// pas si la lecture est refusée : l'écran donne la dernière donnée lue, jamais une autorisation (spec M7 §14).
+/// pas si la lecture est refusée : l'écran donne la dernière donnée lue, jamais une autorisation (spec M7 §14). Tant que Pulse
+/// n'a jamais demandé l'accès (étape passée à l'onboarding), la section commence par « Connecter Apple Santé » : iOS ne liste
+/// pas l'app dans Santé avant cette demande. Une fois faite, le pied de section renvoie à Santé → Partage.
 struct HealthSettingsSection: View {
     /// L'ordre de la spec : le sommeil et la variabilité d'abord, le corps à la fin.
     static let order: [HealthSampleKind] = [.sleep, .sdnn, .restingHeartRate, .run, .ride, .bodyMass, .bodyFat]
@@ -224,6 +226,7 @@ struct HealthSettingsSection: View {
 
     var body: some View {
         Section {
+            if !model.healthAccessRequested { connectButton }
             if let health = model.health {
                 ForEach(Self.order, id: \.self) { kind in
                     row(kind, latest: health.kinds.first { $0.kind == kind }?.latest)
@@ -262,11 +265,43 @@ struct HealthSettingsSection: View {
         } header: {
             Text(String(localized: "Apple Santé", bundle: .module))
         } footer: {
-            Text(String(
-                localized: "Apple Santé ne dit pas à Pulse si l'accès est refusé. Pour le vérifier : Santé → Partage → Apps → Pulse.",
-                bundle: .module))
+            Text(footer)
         }
         .listRowBackground(PulsePalette.surface)
+    }
+
+    /// Demande l'accès à Apple Santé (la feuille d'iOS), puis relit le jour : « Relire maintenant » montre la lecture en cours.
+    private var connectButton: some View {
+        Button {
+            Task { await model.connectHealth() }
+        } label: {
+            HStack {
+                Text(String(localized: "Connecter Apple Santé", bundle: .module))
+                    .fontWeight(.semibold)
+                    .foregroundStyle(PulsePalette.text)
+                Spacer(minLength: 8)
+                if model.isConnectingHealth {
+                    ProgressView()
+                        .accessibilityHidden(true)
+                }
+            }
+        }
+        .disabled(model.isConnectingHealth)
+        .frame(minHeight: 44)
+        .accessibilityHint(String(localized: "Ouvre la demande d'accès d'Apple Santé", bundle: .module))
+        .accessibilityIdentifier(ProfileIdentifiers.connectHealth)
+    }
+
+    /// Avant la demande : pourquoi connecter. Après : où vérifier l'accès, que HealthKit ne dit pas à Pulse.
+    private var footer: String {
+        guard model.healthAccessRequested else {
+            return String(
+                localized: "Pulse n'a pas encore demandé l'accès à Apple Santé. Connecte-le pour mesurer ta récupération chaque matin.",
+                bundle: .module)
+        }
+        return String(
+            localized: "Apple Santé ne dit pas à Pulse si l'accès est refusé. Pour le vérifier : Santé → Partage → Apps → Pulse.",
+            bundle: .module)
     }
 
     private func row(_ kind: HealthSampleKind, latest: Date?) -> some View {

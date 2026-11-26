@@ -9,12 +9,14 @@ struct SettingsModelTests {
     let profiles = InMemoryProfileRepository()
     let cache = InMemoryHealthSampleCache()
 
-    /// L'environnement de l'écran ; `refreshHealth`, l'autorisation des notifications et la réponse d'iOS au choix du test.
-    private func environment(notifications: NotificationAuthorizationStatus = .authorized,
-                             permission: StubNotificationAuthorizer = StubNotificationAuthorizer(granted: true),
-                             refreshHealth: @escaping @Sendable () async -> Void = {},
-                             runPreferences: any RunPreferencesStore = InMemoryRunPreferencesStore(),
-                             sleepPlan: @escaping @Sendable () async -> SleepPlan? = { nil }) -> ProfileEnvironment {
+    /// L'environnement de l'écran ; `refreshHealth`, l'autorisation des notifications, la réponse d'iOS et la demande d'accès à
+    /// Apple Santé au choix du test.
+    func environment(notifications: NotificationAuthorizationStatus = .authorized,
+                     permission: StubNotificationAuthorizer = StubNotificationAuthorizer(granted: true),
+                     refreshHealth: @escaping @Sendable () async -> Void = {},
+                     runPreferences: any RunPreferencesStore = InMemoryRunPreferencesStore(),
+                     sleepPlan: @escaping @Sendable () async -> SleepPlan? = { nil },
+                     healthAccess: HealthAccess? = nil) -> ProfileEnvironment {
         let calendar = ProfileTestClock.calendar
         let clock: @Sendable () -> Date = { ProfileTestClock.now }
         let service = ProfileService(profiles: profiles, programs: InMemoryProgramRepository(), workouts: InMemoryWorkoutRepository(),
@@ -28,17 +30,18 @@ struct SettingsModelTests {
             inspector: SilentInspector(), exporter: SilentExporter(), eraser: SilentEraser(),
             notificationStatus: { notifications }, requestNotificationAuthorization: { await permission.requestAuthorization() },
             refreshHealth: refreshHealth, appVersion: "1.0.2 (14)",
-            privacyPolicyURL: nil, calendar: calendar, now: clock, runPreferences: runPreferences, sleepPlan: sleepPlan)
+            privacyPolicyURL: nil, calendar: calendar, now: clock, runPreferences: runPreferences, sleepPlan: sleepPlan,
+            healthAccess: healthAccess)
     }
 
-    private func storeProfile() async throws -> UserProfile {
+    func storeProfile() async throws -> UserProfile {
         let created = ProfileTestClock.date(2026, 11, 2, hour: 9)
         let profile = UserProfile(firstName: "Mathéo", onboardingCompletedAt: created, createdAt: created, updatedAt: created)
         try await profiles.save(profile)
         return profile
     }
 
-    private func sample(_ kind: HealthSampleKind, start: Date, end: Date, fetchedAt: Date) -> CachedHealthSample {
+    func sample(_ kind: HealthSampleKind, start: Date, end: Date, fetchedAt: Date) -> CachedHealthSample {
         CachedHealthSample(kind: kind, start: start, end: end, value: 1, fetchedAt: fetchedAt)
     }
 

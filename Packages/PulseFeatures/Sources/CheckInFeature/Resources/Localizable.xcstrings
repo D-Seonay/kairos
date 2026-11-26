@@ -270,6 +270,46 @@
           }
         }
       }
+    },
+    "Apple Santé n'est pas connecté": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Santé n'est pas connecté"
+          }
+        }
+      }
+    },
+    "Trois questions suffisent pour estimer ta récupération. Avec Apple Santé, Pulse la mesure chaque matin.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trois questions suffisent pour estimer ta récupération. Avec Apple Santé, Pulse la mesure chaque matin."
+          }
+        }
+      }
+    },
+    "Connecter Apple Santé": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connecter Apple Santé"
+          }
+        }
+      }
+    },
+    "Ouvre la demande d'accès d'Apple Santé": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvre la demande d'accès d'Apple Santé"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
