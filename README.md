@@ -103,10 +103,12 @@ Le score global pondère trois piliers dès lors qu'ils sont disponibles :
 
 $$\text{Score} = 0.50 \times \text{Score}_{\text{VFC}} + 0.25 \times \text{Score}_{\text{Sommeil}} + 0.25 \times \text{Score}_{\text{FCR}}$$
 
-- **VFC ($\text{SDNN}$)** : Traitée sous transformation logarithmique naturelle $\ln(\text{SDNN})$ pour normaliser sa distribution. Comparée à la ligne de base mobile de l'utilisateur (médiane et écart-type sur 60 jours, minimum 5 nuits). Un $z\text{-score} \ge 0.5$ donne 100/100 ; un $z\text{-score} \le -3.5$ donne 10/100.
-- **Sommeil** : Combine la durée totale par rapport au besoin de référence (70%) et la qualité des stades profond + REM (30%).
-- **Fréquence cardiaque au repos (FCR)** : Comparée à la médiane sur 60 jours. Une augmentation anormale au-delà de la ligne de base pénalise rapidement le score (chute à 0 si élévation $\ge 12\text{ bpm}$).
-- **Renormalisation dynamique** : Si un seul facteur manque (ex. pas de VFC cette nuit-là), les poids restants sont recalculés proportionnellement (50% / 50%).
+- **VFC ($\text{SDNN}$)** : La valeur de la nuit est la moyenne des mesures prises endormi, dans le bloc de sommeil principal (une sieste ou un assoupissement du soir n'y entrent pas). Elle est traitée sous transformation logarithmique naturelle $\ln(\text{SDNN})$ pour normaliser sa distribution, puis comparée à la ligne de base mobile de l'utilisateur : moyenne et écart-type des nuits valides des 14 jours précédents, minimum 5 nuits. Un $z\text{-score} \ge 0.5$ donne 100/100 ; le score descend ensuite par paliers (80 à $z = -0.5$, 50 à $z = -1.5$) jusqu'au plancher de 10/100, atteint à $z \le -3.1$.
+- **Calibration** : La ligne de base est dite prête dès 14 nuits valides sur les 28 derniers jours ; une nuit sans montre ne remet donc pas le compteur à zéro. D'ici là, le score est marqué « en calibration » et la surcharge progressive n'est pas proposée.
+- **Sommeil** : Combine la durée totale par rapport à l'objectif de sommeil du profil (8 h par défaut), pour 70 %, et la part de sommeil profond (cible : 20 % de la nuit), pour 30 %. Sans stades de sommeil, la durée compte seule.
+- **Fréquence cardiaque au repos (FCR)** : Comparée à la moyenne des 7 jours précédents (minimum 3 valeurs). Égale ou plus basse, elle donne 100/100 ; chaque battement au-dessus de la ligne de base coûte 8,5 points jusqu'à $+7\text{ bpm}$, puis le score chute à 0 dès $+11\text{ bpm}$.
+- **Renormalisation dynamique** : Si un seul facteur manque (ex. pas de VFC cette nuit-là), les poids restants sont recalculés proportionnellement (50% / 50%). Avec moins de deux facteurs, le check-in subjectif prend le relais.
+- **Figement à midi** : Le score est recalculé à chaque nouvelle donnée jusqu'à midi ; la première passe après midi applique une dernière fois les données du moment, puis le fige pour la journée.
 
 ---
 
