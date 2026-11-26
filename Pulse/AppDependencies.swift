@@ -70,6 +70,8 @@ struct AppDependencies: Sendable {
     let healthCache: any HealthSampleCache
     /// Dernière ouverture et dernier jour annoncé, dans la suite de préférences que la suppression totale vide.
     let activity: any DayActivityLog
+    /// Ce qui ne se fait qu'une fois par appareil (l'avis « notifications désactivées »), dans la même suite de préférences.
+    let once: any OnceLog
     /// Le seul passage qui lit Apple Santé et met le score du jour à jour, au premier plan comme en arrière-plan.
     let refresher: DayRefresher
     /// Les réveils d'Apple Santé ; `nil` sans Apple Santé, avec un scénario de lancement et en mode mémoire.
@@ -266,8 +268,8 @@ struct AppDependencies: Sendable {
             planning: planning, recovery: recovery, scores: scores, supplements: supplements, supplementService: supplementService,
             settings: settings, bedtimeReminderService: bedtimeReminderService, bodyMeasurements: bodyMeasurements,
             personalRecords: personalRecords, exerciseSettings: exerciseSettings, records: records, hevyMappings: hevyMappings,
-            hevyImporter: hevyImporter,
-            healthCache: healthCache, activity: activity, refresher: refresher, backgroundDelivery: wiring.backgroundDelivery,
+            hevyImporter: hevyImporter, healthCache: healthCache, activity: activity,
+            once: UserDefaultsOnceLog(suiteName: wiring.defaultsSuite), refresher: refresher, backgroundDelivery: wiring.backgroundDelivery,
             activeSession: activeSession, liveSession: liveSession, sessionActivity: wiring.sessionActivity,
             run: RunDependencies(wiring, container: container, workouts: workouts, profiles: profiles, bestEfforts: stores.runBestEfforts),
             photos: photos, inspector: wiring.inspector ?? SwiftDataStoreInspector(container: container, cloudEnabled: mode == .cloud),

@@ -54,8 +54,8 @@ extension ActiveSessionService {
         }
     }
 
-    /// Sans profil lisible, la notification garde sa valeur par défaut : activée.
-    private func restNotificationsEnabled() async -> Bool {
+    /// Le réglage « Fin de repos » du profil. Sans profil lisible, la notification garde sa valeur par défaut : activée.
+    public func restNotificationsEnabled() async -> Bool {
         (try? await profiles.load())?.restTimerNotificationEnabled ?? true
     }
 

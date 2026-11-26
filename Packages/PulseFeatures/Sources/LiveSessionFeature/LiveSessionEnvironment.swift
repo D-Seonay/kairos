@@ -17,10 +17,13 @@ public struct LiveSessionEnvironment: Sendable {
     /// La demande de note au récap d'une séance terminée ; `nil` pour une saisie après coup, dans les tests et les modes des
     /// tests d'interface.
     public var reviewPrompt: ReviewPrompt?
+    /// Ce qui ne se dit qu'une fois par appareil : l'avis « notifications désactivées ». En mémoire par défaut (tests, aperçus,
+    /// séance saisie après coup, qui ne demande rien).
+    public var once: any OnceLog
 
     public init(service: ActiveSessionService, train: TrainEnvironment, notifications: any NotificationAuthorizing,
                 supplements: SupplementsEnvironment? = nil, calendar: Calendar, now: @escaping @Sendable () -> Date,
-                reviewPrompt: ReviewPrompt? = nil) {
+                reviewPrompt: ReviewPrompt? = nil, once: any OnceLog = InMemoryOnceLog()) {
         self.service = service
         self.train = train
         self.notifications = notifications
@@ -28,5 +31,6 @@ public struct LiveSessionEnvironment: Sendable {
         self.calendar = calendar
         self.now = now
         self.reviewPrompt = reviewPrompt
+        self.once = once
     }
 }

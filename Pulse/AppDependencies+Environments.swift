@@ -86,7 +86,8 @@ extension AppDependencies {
     /// par l'autorisateur de l'app (une doublure accordée dans les modes des tests d'interface, refusée dans les tests).
     func liveSessionEnvironment() -> LiveSessionEnvironment {
         LiveSessionEnvironment(service: liveSession, train: trainEnvironment(), notifications: liveSessionNotifications,
-                               supplements: supplementsEnvironment(), calendar: calendar, now: now, reviewPrompt: reviewPrompt)
+                               supplements: supplementsEnvironment(), calendar: calendar, now: now, reviewPrompt: reviewPrompt,
+                               once: once)
     }
 
     /// La demande de note au récap (au plus une par version, gardée dans `UserDefaults`) ; aucune dans les modes des tests
