@@ -30,8 +30,8 @@ public final class DailyScoreService: Sendable {
         }
     }
 
-    /// Enregistre le check-in et le score estimé qu'il produit ; il sera remplacé par un score mesuré avant midi.
-    /// Refusé une fois le jour figé ou mesuré.
+    /// Enregistre le check-in. Sans score mesuré, il produit un score estimé, remplacé par un score mesuré avant midi ; avec un
+    /// score mesuré, il s'y ajoute comme léger modificateur (`FeelingAdjustment`). Refusé une fois le jour figé.
     public func saveCheckIn(_ answers: CheckInAnswers, plannedDay: PlannedDay?, now: Date) async throws -> DailyRecovery {
         try await queue.run { try await self.estimate(answers, plannedDay: plannedDay, now: now) }
     }
@@ -68,7 +68,8 @@ public final class DailyScoreService: Sendable {
             ?? NightSample(day: day, sdnnMs: nil, restingHeartRate: nil, sleep: nil)
         let history = nights.filter { !calendar.isDate($0.day, inSameDayAs: day) }
         let outcome = RecoveryCalculator(calendar: calendar).compute(
-            day: day, today: tonight, history: history, sleepGoalMinutes: sleepGoalMinutes ?? SleepGoal.defaultMinutes)
+            day: day, today: tonight, history: history, sleepGoalMinutes: sleepGoalMinutes ?? SleepGoal.defaultMinutes,
+            checkIn: try await checkIn(on: day)?.answers)
 
         // Un profil illisible ne fait pas retomber le score du jour sur l'objectif par défaut : le score enregistré reste.
         if sleepGoalMinutes == nil, let existing {
@@ -107,12 +108,13 @@ public final class DailyScoreService: Sendable {
         if existing?.frozenAt != nil {
             throw DailyScoreError.frozen
         }
-        if existing?.isEstimated == false {
-            throw DailyScoreError.alreadyMeasured
-        }
         let score = CheckInScorer.score(answers)
+        let checkIn = CheckIn(day: day, answers: answers, score: score, createdAt: now, updatedAt: now)
+        try await recovery.save(checkIn)
+        if let existing, !existing.isEstimated {
+            return try await applyFeeling(checkIn, to: existing, plannedDay: plannedDay, now: now)
+        }
         let category = RecoveryCategory(score: score)
-        try await recovery.save(CheckIn(day: day, answers: answers, score: score, createdAt: now, updatedAt: now))
         let estimated = DailyRecovery(
             id: existing?.id ?? UUID(), day: day, score: score, category: category, isEstimated: true,
             missingFactors: Factor.allCases, calibration: .calibrating(nights: 0),
@@ -122,6 +124,24 @@ public final class DailyScoreService: Sendable {
             createdAt: existing?.createdAt ?? now, updatedAt: now)
         try await recovery.save(estimated)
         return estimated
+    }
+
+    /// Le score mesuré, son ressenti appliqué : la catégorie peut baisser (et la séance s'alléger), jamais monter.
+    private func applyFeeling(_ checkIn: CheckIn, to measured: DailyRecovery, plannedDay: PlannedDay?,
+                              now: Date) async throws -> DailyRecovery {
+        guard let feeling = measured.feeling(checkIn) else { return measured }
+        var adjusted = measured
+        adjusted.score = feeling.score
+        adjusted.category = RecoveryCategory(score: feeling.score)
+        adjusted.adjustments = Self.adjustments(for: plannedDay, category: adjusted.category, keeping: measured)
+        adjusted.updatedAt = now
+        try await recovery.save(adjusted)
+        return adjusted
+    }
+
+    private func checkIn(on day: Date) async throws -> CheckIn? {
+        guard let next = calendar.date(byAdding: .day, value: 1, to: day) else { return nil }
+        return try await recovery.checkIns(from: day, to: next).first
     }
 
     /// Les ajustements que la catégorie impose à la séance prévue ; aucun un jour de repos ou sans programme.

@@ -139,13 +139,10 @@ public final class TodayModel {
             let estimated = try await environment.refresher.saveCheckIn(answers)
             errorMessage = nil
             checkIn.selection = [:]
-            todayCheckIn = CheckIn(day: estimated.day, answers: answers, score: estimated.score,
+            // Un score mesuré arrivé entre-temps garde la mesure : le check-in n'y ajoute que le ressenti.
+            todayCheckIn = CheckIn(day: estimated.day, answers: answers, score: CheckInScorer.score(answers),
                                    createdAt: estimated.createdAt, updatedAt: estimated.updatedAt)
             applyWritten(estimated)
-        } catch DailyScoreError.alreadyMeasured {
-            // Un score mesuré est arrivé entre-temps : il remplace le check-in, l'accueil se relit.
-            errorMessage = nil
-            await refresh()
         } catch {
             errorMessage = String(localized: "Pulse n'a pas pu enregistrer ton check-in.", bundle: .module)
         }
