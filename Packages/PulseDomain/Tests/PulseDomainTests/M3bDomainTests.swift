@@ -3,7 +3,14 @@ import Foundation
 import Testing
 
 @Test func nightSignalsAreReadInOrder() {
-    #expect(NightSignal.allCases.map(\.kind) == [.sdnn, .restingHeartRate, .sleep])
+    #expect(NightSignal.allCases.map(\.kind) == [.sdnn, .restingHeartRate, .sleep, .heartRate])
+}
+
+/// La fréquence cardiaque brute, écrite plusieurs fois par heure, ne réveille pas l'app et n'est gardée que quelques jours.
+@Test func rawHeartRateIsNotObservedAndKeptBriefly() {
+    #expect(NightSignal.observed == [.sdnn, .restingHeartRate, .sleep])
+    #expect(healthCacheRetention(for: .heartRate) == Double(NightSignal.heartRateHistoryDays + 2) * 86_400)
+    #expect(healthCacheRetention(for: .heartRate) < healthCacheRetention(for: .restingHeartRate))
 }
 
 @Test func appLinkRoundTrips() throws {
