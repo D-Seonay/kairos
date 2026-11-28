@@ -55,7 +55,9 @@ struct LiveSessionLoadDropTests {
         let bench = session.exercises[0]
         #expect(bench.sets.map(\.proposed.weightKg) == [80, 80, 80])
         #expect(bench.sets.allSatisfy { !$0.proposed.isIncrease })
-        #expect(bench.loadDrop?.originalSets.map(\.weightKg) == [102.5, 102.5, 102.5])
+        // « Remettre » reprend la charge de la dernière fois (100 kg), pas la hausse qu'elle aurait valu (102,5 kg).
+        #expect(bench.loadDrop?.originalSets.map(\.weightKg) == [100, 100, 100])
+        #expect(bench.loadDrop?.originalWeightKg == 100)
         #expect(!session.appliedAdjustments.contains { $0.kind == .load })
         #expect(bench.dayNote == nil)
     }
@@ -96,6 +98,16 @@ struct LiveSessionLoadDropTests {
                                  deload: .active(since: .distantPast, until: .distantFuture)).exercises[0]
         #expect(bench.loadDrop == nil)
         #expect(bench.sets.first?.proposed.weightKg == 90)
+    }
+
+    @Test func duringADeloadWeekRestoringGivesLastTimesLoadsDeloaded() {
+        // Une reprise après sept semaines (−20 %) baisse plus que la décharge (−10 %, deux séries) : « Remettre » rend la charge
+        // de la dernière fois décharge comprise, 100 × 0,9, pas la hausse déchargée (102,5 × 0,9 ≈ 92,5).
+        let topped = bench([12, 12, 12], planned: 10)
+        let bench = benchSession(history: topped, recent: [recent(50, sets: topped)],
+                                 deload: .active(since: .distantPast, until: .distantFuture)).exercises[0]
+        #expect(bench.sets.map(\.proposed.weightKg) == [80, 80])
+        #expect(bench.loadDrop?.originalSets.map(\.weightKg) == [90, 90])
     }
 
     @Test func restoringPutsTheOldLoadsBackOnTheSetsStillToDo() throws {
