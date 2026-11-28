@@ -29,6 +29,20 @@ import Testing
         #expect(RecoveryCategory(score: result.score) == RecoveryCategory(score: measured))
     }
 
+    /// Le score s'affiche arrondi : 61 + 3,9 = 64,9 resterait orange mais s'afficherait « 65 ». Il s'arrête au plus haut score
+    /// entier de la catégorie, comme à 39,5 et 89,5.
+    @Test(arguments: [(36.0, 71.0, 39.0), (61.0, 100.0, 64.0), (88.5, 98.5, 89.0)])
+    func feelingBetterNeverRoundsIntoTheNextCategory(measured: Double, checkIn: Double, ceiling: Double) {
+        let result = FeelingAdjustment.apply(measured: measured, checkInScore: checkIn)
+        #expect(result.score == ceiling)
+        #expect(RecoveryCategory(score: result.score.rounded()) == RecoveryCategory(score: measured))
+    }
+
+    @Test func aBetterFeelingThatRoundsInsideTheCategoryIsKept() {
+        let result = FeelingAdjustment.apply(measured: 61, checkInScore: 95)
+        #expect(abs(result.score - 64.4) < 1e-9)
+    }
+
     @Test func aScoreAlreadyAtTheTopOfItsCategoryIsNotLowered() {
         let result = FeelingAdjustment.apply(measured: 89.6, checkInScore: 100)
         #expect(result.points == 0)

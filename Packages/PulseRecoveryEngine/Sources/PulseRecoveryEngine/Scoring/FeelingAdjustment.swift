@@ -4,7 +4,9 @@ import PulseDomain
 ///
 /// - Le modificateur vaut un dixième de l'écart entre le score du check-in et le score mesuré, plafonné à ± `cap` points.
 /// - Il peut faire baisser la catégorie (se sentir mal rend la séance plus prudente), jamais la faire monter : un ressenti
-///   meilleur que la mesure monte le score au plus jusqu'au haut de sa catégorie. Un jour rouge ne passe donc jamais au vert.
+///   meilleur que la mesure monte le score au plus jusqu'au plus haut score entier de sa catégorie (64 pour la fatigue modérée),
+///   pour que le score affiché, arrondi, n'en sorte pas non plus (64,9 s'afficherait « 65 »). Un jour rouge ne passe donc
+///   jamais au vert.
 public enum FeelingAdjustment {
     /// Le plafond du modificateur, en points.
     public static let cap = 5.0
@@ -24,7 +26,7 @@ public enum FeelingAdjustment {
         let raw = min(cap, max(-cap, (checkInScore - measured) * share))
         var adjusted = min(100, max(0, measured + raw))
         let category = RecoveryCategory(score: measured)
-        if RecoveryCategory(score: adjusted).rank > category.rank, let ceiling = category.ceiling {
+        if adjusted > measured, let ceiling = category.ceiling, adjusted.rounded() > ceiling {
             adjusted = max(measured, ceiling)
         }
         return Result(measured: measured, points: adjusted - measured)
@@ -32,16 +34,6 @@ public enum FeelingAdjustment {
 }
 
 extension RecoveryCategory {
-    /// 0 pour le surmenage, 3 pour l'optimal.
-    var rank: Int {
-        switch self {
-        case .overreached: 0
-        case .moderateFatigue: 1
-        case .normal: 2
-        case .optimal: 3
-        }
-    }
-
     /// Le plus haut score entier de la catégorie (64 pour la fatigue modérée) ; `nil` pour l'optimal, qui va jusqu'à 100.
     var ceiling: Double? {
         switch self {
