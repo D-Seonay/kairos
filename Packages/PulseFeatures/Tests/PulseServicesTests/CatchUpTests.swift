@@ -59,6 +59,20 @@ struct CatchUpTests {
         #expect(CatchUp.isCaughtUp(lines.source) && !CatchUp.isCaughtUp(lines.target))
     }
 
+    @Test func aMovedSessionCaughtUpLosesItsOldMoveLink() {
+        let tuesday = TestClock.date("2026-11-17T00:00")
+        let swapped = ScheduledDay(date: tuesday, programID: Fixture.programID, routineDayID: Fixture.push.id, title: "Push",
+                                   kind: .strength, status: .planned, movedFromDate: monday, moveReason: .user, createdAt: now,
+                                   updatedAt: now)
+        let days = week(overrides: [swapped])
+        #expect(CatchUp.canCatchUp(days[1]) && days[1].movedFrom == monday)
+        let lines = CatchUp.lines(source: days[1], target: days[5], programID: Fixture.programID, now: now)
+        #expect(lines.source.id == swapped.id && lines.source.movedFromDate == nil, "La ligne « Rattrapée » ne dit plus d'où elle venait")
+        #expect(lines.target.movedFromDate == tuesday && lines.target.routineDayID == Fixture.push.id)
+        let after = week(overrides: [lines.source, lines.target])
+        #expect(after[1].state == .caughtUp && after[1].movedFrom == nil && after[1].routine?.name == "Push")
+    }
+
     @Test func theWeekShowsTheSourceCaughtUpAndTheTargetPlanned() {
         let lines = CatchUp.lines(source: week()[1], target: week()[5], programID: Fixture.programID, now: now)
         let days = week(overrides: [lines.source, lines.target])

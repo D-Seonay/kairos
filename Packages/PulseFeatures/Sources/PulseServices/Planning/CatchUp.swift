@@ -42,7 +42,9 @@ public enum CatchUp {
     }
 
     /// Les deux lignes qu'un rattrapage écrit : la séance de `source` sur `target`, et `source` marqué rattrapé. Elles
-    /// reprennent les lignes existantes de ces jours.
+    /// reprennent les lignes existantes de ces jours ; la ligne de `source` perd le lien d'un échange ou d'un déplacement qui
+    /// l'avait amenée là. Une course que la règle des jambes lourdes avait rendue facile est rattrapée telle que prévue au
+    /// programme : la sortie facile ne tenait qu'au jour manqué, et la ligne n'a pas de champ pour la garder.
     public static func lines(source: PlanningDay, target: PlanningDay, programID: UUID, now: Date)
         -> (source: ScheduledDay, target: ScheduledDay) {
         let routine = source.routine
@@ -55,6 +57,7 @@ public enum CatchUp {
         caughtUp.title = title
         caughtUp.kind = kind
         caughtUp.status = .skipped
+        caughtUp.movedFromDate = nil
         caughtUp.moveReason = .user
         caughtUp.moveReasonText = nil
         caughtUp.updatedAt = now
