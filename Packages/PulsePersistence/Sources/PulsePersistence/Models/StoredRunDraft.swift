@@ -23,6 +23,6 @@ public final class StoredRunDraft {
 
     /// `nil` si le contenu ne se relit plus (format d'une version antérieure) : la course n'est alors plus reprenable.
     public func toDomain() -> RunDraft? {
-        payload.flatMap { try? JSONDecoder().decode(RunDraft.self, from: $0) }
+        payload.flatMap { data in logger.attempt("Brouillon de course illisible") { try JSONDecoder().decode(RunDraft.self, from: data) } }
     }
 }

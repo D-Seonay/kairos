@@ -20,7 +20,13 @@ public struct SwiftDataStoreInspector: StoreInspector {
 
     public func cloudAccountStatus() async -> CloudAccountStatus {
         guard cloudEnabled else { return .unknown }
-        let status = try? await CKContainer(identifier: PersistenceStack.cloudContainerIdentifier).accountStatus()
+        let status: CKAccountStatus?
+        do {
+            status = try await CKContainer(identifier: PersistenceStack.cloudContainerIdentifier).accountStatus()
+        } catch {
+            logger.failure("État du compte iCloud illisible", error)
+            status = nil
+        }
         switch status {
         case .available: return .available
         case .noAccount: return .noAccount

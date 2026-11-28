@@ -1,13 +1,16 @@
 import Foundation
+import PulseDomain
 
 /// Stocke un tableau ou une structure `Codable` dans une colonne `Data?` (JSON), sans relation SwiftData.
 enum CodableColumn {
     static func encode<T: Encodable>(_ value: T) -> Data? {
-        try? JSONEncoder().encode(value)
+        logger.attempt("Colonne JSON non encodée") { try JSONEncoder().encode(value) }
     }
 
     static func decode<T: Decodable>(_ type: T.Type, from data: Data?, default fallback: T) -> T {
-        guard let data, let value = try? JSONDecoder().decode(type, from: data) else { return fallback }
+        guard let data, let value = logger.attempt("Colonne JSON illisible", { try JSONDecoder().decode(type, from: data) }) else {
+            return fallback
+        }
         return value
     }
 }

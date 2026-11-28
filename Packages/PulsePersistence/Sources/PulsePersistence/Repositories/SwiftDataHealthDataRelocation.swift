@@ -22,6 +22,7 @@ public actor SwiftDataHealthDataRelocation: HealthDataRelocating {
         for case .failure(let error) in results {
             throw error
         }
+        // swiftlint:disable:next silent_try - les échecs ont été relancés juste avant
         return results.contains { (try? $0.get()) == true }
     }
 
