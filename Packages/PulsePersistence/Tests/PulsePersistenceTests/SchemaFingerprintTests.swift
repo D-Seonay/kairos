@@ -112,6 +112,25 @@ private let drift = "Un modèle partagé a changé : figer sa copie dans la vers
             "StoredProfile.sleepGoalMinutes", "StoredProfile.weekdayWakeMinutes", "StoredProfile.weekendWakeMinutes"])
 }
 
+@Test func v9SchemaMatchesItsFingerprint() throws {
+    try checkFingerprint(of: Schema(versionedSchema: PulseSchemaV9.self), against: "schema-v9")
+}
+
+/// La V9 n'ajoute que des champs optionnels ou avec valeur par défaut, et un modèle local : aucune contrainte d'unicité côté
+/// synchronisé (CloudKit les refuse).
+@Test func v9OnlyAddsDayKeysAndDraftChunks() {
+    let v8 = Set(SchemaFingerprint.lines(Schema(versionedSchema: PulseSchemaV8.self)))
+    let v9 = Set(SchemaFingerprint.lines(Schema(versionedSchema: PulseSchemaV9.self)))
+    #expect(v8.subtracting(v9).isEmpty)
+    let added = v9.subtracting(v8)
+    let fields = Set(added.compactMap { $0.split(separator: ":").first.map(String.init) }.filter { !$0.hasPrefix("StoredRunDraftChunk.") })
+    #expect(fields == ["StoredCheckIn.dayKey", "StoredDailyRecovery.dayKey", "StoredRecoveryReading.dayKey",
+                       "StoredRunDraft.chunkCount", "StoredRunDraft.isChunked", "StoredRunDraft.lastPointAt",
+                       "StoredRunDraft.storedHeartRateCount", "StoredRunDraft.storedPointCount"])
+    #expect(added.contains { $0.hasPrefix("StoredRunDraftChunk.points:") })
+    #expect(!added.contains { ($0.hasPrefix("StoredCheckIn.") || $0.hasPrefix("StoredDailyRecovery.")) && $0.contains("unique") })
+}
+
 @Test func fingerprintNamesTheInverseOfEachRelationship() {
     let lines = SchemaFingerprint.lines(Schema(versionedSchema: PulseSchemaV2.self))
     #expect(lines.contains { $0.hasPrefix("StoredProgram.days -> StoredRoutineDay") && $0.contains("inverse: program") })

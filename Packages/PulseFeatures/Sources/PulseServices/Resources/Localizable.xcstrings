@@ -11,6 +11,26 @@
         }
       }
     },
+    "%@ de retard sur 7 nuits : vise tes %@ cette nuit.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ de retard sur 7 nuits : vise tes %@ cette nuit."
+          }
+        }
+      }
+    },
+    "%@ de retard sur 7 nuits et séance %@ demain : vise tes %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ de retard sur 7 nuits et séance %@ demain : vise tes %@."
+          }
+        }
+      }
+    },
     "Ton score du matin est prêt": {
       "localizations": {
         "fr": {

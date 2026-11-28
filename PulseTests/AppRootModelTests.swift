@@ -146,4 +146,28 @@ import Testing
         #expect(await dependencies.run.service.current() == nil)
         #expect(await dependencies.run.service.recoveryOffer() == nil)
     }
+
+    /// Deux retours rapprochés ne relisent les onglets qu'une fois ; une donnée changée hors des écrans fait relire au retour
+    /// suivant, et le passage de minuit aussi.
+    @Test func closeActivationsReloadTheTabsOnceAndMidnightStillReloads() async throws {
+        let dependencies = AppDependencies.testing()
+        try await dependencies.profiles.save(Self.completedProfile())
+        let model = AppRootModel(dependencies: dependencies, changes: NotificationCenter())
+        await model.load()
+        let calendar = dependencies.calendar
+        let noon = try #require(calendar.date(from: DateComponents(year: 2026, month: 11, day: 27, hour: 12)))
+        await model.becameActive(at: noon)
+        #expect(model.activationReloads == 1)
+        await model.becameActive(at: noon.addingTimeInterval(120))
+        #expect(model.activationReloads == 1)
+        model.noteDataChange()
+        await model.becameActive(at: noon.addingTimeInterval(180))
+        #expect(model.activationReloads == 2)
+        // 23 h 57 relit (dernière relecture trop vieille) ; 0 h 01, quatre minutes plus tard, relit parce que le jour a changé.
+        let lateEvening = try #require(calendar.date(from: DateComponents(year: 2026, month: 11, day: 27, hour: 23, minute: 57)))
+        await model.becameActive(at: lateEvening)
+        #expect(model.activationReloads == 3)
+        await model.becameActive(at: lateEvening.addingTimeInterval(240))
+        #expect(model.activationReloads == 4)
+    }
 }

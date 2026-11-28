@@ -28,6 +28,9 @@ public final class StoredDailyRecovery {
     public var createdAt: Date = Date()
     public var updatedAt: Date = Date()
     public var deletedAt: Date?
+    /// Le jour civil, « 2026-11-27 », arrivé en V9 : `nil` pour une ligne écrite avant, ou par une version plus ancienne de l'app
+    /// sur un autre appareil ; sa clé se déduit alors de `day`.
+    public var dayKey: String?
 
     public init(_ recovery: DailyRecovery) {
         id = recovery.id

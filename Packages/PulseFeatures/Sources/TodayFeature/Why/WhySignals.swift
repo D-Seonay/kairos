@@ -2,6 +2,7 @@ import CheckInFeature
 import Foundation
 import PulseDomain
 import PulseRecoveryEngine
+import PulseServices
 
 extension DailyRecovery {
     func subScore(of factor: Factor) -> Double? {
@@ -34,7 +35,8 @@ enum WhySignals {
 
     // MARK: - Score mesuré
 
-    /// Les poids nominaux 50 / 25 / 25, renormalisés sur les facteurs présents, en pourcentages entiers.
+    /// Les poids nominaux 50 / 25 / 25, renormalisés sur les facteurs présents, en pourcentages entiers. La formule donne le score
+    /// mesuré : le ressenti du matin s'affiche à part (`WhyDetails.feeling`).
     private static func measured(_ recovery: DailyRecovery) -> Result {
         let present = recovery.presentFactors
         let total = present.reduce(0) { $0 + RecoveryCalculator.nominalWeight(for: $1) }
@@ -46,7 +48,8 @@ enum WhySignals {
         let signals = rows.map {
             WhyContent.Signal(title: title(of: $0.factor), score: $0.score, spokenTitle: spokenTitle(of: $0.factor))
         }
-        return Result(signals: signals, formula: formula(terms: rows.map { ($0.weight, $0.score) }, result: recovery.score))
+        return Result(signals: signals,
+                      formula: formula(terms: rows.map { ($0.weight, $0.score) }, result: recovery.measuredScore ?? recovery.score))
     }
 
     private static func title(of factor: Factor) -> String {

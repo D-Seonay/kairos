@@ -36,16 +36,23 @@ public actor SwiftDataHealthDataRelocation: HealthDataRelocating {
         let rows = try modelContext.fetch(FetchDescriptor<StoredDailyRecovery>(predicate: withRawValue))
         guard !rows.isEmpty else { return false }
         try commitLocalCopies {
-            var readingDays = Set(try modelContext.fetch(FetchDescriptor<StoredRecoveryReading>()).map(\.day))
-            // Deux appareils peuvent avoir créé chacun une ligne pour le même jour : seule la première vue d'un jour est recopiée,
-            // donc les lignes vivantes passent d'abord, de la plus récente à la plus ancienne, pour que la dernière écriture gagne.
-            // Les lignes supprimées logiquement ne sont jamais recopiées.
+            let calendar = Calendar.autoupdatingCurrent
+            let existing = try modelContext.fetch(FetchDescriptor<StoredRecoveryReading>())
+            // `day` est unique dans le magasin local : un même instant n'est jamais recopié, même sous une autre clé.
+            var readingDays = Set(existing.map(\.day))
+            var readingKeys = Set(existing.map { Self.civilDay(of: $0, calendar: calendar) })
+            // Deux appareils peuvent avoir créé chacun une ligne pour le même jour civil : seule la première vue d'un jour est
+            // recopiée, donc les lignes vivantes passent d'abord, de la plus récente à la plus ancienne, pour que la dernière
+            // écriture gagne. Les lignes supprimées logiquement ne sont jamais recopiées.
             let alive = rows.filter { $0.deletedAt == nil }.sorted { $0.updatedAt > $1.updatedAt }
-            for row in alive where !readingDays.contains(row.day) {
-                let reading = StoredRecoveryReading(day: row.day, from: row.toDomain(), at: row.updatedAt)
+            for row in alive {
+                let key = Self.civilDay(of: row, calendar: calendar)
+                guard !readingDays.contains(row.day), !readingKeys.contains(key) else { continue }
+                let reading = StoredRecoveryReading(day: row.day, dayKey: row.dayKey, from: row.toDomain(), at: row.updatedAt)
                 guard !reading.isEmpty else { continue }
                 modelContext.insert(reading)
                 readingDays.insert(row.day)
+                readingKeys.insert(key)
             }
         }
         try commitSyncedRemoval {
@@ -54,6 +61,12 @@ public actor SwiftDataHealthDataRelocation: HealthDataRelocating {
             }
         }
         return true
+    }
+
+    /// Le jour civil sûr d'une ligne (`DayKey.exact`) ; à défaut, son instant : une valeur dont le jour n'est qu'estimé ne
+    /// doit pas en écarter une autre.
+    private static func civilDay(of row: some DayKeyedRow, calendar: Calendar) -> String {
+        DayKey.exact(row.dayKey, day: row.day, calendar: calendar) ?? "@\(row.day.timeIntervalSinceReferenceDate)"
     }
 
     /// Une course vivante est copiée en local si son identifiant n'y est pas déjà ; puis toutes les lignes Apple Santé sont

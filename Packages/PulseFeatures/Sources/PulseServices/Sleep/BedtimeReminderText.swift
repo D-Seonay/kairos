@@ -9,9 +9,20 @@ public enum BedtimeReminderText {
         return String(localized: "Au lit avant \(clock)", bundle: .module)
     }
 
-    /// La nuit courte d'hier et la séance de demain d'abord ; sans l'une ni l'autre, l'heure du réveil visé.
-    public static func body(goalMinutes: Int, wakeMinutes: Int, shortNightMinutes: Int?, sessionName: String?) -> String {
+    /// La dette de sommeil à partir de laquelle le rappel en parle : une heure.
+    public static let debtThresholdMinutes = 60
+
+    /// La dette des 7 nuits (à partir d'une heure) ou la nuit courte d'hier, et la séance de demain d'abord ; sans rien de cela,
+    /// l'heure du réveil visé.
+    public static func body(goalMinutes: Int, wakeMinutes: Int, shortNightMinutes: Int?, sessionName: String?,
+                            debtMinutes: Int? = nil) -> String {
         let goal = duration(minutes: goalMinutes)
+        if let debt = debtMinutes.map(duration(minutes:)) {
+            guard let sessionName else {
+                return String(localized: "\(debt) de retard sur 7 nuits : vise tes \(goal) cette nuit.", bundle: .module)
+            }
+            return String(localized: "\(debt) de retard sur 7 nuits et séance \(sessionName) demain : vise tes \(goal).", bundle: .module)
+        }
         switch (shortNightMinutes.map(duration(minutes:)), sessionName) {
         case let (short?, session?):
             return String(localized: "Nuit courte hier (\(short)) et séance \(session) demain : vise tes \(goal).", bundle: .module)

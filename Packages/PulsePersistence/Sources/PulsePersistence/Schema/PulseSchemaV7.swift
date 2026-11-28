@@ -9,16 +9,17 @@ import SwiftData
 public enum PulseSchemaV7: VersionedSchema {
     public static let versionIdentifier = Schema.Version(7, 0, 0)
 
-    /// Les 17 modèles synchronisés, figés en V8 : `StoredProfile`, qui gagne les réglages de sommeil en V8, par sa copie figée.
+    /// Les 17 modèles synchronisés, figés en V8 : `StoredProfile`, qui gagne les réglages de sommeil en V8, par sa copie figée ;
+    /// `StoredDailyRecovery` et `StoredCheckIn`, qui gagnent leur clé de jour en V9, par leur copie figée en V8.
     static let syncedModels: [any PersistentModel.Type] = [
         PulseSchemaV7.StoredProfile.self, StoredProgram.self, StoredRoutineDay.self, StoredRoutineExercise.self,
-        StoredUserExercise.self, StoredWorkoutSession.self, StoredWorkoutSet.self, StoredScheduledDay.self, StoredDailyRecovery.self,
-        StoredCheckIn.self, StoredSupplement.self, StoredSupplementIntake.self, StoredBodyMeasurement.self, StoredPersonalRecord.self,
-        StoredExerciseSettings.self, StoredRunTrack.self, StoredSessionPhoto.self
+        StoredUserExercise.self, StoredWorkoutSession.self, StoredWorkoutSet.self, StoredScheduledDay.self,
+        PulseSchemaV8.StoredDailyRecovery.self, PulseSchemaV8.StoredCheckIn.self, StoredSupplement.self, StoredSupplementIntake.self,
+        StoredBodyMeasurement.self, StoredPersonalRecord.self, StoredExerciseSettings.self, StoredRunTrack.self, StoredSessionPhoto.self
     ]
 
     public static var models: [any PersistentModel.Type] {
-        syncedModels + PersistenceStack.localModels
+        syncedModels + PulseSchemaV8.localModels
     }
 }
 
