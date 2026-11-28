@@ -121,6 +121,16 @@
         }
       }
     },
+    "%@, super set %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, super set %@"
+          }
+        }
+      }
+    },
     "%lld min" : {
       "localizations" : {
         "fr" : {

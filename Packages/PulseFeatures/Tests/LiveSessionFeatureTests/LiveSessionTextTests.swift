@@ -107,8 +107,8 @@ import Testing
     @Test func exerciseCardTexts() {
         #expect(LiveExerciseCard.rpeCapText(7.5) == "RPE 7,5 max")
         #expect(LiveExerciseCard.rpeCapText(8) == "RPE 8 max")
-        #expect(LiveExerciseCard.supersetText(group: 1) == "Super set A")
-        #expect(LiveExerciseCard.supersetText(group: 2) == "Super set B")
+        #expect(LiveExerciseCard.supersetText(label: "A1") == "Super set A1")
+        #expect(LiveExerciseCard.supersetText(label: "B3") == "Super set B3")
         #expect(LiveExerciseCard.incrementText(2.5) == "2,5 kg")
         #expect(LiveExerciseCard.incrementText(5) == "5 kg")
     }

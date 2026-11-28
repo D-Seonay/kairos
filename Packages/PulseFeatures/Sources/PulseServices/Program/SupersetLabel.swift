@@ -27,3 +27,11 @@ public enum SupersetLabel {
         return letters.indices.contains(block) ? String(letters[block]) : "\(block + 1)"
     }
 }
+
+extension LiveSession {
+    /// « A1 », « A2 », « A3 » : le repère de l'exercice `id` dans son super set, dans l'ordre de la séance ; `nil` hors groupe.
+    public func supersetLabel(of id: UUID) -> String? {
+        guard let index = exercises.firstIndex(where: { $0.id == id }) else { return nil }
+        return SupersetLabel.labels(for: exercises.map(\.supersetGroup))[index]
+    }
+}

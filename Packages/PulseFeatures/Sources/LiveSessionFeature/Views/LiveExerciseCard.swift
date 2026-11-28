@@ -112,7 +112,8 @@ struct LiveExerciseCard: View {
     }
 
     private var details: some View {
-        LiveExerciseDetails(exercise: exercise, onEditNote: editNote) {
+        LiveExerciseDetails(exercise: exercise, supersetLabel: model.session.supersetLabel(of: exercise.id),
+                            onEditNote: editNote) {
             Task { await model.restoreLoads(exercise: exercise.id) }
         }
     }
@@ -251,11 +252,9 @@ extension LiveExerciseCard {
         String(localized: "RPE \(PulseFormat.decimal(cap, maxFractionDigits: 1)) max", bundle: .module)
     }
 
-    /// « Super set A » : les groupes de la routine sont numérotés à partir de 1.
-    nonisolated static func supersetText(group: Int) -> String {
-        let letters = Array("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-        let letter = letters[((group - 1) % letters.count + letters.count) % letters.count]
-        return String(localized: "Super set \(String(letter))", bundle: .module)
+    /// « Super set A2 » : la lettre du groupe dans la séance, la place de l'exercice dans le groupe.
+    nonisolated static func supersetText(label: String) -> String {
+        String(localized: "Super set \(label)", bundle: .module)
     }
 
     /// « 2 séries faites sur 5 », « Exercice terminé » : l'anneau de la carte dit en mots.

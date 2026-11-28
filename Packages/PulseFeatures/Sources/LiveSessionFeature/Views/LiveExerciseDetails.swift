@@ -7,6 +7,8 @@ import SwiftUI
 /// fois », la baisse du jour avec « Remettre », ce que le jour a changé et le RPE plafond.
 struct LiveExerciseDetails: View {
     let exercise: LiveExercise
+    /// « A2 » : le repère de l'exercice dans son super set, `nil` hors groupe.
+    var supersetLabel: String?
     let onEditNote: () -> Void
     let onRestore: () -> Void
     @Environment(\.pulseTheme) private var theme
@@ -29,8 +31,8 @@ struct LiveExerciseDetails: View {
             .accessibilityLabel(String(localized: "Note : \(note)", bundle: .module))
             .accessibilityHint(String(localized: "Modifie la note", bundle: .module))
         }
-        if let group = exercise.supersetGroup {
-            Text(LiveExerciseCard.supersetText(group: group))
+        if let supersetLabel {
+            Text(LiveExerciseCard.supersetText(label: supersetLabel))
                 .font(.caption.weight(.bold))
                 .foregroundStyle(accent)
         }
