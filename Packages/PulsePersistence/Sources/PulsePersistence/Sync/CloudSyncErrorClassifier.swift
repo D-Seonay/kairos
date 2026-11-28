@@ -43,16 +43,18 @@ public enum CloudSyncErrorClassifier {
         switch code {
         case .quotaExceeded?: .quotaExceeded
         case .notAuthenticated?, .accountTemporarilyUnavailable?: .noAccount
-        case .networkUnavailable?, .networkFailure?, .serviceUnavailable?, .requestRateLimited?, .zoneBusy?: .network
+        case .networkUnavailable?, .networkFailure?: .network
+        case .serviceUnavailable?, .requestRateLimited?, .zoneBusy?: .busy
         case .partialFailure?: .partialFailure
         default: nil
         }
     }
 
-    /// Le cas le plus parlant parmi les erreurs par enregistrement d'un échec partiel : quota, compte, réseau, puis le reste.
+    /// Le cas le plus parlant parmi les erreurs par enregistrement d'un échec partiel : quota, compte, réseau, iCloud occupé, puis
+    /// le reste.
     private static func partialProblem(_ error: NSError, depth: Int) -> CloudSyncProblem? {
         guard let items = error.userInfo[CKPartialErrorsByItemIDKey] as? [AnyHashable: any Error] else { return nil }
         let problems = Set(items.values.compactMap { classify($0 as NSError, depth: depth + 1) })
-        return [CloudSyncProblem.quotaExceeded, .noAccount, .network].first { problems.contains($0) }
+        return [CloudSyncProblem.quotaExceeded, .noAccount, .network, .busy].first { problems.contains($0) }
     }
 }

@@ -32,6 +32,8 @@ private let now = Date(timeIntervalSince1970: 1_794_700_000)
         #expect(!CloudSyncText.advice(for: problem).isEmpty)
     }
     #expect(CloudSyncText.advice(for: .network).contains("réseau"))
+    // iCloud saturé ou qui demande d'attendre : rien à voir avec le réseau de l'iPhone.
+    #expect(CloudSyncText.advice(for: .busy) == "iCloud est occupé pour l'instant. La synchronisation reprendra d'elle-même.")
 }
 
 /// La page Profil ne parle de la synchronisation qu'après plus d'un jour d'échec sans réussite.

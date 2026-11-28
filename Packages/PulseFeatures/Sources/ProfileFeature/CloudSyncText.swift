@@ -39,6 +39,7 @@ public enum CloudSyncText {
         case .network: String(localized: """
             iCloud est injoignable pour l'instant : la synchronisation reprendra toute seule quand le réseau reviendra.
             """, bundle: .module)
+        case .busy: String(localized: "iCloud est occupé pour l'instant. La synchronisation reprendra d'elle-même.", bundle: .module)
         case .partialFailure: String(localized: """
             Une partie de tes données n'est pas passée dans iCloud. Pulse réessaie tout seul ; \
             si ça dure, vérifie l'espace libre de ton stockage iCloud.

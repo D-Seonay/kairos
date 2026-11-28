@@ -991,6 +991,16 @@
         }
       }
     },
+    "iCloud est occupé pour l'instant. La synchronisation reprendra d'elle-même." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud est occupé pour l'instant. La synchronisation reprendra d'elle-même."
+          }
+        }
+      }
+    },
     "il y a %lld h" : {
       "localizations" : {
         "fr" : {

@@ -6,8 +6,10 @@ public enum CloudSyncProblem: String, Sendable, Equatable, Codable, CaseIterable
     case quotaExceeded
     /// Aucun compte iCloud, ou compte momentanément indisponible.
     case noAccount
-    /// Pas de réseau, ou iCloud injoignable ou saturé pour l'instant.
+    /// Pas de réseau, ou iCloud injoignable.
     case network
+    /// iCloud saturé ou qui demande d'attendre (trop de requêtes, zone occupée, service indisponible) : il reprendra seul.
+    case busy
     /// Une partie des enregistrements n'est pas passée.
     case partialFailure
     /// Tout le reste.
