@@ -23,12 +23,14 @@ public enum HealthKitTypes {
         switch signal {
         case .sdnn: HKQuantityType(.heartRateVariabilitySDNN)
         case .restingHeartRate: HKQuantityType(.restingHeartRate)
+        case .heartRate: HKQuantityType(.heartRate)
         case .sleep: HKCategoryType(.sleepAnalysis)
         }
     }
 
-    /// Les types dont un nouvel échantillon doit déclencher une lecture : les trois signaux de la nuit.
+    /// Les types dont un nouvel échantillon doit déclencher une lecture : VFC, FC au repos et sommeil. Pas la fréquence cardiaque
+    /// brute, écrite plusieurs fois par heure : elle est lue avec les autres signaux.
     public static var observed: [HKSampleType] {
-        NightSignal.allCases.map(sampleType(for:))
+        NightSignal.observed.map(sampleType(for:))
     }
 }

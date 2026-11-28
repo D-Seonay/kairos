@@ -14,6 +14,7 @@ public struct NightHistorySnapshot: Sendable, Equatable {
 }
 
 /// Met à jour le cache local par lectures ancrées d'Apple Santé, un signal à la fois, puis agrège les 60 dernières nuits depuis ce cache.
+/// La fréquence cardiaque brute, qui fait la FC de repos de la nuit, n'est lue que sur `NightSignal.heartRateHistoryDays` jours.
 public struct NightHistory: Sendable {
     public static let historyDays = 60
 
@@ -30,6 +31,7 @@ public struct NightHistory: Sendable {
     private struct RawSamples {
         var sdnn: [TimedSample]
         var restingHeartRate: [TimedSample]
+        var heartRate: [TimedSample]
         var sleep: [SleepInterval]
     }
 
@@ -42,17 +44,20 @@ public struct NightHistory: Sendable {
         let start = calendar.date(byAdding: .day, value: -Self.historyDays, to: today) ?? today
         let end = calendar.date(byAdding: .day, value: 1, to: today) ?? today
         let days = (0..<Self.historyDays).compactMap { calendar.date(byAdding: .day, value: $0 - (Self.historyDays - 1), to: today) }
+        // La veille du plus ancien jour couvert : sa nuit commence le soir.
+        let heartRateStart = calendar.date(byAdding: .day, value: -(NightSignal.heartRateHistoryDays + 1), to: today) ?? today
 
         var allSucceeded = true
-        for (index, signal) in NightSignal.allCases.enumerated() {
-            let succeeded = await sync(signal, from: start, fetchedAt: now)
+        let signals = NightSignal.allCases
+        for (index, signal) in signals.enumerated() {
+            let succeeded = await sync(signal, from: signal == .heartRate ? heartRateStart : start, fetchedAt: now)
             allSucceeded = allSucceeded && succeeded
-            progress(Double(index + 1) * 0.25)
+            progress(Double(index + 1) / Double(signals.count + 1))
         }
         progress(1)
-        let raw = await cached(from: start, to: end)
-        let nights = NightAggregator(calendar: calendar)
-            .nights(days: days, sdnn: raw.sdnn, restingHeartRate: raw.restingHeartRate, sleep: raw.sleep)
+        let raw = await cached(from: start, heartRateFrom: heartRateStart, to: end)
+        let nights = NightAggregator(calendar: calendar).nights(
+            days: days, sdnn: raw.sdnn, restingHeartRate: raw.restingHeartRate, heartRate: raw.heartRate, sleep: raw.sleep)
         return NightHistorySnapshot(nights: nights, readAt: allSucceeded ? now : nil)
     }
 
@@ -73,12 +78,14 @@ public struct NightHistory: Sendable {
         }
     }
 
-    private func cached(from: Date, to: Date) async -> RawSamples {
+    private func cached(from: Date, heartRateFrom: Date, to: Date) async -> RawSamples {
         let sdnn = (try? await cache.samples(kind: .sdnn, from: from, to: to)) ?? []
         let restingHeartRate = (try? await cache.samples(kind: .restingHeartRate, from: from, to: to)) ?? []
+        let heartRate = (try? await cache.samples(kind: .heartRate, from: heartRateFrom, to: to)) ?? []
         let sleep = (try? await cache.samples(kind: .sleep, from: from, to: to)) ?? []
         return RawSamples(sdnn: CachedSampleMapping.timedSamples(sdnn),
                           restingHeartRate: CachedSampleMapping.timedSamples(restingHeartRate),
+                          heartRate: CachedSampleMapping.timedSamples(heartRate),
                           sleep: CachedSampleMapping.sleepIntervals(sleep))
     }
 }
