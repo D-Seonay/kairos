@@ -52,6 +52,9 @@ public struct BedtimeReminderService: Sendable {
         let planned = BedtimeReminderPlanner.reminders(
             plan: plan,
             nightAsleepMinutes: { day in nights.first { calendar.isDate($0.day, inSameDayAs: day) }?.asleepMinutes },
+            sleepDebtMinutes: { day in
+                SleepDebtWindow.minutes(endingAt: day, nights: nights, goalMinutes: plan.goalMinutes, calendar: calendar)
+            },
             sessionName: { day in
                 routine.flatMap { TodayPlanner.routineDay(of: $0.program, on: day, calendar: calendar, overrides: $0.overrides) }
                     .map { $0.runType?.localizedName ?? $0.name }

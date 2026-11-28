@@ -3,6 +3,8 @@ import Foundation
 public enum HealthSampleKind: String, Sendable, Codable, CaseIterable {
     case sdnn
     case restingHeartRate
+    /// La fréquence cardiaque brute, lue pour la FC la plus basse de la nuit (spec moteur #118).
+    case heartRate
     case sleep
     case run
     case ride

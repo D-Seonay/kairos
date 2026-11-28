@@ -751,6 +751,16 @@
         }
       }
     },
+    "Dernière synchronisation réussie %@." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dernière synchronisation réussie %@."
+          }
+        }
+      }
+    },
     "Diagnostic" : {
       "localizations" : {
         "fr" : {
@@ -1061,6 +1071,26 @@
         }
       }
     },
+    "La synchronisation iCloud a échoué. Pulse réessaie tout seul ; si ça dure plus d'un jour, redémarre l'iPhone ou vérifie iCloud dans Réglages." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La synchronisation iCloud a échoué. Pulse réessaie tout seul ; si ça dure plus d'un jour, redémarre l'iPhone ou vérifie iCloud dans Réglages."
+          }
+        }
+      }
+    },
+    "La synchronisation iCloud échoue depuis plus d'un jour" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La synchronisation iCloud échoue depuis plus d'un jour"
+          }
+        }
+      }
+    },
     "Le compte iCloud est restreint : la synchronisation est coupée." : {
       "localizations" : {
         "fr" : {
@@ -1211,6 +1241,16 @@
         }
       }
     },
+    "Noter Pulse" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noter Pulse"
+          }
+        }
+      }
+    },
     "Notifications" : {
       "localizations" : {
         "fr" : {
@@ -1231,22 +1271,22 @@
         }
       }
     },
-    "Objectif de sommeil" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Objectif de sommeil"
-          }
-        }
-      }
-    },
     "OK" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "OK"
+          }
+        }
+      }
+    },
+    "Objectif de sommeil" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Objectif de sommeil"
           }
         }
       }
@@ -1277,6 +1317,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ouvre la demande d'accès d'Apple Santé"
+          }
+        }
+      }
+    },
+    "Ouvre la fiche de Pulse sur l'App Store pour écrire un avis" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvre la fiche de Pulse sur l'App Store pour écrire un avis"
           }
         }
       }
@@ -1941,6 +1991,16 @@
         }
       }
     },
+    "Stockage iCloud plein : tes dernières données ne sont plus sauvegardées. Libère de l'espace dans Réglages > ton nom > iCloud." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stockage iCloud plein : tes dernières données ne sont plus sauvegardées. Libère de l'espace dans Réglages > ton nom > iCloud."
+          }
+        }
+      }
+    },
     "Stockage, export et suppression" : {
       "localizations" : {
         "fr" : {
@@ -1967,6 +2027,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sur ce téléphone"
+          }
+        }
+      }
+    },
+    "Synchronisation iCloud en attente." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchronisation iCloud en attente."
+          }
+        }
+      }
+    },
+    "Synchronisé %@." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchronisé %@."
           }
         }
       }
@@ -2131,6 +2211,16 @@
         }
       }
     },
+    "Une partie de tes données n'est pas passée dans iCloud. Pulse réessaie tout seul ; si ça dure, vérifie l'espace libre de ton stockage iCloud." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une partie de tes données n'est pas passée dans iCloud. Pulse réessaie tout seul ; si ça dure, vérifie l'espace libre de ton stockage iCloud."
+          }
+        }
+      }
+    },
     "Une phrase dite à chaque kilomètre : la distance, le temps et l'allure." : {
       "localizations" : {
         "fr" : {
@@ -2257,6 +2347,76 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "du %1$@ au %2$@"
+          }
+        }
+      }
+    },
+    "iCloud est indisponible : vérifie que tu es connecté à ton compte dans Réglages. Tes données restent sur ce téléphone en attendant." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud est indisponible : vérifie que tu es connecté à ton compte dans Réglages. Tes données restent sur ce téléphone en attendant."
+          }
+        }
+      }
+    },
+    "iCloud est injoignable pour l'instant : la synchronisation reprendra toute seule quand le réseau reviendra." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud est injoignable pour l'instant : la synchronisation reprendra toute seule quand le réseau reviendra."
+          }
+        }
+      }
+    },
+    "iCloud est occupé pour l'instant. La synchronisation reprendra d'elle-même." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud est occupé pour l'instant. La synchronisation reprendra d'elle-même."
+          }
+        }
+      }
+    },
+    "il y a %lld h" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "il y a %lld h"
+          }
+        }
+      }
+    },
+    "il y a %lld jours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "il y a %lld jours"
+          }
+        }
+      }
+    },
+    "il y a %lld min" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "il y a %lld min"
+          }
+        }
+      }
+    },
+    "il y a 1 jour" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "il y a 1 jour"
           }
         }
       }
@@ -2531,22 +2691,12 @@
         }
       }
     },
-    "Noter Pulse" : {
+    "à l'instant" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Noter Pulse"
-          }
-        }
-      }
-    },
-    "Ouvre la fiche de Pulse sur l'App Store pour écrire un avis" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ouvre la fiche de Pulse sur l'App Store pour écrire un avis"
+            "value" : "à l'instant"
           }
         }
       }

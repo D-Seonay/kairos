@@ -19,6 +19,9 @@ extension HealthKitReader: HealthSampleSource, HealthWorkoutSource, HealthBodySo
         case .restingHeartRate:
             return try await quantityChanges(of: signal.kind, .restingHeartRate, unit: Self.beatsPerMinute,
                                              anchor: queryAnchor, dates: dates)
+        case .heartRate:
+            return try await quantityChanges(of: signal.kind, .heartRate, unit: Self.beatsPerMinute,
+                                             anchor: queryAnchor, dates: dates)
         case .sleep:
             return try await sleepChanges(anchor: queryAnchor, dates: dates)
         }

@@ -29,6 +29,7 @@ actor StoreWiper {
         try modelContext.delete(model: StoredHealthQueryAnchor.self)
         try modelContext.delete(model: StoredActiveSessionSnapshot.self)
         try modelContext.delete(model: StoredRunDraft.self)
+        try modelContext.delete(model: StoredRunDraftChunk.self)
         try modelContext.delete(model: StoredRunHealthSummary.self)
         try modelContext.save()
     }

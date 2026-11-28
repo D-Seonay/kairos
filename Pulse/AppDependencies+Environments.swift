@@ -84,7 +84,8 @@ extension AppDependencies {
             appVersion: Self.appVersion, privacyPolicyURL: Self.privacyPolicyURL, calendar: calendar, now: now,
             runPreferences: run.preferences, bodyPhotos: photos.body, ownerAuthentication: photos.ownerAuthentication,
             bodyPhotoLock: photos.bodyLock, bodyPhotoReminders: photos.reminders, train: trainEnvironment(),
-            sleepPlan: { await bedtime.plan() }, healthAccess: healthAccess, checkInReminders: checkInReminders)
+            sleepPlan: { await bedtime.plan() }, healthAccess: healthAccess, checkInReminders: checkInReminders,
+            cloudSync: cloudSync)
     }
 
     /// La politique de confidentialité, lue dans l'Info.plist (`PulsePrivacyPolicyURL`) ; `nil` tant que la clé est vide ou

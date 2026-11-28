@@ -184,3 +184,30 @@ private func makeExporter(_ container: ModelContainerBox, directory: URL? = nil)
     let bytes = try Data(contentsOf: folder.appendingPathComponent("photos").appendingPathComponent(try #require(files.first)))
     #expect(bytes == Sample.photoImage(seed: 1).image)
 }
+
+/// Deux appareils hors ligne ont chacun écrit le score et le check-in du même jour : l'export n'en garde qu'un de chaque, le plus
+/// récent, comme l'app.
+@Test func exportKeepsOneRecoveryAndOneCheckInPerDay() async throws {
+    let box = try ModelContainerBox()
+    let context = ModelContext(box.container)
+    let day = Fixed.calendar.startOfDay(for: Fixed.t0)
+    for (score, updatedAt) in [(55.0, Fixed.t2), (65.0, Fixed.t1)] {
+        var recovery = Sample.recovery(day: day, score: score)
+        recovery.id = UUID()
+        recovery.updatedAt = updatedAt
+        let row = StoredDailyRecovery(recovery)
+        row.dayKey = "2026-11-21"
+        context.insert(row)
+        var checkIn = Sample.checkIn(day: day)
+        checkIn.id = UUID()
+        checkIn.score = score
+        checkIn.updatedAt = updatedAt
+        let checkInRow = StoredCheckIn(checkIn)
+        checkInRow.dayKey = "2026-11-21"
+        context.insert(checkInRow)
+    }
+    try context.save()
+    let snapshot = try await ExportSnapshotLoader(modelContainer: box.container).snapshot()
+    #expect(snapshot.dailyRecoveries.map(\.score) == [55])
+    #expect(snapshot.checkIns.map(\.score) == [55])
+}

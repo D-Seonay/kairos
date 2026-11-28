@@ -179,6 +179,6 @@ struct NightHistoryTests {
         _ = await history(.goodNight, cache: InMemoryHealthSampleCache()).refresh(now: now) { value in
             values.withLock { $0.append(value) }
         }
-        #expect(values.withLock { $0 } == [0.25, 0.5, 0.75, 1])
+        #expect(values.withLock { $0 } == [0.2, 0.4, 0.6, 0.8, 1])
     }
 }

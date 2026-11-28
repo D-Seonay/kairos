@@ -48,28 +48,3 @@ extension ModelContext {
         return !rows.isEmpty
     }
 }
-
-/// Un seul emplacement, local : le brouillon de la course en cours.
-@ModelActor
-public actor SwiftDataRunDraftStore: RunDraftStore {
-    public func load() throws -> RunDraft? {
-        try modelContext.fetch(FetchDescriptor<StoredRunDraft>()).first?.toDomain()
-    }
-
-    /// Réécrit la ligne de la même course sur place ; le brouillon d'une autre course est remplacé.
-    public func save(_ draft: RunDraft) throws {
-        let id = draft.sessionID
-        try modelContext.delete(model: StoredRunDraft.self, where: #Predicate { $0.id != id })
-        if let existing = try modelContext.first(StoredRunDraft.self, where: #Predicate { $0.id == id }) {
-            try existing.apply(draft)
-        } else {
-            modelContext.insert(try StoredRunDraft(draft))
-        }
-        try modelContext.save()
-    }
-
-    public func clear() throws {
-        try modelContext.delete(model: StoredRunDraft.self)
-        try modelContext.save()
-    }
-}

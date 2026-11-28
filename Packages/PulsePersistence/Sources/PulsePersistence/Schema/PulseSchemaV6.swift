@@ -12,7 +12,7 @@ public enum PulseSchemaV6: VersionedSchema {
     static let localModels: [any PersistentModel.Type] = [
         StoredCachedHealthSample.self, StoredHealthQueryAnchor.self, StoredActiveSessionSnapshot.self,
         StoredRecoveryReading.self, StoredImportedWorkout.self, StoredImportedBodyMeasurement.self,
-        StoredRunDraft.self, StoredRunHealthSummary.self
+        PulseSchemaV8.StoredRunDraft.self, StoredRunHealthSummary.self
     ]
 
     public static var models: [any PersistentModel.Type] {

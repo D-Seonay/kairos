@@ -17,7 +17,7 @@ public enum PulseSchemaV2: VersionedSchema {
     public static var models: [any PersistentModel.Type] {
         [PulseSchemaV7.StoredProfile.self, StoredProgram.self, StoredRoutineDay.self, StoredRoutineExercise.self,
          StoredUserExercise.self, StoredWorkoutSession.self, StoredWorkoutSet.self, PulsePersistence.StoredScheduledDay.self,
-         PulsePersistence.StoredDailyRecovery.self, PulsePersistence.StoredCheckIn.self, PulsePersistence.StoredSupplement.self,
+         PulseSchemaV8.StoredDailyRecovery.self, PulseSchemaV8.StoredCheckIn.self, PulsePersistence.StoredSupplement.self,
          PulsePersistence.StoredSupplementIntake.self, PulsePersistence.StoredBodyMeasurement.self,
          PulsePersistence.StoredPersonalRecord.self] + frozenLocalModels
     }

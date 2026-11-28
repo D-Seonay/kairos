@@ -148,4 +148,10 @@ struct NightTextTests {
     @Test func spokenRegularityUsesWords() {
         #expect(NightText.spokenRegularity(minutes: 25) == "Coucher régulier, à plus ou moins 25 minutes sur 14 nuits")
     }
+
+    @Test func sleepDebtIsSaidOverSevenNights() {
+        #expect(NightText.sleepDebt(minutes: 220) == "3 h 40 de retard sur 7 nuits")
+        #expect(NightText.sleepDebt(minutes: 0) == "Aucun retard de sommeil sur 7 nuits")
+        #expect(NightText.spokenSleepDebt(minutes: 0) == "Aucun retard de sommeil sur 7 nuits")
+    }
 }

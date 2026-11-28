@@ -16,10 +16,12 @@ public protocol HealthSampleCache: Sendable {
 
 /// Ce que le cache garde avant l'échantillon le plus récent d'un type. Les nuits : les 60 que lit le score, plus deux jours de
 /// marge (une nuit commence la veille). Les entraînements, le poids et la masse grasse : un an, plus deux jours, pour les
-/// statistiques et la courbe de poids (spec M7 §6 et §14).
+/// statistiques et la courbe de poids (spec M7 §6 et §14). La fréquence cardiaque brute, écrite plusieurs fois par heure : les
+/// `NightSignal.heartRateHistoryDays` jours que lit la FC de repos nocturne, plus deux jours.
 public func healthCacheRetention(for kind: HealthSampleKind) -> TimeInterval {
     switch kind {
     case .sdnn, .restingHeartRate, .sleep: 62 * 86_400
+    case .heartRate: Double(NightSignal.heartRateHistoryDays + 2) * 86_400
     case .run, .ride, .otherWorkout, .bodyMass, .bodyFat: 367 * 86_400
     }
 }

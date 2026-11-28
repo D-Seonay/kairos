@@ -37,10 +37,17 @@ private struct ScriptedExporter: DataExporter {
 
 private struct MyDataFailure: Error {}
 
+/// Un état de synchronisation fixe.
+struct FixedCloudSync: CloudSyncMonitoring {
+    var value: CloudSyncStatus?
+
+    func status() async -> CloudSyncStatus? { value }
+}
+
 @MainActor
 struct MyDataModelTests {
-    private func model(inspector: ScriptedInspector = ScriptedInspector(),
-                       exporter: ScriptedExporter = ScriptedExporter()) -> MyDataModel {
+    private func model(inspector: ScriptedInspector = ScriptedInspector(), exporter: ScriptedExporter = ScriptedExporter(),
+                       cloudSync: any CloudSyncMonitoring = NoCloudSync()) -> MyDataModel {
         let calendar = ProfileTestClock.calendar
         let clock: @Sendable () -> Date = { ProfileTestClock.now }
         let profiles = InMemoryProfileRepository()
@@ -54,8 +61,22 @@ struct MyDataModelTests {
             settings: SettingsService(profiles: profiles, now: clock) { _, _ in }, healthCache: InMemoryHealthSampleCache(),
             inspector: inspector, exporter: exporter, eraser: SilentEraser(), notificationStatus: { .authorized },
             requestNotificationAuthorization: { true }, refreshHealth: {},
-            appVersion: "1.0.2 (14)", privacyPolicyURL: nil, calendar: calendar, now: clock)
+            appVersion: "1.0.2 (14)", privacyPolicyURL: nil, calendar: calendar, now: clock, cloudSync: cloudSync)
         return MyDataModel(environment: environment)
+    }
+
+    /// La synchronisation se relit avec le reste ; sans iCloud sur l'appareil, rien n'est dit.
+    @Test func refreshReadsTheSyncStatus() async {
+        let synced = CloudSyncStatus(lastSuccess: ProfileTestClock.now.addingTimeInterval(-180))
+        let model = model(inspector: ScriptedInspector(status: .available), cloudSync: FixedCloudSync(value: synced))
+        #expect(model.syncText(now: ProfileTestClock.now) == nil)
+        await model.refresh()
+        #expect(model.syncStatus == synced)
+        #expect(model.syncText(now: ProfileTestClock.now) == "Synchronisé il y a 3 min.")
+
+        let local = self.model(inspector: ScriptedInspector(status: .available))
+        await local.refresh()
+        #expect(local.syncStatus == nil && local.syncText(now: ProfileTestClock.now) == nil)
     }
 
     @Test func refreshReadsCountsAndCloudStatus() async {
