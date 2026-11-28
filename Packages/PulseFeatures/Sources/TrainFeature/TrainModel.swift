@@ -43,6 +43,9 @@ public final class TrainModel {
     private(set) var weekday: Weekday?
     /// Vrai une fois le programme lu : avant, l'onglet ne dit ni « Aucun programme actif » ni « Aucune course au programme ».
     public private(set) var hasLoaded = false
+    /// Faux tant qu'aucune séance n'est enregistrée (hors Apple Santé) : l'onglet offre l'import Hevy en haut. Vrai par défaut,
+    /// pour ne pas l'afficher le temps de la première lecture ; une lecture qui échoue garde la valeur d'avant.
+    public private(set) var hasHistory = true
 
     @ObservationIgnored let environment: TrainEnvironment
     /// Le profil et le score du jour de la dernière lecture : ils règlent ce qu'une séance lancée applique.
@@ -66,6 +69,11 @@ public final class TrainModel {
         await refreshDirectory()
         let active = await environment.activeSession.current()
         activeSessionTitle = active?.title
+        do {
+            hasHistory = try await environment.workouts.oldestRecordedStart() != nil
+        } catch {
+            // L'offre d'import garde son dernier état.
+        }
         do {
             let profile = try await environment.profiles.load()
             let program = try await activeProgram(of: profile)

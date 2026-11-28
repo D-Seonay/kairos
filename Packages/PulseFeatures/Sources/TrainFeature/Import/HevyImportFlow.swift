@@ -5,11 +5,12 @@ import SwiftUI
 /// À présenter dans la pile de l'onglet « Séance » ; `onShowHistory` ouvre l'historique, `onFinish` quitte le parcours.
 public struct HevyImportFlow: View {
     @State private var model: HevyImportModel
-    private let onShowHistory: () -> Void
+    private let onShowHistory: (() -> Void)?
     private let onFinish: () -> Void
 
-    /// Le modèle est gardé par l'écran : le premier reçu l'emporte, comme le veut `@State`.
-    public init(model: HevyImportModel, onShowHistory: @escaping () -> Void = {}, onFinish: @escaping () -> Void = {}) {
+    /// Le modèle est gardé par l'écran : le premier reçu l'emporte, comme le veut `@State`. Sans `onShowHistory` (Mes données,
+    /// onboarding), le bilan n'offre que « Terminer ».
+    public init(model: HevyImportModel, onShowHistory: (() -> Void)? = nil, onFinish: @escaping () -> Void = {}) {
         _model = State(initialValue: model)
         self.onShowHistory = onShowHistory
         self.onFinish = onFinish

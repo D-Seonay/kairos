@@ -2,20 +2,24 @@ import PulseDesignSystem
 import PulseDomain
 import PulseServices
 import SwiftUI
+import TrainFeature
 
-/// Le premier score : pastille « N nuits analysées », jauge, catégorie, ligne de base, interrupteur de notification.
+/// Le premier score : pastille « N nuits analysées », jauge, catégorie, ligne de base, interrupteur de notification, puis l'import
+/// facultatif de l'historique Hevy.
 struct ScoredView: View {
     @Bindable var model: OnboardingModel
     let recovery: DailyRecovery
     let baseline: BaselineSummary
     @Environment(\.pulseTheme) private var theme
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @State private var importsHevy = false
 
     var body: some View {
         OnboardingScreen(errorMessage: model.errorMessage) {
             scoreHeader
             baselineSection
             notificationCard
+            if let train = model.environment.train { hevyImport(train) }
         } footer: {
             OnboardingButton(
                 title: String(localized: "Voir ma séance du jour", bundle: .module),
@@ -167,5 +171,27 @@ struct ScoredView: View {
             }
             .tint(Color(PulsePalette.accent(for: theme).accent))
         }
+    }
+}
+
+// MARK: - Import Hevy
+
+extension ScoredView {
+    /// « Tu viens d'une autre app ? » : le même parcours d'import que l'onglet Séance, dans une feuille. Facultatif : rien ne
+    /// change pour qui ne l'ouvre pas.
+    fileprivate func hevyImport(_ train: TrainEnvironment) -> some View {
+        Button { importsHevy = true } label: { HevyImportOfferLabel() }
+            .buttonStyle(PressableButtonStyle())
+            .accessibilityIdentifier(OnboardingIdentifiers.hevyImport)
+            .sheet(isPresented: $importsHevy) {
+                NavigationStack {
+                    HevyImportFlow(model: HevyImportModel(environment: train), onFinish: { importsHevy = false })
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button(String(localized: "Fermer", bundle: .module)) { importsHevy = false }
+                            }
+                        }
+                }
+            }
     }
 }

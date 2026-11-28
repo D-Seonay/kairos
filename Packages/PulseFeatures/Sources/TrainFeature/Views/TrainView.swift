@@ -117,6 +117,12 @@ public struct TrainView: View {
                 TrainTiles(model: model, onOpenToday: onOpenToday,
                            onStart: model.launchToday() == nil ? nil : { start(model.launchToday()) },
                            onStartRun: startRun)
+                if model.hasLoaded && !model.hasHistory {
+                    // Le meilleur moment pour importer : tant que la progression n'a aucune référence.
+                    NavigationLink(value: TrainDestination.hevyImport) { HevyImportOfferLabel() }
+                        .buttonStyle(PressableButtonStyle())
+                        .accessibilityIdentifier(TrainIdentifiers.hevyImportOffer)
+                }
                 routines
                 entries
             }

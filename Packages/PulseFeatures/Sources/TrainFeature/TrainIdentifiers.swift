@@ -18,6 +18,8 @@ public enum TrainIdentifiers {
     public static let exerciseRowPrefix = "train.exercise."
     public static let history = "train.history"
     public static let hevyImport = "train.import"
+    /// L'offre d'import en haut de l'onglet, tant que l'historique est vide.
+    public static let hevyImportOffer = "train.import.offer"
     public static let hevyImportPick = "hevy.pick"
     public static let hevyImportReview = "hevy.review"
     public static let hevyImportStart = "hevy.start"

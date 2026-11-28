@@ -22,7 +22,7 @@ extension AppDependencies {
     func onboardingEnvironment() -> OnboardingEnvironment {
         OnboardingEnvironment(profiles: profiles, programs: programs, health: healthSource, nightHistory: nightHistory,
                               scores: scores, notifications: notifications, library: content, stepStore: onboardingSteps,
-                              calendar: calendar, now: now, once: once)
+                              calendar: calendar, now: now, once: once, train: trainEnvironment())
     }
 
     /// « Connecter Apple Santé » (Paramètres, bannière du check-in) : la demande d'accès de l'onboarding, retenue dans les mêmes
