@@ -248,7 +248,7 @@ public final class TodayModel {
             return
         }
         let loads = LoadPreview.adjustments(session: session, recovery: recovery, profile: profile, reading: live,
-                                            directory: directory, now: environment.now())
+                                            directory: directory, now: environment.now(), calendar: environment.calendar)
         why = WhyContent.make(recovery: recovery, session: session, checkIn: todayCheckIn, directory: directory,
                                loadAdjustments: loads, progress: whyProgress, sleepGoalMinutes: SleepGoal.minutes(of: profile),
                                insight: insight)

@@ -121,11 +121,15 @@ public final class RoutineEditorModel {
         return day.exercises[index + 1].supersetGroup == group
     }
 
-    /// Un super set relie deux exercices consécutifs libres : il y a un suivant, et l'un des deux n'est pas déjà dans une autre paire.
+    /// Le lien avec le suivant se défait toujours ; il se fait tant que le groupe obtenu ne dépasse pas cinq exercices.
     public func canToggleSuperset(at index: Int) -> Bool {
-        guard day.exercises.indices.contains(index), day.exercises.indices.contains(index + 1) else { return false }
-        if isSuperset(at: index) { return true }
-        return day.exercises[index].supersetGroup == nil && day.exercises[index + 1].supersetGroup == nil
+        isSuperset(at: index) || RoutineEditor.canLink(at: index, in: day)
+    }
+
+    /// « A1 », « A2 », « A3 » : le repère de l'exercice `index` dans son super set, `nil` hors groupe.
+    public func supersetLabel(at index: Int) -> String? {
+        let labels = SupersetLabel.labels(for: day.exercises.map(\.supersetGroup))
+        return labels.indices.contains(index) ? labels[index] : nil
     }
 
     /// L'incrément de l'exercice : son réglage, sinon le défaut de l'exercice borné par celui du profil.

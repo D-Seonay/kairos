@@ -95,17 +95,35 @@ func rejectsMalformedIDs(id: String) {
     #expect(rules(lib) == [.templateSets, .templateReps, .templateRPE, .templateRest])
 }
 
-@Test func rejectsSupersetOfThreeOrNonConsecutive() {
+@Test func acceptsSupersetsOfTwoToFiveConsecutiveExercises() {
     let three = Fixtures.strengthDay(id: "a", exercises: [
         Fixtures.templateExercise("p-1", superset: 1), Fixtures.templateExercise("p-2", superset: 1),
         Fixtures.templateExercise("p-3", superset: 1)
     ])
+    let pairs = Fixtures.strengthDay(id: "b", exercises: [
+        Fixtures.templateExercise("p-1", superset: 1), Fixtures.templateExercise("p-2", superset: 1),
+        Fixtures.templateExercise("p-3", superset: 2), Fixtures.templateExercise("p-4", superset: 2)
+    ])
+    let template = Fixtures.template(days: [three, pairs], suggestedWeek: ["a", "b", nil, nil, nil, nil, nil], sessionsPerWeek: 2)
+    let lib = Fixtures.library(exercises: Fixtures.fourExercises(pattern: .squat), templates: [template])
+    #expect(rules(lib).isEmpty)
+}
+
+@Test func rejectsSupersetOfOneSixOrNonConsecutive() {
+    let single = Fixtures.strengthDay(id: "a", exercises: [
+        Fixtures.templateExercise("p-1", superset: 1), Fixtures.templateExercise("p-2")
+    ])
     let split = Fixtures.strengthDay(id: "b", exercises: [
         Fixtures.templateExercise("p-1", superset: 1), Fixtures.templateExercise("p-2"), Fixtures.templateExercise("p-3", superset: 1)
     ])
-    let template = Fixtures.template(days: [three, split], suggestedWeek: ["a", "b", nil, nil, nil, nil, nil], sessionsPerWeek: 2)
-    let lib = Fixtures.library(exercises: Fixtures.fourExercises(pattern: .squat), templates: [template])
-    #expect(rules(lib) == [.superset, .superset])
+    let six = Fixtures.strengthDay(id: "c", exercises: ["p-1", "p-2", "p-3", "p-4", "q-1", "q-2"].map {
+        Fixtures.templateExercise($0, superset: 1)
+    })
+    let template = Fixtures.template(days: [single, split, six], suggestedWeek: ["a", "b", "c", nil, nil, nil, nil],
+                                     sessionsPerWeek: 3)
+    let exercises = Fixtures.fourExercises(pattern: .squat) + Fixtures.fourExercises(pattern: .squat, prefix: "q")
+    let lib = Fixtures.library(exercises: exercises, templates: [template])
+    #expect(rules(lib) == [.superset, .superset, .superset])
 }
 
 @Test func rejectsRunDayWithBothTargetsOrStrengthDayWithoutExercises() {

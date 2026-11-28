@@ -2,11 +2,13 @@ import Foundation
 import PulseDomain
 
 /// Modifie les exercices d'un jour de routine sans l'enregistrer : chaque fonction rend une copie du jour.
-/// Après chaque opération, `order` va de 0 à n−1, les groupes de super set de 1 à k, et une paire qui n'est plus
-/// consécutive est défaite. Une fourchette inversée est toujours remise à l'endroit : `repRange(forSet:)` planterait.
+/// Après chaque opération, `order` va de 0 à n−1, les groupes de super set de 1 à k, et un groupe ne garde que ses membres
+/// consécutifs (un membre resté seul en sort). Une fourchette inversée est toujours remise à l'endroit : `repRange(forSet:)` planterait.
 public enum RoutineEditor {
     /// Le repos d'un exercice que l'annuaire ne connaît pas.
     static let fallbackRestSeconds = 90
+    /// Un super set va de la paire au circuit de cinq exercices consécutifs, comme dans les programmes fournis.
+    public static let maxSupersetSize = 5
 
     /// Ajoute `references` en fin de jour : 3 séries de 8 à 12 répétitions (30 à 60 s pour un exercice tenu), RPE 8, et le repos
     /// par défaut de l'exercice ramené dans les bornes de `RoutineRules`.
@@ -41,23 +43,45 @@ public enum RoutineEditor {
         return normalized(result)
     }
 
-    /// Apparie l'exercice `index` et le suivant, ou défait leur paire. Un exercice déjà en paire n'entre pas dans une autre.
+    /// Relie l'exercice `index` au suivant, ou les sépare. Déjà dans le même groupe, le groupe est coupé entre les deux : un
+    /// membre resté seul en sort. Sinon, l'exercice libre entre dans le groupe voisin, ou les deux groupes se fondent, tant que
+    /// le groupe obtenu ne dépasse pas `maxSupersetSize` exercices.
     public static func toggleSuperset(at index: Int, in day: RoutineDay) -> RoutineDay {
         guard day.exercises.indices.contains(index), day.exercises.indices.contains(index + 1) else { return day }
         var result = day
-        let first = day.exercises[index].supersetGroup
-        let second = day.exercises[index + 1].supersetGroup
-        if let first, first == second {
-            result.exercises[index].supersetGroup = nil
-            result.exercises[index + 1].supersetGroup = nil
-        } else if first == nil, second == nil {
-            let group = (day.exercises.compactMap(\.supersetGroup).max() ?? 0) + 1
-            result.exercises[index].supersetGroup = group
-            result.exercises[index + 1].supersetGroup = group
+        let groups = day.exercises.map(\.supersetGroup)
+        if let first = groups[index], first == groups[index + 1] {
+            let fresh = (groups.compactMap { $0 }.max() ?? 0) + 1
+            for position in (index + 1)...block(containing: index + 1, in: groups).upperBound {
+                result.exercises[position].supersetGroup = fresh
+            }
         } else {
-            return day
+            guard canLink(at: index, in: day) else { return day }
+            let group = groups[index] ?? groups[index + 1] ?? (groups.compactMap { $0 }.max() ?? 0) + 1
+            let linked = block(containing: index, in: groups).lowerBound...block(containing: index + 1, in: groups).upperBound
+            for position in linked { result.exercises[position].supersetGroup = group }
         }
         return normalized(result)
+    }
+
+    /// Vrai quand l'exercice `index` peut être relié au suivant : il y en a un, ils ne sont pas déjà ensemble, et le groupe
+    /// obtenu ne dépasse pas `maxSupersetSize` exercices.
+    public static func canLink(at index: Int, in day: RoutineDay) -> Bool {
+        guard day.exercises.indices.contains(index), day.exercises.indices.contains(index + 1) else { return false }
+        let groups = day.exercises.map(\.supersetGroup)
+        if let first = groups[index], first == groups[index + 1] { return false }
+        let size = block(containing: index, in: groups).count + block(containing: index + 1, in: groups).count
+        return size <= maxSupersetSize
+    }
+
+    /// Les positions du groupe consécutif qui contient `index` ; l'exercice seul s'il n'est dans aucun groupe.
+    private static func block(containing index: Int, in groups: [Int?]) -> ClosedRange<Int> {
+        guard let group = groups[index] else { return index...index }
+        var start = index
+        while start > 0, groups[start - 1] == group { start -= 1 }
+        var end = index
+        while end + 1 < groups.count, groups[end + 1] == group { end += 1 }
+        return start...end
     }
 
     /// Fixe le nombre de séries (au moins 1) ; les fourchettes par série suivent, en répétant la dernière.

@@ -11,6 +11,8 @@ struct LiveReading {
     var runDone = false
     var history: [ExerciseReference: [WorkoutSet]] = [:]
     var settings: [ExerciseReference: ExerciseSettings] = [:]
+    /// Les dernières séances de chaque exercice du jour : une reprise ou des échecs répétés remplacent la hausse.
+    var recent: [ExerciseReference: [RecentExerciseSession]] = [:]
 }
 
 extension TodayEnvironment {
@@ -27,9 +29,13 @@ extension TodayEnvironment {
         }
         reading.history = [:]
         reading.settings = [:]
+        reading.recent = [:]
         for reference in plannedDay.routineDay?.exercises.map(\.exercise) ?? [] {
             reading.history[reference] = (try? await workouts.lastSets(for: reference)) ?? previous.history[reference]
             reading.settings[reference] = (try? await exerciseSettings.settings(for: reference)) ?? previous.settings[reference]
+            reading.recent[reference] = (try? await workouts.recentSessions(
+                for: reference, startedBefore: .distantFuture, limit: ActiveSessionService.recentSessionCount))
+                ?? previous.recent[reference]
         }
         return reading
     }

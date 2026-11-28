@@ -121,6 +121,16 @@
         }
       }
     },
+    "%@, super set %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, super set %@"
+          }
+        }
+      }
+    },
     "%lld min" : {
       "localizations" : {
         "fr" : {
@@ -959,6 +969,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Note"
+          }
+        }
+      }
+    },
+    "Note de la dernière séance : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Note de la dernière séance : %@"
           }
         }
       }

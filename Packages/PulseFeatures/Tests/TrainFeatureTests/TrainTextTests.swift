@@ -185,6 +185,9 @@ import Testing
             == "Développé couché, 3 séries de 8 à 12 répétitions, RPE 8, repos 2 minutes")
         #expect(TrainText.routineExerciseLabel(name: "Développé couché", exercise: exercise(), tracksDuration: false, hasIssue: true)
             == "Développé couché, 3 séries de 8 à 12 répétitions, RPE 8, repos 2 minutes, à corriger")
+        #expect(TrainText.routineExerciseLabel(name: "Développé couché", exercise: exercise(), tracksDuration: false, hasIssue: false,
+                                               supersetLabel: "A2")
+            == "Développé couché, 3 séries de 8 à 12 répétitions, RPE 8, repos 2 minutes, super set A2")
     }
 
     @Test func rangeSteppersNameTheirBoundAndSeries() {

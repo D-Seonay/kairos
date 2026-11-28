@@ -33,6 +33,9 @@ public enum LiveSessionChange: Sendable, Equatable {
     /// La charge de toutes les séries de travail pas encore validées de l'exercice, marquées modifiées (le ±2,5 kg du
     /// calculateur de disques, spec M4 §19.2). Une charge négative est ignorée.
     case setRemainingLoad(exercise: UUID, weightKg: Double)
+    /// Remet les charges d'avant la baisse du jour (`LiveExercise.loadDrop`) sur les séries de travail ni validées ni
+    /// modifiées, recalcule l'échauffement, et retire la ligne de la baisse.
+    case restoreLoads(exercise: UUID)
     /// Remplace l'exercice (spec M4 §19.3) : ses séries validées restent, les autres disparaissent, et `replacement` se place
     /// juste après lui. Un exercice sans série validée laisse toute sa place au remplaçant.
     case replaceExercise(UUID, with: LiveExercise)
@@ -49,7 +52,7 @@ extension LiveSession {
             applySetChange(change, now: now)
         case .addExercises, .removeExercise, .moveExercise, .replaceExercise:
             applyExerciseChange(change)
-        case .setNote, .setIncrement, .setWarmupCount, .setRemainingLoad:
+        case .setNote, .setIncrement, .setWarmupCount, .setRemainingLoad, .restoreLoads:
             applyExerciseSetting(change)
         case .restMinus30, .restPlus30, .skipRest:
             return
@@ -110,6 +113,8 @@ extension LiveSession {
         case let .setRemainingLoad(exercise, weightKg):
             guard weightKg >= 0 else { return }
             updateExercise(exercise) { $0.setRemainingLoad(weightKg) }
+        case let .restoreLoads(exercise):
+            updateExercise(exercise) { $0.restoreLoads() }
         default:
             return
         }
@@ -224,6 +229,36 @@ private extension LiveExercise {
             sets[index].isEdited = true
         }
         refreshWarmups(afterEditing: sets[first].id)
+    }
+
+    /// Chaque série de travail planifiée reprend sa charge d'avant la baisse, retrouvée par son identité, tant qu'elle n'est
+    /// ni validée ni modifiée ; une série ajoutée en séance garde la sienne. L'échauffement suit la nouvelle charge.
+    mutating func restoreLoads() {
+        guard let drop = loadDrop else { return }
+        let working = sets.indices.filter { sets[$0].setType != .warmup }
+        let loweredFirstKg = working.first.flatMap { sets[$0].weightKg }
+        for (position, index) in working.enumerated() where sets[index].completedAt == nil && !sets[index].isEdited {
+            if let original = drop.original(for: sets[index].id, position: position) { propose(original, at: index) }
+        }
+        loadDrop = nil
+        restoreWarmups(loweredFirstKg: loweredFirstKg)
+    }
+
+    /// Après « Remettre », l'échauffement est refait pour la charge remise, comme au lancement : une charge plus haute peut en
+    /// demander une série de plus. Seulement si les séries d'échauffement sont celles que la charge baissée proposait (ni
+    /// validées, ni modifiées, ni supprimées) ; sinon, recalcul habituel sans en ajouter.
+    private mutating func restoreWarmups(loweredFirstKg: Double?) {
+        guard let first = sets.firstIndex(where: { $0.setType != .warmup }) else { return }
+        let warmups = sets[..<first]
+        let planned = LiveSessionPlanner.warmupSets(firstWorkingKg: loweredFirstKg, plan: warmupPlan, incrementKg: incrementKg)
+        guard warmupPlan != nil, sets[first].completedAt == nil, warmups.count == planned.count,
+              warmups.allSatisfy({ $0.setType == .warmup && $0.completedAt == nil && !$0.isEdited }),
+              zip(warmups, planned).allSatisfy({ $0.weightKg == $1.weightKg }) else {
+            refreshWarmups(afterEditing: sets[first].id)
+            return
+        }
+        sets.replaceSubrange(..<first, with: LiveSessionPlanner.warmupSets(firstWorkingKg: sets[first].weightKg, plan: warmupPlan,
+                                                                           incrementKg: incrementKg))
     }
 
     mutating func setWarmupCount(_ count: Int?) {

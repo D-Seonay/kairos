@@ -41,6 +41,19 @@ struct ActiveSessionRestTests {
         #expect(await fixture.notifier.cancelCount == 1)
     }
 
+    @Test func triSetRestStartsAfterTheThirdExerciseOnly() async throws {
+        let (service, session) = try await start([Fix.exercise(Fix.bench, order: 0, rest: 120, superset: 1),
+                                                  Fix.exercise(Fix.pecDeck, order: 1, rest: 75, superset: 1),
+                                                  Fix.exercise(Fix.pullUp, order: 2, rest: 90, superset: 1)])
+        let (bench, pecDeck, pullUp) = (session.exercises[0], session.exercises[1], session.exercises[2])
+        #expect(try await validate(service, bench, 0).rest == nil)
+        #expect(try await validate(service, pecDeck, 0).rest == nil)
+        #expect(await fixture.notifier.scheduled.isEmpty)
+        let round = try await validate(service, pullUp, 0)
+        #expect(round.rest == LiveRest(startedAt: fixture.clock.now, endsAt: fixture.clock.now.addingTimeInterval(90),
+                                       exerciseID: pullUp.id))
+    }
+
     @Test func theLastSetStartsNoRest() async throws {
         let (service, session) = try await start([Fix.exercise(Fix.pecDeck, sets: 2)])
         let pecDeck = session.exercises[0]

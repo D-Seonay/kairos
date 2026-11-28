@@ -79,10 +79,57 @@ struct RoutineEditorTests {
         #expect(unpaired.exercises.map(\.supersetGroup) == [nil, nil, nil])
     }
 
-    @Test func anExerciseAlreadyPairedCannotJoinAnotherPair() {
-        let paired = RoutineEditor.toggleSuperset(at: 0, in: day([bench, pecDeck, plank]))
-        #expect(RoutineEditor.toggleSuperset(at: 1, in: paired) == paired)
-        #expect(RoutineEditor.toggleSuperset(at: 2, in: paired) == paired)
+    @Test func linkingTheNextExerciseGrowsAPairIntoATriSet() {
+        let paired = RoutineEditor.toggleSuperset(at: 0, in: day([bench, pecDeck, plank, bench]))
+        let triSet = RoutineEditor.toggleSuperset(at: 1, in: paired)
+        #expect(triSet.exercises.map(\.supersetGroup) == [1, 1, 1, nil])
+        // Un exercice libre placé avant le groupe y entre aussi.
+        let before = RoutineEditor.toggleSuperset(at: 0, in: RoutineEditor.toggleSuperset(at: 1, in: day([bench, pecDeck, plank])))
+        #expect(before.exercises.map(\.supersetGroup) == [1, 1, 1])
+    }
+
+    @Test func unlinkingInsideATriSetSplitsItWhereItWasCut() {
+        let triSet = RoutineEditor.toggleSuperset(at: 1, in: RoutineEditor.toggleSuperset(at: 0, in: day([bench, pecDeck, plank])))
+        #expect(RoutineEditor.toggleSuperset(at: 0, in: triSet).exercises.map(\.supersetGroup) == [nil, 1, 1])
+        #expect(RoutineEditor.toggleSuperset(at: 1, in: triSet).exercises.map(\.supersetGroup) == [1, 1, nil])
+        let four = RoutineEditor.toggleSuperset(at: 2, in: triSet.adding(bench))
+        #expect(four.exercises.map(\.supersetGroup) == [1, 1, 1, 1])
+        #expect(RoutineEditor.toggleSuperset(at: 1, in: four).exercises.map(\.supersetGroup) == [1, 1, 2, 2])
+    }
+
+    @Test func twoGroupsMergeUpToFiveExercises() {
+        var base = day([bench, pecDeck, plank, bench, pecDeck, plank])
+        base = RoutineEditor.toggleSuperset(at: 0, in: base)
+        base = RoutineEditor.toggleSuperset(at: 2, in: base)
+        base = RoutineEditor.toggleSuperset(at: 3, in: base)
+        #expect(base.exercises.map(\.supersetGroup) == [1, 1, 2, 2, 2, nil])
+        let five = RoutineEditor.toggleSuperset(at: 1, in: base)
+        #expect(five.exercises.map(\.supersetGroup) == [1, 1, 1, 1, 1, nil])
+        #expect(RoutineEditor.canLink(at: 4, in: five) == false)
+        #expect(RoutineEditor.toggleSuperset(at: 4, in: five) == five)
+        #expect(RoutineEditor.maxSupersetSize == 5)
+    }
+
+    @Test func removingFromATriSetKeepsThePair() {
+        let triSet = RoutineEditor.toggleSuperset(at: 1, in: RoutineEditor.toggleSuperset(at: 0, in: day([bench, pecDeck, plank])))
+        let removed = RoutineEditor.remove(at: 1, from: triSet)
+        #expect(removed.exercises.map(\.exercise) == [bench, plank] && removed.exercises.map(\.supersetGroup) == [1, 1])
+        let again = RoutineEditor.remove(at: 0, from: removed)
+        #expect(again.exercises.map(\.supersetGroup) == [nil])
+    }
+
+    @Test func reorderingInsideAndOutOfATriSet() {
+        let triSet = RoutineEditor.toggleSuperset(at: 1, in: RoutineEditor.toggleSuperset(at: 0, in: day([bench, pecDeck, plank, bench])))
+        // À l'intérieur du groupe : l'ordre change, le groupe reste.
+        let inside = RoutineEditor.move(fromOffsets: IndexSet(integer: 2), toOffset: 0, in: triSet)
+        #expect(inside.exercises.map(\.exercise) == [plank, bench, pecDeck, bench])
+        #expect(inside.exercises.map(\.supersetGroup) == [1, 1, 1, nil])
+        // Un membre sorti du groupe le quitte ; les deux autres restent une paire.
+        let out = RoutineEditor.move(fromOffsets: IndexSet(integer: 0), toOffset: 4, in: triSet)
+        #expect(out.exercises.map(\.supersetGroup) == [1, 1, nil, nil])
+        // Un exercice libre glissé au milieu coupe le groupe : il reste un membre seul et une paire.
+        let cut = RoutineEditor.move(fromOffsets: IndexSet(integer: 3), toOffset: 1, in: triSet)
+        #expect(cut.exercises.map(\.supersetGroup) == [nil, nil, 1, 1])
     }
 
     @Test func togglingOutOfBoundsChangesNothing() {
@@ -176,5 +223,11 @@ struct RoutineEditorTests {
         #expect(RoutineEditor.updateSetTarget(SetTarget(repsMin: 4, repsMax: 6), set: 0, at: 0, in: plain) == plain)
         let perSet = RoutineEditor.setPerSetTargets(true, at: 0, in: plain)
         #expect(RoutineEditor.updateSetTarget(SetTarget(repsMin: 4, repsMax: 6), set: 3, at: 0, in: perSet) == perSet)
+    }
+}
+
+private extension RoutineDay {
+    func adding(_ reference: ExerciseReference) -> RoutineDay {
+        RoutineEditor.add([reference], to: self, directory: ExerciseDirectory(library: .bundled, userExercises: []))
     }
 }

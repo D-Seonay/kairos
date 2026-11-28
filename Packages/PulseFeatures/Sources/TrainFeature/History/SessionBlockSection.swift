@@ -18,7 +18,12 @@ struct SessionBlockSection: View {
                 SetRow(set: set)
             }
         } header: {
-            Text(block.name)
+            if let label = block.supersetLabel {
+                Text(String(localized: "\(label) · \(block.name)", bundle: .module))
+                    .accessibilityLabel(String(localized: "\(block.name), super set \(label)", bundle: .module))
+            } else {
+                Text(block.name)
+            }
         }
         .listRowBackground(PulsePalette.surface)
     }

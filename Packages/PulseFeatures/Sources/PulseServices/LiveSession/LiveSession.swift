@@ -174,13 +174,16 @@ public struct LiveExercise: Sendable, Equatable, Codable, Identifiable {
     /// `warmupPlan`.
     public var replacedExercise: ExerciseReference?
     public var replacementReason: ReplacementReason?
+    /// La baisse des charges du jour (reprise après une pause, échecs répétés), tant qu'elle n'est pas remise. Optionnelle :
+    /// une séance enregistrée avant se relit sans.
+    public var loadDrop: LiveLoadDrop?
 
     public init(id: UUID = UUID(), exercise: ExerciseReference, name: String, loadKind: LoadKind, tracksDuration: Bool,
                 isBarbell: Bool, incrementKg: Double, supersetGroup: Int? = nil, restSeconds: Int, rpeCap: Double? = nil,
                 dayNote: String? = nil, lastTimeText: String? = nil, lastTimeSpoken: String? = nil, note: String? = nil,
                 sets: [LiveSet],
                 warmupPlan: LiveWarmupPlan? = nil, replacedExercise: ExerciseReference? = nil,
-                replacementReason: ReplacementReason? = nil) {
+                replacementReason: ReplacementReason? = nil, loadDrop: LiveLoadDrop? = nil) {
         self.id = id
         self.exercise = exercise
         self.name = name
@@ -199,6 +202,7 @@ public struct LiveExercise: Sendable, Equatable, Codable, Identifiable {
         self.warmupPlan = warmupPlan
         self.replacedExercise = replacedExercise
         self.replacementReason = replacementReason
+        self.loadDrop = loadDrop
     }
 }
 
