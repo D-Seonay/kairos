@@ -15,11 +15,11 @@ public protocol HealthSampleCache: Sendable {
 }
 
 /// Ce que le cache garde avant l'échantillon le plus récent d'un type. Les nuits : les 60 que lit le score, plus deux jours de
-/// marge (une nuit commence la veille). Les courses, les vélos, le poids et la masse grasse : un an, plus deux jours, pour les
+/// marge (une nuit commence la veille). Les entraînements, le poids et la masse grasse : un an, plus deux jours, pour les
 /// statistiques et la courbe de poids (spec M7 §6 et §14).
 public func healthCacheRetention(for kind: HealthSampleKind) -> TimeInterval {
     switch kind {
     case .sdnn, .restingHeartRate, .sleep: 62 * 86_400
-    case .run, .ride, .bodyMass, .bodyFat: 367 * 86_400
+    case .run, .ride, .otherWorkout, .bodyMass, .bodyFat: 367 * 86_400
     }
 }

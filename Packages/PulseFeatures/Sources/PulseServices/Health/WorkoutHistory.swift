@@ -28,8 +28,9 @@ public struct WorkoutHistory: Sendable {
         self.ownBundleIdentifier = ownBundleIdentifier
     }
 
-    /// Un type à la fois : un type dont la lecture ou l'écriture du cache échoue garde ses séances telles quelles. Rend vrai si
-    /// une séance a été ajoutée, modifiée ou supprimée.
+    /// Un type à la fois : un type dont la lecture ou l'écriture du cache échoue garde ses séances telles quelles. Les autres
+    /// entraînements (`.otherWorkout`) ne vont que dans le cache : la charge les y lit (`HealthActivities`). Rend vrai si une
+    /// séance a été ajoutée, modifiée ou supprimée.
     @discardableResult
     public func refresh(now: Date) async -> Bool {
         let start = calendar.date(byAdding: .day, value: -Self.historyDays, to: calendar.startOfDay(for: now)) ?? now
@@ -37,29 +38,42 @@ public struct WorkoutHistory: Sendable {
         let birthDate = (try? await profiles.load())?.birthDate
         var changed = false
         for signal in WorkoutSignal.allCases {
-            guard await sync(signal, from: start, to: end, fetchedAt: now) else { continue }
+            let synced = await sync(signal.kind, sessionKind: signal.sessionKind, window: DateInterval(start: start, end: end),
+                                    fetchedAt: now) { anchor in
+                try await source.workoutChanges(of: signal, since: anchor, from: start)
+            }
+            guard synced else { continue }
             changed = await align(signal, from: start, to: end, now: now, birthDate: birthDate) || changed
+        }
+        await sync(.otherWorkout, sessionKind: nil, window: DateInterval(start: start, end: end), fetchedAt: now) { anchor in
+            try await source.otherWorkoutChanges(since: anchor, from: start)
         }
         return changed
     }
 
-    private func sync(_ signal: WorkoutSignal, from start: Date, to end: Date, fetchedAt: Date) async -> Bool {
+    /// `sessionKind` : le type des séances importées de ce type d'échantillon, `nil` pour un type gardé dans le cache seulement.
+    /// `window` : la fenêtre lue, où chercher les séances importées.
+    @discardableResult
+    private func sync(_ kind: HealthSampleKind, sessionKind: SessionKind?, window: DateInterval, fetchedAt: Date,
+                      read: (Data?) async throws -> HealthSampleChanges) async -> Bool {
         // Une fenêtre lue plus étroite que celle d'aujourd'hui (60 jours avant M7, ou rien) : l'ancre est ignorée, la lecture est
         // complète et le cache remplace le type. La fenêtre n'est retenue qu'une fois le cache écrit, donc un échec est retenté.
-        let windowIsCurrent = (windows.days(for: signal.kind) ?? 0) >= Self.historyDays
-        let anchor = windowIsCurrent ? try? await cache.anchor(for: signal.kind) : nil
+        let windowIsCurrent = (windows.days(for: kind) ?? 0) >= Self.historyDays
+        let anchor = windowIsCurrent ? try? await cache.anchor(for: kind) : nil
         do {
-            var changes = try await source.workoutChanges(of: signal, since: anchor, from: start)
+            var changes = try await read(anchor)
             // Apple Santé ne distingue pas un accès révoqué d'entraînements effacés : une lecture complète (fenêtre élargie ou ancre
             // illisible) qui ne rend rien alors que le cache en gardait ne doit pas emporter les séances importées (et leur RPE,
             // leurs notes). Le cache et les séances importées sont tous deux locaux, mais le cache peut être vidé sans le magasin
             // local (réinstallation partielle, cache purgé) : les séances importées sont alors là et le cache est vide. Dans les
             // deux cas rien n'est appliqué ni retenu, la lecture est retentée à la passe suivante.
             if changes.isFullRead, changes.added.isEmpty {
-                let cached = try await cache.samples(kind: signal.kind, from: .distantPast, to: .distantFuture)
+                let cached = try await cache.samples(kind: kind, from: .distantPast, to: .distantFuture)
                 if !cached.isEmpty { return false }
-                let sessions = try await workouts.sessions(from: start, to: end)
-                if sessions.contains(where: { $0.source == .appleHealth && $0.kind == signal.sessionKind }) { return false }
+                if let sessionKind {
+                    let sessions = try await workouts.sessions(from: window.start, to: window.end)
+                    if sessions.contains(where: { $0.source == .appleHealth && $0.kind == sessionKind }) { return false }
+                }
             }
             changes.added = changes.added.map { sample in
                 var stamped = sample
@@ -67,7 +81,7 @@ public struct WorkoutHistory: Sendable {
                 return stamped
             }
             try await cache.apply(changes)
-            windows.save(days: Self.historyDays, for: signal.kind)
+            windows.save(days: Self.historyDays, for: kind)
             return true
         } catch {
             return false
