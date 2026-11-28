@@ -10,17 +10,22 @@ import Testing
 
     /// 14 nuits à 8 h de sommeil (pas de dette), SDNN 48 à 52 ms mesurée 4 fois, FC repos 50 la plus basse de la nuit.
     func history(sdnn: (Int) -> Double = { 48 + Double($0 % 5) }, samples: (Int) -> Int? = { _ in 4 },
-                 source: RestingHeartRateSource? = .overnightLowest, rhr: Double = 50) -> [NightSample] {
+                 source: RestingHeartRateSource? = .overnightLowest, rhr: Double = 50, apple: Double? = nil) -> [NightSample] {
         (1...14).map { age in
             NightSample(day: TestCalendar.shift(day, by: -age), sdnnMs: sdnn(age), sdnnSampleCount: samples(age),
-                        restingHeartRate: rhr, restingHeartRateSource: source, sleep: .init(asleepMinutes: 480, deepMinutes: 96))
+                        restingHeartRate: rhr, restingHeartRateSource: source, appleRestingHeartRate: apple,
+                        sleep: .init(asleepMinutes: 480, deepMinutes: 96))
         }
     }
 
     func today(sdnn: Double? = 50, rhr: Double? = 50, source: RestingHeartRateSource? = .overnightLowest,
-               asleep: Int = 480) -> NightSample {
+               apple: Double? = nil, asleep: Int = 480) -> NightSample {
         NightSample(day: day, sdnnMs: sdnn, sdnnSampleCount: 4, restingHeartRate: rhr, restingHeartRateSource: source,
-                    sleep: .init(asleepMinutes: asleep, deepMinutes: asleep / 5))
+                    appleRestingHeartRate: apple, sleep: .init(asleepMinutes: asleep, deepMinutes: asleep / 5))
+    }
+
+    func restingHeartRate(_ result: RecoveryResult) -> FactorScore? {
+        result.factors.first { $0.factor == .restingHeartRate }
     }
 
     func measured(_ outcome: RecoveryOutcome) throws -> RecoveryResult {
@@ -100,10 +105,39 @@ import Testing
         #expect(result.factors.first { $0.factor == .restingHeartRate }?.baselineValue == 50)
     }
 
-    @Test func tooFewNightsOfTheSameSourceUseAllNights() throws {
-        let nights = history(source: .appleNearWake)
+    /// Une semaine de nuits « FC la plus basse » (50, Apple à 56), puis une nuit trop peu mesurée lue chez Apple (56) : elle se
+    /// compare aux valeurs Apple des mêmes nuits, pas aux minima nocturnes, et ne perd pas 13 points sans que rien n'ait changé.
+    @Test func anAppleNightIsComparedWithTheAppleValuesOfOvernightNights() throws {
+        let nights = history(apple: 56)
+        let result = try measured(calculator.compute(day: day, today: today(rhr: 56, source: .appleNearWake, apple: 56),
+                                                     history: nights))
+        #expect(restingHeartRate(result)?.baselineValue == 56)
+        #expect(restingHeartRate(result)?.score == 100)
+        #expect(result.insight?.restingHeartRateSource == .appleNearWake)
+    }
+
+    @Test func anAppleNightWithoutAppleReferenceHasNoRestingHeartRate() throws {
+        let result = try measured(calculator.compute(day: day, today: today(rhr: 56, source: .appleNearWake, apple: 56),
+                                                     history: history()))
+        #expect(result.missing.contains(.restingHeartRate))
+        #expect(result.insight?.restingHeartRateSource == nil)
+    }
+
+    /// Le sens inverse : une nuit « FC la plus basse » (50) après une semaine Apple (56) ne gagne pas 100 d'office ; elle compare
+    /// son propre échantillon Apple (57) aux nuits Apple.
+    @Test func anOvernightNightAfterAppleNightsComparesItsAppleValue() throws {
+        let nights = history(source: .appleNearWake, rhr: 56, apple: 56)
+        let result = try measured(calculator.compute(day: day, today: today(rhr: 50, apple: 57), history: nights))
+        #expect(restingHeartRate(result)?.baselineValue == 56)
+        #expect(restingHeartRate(result)?.todayValue == 57)
+        #expect(result.insight?.restingHeartRateSource == .appleNearWake)
+    }
+
+    @Test func anOvernightNightWithoutComparableNightsHasNoRestingHeartRate() throws {
+        let nights = history(source: .appleNearWake, rhr: 56, apple: 56)
         let result = try measured(calculator.compute(day: day, today: today(rhr: 50), history: nights))
-        #expect(result.factors.first { $0.factor == .restingHeartRate }?.baselineValue == 50)
+        #expect(result.missing.contains(.restingHeartRate))
+        #expect(calculator.insight(day: day, today: today(rhr: 50), history: nights).restingHeartRateSource == nil)
     }
 
     // MARK: - #119

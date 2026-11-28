@@ -38,15 +38,21 @@ public struct NightSample: Sendable, Equatable, Codable {
     public var restingHeartRate: Double?
     /// D'où vient `restingHeartRate` ; `nil` quand il n'est pas connu (fixtures).
     public var restingHeartRateSource: RestingHeartRateSource?
+    /// L'échantillon Apple « FC au repos » le plus proche du réveil, gardé même quand `restingHeartRate` est la FC la plus basse
+    /// de la nuit : une nuit sans assez de mesures se compare alors à des valeurs Apple, jamais à des minima nocturnes.
+    /// Recalculé à chaque agrégation, jamais enregistré.
+    public var appleRestingHeartRate: Double?
     public var sleep: SleepSummary?
 
     public init(day: Date, sdnnMs: Double?, sdnnSampleCount: Int? = nil, restingHeartRate: Double?,
-                restingHeartRateSource: RestingHeartRateSource? = nil, sleep: SleepSummary?) {
+                restingHeartRateSource: RestingHeartRateSource? = nil, appleRestingHeartRate: Double? = nil,
+                sleep: SleepSummary?) {
         self.day = day
         self.sdnnMs = sdnnMs
         self.sdnnSampleCount = sdnnSampleCount
         self.restingHeartRate = restingHeartRate
         self.restingHeartRateSource = restingHeartRateSource
+        self.appleRestingHeartRate = appleRestingHeartRate
         self.sleep = sleep
     }
 }

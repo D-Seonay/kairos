@@ -27,7 +27,7 @@ import Testing
         let rhr = [TimedSample(date: d(2026, 11, 20, 10, 0), value: 49)]
         let n = aggregator.night(for: day, sdnn: typicalSDNN, restingHeartRate: rhr, sleep: typicalSleep)
         #expect(n == NightSample(day: day, sdnnMs: 50, sdnnSampleCount: 3, restingHeartRate: 49,
-                                 restingHeartRateSource: .appleNearWake, sleep: typicalSummary))
+                                 restingHeartRateSource: .appleNearWake, appleRestingHeartRate: 49, sleep: typicalSummary))
     }
 
     @Test func noSleepFallsBackToMidnightToEight() {
@@ -176,6 +176,7 @@ import Testing
         let n = aggregator.night(for: day, sdnn: [], restingHeartRate: rhr, heartRate: heartRate, sleep: typicalSleep)
         #expect(n.restingHeartRate == 52)
         #expect(n.restingHeartRateSource == .overnightLowest)
+        #expect(n.appleRestingHeartRate == 58, "L'échantillon Apple reste, pour comparer une nuit trop peu mesurée")
     }
 
     @Test func tooFewOvernightHeartRatesFallBackToApple() {

@@ -61,17 +61,42 @@ extension RecoveryCalculator {
 
     // MARK: - FC de repos
 
-    /// La référence est la moyenne des 7 jours d'avant, lue de la même façon que la valeur du jour : avec une FC la plus basse de
-    /// la nuit, les nuits de même source ; s'il n'y en a pas assez (montre retirée, données d'avant la mise à jour), toutes.
-    func restingHeartRateFactor(day: Date, today: NightSample, history: [NightSample]) -> PartialFactor? {
-        guard let bpm = today.restingHeartRate else { return nil }
-        let window = nights(of: history, before: day, days: Self.restingHeartRateWindowDays).filter { $0.restingHeartRate != nil }
-        let sameSource = window.filter { $0.restingHeartRateSource == today.restingHeartRateSource }
-        let reference = (sameSource.count >= Self.restingHeartRateMinimumValues ? sameSource : window).compactMap(\.restingHeartRate)
-        guard reference.count >= Self.restingHeartRateMinimumValues else { return nil }
-        let mean = reference.reduce(0, +) / Double(reference.count)
-        return PartialFactor(factor: .restingHeartRate, score: RHRScorer.score(todayBpm: bpm, baselineMeanBpm: mean),
-                             todayValue: bpm, baselineValue: mean)
+    /// La FC de repos qui compte et d'où elle vient.
+    struct RestingHeartRateFactor {
+        var score: PartialFactor
+        var source: RestingHeartRateSource?
+    }
+
+    /// La référence est la moyenne des 7 jours d'avant, toujours lue à la même source que la valeur du jour : un minimum nocturne
+    /// face aux minima nocturnes, un échantillon Apple face aux échantillons Apple des mêmes nuits (gardés même quand la nuit a son
+    /// minimum). Une nuit « FC la plus basse » sans assez de nuits de même source se compare par son échantillon Apple ; sans
+    /// `restingHeartRateMinimumValues` valeurs comparables, pas de facteur : mieux vaut un facteur absent qu'un écart de source.
+    func restingHeartRateFactor(day: Date, today: NightSample, history: [NightSample]) -> RestingHeartRateFactor? {
+        let window = nights(of: history, before: day, days: Self.restingHeartRateWindowDays)
+        var sources: [RestingHeartRateSource?] = [today.restingHeartRateSource]
+        if today.restingHeartRateSource == .overnightLowest { sources.append(.appleNearWake) }
+        for source in sources {
+            guard let bpm = Self.restingHeartRate(of: today, from: source) else { continue }
+            let reference = window.compactMap { Self.restingHeartRate(of: $0, from: source) }
+            guard reference.count >= Self.restingHeartRateMinimumValues else { continue }
+            let mean = reference.reduce(0, +) / Double(reference.count)
+            let factor = PartialFactor(factor: .restingHeartRate, score: RHRScorer.score(todayBpm: bpm, baselineMeanBpm: mean),
+                                       todayValue: bpm, baselineValue: mean)
+            return RestingHeartRateFactor(score: factor, source: source)
+        }
+        return nil
+    }
+
+    /// La FC de repos de la nuit lue à `source` ; sans source connue (fixtures), celle des nuits sans source.
+    private static func restingHeartRate(of night: NightSample, from source: RestingHeartRateSource?) -> Double? {
+        switch source {
+        case .overnightLowest:
+            night.restingHeartRateSource == .overnightLowest ? night.restingHeartRate : nil
+        case .appleNearWake:
+            night.appleRestingHeartRate ?? (night.restingHeartRateSource == .appleNearWake ? night.restingHeartRate : nil)
+        case nil:
+            night.restingHeartRateSource == nil ? night.restingHeartRate : nil
+        }
     }
 
     // MARK: - Sommeil

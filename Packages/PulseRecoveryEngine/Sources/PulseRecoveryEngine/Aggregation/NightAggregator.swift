@@ -34,7 +34,8 @@ public struct NightAggregator: Sendable {
     /// `day` est minuit local du jour de réveil. La SDNN de la nuit est la moyenne des mesures prises endormi dans le bloc
     /// principal : une sieste, un assoupissement du soir et les éveils n'y entrent pas. Sans mesure endormie, pas de SDNN.
     /// La FC de repos est la fréquence cardiaque la plus basse des mêmes plages (5e centile) ; sans assez de mesures, l'échantillon
-    /// Apple « FC au repos » le plus proche du réveil. Ni l'une ni l'autre ne bouge au fil de la matinée sans nouvelle nuit.
+    /// Apple « FC au repos » le plus proche du réveil, gardé dans tous les cas (`appleRestingHeartRate`) pour que la référence
+    /// compare des valeurs de même source. Ni l'une ni l'autre ne bouge au fil de la matinée sans nouvelle nuit.
     public func night(for day: Date, sdnn: [TimedSample], restingHeartRate: [TimedSample], heartRate: [TimedSample] = [],
                       sleep: [SleepInterval]) -> NightSample {
         let asleep = mergedAsleepIntervals(for: day, in: sleep)
@@ -43,7 +44,7 @@ public struct NightAggregator: Sendable {
         let sdnnValues = validSDNN(sdnn, in: sdnnWindows)
         let overnight = asleep.isEmpty ? nil : overnightLowest(heartRate, in: sdnnWindows)
         let wake = detail?.wokeUp ?? hours(Self.fallbackSDNNHours, from: day)
-        let nearWake = overnight == nil ? appleRestingHeartRate(nearestTo: wake, in: restingHeartRate, on: day) : nil
+        let nearWake = appleRestingHeartRate(nearestTo: wake, in: restingHeartRate, on: day)
 
         return NightSample(
             day: day,
@@ -51,6 +52,7 @@ public struct NightAggregator: Sendable {
             sdnnSampleCount: sdnnValues.isEmpty ? nil : sdnnValues.count,
             restingHeartRate: overnight ?? nearWake,
             restingHeartRateSource: overnight != nil ? .overnightLowest : (nearWake != nil ? .appleNearWake : nil),
+            appleRestingHeartRate: nearWake,
             sleep: summary(for: day, asleepIntervals: asleep, sleep: sleep, detail: detail)
         )
     }

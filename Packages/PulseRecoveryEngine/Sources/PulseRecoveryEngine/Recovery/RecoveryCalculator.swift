@@ -36,7 +36,7 @@ public struct RecoveryCalculator: Sendable {
         let hrv = hrvFactor(day: day, today: today, history: history)
         let restingHeartRate = restingHeartRateFactor(day: day, today: today, history: history)
         let sleep = sleepFactor(day: day, today: today, history: history, goalMinutes: sleepGoalMinutes)
-        let present = [hrv.score, restingHeartRate, sleep.score].compactMap { $0 }
+        let present = [hrv.score, restingHeartRate?.score, sleep.score].compactMap { $0 }
 
         let missing = Factor.allCases.filter { factor in !present.contains { $0.factor == factor } }
         guard present.count >= Self.minimumFactors else {
@@ -53,7 +53,7 @@ public struct RecoveryCalculator: Sendable {
         let feeling = checkIn.map { FeelingAdjustment.apply(measured: measured, checkInScore: CheckInScorer.score($0)) }
         let score = feeling?.score ?? measured
         let insight = RecoveryInsight(hrvBaselineNights: hrv.nights.used, hrvSetAsideNights: hrv.nights.setAside,
-                                      restingHeartRateSource: restingHeartRate == nil ? nil : today.restingHeartRateSource,
+                                      restingHeartRateSource: restingHeartRate?.source,
                                       sleepDebtMinutes: sleep.debtMinutes)
         return .measured(RecoveryResult(day: day, score: score, category: RecoveryCategory(score: score),
                                         factors: factors, missing: missing, calibration: hrv.calibration,
@@ -65,9 +65,8 @@ public struct RecoveryCalculator: Sendable {
     public func insight(day: Date, today: NightSample, history: [NightSample],
                         sleepGoalMinutes: Int = SleepGoal.defaultMinutes) -> RecoveryInsight {
         let nights = hrvNights(day: day, history: history)
-        let hasRestingHeartRate = restingHeartRateFactor(day: day, today: today, history: history) != nil
         return RecoveryInsight(hrvBaselineNights: nights.used, hrvSetAsideNights: nights.setAside,
-                               restingHeartRateSource: hasRestingHeartRate ? today.restingHeartRateSource : nil,
+                               restingHeartRateSource: restingHeartRateFactor(day: day, today: today, history: history)?.source,
                                sleepDebtMinutes: sleepFactor(day: day, today: today, history: history,
                                                              goalMinutes: sleepGoalMinutes).debtMinutes)
     }
