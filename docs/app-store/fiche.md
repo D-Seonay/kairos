@@ -59,44 +59,39 @@ Autres cases :
 
 ## 4. Notes pour la revue
 
-À coller dans « Notes » de la section Informations de revue. Laisser « Connexion requise » décoché : il n'y a pas de compte.
+À coller dans « Notes » de la section Informations de revue. Laisser « Connexion requise » décoché : il n'y a pas de compte. Le bloc anglais fait 3 288 caractères (limite d'App Store Connect : 4 000) ; garder cette marge en le modifiant.
 
 ### English (pasted in App Review notes)
 
 ```
 Pulse is a French-language fitness and recovery app. There is no account, no sign-in and no server.
 
-HOW THE APP USES HEALTH DATA
-Pulse reads from Apple Health: sleep, heart rate variability (SDNN), resting heart rate, heart rate, running and cycling workouts, body mass, body fat percentage, and (once, at onboarding, to prefill the profile form) height, date of birth and biological sex. It writes to Apple Health: strength training workouts (with estimated active energy), runs recorded with Pulse (GPS distance and route) and supplement intakes (vitamin D, magnesium, caffeine, protein). Every permission is optional and can be refused separately.
+HEALTH DATA
+Pulse reads from Apple Health: sleep, HRV (SDNN), resting heart rate, heart rate, workouts (all activity types, counted in training load), body mass, body fat and, once at onboarding to prefill the profile, height, date of birth and sex. It writes: strength workouts (with estimated active energy), runs recorded with Pulse (GPS distance and route) and supplement intakes. Every permission is optional.
 
 LOCATION AND BACKGROUND MODES
-Location ("While Using the App") is used only for a run the user starts from Pulse: on the run's start screen, in the foreground, to check the GPS signal before the run, then during the run to measure distance and draw the route. The "location" background mode keeps that run tracking while the screen is locked, from the start to the end of that run only; Pulse never tracks location outside a run's start screen and the run itself. The "audio" background mode is used only for the spoken kilometre announcements during a run. If location is denied, the run records time only. A run tracked with Pulse can be exported as a GPX file (route with GPS positions) from its detail screen, through the share sheet, only when the user taps "Exporter en GPX".
+Location ("While Using the App") is used only for a run the user starts in Pulse: to check GPS on the run's start screen, then to measure distance and draw the route. The "location" background mode keeps that run tracking while the screen is locked, until the run ends. The "audio" mode is only for spoken kilometre announcements during a run. Without location, a run records time only. GPX export happens only when the user taps "Exporter en GPX".
 
 CAMERA, PHOTOS AND FACE ID
-The camera is used only when the user takes a photo for a workout or a body progress photo; photos taken in Pulse are not saved to the Photos library. Importing goes through the system photo picker, so Pulse only receives the images the user picks (no NSPhotoLibraryUsageDescription). Pulse saves a workout photo to Photos only when the user chooses "Save Image" in the share sheet (NSPhotoLibraryAddUsageDescription). Body photos have no share sheet. Face ID (or the passcode) locks the body photo section; the lock can be turned off in that section's settings. On a device without a passcode, the section opens without a lock and says the photos are not encrypted. Metadata, including location, is removed from every image.
+Camera on demand only; imports use the system photo picker. A workout photo is saved to Photos only via "Save Image" in the share sheet. Body photos stay on the device, locked by Face ID or the passcode. Metadata, including location, is removed from every image.
 
 PRIVACY (guideline 5.1.3)
-Values read from Apple Health are stored in an on-device store that is never synced: Pulse never writes them to iCloud. Like all of the app's local data, they are part of the iPhone's own backup if the user has turned it on (iCloud or computer backup), and of the exports the user makes. Values proposed from Apple Health at onboarding (height, weight, date of birth, sex) are saved, and synced, only once the user validates the profile step; they then count as user input. iCloud (the user's private CloudKit database) only holds what the user types and what Pulse computes (workouts logged in Pulse, runs recorded with Pulse and their simplified route, supplements, program, check-ins, recovery scores). Heart rate delivered by the run's workout session counts as read from Apple Health and stays on the device. Workout photos are user content: they sync to the user's private iCloud with the workout and are included in the CSV export. Body photos stay on the iPhone only, in a file-protected folder excluded from device backups and from the general export; the user can export them to the Files app. No image is sent to the developer or any third party. No analytics, no advertising, no third-party SDK. The privacy policy is at https://pulserecovery.app/confidentialite and support is at https://pulserecovery.app/support. Export and full erase are in Profile > Mes données (My data).
+Values read from Apple Health stay in an on-device store and are never written to iCloud. The user's private iCloud database only holds what the user types and what Pulse computes (workouts, runs and their simplified route, supplements, program, check-ins, scores, workout photos). Body photos never leave the iPhone. No analytics, no advertising, no third-party SDK, nothing sent to the developer. Details: https://pulserecovery.app/confidentialite. Support: https://pulserecovery.app/support. Export and full erase: Profile > Mes données.
 
 NOTIFICATIONS, SIRI AND RATINGS
-Notifications are optional: end of rest, morning score, supplement reminders, a bedtime reminder (off by default, in Settings > Sommeil) and a body photo reminder (off by default, in the Body photos section; the notification only says it is time for a progress photo, with no image). Siri shortcuts (App Intents) give the recovery score, start today's workout, log a supplement intake ("J'ai pris ma créatine") and start a run; the score and the supplement intake require the device to be unlocked. Pulse asks for an App Store rating at most once per version, after the 5th strength workout or a new record, never during a workout or a run.
+All notifications are optional (rest timer, morning score, check-in reminder, supplement, bedtime and body photo reminders). Siri shortcuts give the score, start a workout or a run and log a supplement; the score and the supplement intake require the device to be unlocked. Pulse asks for a rating at most once per version, after the 5th workout or a new record, never during a workout or a run.
 
 THE REVIEW DEVICE HAS NO HEALTH DATA, WHICH IS EXPECTED
-The recovery score needs several nights of sleep, HRV and resting heart rate data from an Apple Watch or compatible device. On a device without them, Today shows a calibration or check-in state (three questions) instead of a measured score. This is normal behaviour, not an error. The measured score appears after a few nights of real data.
+The recovery score needs several nights of sleep, HRV and resting heart rate from an Apple Watch or similar. Without them, Today shows a calibration or check-in state (three questions) instead of a measured score. This is normal, not an error.
 
 HOW TO SEE THE MAIN FEATURES WITHOUT HEALTH DATA
-1. First launch: on the Health screen, tap "Continuer sans montre" (Continue without a watch), or "Autoriser dans Apple Santé" (Allow in Apple Health) and allow or deny as you wish. Then fill in the short profile and goals screens. Apple Health can be connected later from Profile > Paramètres > "Connecter Apple Santé".
-2. Live workout: open the "Séance" tab, tap "Séance libre" (Free session), then add an exercise and log sets. The rest timer and the recap work without any Health data. Writing the finished workout to Apple Health is optional.
-3. Supplements: Profile tab > "Compléments" (Supplements) > "+" / "Ajouter un complément" (Add a supplement), then mark it as taken ("Pris"). Pulse never suggests a dose.
-4. Run: "Séance" tab > "Courir" (Run), allow location, then "Partir" (Go). Distance needs a GPS signal outdoors; "Pause" and "Terminer" (Finish) are on the run screen; the Live Activity has "Pause" and "Reprendre" (Resume).
-5. Photos: during a live workout, the camera button in the header adds a photo; the recap and the workout detail have a "Photos" section. Body photos: Profile tab > "Photos de corps" (Body photos), unlock with Face ID or the passcode, then "Ajouter une photo" (Add a photo).
-6. Export and delete: Profile tab > "Mes données" (My data).
-7. Siri: Pulse's shortcuts are listed in the Shortcuts app without any setup; say for example "Mon score de récupération Pulse".
+1. First launch: tap "Continuer sans montre" (Continue without a watch) or allow Apple Health as you wish, then fill in the short profile and goals screens.
+2. Live workout: "Séance" tab > "Séance libre" (Free session), add an exercise and log sets. Rest timer and recap work without Health data.
+3. Supplements: Profile > "Compléments" > "Ajouter un complément", then "Pris" (Taken). Pulse never suggests a dose.
+4. Run: "Séance" > "Courir" (Run), allow location, then "Partir" (Go). Distance needs GPS outdoors.
+5. Export and delete: Profile > "Mes données" (My data).
 
-MEDICAL DISCLAIMER
-Pulse is not a medical device. The score and adjustments are training indicators, not medical advice. The notice appears at onboarding and in Settings.
-
-The interface is in French only (version 1).
+Pulse is not a medical device; the notice appears at onboarding and in Settings.
 ```
 
 ### Français (même contenu, pour mémoire)
@@ -104,37 +99,32 @@ The interface is in French only (version 1).
 ```
 Pulse est une app de forme et de récupération en français. Il n'y a ni compte, ni connexion, ni serveur.
 
-USAGE DES DONNÉES DE SANTÉ
-Pulse lit dans Apple Santé : le sommeil, la variabilité cardiaque (SDNN), la fréquence cardiaque au repos, la fréquence cardiaque, les entraînements de course et de vélo, le poids, la masse grasse, et (une seule fois, à l'accueil, pour préremplir le profil) la taille, la date de naissance et le sexe. Pulse écrit dans Apple Santé : les séances de musculation (avec l'énergie active estimée), les courses faites avec Pulse (distance GPS et tracé) et les prises de compléments (vitamine D, magnésium, caféine, protéines). Chaque autorisation est facultative et se refuse séparément.
+DONNÉES DE SANTÉ
+Pulse lit dans Apple Santé : le sommeil, la VFC (SDNN), la fréquence cardiaque au repos, la fréquence cardiaque, les entraînements (tous types, comptés dans la charge), le poids, la masse grasse et, une seule fois à l'accueil pour préremplir le profil, la taille, la date de naissance et le sexe. Pulse écrit : les séances de musculation (avec l'énergie active estimée), les courses faites avec Pulse (distance GPS et tracé) et les prises de compléments. Chaque autorisation est facultative.
 
 LOCALISATION ET MODES D'ARRIÈRE-PLAN
-La localisation (« Lorsque l'app est active ») sert seulement pour une course que l'utilisateur lance depuis Pulse : sur l'écran de départ, app ouverte, pour vérifier le signal GPS avant de partir, puis pendant la course pour mesurer la distance et tracer le parcours. Le mode d'arrière-plan « location » garde ce suivi écran verrouillé, du départ à la fin de cette course seulement : Pulse ne suit jamais la position hors de l'écran de départ et de la course. Le mode « audio » sert seulement aux annonces vocales de chaque kilomètre pendant la course. Localisation refusée, la course enregistre seulement le temps. Une course suivie dans Pulse s'exporte en fichier GPX (tracé avec les positions GPS) depuis son détail, par la feuille de partage, seulement quand l'utilisateur touche « Exporter en GPX ».
+La localisation (« Lorsque l'app est active ») ne sert qu'à une course lancée dans Pulse : vérifier le GPS sur l'écran de départ, puis mesurer la distance et tracer le parcours. Le mode d'arrière-plan « location » garde le suivi écran verrouillé jusqu'à la fin de la course. Le mode « audio » ne sert qu'aux annonces vocales des kilomètres. Sans localisation, la course n'enregistre que le temps. L'export GPX n'a lieu que si l'utilisateur touche « Exporter en GPX ».
 
-APPAREIL PHOTO, PHOTOS ET FACE ID
-L'appareil photo sert seulement quand l'utilisateur prend une photo de séance ou une photo de corps ; les photos prises dans Pulse ne sont pas enregistrées dans Photos. L'import passe par le sélecteur de photos du système : Pulse ne reçoit que les images choisies (pas de NSPhotoLibraryUsageDescription). Pulse enregistre une photo de séance dans Photos seulement quand l'utilisateur choisit « Enregistrer l'image » dans la feuille de partage (NSPhotoLibraryAddUsageDescription). Les photos de corps n'ont pas de feuille de partage. Face ID (ou le code) verrouille la section des photos de corps ; le verrou se coupe dans les réglages de la section. Sur un appareil sans code, la section s'ouvre sans verrou et dit que les photos ne sont pas chiffrées. Les métadonnées, dont la position, sont retirées de chaque image.
+CAMÉRA, PHOTOS ET FACE ID
+Caméra seulement à la demande ; l'import passe par le sélecteur de photos du système. Une photo de séance n'est enregistrée dans Photos que par « Enregistrer l'image » dans la feuille de partage. Les photos de corps restent sur l'appareil, verrouillées par Face ID ou le code. Les métadonnées, dont la position, sont retirées de chaque image.
 
 CONFIDENTIALITÉ (règle 5.1.3)
-Les valeurs lues dans Apple Santé sont gardées dans un magasin de l'appareil qui ne se synchronise jamais : Pulse ne les écrit jamais dans iCloud. Comme toutes les données locales de l'app, elles font partie de la sauvegarde de l'iPhone si l'utilisateur l'a activée (iCloud ou ordinateur), et des exports qu'il fait lui-même. Les valeurs proposées depuis Apple Santé à l'accueil (taille, poids, date de naissance, sexe) ne sont enregistrées, et synchronisées, qu'une fois l'étape du profil validée ; elles comptent alors comme une saisie. iCloud (la base CloudKit privée de l'utilisateur) ne contient que ce que l'utilisateur saisit et ce que Pulse calcule (séances faites dans Pulse, courses faites avec Pulse et leur tracé simplifié, compléments, programme, check-ins, scores de récupération). La fréquence cardiaque livrée par la séance d'entraînement de la course compte comme lue dans Apple Santé et reste sur l'appareil. Les photos de séance sont du contenu de l'utilisateur : elles se synchronisent dans son iCloud privé avec la séance et font partie de l'export CSV. Les photos de corps restent sur l'iPhone seulement, dans un dossier protégé, exclu des sauvegardes de l'appareil et de l'export général ; l'utilisateur peut les exporter vers Fichiers. Aucune image n'est envoyée au développeur ni à un tiers. Aucune analytics, aucune publicité, aucun SDK tiers. Politique : https://pulserecovery.app/confidentialite ; assistance : https://pulserecovery.app/support. L'export et la suppression totale sont dans Profil > Mes données.
+Les valeurs lues dans Apple Santé restent dans un stockage local et ne sont jamais écrites dans iCloud. La base iCloud privée de l'utilisateur ne contient que ce qu'il saisit et ce que Pulse calcule (séances, courses et leur tracé simplifié, compléments, programme, check-ins, scores, photos de séance). Les photos de corps ne quittent jamais l'iPhone. Aucune mesure d'audience, aucune publicité, aucun SDK tiers, rien n'est envoyé au développeur. Détails : https://pulserecovery.app/confidentialite. Assistance : https://pulserecovery.app/support. Export et effacement complet : Profil > Mes données.
 
 NOTIFICATIONS, SIRI ET NOTES
-Les notifications sont facultatives : fin de repos, score du matin, rappels de compléments, rappel de coucher (désactivé par défaut, dans Paramètres > Sommeil) et rappel de photo de corps (désactivé par défaut, dans la section Photos de corps ; la notification dit seulement que c'est le moment de la photo de suivi, sans image). Les raccourcis Siri (App Intents) donnent le score de récupération, démarrent la séance du jour, notent une prise de complément (« J'ai pris ma créatine ») et lancent une course ; le score et la prise demandent le déverrouillage. Pulse demande une note App Store au plus une fois par version, après la 5e séance de musculation ou un nouveau record, jamais pendant une séance ou une course.
+Toutes les notifications sont facultatives (fin de repos, score du matin, rappel de check-in, rappels de compléments, du coucher et des photos de corps). Les raccourcis Siri donnent le score, lancent une séance ou une course et enregistrent une prise de complément ; le score et la prise demandent un appareil déverrouillé. Pulse demande une note au plus une fois par version, après la 5e séance ou un nouveau record, jamais pendant une séance ou une course.
 
 L'APPAREIL DE REVUE N'A PAS DE DONNÉES DE SANTÉ, C'EST NORMAL
-Le score de récupération demande plusieurs nuits de sommeil, de VFC et de fréquence cardiaque au repos venues d'une Apple Watch ou d'une montre compatible. Sans elles, l'écran Aujourd'hui affiche la calibration ou un check-in de trois questions à la place du score mesuré. Ce n'est pas une erreur. Le score mesuré apparaît après quelques nuits de vraies données.
+Le score de récupération demande plusieurs nuits de sommeil, de VFC et de FC au repos venant d'une Apple Watch ou équivalent. Sans elles, Aujourd'hui affiche un état de calibration ou de check-in (trois questions) au lieu d'un score mesuré. C'est normal, pas une erreur.
 
-VOIR L'ESSENTIEL SANS DONNÉES DE SANTÉ
-1. Premier lancement : sur l'écran Santé, touche « Continuer sans montre », ou « Autoriser dans Apple Santé » et accepte ou refuse. Remplis ensuite le profil et les objectifs. Apple Santé se connecte plus tard depuis Profil > Paramètres > « Connecter Apple Santé ».
-2. Séance live : onglet « Séance », « Séance libre », ajoute un exercice et saisis des séries. Le chrono de repos et le récap marchent sans données de santé. L'écriture de la séance dans Apple Santé est facultative.
-3. Compléments : onglet Profil > « Compléments » > « + » / « Ajouter un complément », puis « Pris ». Pulse ne propose jamais de dose.
-4. Course : onglet « Séance » > « Courir », autorise la localisation, puis « Partir ». La distance demande un signal GPS en extérieur ; « Pause » et « Terminer » sont sur l'écran de course ; la Live Activity propose « Pause » et « Reprendre ».
-5. Photos : pendant une séance live, le bouton appareil photo de l'en-tête ajoute une photo ; le récap et le détail de la séance ont une section « Photos ». Photos de corps : onglet Profil > « Photos de corps », déverrouille avec Face ID ou le code, puis « Ajouter une photo ».
-6. Export et suppression : onglet Profil > « Mes données ».
-7. Siri : les raccourcis de Pulse sont listés dans l'app Raccourcis sans réglage ; dis par exemple « Mon score de récupération Pulse ».
+VOIR LES FONCTIONS PRINCIPALES SANS DONNÉES DE SANTÉ
+1. Premier lancement : toucher « Continuer sans montre » ou autoriser Apple Santé au choix, puis remplir les courts écrans de profil et d'objectifs.
+2. Séance en direct : onglet « Séance » > « Séance libre », ajouter un exercice et noter des séries. Le minuteur de repos et le récap fonctionnent sans données de santé.
+3. Compléments : Profil > « Compléments » > « Ajouter un complément », puis « Pris ». Pulse ne propose jamais de dose.
+4. Course : « Séance » > « Courir », autoriser la localisation, puis « Partir ». La distance demande le GPS en extérieur.
+5. Export et suppression : Profil > « Mes données ».
 
-AVERTISSEMENT MÉDICAL
-Pulse n'est pas un dispositif médical. Le score et les ajustements sont des repères d'entraînement, pas un avis médical. L'avertissement figure à l'accueil et dans Paramètres.
-
-L'interface est uniquement en français (version 1).
+Pulse n'est pas un dispositif médical ; l'avertissement apparaît à l'accueil et dans les Réglages.
 ```
 
 ## 5. Fiche
