@@ -15,9 +15,11 @@ public struct MonthDay: Sendable, Equatable, Identifiable {
     public var planned: RoutineDayKind?
     /// Les séances faites ce jour-là, de la plus ancienne à la plus récente : de quoi ouvrir leur détail.
     public var sessions: [MonthDaySession]
+    /// Un autre entraînement d'Apple Santé ce jour-là (natation, HIIT, sport…), montré d'une icône neutre (`HealthActivities`).
+    public var hasActivity: Bool
 
     public init(date: Date, isInMonth: Bool, isToday: Bool, done: [SessionKind], hasMark: Bool, planned: RoutineDayKind?,
-                sessions: [MonthDaySession] = []) {
+                sessions: [MonthDaySession] = [], hasActivity: Bool = false) {
         self.date = date
         self.isInMonth = isInMonth
         self.isToday = isToday
@@ -25,6 +27,7 @@ public struct MonthDay: Sendable, Equatable, Identifiable {
         self.hasMark = hasMark
         self.planned = planned
         self.sessions = sessions
+        self.hasActivity = hasActivity
     }
 
     public var id: Date { date }
@@ -98,6 +101,7 @@ public enum MonthCalendar {
         return MonthDay(date: date, isInMonth: calendar.isDate(date, equalTo: month, toGranularity: .month),
                         isToday: calendar.isDate(date, inSameDayAs: today), done: kinds, hasMark: done.count >= 2 || hasRecord,
                         planned: planned,
-                        sessions: done.sorted { $0.startedAt < $1.startedAt }.map { MonthDaySession(id: $0.id, kind: $0.kind) })
+                        sessions: done.sorted { $0.startedAt < $1.startedAt }.map { MonthDaySession(id: $0.id, kind: $0.kind) },
+                        hasActivity: context.activities.contains { calendar.isDate($0, inSameDayAs: date) })
     }
 }

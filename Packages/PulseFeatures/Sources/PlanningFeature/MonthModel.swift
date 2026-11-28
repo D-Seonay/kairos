@@ -109,6 +109,7 @@ public final class MonthModel {
             case .ride: parts.append(String(localized: "vélo fait", bundle: .module))
             }
         }
+        if day.hasActivity { parts.append(String(localized: "autre entraînement", bundle: .module)) }
         switch day.planned {
         case .strength: parts.append(String(localized: "musculation prévue", bundle: .module))
         case .run: parts.append(String(localized: "course prévue", bundle: .module))

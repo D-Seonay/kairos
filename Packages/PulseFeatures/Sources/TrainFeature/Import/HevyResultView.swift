@@ -2,10 +2,11 @@ import PulseDesignSystem
 import PulseServices
 import SwiftUI
 
-/// Le bilan de l'import : séances importées, exercices créés, records, séances non importées, et le lien vers l'historique.
+/// Le bilan de l'import : séances importées, exercices créés, records, séances non importées, et le lien vers l'historique quand
+/// l'écran qui ouvre l'import en a un (`onShowHistory`).
 struct HevyResultView: View {
     let result: HevyImportResult
-    let onShowHistory: () -> Void
+    let onShowHistory: (() -> Void)?
     let onFinish: () -> Void
 
     var body: some View {
@@ -31,11 +32,16 @@ struct HevyResultView: View {
                         .font(.footnote)
                         .foregroundStyle(PulsePalette.text2)
                 }
-                Button(String(localized: "Voir l'historique", bundle: .module), action: onShowHistory)
-                    .buttonStyle(PrimaryButtonStyle())
-                    .accessibilityIdentifier(TrainIdentifiers.hevyImportHistory)
-                Button(String(localized: "Terminer", bundle: .module), action: onFinish)
-                    .buttonStyle(SecondaryButtonStyle())
+                if let onShowHistory {
+                    Button(String(localized: "Voir l'historique", bundle: .module), action: onShowHistory)
+                        .buttonStyle(PrimaryButtonStyle())
+                        .accessibilityIdentifier(TrainIdentifiers.hevyImportHistory)
+                    Button(String(localized: "Terminer", bundle: .module), action: onFinish)
+                        .buttonStyle(SecondaryButtonStyle())
+                } else {
+                    Button(String(localized: "Terminer", bundle: .module), action: onFinish)
+                        .buttonStyle(PrimaryButtonStyle())
+                }
             }
             .padding(PulseMetrics.spacing)
         }

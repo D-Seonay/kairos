@@ -4,4 +4,6 @@ public enum ProfileIdentifiers {
     public static let screen = "profile.screen"
     /// « Connecter Apple Santé », dans la section Apple Santé des Paramètres.
     public static let connectHealth = "settings.health.connect"
+    /// « Importer depuis Hevy », dans Mes données.
+    public static let hevyImport = "mydata.hevyImport"
 }

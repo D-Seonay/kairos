@@ -8,4 +8,5 @@ public enum OnboardingIdentifiers {
     public static let programAdopt = "onboarding.program.adopt"
     public static let calibrationScore = "onboarding.calibration.score"
     public static let calibrationFinish = "onboarding.calibration.finish"
+    public static let hevyImport = "onboarding.calibration.hevyImport"
 }

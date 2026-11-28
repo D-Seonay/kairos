@@ -10,6 +10,9 @@ public enum HealthSampleKind: String, Sendable, Codable, CaseIterable {
     case ride
     case bodyMass
     case bodyFat
+    /// Les entraînements d'Apple Santé autres que course et vélo (natation, HIIT, sports, musculation d'une autre app…). Gardés
+    /// dans le cache seulement, jamais en séance : leur famille (`WorkoutFamily`) est dans `value`.
+    case otherWorkout
 }
 
 /// Un échantillon Apple Santé mis en cache localement, reconstructible (spec M2 §5.4). Jamais synchronisé, jamais exporté.

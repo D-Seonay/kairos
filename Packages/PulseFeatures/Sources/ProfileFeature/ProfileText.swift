@@ -172,6 +172,7 @@ enum ProfileText {
         case .ride: String(localized: "Vélo", bundle: .module)
         case .bodyMass: String(localized: "Poids", bundle: .module)
         case .bodyFat: String(localized: "Masse grasse", bundle: .module)
+        case .otherWorkout: String(localized: "Autres entraînements", bundle: .module)
         }
     }
 

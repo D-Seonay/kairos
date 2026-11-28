@@ -441,6 +441,16 @@
         }
       }
     },
+    "Au réveil" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Au réveil"
+          }
+        }
+      }
+    },
     "Aucun compte iCloud : tes données restent sur ce téléphone." : {
       "localizations" : {
         "fr" : {
@@ -487,6 +497,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucune séance pour l'instant"
+          }
+        }
+      }
+    },
+    "Autres entraînements" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autres entraînements"
           }
         }
       }
@@ -951,6 +971,16 @@
         }
       }
     },
+    "Heure du rappel" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heure du rappel"
+          }
+        }
+      }
+    },
     "Heure plafond" : {
       "localizations" : {
         "fr" : {
@@ -971,72 +1001,22 @@
         }
       }
     },
-    "iCloud est indisponible : vérifie que tu es connecté à ton compte dans Réglages. Tes données restent sur ce téléphone en attendant." : {
+    "Importer" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iCloud est indisponible : vérifie que tu es connecté à ton compte dans Réglages. Tes données restent sur ce téléphone en attendant."
+            "value" : "Importer"
           }
         }
       }
     },
-    "iCloud est injoignable pour l'instant : la synchronisation reprendra toute seule quand le réseau reviendra." : {
+    "Importer depuis Hevy" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iCloud est injoignable pour l'instant : la synchronisation reprendra toute seule quand le réseau reviendra."
-          }
-        }
-      }
-    },
-    "iCloud est occupé pour l'instant. La synchronisation reprendra d'elle-même." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iCloud est occupé pour l'instant. La synchronisation reprendra d'elle-même."
-          }
-        }
-      }
-    },
-    "il y a %lld h" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "il y a %lld h"
-          }
-        }
-      }
-    },
-    "il y a %lld jours" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "il y a %lld jours"
-          }
-        }
-      }
-    },
-    "il y a %lld min" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "il y a %lld min"
-          }
-        }
-      }
-    },
-    "il y a 1 jour" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "il y a 1 jour"
+            "value" : "Importer depuis Hevy"
           }
         }
       }
@@ -1261,6 +1241,16 @@
         }
       }
     },
+    "Noter Pulse" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noter Pulse"
+          }
+        }
+      }
+    },
     "Notifications" : {
       "localizations" : {
         "fr" : {
@@ -1281,22 +1271,22 @@
         }
       }
     },
-    "Objectif de sommeil" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Objectif de sommeil"
-          }
-        }
-      }
-    },
     "OK" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "OK"
+          }
+        }
+      }
+    },
+    "Objectif de sommeil" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Objectif de sommeil"
           }
         }
       }
@@ -1327,6 +1317,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ouvre la demande d'accès d'Apple Santé"
+          }
+        }
+      }
+    },
+    "Ouvre la fiche de Pulse sur l'App Store pour écrire un avis" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvre la fiche de Pulse sur l'App Store pour écrire un avis"
           }
         }
       }
@@ -1731,6 +1731,16 @@
         }
       }
     },
+    "Rappel de check-in" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rappel de check-in"
+          }
+        }
+      }
+    },
     "Rappel de coucher" : {
       "localizations" : {
         "fr" : {
@@ -1907,6 +1917,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sert à calculer la fréquence cardiaque maximale des courses"
+          }
+        }
+      }
+    },
+    "Seulement si ta montre n'a rien mesuré depuis 3 jours, et jamais une fois le check-in fait." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seulement si ta montre n'a rien mesuré depuis 3 jours, et jamais une fois le check-in fait."
           }
         }
       }
@@ -2107,6 +2127,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tes séances, compléments et scores se synchronisent avec ton compte iCloud. Les données d'Apple Santé restent sur ce téléphone."
+          }
+        }
+      }
+    },
+    "Ton historique de séances, depuis un export CSV de Hevy." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton historique de séances, depuis un export CSV de Hevy."
           }
         }
       }
@@ -2317,6 +2347,76 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "du %1$@ au %2$@"
+          }
+        }
+      }
+    },
+    "iCloud est indisponible : vérifie que tu es connecté à ton compte dans Réglages. Tes données restent sur ce téléphone en attendant." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud est indisponible : vérifie que tu es connecté à ton compte dans Réglages. Tes données restent sur ce téléphone en attendant."
+          }
+        }
+      }
+    },
+    "iCloud est injoignable pour l'instant : la synchronisation reprendra toute seule quand le réseau reviendra." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud est injoignable pour l'instant : la synchronisation reprendra toute seule quand le réseau reviendra."
+          }
+        }
+      }
+    },
+    "iCloud est occupé pour l'instant. La synchronisation reprendra d'elle-même." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud est occupé pour l'instant. La synchronisation reprendra d'elle-même."
+          }
+        }
+      }
+    },
+    "il y a %lld h" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "il y a %lld h"
+          }
+        }
+      }
+    },
+    "il y a %lld jours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "il y a %lld jours"
+          }
+        }
+      }
+    },
+    "il y a %lld min" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "il y a %lld min"
+          }
+        }
+      }
+    },
+    "il y a 1 jour" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "il y a 1 jour"
           }
         }
       }
@@ -2541,16 +2641,6 @@
         }
       }
     },
-    "à l'instant" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "à l'instant"
-          }
-        }
-      }
-    },
     "À propos" : {
       "localizations" : {
         "fr" : {
@@ -2601,22 +2691,12 @@
         }
       }
     },
-    "Noter Pulse" : {
+    "à l'instant" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Noter Pulse"
-          }
-        }
-      }
-    },
-    "Ouvre la fiche de Pulse sur l'App Store pour écrire un avis" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ouvre la fiche de Pulse sur l'App Store pour écrire un avis"
+            "value" : "à l'instant"
           }
         }
       }

@@ -19,11 +19,17 @@ public struct TodayEnvironment: Sendable {
     /// La demande d'accès à Apple Santé, pour « Connecter Apple Santé » sur la bannière du check-in ; `nil` : la bannière ne
     /// l'offre pas.
     public var healthAccess: HealthAccess?
+    /// Les autres entraînements d'Apple Santé, comptés dans le ratio de charge et la proposition de décharge ; `nil` : seules
+    /// les séances comptent.
+    public var activities: HealthActivities?
+    /// Le rappel de check-in, replanifié après un check-in : celui du jour ne part plus. `nil` : pas de rappel.
+    public var checkInReminders: CheckInReminderService?
 
     public init(refresher: DayRefresher, workouts: any WorkoutRepository, userExercises: any UserExerciseRepository,
                 exerciseSettings: any ExerciseSettingsRepository, activeSession: ActiveSessionService, library: ContentLibrary,
                 calendar: Calendar, now: @escaping @Sendable () -> Date, nights: NightDetailService,
-                healthAccess: HealthAccess? = nil) {
+                healthAccess: HealthAccess? = nil, activities: HealthActivities? = nil,
+                checkInReminders: CheckInReminderService? = nil) {
         self.refresher = refresher
         self.workouts = workouts
         self.userExercises = userExercises
@@ -34,5 +40,7 @@ public struct TodayEnvironment: Sendable {
         self.now = now
         self.nights = nights
         self.healthAccess = healthAccess
+        self.activities = activities
+        self.checkInReminders = checkInReminders
     }
 }

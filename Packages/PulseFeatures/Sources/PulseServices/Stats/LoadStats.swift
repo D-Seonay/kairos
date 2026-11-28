@@ -69,18 +69,20 @@ public struct LoadStats: Sendable, Equatable {
     public var bars: [LoadBar]
     public var totals: LoadTotals
 
-    // swiftlint:disable:next function_parameter_count
-    public static func make(sessions: [WorkoutSession], onboardingCompletedAt: Date?, deloadUntil: Date?, period: StatsPeriod,
-                            now: Date, calendar: Calendar) -> LoadStats {
+    // swiftlint:disable function_parameter_count
+    /// `extra` : la charge des autres entraînements d'Apple Santé (`HealthActivities`). Elle compte dans le ratio, sa courbe et
+    /// son bilan, comme à l'accueil ; les barres et les totaux restent ceux des séances, par discipline.
+    public static func make(sessions: [WorkoutSession], extra: [LoadSession] = [], onboardingCompletedAt: Date?, deloadUntil: Date?,
+                            period: StatsPeriod, now: Date, calendar: Calendar) -> LoadStats {
         // Mêmes séances et même début d'historique que l'accueil : `sessions` est tout l'historique.
         let start = TrainingLoad.historyStart(sessions: sessions, onboardingCompletedAt: onboardingCompletedAt)
         let historyStart = start ?? now
         let counted = sessions
             .filter { $0.status == .completed || $0.status == .abandoned }
             .map { CountedSession(session: $0, load: TrainingLoad.loadSession($0)) }
-        let ratios = DailyRatios(loads: counted.compactMap(\.load), historyStart: historyStart, calendar: calendar)
+        let ratios = DailyRatios(loads: counted.compactMap(\.load) + extra, historyStart: historyStart, calendar: calendar)
 
-        let today = TrainingLoad.acwr(sessions: sessions, historyStart: start, now: now, calendar: calendar)
+        let today = TrainingLoad.acwr(sessions: sessions, extra: extra, historyStart: start, now: now, calendar: calendar)
         let weekBefore = calendar.date(byAdding: .day, value: -7, to: now) ?? now
         let interval = period.interval(now: now, calendar: calendar)
         let inPeriod = counted.filter { interval.start <= $0.session.startedAt && $0.session.startedAt < interval.end }
@@ -96,6 +98,7 @@ public struct LoadStats: Sendable, Equatable {
             bars: bars(of: inBars, interval: interval, bucket: period.loadBucket, calendar: calendar),
             totals: totals(of: inPeriod))
     }
+    // swiftlint:enable function_parameter_count
 
     // MARK: - Courbe
 

@@ -20,9 +20,11 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
 
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
-        let notificationRouter = NotificationRouter(router: router, supplements: dependencies.supplementService)
+        let notificationRouter = NotificationRouter(router: router, supplements: dependencies.supplementService,
+                                                    checkIns: dependencies.checkInReminders)
         UNUserNotificationCenter.current().delegate = notificationRouter
-        UNUserNotificationCenter.current().setNotificationCategories(UserNotificationScheduler.supplementCategories)
+        UNUserNotificationCenter.current().setNotificationCategories(
+            UserNotificationScheduler.supplementCategories.union(UserNotificationScheduler.checkInCategories))
         self.notificationRouter = notificationRouter
         sessionIntents.install()
         metricKitReports.start()
@@ -55,13 +57,14 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     }
 
     /// Le passage du jour en arrière-plan, puis les rappels de compléments et du coucher : les règles anti-interférence du passage
-    /// ont pu déplacer une séance, et avec elle les rappels des jours d'entraînement. Un passage qui n'a pas tourné (onboarding pas
-    /// terminé) ne touche pas aux rappels.
+    /// ont pu déplacer une séance, et avec elle les rappels des jours d'entraînement. Le rappel de check-in suit les mesures de
+    /// montre que le passage vient de lire. Un passage qui n'a pas tourné (onboarding pas terminé) ne touche pas aux rappels.
     private static func refreshInBackground(_ dependencies: AppDependencies) async {
         let refresh = await dependencies.refresher.refresh(origin: .background)
         guard refresh.profile?.onboardingCompletedAt != nil else { return }
         await dependencies.supplementService.rescheduleReminders()
         await dependencies.bedtimeReminderService.reschedule()
+        await dependencies.checkInReminders.reschedule()
     }
 
     /// Les raccourcis Siri lisent les dépendances et le routeur de l'app, posés avant qu'une intention ne s'exécute ; les noms

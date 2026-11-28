@@ -33,6 +33,7 @@ struct MyDataScreen: View {
             }
             phoneSection
             exportSection
+            if let train = environment.train { HevyImportSection(train: train) }
             eraseSection
             linksSection
             if let dataDebug = screens.dataDebug {

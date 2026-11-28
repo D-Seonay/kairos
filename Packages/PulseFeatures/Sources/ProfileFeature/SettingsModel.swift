@@ -26,6 +26,8 @@ public final class SettingsModel {
     public private(set) var announcesKilometres = true
     /// Le plan du sommeil (réveils habituels, coucher conseillé) : relu au chargement et après chaque réglage enregistré.
     public private(set) var sleepPlan: SleepPlan?
+    /// Le rappel de check-in, réglé par appareil ; `nil` : l'app n'en offre pas.
+    public internal(set) var checkInReminder: CheckInReminderSettings?
 
     @ObservationIgnored let environment: ProfileEnvironment
     @ObservationIgnored private let onProfileSaved: @MainActor (UserProfile) -> Void
@@ -38,6 +40,7 @@ public final class SettingsModel {
     /// Relit le profil, l'état d'Apple Santé et celui des notifications.
     public func load() async {
         announcesKilometres = environment.runPreferences.announcesKilometres
+        checkInReminder = environment.checkInReminders?.settings
         do {
             profile = try await environment.settings.load()
             errorMessage = nil

@@ -177,9 +177,11 @@ private struct MonthDayCell: View {
         return day.isInMonth ? PulsePalette.text : PulsePalette.muted
     }
 
-    /// La discipline faite, sinon celle prévue ; `nil` un jour sans séance.
+    /// La discipline faite, sinon l'icône neutre d'un autre entraînement d'Apple Santé, sinon la discipline prévue ; `nil` un
+    /// jour sans rien.
     private var icon: String? {
         if let kind = day.done.first { return PlanningText.icon(of: kind) }
+        if day.hasActivity { return PlanningText.activityIcon }
         return day.planned.map { PlanningText.icon(of: $0) }
     }
 }
