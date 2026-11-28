@@ -6,8 +6,8 @@ import Testing
 struct HealthKitWorkoutFamilyTests {
     @Test func typesFallIntoTheirFamily() {
         #expect(HealthKitWorkoutFamily.family(of: .swimming) == .endurance)
-        #expect(HealthKitWorkoutFamily.family(of: .walking) == .endurance)
-        #expect(HealthKitWorkoutFamily.family(of: .hiking) == .endurance)
+        #expect(HealthKitWorkoutFamily.family(of: .walking) == .walking)
+        #expect(HealthKitWorkoutFamily.family(of: .hiking) == .walking)
         #expect(HealthKitWorkoutFamily.family(of: .rowing) == .endurance)
         #expect(HealthKitWorkoutFamily.family(of: .highIntensityIntervalTraining) == .intermittent)
         #expect(HealthKitWorkoutFamily.family(of: .boxing) == .intermittent)

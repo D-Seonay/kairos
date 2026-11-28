@@ -16,6 +16,8 @@ public enum HealthKitWorkoutFamily {
             .strength
         case .yoga, .pilates, .flexibility, .mindAndBody, .taiChi, .cooldown, .preparationAndRecovery, .barre:
             .mobility
+        case .walking, .hiking:
+            .walking
         default:
             sportsTypes.contains(type) ? .sports : .endurance
         }

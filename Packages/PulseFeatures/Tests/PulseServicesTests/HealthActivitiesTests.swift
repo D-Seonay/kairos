@@ -20,7 +20,7 @@ struct HealthActivitiesTests {
     @Test func eachFamilyHasItsDefaultRPE() {
         let samples = WorkoutFamily.allCases.map { workout($0, at: "2026-11-18T10:00") }
         let loads = HealthActivities.loadSessions(of: samples, ownBundleIdentifier: nil, birthDate: nil, calendar: calendar)
-        #expect(loads.map(\.rpe) == [5, 7, 6, 6, 2])
+        #expect(loads.map(\.rpe) == [5, 7, 6, 6, 2, 3])
         #expect(loads.allSatisfy { $0.minutes == 60 && $0.date == TestClock.date("2026-11-18T10:00") })
     }
 
@@ -29,6 +29,19 @@ struct HealthActivitiesTests {
         let loads = HealthActivities.loadSessions(of: [sample], ownBundleIdentifier: nil, birthDate: nil, calendar: calendar)
         let expected = EstimatedRPE.rpe(averageHeartRate: 160, maxHeartRate: EstimatedRPE.defaultMaxHeartRate)
         #expect(loads.first?.rpe == expected && expected != WorkoutFamily.mobility.defaultRPE)
+    }
+
+    @Test func anHourOfWalkingCountsLessThanAStrengthSession() {
+        let samples = [workout(.walking, at: "2026-11-18T10:00"), workout(.strength, at: "2026-11-18T18:00")]
+        let loads = HealthActivities.loadSessions(of: samples, ownBundleIdentifier: nil, birthDate: nil, calendar: calendar)
+        #expect(loads.map { $0.minutes * $0.rpe } == [180, 360])
+    }
+
+    @Test func aBriskWalkWithHeartRateUsesIt() {
+        let sample = workout(.walking, at: "2026-11-18T10:00", heartRate: 150)
+        let loads = HealthActivities.loadSessions(of: [sample], ownBundleIdentifier: nil, birthDate: nil, calendar: calendar)
+        let expected = EstimatedRPE.rpe(averageHeartRate: 150, maxHeartRate: EstimatedRPE.defaultMaxHeartRate)
+        #expect(loads.first?.rpe == expected && expected != WorkoutFamily.walking.defaultRPE)
     }
 
     @Test func pulseOwnWorkoutsAreIgnored() {
