@@ -1,4 +1,5 @@
 import Foundation
+import os
 import SwiftData
 
 /// Où vivent les données : iCloud, fichier local seul, ou mémoire (tests).
@@ -55,10 +56,21 @@ public enum PersistenceStack {
         ])
     }
 
+    /// Migre jusqu'à la dernière version, puis donne leur clé de jour civil aux lignes qui n'en ont pas et retire les doublons d'un
+    /// même jour (V9). Une réparation qui échoue n'empêche pas l'ouverture : les lectures dédoublonnent déjà, et elle repassera
+    /// au lancement suivant.
     private static func makeContainer(configurations: [ModelConfiguration]) throws -> ModelContainer {
-        try ModelContainer(for: Schema(versionedSchema: PulseSchemaV9.self), migrationPlan: PulseMigrationPlan.self,
-                           configurations: configurations)
+        let container = try ModelContainer(for: Schema(versionedSchema: PulseSchemaV9.self), migrationPlan: PulseMigrationPlan.self,
+                                           configurations: configurations)
+        do {
+            try DayKeyRepair.run(in: ModelContext(container), calendar: .autoupdatingCurrent, now: Date())
+        } catch {
+            logger.error("Réparation des jours civils impossible : \(String(describing: error), privacy: .public)")
+        }
+        return container
     }
+
+    private static let logger = Logger(subsystem: "fr.seonay.pulse", category: "persistence")
 
     private static func storeDirectory() throws -> URL {
         let directory = URL.applicationSupportDirectory.appending(path: "Pulse", directoryHint: .isDirectory)

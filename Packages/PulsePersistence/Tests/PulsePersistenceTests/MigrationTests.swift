@@ -107,6 +107,27 @@ import Testing
     #expect(profile.bedtimeReminderEnabled == false && profile.bedtimeReminderLeadMinutes == nil)
 }
 
+/// Un magasin V8 avec deux scores et deux check-ins pour le même jour (deux appareils), deux lectures locales du même jour et
+/// un brouillon de course à l'ancien format : à l'ouverture en V9, un seul score et un seul check-in vivants, les plus récents,
+/// tous avec leur clé ; une seule lecture ; le brouillon se relit.
+@Test func v8StoreWithDuplicateDaysOpensAsV9WithOneRowPerDay() async throws {
+    let directory = try makeStoreDirectory()
+    defer { try? FileManager.default.removeItem(at: directory) }
+    let draft = try writeV8Store(in: directory)
+
+    let container = try PersistenceStack.makeContainer(directory: directory)
+    let context = ModelContext(container)
+    let recoveries = try context.fetch(FetchDescriptor<StoredDailyRecovery>(predicate: #Predicate { $0.deletedAt == nil }))
+    #expect(recoveries.map(\.score) == [70])
+    #expect(try context.fetchCount(FetchDescriptor<StoredDailyRecovery>()) == 2)
+    let checkIns = try context.fetch(FetchDescriptor<StoredCheckIn>(predicate: #Predicate { $0.deletedAt == nil }))
+    #expect(checkIns.map(\.score) == [80])
+    #expect((recoveries.map(\.dayKey) + checkIns.map(\.dayKey)).allSatisfy { $0 != nil })
+    let readings = try context.fetch(FetchDescriptor<StoredRecoveryReading>())
+    #expect(readings.map(\.sdnnMs) == [55])
+    #expect(try await SwiftDataRunDraftStore(modelContainer: container).load() == draft)
+}
+
 private func makeStoreDirectory() throws -> URL {
     let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
     try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
@@ -262,4 +283,37 @@ private func writeV7Store(in directory: URL, profileID: UUID) throws {
     profile.createdAt = Fixed.t0
     context.insert(profile)
     try context.save()
+}
+
+/// Écrit un magasin V8 : deux scores, deux check-ins et deux lectures pour le même jour, le second plus récent, et un brouillon
+/// de course entier dans `payload`. Renvoie le brouillon.
+private func writeV8Store(in directory: URL) throws -> RunDraft {
+    let container = try makeFrozenContainer(PulseSchemaV8.self, synced: PulseSchemaV8.syncedModels,
+                                            local: PulseSchemaV8.localModels, in: directory)
+    let context = ModelContext(container)
+    let day = Fixed.calendar.startOfDay(for: Fixed.t0)
+    for (index, updatedAt) in [Fixed.t1, Fixed.t2].enumerated() {
+        let recovery = PulseSchemaV8.StoredDailyRecovery()
+        recovery.day = day
+        recovery.score = 60 + Double(index) * 10
+        recovery.updatedAt = updatedAt
+        context.insert(recovery)
+        let checkIn = PulseSchemaV8.StoredCheckIn()
+        checkIn.day = day
+        checkIn.score = 70 + Double(index) * 10
+        checkIn.updatedAt = updatedAt
+        context.insert(checkIn)
+        let reading = PulseSchemaV8.StoredRecoveryReading()
+        reading.day = day.addingTimeInterval(Double(index) * 60)   // même jour dans tous les fuseaux
+        reading.sdnnMs = 45 + Double(index) * 10
+        reading.updatedAt = updatedAt
+        context.insert(reading)
+    }
+    let draft = Sample.runDraft()
+    let row = PulseSchemaV8.StoredRunDraft()
+    row.id = draft.sessionID
+    row.payload = try JSONEncoder().encode(draft)
+    context.insert(row)
+    try context.save()
+    return draft
 }

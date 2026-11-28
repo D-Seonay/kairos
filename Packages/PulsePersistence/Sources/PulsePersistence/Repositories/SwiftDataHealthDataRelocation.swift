@@ -42,7 +42,7 @@ public actor SwiftDataHealthDataRelocation: HealthDataRelocating {
             // Les lignes supprimées logiquement ne sont jamais recopiées.
             let alive = rows.filter { $0.deletedAt == nil }.sorted { $0.updatedAt > $1.updatedAt }
             for row in alive where !readingDays.contains(row.day) {
-                let reading = StoredRecoveryReading(day: row.day, from: row.toDomain(), at: row.updatedAt)
+                let reading = StoredRecoveryReading(day: row.day, dayKey: row.dayKey, from: row.toDomain(), at: row.updatedAt)
                 guard !reading.isEmpty else { continue }
                 modelContext.insert(reading)
                 readingDays.insert(row.day)
