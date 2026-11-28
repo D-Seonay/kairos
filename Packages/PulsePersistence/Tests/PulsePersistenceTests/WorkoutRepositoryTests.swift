@@ -331,7 +331,8 @@ private func counts(_ container: ModelContainer) throws -> (synced: Int, local: 
     let repo = SwiftDataWorkoutRepository(modelContainer: try TestContainer.make())
     let bench = ExerciseReference.content(id: "bench-press-barbell")
     var old = benchSession(day: 1, status: .completed, sets: [benchSet(order: 1, reps: 10, type: .warmup), benchSet(order: 2, reps: 8)])
-    old.exerciseNotes = [ExerciseNote(exercise: bench, text: "Banc cran 3")]
+    // Le bench deux fois dans la séance : les deux notes sont reprises.
+    old.exerciseNotes = [ExerciseNote(exercise: bench, text: "Banc cran 3"), ExerciseNote(exercise: bench, text: "Pause en bas")]
     var deloaded = benchSession(day: 5, status: .abandoned, sets: [benchSet(order: 2, reps: 7), benchSet(order: 1, reps: 9)])
     deloaded.appliedAdjustments = [SessionAdjustment(kind: .deload, reason: "Décharge")]
     deloaded.exerciseNotes = [ExerciseNote(exercise: bench, text: "Prise large")]
@@ -343,7 +344,7 @@ private func counts(_ container: ModelContainer) throws -> (synced: Int, local: 
     let recent = try await repo.recentSessions(for: bench, startedBefore: Fixed.t0.addingTimeInterval(10 * day), limit: 5)
     #expect(recent.map(\.startedAt) == [deloaded.startedAt, old.startedAt])
     #expect(recent.map(\.isDeloaded) == [true, false])
-    #expect(recent.map(\.note) == ["Prise large", "Banc cran 3"])
+    #expect(recent.map(\.note) == ["Prise large", "Banc cran 3\nPause en bas"])
     #expect(recent[0].sets.map(\.actualReps) == [9, 7] && recent[1].sets.map(\.actualReps) == [8])
     #expect(try await repo.recentSessions(for: bench, startedBefore: .distantFuture, limit: 1).map(\.startedAt) == [later.startedAt])
 }

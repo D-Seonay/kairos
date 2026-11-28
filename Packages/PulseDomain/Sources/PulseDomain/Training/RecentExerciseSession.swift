@@ -16,12 +16,12 @@ public struct RecentExerciseSession: Sendable, Equatable {
         self.note = note
     }
 
-    /// La même lecture sur une séance entière : `nil` quand elle n'a aucune série hors échauffement de l'exercice.
+    /// La même lecture sur une séance entière : `nil` quand elle n'a aucune série hors échauffement de l'exercice. Un exercice
+    /// fait deux fois garde les notes des deux cartes (`ExerciseNote.merged`).
     public init?(_ session: WorkoutSession, exercise: ExerciseReference) {
         let sets = session.sets.filter { $0.exercise == exercise && $0.setType != .warmup }.sorted { $0.order < $1.order }
         guard !sets.isEmpty else { return nil }
-        let note = session.exerciseNotes.first { $0.exercise == exercise }?.text
         self.init(startedAt: session.startedAt, isDeloaded: session.isDeloaded, sets: sets,
-                  note: note?.isEmpty == false ? note : nil)
+                  note: ExerciseNote.merged(session.exerciseNotes, for: exercise))
     }
 }

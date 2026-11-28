@@ -137,10 +137,9 @@ public actor SwiftDataWorkoutRepository: WorkoutRepository {
         let latest = setsBySession.values.sorted { Self.isEarlier($1.session, $0.session) }.prefix(max(0, limit))
         return latest.map { entry in
             let notes = CodableColumn.decode([ExerciseNote].self, from: entry.session.exerciseNotes, default: [])
-            let note = notes.first { $0.exercise == exercise }?.text
             return RecentExerciseSession(startedAt: entry.session.startedAt, isDeloaded: Self.isDeloaded(entry.session),
                                          sets: entry.sets.map { $0.toDomain() }.sorted { $0.order < $1.order },
-                                         note: note?.isEmpty == false ? note : nil)
+                                         note: ExerciseNote.merged(notes, for: exercise))
         }
     }
 
