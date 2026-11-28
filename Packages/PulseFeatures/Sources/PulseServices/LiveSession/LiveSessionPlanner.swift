@@ -19,13 +19,19 @@ public enum LiveSessionPlanner {
         var policy: ProgressionPolicy
         /// Le facteur des charges externes proposées : 0,9 pendant une semaine de décharge.
         var loadFactor = 1.0
+        /// Le début de la séance, d'où se compte la pause depuis la dernière fois.
+        var start: Date
     }
 
     // swiftlint:disable function_parameter_count
+    /// `recent` : les dernières séances de chaque exercice (`WorkoutRepository.recentSessions`), d'où se lisent la baisse des
+    /// charges après une pause ou des échecs répétés (`LoadDropRule`) et la note reprise de la dernière fois.
     public static func session(for launch: SessionLaunch, directory: ExerciseDirectory,
                                history: [ExerciseReference: [WorkoutSet]], settings: [ExerciseReference: ExerciseSettings],
-                               profile: UserProfile?, now: Date) -> LiveSession {
-        let context = Context(directory: directory, profile: profile, policy: launch.policy, loadFactor: launch.loadFactor)
+                               profile: UserProfile?, now: Date,
+                               recent: [ExerciseReference: [RecentExerciseSession]] = [:]) -> LiveSession {
+        let context = Context(directory: directory, profile: profile, policy: launch.policy, loadFactor: launch.loadFactor,
+                              start: launch.past?.start ?? now)
         let planned = Dictionary((launch.plannedDay?.exercises ?? []).map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         var applied = launch.applied
         var exercises: [LiveExercise] = []
@@ -34,7 +40,8 @@ public enum LiveSessionPlanner {
         for routineExercise in (launch.day?.exercises ?? []).sorted(by: { $0.order < $1.order }) {
             let reference = routineExercise.exercise
             let built = build(routineExercise, planned: planned[routineExercise.id], lastSets: history[reference] ?? [],
-                              settings: settings[reference], context: context, workedMuscles: worked)
+                              recent: recent[reference] ?? [], settings: settings[reference], context: context,
+                              workedMuscles: worked)
             exercises.append(built.exercise)
             worked.formUnion(directory.info(reference)?.primaryMuscles ?? [])
             if let adjustment = built.loadAdjustment { applied.append(adjustment) }
@@ -51,19 +58,21 @@ public enum LiveSessionPlanner {
     /// Un exercice ajouté en séance : 3 séries de 8 à 12 répétitions (30 à 60 s s'il est tenu), au repos par défaut de
     /// l'exercice, sinon à celui du profil. `workedMuscles` : les muscles principaux des exercices déjà dans la séance.
     /// `routineExercise` remplace ces séries par défaut (le remplacement reprend celles de l'exercice remplacé). `loadFactor`
-    /// baisse les charges externes proposées comme au lancement : 0,9 dans une séance lancée en décharge.
+    /// baisse les charges externes proposées comme au lancement : 0,9 dans une séance lancée en décharge. `recent` et `now`
+    /// donnent la baisse après une pause ou des échecs répétés, et la note reprise, comme au lancement.
     public static func exercise(_ reference: ExerciseReference, directory: ExerciseDirectory, history: [WorkoutSet],
                                 settings: ExerciseSettings?, profile: UserProfile?, policy: ProgressionPolicy,
                                 workedMuscles: Set<Muscle> = [], routineExercise: RoutineExercise? = nil,
-                                loadFactor: Double = 1) -> LiveExercise {
+                                loadFactor: Double = 1, recent: [RecentExerciseSession] = [],
+                                now: Date = Date()) -> LiveExercise {
         let info = directory.info(reference)
         let range = info?.tracksDuration == true ? addedHoldRange : addedRepRange
         let restSeconds = info?.defaultRestSeconds ?? profile?.defaultRestSeconds ?? fallbackRestSeconds
         let routineExercise = routineExercise ?? RoutineExercise(
             order: 0, exercise: reference, sets: addedSetCount, repsMin: range.lowerBound, repsMax: range.upperBound,
             targetRPE: addedTargetRPE, restSeconds: restSeconds)
-        let context = Context(directory: directory, profile: profile, policy: policy, loadFactor: loadFactor)
-        return build(routineExercise, planned: nil, lastSets: history, settings: settings, context: context,
+        let context = Context(directory: directory, profile: profile, policy: policy, loadFactor: loadFactor, start: now)
+        return build(routineExercise, planned: nil, lastSets: history, recent: recent, settings: settings, context: context,
                      workedMuscles: workedMuscles).exercise
     }
     // swiftlint:enable function_parameter_count
@@ -72,7 +81,8 @@ public enum LiveSessionPlanner {
 
     // swiftlint:disable:next function_parameter_count
     private static func build(_ routineExercise: RoutineExercise, planned: RoutineExercise?, lastSets: [WorkoutSet],
-                              settings: ExerciseSettings?, context: Context, workedMuscles: Set<Muscle>) -> Built {
+                              recent: [RecentExerciseSession], settings: ExerciseSettings?, context: Context,
+                              workedMuscles: Set<Muscle>) -> Built {
         let info = context.directory.info(routineExercise.exercise)
         let name = info?.name ?? String(localized: "Exercice inconnu", bundle: .module)
         let loadKind = info?.loadKind ?? .external
@@ -83,20 +93,24 @@ public enum LiveSessionPlanner {
         let proposal = LoadProgression.propose(exercise: routineExercise, name: name, loadKind: loadKind,
                                                tracksDuration: tracksDuration, lastSets: lastSets, incrementKg: incrementKg,
                                                rounding: rounding, policy: context.policy)
-        let proposedSets = loadKind == .external ? scaled(proposal.sets, by: context.loadFactor, increment: incrementKg,
-                                                           rounding: rounding) : proposal.sets
-        let working = proposedSets.enumerated().map { index, proposed in
+        let scaledSets = loadKind == .external ? scaled(proposal.sets, by: context.loadFactor, increment: incrementKg,
+                                                         rounding: rounding) : proposal.sets
+        let recall = Recall(recent: recent, start: context.start)
+        let dropped = applyingDrop(recall.drop(for: routineExercise, tracksDuration: tracksDuration), to: scaledSets,
+                                   routineExercise: routineExercise, lastSets: lastSets, loadKind: loadKind,
+                                   tracksDuration: tracksDuration, incrementKg: incrementKg, rounding: rounding,
+                                   loadFactor: context.loadFactor)
+        // Une baisse remplace la hausse : ni la raison de la hausse, ni « Même charge ».
+        let loadAdjustment = dropped.drop == nil ? proposal.loadAdjustment : nil
+        let working = dropped.sets.enumerated().map { index, proposed in
             let before = index < lastSets.count ? lastSets[index] : nil
             return LiveSet(proposed: proposed,
                            previous: LiveSessionText.previous(before, loadKind: loadKind, tracksDuration: tracksDuration),
                            previousSpoken: LiveSessionText.previousSpoken(before, loadKind: loadKind,
                                                                           tracksDuration: tracksDuration))
         }
-        let primaryMuscles = Set(info?.primaryMuscles ?? [])
-        let warms = loadKind == .external && !tracksDuration && WarmupPlanner.isEligible(
-            autoWarmupEnabled: context.profile?.autoWarmupEnabled ?? false, isCompound: info?.isCompound ?? false,
-            warmupSetCount: settings?.warmupSetCount, primaryMuscleAlreadyWorked: !primaryMuscles.isDisjoint(with: workedMuscles))
-        let warmupPlan = warms ? LiveWarmupPlan(rounding: rounding, maxCount: settings?.warmupSetCount) : nil
+        let warmupPlan = warmupPlan(info: info, settings: settings, rounding: rounding, context: context,
+                                    workedMuscles: workedMuscles)
         let sets = LiveSessionPlanner.warmupSets(firstWorkingKg: working.first?.proposed.weightKg, plan: warmupPlan,
                                                  incrementKg: incrementKg) + working
         let lowered = planned.map { routineExercise.targetRPE < $0.targetRPE } ?? false
@@ -104,13 +118,22 @@ public enum LiveSessionPlanner {
             exercise: routineExercise.exercise, name: name, loadKind: loadKind, tracksDuration: tracksDuration,
             isBarbell: info?.equipment == .barbell, incrementKg: incrementKg, supersetGroup: routineExercise.supersetGroup,
             restSeconds: routineExercise.restSeconds, rpeCap: lowered ? routineExercise.targetRPE : nil,
-            dayNote: LiveSessionText.dayNote(loadAdjustment: proposal.loadAdjustment, hasHistory: !lastSets.isEmpty,
+            dayNote: LiveSessionText.dayNote(loadAdjustment: loadAdjustment, hasHistory: !lastSets.isEmpty && dropped.drop == nil,
                                              policy: context.policy, planned: planned, adjusted: routineExercise),
             lastTimeText: LiveSessionText.lastTime(lastSets, loadKind: loadKind, tracksDuration: tracksDuration),
             lastTimeSpoken: LiveSessionText.lastTimeSpoken(lastSets, loadKind: loadKind, tracksDuration: tracksDuration),
-            sets: sets,
-            warmupPlan: warmupPlan)
-        return (exercise, proposal.loadAdjustment)
+            sets: sets, warmupPlan: warmupPlan, loadDrop: dropped.drop)
+        return (exercise, loadAdjustment)
+    }
+
+    /// L'échauffement automatique d'un exercice à charge externe compté en répétitions, s'il y a lieu (spec M4 §8.3).
+    private static func warmupPlan(info: ExerciseInfo?, settings: ExerciseSettings?, rounding: WeightRounding, context: Context,
+                                   workedMuscles: Set<Muscle>) -> LiveWarmupPlan? {
+        let primaryMuscles = Set(info?.primaryMuscles ?? [])
+        let warms = (info?.loadKind ?? .external) == .external && !(info?.tracksDuration ?? false) && WarmupPlanner.isEligible(
+            autoWarmupEnabled: context.profile?.autoWarmupEnabled ?? false, isCompound: info?.isCompound ?? false,
+            warmupSetCount: settings?.warmupSetCount, primaryMuscleAlreadyWorked: !primaryMuscles.isDisjoint(with: workedMuscles))
+        return warms ? LiveWarmupPlan(rounding: rounding, maxCount: settings?.warmupSetCount) : nil
     }
 
     /// Les séries d'échauffement proposées avant une première série de travail à `firstWorkingKg` ; aucune sans plan ou sans

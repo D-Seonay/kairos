@@ -111,35 +111,15 @@ struct LiveExerciseCard: View {
         }
     }
 
-    @ViewBuilder
     private var details: some View {
-        let accent = Color(PulsePalette.accent(for: theme).accent)
-        if let group = exercise.supersetGroup {
-            Text(Self.supersetText(group: group))
-                .font(.caption.weight(.bold))
-                .foregroundStyle(accent)
+        LiveExerciseDetails(exercise: exercise) {
+            Task { await model.restoreLoads(exercise: exercise.id) }
         }
-        if let lastTime = exercise.lastTimeText {
-            Text(lastTime)
-                .font(.footnote)
-                .foregroundStyle(PulsePalette.text2)
-                .accessibilityLabel(exercise.lastTimeSpoken ?? lastTime)
-        }
-        if let dayNote = exercise.dayNote {
-            Label {
-                Text(dayNote)
-            } icon: {
-                Image(systemName: "sparkles").accessibilityHidden(true)
-            }
-            .font(.footnote)
-            .foregroundStyle(accent)
-        }
-        if let cap = exercise.rpeCap {
-            Text(Self.rpeCapText(cap)).font(.footnote.weight(.semibold)).foregroundStyle(PulsePalette.warn)
-        }
-        if let note = exercise.note {
-            Text(note).font(.footnote.italic()).foregroundStyle(PulsePalette.text2)
-        }
+    }
+
+    private func editNote() {
+        noteDraft = exercise.note ?? ""
+        isEditingNote = true
     }
 
     /// Le calculateur de disques, sur les exercices à la barre (spec M4 §19.2).
@@ -159,10 +139,7 @@ struct LiveExerciseCard: View {
 
     private var menu: some View {
         Menu {
-            Button {
-                noteDraft = exercise.note ?? ""
-                isEditingNote = true
-            } label: {
+            Button(action: editNote) {
                 Label(String(localized: "Note", bundle: .module), systemImage: "note.text")
             }
             Picker(String(localized: "Incrément", bundle: .module), selection: incrementBinding) {

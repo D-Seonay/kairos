@@ -177,6 +177,36 @@
         }
       }
     },
+    "Remettre %@ kg" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remettre %@ kg"
+          }
+        }
+      }
+    },
+    "Remettre les charges" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remettre les charges"
+          }
+        }
+      }
+    },
+    "Reprend les charges de la dernière fois sur les séries qui restent" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprend les charges de la dernière fois sur les séries qui restent"
+          }
+        }
+      }
+    },
     "Revenir à la séance" : {
       "localizations" : {
         "fr" : {

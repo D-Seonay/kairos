@@ -33,6 +33,9 @@ public enum LiveSessionChange: Sendable, Equatable {
     /// La charge de toutes les séries de travail pas encore validées de l'exercice, marquées modifiées (le ±2,5 kg du
     /// calculateur de disques, spec M4 §19.2). Une charge négative est ignorée.
     case setRemainingLoad(exercise: UUID, weightKg: Double)
+    /// Remet les charges d'avant la baisse du jour (`LiveExercise.loadDrop`) sur les séries de travail ni validées ni
+    /// modifiées, recalcule l'échauffement, et retire la ligne de la baisse.
+    case restoreLoads(exercise: UUID)
     /// Remplace l'exercice (spec M4 §19.3) : ses séries validées restent, les autres disparaissent, et `replacement` se place
     /// juste après lui. Un exercice sans série validée laisse toute sa place au remplaçant.
     case replaceExercise(UUID, with: LiveExercise)
@@ -49,7 +52,7 @@ extension LiveSession {
             applySetChange(change, now: now)
         case .addExercises, .removeExercise, .moveExercise, .replaceExercise:
             applyExerciseChange(change)
-        case .setNote, .setIncrement, .setWarmupCount, .setRemainingLoad:
+        case .setNote, .setIncrement, .setWarmupCount, .setRemainingLoad, .restoreLoads:
             applyExerciseSetting(change)
         case .restMinus30, .restPlus30, .skipRest:
             return
@@ -110,6 +113,8 @@ extension LiveSession {
         case let .setRemainingLoad(exercise, weightKg):
             guard weightKg >= 0 else { return }
             updateExercise(exercise) { $0.setRemainingLoad(weightKg) }
+        case let .restoreLoads(exercise):
+            updateExercise(exercise) { $0.restoreLoads() }
         default:
             return
         }
@@ -224,6 +229,18 @@ private extension LiveExercise {
             sets[index].isEdited = true
         }
         refreshWarmups(afterEditing: sets[first].id)
+    }
+
+    /// La série de travail *n* reprend la proposition *n* d'avant la baisse, tant qu'elle n'est ni validée ni modifiée.
+    mutating func restoreLoads() {
+        guard let drop = loadDrop else { return }
+        let working = sets.indices.filter { sets[$0].setType != .warmup }
+        for (position, index) in working.enumerated() where position < drop.originalSets.count
+            && sets[index].completedAt == nil && !sets[index].isEdited {
+            propose(drop.originalSets[position], at: index)
+        }
+        loadDrop = nil
+        if let first = working.first { refreshWarmups(afterEditing: sets[first].id) }
     }
 
     mutating func setWarmupCount(_ count: Int?) {

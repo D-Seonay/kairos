@@ -113,6 +113,13 @@ import Testing
         #expect(LiveExerciseCard.incrementText(5) == "5 kg")
     }
 
+    @Test func theRestoreButtonNamesTheLoadOfLastTime() {
+        let same = LiveLoadDrop(text: "", originalSets: [ProposedSet(weightKg: 82.5, reps: 8), ProposedSet(weightKg: 82.5, reps: 8)])
+        #expect(LiveExerciseDetails.restoreText(same) == "Remettre 82,5 kg")
+        let ramp = LiveLoadDrop(text: "", originalSets: [ProposedSet(weightKg: 60, reps: 10), ProposedSet(weightKg: 70, reps: 5)])
+        #expect(LiveExerciseDetails.restoreText(ramp) == "Remettre les charges")
+    }
+
     // MARK: Repos
 
     private func session() -> LiveSession {

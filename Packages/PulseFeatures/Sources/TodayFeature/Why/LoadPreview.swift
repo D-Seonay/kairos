@@ -18,7 +18,7 @@ enum LoadPreview {
                                            deload: session.isDeload ? .active(since: now, until: now) : .none)
         guard launch.policy.allowsIncrease else { return nil }
         let planned = LiveSessionPlanner.session(for: launch, directory: directory, history: reading.history,
-                                                 settings: reading.settings, profile: profile, now: now)
+                                                 settings: reading.settings, profile: profile, now: now, recent: reading.recent)
         return planned.appliedAdjustments.filter { $0.kind == .load }
     }
     // swiftlint:enable function_parameter_count
