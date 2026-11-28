@@ -78,6 +78,21 @@ struct CheckInReminderServiceTests {
         #expect(await scheduler.clearedDelivered)
     }
 
+    @Test func aRescheduleAfterTheReminderKeepsItWhileTheCheckInIsMissing() async throws {
+        try await setUp()
+        clock.set("2026-11-18T08:20")
+        await service().reschedule()
+        #expect(await scheduler.reminders.first?.day == TestClock.date("2026-11-19T00:00"))
+        #expect(await scheduler.clearedDelivered == false, "Le rappel de 7 h reste dans le centre de notifications")
+    }
+
+    @Test func turningTheReminderOffClearsTheDeliveredOne() async throws {
+        try await setUp()
+        clock.set("2026-11-18T08:20")
+        await service().setEnabled(false)
+        #expect(await scheduler.clearedDelivered)
+    }
+
     @Test func anAnswerFromAnotherDayIsIgnored() async throws {
         try await setUp()
         #expect(await service().answer(.good, day: TestClock.date("2026-11-17T00:00")) == false)

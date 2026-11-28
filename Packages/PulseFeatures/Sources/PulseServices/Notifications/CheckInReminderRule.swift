@@ -84,6 +84,16 @@ public enum CheckInReminderRule {
         return (silent.day ?? 0) >= silentWatchDays
     }
 
+    /// Vrai tant que le check-in du jour reste à demander : réglage actif, rappel proposé, ni check-in ni score mesuré
+    /// aujourd'hui. L'heure du rappel n'y fait rien : passé, le rappel du jour reste dans le centre de notifications tant que
+    /// le check-in n'est pas fait.
+    public static func isNeededToday(settings: CheckInReminderSettings, context: CheckInReminderContext, now: Date,
+                                     calendar: Calendar) -> Bool {
+        settings.enabled && !context.doneToday
+            && isOffered(lastWatchSample: context.lastWatchSample, onboardingCompletedAt: context.onboardingCompletedAt, now: now,
+                         calendar: calendar)
+    }
+
     /// Un rappel par matin des `horizonDays` jours à venir, à l'heure choisie, sinon au réveil habituel, sinon à 8 h ; aucun si
     /// le réglage est coupé ou le rappel pas proposé. Aujourd'hui n'en a pas si le check-in ou un score mesuré existe déjà, ni
     /// si l'heure est passée.

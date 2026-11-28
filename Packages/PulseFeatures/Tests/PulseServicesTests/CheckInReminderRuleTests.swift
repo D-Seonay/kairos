@@ -69,6 +69,19 @@ struct CheckInReminderRuleTests {
         #expect(reminders(context(watch: "2026-11-18T05:30")).isEmpty)
     }
 
+    @Test func todayStillNeedsTheCheckInAfterTheReminderTime() {
+        func needed(_ context: CheckInReminderContext, settings: CheckInReminderSettings = CheckInReminderSettings(),
+                    at text: String = "2026-11-18T08:20") -> Bool {
+            CheckInReminderRule.isNeededToday(settings: settings, context: context, now: TestClock.date(text), calendar: calendar)
+        }
+        #expect(needed(context()), "Le rappel de 7 h est passé, le check-in reste à faire")
+        #expect(needed(context(), at: "2026-11-18T06:00"))
+        #expect(!needed(context(doneToday: true)), "Check-in ou score mesuré du jour")
+        #expect(!needed(context(), settings: CheckInReminderSettings(enabled: false)), "Réglage coupé")
+        #expect(!needed(context(watch: "2026-11-18T05:30")), "La montre est revenue")
+        #expect(!needed(context(onboarded: nil)))
+    }
+
     @Test func quickAnswersAreFullCheckIns() {
         #expect(CheckInQuickAnswer.allCases.map(\.title) == ["En forme", "Moyen", "Fatigué"])
         #expect(CheckInQuickAnswer.allCases.map { CheckInScorer.score($0.answers) } == [75, 50, 33.75])

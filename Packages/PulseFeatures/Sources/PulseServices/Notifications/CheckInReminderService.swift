@@ -134,9 +134,12 @@ public struct CheckInReminderService: Sendable {
     private func replaceReminders() async {
         let now = now()
         guard let context = await context(now: now) else { return }
-        let reminders = CheckInReminderRule.reminders(settings: store.settings, context: context, now: now, calendar: calendar)
-        let today = calendar.startOfDay(for: now)
-        await scheduler.replaceCheckInReminders(with: reminders, clearDelivered: !reminders.contains { $0.day == today })
+        let settings = store.settings
+        let reminders = CheckInReminderRule.reminders(settings: settings, context: context, now: now, calendar: calendar)
+        // Le rappel déjà reçu ne part du centre de notifications qu'une fois inutile, pas parce que son heure est passée : une
+        // replanification d'arrière-plan (déverrouillage, livraison Apple Santé) ne l'efface pas avant qu'on y réponde.
+        let neededToday = CheckInReminderRule.isNeededToday(settings: settings, context: context, now: now, calendar: calendar)
+        await scheduler.replaceCheckInReminders(with: reminders, clearDelivered: !neededToday)
     }
 
     private func context(now: Date) async -> CheckInReminderContext? {
