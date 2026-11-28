@@ -5,6 +5,7 @@ import OnboardingFeature
 import PlanningFeature
 import ProfileFeature
 import PulseDomain
+import PulsePersistence
 import PulseServices
 import RunFeature
 import StatsFeature
@@ -49,10 +50,27 @@ final class AppRootModel {
     let dependencies: AppDependencies
     /// Les boutons de la Live Activity relisent la séance des onglets ; `nil` dans les tests.
     private let sessionIntents: SessionIntentWiring?
+    /// Décide si un retour au premier plan relit les onglets : jour changé, donnée changée, ou dernière relecture trop vieille.
+    @ObservationIgnored private var reloadGate = ActivationReloadGate()
+    /// Les relectures des onglets faites par un retour au premier plan, pour les tests.
+    @ObservationIgnored private(set) var activationReloads = 0
+    /// Prévient la porte d'un enregistrement SwiftData, d'un import iCloud ou d'un changement de fuseau.
+    @ObservationIgnored private var changeObserver: DataChangeObserver?
 
-    init(dependencies: AppDependencies, sessionIntents: SessionIntentWiring? = nil) {
+    /// `changes` : le centre de notifications observé ; un centre à part dans les tests, que les enregistrements des autres tests
+    /// ne touchent pas.
+    init(dependencies: AppDependencies, sessionIntents: SessionIntentWiring? = nil, changes: NotificationCenter = .default) {
         self.dependencies = dependencies
         self.sessionIntents = sessionIntents
+        changeObserver = DataChangeObserver(center: changes) { [weak self] in
+            Task { @MainActor in self?.noteDataChange() }
+        }
+    }
+
+    /// Une donnée a changé hors des écrans (passage du jour en arrière-plan, action d'une notification, autre appareil, fuseau) :
+    /// le prochain retour au premier plan relit les onglets.
+    func noteDataChange() {
+        reloadGate.noteChange()
     }
 
     var theme: Theme {
@@ -91,30 +109,56 @@ final class AppRootModel {
         await refreshSupplementReminders()
     }
 
-    /// Au retour au premier plan : la séance en cours, puis « Aujourd'hui », puis « Séance », qui relit le score du jour
-    /// qu'« Aujourd'hui » vient d'enregistrer, puis « Planning ».
-    func becameActive() async {
+    /// Au retour au premier plan : toujours la séance en cours et la course (les boutons de la Live Activity ont pu les changer).
+    /// Les onglets ne sont relus que si le jour a changé, si une donnée a changé hors des écrans, ou si la dernière relecture a
+    /// plus de dix minutes : deux retours rapprochés (centre de notifications, widget) ne relisent qu'une fois.
+    func becameActive(at date: Date? = nil) async {
         // L'accès à Apple Santé a pu être accordé dans Réglages pendant que l'app était en arrière-plan.
         dependencies.backgroundDelivery?.restartIfStopped()
         guard destination == .main, let today else { return }
+        await refreshLiveSession()
+        // Une course interrompue à proposer, ou une course rattachée dont l'écran se rouvre.
+        await run?.refresh()
+        let start = date ?? dependencies.now()
+        guard reloadGate.beginReload(at: start, calendar: dependencies.calendar) else { return }
+        await reloadTabs(today: today)
+        reloadGate.endReload(at: start)
+        activationReloads += 1
+    }
+
+    /// « Aujourd'hui », puis « Séance », qui relit le score du jour qu'« Aujourd'hui » vient d'enregistrer, en même temps que
+    /// « Planning », qui tient compte des courses d'Apple Santé qu'« Aujourd'hui » vient de lire ; les compléments et les rappels
+    /// à côté, indépendants. Stats et Profil, une fois leur onglet ouvert, en dernier : ils lisent ce que le passage du jour vient
+    /// de mettre à jour.
+    private func reloadTabs(today: TodayModel) async {
         let train = train
         let planning = planning
         let stats = stats
         let profileModel = profileModel
-        await refreshLiveSession()
-        // Une course interrompue à proposer, ou une course rattachée dont l'écran se rouvre.
-        await run?.refresh()
+        let supplements = supplements
+        async let supplementsReloaded: Void = reloadSupplements(supplements)
         await today.refresh()
-        await train?.refresh()
-        // « Aujourd'hui » vient de lire les courses d'Apple Santé : la semaine et la série en tiennent compte.
+        async let trainReloaded: Void = refresh(train)
         await planning?.load()
+        await trainReloaded
+        async let statsReloaded: Void = reloadIfOpened(stats)
+        if let profileModel, profileModel.hasLoaded { await profileModel.load() }
+        await statsReloaded
+        await supplementsReloaded
+    }
+
+    private func refresh(_ train: TrainModel?) async {
+        await train?.refresh()
+    }
+
+    /// Les statistiques relisent tout l'historique : seulement une fois l'onglet ouvert (son `.task` charge la première fois).
+    private func reloadIfOpened(_ stats: StatsModel?) async {
+        if let stats, stats.hasLoaded { await stats.load() }
+    }
+
+    private func reloadSupplements(_ supplements: SupplementsModel?) async {
         await supplements?.load()
         await refreshSupplementReminders()
-        // Les statistiques relisent tout l'historique : seulement une fois l'onglet ouvert (son `.task` charge la première fois).
-        if let stats, stats.hasLoaded { await stats.load() }
-        // Le profil lit la série, le score et le poids que le passage du jour vient de mettre à jour : en dernier, et seulement
-        // une fois l'onglet ouvert, comme les statistiques.
-        if let profileModel, profileModel.hasLoaded { await profileModel.load() }
     }
 
     /// Les rappels de compléments couvrent 14 jours : chaque lancement et chaque retour au premier plan les recalculent, et
@@ -216,6 +260,8 @@ final class AppRootModel {
                 supplements = SupplementsModel(environment: dependencies.supplementsEnvironment())
                 sessionIntents?.coordinator = liveSession
                 sessionIntents?.runCoordinator = run
+                // Les onglets neufs se chargent eux-mêmes en s'affichant : un retour au premier plan juste après ne relit pas.
+                reloadGate.endReload(at: dependencies.now())
             }
         }
         destination = next
