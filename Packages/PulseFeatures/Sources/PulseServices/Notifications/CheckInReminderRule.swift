@@ -65,8 +65,11 @@ public struct CheckInReminderContext: Sendable, Equatable {
 public enum CheckInReminderRule {
     /// Les jours sans donnée de montre après lesquels le rappel se propose.
     public static let silentWatchDays = 3
-    /// Les matins planifiés d'avance : sans ouvrir l'app, les rappels continuent une semaine.
-    public static let horizonDays = 7
+    /// Les matins planifiés d'avance : aujourd'hui et demain. Un rappel déjà planifié ne s'annule qu'à une replanification, que
+    /// l'iPhone verrouillé empêche (Apple Santé illisible) : une montre remise la nuit laisse partir au plus ces rappels-là. Une
+    /// réponse rapide, l'ouverture de l'app ou un passage d'arrière-plan replanifient et prolongent la suite ; sans aucun des
+    /// trois, les rappels s'arrêtent après deux matins sans réponse.
+    public static let horizonDays = 2
     /// 8 h, sans réveil habituel connu.
     public static let defaultMinutes = 8 * 60
     /// Les heures qu'on peut choisir : de 5 h à 11 h, par demi-heure.

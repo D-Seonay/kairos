@@ -37,12 +37,21 @@ struct CheckInReminderRuleTests {
 
     @Test func oneReminderEachMorningAtTheUsualWakeTime() {
         let result = reminders(context())
-        #expect(result.count == CheckInReminderRule.horizonDays)
-        #expect(result.first?.fireDate == TestClock.date("2026-11-18T07:00"))
+        #expect(result.map(\.fireDate) == [TestClock.date("2026-11-18T07:00"), TestClock.date("2026-11-19T07:00")])
         #expect(result.first?.day == TestClock.date("2026-11-18T00:00"))
-        #expect(result.map(\.fireDate).contains(TestClock.date("2026-11-21T09:00")), "Le week-end, au réveil du week-end")
-        #expect(result.map(\.fireDate).contains(TestClock.date("2026-11-23T07:00")))
         #expect(result.allSatisfy { $0.title == "Comment tu te sens ?" })
+        let friday = CheckInReminderRule.reminders(settings: CheckInReminderSettings(), context: context(),
+                                                   now: TestClock.date("2026-11-20T06:00"), calendar: calendar)
+        #expect(friday.last?.fireDate == TestClock.date("2026-11-21T09:00"), "Le week-end, au réveil du week-end")
+    }
+
+    @Test func onlyTodayAndTomorrowAreBookedAhead() {
+        // Une montre remise une nuit iPhone verrouillé ne peut rien annuler : au plus deux rappels partent pour rien. Une réponse
+        // rapide ou un passage d'arrière-plan replanifie et prolonge la suite.
+        #expect(CheckInReminderRule.horizonDays == 2)
+        let late = CheckInReminderRule.reminders(settings: CheckInReminderSettings(), context: context(),
+                                                 now: TestClock.date("2026-11-18T07:30"), calendar: calendar)
+        #expect(late.map(\.day) == [TestClock.date("2026-11-19T00:00")])
     }
 
     @Test func aChosenTimeWinsAndEightIsTheFallback() {
