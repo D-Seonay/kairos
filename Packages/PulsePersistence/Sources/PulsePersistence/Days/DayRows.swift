@@ -38,4 +38,10 @@ enum DayRows {
         }
         return groups
     }
+
+    /// La plus récente de chaque jour civil, triées par jour (une clé « 2026-11-27 » se trie comme sa date).
+    static func latest<Row: DayKeyedRow>(_ rows: [Row], calendar: Calendar) -> [(key: String, row: Row)] {
+        byDay(rows, calendar: calendar).compactMap { key, group in group.first.map { (key: key, row: $0) } }
+            .sorted { $0.key < $1.key }
+    }
 }

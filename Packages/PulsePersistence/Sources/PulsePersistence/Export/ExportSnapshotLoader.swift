@@ -63,14 +63,15 @@ public actor ExportSnapshotLoader {
             .filter { liveSessionIDs.contains($0.sessionID) }
         snapshot.scheduledDays = try fetch(StoredScheduledDay.self, #Predicate { $0.deletedAt == nil },
                                            [SortDescriptor(\.date), SortDescriptor(\.createdAt)]).map { $0.toDomain() }
-        // Les valeurs brutes d'Apple Health viennent du magasin local, recollées sur chaque score.
+        // Un score et un check-in par jour civil, le plus récent, comme l'app les lit ; les valeurs brutes d'Apple Health viennent
+        // du magasin local, recollées sur chaque score.
         let calendar = Calendar.current
-        let recoveries = try fetch(StoredDailyRecovery.self, #Predicate { $0.deletedAt == nil }, [SortDescriptor(\.day)])
-            .map { (key: DayKey.effective($0.dayKey, day: $0.day, calendar: calendar), recovery: $0.toDomain()) }
+        let recoveries = DayRows.latest(try fetch(StoredDailyRecovery.self, #Predicate { $0.deletedAt == nil }, []), calendar: calendar)
+            .map { (key: $0.key, recovery: $0.row.toDomain()) }
         let readings = try fetch(StoredRecoveryReading.self, #Predicate { _ in true }, [SortDescriptor(\.day)])
         snapshot.dailyRecoveries = RecoveryReadingJoin.fill(recoveries, with: readings, calendar: calendar)
-        snapshot.checkIns = try fetch(StoredCheckIn.self, #Predicate { $0.deletedAt == nil }, [SortDescriptor(\.day)])
-            .map { $0.toDomain() }
+        snapshot.checkIns = DayRows.latest(try fetch(StoredCheckIn.self, #Predicate { $0.deletedAt == nil }, []), calendar: calendar)
+            .map { $0.row.toDomain() }
         snapshot.supplements = try fetch(StoredSupplement.self, #Predicate { $0.deletedAt == nil },
                                          [SortDescriptor(\.order), SortDescriptor(\.createdAt)]).map { $0.toDomain() }
         snapshot.supplementIntakes = try fetch(StoredSupplementIntake.self, #Predicate { $0.deletedAt == nil },
