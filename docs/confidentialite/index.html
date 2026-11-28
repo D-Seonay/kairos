@@ -48,8 +48,8 @@
     <li><strong>Sommeil</strong> (durée et phases) : pour le facteur sommeil de ton score de récupération du matin, pour l'écran Nuit (l'écart à ton objectif de sommeil et la régularité de ton coucher), et pour deux rappels si tu les actives : le rappel de coucher, calé sur ton heure de réveil habituelle tant que tu n'en as pas choisi une, et le rappel d'un complément au coucher avec « Suivre mes nuits ». Ces heures sont recalculées sur l'iPhone et ne sont jamais enregistrées.</li>
     <li><strong>Variabilité cardiaque (VFC, mesure SDNN)</strong> : pour construire ta ligne de base et situer ta nuit par rapport à elle.</li>
     <li><strong>Fréquence cardiaque au repos</strong> : pour comparer ta nuit à tes jours précédents.</li>
-    <li><strong>Fréquence cardiaque</strong> : pour en tirer la fréquence moyenne de tes courses et sorties à vélo, y compris celle que mesure la séance d'entraînement d'une course lancée avec Pulse.</li>
-    <li><strong>Entraînements de course et de vélo</strong> : pour compter ces séances dans ta charge d'entraînement des 28 derniers jours.</li>
+    <li><strong>Fréquence cardiaque</strong> : pour en tirer la fréquence moyenne de tes entraînements (courses, sorties à vélo et autres), y compris celle que mesure la séance d'entraînement d'une course lancée avec Pulse.</li>
+    <li><strong>Entraînements</strong> (course, vélo, natation, HIIT, sports, musculation enregistrée par une autre app…) : pour compter ces séances dans ta charge d'entraînement des 28 derniers jours et les montrer dans ton assiduité. Seuls la course et le vélo deviennent des séances dans Pulse ; les autres restent sur l'iPhone, avec leur type, leur durée et leur fréquence cardiaque moyenne. Les séances que Pulse a lui-même écrites dans Apple Santé ne sont pas relues.</li>
     <li><strong>Poids et masse grasse</strong> : pour suivre ta progression.</li>
     <li><strong>Taille, date de naissance et sexe</strong> : pour te proposer ces valeurs dans ton profil à la première ouverture. Tu les vérifies et tu peux les modifier avant de les valider.</li>
   </ul>
@@ -98,11 +98,11 @@
   <ul>
     <li><strong>Sur ton iPhone</strong> : toutes les données de Pulse.</li>
     <li><strong>Dans ton iCloud privé</strong> : ce que tu saisis et ce que Pulse calcule, c'est-à-dire tes séances et leurs séries, tes pesées saisies, tes compléments et leurs prises, tes courses lancées avec Pulse (distance, temps par kilomètre, dénivelé et tracé simplifié), tes photos de séance, ton programme et ton planning, tes check-ins, tes réglages, et tes scores de récupération calculés avec leurs sous-scores. Cet espace est le tien : il n'est pas lisible par le développeur de Pulse. Sans compte iCloud, rien ne se synchronise.</li>
-    <li><strong>Ce que Pulse n'écrit jamais dans iCloud</strong> : les valeurs lues dans Apple Santé (sommeil, VFC, fréquence cardiaque, y compris celle mesurée pendant une course lancée avec Pulse, courses, vélos, poids et masse grasse venus d'Apple Santé), ni les points de la course en cours. Elles restent dans un espace de l'iPhone qui ne se synchronise pas. Comme toutes les données locales de l'app, elles font partie de la sauvegarde de ton iPhone si tu l'as activée (sauvegarde iCloud ou sur ordinateur), et des exports que tu fais toi-même.</li>
+    <li><strong>Ce que Pulse n'écrit jamais dans iCloud</strong> : les valeurs lues dans Apple Santé (sommeil, VFC, fréquence cardiaque, y compris celle mesurée pendant une course lancée avec Pulse, courses, vélos et autres entraînements, poids et masse grasse venus d'Apple Santé), ni les points de la course en cours. Elles restent dans un espace de l'iPhone qui ne se synchronise pas. Comme toutes les données locales de l'app, elles font partie de la sauvegarde de ton iPhone si tu l'as activée (sauvegarde iCloud ou sur ordinateur), et des exports que tu fais toi-même.</li>
     <li><strong>Seulement sur ton iPhone, hors sauvegarde</strong> : tes photos de corps et leur liste de dates, dans un dossier protégé de l'app, exclu de la sauvegarde de l'iPhone et de l'export général.</li>
   </ul>
   <p class="note">Une exception à connaître : les valeurs proposées depuis Apple Santé à la création de ton profil (taille, poids, date de naissance, sexe) ne sont enregistrées, et synchronisées, qu'une fois l'étape du profil validée. Elles deviennent alors une saisie de ton profil Pulse, qui se synchronise comme le reste. Le RPE et la note que tu ajoutes à une course venue d'Apple Santé restent aussi sur l'iPhone.</p>
-  <p>Les widgets et la Live Activity de séance lisent un résumé enregistré sur ton iPhone (score du jour, séance prévue, titre et durées de la séance en cours). La Live Activity de course affiche le titre, le temps, la distance et l'allure de la course en cours. Les rappels sont des notifications locales, programmées par l'iPhone. Les annonces vocales de la course sont dites par l'iPhone lui-même. Siri et l'app Raccourcis ne lisent ton score du jour, et ne cochent un complément, qu'une fois l'iPhone déverrouillé ; la réponse est préparée par Pulse sur l'iPhone.</p>
+  <p>Les widgets et la Live Activity de séance lisent un résumé enregistré sur ton iPhone (score du jour, séance prévue, titre et durées de la séance en cours). La Live Activity de course affiche le titre, le temps, la distance et l'allure de la course en cours. Les rappels sont des notifications locales, programmées par l'iPhone. Le rappel de check-in (« Comment tu te sens ? »), qui ne part que si ta montre n'a rien mesuré depuis 3 jours, n'affiche aucune donnée de santé ; ses trois réponses rapides enregistrent ton check-in comme dans l'app, et son réglage reste sur l'iPhone. Les annonces vocales de la course sont dites par l'iPhone lui-même. Siri et l'app Raccourcis ne lisent ton score du jour, et ne cochent un complément, qu'une fois l'iPhone déverrouillé ; la réponse est préparée par Pulse sur l'iPhone.</p>
 </section>
 
 <section id="ne-fait-pas">
@@ -149,7 +149,7 @@
 </section>
 
 <footer>
-  <p class="note">Mise à jour le 26 novembre 2026.</p>
+  <p class="note">Mise à jour le 28 novembre 2026.</p>
 </footer>
 </main>
 </body>
