@@ -11,7 +11,7 @@ public struct DayRefresh: Sendable, Equatable {
     /// Nul si le calcul du score a échoué.
     public var score: TodayScore?
     public var session: TodaySession
-    /// Le check-in du jour, quand le score en est estimé.
+    /// Le check-in du jour : celui du score estimé, ou le ressenti ajouté au score mesuré.
     public var checkIn: CheckIn?
 
     public init(profile: UserProfile?, nights: [NightSample], readAt: Date?, plannedDay: PlannedDay, score: TodayScore?,

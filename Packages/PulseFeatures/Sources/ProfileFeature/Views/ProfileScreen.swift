@@ -96,7 +96,7 @@ public struct ProfileScreen: View {
                         .frame(maxWidth: .infinity, minHeight: 200)
                         .accessibilityLabel(String(localized: "Chargement du profil", bundle: .module))
                 }
-                ProfileLinks(onOpenStats: onOpenStats)
+                ProfileLinks(syncWarning: model.syncWarning, onOpenStats: onOpenStats)
             }
             .padding(PulseMetrics.spacing)
         }

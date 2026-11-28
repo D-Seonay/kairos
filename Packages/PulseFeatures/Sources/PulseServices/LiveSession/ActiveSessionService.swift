@@ -16,6 +16,10 @@ public enum ActiveSessionError: Error, Equatable {
 /// après une relance passent par lui. Tous ses appels passent l'un après l'autre par une même file ; chaque changement est
 /// enregistré dans le snapshot avant de rendre la main, puis le repos, sa notification et la Live Activity suivent.
 public final class ActiveSessionService: Sendable {
+    /// Les dernières séances lues par exercice au lancement : deux hors décharge pour les échecs répétés, une de plus au cas où
+    /// la plus récente serait une décharge.
+    public static let recentSessionCount = 3
+
     let store: any ActiveSessionStore
     let workouts: any WorkoutRepository
     let profiles: any ProfileRepository
@@ -90,13 +94,18 @@ public final class ActiveSessionService: Sendable {
             let profile = try await self.profiles.load()
             var history: [ExerciseReference: [WorkoutSet]] = [:]
             var settingsByExercise: [ExerciseReference: ExerciseSettings] = [:]
+            var recent: [ExerciseReference: [RecentExerciseSession]] = [:]
             let historyLimit = min(launch.past?.start ?? .distantFuture, launch.historyLimit ?? .distantFuture)
             for reference in launch.day?.exercises.map(\.exercise) ?? [] where history[reference] == nil {
                 history[reference] = try await self.workouts.lastSets(for: reference, startedBefore: historyLimit)
                 settingsByExercise[reference] = try await self.settings.settings(for: reference)
+                // La pause et la note se lisent sur toutes les séances d'avant, décharge en cours comprise.
+                recent[reference] = try await self.workouts.recentSessions(
+                    for: reference, startedBefore: launch.past?.start ?? .distantFuture, limit: Self.recentSessionCount)
             }
             let session = LiveSessionPlanner.session(for: launch, directory: directory, history: history,
-                                                     settings: settingsByExercise, profile: profile, now: self.now())
+                                                     settings: settingsByExercise, profile: profile, now: self.now(),
+                                                     recent: recent, calendar: self.calendar)
             try await self.save(session, at: session.lastActionAt)
             if !session.isPastEntry { await self.activity.start(Self.activityState(for: session)) }
             return session
@@ -118,7 +127,10 @@ public final class ActiveSessionService: Sendable {
                     reference, directory: directory,
                     history: try await self.workouts.lastSets(for: reference, startedBefore: session.proposalHistoryLimit),
                     settings: try await self.settings.settings(for: reference), profile: profile, policy: session.policy,
-                    workedMuscles: worked, loadFactor: session.addedLoadFactor))
+                    workedMuscles: worked, loadFactor: session.addedLoadFactor,
+                    recent: try await self.workouts.recentSessions(for: reference, startedBefore: session.historyLimit,
+                                                                   limit: Self.recentSessionCount),
+                    now: session.startedAt, calendar: self.calendar))
                 worked.formUnion(directory.info(reference)?.primaryMuscles ?? [])
             }
             return added

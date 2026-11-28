@@ -9,10 +9,12 @@ import TrainFeature
 @Observable
 public final class PlanningModel {
     public private(set) var overview: PlanningOverview?
-    public private(set) var errorMessage: String?
+    public internal(set) var errorMessage: String?
     public private(set) var hasLoaded = false
     /// Le jour dont on choisit la nouvelle place (« Déplacer à… »).
     public var moving: PlanningDay?
+    /// Le jour manqué dont on choisit le jour de rattrapage (« Rattraper… »).
+    public var catchingUp: PlanningDay?
 
     @ObservationIgnored let environment: PlanningEnvironment
     @ObservationIgnored private var isLoading = false
@@ -177,12 +179,10 @@ public final class PlanningModel {
                 : String(localized: "Validée · \(results)", bundle: .module)
         case .missed:
             return String(localized: "Manquée", bundle: .module)
+        case .caughtUp:
+            return caughtUpDetail(of: day)
         case .planned:
-            if let origin = day.movedFrom {
-                return String(localized: "Déplacée de \(weekdayName(origin))", bundle: .module)
-            }
-            guard let routine = day.routine else { return "" }
-            return routine.kind == .run ? PlanningText.run(routine, spoken: spoken) : String(localized: "Prévue", bundle: .module)
+            return plannedDetail(of: day, spoken: spoken)
         case .rest:
             if let moved = days.first(where: { $0.movedFrom.map { environment.calendar.isDate($0, inSameDayAs: day.date) } ?? false }),
                let routine = moved.routine {
@@ -192,6 +192,17 @@ public final class PlanningModel {
         case .mandatoryRest:
             return String(localized: "Choisi à l'inscription", bundle: .module)
         }
+    }
+
+    /// « Rattrapage de mardi », « Déplacée de mardi », « Sortie facile · 45 min » ou « Prévue ».
+    private func plannedDetail(of day: PlanningDay, spoken: Bool) -> String {
+        if let origin = day.movedFrom {
+            return isCaughtUp(origin)
+                ? String(localized: "Rattrapage de \(weekdayName(origin))", bundle: .module)
+                : String(localized: "Déplacée de \(weekdayName(origin))", bundle: .module)
+        }
+        guard let routine = day.routine else { return "" }
+        return routine.kind == .run ? PlanningText.run(routine, spoken: spoken) : String(localized: "Prévue", bundle: .module)
     }
 
     /// L'icône d'un jour : la discipline faite, sinon celle prévue, sinon un repos.

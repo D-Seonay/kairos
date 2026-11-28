@@ -1,6 +1,26 @@
 {
   "sourceLanguage": "fr",
   "strings": {
+    "%@ de retard de sommeil sur 7 nuits": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ de retard de sommeil sur 7 nuits"
+          }
+        }
+      }
+    },
+    "%@ de retard sur 7 nuits": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ de retard sur 7 nuits"
+          }
+        }
+      }
+    },
     "%@ vs ta moyenne": {
       "localizations": {
         "fr": {
@@ -57,6 +77,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "1 réveil"
+          }
+        }
+      }
+    },
+    "Aucun retard de sommeil sur 7 nuits": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun retard de sommeil sur 7 nuits"
           }
         }
       }

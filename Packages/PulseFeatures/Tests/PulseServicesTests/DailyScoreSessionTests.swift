@@ -3,7 +3,7 @@ import PulseDomain
 import PulseServices
 import Testing
 
-/// Le score du jour et la séance prévue : ajustements enregistrés, choix « Séance d'origine », check-in refusé une fois mesuré,
+/// Le score du jour et la séance prévue : ajustements enregistrés, choix « Séance d'origine », ressenti ajouté au score mesuré,
 /// opérations sérialisées.
 struct DailyScoreSessionTests: DailyScoreTesting {
     @Test func measuredScoreStoresTheDaysAdjustments() async throws {
@@ -39,17 +39,65 @@ struct DailyScoreSessionTests: DailyScoreTesting {
         #expect(try await records(fixture, on: "2026-11-02T00:00").first?.originalSessionChosen == true)
     }
 
-    @Test func checkInIsRefusedOnceMeasured() async throws {
+    /// Le ressenti du matin compte aussi quand le score est mesuré (#119) : enregistré à côté, il retire au plus 5 points.
+    @Test func checkInAddsTheFeelingToAMeasuredScore() async throws {
         let fixture = fixture()
         let now = TestClock.date("2026-11-02T08:00")
         let measured = try scored(try await fixture.service.update(nights: await nights(.goodNight, at: now), now: now))
-        await #expect(throws: DailyScoreError.alreadyMeasured) {
-            try await fixture.service.saveCheckIn(CheckInAnswers(sleep: 1, pain: 1, motivation: 1),
-                                                  now: TestClock.date("2026-11-02T09:00"))
+        let feelingBad = CheckInAnswers(sleep: 0, pain: 0, motivation: 0)
+        let adjusted = try await fixture.service.saveCheckIn(feelingBad, now: TestClock.date("2026-11-02T09:00"))
+        #expect(!adjusted.isEstimated)
+        #expect(abs(adjusted.score - (measured.score - 5)) < 1e-9)
+        #expect(adjusted.hrvScore == measured.hrvScore && adjusted.sleepScore == measured.sleepScore)
+        #expect(adjusted.measuredScore.map { abs($0 - measured.score) < 1e-9 } == true)
+        #expect(try await records(fixture, on: "2026-11-02T00:00") == [adjusted])
+        let day = TestClock.date("2026-11-02T00:00")
+        let checkIns = try await fixture.repository.checkIns(from: day, to: TestClock.date("2026-11-03T00:00"))
+        #expect(checkIns.map(\.answers) == [feelingBad])
+    }
+
+    /// Un recalcul avant midi garde le ressenti enregistré : le score ne revient pas à la mesure seule.
+    @Test func aRecomputeKeepsTheFeeling() async throws {
+        let fixture = fixture()
+        let now = TestClock.date("2026-11-02T08:00")
+        let nights = await nights(.goodNight, at: now)
+        _ = try await fixture.service.update(nights: nights, now: now)
+        let adjusted = try await fixture.service.saveCheckIn(CheckInAnswers(sleep: 0, pain: 0, motivation: 0), now: now)
+        let later = TestClock.date("2026-11-02T10:00")
+        let recomputed = try scored(try await fixture.service.update(nights: nights, now: later))
+        #expect(recomputed.score == adjusted.score)
+        #expect(recomputed.category == adjusted.category)
+    }
+
+    /// À 12 h 30, avant qu'une passe ait figé le jour, le ressenti ne se glisse plus dans le score mesuré : midi est passé.
+    @Test func aFeelingAfterNoonIsRefusedOnAMeasuredScore() async throws {
+        let fixture = fixture()
+        let now = TestClock.date("2026-11-02T08:00")
+        let measured = try scored(try await fixture.service.update(nights: await nights(.goodNight, at: now), now: now))
+        await #expect(throws: DailyScoreError.frozen) {
+            try await fixture.service.saveCheckIn(CheckInAnswers(sleep: 0, pain: 0, motivation: 0),
+                                                  now: TestClock.date("2026-11-02T12:30"))
         }
         #expect(try await records(fixture, on: "2026-11-02T00:00") == [measured])
         let day = TestClock.date("2026-11-02T00:00")
-        #expect(try await fixture.repository.checkIns(from: day, to: TestClock.date("2026-11-03T00:00")).isEmpty)
+        #expect(try await fixture.repository.checkIns(from: day, to: TestClock.date("2026-11-03T00:00")).isEmpty,
+                "Le ressenti refusé n'est pas enregistré : la passe de midi ne le reprend pas")
+    }
+
+    /// Le ressenti peut alléger la séance (catégorie plus basse), jamais la durcir.
+    @Test func feelingWorseCanLightenTheSession() async throws {
+        let fixture = fixture()
+        let now = TestClock.date("2026-11-02T08:00")
+        let monday = try plannedDay(at: now)
+        let measured = try scored(try await fixture.service.update(nights: await nights(.badNight, at: now), plannedDay: monday,
+                                                                   now: now))
+        let adjusted = try await fixture.service.saveCheckIn(CheckInAnswers(sleep: 0, pain: 0, motivation: 0), plannedDay: monday,
+                                                             now: now)
+        #expect(adjusted.score < measured.score)
+        #expect(adjusted.category == RecoveryCategory(score: adjusted.score))
+        let great = try await fixture.service.saveCheckIn(CheckInAnswers(sleep: 4, pain: 4, motivation: 4), plannedDay: monday,
+                                                          now: now)
+        #expect(great.category == measured.category, "Un bon ressenti ne fait jamais monter la catégorie")
     }
 
     @Test func checkInStoresAdjustments() async throws {
@@ -106,8 +154,10 @@ struct DailyScoreSessionTests: DailyScoreTesting {
         #expect(await repository.calls == calls)
 
         await gate.open()
-        _ = try scored(try await update.value)
-        await #expect(throws: DailyScoreError.alreadyMeasured) { try await checkIn.value }
+        let measured = try scored(try await update.value)
+        let adjusted = try await checkIn.value
+        #expect(!adjusted.isEstimated, "Le check-in arrivé après la mesure s'y ajoute comme ressenti")
+        #expect(adjusted.id == measured.id)
         #expect(try await repository.dailyRecoveries(from: now.addingTimeInterval(-86_400), to: now.addingTimeInterval(86_400)).count == 1)
     }
 

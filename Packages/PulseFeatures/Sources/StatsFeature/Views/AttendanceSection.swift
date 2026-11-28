@@ -121,7 +121,7 @@ private struct AttendanceMatrixCard: View {
 
     var body: some View {
         StatsChartCard(title: String(localized: "16 dernières semaines", bundle: .module)) {
-            if weeks.joined().allSatisfy({ $0.level == 0 }) {
+            if weeks.joined().allSatisfy({ $0.level == 0 && !$0.hasActivity }) {
                 StatsEmptyNote(reason: String(localized: "aucune séance validée sur les 16 dernières semaines", bundle: .module))
             } else {
                 HStack(alignment: .top, spacing: 4) {
@@ -137,7 +137,7 @@ private struct AttendanceMatrixCard: View {
     private func column(_ week: [AttendanceDay], isCurrent: Bool) -> some View {
         VStack(spacing: 4) {
             ForEach(week) { day in
-                AttendanceDot(level: day.isFuture ? nil : day.level)
+                AttendanceDot(level: day.isFuture ? nil : day.level, isActivity: !day.isFuture && day.level == 0 && day.hasActivity)
             }
         }
         .frame(maxWidth: .infinity)
@@ -147,17 +147,25 @@ private struct AttendanceMatrixCard: View {
     }
 
     /// « Lundi en haut · Moins ○ ● ● ● ● Plus » : le sens de lecture et l'échelle d'encre ; sur deux lignes quand elle ne tient
-    /// pas.
+    /// pas. Puis la marque neutre des autres entraînements d'Apple Santé, quand la grille en montre.
     private var legend: some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(spacing: 6) {
-                reading
-                Spacer(minLength: 8)
-                scale
+        VStack(alignment: .leading, spacing: 6) {
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 6) {
+                    reading
+                    Spacer(minLength: 8)
+                    scale
+                }
+                VStack(alignment: .leading, spacing: 6) {
+                    reading
+                    HStack(spacing: 6) { scale }
+                }
             }
-            VStack(alignment: .leading, spacing: 6) {
-                reading
-                HStack(spacing: 6) { scale }
+            if weeks.joined().contains(where: { $0.level == 0 && $0.hasActivity }) {
+                HStack(spacing: 6) {
+                    AttendanceDot(level: 0, isActivity: true).frame(width: swatch)
+                    Text(String(localized: "Autre entraînement d'Apple Santé", bundle: .module))
+                }
             }
         }
         .font(.caption)
@@ -179,15 +187,21 @@ private struct AttendanceMatrixCard: View {
     }
 }
 
-/// Une pastille : le papier teinté à 0, l'encre de plus en plus pleine de 1 à 4 ; un jour à venir (`nil`) n'est pas dessiné.
+/// Une pastille : le papier teinté à 0, l'encre de plus en plus pleine de 1 à 4 ; un jour à venir (`nil`) n'est pas dessiné. Un
+/// jour sans séance mais avec un autre entraînement d'Apple Santé (`isActivity`) garde son fond, cerclé d'encre : une marque
+/// neutre, qui ne dit pas d'intensité.
 private struct AttendanceDot: View {
     let level: Int?
+    var isActivity = false
 
     private static let inks = StatsInk.attendanceOpacities.map { PulsePalette.ink.opacity($0) }
 
     var body: some View {
         Circle()
             .fill(fill)
+            .overlay {
+                if isActivity { Circle().strokeBorder(PulsePalette.ink, lineWidth: 1.5) }
+            }
             .aspectRatio(1, contentMode: .fit)
     }
 

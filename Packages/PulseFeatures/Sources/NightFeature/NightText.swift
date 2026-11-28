@@ -51,6 +51,18 @@ enum NightText {
         return String(localized: "Objectif \(goal) · \(missing) de moins", bundle: .module)
     }
 
+    /// « 3 h 40 de retard sur 7 nuits », « Aucun retard de sommeil sur 7 nuits » : la dette pondérée des 7 nuits (`SleepDebt`).
+    static func sleepDebt(minutes: Int) -> String {
+        guard minutes > 0 else { return String(localized: "Aucun retard de sommeil sur 7 nuits", bundle: .module) }
+        return String(localized: "\(PulseFormat.duration(minutes: minutes)) de retard sur 7 nuits", bundle: .module)
+    }
+
+    /// « 3 heures 40 minutes de retard de sommeil sur 7 nuits ».
+    static func spokenSleepDebt(minutes: Int) -> String {
+        guard minutes > 0 else { return sleepDebt(minutes: 0) }
+        return String(localized: "\(spokenMinutes(minutes)) de retard de sommeil sur 7 nuits", bundle: .module)
+    }
+
     /// « Coucher régulier, à ± 25 min sur 14 nuits » ; assez régulier ou irrégulier selon `BedtimeRegularity.level` ; sans écart,
     /// « à la même heure ».
     static func regularity(minutes: Int) -> String {

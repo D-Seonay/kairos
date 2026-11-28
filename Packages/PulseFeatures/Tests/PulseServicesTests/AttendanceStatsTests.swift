@@ -39,6 +39,19 @@ struct AttendanceStatsTests {
         #expect(all.allSatisfy { $0.isFuture == ($0.date > today) })
     }
 
+    @Test func otherWorkoutsMarkTheirDayWithoutChangingLevelsOrCounts() {
+        let result = AttendanceStats.make(sessions: [session(daysAgo: 1)], activities: [day(1, hour: 7), day(2, hour: 9)], target: 1,
+                                          historyStart: TestClock.date("2026-01-05T08:00"), period: .month, now: now,
+                                          calendar: calendar)
+        let all = result.weeks.flatMap { $0 }
+        let monday = all.first { $0.date == calendar.startOfDay(for: day(2)) }
+        let tuesday = all.first { $0.date == calendar.startOfDay(for: day(1)) }
+        #expect(monday?.hasActivity == true && monday?.level == 0)
+        #expect(tuesday?.hasActivity == true && tuesday?.level == 1)
+        #expect(all.filter(\.hasActivity).count == 2)
+        #expect(result.sessionsInPeriod == 1 && result.sessionsTotal == 1)
+    }
+
     @Test func levelsFollowQuartiles() {
         // Charges quotidiennes 100, 200, 300 et 400 (minutes × RPE).
         let sessions = [

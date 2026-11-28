@@ -31,6 +31,23 @@ struct LiveSessionProgressTests {
         #expect(session.nextSet == nil)
     }
 
+    @Test func aTriSetRotatesThroughItsThreeExercisesRoundByRound() throws {
+        let day = Fix.day([
+            Fix.exercise(Fix.bench, order: 0, sets: 2, superset: 1),
+            Fix.exercise(Fix.pecDeck, order: 1, sets: 3, superset: 1),
+            Fix.exercise(Fix.pullUp, order: 2, sets: 2, superset: 1),
+            Fix.exercise(Fix.plank, order: 3, sets: 1, reps: 30...60)
+        ])
+        var session = Fix.session(Fix.launch(day, nil))
+        let expected = [(0, 0), (1, 0), (2, 0), (0, 1), (1, 1), (2, 1), (1, 2), (3, 0)]
+        for (exercise, set) in expected {
+            let next = try #require(session.nextSet)
+            #expect(next.exerciseIndex == exercise && next.setIndex == set)
+            validate(&session, exercise, set)
+        }
+        #expect(session.nextSet == nil)
+    }
+
     @Test func nextSetFollowsWhatIsStillToDoWhenSetsAreSkipped() throws {
         var session = supersetSession()
         validate(&session, 0, 0)

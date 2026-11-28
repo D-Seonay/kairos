@@ -240,9 +240,9 @@ public final class DayRefresher: Sendable {
         return (try? await scheduledDays.days(from: today, to: end)) ?? []
     }
 
-    /// Le check-in du jour, quand le score en est estimé.
+    /// Le check-in du jour, dès qu'il y a un score : il fait le score estimé, ou le ressenti ajouté au score mesuré.
     private func checkIn(of scored: DailyRecovery?, now: Date) async -> CheckIn? {
-        guard let scored, scored.isEstimated else { return nil }
+        guard scored != nil else { return nil }
         let day = calendar.startOfDay(for: now)
         guard let next = calendar.date(byAdding: .day, value: 1, to: day) else { return nil }
         return (try? await recovery.checkIns(from: day, to: next))?.first

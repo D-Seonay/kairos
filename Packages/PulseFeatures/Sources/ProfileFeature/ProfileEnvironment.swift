@@ -47,6 +47,10 @@ public struct ProfileEnvironment: Sendable {
     /// La demande d'accès à Apple Santé, pour « Connecter Apple Santé » dans la section Apple Santé ; `nil` : la section ne
     /// l'offre pas.
     public var healthAccess: HealthAccess?
+    /// Le rappel de check-in pour qui n'a pas de montre, réglé dans les notifications ; `nil` : la ligne n'apparaît pas.
+    public var checkInReminders: CheckInReminderService?
+    /// La dernière synchronisation iCloud réussie et la dernière erreur, pour « Mes données ».
+    public var cloudSync: any CloudSyncMonitoring
 
     /// Les photos de corps ne s'offrent qu'avec leur service et leur authentificateur : jamais d'écran ouvert sans verrou.
     public var offersBodyPhotos: Bool {
@@ -63,7 +67,9 @@ public struct ProfileEnvironment: Sendable {
                 ownerAuthentication: (any DeviceOwnerAuthenticating)? = nil,
                 bodyPhotoLock: any BodyPhotoLockStore = InMemoryBodyPhotoLockStore(),
                 bodyPhotoReminders: BodyPhotoReminders? = nil, train: TrainEnvironment? = nil,
-                sleepPlan: @escaping @Sendable () async -> SleepPlan? = { nil }, healthAccess: HealthAccess? = nil) {
+                sleepPlan: @escaping @Sendable () async -> SleepPlan? = { nil }, healthAccess: HealthAccess? = nil,
+                checkInReminders: CheckInReminderService? = nil,
+                cloudSync: any CloudSyncMonitoring = NoCloudSync()) {
         self.profile = profile
         self.body = body
         self.settings = settings
@@ -86,6 +92,8 @@ public struct ProfileEnvironment: Sendable {
         self.train = train
         self.sleepPlan = sleepPlan
         self.healthAccess = healthAccess
+        self.checkInReminders = checkInReminders
+        self.cloudSync = cloudSync
     }
 }
 

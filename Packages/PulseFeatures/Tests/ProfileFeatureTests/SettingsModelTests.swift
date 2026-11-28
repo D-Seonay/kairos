@@ -353,7 +353,7 @@ final class SavedProfiles {
 struct SettingsTextTests {
     @Test func healthKindsAndSexHaveFrenchNames() {
         #expect(HealthSampleKind.allCases.map(ProfileText.healthKind)
-            == ["VFC", "FC au repos", "Sommeil", "Courses", "Vélo", "Poids", "Masse grasse"])
+            == ["VFC", "FC au repos", "Fréquence cardiaque", "Sommeil", "Courses", "Vélo", "Poids", "Masse grasse", "Autres entraînements"])
         #expect(Sex.allCases.map(ProfileText.sex) == ["Femme", "Homme", "Non précisé"])
     }
 

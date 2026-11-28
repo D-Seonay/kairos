@@ -11,6 +11,8 @@ public final class MyDataModel {
     /// Enregistrements par table ; une table absente n'a pas pu être comptée.
     public private(set) var counts: [StoreTable: Int] = [:]
     public private(set) var cloudStatus: CloudAccountStatus?
+    /// La dernière synchronisation iCloud réussie et la dernière erreur ; `nil` sans iCloud sur cet appareil.
+    public private(set) var syncStatus: CloudSyncStatus?
     /// Le dernier export réussi, prêt pour la feuille de partage.
     public private(set) var shareURL: URL?
     public private(set) var isBusy = false
@@ -26,7 +28,8 @@ public final class MyDataModel {
         self.environment = environment
     }
 
-    /// Relit les comptes et l'état d'iCloud. Une lecture qui échoue le dit et laisse les comptes tels quels.
+    /// Relit les comptes, l'état du compte iCloud et celui de la synchronisation. Une lecture qui échoue le dit et laisse les
+    /// comptes tels quels.
     public func refresh() async {
         do {
             counts = try await environment.inspector.counts()
@@ -36,7 +39,13 @@ public final class MyDataModel {
             failureCount += 1
         }
         cloudStatus = await environment.inspector.cloudAccountStatus()
+        syncStatus = await environment.cloudSync.status()
         hasRefreshed = true
+    }
+
+    /// La phrase de la synchronisation sous celle du compte ; `nil` quand il n'y a rien à dire.
+    public func syncText(now: Date) -> String? {
+        CloudSyncText.status(syncStatus, account: cloudStatus, now: now)
     }
 
     /// Tout en JSON.

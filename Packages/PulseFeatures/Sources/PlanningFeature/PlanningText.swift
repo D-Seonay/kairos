@@ -144,4 +144,7 @@ enum PlanningText {
         case .run: "figure.run"
         }
     }
+
+    /// L'icône neutre d'un autre entraînement d'Apple Santé (natation, HIIT, sport…).
+    static let activityIcon = "circle.dashed"
 }

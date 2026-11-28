@@ -46,9 +46,13 @@ public struct PlanningService: Sendable {
     /// La file des écritures de la semaine datée (échange, refus d'une règle, rétablissement). Le passage du jour qui reçoit ce
     /// service passe par la même file : un déplacement et les règles anti-interférence ne s'écrasent plus l'un l'autre.
     let writes = SerialTaskQueue()
+    /// Les autres entraînements d'Apple Santé : l'icône neutre du mois et la charge des widgets ; sans eux, seules les séances.
+    let activities: HealthActivities?
 
     public init(profiles: any ProfileRepository, programs: any ProgramRepository, workouts: any WorkoutRepository,
-                scheduledDays: any ScheduledDayRepository, calendar: Calendar, now: @escaping @Sendable () -> Date) {
+                scheduledDays: any ScheduledDayRepository, calendar: Calendar, now: @escaping @Sendable () -> Date,
+                activities: HealthActivities? = nil) {
+        self.activities = activities
         self.profiles = profiles
         self.programs = programs
         self.workouts = workouts
@@ -83,8 +87,10 @@ public struct PlanningService: Sendable {
         let (_, program) = try await profileAndProgram()
         let overrides = try await scheduledDays.days(from: range.start, to: range.end)
         let sessions = try await workouts.sessions(from: range.start, to: range.end)
-        return MonthCalendar.grid(month: month, context: ScheduleContext(program: program, overrides: overrides, sessions: sessions,
-                                                                         calendar: calendar), now: now())
+        let activities = await activities?.starts(from: range.start, to: range.end) ?? []
+        let context = ScheduleContext(program: program, overrides: overrides, sessions: sessions, calendar: calendar,
+                                      activities: activities)
+        return MonthCalendar.grid(month: month, context: context, now: now())
     }
 
     /// Les lignes de la semaine datée entre `from` et `to`, pour `TodayPlanner`.

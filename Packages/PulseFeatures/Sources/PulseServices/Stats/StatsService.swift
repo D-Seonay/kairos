@@ -37,12 +37,15 @@ public struct StatsService: Sendable {
     let now: @Sendable () -> Date
     /// Les meilleurs segments des courses Pulse, calculés au passage du jour ; sans cache, les records restent à l'allure moyenne.
     let runEfforts: (any RunBestEffortStore)?
+    /// Les autres entraînements d'Apple Santé, comptés dans le ratio de charge ; sans eux, seules les séances comptent.
+    let activities: HealthActivities?
 
     public init(profiles: any ProfileRepository, programs: any ProgramRepository, workouts: any WorkoutRepository,
                 recoveries: any RecoveryRepository, records: any PersonalRecordRepository, userExercises: any UserExerciseRepository,
                 library: ContentLibrary, calendar: Calendar, now: @escaping @Sendable () -> Date,
-                runEfforts: (any RunBestEffortStore)? = nil) {
+                runEfforts: (any RunBestEffortStore)? = nil, activities: HealthActivities? = nil) {
         self.runEfforts = runEfforts
+        self.activities = activities
         self.profiles = profiles
         self.programs = programs
         self.workouts = workouts
@@ -69,6 +72,8 @@ public struct StatsService: Sendable {
         let directory = ExerciseDirectory(library: library, userExercises: try await userExercises.all(includeArchived: true))
 
         let efforts = await runEfforts?.all() ?? [:]
+        let extraLoad = await activities?.loadSessions(from: .distantPast, to: end, excluding: sessions) ?? []
+        let activityStarts = await activities?.starts(from: .distantPast, to: end) ?? []
         let onboardingCompletedAt = profile?.onboardingCompletedAt
         let historyStart = ([onboardingCompletedAt] + [sessions.map(\.startedAt).min()]).compactMap { $0 }.min()
         let target = WeekStreak.target(program: program, profile: profile)
@@ -77,13 +82,13 @@ public struct StatsService: Sendable {
 
         return StatsSnapshot(
             period: period,
-            load: LoadStats.make(sessions: sessions, onboardingCompletedAt: onboardingCompletedAt, deloadUntil: deloadUntil,
-                                 period: period, now: now, calendar: calendar),
+            load: LoadStats.make(sessions: sessions, extra: extraLoad, onboardingCompletedAt: onboardingCompletedAt,
+                                 deloadUntil: deloadUntil, period: period, now: now, calendar: calendar),
             biometry: BiometryStats.make(recoveries: scores, period: period, now: now, calendar: calendar),
             muscles: MuscleStats.make(sessions: sessions, directory: directory, historyStart: historyStart, period: period,
                                    now: now, calendar: calendar),
-            attendance: AttendanceStats.make(sessions: sessions, target: target, historyStart: historyStart, period: period,
-                                             now: now, calendar: calendar),
+            attendance: AttendanceStats.make(sessions: sessions, activities: activityStarts, target: target,
+                                             historyStart: historyStart, period: period, now: now, calendar: calendar),
             records: RecordStats.make(records: personalRecords, sessions: sessions, directory: directory, period: period,
                                       now: now, calendar: calendar, runEfforts: efforts))
     }

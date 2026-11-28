@@ -181,6 +181,16 @@
         }
       }
     },
+    "autre entraînement": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "autre entraînement"
+          }
+        }
+      }
+    },
     "Cet entraînement est introuvable. Il a peut-être été supprimé d'Apple Santé.": {
       "localizations": {
         "fr": {
@@ -811,16 +821,6 @@
         }
       }
     },
-    "Touche longue sur un jour à venir pour le déplacer.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Touche longue sur un jour à venir pour le déplacer."
-          }
-        }
-      }
-    },
     "Tracé": {
       "localizations": {
         "fr": {
@@ -1027,6 +1027,126 @@
           "stringUnit": {
             "state": "translated",
             "value": "—"
+          }
+        }
+      }
+    },
+    "Rattraper…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rattraper…"
+          }
+        }
+      }
+    },
+    "Rattraper": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rattraper"
+          }
+        }
+      }
+    },
+    "Rattrapée": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rattrapée"
+          }
+        }
+      }
+    },
+    "Rattrapée %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rattrapée %@"
+          }
+        }
+      }
+    },
+    "Rattrapage de %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rattrapage de %@"
+          }
+        }
+      }
+    },
+    "%@ · remplace %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · remplace %@"
+          }
+        }
+      }
+    },
+    "%@ · Repos (conseillé)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · Repos (conseillé)"
+          }
+        }
+      }
+    },
+    "%@ · Repos": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · Repos"
+          }
+        }
+      }
+    },
+    "Pulse n'a pas pu rattraper cette séance.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pulse n'a pas pu rattraper cette séance."
+          }
+        }
+      }
+    },
+    "Rattraper « %@ »": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rattraper « %@ »"
+          }
+        }
+      }
+    },
+    "La séance passe sur le jour choisi ; le jour manqué devient « Rattrapée ».": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La séance passe sur le jour choisi ; le jour manqué devient « Rattrapée »."
+          }
+        }
+      }
+    },
+    "Touche longue sur un jour à venir pour le déplacer, sur un jour manqué pour le rattraper.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Touche longue sur un jour à venir pour le déplacer, sur un jour manqué pour le rattraper."
           }
         }
       }

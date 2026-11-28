@@ -55,7 +55,7 @@ public struct WidgetPlanning: Sendable, Equatable {
         case .done: .done
         case .missed: .missed
         case .planned: .planned
-        case .rest, .mandatoryRest: .rest
+        case .rest, .mandatoryRest, .caughtUp: .rest
         }
     }
 
@@ -110,7 +110,8 @@ extension PlanningService {
         let start = calendar.date(byAdding: .day, value: -28, to: today) ?? today
         let end = calendar.date(byAdding: .day, value: 1, to: today) ?? now
         let sessions = try await workouts.sessions(from: start, to: end)
-        let ratio = TrainingLoad.acwr(sessions: sessions, historyStart: overview.loadHistoryStart, now: now,
+        let extra = await activities?.loadSessions(from: start, to: end, excluding: sessions) ?? []
+        let ratio = TrainingLoad.acwr(sessions: sessions, extra: extra, historyStart: overview.loadHistoryStart, now: now,
                                       calendar: calendar)?.ratio
         return WidgetPlanning.make(overview: overview, loadRatio: ratio, now: now, calendar: calendar)
     }

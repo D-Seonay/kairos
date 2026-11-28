@@ -170,6 +170,11 @@ public final class LiveSessionModel {
         await perform(.setNote(exercise: exercise, note))
     }
 
+    /// Remet les charges d'avant la baisse du jour (reprise, échecs répétés) sur les séries qui restent.
+    public func restoreLoads(exercise: UUID) async {
+        await perform(.restoreLoads(exercise: exercise))
+    }
+
     /// L'incrément de charge de l'exercice : la séance le prend tout de suite, ses réglages pour la suite, comme l'échauffement.
     public func setIncrement(_ incrementKg: Double, exercise: UUID) async {
         guard let reference = session.exercises.first(where: { $0.id == exercise })?.exercise,

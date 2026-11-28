@@ -3,7 +3,8 @@ import Observation
 import PulseDomain
 import PulseServices
 
-/// L'état de la page Profil (spec M7 §13) : le résumé (identité, série, score, records, vitrine) et le poids.
+/// L'état de la page Profil (spec M7 §13) : le résumé (identité, série, score, records, vitrine), le poids et l'alerte d'une
+/// synchronisation iCloud en échec durable.
 @MainActor
 @Observable
 public final class ProfileModel {
@@ -11,6 +12,8 @@ public final class ProfileModel {
     public private(set) var body: BodyOverview?
     public private(set) var errorMessage: String?
     public private(set) var hasLoaded = false
+    /// La synchronisation iCloud échoue depuis plus d'un jour : la seule fois où la page en parle, sous « Mes données ».
+    public private(set) var syncWarning: String?
     /// Une lecture ratée de plus : la même erreur revue est annoncée à nouveau.
     public private(set) var failureCount = 0
 
@@ -57,6 +60,7 @@ public final class ProfileModel {
                 failureCount += 1
             }
         } while needsReload
+        syncWarning = CloudSyncText.durableWarning(await environment.cloudSync.status(), now: environment.now())
         hasLoaded = true
     }
 }

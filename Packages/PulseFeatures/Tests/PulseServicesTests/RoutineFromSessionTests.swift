@@ -119,6 +119,14 @@ struct RoutineFromSessionTests {
         #expect(day.exercises.map(\.supersetGroup) == [1, 1, nil])
     }
 
+    @Test func aTriSetIsKeptWhole() {
+        let day = day([
+            set(bench, reps: 8, superset: 3), set(pecDeck, reps: 10, superset: 3), set(plank, seconds: 40, superset: 3),
+            set(bench, reps: 8, superset: 3), set(pecDeck, reps: 10, superset: 3), set(plank, seconds: 40, superset: 3)
+        ])
+        #expect(day.exercises.map(\.supersetGroup) == [1, 1, 1])
+    }
+
     @Test func aSupersetWhoseMembersAreNotNeighboursIsDropped() {
         let day = day([set(bench, reps: 8, superset: 2), set(plank, seconds: 40), set(pecDeck, reps: 10, superset: 2)])
         #expect(day.exercises.map(\.supersetGroup) == [nil, nil, nil])

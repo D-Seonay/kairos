@@ -178,3 +178,15 @@ func pplProgram(withRun run: Bool = false) -> Program {
     let model = TrainModel(environment: fixture.environment)
     await #expect(throws: ProgramEditorError.noProgram) { try await model.addRoutine(named: "Push") }
 }
+
+@MainActor @Test func trainModelOffersTheHevyImportOnlyWhileTheHistoryIsEmpty() async throws {
+    let fixture = TrainFixture()
+    try await fixture.activate(pplProgram())
+    let model = TrainModel(environment: fixture.environment)
+    #expect(model.hasHistory, "Rien d'affiché avant la première lecture")
+    await model.refresh()
+    #expect(!model.hasHistory)
+    try await fixture.log(on: TrainClock.date(day: 2, hour: 18), sets: [LoggedSet(weightKg: 60, reps: 8)])
+    await model.refresh()
+    #expect(model.hasHistory)
+}

@@ -40,6 +40,7 @@ struct RoutineExerciseEditor: View {
         let tracksDuration = model.tracksDuration(exercise.exercise)
         let summary = TrainText.routineExerciseSummary(exercise, tracksDuration: tracksDuration)
         let hasIssue = model.issues[index] != nil
+        let supersetLabel = model.supersetLabel(at: index)
         return Button(action: onToggle) {
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 2) {
@@ -59,11 +60,8 @@ struct RoutineExerciseEditor: View {
                 }
                 .multilineTextAlignment(.leading)
                 Spacer(minLength: 0)
-                if model.isSuperset(at: index) || (index > 0 && model.isSuperset(at: index - 1)) {
-                    Image(systemName: "link")
-                        .font(.footnote)
-                        .foregroundStyle(PulsePalette.muted)
-                        .accessibilityHidden(true)
+                if let supersetLabel {
+                    Badge(text: supersetLabel, color: PulsePalette.text2)
                 }
                 Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                     .font(.footnote.weight(.semibold))
@@ -77,7 +75,7 @@ struct RoutineExerciseEditor: View {
         .buttonStyle(.plain)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(TrainText.routineExerciseLabel(name: name, exercise: exercise, tracksDuration: tracksDuration,
-                                                           hasIssue: hasIssue))
+                                                           hasIssue: hasIssue, supersetLabel: supersetLabel))
         .accessibilityHint(isExpanded ? String(localized: "Replie les réglages", bundle: .module)
                             : String(localized: "Déplie les réglages", bundle: .module))
         .accessibilityAddTraits(.isButton)

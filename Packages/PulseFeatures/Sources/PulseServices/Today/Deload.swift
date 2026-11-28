@@ -51,15 +51,18 @@ public enum Deload {
 
     /// La décharge à proposer : ratio ≥ 1,5 aujourd'hui et hier, avec 28 jours d'historique, sans décision en cours.
     /// `historyStart` vient de `TrainingLoad.historyStart`, lu sur tout l'historique. Sans trois séances dans les deux
-    /// semaines d'avant la semaine aiguë, le ratio élevé est celui d'une reprise après une pause : rien n'est proposé.
-    public static func offer(sessions: [WorkoutSession], historyStart: Date?, profile: UserProfile?, now: Date,
-                             calendar: Calendar) -> DeloadOffer? {
+    /// semaines d'avant la semaine aiguë, le ratio élevé est celui d'une reprise après une pause : rien n'est proposé. `extra` :
+    /// la charge des autres entraînements d'Apple Santé (`HealthActivities`).
+    public static func offer(sessions: [WorkoutSession], extra: [LoadSession] = [], historyStart: Date?, profile: UserProfile?,
+                             now: Date, calendar: Calendar) -> DeloadOffer? {
         guard let profile, status(profile: profile, now: now, calendar: calendar) == .none,
               let yesterday = calendar.date(byAdding: .day, value: -1, to: now) else { return nil }
-        guard let today = TrainingLoad.acwr(sessions: sessions, historyStart: historyStart, now: now, calendar: calendar),
+        let midnight = calendar.startOfDay(for: now)
+        guard let today = TrainingLoad.acwr(sessions: sessions, extra: extra, historyStart: historyStart, now: now, calendar: calendar),
               today.ratio >= ratioThreshold,
-              TrainingLoad.hasTrainingBase(sessions: sessions, now: now, calendar: calendar),
-              let before = TrainingLoad.acwr(sessions: sessions.filter { $0.startedAt < calendar.startOfDay(for: now) },
+              TrainingLoad.hasTrainingBase(sessions: sessions, extra: extra, now: now, calendar: calendar),
+              let before = TrainingLoad.acwr(sessions: sessions.filter { $0.startedAt < midnight },
+                                             extra: extra.filter { $0.date < midnight },
                                              historyStart: historyStart, now: yesterday, calendar: calendar),
               before.ratio >= ratioThreshold else { return nil }
         return DeloadOffer(ratio: today.ratio)

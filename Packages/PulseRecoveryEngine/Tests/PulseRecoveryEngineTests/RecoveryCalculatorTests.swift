@@ -29,7 +29,8 @@ import Testing
     @Test func fourteenNightsReady() throws {
         let today = NightSample(day: day, sdnnMs: 60, restingHeartRate: 49, sleep: .init(asleepMinutes: 480, deepMinutes: 100))
         let r = try measured(calculator.compute(day: day, today: today, history: fourteenNights))
-        #expect(r.score == 100)
+        // Sommeil : 100 la nuit dernière, mais 30 min de moins chacune des 6 nuits d'avant → 1 h 30 de dette (score 81,25).
+        #expect(abs(r.score - 98.59375) < 1e-6)
         #expect(r.category == .optimal)
         #expect(r.calibration == .ready)
         #expect(r.missing.isEmpty)
@@ -41,7 +42,7 @@ import Testing
     @Test func missingHRVRenormalizesWeights() throws {
         let today = NightSample(day: day, sdnnMs: nil, restingHeartRate: 52, sleep: .init(asleepMinutes: 420, deepMinutes: 84))
         let r = try measured(calculator.compute(day: day, today: today, history: fourteenNights))
-        #expect(abs(r.score - 87.125) < 1e-6)
+        #expect(abs(r.score - 83.75) < 1e-6) // sommeil 91,25 la nuit dernière, 2 h 30 de dette
         #expect(r.category == .normal)
         #expect(r.missing == [.hrv])
         #expect(r.calibration == .ready)
@@ -84,7 +85,7 @@ import Testing
         let r = try measured(calculator.compute(day: day, today: today, history: history))
         #expect(r.missing == [.hrv])
         #expect(r.calibration == .calibrating(nights: 3))
-        #expect(abs(r.score - 97.8125) < 1e-6)
+        #expect(abs(r.score - 95.53125) < 1e-6) // 1 h 34 de dette sur les 4 nuits connues
     }
 
     @Test func twoMissingFactorsNeedsCheckIn() {
@@ -162,8 +163,11 @@ import Testing
     @Test func sleepGoalChangesTheSleepFactor() throws {
         let today = NightSample(day: day, sdnnMs: 50, restingHeartRate: 50, sleep: .init(asleepMinutes: 420, deepMinutes: nil))
         let byDefault = try measured(calculator.compute(day: day, today: today, history: fourteenNights))
-        #expect(byDefault.factors.first { $0.factor == .sleep }?.score == 87.5)
+        // 87,5 la nuit dernière (7 h sur 8 h) ; 2 h 30 de dette (score 68,75) → 70 % × 87,5 + 30 % × 68,75.
+        #expect(abs((byDefault.factors.first { $0.factor == .sleep }?.score ?? 0) - 81.875) < 1e-6)
+        #expect(byDefault.insight?.sleepDebtMinutes == 150)
         let toGoal = try measured(calculator.compute(day: day, today: today, history: fourteenNights, sleepGoalMinutes: 420))
         #expect(toGoal.factors.first { $0.factor == .sleep }?.score == 100)
+        #expect(toGoal.insight?.sleepDebtMinutes == 0)
     }
 }

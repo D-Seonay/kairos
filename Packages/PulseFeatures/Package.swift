@@ -60,7 +60,7 @@ let package = Package(
         ),
         .target(
             name: "OnboardingFeature",
-            dependencies: ["PulseServices", "CheckInFeature", designSystem, domain, content],
+            dependencies: ["PulseServices", "CheckInFeature", "TrainFeature", designSystem, domain, content],
             resources: [.process("Resources")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),

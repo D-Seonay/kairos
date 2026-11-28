@@ -16,6 +16,16 @@
     "+%@ kg" : {
 
     },
+    "Deux séances sous la fourchette : −%lld %%" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deux séances sous la fourchette : −%lld %%"
+          }
+        }
+      }
+    },
     "Effort plafonné à RPE 7,5" : {
 
     },
@@ -27,6 +37,16 @@
     },
     "Repos rallongés de %lld secondes" : {
 
+    },
+    "Reprise après %lld semaines : −%lld %%" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprise après %lld semaines : −%lld %%"
+          }
+        }
+      }
     },
     "Séance remplacée par %lld min de mobilité ou du repos, au choix" : {
 

@@ -28,15 +28,17 @@ public enum TrainingLoad {
     /// Les séances terminées et abandonnées comptent (spec M4 §14.6), jamais une séance encore en cours. `historyStart` vient
     /// de `historyStart(sessions:onboardingCompletedAt:)`, lu sur tout l'historique ; `sessions` peut n'être que les 28
     /// derniers jours. Sous 28 jours d'historique, sans début d'historique ou sans charge, il n'y a pas de ratio.
-    public static func acwr(sessions: [WorkoutSession], historyStart: Date?, now: Date, calendar: Calendar) -> ACWRResult? {
+    /// `extra` : la charge des autres entraînements d'Apple Santé (`HealthActivities`), qui ne sont pas des séances.
+    public static func acwr(sessions: [WorkoutSession], extra: [LoadSession] = [], historyStart: Date?, now: Date,
+                            calendar: Calendar) -> ACWRResult? {
         guard let historyStart else { return nil }
-        return LoadCalculator(calendar: calendar).acwr(sessions: counted(sessions), asOf: now, historyStart: historyStart)
+        return LoadCalculator(calendar: calendar).acwr(sessions: counted(sessions) + extra, asOf: now, historyStart: historyStart)
     }
 
     /// Vrai si les deux semaines d'avant la semaine aiguë portent assez de séances pour qu'un ratio élevé dise une surcharge
     /// (`LoadCalculator.hasTrainingBase`) : sans cette base, c'est une reprise après une pause.
-    public static func hasTrainingBase(sessions: [WorkoutSession], now: Date, calendar: Calendar) -> Bool {
-        LoadCalculator(calendar: calendar).hasTrainingBase(sessions: counted(sessions), asOf: now)
+    public static func hasTrainingBase(sessions: [WorkoutSession], extra: [LoadSession] = [], now: Date, calendar: Calendar) -> Bool {
+        LoadCalculator(calendar: calendar).hasTrainingBase(sessions: counted(sessions) + extra, asOf: now)
     }
 
     /// Les séances qui comptent dans la charge, avec leur charge.

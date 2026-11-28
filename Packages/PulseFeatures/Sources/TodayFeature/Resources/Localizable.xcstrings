@@ -146,6 +146,36 @@
         }
       }
     },
+    "FC au repos : la valeur d'Apple Santé la plus proche de ton réveil, comparée à celle de tes 7 nuits d'avant." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FC au repos : la valeur d'Apple Santé la plus proche de ton réveil, comparée à celle de tes 7 nuits d'avant."
+          }
+        }
+      }
+    },
+    "La dette de sommeil (%lld %% du sommeil) est nulle sur 7 nuits." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La dette de sommeil (%lld %% du sommeil) est nulle sur 7 nuits."
+          }
+        }
+      }
+    },
+    "Ressenti du matin : aucun point, le score reste à %lld (± %lld au plus)." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ressenti du matin : aucun point, le score reste à %lld (± %lld au plus)."
+          }
+        }
+      }
+    },
     "hier" : {
       "localizations" : {
         "fr" : {

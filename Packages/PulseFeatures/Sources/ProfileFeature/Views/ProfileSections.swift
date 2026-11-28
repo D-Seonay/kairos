@@ -247,8 +247,10 @@ private struct BadgeProgressBar: View {
 
 // MARK: - Liens
 
-/// Statistiques (l'onglet Stats), Compléments, Paramètres et Mes données.
+/// Statistiques (l'onglet Stats), Compléments, Paramètres et Mes données, avec l'alerte d'une synchronisation iCloud en échec.
 struct ProfileLinks: View {
+    /// Une synchronisation iCloud en échec depuis plus d'un jour ; elle remplace le détail de « Mes données ».
+    var syncWarning: String?
     let onOpenStats: () -> Void
 
     var body: some View {
@@ -263,7 +265,7 @@ struct ProfileLinks: View {
             link(.settings, systemImage: "gearshape", title: String(localized: "Paramètres", bundle: .module),
                  detail: String(localized: "Profil, Apple Santé, séance et notifications", bundle: .module))
             link(.myData, systemImage: "externaldrive", title: String(localized: "Mes données", bundle: .module),
-                 detail: String(localized: "Stockage, export et suppression", bundle: .module))
+                 detail: syncWarning ?? String(localized: "Stockage, export et suppression", bundle: .module))
         }
         .padding(.top, 8)
     }

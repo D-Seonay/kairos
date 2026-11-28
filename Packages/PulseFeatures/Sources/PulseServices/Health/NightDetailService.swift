@@ -26,13 +26,16 @@ public struct NightDetail: Sendable, Equatable, Identifiable {
     /// L'écart moyen des heures d'endormissement des `BedtimeRegularity.windowNights` jours qui finissent à cette nuit, en minutes ;
     /// nul sous `BedtimeRegularity.minimumNights` nuits. Recalculé à chaque lecture du cache, jamais enregistré.
     public var bedtimeRegularityMinutes: Int?
+    /// La dette de sommeil des 7 nuits qui finissent à cette nuit (`SleepDebtWindow`), contre l'objectif du profil d'aujourd'hui.
+    public var sleepDebtMinutes: Int?
 
     public var id: Date { night.day }
 
-    public init(night: NightSleep, averages: StageAverages?, bedtimeRegularityMinutes: Int? = nil) {
+    public init(night: NightSleep, averages: StageAverages?, bedtimeRegularityMinutes: Int? = nil, sleepDebtMinutes: Int? = nil) {
         self.night = night
         self.averages = averages
         self.bedtimeRegularityMinutes = bedtimeRegularityMinutes
+        self.sleepDebtMinutes = sleepDebtMinutes
     }
 }
 
@@ -69,9 +72,12 @@ public struct NightDetailService: Sendable {
             guard let day = calendar.date(byAdding: .day, value: offset - (NightHistory.historyDays - 1), to: today) else { return nil }
             return builder.night(for: day, sleep: sleep)
         }
+        let goal = await sleepGoalMinutes()
         return nights.indices.map { index in
             NightDetail(night: nights[index], averages: averages(before: index, in: nights),
-                        bedtimeRegularityMinutes: regularity(endingAt: index, in: nights))
+                        bedtimeRegularityMinutes: regularity(endingAt: index, in: nights),
+                        sleepDebtMinutes: SleepDebtWindow.minutes(endingAt: nights[index].day, nights: nights, goalMinutes: goal,
+                                                                  calendar: calendar))
         }
     }
 

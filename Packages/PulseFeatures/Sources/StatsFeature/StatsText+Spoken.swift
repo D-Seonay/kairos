@@ -145,19 +145,25 @@ extension StatsText {
     }
 
     /// « 4 jours d'entraînement : lundi, mercredi, vendredi, samedi » ; « aucun jour d'entraînement ». La valeur d'une colonne
-    /// de la grille : quels jours, et pas seulement combien.
+    /// de la grille : quels jours, et pas seulement combien. Les jours qui n'ont qu'un autre entraînement d'Apple Santé suivent :
+    /// « · autre entraînement : mardi ».
     static func attendanceDays(week: [AttendanceDay], calendar: Calendar) -> String {
         let trained = week.filter { $0.level > 0 && !$0.isFuture }
+        let summary: String
         switch trained.count {
         case 0:
-            return String(localized: "aucun jour d'entraînement", bundle: .module)
+            summary = String(localized: "aucun jour d'entraînement", bundle: .module)
         case let count:
             let days = trained.map { PulseSpoken.weekday($0.date, calendar: calendar) }.joined(separator: ", ")
             let total = count == 1
                 ? String(localized: "1 jour d'entraînement", bundle: .module)
                 : String(localized: "\(count) jours d'entraînement", bundle: .module)
-            return String(localized: "\(total) : \(days)", bundle: .module)
+            summary = String(localized: "\(total) : \(days)", bundle: .module)
         }
+        let others = week.filter { $0.level == 0 && $0.hasActivity && !$0.isFuture }
+        guard !others.isEmpty else { return summary }
+        let days = others.map { PulseSpoken.weekday($0.date, calendar: calendar) }.joined(separator: ", ")
+        return String(localized: "\(summary) · autre entraînement : \(days)", bundle: .module)
     }
 
     // MARK: Noms

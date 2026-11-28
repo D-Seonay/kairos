@@ -167,11 +167,13 @@ enum ProfileText {
         switch kind {
         case .sdnn: String(localized: "VFC", bundle: .module)
         case .restingHeartRate: String(localized: "FC au repos", bundle: .module)
+        case .heartRate: String(localized: "Fréquence cardiaque", bundle: .module)
         case .sleep: String(localized: "Sommeil", bundle: .module)
         case .run: String(localized: "Courses", bundle: .module)
         case .ride: String(localized: "Vélo", bundle: .module)
         case .bodyMass: String(localized: "Poids", bundle: .module)
         case .bodyFat: String(localized: "Masse grasse", bundle: .module)
+        case .otherWorkout: String(localized: "Autres entraînements", bundle: .module)
         }
     }
 

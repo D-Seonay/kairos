@@ -332,6 +332,16 @@
         }
       }
     },
+    "Fermer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fermer"
+          }
+        }
+      }
+    },
     "OK" : {
       "localizations" : {
         "fr" : {

@@ -11,256 +11,6 @@
         }
       }
     },
-    "Ton score du matin est prêt": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ton score du matin est prêt"
-          }
-        }
-      }
-    },
-    "%@, volume allégé": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, volume allégé"
-          }
-        }
-      }
-    },
-    "%@, séance allégée": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, séance allégée"
-          }
-        }
-      }
-    },
-    "forme optimale": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "forme optimale"
-          }
-        }
-      }
-    },
-    "forme normale": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "forme normale"
-          }
-        }
-      }
-    },
-    "fatigue modérée": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "fatigue modérée"
-          }
-        }
-      }
-    },
-    "surmenage": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "surmenage"
-          }
-        }
-      }
-    },
-    "Séance libre": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Séance libre"
-          }
-        }
-      }
-    },
-    "%lld s": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld s"
-          }
-        }
-      }
-    },
-    "%@ × %@": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ × %@"
-          }
-        }
-      }
-    },
-    "Dernière fois %@": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dernière fois %@"
-          }
-        }
-      }
-    },
-    "Même charge": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Même charge"
-          }
-        }
-      }
-    },
-    "une série en moins": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "une série en moins"
-          }
-        }
-      }
-    },
-    "%lld séries en moins": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld séries en moins"
-          }
-        }
-      }
-    },
-    "RPE %@ max": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "RPE %@ max"
-          }
-        }
-      }
-    },
-    "repos %@": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "repos %@"
-          }
-        }
-      }
-    },
-    "Exercice inconnu": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Exercice inconnu"
-          }
-        }
-      }
-    },
-    "Repos terminé": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Repos terminé"
-          }
-        }
-      }
-    },
-    "%@, série %lld : %@": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, série %lld : %@"
-          }
-        }
-      }
-    },
-    "%@, série %lld": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, série %lld"
-          }
-        }
-      }
-    },
-    "%@ · série %lld · %@": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ · série %lld · %@"
-          }
-        }
-      }
-    },
-    "%@ · série %lld": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ · série %lld"
-          }
-        }
-      }
-    },
-    "%lld rép.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld rép."
-          }
-        }
-      }
-    },
-    "Charge de la séance : %lld min × %lld = %lld.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Charge de la séance : %lld min × %lld = %lld."
-          }
-        }
-      }
-    },
-    "Ratio aigu / chronique après la séance : %@.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ratio aigu / chronique après la séance : %@."
-          }
-        }
-      }
-    },
     "%@ : %@ %@, nouveau record de charge": {
       "localizations": {
         "fr": {
@@ -271,242 +21,12 @@
         }
       }
     },
-    "%@ : 1RM estimé %@ %@, nouveau record": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ : 1RM estimé %@ %@, nouveau record"
-          }
-        }
-      }
-    },
-    "%@ : %@ à %@ %@, nouveau record": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ : %@ à %@ %@, nouveau record"
-          }
-        }
-      }
-    },
-    "Dernière fois : %@": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dernière fois : %@"
-          }
-        }
-      }
-    },
-    ", puis ": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": ", puis "
-          }
-        }
-      }
-    },
-    "lest de %@": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "lest de %@"
-          }
-        }
-      }
-    },
-    "assistance de %@": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "assistance de %@"
-          }
-        }
-      }
-    },
-    "%lld seconde": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld seconde"
-          }
-        }
-      }
-    },
-    "%lld secondes": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld secondes"
-          }
-        }
-      }
-    },
-    "%lld répétition": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld répétition"
-          }
-        }
-      }
-    },
-    "%lld répétitions": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld répétitions"
-          }
-        }
-      }
-    },
-    "%lld exercice": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld exercice"
-          }
-        }
-      }
-    },
-    "%lld exercices": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld exercices"
-          }
-        }
-      }
-    },
-    "%lld série": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld série"
-          }
-        }
-      }
-    },
-    "%lld séries": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld séries"
-          }
-        }
-      }
-    },
-    "%@ · %@": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ · %@"
-          }
-        }
-      }
-    },
-    "%@, %@": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, %@"
-          }
-        }
-      }
-    },
-    "sans lest": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "sans lest"
-          }
-        }
-      }
-    },
-    "sans assistance": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "sans assistance"
-          }
-        }
-      }
-    },
-    "%@ kilo": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ kilo"
-          }
-        }
-      }
-    },
-    "%@ kilos": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ kilos"
-          }
-        }
-      }
-    },
-    "%@ : %@, nouveau record de charge": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ : %@, nouveau record de charge"
-          }
-        }
-      }
-    },
-    "%@ : maximum estimé sur une répétition %@, nouveau record": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ : maximum estimé sur une répétition %@, nouveau record"
-          }
-        }
-      }
-    },
     "%@ : %@ au poids du corps, nouveau record": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "%@ : %@ au poids du corps, nouveau record"
-          }
-        }
-      }
-    },
-    "%@ : %@ à %@, nouveau record": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ : %@ à %@, nouveau record"
           }
         }
       }
@@ -531,222 +51,242 @@
         }
       }
     },
-    "Ton score de récupération n'est pas encore prêt. Ouvre Pulse pour le calculer.": {
+    "%@ : %@ kg, nouveau record de charge": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ton score de récupération n'est pas encore prêt. Ouvre Pulse pour le calculer."
+            "value": "%@ : %@ kg, nouveau record de charge"
           }
         }
       }
     },
-    "Ton score de récupération est estimé à %lld sur 100 : %@.": {
+    "%@ : %@ à %@ %@, nouveau record": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ton score de récupération est estimé à %lld sur 100 : %@."
+            "value": "%@ : %@ à %@ %@, nouveau record"
           }
         }
       }
     },
-    "Ton score de récupération est de %lld sur 100 : %@.": {
+    "%@ : %@ à %@ kg, nouveau record": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ton score de récupération est de %lld sur 100 : %@."
+            "value": "%@ : %@ à %@ kg, nouveau record"
           }
         }
       }
     },
-    "C'est noté : prise de %@ cochée pour aujourd'hui.": {
+    "%@ : %@ à %@, nouveau record": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "C'est noté : prise de %@ cochée pour aujourd'hui."
+            "value": "%@ : %@ à %@, nouveau record"
           }
         }
       }
     },
-    "La prise de %@ est déjà cochée aujourd'hui.": {
+    "%@ : %@, nouveau record de charge": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "La prise de %@ est déjà cochée aujourd'hui."
+            "value": "%@ : %@, nouveau record de charge"
           }
         }
       }
     },
-    "Ce complément n'est plus dans Pulse.": {
+    "%@ : 1RM estimé %@ %@, nouveau record": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ce complément n'est plus dans Pulse."
+            "value": "%@ : 1RM estimé %@ %@, nouveau record"
           }
         }
       }
     },
-    "Ton score de récupération est de %lld sur 100 : %@, %@.": {
+    "%@ : 1RM estimé %@ kg, nouveau record": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ton score de récupération est de %lld sur 100 : %@, %@."
+            "value": "%@ : 1RM estimé %@ kg, nouveau record"
           }
         }
       }
     },
-    "1 semaine": {
+    "%@ : maximum estimé sur une répétition %@, nouveau record": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "1 semaine"
+            "value": "%@ : maximum estimé sur une répétition %@, nouveau record"
           }
         }
       }
     },
-    "%lld semaines": {
+    "%@ de retard sur 7 nuits : vise tes %@ cette nuit.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld semaines"
+            "value": "%@ de retard sur 7 nuits : vise tes %@ cette nuit."
           }
         }
       }
     },
-    "1 séance faite en fatigue ou en décharge n'est pas comptée.": {
+    "%@ de retard sur 7 nuits et séance %@ demain : vise tes %@.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "1 séance faite en fatigue ou en décharge n'est pas comptée."
+            "value": "%@ de retard sur 7 nuits et séance %@ demain : vise tes %@."
           }
         }
       }
     },
-    "%lld séances faites en fatigue ou en décharge ne sont pas comptées.": {
+    "%@ kg": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld séances faites en fatigue ou en décharge ne sont pas comptées."
+            "value": "%@ kg"
           }
         }
       }
     },
-    "Changer de schéma de séries, par exemple de 5 × 5 à 4 × 8.": {
+    "%@ kilo": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Changer de schéma de séries, par exemple de 5 × 5 à 4 × 8."
+            "value": "%@ kilo"
           }
         }
       }
     },
-    "Décharger cet exercice seul une semaine : charges −10 % et moins de séries, puis repartir.": {
+    "%@ kilos": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Décharger cet exercice seul une semaine : charges −10 % et moins de séries, puis repartir."
+            "value": "%@ kilos"
           }
         }
       }
     },
-    "Pulse estime ton 1RM avec la formule de Brzycki et garde la meilleure série de chaque séance. Ton meilleur 1RM estimé des 3 derniers mois : %@ le %@. Les %lld séances suivantes, sur %@, n'ont pas fait mieux (au mieux %@).": {
+    "%@ · %@": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pulse estime ton 1RM avec la formule de Brzycki et garde la meilleure série de chaque séance. Ton meilleur 1RM estimé des 3 derniers mois : %@ le %@. Les %lld séances suivantes, sur %@, n'ont pas fait mieux (au mieux %@)."
+            "value": "%@ · %@"
           }
         }
       }
     },
-    "Le remplacer quelques semaines par une variante, comme %@.": {
+    "%@ · série %lld": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le remplacer quelques semaines par une variante, comme %@."
+            "value": "%@ · série %lld"
           }
         }
       }
     },
-    "Le remplacer quelques semaines par une variante proche.": {
+    "%@ · série %lld · %@": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le remplacer quelques semaines par une variante proche."
+            "value": "%@ · série %lld · %@"
           }
         }
       }
     },
-    "Au lit avant %@": {
+    "%@ × %@": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Au lit avant %@"
+            "value": "%@ × %@"
           }
         }
       }
     },
-    "Nuit courte hier (%@) et séance %@ demain : vise tes %@.": {
+    "%@, %@": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nuit courte hier (%@) et séance %@ demain : vise tes %@."
+            "value": "%@, %@"
           }
         }
       }
     },
-    "Nuit courte hier (%@) : vise tes %@ cette nuit.": {
+    "%@, séance allégée": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nuit courte hier (%@) : vise tes %@ cette nuit."
+            "value": "%@, séance allégée"
           }
         }
       }
     },
-    "Séance %@ demain : vise tes %@ de sommeil.": {
+    "%@, série %lld": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Séance %@ demain : vise tes %@ de sommeil."
+            "value": "%@, série %lld"
           }
         }
       }
     },
-    "Pour tes %@ de sommeil avant le réveil de %@.": {
+    "%@, série %lld : %@": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pour tes %@ de sommeil avant le réveil de %@."
+            "value": "%@, série %lld : %@"
           }
         }
       }
     },
-    "%lld min": {
+    "%@, volume allégé": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld min"
+            "value": "%@, volume allégé"
+          }
+        }
+      }
+    },
+    "%lld exercice": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld exercice"
+          }
+        }
+      }
+    },
+    "%lld exercices": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld exercices"
           }
         }
       }
@@ -767,6 +307,596 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld h %@"
+          }
+        }
+      }
+    },
+    "%lld min": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld min"
+          }
+        }
+      }
+    },
+    "%lld rép.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld rép."
+          }
+        }
+      }
+    },
+    "%lld répétition": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld répétition"
+          }
+        }
+      }
+    },
+    "%lld répétitions": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld répétitions"
+          }
+        }
+      }
+    },
+    "%lld s": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld s"
+          }
+        }
+      }
+    },
+    "%lld seconde": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld seconde"
+          }
+        }
+      }
+    },
+    "%lld secondes": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld secondes"
+          }
+        }
+      }
+    },
+    "%lld semaines": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld semaines"
+          }
+        }
+      }
+    },
+    "%lld séances faites en fatigue ou en décharge ne sont pas comptées.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld séances faites en fatigue ou en décharge ne sont pas comptées."
+          }
+        }
+      }
+    },
+    "%lld séances faites en fatigue, en décharge ou en reprise ne sont pas comptées.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld séances faites en fatigue, en décharge ou en reprise ne sont pas comptées."
+          }
+        }
+      }
+    },
+    "%lld série": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld série"
+          }
+        }
+      }
+    },
+    "%lld séries": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld séries"
+          }
+        }
+      }
+    },
+    "%lld séries en moins": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld séries en moins"
+          }
+        }
+      }
+    },
+    ", puis ": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ", puis "
+          }
+        }
+      }
+    },
+    "1 semaine": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 semaine"
+          }
+        }
+      }
+    },
+    "1 séance faite en fatigue ou en décharge n'est pas comptée.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 séance faite en fatigue ou en décharge n'est pas comptée."
+          }
+        }
+      }
+    },
+    "1 séance faite en fatigue, en décharge ou en reprise n'est pas comptée.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 séance faite en fatigue, en décharge ou en reprise n'est pas comptée."
+          }
+        }
+      }
+    },
+    "Au lit avant %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Au lit avant %@"
+          }
+        }
+      }
+    },
+    "C'est noté : prise de %@ cochée pour aujourd'hui.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "C'est noté : prise de %@ cochée pour aujourd'hui."
+          }
+        }
+      }
+    },
+    "Ce complément n'est plus dans Pulse.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce complément n'est plus dans Pulse."
+          }
+        }
+      }
+    },
+    "Changer de schéma de séries, par exemple de 5 × 5 à 4 × 8.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Changer de schéma de séries, par exemple de 5 × 5 à 4 × 8."
+          }
+        }
+      }
+    },
+    "Charge de la séance : %lld min × %lld = %lld.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Charge de la séance : %lld min × %lld = %lld."
+          }
+        }
+      }
+    },
+    "Comment tu te sens ?": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comment tu te sens ?"
+          }
+        }
+      }
+    },
+    "Dernière fois %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dernière fois %@"
+          }
+        }
+      }
+    },
+    "Dernière fois : %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dernière fois : %@"
+          }
+        }
+      }
+    },
+    "Décharger cet exercice seul une semaine : charges −10 % et moins de séries, puis repartir.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Décharger cet exercice seul une semaine : charges −10 % et moins de séries, puis repartir."
+          }
+        }
+      }
+    },
+    "En forme": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En forme"
+          }
+        }
+      }
+    },
+    "Exercice inconnu": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exercice inconnu"
+          }
+        }
+      }
+    },
+    "Fatigué": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fatigué"
+          }
+        }
+      }
+    },
+    "La prise de %@ est déjà cochée aujourd'hui.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La prise de %@ est déjà cochée aujourd'hui."
+          }
+        }
+      }
+    },
+    "Le remplacer quelques semaines par une variante proche.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le remplacer quelques semaines par une variante proche."
+          }
+        }
+      }
+    },
+    "Le remplacer quelques semaines par une variante, comme %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le remplacer quelques semaines par une variante, comme %@."
+          }
+        }
+      }
+    },
+    "Moyen": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moyen"
+          }
+        }
+      }
+    },
+    "Même charge": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Même charge"
+          }
+        }
+      }
+    },
+    "Nuit courte hier (%@) : vise tes %@ cette nuit.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nuit courte hier (%@) : vise tes %@ cette nuit."
+          }
+        }
+      }
+    },
+    "Nuit courte hier (%@) et séance %@ demain : vise tes %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nuit courte hier (%@) et séance %@ demain : vise tes %@."
+          }
+        }
+      }
+    },
+    "Pour tes %@ de sommeil avant le réveil de %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pour tes %@ de sommeil avant le réveil de %@."
+          }
+        }
+      }
+    },
+    "Pulse estime ton 1RM avec la formule de Brzycki et garde la meilleure série de chaque séance. Ton meilleur 1RM estimé des 3 derniers mois : %@ le %@. Les %lld séances suivantes, sur %@, n'ont pas fait mieux (au mieux %@).": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pulse estime ton 1RM avec la formule de Brzycki et garde la meilleure série de chaque séance. Ton meilleur 1RM estimé des 3 derniers mois : %@ le %@. Les %lld séances suivantes, sur %@, n'ont pas fait mieux (au mieux %@)."
+          }
+        }
+      }
+    },
+    "RPE %@ max": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "RPE %@ max"
+          }
+        }
+      }
+    },
+    "Ratio aigu / chronique après la séance : %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ratio aigu / chronique après la séance : %@."
+          }
+        }
+      }
+    },
+    "Repos terminé": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repos terminé"
+          }
+        }
+      }
+    },
+    "Réponds d'un geste : Pulse estime ton score du jour.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réponds d'un geste : Pulse estime ton score du jour."
+          }
+        }
+      }
+    },
+    "Séance %@ demain : vise tes %@ de sommeil.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Séance %@ demain : vise tes %@ de sommeil."
+          }
+        }
+      }
+    },
+    "Séance libre": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Séance libre"
+          }
+        }
+      }
+    },
+    "Ton score de récupération est de %lld sur 100 : %@, %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ton score de récupération est de %lld sur 100 : %@, %@."
+          }
+        }
+      }
+    },
+    "Ton score de récupération est de %lld sur 100 : %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ton score de récupération est de %lld sur 100 : %@."
+          }
+        }
+      }
+    },
+    "Ton score de récupération est estimé à %lld sur 100 : %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ton score de récupération est estimé à %lld sur 100 : %@."
+          }
+        }
+      }
+    },
+    "Ton score de récupération n'est pas encore prêt. Ouvre Pulse pour le calculer.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ton score de récupération n'est pas encore prêt. Ouvre Pulse pour le calculer."
+          }
+        }
+      }
+    },
+    "Ton score du matin est prêt": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ton score du matin est prêt"
+          }
+        }
+      }
+    },
+    "assistance de %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "assistance de %@"
+          }
+        }
+      }
+    },
+    "fatigue modérée": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "fatigue modérée"
+          }
+        }
+      }
+    },
+    "forme normale": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "forme normale"
+          }
+        }
+      }
+    },
+    "forme optimale": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "forme optimale"
+          }
+        }
+      }
+    },
+    "lest de %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "lest de %@"
+          }
+        }
+      }
+    },
+    "repos %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "repos %@"
+          }
+        }
+      }
+    },
+    "sans assistance": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sans assistance"
+          }
+        }
+      }
+    },
+    "sans lest": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sans lest"
+          }
+        }
+      }
+    },
+    "surmenage": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "surmenage"
+          }
+        }
+      }
+    },
+    "une série en moins": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "une série en moins"
           }
         }
       }

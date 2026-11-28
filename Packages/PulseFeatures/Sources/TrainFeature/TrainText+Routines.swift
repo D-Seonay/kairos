@@ -128,8 +128,11 @@ extension TrainText {
 
     /// L'en-tête d'un exercice replié : « Développé couché, 3 séries de 8 à 12 répétitions, RPE 8, repos 2 minutes », suivi de
     /// « à corriger » quand ses réglages ont une erreur.
-    static func routineExerciseLabel(name: String, exercise: RoutineExercise, tracksDuration: Bool, hasIssue: Bool) -> String {
-        let label = String(localized: "\(name), \(routineExerciseSpoken(exercise, tracksDuration: tracksDuration))", bundle: .module)
+    /// `supersetLabel` : « A2 » quand l'exercice est dans un super set, dit « super set A2 ».
+    static func routineExerciseLabel(name: String, exercise: RoutineExercise, tracksDuration: Bool, hasIssue: Bool,
+                                     supersetLabel: String? = nil) -> String {
+        var label = String(localized: "\(name), \(routineExerciseSpoken(exercise, tracksDuration: tracksDuration))", bundle: .module)
+        if let supersetLabel { label = String(localized: "\(label), super set \(supersetLabel)", bundle: .module) }
         return hasIssue ? String(localized: "\(label), à corriger", bundle: .module) : label
     }
 

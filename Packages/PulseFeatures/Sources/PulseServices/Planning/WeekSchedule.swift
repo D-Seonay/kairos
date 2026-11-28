@@ -7,6 +7,8 @@ public enum PlanningDayState: Sendable, Equatable {
     case done
     /// Un jour passé, prévu, sans séance qui le valide.
     case missed
+    /// Un jour passé dont la séance manquée a été rattrapée un autre jour de la semaine (`CatchUp`).
+    case caughtUp
     /// Une séance prévue aujourd'hui ou plus tard.
     case planned
     case rest
@@ -61,14 +63,17 @@ public struct ScheduleContext: Sendable {
     public var sessions: [WorkoutSession]
     public var restWeekdays: [Weekday]
     public var calendar: Calendar
+    /// Les débuts des autres entraînements d'Apple Santé (`HealthActivities`), pour la grille du mois.
+    public var activities: [Date]
 
     public init(program: Program?, overrides: [ScheduledDay] = [], sessions: [WorkoutSession] = [], restWeekdays: [Weekday] = [],
-                calendar: Calendar) {
+                calendar: Calendar, activities: [Date] = []) {
         self.program = program
         self.overrides = overrides
         self.sessions = sessions
         self.restWeekdays = restWeekdays
         self.calendar = calendar
+        self.activities = activities
     }
 }
 
@@ -105,6 +110,8 @@ public enum WeekSchedule {
         if let routine {
             if done.contains(where: { validates($0, routine) }) {
                 state = .done
+            } else if CatchUp.isCaughtUp(scheduled) {
+                state = .caughtUp
             } else {
                 state = isPast ? .missed : .planned
             }

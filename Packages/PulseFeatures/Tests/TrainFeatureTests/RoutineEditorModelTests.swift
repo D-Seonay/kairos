@@ -176,6 +176,20 @@ private struct RoutineSetup {
     #expect(model.day.exercises.map(\.order) == [0, 1])
 }
 
+@MainActor @Test func aTriSetIsBuiltLinkByLinkAndLabelled() async throws {
+    let setup = try await RoutineSetup()
+    let model = await setup.model()
+    model.add([bench, chestPress, plank])
+    model.toggleSuperset(at: 0)
+    #expect(model.canToggleSuperset(at: 1))
+    model.toggleSuperset(at: 1)
+    #expect(model.day.exercises.map(\.supersetGroup) == [1, 1, 1])
+    #expect((0..<3).map { model.supersetLabel(at: $0) } == ["A1", "A2", "A3"])
+    #expect(model.supersetLabel(at: 3) == nil)
+    model.toggleSuperset(at: 0)
+    #expect((0..<3).map { model.supersetLabel(at: $0) } == [nil, "A1", "A2"])
+}
+
 @MainActor @Test func setsRangeRpeAndPerSetTargetsStayInStep() async throws {
     let setup = try await RoutineSetup()
     let model = await setup.model()

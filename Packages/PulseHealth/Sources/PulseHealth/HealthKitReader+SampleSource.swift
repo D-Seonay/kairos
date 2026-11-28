@@ -19,6 +19,9 @@ extension HealthKitReader: HealthSampleSource, HealthWorkoutSource, HealthBodySo
         case .restingHeartRate:
             return try await quantityChanges(of: signal.kind, .restingHeartRate, unit: Self.beatsPerMinute,
                                              anchor: queryAnchor, dates: dates)
+        case .heartRate:
+            return try await quantityChanges(of: signal.kind, .heartRate, unit: Self.beatsPerMinute,
+                                             anchor: queryAnchor, dates: dates)
         case .sleep:
             return try await sleepChanges(anchor: queryAnchor, dates: dates)
         }
@@ -130,6 +133,30 @@ extension HealthKitReader: HealthSampleSource, HealthWorkoutSource, HealthBodySo
                 sourceBundleID: workout.sourceRevision.source.bundleIdentifier, fetchedAt: workout.endDate)
         }
         return try Self.changes(of: signal.kind, added: added, deleted: result.deletedObjects, newAnchor: result.newAnchor,
+                                isFullRead: queryAnchor == nil)
+    }
+
+    /// Les entraînements autres que course et vélo commencés après `start`, de toutes les apps, Pulse compris : c'est à la lecture
+    /// du cache que les siens sont écartés. La famille va dans `value`.
+    public func otherWorkoutChanges(since anchor: Data?, from start: Date) async throws -> HealthSampleChanges {
+        let queryAnchor = anchor.flatMap(Self.decodedAnchor)
+        let sessions = HealthKitWorkoutFamily.sessionTypes.map { HKQuery.predicateForWorkouts(with: $0) }
+        let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
+            NSCompoundPredicate(notPredicateWithSubpredicate: NSCompoundPredicate(orPredicateWithSubpredicates: sessions)),
+            HKQuery.predicateForSamples(withStart: start, end: nil, options: [])
+        ])
+        let descriptor = HKAnchoredObjectQueryDescriptor(predicates: [.workout(predicate)], anchor: queryAnchor)
+        let result = try await descriptor.result(for: store)
+        let added = result.addedSamples.map { workout in
+            CachedHealthSample(
+                kind: .otherWorkout, start: workout.startDate, end: workout.endDate,
+                value: Double(HealthKitWorkoutFamily.family(of: workout.workoutActivityType).rawValue),
+                averageHeartRate: workout.statistics(for: HKQuantityType(.heartRate))?.averageQuantity()?
+                    .doubleValue(for: Self.beatsPerMinute),
+                durationMinutes: workout.duration / 60, healthKitUUID: workout.uuid.uuidString,
+                sourceBundleID: workout.sourceRevision.source.bundleIdentifier, fetchedAt: workout.endDate)
+        }
+        return try Self.changes(of: .otherWorkout, added: added, deleted: result.deletedObjects, newAnchor: result.newAnchor,
                                 isFullRead: queryAnchor == nil)
     }
 

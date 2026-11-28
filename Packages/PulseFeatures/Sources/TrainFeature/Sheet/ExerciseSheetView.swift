@@ -31,6 +31,12 @@ public struct ExerciseSheetView: View {
                             .font(.footnote)
                             .foregroundStyle(PulsePalette.bad)
                     }
+                    if let note = model.pinnedNote {
+                        Label(note, systemImage: "pin.fill")
+                            .font(.footnote)
+                            .foregroundStyle(PulsePalette.text2)
+                            .accessibilityLabel(String(localized: "Note de la dernière séance : \(note)", bundle: .module))
+                    }
                     pane
                 } else if hasLoaded {
                     Text(String(localized: "Cet exercice est introuvable.", bundle: .module))

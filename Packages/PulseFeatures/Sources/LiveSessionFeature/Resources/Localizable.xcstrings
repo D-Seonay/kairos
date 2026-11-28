@@ -177,12 +177,62 @@
         }
       }
     },
+    "Modifie la note" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modifie la note"
+          }
+        }
+      }
+    },
+    "Note : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Note : %@"
+          }
+        }
+      }
+    },
     "Pas possible exactement avec tes disques. Les charges les plus proches :" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pas possible exactement avec tes disques. Les charges les plus proches :"
+          }
+        }
+      }
+    },
+    "Remettre %@ kg" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remettre %@ kg"
+          }
+        }
+      }
+    },
+    "Remettre les charges" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remettre les charges"
+          }
+        }
+      }
+    },
+    "Reprend les charges de la dernière fois sur les séries qui restent" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprend les charges de la dernière fois sur les séries qui restent"
           }
         }
       }

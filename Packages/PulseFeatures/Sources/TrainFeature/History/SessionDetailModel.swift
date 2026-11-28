@@ -41,12 +41,15 @@ public struct SessionExerciseBlock: Identifiable, Equatable, Sendable {
     public var name: String
     public var note: String?
     public var sets: [SessionSetLine]
+    /// « A1 », « A2 », « A3 » : le repère de l'exercice dans son super set, `nil` hors groupe.
+    public var supersetLabel: String?
 
-    public init(exercise: ExerciseReference, name: String, note: String?, sets: [SessionSetLine]) {
+    public init(exercise: ExerciseReference, name: String, note: String?, sets: [SessionSetLine], supersetLabel: String? = nil) {
         self.exercise = exercise
         self.name = name
         self.note = note
         self.sets = sets
+        self.supersetLabel = supersetLabel
     }
 
     public var id: ExerciseReference { exercise }
@@ -305,7 +308,8 @@ public final class SessionDetailModel {
         return title.isEmpty ? String(localized: "Nouvelle routine", bundle: .module) : title
     }
 
-    /// Les exercices dans l'ordre de leur première série, chacun avec toutes ses séries, échauffement compris.
+    /// Les exercices dans l'ordre de leur première série, chacun avec toutes ses séries, échauffement compris, et son repère
+    /// de super set (« A1 ») lu sur sa première série de travail.
     private func makeBlocks(of session: WorkoutSession) -> [SessionExerciseBlock] {
         var order: [ExerciseReference] = []
         var setsByExercise: [ExerciseReference: [WorkoutSet]] = [:]
@@ -313,12 +317,15 @@ public final class SessionDetailModel {
             if setsByExercise[set.exercise] == nil { order.append(set.exercise) }
             setsByExercise[set.exercise, default: []].append(set)
         }
-        return order.map { reference in
+        let labels = SupersetLabel.labels(for: order.map { reference in
+            setsByExercise[reference]?.first { $0.setType != .warmup }?.supersetGroup
+        })
+        return order.enumerated().map { position, reference in
             let sets = setsByExercise[reference] ?? []
             let note = session.exerciseNotes.first { $0.exercise == reference }?.text
             return SessionExerciseBlock(
                 exercise: reference, name: directory.name(of: reference, fallback: sets.first?.exerciseName ?? ""),
-                note: note?.isEmpty == false ? note : nil, sets: sets.map(line(for:)))
+                note: note?.isEmpty == false ? note : nil, sets: sets.map(line(for:)), supersetLabel: labels[position])
         }
     }
 

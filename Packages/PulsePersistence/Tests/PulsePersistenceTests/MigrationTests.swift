@@ -107,18 +107,43 @@ import Testing
     #expect(profile.bedtimeReminderEnabled == false && profile.bedtimeReminderLeadMinutes == nil)
 }
 
+/// Un magasin V8 avec deux scores et deux check-ins pour le même jour (deux appareils), une lecture locale de ce jour et une autre
+/// écrite à minuit d'un autre fuseau, et un brouillon de course à l'ancien format : à l'ouverture en V9, un seul score et un seul
+/// check-in vivants, les plus récents, tous avec leur clé ; la lecture d'ici prend sa clé, celle de l'autre fuseau, dont le jour
+/// n'est qu'estimé, reste sans clé ; le brouillon se relit.
+@Test func v8StoreWithDuplicateDaysOpensAsV9WithOneRowPerDay() async throws {
+    let directory = try makeStoreDirectory()
+    defer { try? FileManager.default.removeItem(at: directory) }
+    let draft = try writeV8Store(in: directory)
+
+    let container = try PersistenceStack.makeContainer(directory: directory)
+    let context = ModelContext(container)
+    let recoveries = try context.fetch(FetchDescriptor<StoredDailyRecovery>(predicate: #Predicate { $0.deletedAt == nil }))
+    #expect(recoveries.map(\.score) == [70])
+    #expect(try context.fetchCount(FetchDescriptor<StoredDailyRecovery>()) == 2)
+    let checkIns = try context.fetch(FetchDescriptor<StoredCheckIn>(predicate: #Predicate { $0.deletedAt == nil }))
+    #expect(checkIns.map(\.score) == [80])
+    #expect((recoveries.map(\.dayKey) + checkIns.map(\.dayKey)).allSatisfy { $0 != nil })
+    let readings = try context.fetch(FetchDescriptor<StoredRecoveryReading>(sortBy: [SortDescriptor(\.updatedAt, order: .reverse)]))
+    #expect(readings.map(\.sdnnMs) == [55, 45])
+    #expect(readings.map { $0.dayKey != nil } == [true, false])
+    #expect(try await SwiftDataRunDraftStore(modelContainer: container).load() == draft)
+}
+
 private func makeStoreDirectory() throws -> URL {
     let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
     try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
     return directory
 }
 
-/// Les modèles synchronisés de la V2, avec les copies figées des six modèles modifiés en V3 et du profil modifié en V8.
+/// Les modèles synchronisés de la V2, avec les copies figées des six modèles modifiés en V3, du profil modifié en V8 et du score
+/// et du check-in modifiés en V9.
 private let v2SyncedModels: [any PersistentModel.Type] = [
     PulseSchemaV7.StoredProfile.self, PulseSchemaV2.StoredProgram.self, PulseSchemaV2.StoredRoutineDay.self,
     PulseSchemaV2.StoredRoutineExercise.self, PulseSchemaV2.StoredUserExercise.self, PulseSchemaV2.StoredWorkoutSession.self,
-    PulseSchemaV2.StoredWorkoutSet.self, StoredScheduledDay.self, StoredDailyRecovery.self, StoredCheckIn.self,
-    StoredSupplement.self, StoredSupplementIntake.self, StoredBodyMeasurement.self, StoredPersonalRecord.self
+    PulseSchemaV2.StoredWorkoutSet.self, StoredScheduledDay.self, PulseSchemaV8.StoredDailyRecovery.self,
+    PulseSchemaV8.StoredCheckIn.self, StoredSupplement.self, StoredSupplementIntake.self, StoredBodyMeasurement.self,
+    StoredPersonalRecord.self
 ]
 
 /// Les modèles locaux d'avant la V4.
@@ -143,7 +168,8 @@ private func writeV1Store(in directory: URL, profileID: UUID) throws {
     let synced: [any PersistentModel.Type] = [
         PulseSchemaV1.StoredProfile.self, PulseSchemaV2.StoredProgram.self, PulseSchemaV2.StoredRoutineDay.self,
         PulseSchemaV2.StoredRoutineExercise.self, PulseSchemaV2.StoredUserExercise.self, PulseSchemaV2.StoredWorkoutSession.self,
-        PulseSchemaV2.StoredWorkoutSet.self, StoredScheduledDay.self, PulseSchemaV1.StoredDailyRecovery.self, StoredCheckIn.self,
+        PulseSchemaV2.StoredWorkoutSet.self, StoredScheduledDay.self, PulseSchemaV1.StoredDailyRecovery.self,
+        PulseSchemaV8.StoredCheckIn.self,
         StoredSupplement.self, StoredSupplementIntake.self, StoredBodyMeasurement.self, StoredPersonalRecord.self
     ]
     let container = try makeFrozenContainer(PulseSchemaV1.self, synced: synced, in: directory)
@@ -210,10 +236,12 @@ private func insertV2Session(in context: ModelContext) {
 private func writeV3Store(in directory: URL) throws {
     let container = try makeFrozenContainer(PulseSchemaV3.self, synced: PulseSchemaV4.syncedModels, in: directory)
     let context = ModelContext(container)
-    let recovery = StoredDailyRecovery(DailyRecovery(day: Fixed.calendar.startOfDay(for: Fixed.t0), score: 60, category: .normal,
-                                                     isEstimated: false, calibration: .ready,
-                                                     createdAt: Fixed.t0, updatedAt: Fixed.t0))
-    recovery.sdnnMs = 50   // `init` n'écrit plus les valeurs brutes : on reproduit l'ancienne ligne V3
+    let recovery = PulseSchemaV8.StoredDailyRecovery()
+    recovery.day = Fixed.calendar.startOfDay(for: Fixed.t0)
+    recovery.score = 60
+    recovery.createdAt = Fixed.t0
+    recovery.updatedAt = Fixed.t0
+    recovery.sdnnMs = 50   // l'ancienne ligne V3 porte encore la valeur brute
     context.insert(recovery)
     let session = StoredWorkoutSession(WorkoutSession(startedAt: Fixed.t0, kind: .run, source: .appleHealth, status: .completed,
                                                       title: "Course", createdAt: Fixed.t0, updatedAt: Fixed.t0))
@@ -249,7 +277,7 @@ private func writeV5Store(in directory: URL) throws -> UUID {
 /// Écrit un magasin V7 : un profil figé avec un prénom, sans réglage de sommeil.
 private func writeV7Store(in directory: URL, profileID: UUID) throws {
     let container = try makeFrozenContainer(PulseSchemaV7.self, synced: PulseSchemaV7.syncedModels,
-                                            local: PersistenceStack.localModels, in: directory)
+                                            local: PulseSchemaV8.localModels, in: directory)
     let context = ModelContext(container)
     let profile = PulseSchemaV7.StoredProfile()
     profile.id = profileID
@@ -257,4 +285,38 @@ private func writeV7Store(in directory: URL, profileID: UUID) throws {
     profile.createdAt = Fixed.t0
     context.insert(profile)
     try context.save()
+}
+
+/// Écrit un magasin V8 : deux scores, deux check-ins et deux lectures pour le même jour, le second plus récent, et un brouillon
+/// de course entier dans `payload`. Renvoie le brouillon.
+private func writeV8Store(in directory: URL) throws -> RunDraft {
+    let container = try makeFrozenContainer(PulseSchemaV8.self, synced: PulseSchemaV8.syncedModels,
+                                            local: PulseSchemaV8.localModels, in: directory)
+    let context = ModelContext(container)
+    // Minuit du fuseau de la machine, celui que la réparation de `PersistenceStack` lit : un jour sûr, pas une estimation.
+    let day = Calendar.autoupdatingCurrent.startOfDay(for: Fixed.t0)
+    for (index, updatedAt) in [Fixed.t1, Fixed.t2].enumerated() {
+        let recovery = PulseSchemaV8.StoredDailyRecovery()
+        recovery.day = day
+        recovery.score = 60 + Double(index) * 10
+        recovery.updatedAt = updatedAt
+        context.insert(recovery)
+        let checkIn = PulseSchemaV8.StoredCheckIn()
+        checkIn.day = day
+        checkIn.score = 70 + Double(index) * 10
+        checkIn.updatedAt = updatedAt
+        context.insert(checkIn)
+        let reading = PulseSchemaV8.StoredRecoveryReading()
+        reading.day = index == 0 ? day.addingTimeInterval(3_600) : day   // la première, à minuit d'un autre fuseau
+        reading.sdnnMs = 45 + Double(index) * 10
+        reading.updatedAt = updatedAt
+        context.insert(reading)
+    }
+    let draft = Sample.runDraft()
+    let row = PulseSchemaV8.StoredRunDraft()
+    row.id = draft.sessionID
+    row.payload = try JSONEncoder().encode(draft)
+    context.insert(row)
+    try context.save()
+    return draft
 }

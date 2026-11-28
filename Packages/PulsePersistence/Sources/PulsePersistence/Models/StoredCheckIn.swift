@@ -13,6 +13,8 @@ public final class StoredCheckIn {
     public var createdAt: Date = Date()
     public var updatedAt: Date = Date()
     public var deletedAt: Date?
+    /// Le jour civil, « 2026-11-27 », arrivé en V9 ; `nil` comme pour `StoredDailyRecovery.dayKey`.
+    public var dayKey: String?
 
     public init(_ checkIn: CheckIn) {
         id = checkIn.id
