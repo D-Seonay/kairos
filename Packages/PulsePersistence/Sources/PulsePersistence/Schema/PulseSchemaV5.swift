@@ -11,7 +11,8 @@ public enum PulseSchemaV5: VersionedSchema {
     /// qui gagne les réglages de sommeil en V8, par sa copie figée.
     static let syncedModels: [any PersistentModel.Type] = [
         PulseSchemaV7.StoredProfile.self, StoredProgram.self, StoredRoutineDay.self, StoredRoutineExercise.self, StoredUserExercise.self,
-        StoredWorkoutSession.self, StoredWorkoutSet.self, StoredScheduledDay.self, StoredDailyRecovery.self, StoredCheckIn.self,
+        StoredWorkoutSession.self, StoredWorkoutSet.self, StoredScheduledDay.self, PulseSchemaV8.StoredDailyRecovery.self,
+        PulseSchemaV8.StoredCheckIn.self,
         StoredSupplement.self, StoredSupplementIntake.self, StoredBodyMeasurement.self, StoredPersonalRecord.self,
         StoredExerciseSettings.self, StoredRunTrack.self
     ]
@@ -20,7 +21,7 @@ public enum PulseSchemaV5: VersionedSchema {
     static let localModels: [any PersistentModel.Type] = [
         StoredCachedHealthSample.self, StoredHealthQueryAnchor.self, StoredActiveSessionSnapshot.self,
         PulseSchemaV6.StoredRecoveryReading.self, StoredImportedWorkout.self, StoredImportedBodyMeasurement.self,
-        StoredRunDraft.self, StoredRunHealthSummary.self
+        PulseSchemaV8.StoredRunDraft.self, StoredRunHealthSummary.self
     ]
 
     public static var models: [any PersistentModel.Type] {

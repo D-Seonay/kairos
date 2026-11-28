@@ -4,7 +4,7 @@ import SwiftData
 
 /// Les dix valeurs brutes lues dans Apple Health pour un jour, gardées dans le magasin local : jamais synchronisées avec iCloud.
 /// Une seule lecture par jour : `day` est une clé unique (le magasin local n'est pas soumis aux règles de CloudKit).
-/// Les quatre minutes de phase (léger, paradoxal, sans phase, éveil) sont arrivées en V7.
+/// Les quatre minutes de phase (léger, paradoxal, sans phase, éveil) sont arrivées en V7, la clé de jour civil en V9.
 @Model
 public final class StoredRecoveryReading {
     @Attribute(.unique) public var day: Date = Date()
@@ -20,9 +20,12 @@ public final class StoredRecoveryReading {
     public var awakeMinutes: Int?
     public var createdAt: Date = Date()
     public var updatedAt: Date = Date()
+    /// Le jour civil, « 2026-11-27 », arrivé en V9 ; `nil` pour une lecture écrite avant, sa clé se déduit alors de `day`.
+    public var dayKey: String?
 
-    public init(day: Date, from recovery: DailyRecovery, at date: Date) {
+    public init(day: Date, dayKey: String? = nil, from recovery: DailyRecovery, at date: Date) {
         self.day = day
+        self.dayKey = dayKey
         createdAt = date
         apply(recovery, at: date)
     }

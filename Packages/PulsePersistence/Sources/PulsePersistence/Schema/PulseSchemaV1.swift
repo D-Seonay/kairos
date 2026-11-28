@@ -19,7 +19,7 @@ public enum PulseSchemaV1: VersionedSchema {
         [StoredProfile.self, PulseSchemaV2.StoredProgram.self, PulseSchemaV2.StoredRoutineDay.self,
          PulseSchemaV2.StoredRoutineExercise.self, PulseSchemaV2.StoredUserExercise.self,
          PulseSchemaV2.StoredWorkoutSession.self, PulseSchemaV2.StoredWorkoutSet.self, PulsePersistence.StoredScheduledDay.self,
-         StoredDailyRecovery.self, PulsePersistence.StoredCheckIn.self, PulsePersistence.StoredSupplement.self,
+         StoredDailyRecovery.self, PulseSchemaV8.StoredCheckIn.self, PulsePersistence.StoredSupplement.self,
          PulsePersistence.StoredSupplementIntake.self, PulsePersistence.StoredBodyMeasurement.self,
          PulsePersistence.StoredPersonalRecord.self] + frozenLocalModels
     }

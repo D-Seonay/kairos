@@ -67,6 +67,26 @@ private func syncedHealthRuns(_ context: ModelContext) throws -> Int {
     #expect(hasNoRawValue(synced))
 }
 
+/// La lecture locale du jour a été écrite ailleurs (minuit de New York, avec sa clé) : la vieille valeur synchronisée du même jour
+/// civil, minuit de Paris, ne devient pas une seconde lecture.
+@Test func aLocalReadingOfTheSameCivilDayWinsAcrossTimeZones() async throws {
+    let box = try ModelContainerBox()
+    let context = ModelContext(box.container)
+    let row = legacyRecovery(sdnnMs: 50)
+    row.dayKey = DayKey.key(for: row.day, calendar: Fixed.calendar)
+    context.insert(row)
+    var newYork = Calendar(identifier: .gregorian)
+    newYork.timeZone = TimeZone(identifier: "America/New_York") ?? .gmt
+    let newYorkMidnight = try #require(DayKey.date(for: row.dayKey ?? "", calendar: newYork))
+    var newer = row.toDomain()
+    newer.sdnnMs = 55
+    context.insert(StoredRecoveryReading(day: newYorkMidnight, dayKey: row.dayKey, from: newer, at: Fixed.t2))
+    try context.save()
+    _ = try await SwiftDataHealthDataRelocation(modelContainer: box.container).relocate()
+    let readings = try ModelContext(box.container).fetch(FetchDescriptor<StoredRecoveryReading>())
+    #expect(readings.map(\.sdnnMs) == [55])
+}
+
 @Test func movesImportedRunsAndDropsDeletedOnes() async throws {
     let box = try ModelContainerBox()
     let context = ModelContext(box.container)
