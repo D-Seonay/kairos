@@ -7,18 +7,30 @@ public enum DayKey {
     /// contient le minuit de n'importe quel fuseau pour le même jour civil.
     static let window: TimeInterval = 36 * 3_600
 
-    /// « 2026-11-27 » pour `date` lue dans `calendar`.
+    /// « 2026-11-27 » pour `date` lue dans le fuseau de `calendar`, toujours en grégorien : un iPhone réglé sur le calendrier
+    /// bouddhiste (Réglages > Calendrier) écrit la même clé qu'un iPad grégorien.
     public static func key(for date: Date, calendar: Calendar) -> String {
-        let parts = calendar.dateComponents([.year, .month, .day], from: date)
+        let gregorian = gregorian(in: calendar)
+        let parts = gregorian.dateComponents([.year, .month, .day], from: date)
         return String(format: "%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
     }
 
-    /// Minuit de ce jour civil dans `calendar` ; `nil` pour une clé illisible.
+    /// Minuit de ce jour civil (grégorien) dans le fuseau de `calendar` ; `nil` pour une clé illisible.
     public static func date(for key: String, calendar: Calendar) -> Date? {
         let parts = key.split(separator: "-").compactMap { Int($0) }
         guard parts.count == 3 else { return nil }
+        let gregorian = gregorian(in: calendar)
         let components = DateComponents(year: parts[0], month: parts[1], day: parts[2])
-        return calendar.date(from: components).map { calendar.startOfDay(for: $0) }
+        return gregorian.date(from: components).map { gregorian.startOfDay(for: $0) }
+    }
+
+    /// Le calendrier grégorien du fuseau de `calendar`, dans lequel toutes les clés s'écrivent et se lisent.
+    private static func gregorian(in calendar: Calendar) -> Calendar {
+        if calendar.identifier == .gregorian { return calendar }
+        var gregorian = Calendar(identifier: .gregorian)
+        gregorian.timeZone = calendar.timeZone
+        gregorian.locale = Locale(identifier: "en_US_POSIX")
+        return gregorian
     }
 
     /// La clé enregistrée ; pour une ligne écrite avant la V9 (ou par une version plus ancienne de l'app, sur un autre appareil),

@@ -134,3 +134,32 @@ private func midnight(_ day: Int = 27, in calendar: Calendar) -> Date {
     #expect(try DayKeyRepair.run(in: context, calendar: newYork, now: Fixed.t2))
     #expect(try context.fetch(FetchDescriptor<StoredDailyRecovery>()).map(\.dayKey) == ["2026-11-27"])
 }
+
+/// Un iPhone réglé sur le calendrier bouddhiste ou japonais écrit la même clé qu'un iPad grégorien, et la relit au bon minuit.
+@Test func theKeyIgnoresTheDeviceCalendar() throws {
+    for identifier in [Calendar.Identifier.buddhist, .japanese, .islamicUmmAlQura] {
+        var device = Calendar(identifier: identifier)
+        device.timeZone = paris.timeZone
+        device.locale = Locale(identifier: "th_TH")
+        #expect(DayKey.key(for: midnight(in: paris).addingTimeInterval(9 * 3_600), calendar: device) == "2026-11-27")
+        #expect(DayKey.date(for: "2026-11-27", calendar: device) == midnight(in: paris))
+        #expect(DayKey.effective(nil, day: midnight(in: paris), calendar: device) == "2026-11-27")
+    }
+}
+
+/// Un score enregistré sur un appareil au calendrier bouddhiste se relit et se remplace depuis un appareil grégorien.
+@Test func aBuddhistDeviceAndAGregorianDeviceShareTheirRows() async throws {
+    var buddhist = Calendar(identifier: .buddhist)
+    buddhist.timeZone = paris.timeZone
+    let container = try TestContainer.make()
+    let onPhone = SwiftDataRecoveryRepository(modelContainer: container, calendar: buddhist)
+    try await onPhone.save(Sample.recovery(day: midnight(in: paris).addingTimeInterval(8 * 3_600), score: 60))
+    let read = try await onPhone.dailyRecoveries(from: midnight(in: paris), to: midnight(28, in: paris))
+    #expect(read.map(\.score) == [60] && read.first?.day == midnight(in: paris))
+
+    let onPad = SwiftDataRecoveryRepository(modelContainer: container, calendar: paris)
+    #expect(try await onPad.dailyRecoveries(from: midnight(in: paris), to: midnight(28, in: paris)).map(\.score) == [60])
+    try await onPad.save(Sample.recovery(day: midnight(in: paris), score: 70))
+    let rows = try ModelContext(container).fetch(FetchDescriptor<StoredDailyRecovery>())
+    #expect(rows.count == 1 && rows.first?.dayKey == "2026-11-27" && rows.first?.score == 70)
+}
