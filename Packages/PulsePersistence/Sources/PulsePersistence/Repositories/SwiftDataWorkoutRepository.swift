@@ -116,6 +116,34 @@ public actor SwiftDataWorkoutRepository: WorkoutRepository {
         return candidates.filter { $0.session === latest }.map { $0.set.toDomain() }.sorted { $0.order < $1.order }
     }
 
+    /// Les `limit` dernières séances terminées ou abandonnées contenant l'exercice hors échauffement et commencées avant `date`,
+    /// de la plus récente à la plus ancienne, décharges comprises. Lit les séries de l'exercice, comme `lastSets`, et la note de
+    /// l'exercice sur la colonne des notes de chaque séance retenue.
+    public func recentSessions(for exercise: ExerciseReference, startedBefore date: Date, limit: Int) throws
+        -> [RecentExerciseSession] {
+        let contentID = exercise.contentID
+        let userID = exercise.userID
+        let inProgress = SessionStatus.inProgress.rawValue
+        let warmup = SetType.warmup.rawValue
+        let descriptor = FetchDescriptor<StoredWorkoutSet>(predicate: #Predicate {
+            $0.deletedAt == nil && $0.setType != warmup && $0.contentExerciseID == contentID && $0.userExerciseID == userID
+                && $0.session != nil && $0.session?.deletedAt == nil && $0.session?.status != inProgress
+        })
+        var setsBySession: [ObjectIdentifier: (session: StoredWorkoutSession, sets: [StoredWorkoutSet])] = [:]
+        for stored in try modelContext.fetch(descriptor) {
+            guard let session = stored.session, session.startedAt < date else { continue }
+            setsBySession[ObjectIdentifier(session), default: (session, [])].sets.append(stored)
+        }
+        let latest = setsBySession.values.sorted { Self.isEarlier($1.session, $0.session) }.prefix(max(0, limit))
+        return latest.map { entry in
+            let notes = CodableColumn.decode([ExerciseNote].self, from: entry.session.exerciseNotes, default: [])
+            let note = notes.first { $0.exercise == exercise }?.text
+            return RecentExerciseSession(startedAt: entry.session.startedAt, isDeloaded: Self.isDeloaded(entry.session),
+                                         sets: entry.sets.map { $0.toDomain() }.sorted { $0.order < $1.order },
+                                         note: note?.isEmpty == false ? note : nil)
+        }
+    }
+
     /// Vrai pour une séance faite en décharge appliquée, lue sur la colonne des ajustements sans charger la séance.
     private static func isDeloaded(_ session: StoredWorkoutSession) -> Bool {
         WorkoutSession.isDeloaded(

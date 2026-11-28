@@ -326,3 +326,24 @@ private func counts(_ container: ModelContainer) throws -> (synced: Int, local: 
     let all = try await repo.sessions(from: .distantPast, to: .distantFuture)
     #expect(all.filter { $0.source != .appleHealth }.map(\.startedAt).min() == hevy.startedAt)
 }
+
+@Test func recentSessionsListTheLatestSessionsWithTheExerciseAndTheirNote() async throws {
+    let repo = SwiftDataWorkoutRepository(modelContainer: try TestContainer.make())
+    let bench = ExerciseReference.content(id: "bench-press-barbell")
+    var old = benchSession(day: 1, status: .completed, sets: [benchSet(order: 1, reps: 10, type: .warmup), benchSet(order: 2, reps: 8)])
+    old.exerciseNotes = [ExerciseNote(exercise: bench, text: "Banc cran 3")]
+    var deloaded = benchSession(day: 5, status: .abandoned, sets: [benchSet(order: 2, reps: 7), benchSet(order: 1, reps: 9)])
+    deloaded.appliedAdjustments = [SessionAdjustment(kind: .deload, reason: "Décharge")]
+    deloaded.exerciseNotes = [ExerciseNote(exercise: bench, text: "Prise large")]
+    let onlyWarmup = benchSession(day: 7, status: .completed, sets: [benchSet(order: 1, reps: 10, type: .warmup)])
+    let live = benchSession(day: 8, status: .inProgress, sets: [benchSet(order: 1, reps: 8)])
+    let later = benchSession(day: 20, status: .completed, sets: [benchSet(order: 1, reps: 6)])
+    for session in [old, deloaded, onlyWarmup, live, later] { try await repo.save(session) }
+
+    let recent = try await repo.recentSessions(for: bench, startedBefore: Fixed.t0.addingTimeInterval(10 * day), limit: 5)
+    #expect(recent.map(\.startedAt) == [deloaded.startedAt, old.startedAt])
+    #expect(recent.map(\.isDeloaded) == [true, false])
+    #expect(recent.map(\.note) == ["Prise large", "Banc cran 3"])
+    #expect(recent[0].sets.map(\.actualReps) == [9, 7] && recent[1].sets.map(\.actualReps) == [8])
+    #expect(try await repo.recentSessions(for: bench, startedBefore: .distantFuture, limit: 1).map(\.startedAt) == [later.startedAt])
+}

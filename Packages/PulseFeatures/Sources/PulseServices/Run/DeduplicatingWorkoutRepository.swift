@@ -57,4 +57,9 @@ public struct DeduplicatingWorkoutRepository: WorkoutRepository {
     public func lastSets(for exercise: ExerciseReference, startedBefore date: Date) async throws -> [WorkoutSet] {
         try await base.lastSets(for: exercise, startedBefore: date)
     }
+
+    public func recentSessions(for exercise: ExerciseReference, startedBefore date: Date, limit: Int) async throws
+        -> [RecentExerciseSession] {
+        try await base.recentSessions(for: exercise, startedBefore: date, limit: limit)
+    }
 }
