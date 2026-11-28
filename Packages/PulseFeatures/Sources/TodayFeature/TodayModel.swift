@@ -59,6 +59,10 @@ public final class TodayModel {
     public let checkIn = CheckInForm()
     /// Vrai pendant l'enregistrement du check-in : son bouton reste inactif.
     public private(set) var isSubmittingCheckIn = false
+    /// Le ressenti du matin, donné depuis l'écran « Pourquoi » quand le score est mesuré.
+    let feeling = CheckInForm()
+    var isSubmittingFeeling = false
+    var feelingError: String?
 
     @ObservationIgnored let environment: TodayEnvironment
     /// Le contenu et les exercices de l'utilisateur, relus à chaque actualisation pour nommer et compter les muscles des séances.
@@ -67,8 +71,11 @@ public final class TodayModel {
     /// ne peut plus écarter une lecture périmée : elle ne sert qu'en défense, et peut au pire écarter sans dommage un résultat
     /// plus récent que le score écrit.
     @ObservationIgnored private var scoreEpoch = 0
-    /// Le check-in du jour, qui sert à lire un score estimé : relu avec le jour, ou les réponses que l'accueil vient d'enregistrer.
-    @ObservationIgnored private var todayCheckIn: CheckIn?
+    /// Le check-in du jour, qui fait le score estimé ou le ressenti ajouté au score mesuré : relu avec le jour, ou les réponses que
+    /// l'accueil vient d'enregistrer.
+    @ObservationIgnored var todayCheckIn: CheckIn?
+    /// Ce que l'écran « Pourquoi » dit du calcul, relu des nuits à chaque actualisation.
+    @ObservationIgnored private var insight: RecoveryInsight?
     /// Le jour de la dernière actualisation : un jour de plus et le formulaire du check-in repart de zéro.
     @ObservationIgnored private var lastRefreshDay: Date?
     /// Le profil de la dernière actualisation : il règle la hausse de charge et le lancement de la séance.
@@ -173,6 +180,8 @@ public final class TodayModel {
         if let updated = day.score {
             apply(updated)
             todayCheckIn = day.checkIn
+            insight = TodayInsight.make(nights: day.nights, now: environment.now(), sleepGoalMinutes: SleepGoal.minutes(of: day.profile),
+                                        calendar: environment.calendar)
             show(day.session)
         } else {
             // Le calcul a échoué : le score affiché reste, la séance suit le programme relu.
@@ -236,9 +245,9 @@ public final class TodayModel {
         }
         let loads = LoadPreview.adjustments(session: session, recovery: recovery, profile: profile, reading: live,
                                             directory: directory, now: environment.now())
-        why = WhyContent.make(recovery: recovery, session: session, checkIn: recovery.isEstimated ? todayCheckIn : nil,
-                               directory: directory, loadAdjustments: loads, progress: whyProgress,
-                               sleepGoalMinutes: SleepGoal.minutes(of: profile))
+        why = WhyContent.make(recovery: recovery, session: session, checkIn: todayCheckIn, directory: directory,
+                               loadAdjustments: loads, progress: whyProgress, sleepGoalMinutes: SleepGoal.minutes(of: profile),
+                               insight: insight)
     }
 
     /// La séance de la carte vue par l'écran « Pourquoi ».
