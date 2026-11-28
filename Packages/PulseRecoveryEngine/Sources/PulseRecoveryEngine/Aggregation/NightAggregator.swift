@@ -9,8 +9,15 @@ public struct NightAggregator: Sendable {
     static let windowStartHours = NightWindow.startHours
     /// Fin de la fenêtre candidate, en heures après minuit (midi).
     static let windowEndHours = NightWindow.endHours
-    /// Fenêtre SDNN de repli sans aucun sommeil enregistré : de minuit à 8 h.
+    /// Fenêtre SDNN de repli sans aucun sommeil enregistré : de minuit à 8 h. 8 h sert aussi de réveil supposé pour choisir
+    /// l'échantillon Apple de FC au repos quand la nuit n'a pas de sommeil.
     static let fallbackSDNNHours = 8
+    /// Le centile des fréquences cardiaques endormies qui fait la FC de repos de la nuit : le 5e, pour qu'une mesure isolée
+    /// aberrante (montre qui glisse) ne fasse pas le minimum.
+    static let overnightPercentile = 0.05
+    /// Le nombre minimal de mesures de fréquence cardiaque endormies pour lire la FC de repos dans la nuit ; en dessous, on
+    /// prend l'échantillon Apple le plus proche du réveil.
+    static let overnightMinimumSamples = 5
 
     private let calendar: Calendar
 
@@ -18,21 +25,32 @@ public struct NightAggregator: Sendable {
         self.calendar = calendar
     }
 
-    public func nights(days: [Date], sdnn: [TimedSample], restingHeartRate: [TimedSample], sleep: [SleepInterval]) -> [NightSample] {
-        days.map { night(for: $0, sdnn: sdnn, restingHeartRate: restingHeartRate, sleep: sleep) }
+    /// `heartRate` : la fréquence cardiaque brute, d'où vient la FC de repos de la nuit quand elle couvre le sommeil.
+    public func nights(days: [Date], sdnn: [TimedSample], restingHeartRate: [TimedSample], heartRate: [TimedSample] = [],
+                       sleep: [SleepInterval]) -> [NightSample] {
+        days.map { night(for: $0, sdnn: sdnn, restingHeartRate: restingHeartRate, heartRate: heartRate, sleep: sleep) }
     }
 
     /// `day` est minuit local du jour de réveil. La SDNN de la nuit est la moyenne des mesures prises endormi dans le bloc
     /// principal : une sieste, un assoupissement du soir et les éveils n'y entrent pas. Sans mesure endormie, pas de SDNN.
-    public func night(for day: Date, sdnn: [TimedSample], restingHeartRate: [TimedSample], sleep: [SleepInterval]) -> NightSample {
+    /// La FC de repos est la fréquence cardiaque la plus basse des mêmes plages (5e centile) ; sans assez de mesures, l'échantillon
+    /// Apple « FC au repos » le plus proche du réveil. Ni l'une ni l'autre ne bouge au fil de la matinée sans nouvelle nuit.
+    public func night(for day: Date, sdnn: [TimedSample], restingHeartRate: [TimedSample], heartRate: [TimedSample] = [],
+                      sleep: [SleepInterval]) -> NightSample {
         let asleep = mergedAsleepIntervals(for: day, in: sleep)
         let detail = asleep.isEmpty ? nil : NightSleepBuilder(calendar: calendar).night(for: day, sleep: sleep)
         let sdnnWindows = asleep.isEmpty ? [fallbackWindow(for: day)] : mainBlockAsleepIntervals(of: detail)
+        let sdnnValues = validSDNN(sdnn, in: sdnnWindows)
+        let overnight = asleep.isEmpty ? nil : overnightLowest(heartRate, in: sdnnWindows)
+        let wake = detail?.wokeUp ?? hours(Self.fallbackSDNNHours, from: day)
+        let nearWake = overnight == nil ? appleRestingHeartRate(nearestTo: wake, in: restingHeartRate, on: day) : nil
 
         return NightSample(
             day: day,
-            sdnnMs: meanSDNN(sdnn, in: sdnnWindows),
-            restingHeartRate: lastRestingHeartRate(restingHeartRate, on: day),
+            sdnnMs: sdnnValues.isEmpty ? nil : sdnnValues.reduce(0, +) / Double(sdnnValues.count),
+            sdnnSampleCount: sdnnValues.isEmpty ? nil : sdnnValues.count,
+            restingHeartRate: overnight ?? nearWake,
+            restingHeartRateSource: overnight != nil ? .overnightLowest : (nearWake != nil ? .appleNearWake : nil),
             sleep: summary(for: day, asleepIntervals: asleep, sleep: sleep, detail: detail)
         )
     }
@@ -90,20 +108,34 @@ public struct NightAggregator: Sendable {
         DateInterval(start: day, end: hours(Self.fallbackSDNNHours, from: day))
     }
 
-    /// La moyenne des mesures valides qui tombent dans l'une des plages ; `nil` sans aucune.
-    private func meanSDNN(_ samples: [TimedSample], in windows: [DateInterval]) -> Double? {
-        let values = samples
+    /// Les mesures valides qui tombent dans l'une des plages.
+    private func validSDNN(_ samples: [TimedSample], in windows: [DateInterval]) -> [Double] {
+        samples
             .filter { sample in HRVBaseline.isValid(sdnnMs: sample.value) && windows.contains { $0.contains(sample.date) } }
             .map(\.value)
-        guard !values.isEmpty else { return nil }
-        return values.reduce(0, +) / Double(values.count)
     }
 
-    private func lastRestingHeartRate(_ samples: [TimedSample], on day: Date) -> Double? {
+    /// Le 5e centile (rang le plus proche) des fréquences cardiaques prises endormi ; `nil` sous `overnightMinimumSamples`.
+    private func overnightLowest(_ samples: [TimedSample], in windows: [DateInterval]) -> Double? {
+        let values = samples
+            .filter { sample in sample.value > 0 && windows.contains { $0.contains(sample.date) } }
+            .map(\.value)
+            .sorted()
+        guard values.count >= Self.overnightMinimumSamples else { return nil }
+        let rank = Int((Self.overnightPercentile * Double(values.count)).rounded(.up))
+        return values[max(0, rank - 1)]
+    }
+
+    /// L'échantillon Apple du jour (de minuit à minuit) le plus proche de `wake` ; à égalité, le plus tôt.
+    private func appleRestingHeartRate(nearestTo wake: Date, in samples: [TimedSample], on day: Date) -> Double? {
         guard let nextDay = calendar.date(byAdding: .day, value: 1, to: day) else { return nil }
         return samples
             .filter { $0.date >= day && $0.date < nextDay }
-            .max(by: { $0.date < $1.date })?
+            .min { lhs, rhs in
+                let left = abs(lhs.date.timeIntervalSince(wake))
+                let right = abs(rhs.date.timeIntervalSince(wake))
+                return left == right ? lhs.date < rhs.date : left < right
+            }?
             .value
     }
 
