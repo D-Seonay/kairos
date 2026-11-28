@@ -49,6 +49,25 @@ private func hevyPush(_ fixture: TrainFixture, status: SessionStatus = .complete
     #expect(model.blocks[1].sets.map(\.text) == ["15 × 12"])
 }
 
+@MainActor @Test func detailLabelsTheMembersOfATriSet() async throws {
+    let fixture = TrainFixture()
+    let date = TrainClock.date(month: 10, day: 12, hour: 18)
+    let references: [ExerciseReference] = [bench, fly, .content(id: "plank"), .content(id: "pull-up")]
+    // Deux tours du tri-set A1, A2, A3, puis les tractions seules.
+    let rounds = (0..<2).flatMap { _ in references.prefix(3) } + [references[3]]
+    let sets = rounds.enumerated().map { order, reference in
+        WorkoutSet(order: order, exercise: reference, exerciseName: "Exercice", setType: .working,
+                   supersetGroup: reference == references[3] ? nil : 1, actualReps: 8, completedAt: date)
+    }
+    let session = WorkoutSession(startedAt: date, endedAt: date, kind: .strength, source: .pulse, status: .completed,
+                                 title: "Circuit", sets: sets, createdAt: date, updatedAt: date)
+    try await fixture.environment.workouts.save(session)
+    let model = SessionDetailModel(environment: fixture.environment, sessionID: session.id)
+    await model.load()
+    #expect(model.blocks.map(\.exercise) == references)
+    #expect(model.blocks.map(\.supersetLabel) == ["A1", "A2", "A3", nil])
+}
+
 @MainActor @Test func detailFormatsSetsWithoutLoadOrHeldForATime() async throws {
     let fixture = TrainFixture()
     let date = TrainClock.date(month: 10, day: 12, hour: 18)
