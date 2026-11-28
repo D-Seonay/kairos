@@ -126,6 +126,30 @@ struct LiveSessionLoadDropTests {
         #expect(session == again)
     }
 
+    @Test func restoringMatchesEachSetByIdentityAfterADeletion() {
+        // 100, 95 puis 90 kg la dernière fois ; la première série supprimée avant « Remettre » : les deux autres reprennent 95
+        // et 90 kg, pas 100 et 95.
+        let ramp = [Fix.done(Fix.bench, 100, 10), Fix.done(Fix.bench, 95, 10), Fix.done(Fix.bench, 90, 10)]
+        var session = benchSession(history: ramp, recent: [recent(36, sets: ramp)])
+        let bench = session.exercises[0]
+        session.applyStructure(.deleteSet(exercise: bench.id, set: bench.sets[0].id), now: .t0)
+        session.applyStructure(.restoreLoads(exercise: bench.id), now: .t0)
+        #expect(session.exercises[0].sets.map(\.weightKg) == [95, 90])
+    }
+
+    @Test func restoringAHigherLoadAddsBackTheWarmupsItNeeds() {
+        // 40 kg la dernière fois, −20 % après sept semaines : 32,5 kg s'échauffe en deux séries, 40 kg en trois.
+        let light = [Fix.done(Fix.bench, 40, 10), Fix.done(Fix.bench, 40, 10), Fix.done(Fix.bench, 40, 10)]
+        var session = benchSession(history: light, recent: [recent(50, sets: light)], warmups: true)
+        let bench = session.exercises[0]
+        let lowWarmups = bench.sets.filter { $0.setType == .warmup }.map(\.weightKg)
+        session.applyStructure(.restoreLoads(exercise: bench.id), now: .t0)
+        let plain = Fix.session(Fix.launch(Fix.day([Fix.exercise(Fix.bench)]), nil), history: [Fix.bench: light], warmups: true)
+        let expected = plain.exercises[0].sets.filter { $0.setType == .warmup }.map(\.weightKg)
+        #expect(expected.count > lowWarmups.count)
+        #expect(session.exercises[0].sets.filter { $0.setType == .warmup }.map(\.weightKg) == expected)
+    }
+
     @Test func restoringRecomputesTheWarmups() throws {
         var session = benchSession(recent: [recent(36)], warmups: true)
         let bench = session.exercises[0]

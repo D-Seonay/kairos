@@ -10,10 +10,21 @@ public struct LiveLoadDrop: Sendable, Equatable, Codable {
     /// Les propositions sans la baisse, série de travail par série de travail : la charge de la dernière fois (décharge en
     /// cours comprise), jamais la hausse qu'elle aurait value, et les répétitions proposées.
     public var originalSets: [ProposedSet]
+    /// Les séries de travail planifiées, dans l'ordre de `originalSets` : « Remettre » retrouve chaque série par son identité,
+    /// même après une série supprimée. `nil` : relue d'avant, la série *n* reprend la proposition *n*.
+    public var setIDs: [UUID]?
 
-    public init(text: String, originalSets: [ProposedSet]) {
+    public init(text: String, originalSets: [ProposedSet], setIDs: [UUID]? = nil) {
         self.text = text
         self.originalSets = originalSets
+        self.setIDs = setIDs
+    }
+
+    /// Ce que « Remettre » repose sur la série `id`, à la place `position` parmi les séries de travail.
+    func original(for id: UUID, position: Int) -> ProposedSet? {
+        let index = setIDs.map { $0.firstIndex(of: id) } ?? position
+        guard let index, originalSets.indices.contains(index) else { return nil }
+        return originalSets[index]
     }
 
     /// La charge d'avant la baisse quand toutes les séries la partagent : le « 80 kg » de « Remettre 80 kg ».

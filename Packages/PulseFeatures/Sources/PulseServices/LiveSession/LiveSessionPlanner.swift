@@ -113,6 +113,8 @@ public enum LiveSessionPlanner {
                            previousSpoken: LiveSessionText.previousSpoken(before, loadKind: loadKind,
                                                                           tracksDuration: tracksDuration))
         }
+        var loadDrop = dropped.drop
+        loadDrop?.setIDs = working.map(\.id)
         let warmupPlan = warmupPlan(info: info, settings: settings, rounding: rounding, context: context,
                                     workedMuscles: workedMuscles)
         let sets = LiveSessionPlanner.warmupSets(firstWorkingKg: working.first?.proposed.weightKg, plan: warmupPlan,
@@ -126,7 +128,7 @@ public enum LiveSessionPlanner {
                                              policy: context.policy, planned: planned, adjusted: routineExercise),
             lastTimeText: LiveSessionText.lastTime(lastSets, loadKind: loadKind, tracksDuration: tracksDuration),
             lastTimeSpoken: LiveSessionText.lastTimeSpoken(lastSets, loadKind: loadKind, tracksDuration: tracksDuration),
-            note: recall.pinnedNote, sets: sets, warmupPlan: warmupPlan, loadDrop: dropped.drop)
+            note: recall.pinnedNote, sets: sets, warmupPlan: warmupPlan, loadDrop: loadDrop)
         return (exercise, loadAdjustment)
     }
 

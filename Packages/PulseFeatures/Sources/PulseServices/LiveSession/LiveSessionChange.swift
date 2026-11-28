@@ -231,16 +231,34 @@ private extension LiveExercise {
         refreshWarmups(afterEditing: sets[first].id)
     }
 
-    /// La série de travail *n* reprend la proposition *n* d'avant la baisse, tant qu'elle n'est ni validée ni modifiée.
+    /// Chaque série de travail planifiée reprend sa charge d'avant la baisse, retrouvée par son identité, tant qu'elle n'est
+    /// ni validée ni modifiée ; une série ajoutée en séance garde la sienne. L'échauffement suit la nouvelle charge.
     mutating func restoreLoads() {
         guard let drop = loadDrop else { return }
         let working = sets.indices.filter { sets[$0].setType != .warmup }
-        for (position, index) in working.enumerated() where position < drop.originalSets.count
-            && sets[index].completedAt == nil && !sets[index].isEdited {
-            propose(drop.originalSets[position], at: index)
+        let loweredFirstKg = working.first.flatMap { sets[$0].weightKg }
+        for (position, index) in working.enumerated() where sets[index].completedAt == nil && !sets[index].isEdited {
+            if let original = drop.original(for: sets[index].id, position: position) { propose(original, at: index) }
         }
         loadDrop = nil
-        if let first = working.first { refreshWarmups(afterEditing: sets[first].id) }
+        restoreWarmups(loweredFirstKg: loweredFirstKg)
+    }
+
+    /// Après « Remettre », l'échauffement est refait pour la charge remise, comme au lancement : une charge plus haute peut en
+    /// demander une série de plus. Seulement si les séries d'échauffement sont celles que la charge baissée proposait (ni
+    /// validées, ni modifiées, ni supprimées) ; sinon, recalcul habituel sans en ajouter.
+    private mutating func restoreWarmups(loweredFirstKg: Double?) {
+        guard let first = sets.firstIndex(where: { $0.setType != .warmup }) else { return }
+        let warmups = sets[..<first]
+        let planned = LiveSessionPlanner.warmupSets(firstWorkingKg: loweredFirstKg, plan: warmupPlan, incrementKg: incrementKg)
+        guard warmupPlan != nil, sets[first].completedAt == nil, warmups.count == planned.count,
+              warmups.allSatisfy({ $0.setType == .warmup && $0.completedAt == nil && !$0.isEdited }),
+              zip(warmups, planned).allSatisfy({ $0.weightKg == $1.weightKg }) else {
+            refreshWarmups(afterEditing: sets[first].id)
+            return
+        }
+        sets.replaceSubrange(..<first, with: LiveSessionPlanner.warmupSets(firstWorkingKg: sets[first].weightKg, plan: warmupPlan,
+                                                                           incrementKg: incrementKg))
     }
 
     mutating func setWarmupCount(_ count: Int?) {
