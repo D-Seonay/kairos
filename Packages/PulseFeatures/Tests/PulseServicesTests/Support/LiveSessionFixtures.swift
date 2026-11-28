@@ -22,9 +22,9 @@ enum LiveFixtures {
     }
 
     static func done(_ reference: ExerciseReference, _ weightKg: Double?, _ reps: Int?, seconds: Int? = nil,
-                     order: Int = 0) -> WorkoutSet {
-        WorkoutSet(order: order, exercise: reference, exerciseName: "x", setType: .working, actualWeightKg: weightKg,
-                   actualReps: reps, durationSeconds: seconds)
+                     order: Int = 0, planned: Int? = nil) -> WorkoutSet {
+        WorkoutSet(order: order, exercise: reference, exerciseName: "x", setType: .working, plannedReps: planned,
+                   actualWeightKg: weightKg, actualReps: reps, durationSeconds: seconds)
     }
 
     /// Bench 60 × 12, 70 × 5, 70 × 5.

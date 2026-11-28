@@ -49,8 +49,11 @@ public struct LoadDrop: Sendable, Equatable, Codable {
 /// échec, et la double progression remonte vite.
 ///
 /// **Échecs répétés.** Une séance « sous la fourchette » a au moins une série de travail ou à l'échec (ni échauffement, ni
-/// dégressive, ni série sans répétitions saisies) sous le bas de la fourchette de sa série dans la routine d'aujourd'hui. Deux
-/// séances de suite ainsi, hors décharge : −5 %, ou −10 % quand plus de la moitié des séries ont manqué les deux fois.
+/// dégressive, ni série sans répétitions saisies) sous sa propre cible : les répétitions proposées ce jour-là, ou le bas de la
+/// fourchette de sa série dans la routine d'aujourd'hui s'il est plus bas. Un squat fait en 5 × 5 n'échoue donc pas quand la
+/// fourchette du jour est 8–12 (exercice ajouté en séance, changement de programme). Une série sans répétitions proposées
+/// (importée, exercice tenu) ne dit pas sa cible : elle n'est pas comptée. Deux séances de suite ainsi, hors décharge : −5 %,
+/// ou −10 % quand plus de la moitié des séries comptées ont manqué les deux fois.
 /// Une reprise passe avant : les séances d'avant la pause ne disent plus grand-chose.
 public enum LoadDropRule {
     /// À partir de deux semaines sans l'exercice, la séance est une reprise.
@@ -84,15 +87,17 @@ public enum LoadDropRule {
         return LoadDrop(reason: .misses, percent: heavy ? heavyMissPercent : missPercent)
     }
 
-    /// Les séries comptées d'une séance et celles sous le bas de leur fourchette. La série *n* se lit avec la fourchette de la
-    /// série *n* de la routine, comme la progression.
+    /// Les séries comptées d'une séance et celles sous leur cible : les répétitions proposées ce jour-là, ou le bas de la
+    /// fourchette de la série *n* de la routine s'il est plus bas. Sans cible enregistrée, la série n'est pas comptée. Un
+    /// exercice tenu n'enregistre pas sa durée prévue : aucune de ses séries ne compte.
     static func misses(in sets: [WorkoutSet], exercise: RoutineExercise, tracksDuration: Bool) -> (checked: Int, missed: Int) {
+        guard !tracksDuration else { return (0, 0) }
         var checked = 0
         var missed = 0
         for (index, set) in sets.enumerated() where set.setType == .working || set.setType == .failure {
-            guard let reached = tracksDuration ? set.durationSeconds : set.actualReps else { continue }
+            guard let reached = set.actualReps, let planned = set.plannedReps else { continue }
             checked += 1
-            if reached < exercise.repRange(forSet: index).lowerBound { missed += 1 }
+            if reached < min(exercise.repRange(forSet: index).lowerBound, planned) { missed += 1 }
         }
         return (checked, missed)
     }

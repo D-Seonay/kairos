@@ -11,8 +11,10 @@ struct LoadDropRuleTests {
                         repsMax: range.upperBound, targetRPE: 8, restSeconds: 90)
     }
 
-    private func done(_ weight: Double?, _ reps: Int?, type: SetType = .working, seconds: Int? = nil) -> WorkoutSet {
-        WorkoutSet(order: 0, exercise: .content(id: "exercise"), exerciseName: "Exercice", setType: type,
+    /// Une série faite ; `planned` : les répétitions proposées ce jour-là, le bas de la fourchette 8–12 par défaut.
+    private func done(_ weight: Double?, _ reps: Int?, type: SetType = .working, seconds: Int? = nil,
+                      planned: Int? = 8) -> WorkoutSet {
+        WorkoutSet(order: 0, exercise: .content(id: "exercise"), exerciseName: "Exercice", setType: type, plannedReps: planned,
                    actualWeightKg: weight, actualReps: reps, durationSeconds: seconds)
     }
 
@@ -68,16 +70,30 @@ struct LoadDropRuleTests {
     @Test func aPerSetRangeIsReadSetBySet() {
         var ramping = routine(range: 4...12)
         ramping.setTargets = [SetTarget(repsMin: 10, repsMax: 12), SetTarget(repsMin: 4, repsMax: 6)]
-        let recent = [[done(60, 10), done(70, 4)], [done(60, 11), done(70, 5)]]
+        let recent = [[done(60, 10, planned: 10), done(70, 4, planned: 4)], [done(60, 11, planned: 10), done(70, 5, planned: 4)]]
         #expect(LoadDropRule.drop(daysSinceLast: 3, recentSets: recent, exercise: ramping, tracksDuration: false) == nil)
-        let missed = [[done(60, 9), done(70, 4)], [done(60, 9), done(70, 5)]]
+        let missed = [[done(60, 9, planned: 10), done(70, 4, planned: 4)], [done(60, 9, planned: 10), done(70, 5, planned: 4)]]
         #expect(LoadDropRule.drop(daysSinceLast: 3, recentSets: missed, exercise: ramping, tracksDuration: false)?.percent == 5)
     }
 
-    @Test func aHeldExerciseReadsItsRangeInSeconds() {
-        let recent = [[done(10, nil, seconds: 25)], [done(10, nil, seconds: 20)]]
-        let drop = LoadDropRule.drop(daysSinceLast: 3, recentSets: recent, exercise: routine(range: 30...60), tracksDuration: true)
-        #expect(drop?.reason == .misses)
+    @Test func pastSetsAreJudgedAgainstTheirOwnTarget() {
+        // Un squat fait en 5 × 5, ajouté en séance avec la fourchette par défaut (8–12) ou passé à un programme en 8–12 :
+        // 5 répétitions sur 5 prévues ne sont pas des échecs.
+        let fiveByFive = [[done(100, 5, planned: 5), done(100, 5, planned: 5)], [done(100, 5, planned: 5), done(100, 5, planned: 5)]]
+        #expect(drop(days: 3, recent: fiveByFive) == nil)
+        // Sous les 5 prévues, deux fois : un échec, même lu avec la fourchette 8–12.
+        let missedFives = [[done(100, 4, planned: 5), done(100, 5, planned: 5)], [done(100, 4, planned: 5), done(100, 5, planned: 5)]]
+        #expect(drop(days: 3, recent: missedFives)?.percent == 5)
+        // Une proposition au-dessus du bas de la fourchette (9 prévues, 8 faites) reste dans la fourchette.
+        #expect(drop(days: 3, recent: [[done(60, 8, planned: 9)], [done(60, 8, planned: 9)]]) == nil)
+    }
+
+    @Test func withoutAPastTargetTheMissRuleStaysQuiet() {
+        // Une série sans proposition enregistrée (importée, saisie sans proposition) ne dit pas quelle était la cible.
+        #expect(drop(days: 3, recent: [[done(60, 5, planned: nil)], [done(60, 5, planned: nil)]]) == nil)
+        // Un exercice tenu n'enregistre pas sa durée prévue.
+        let held = [[done(10, nil, seconds: 25, planned: nil)], [done(10, nil, seconds: 20, planned: nil)]]
+        #expect(LoadDropRule.drop(daysSinceLast: 3, recentSets: held, exercise: routine(range: 30...60), tracksDuration: true) == nil)
     }
 
     // MARK: - Charges baissées

@@ -10,6 +10,11 @@ struct LiveSessionLoadDropTests {
     private typealias Fix = LiveFixtures
     private let flat = [Fix.done(Fix.bench, 100, 10), Fix.done(Fix.bench, 100, 10), Fix.done(Fix.bench, 100, 10)]
 
+    /// Trois séries de bench à 100 kg, `reps` faites sur `planned` proposées.
+    private func bench(_ reps: [Int], planned: Int = 8, weightKg: Double = 100) -> [WorkoutSet] {
+        reps.map { Fix.done(Fix.bench, weightKg, $0, planned: planned) }
+    }
+
     private func recent(_ daysAgo: Int, sets: [WorkoutSet]? = nil, note: String? = nil,
                         deloaded: Bool = false) -> RecentExerciseSession {
         RecentExerciseSession(startedAt: Date.t0.addingTimeInterval(-Double(daysAgo) * 86_400), isDeloaded: deloaded,
@@ -46,7 +51,7 @@ struct LiveSessionLoadDropTests {
     }
 
     @Test func twoMissedSessionsLowerOnlyThatExercise() throws {
-        let missed = [Fix.done(Fix.bench, 100, 7), Fix.done(Fix.bench, 100, 8), Fix.done(Fix.bench, 100, 8)]
+        let missed = bench([7, 8, 8])
         let pecSets = [Fix.done(Fix.pecDeck, 50, 10), Fix.done(Fix.pecDeck, 50, 10)]
         let day = Fix.day([Fix.exercise(Fix.bench, order: 0), Fix.exercise(Fix.pecDeck, order: 1)])
         let session = Fix.session(Fix.launch(day, nil), history: [Fix.bench: missed, Fix.pecDeck: pecSets],
@@ -59,15 +64,24 @@ struct LiveSessionLoadDropTests {
         #expect(session.exercises[1].sets.map(\.proposed.weightKg) == [50, 50, 50])
     }
 
+    @Test func anExerciseAddedWithTheDefaultRangeIsJudgedOnItsOwnPastTargets() {
+        // Un bench fait en 5 × 5, ajouté en séance : la fourchette par défaut (8–12) ne transforme pas 5 sur 5 en échecs.
+        let fives = bench([5, 5, 5], planned: 5)
+        let added = LiveSessionPlanner.exercise(Fix.bench, directory: Fix.directory, history: fives, settings: nil,
+                                                profile: Fix.profile(), policy: ProgressionPolicy(allowsIncrease: true),
+                                                recent: [recent(3, sets: fives), recent(6, sets: fives)], now: .t0)
+        #expect(added.loadDrop == nil)
+    }
+
     @Test func aDeloadedSessionBetweenTwoMissesIsSkippedButStillEndsTheLayoff() {
-        let missed = [Fix.done(Fix.bench, 100, 6), Fix.done(Fix.bench, 100, 6), Fix.done(Fix.bench, 100, 6)]
+        let missed = bench([6, 6, 6])
         let bench = benchSession(history: missed, recent: [recent(2, deloaded: true), recent(20, sets: missed),
                                                            recent(23, sets: missed)]).exercises[0]
         #expect(bench.loadDrop?.text == "Deux séances sous la fourchette : −10 %")
     }
 
     @Test func aDeloadWeekThatAlreadyLowersMoreKeepsTheDeloadOnly() {
-        let missed = [Fix.done(Fix.bench, 100, 7), Fix.done(Fix.bench, 100, 8), Fix.done(Fix.bench, 100, 8)]
+        let missed = bench([7, 8, 8])
         let bench = benchSession(history: missed, recent: [recent(3, sets: missed), recent(6, sets: missed)],
                                  deload: .active(since: .distantPast, until: .distantFuture)).exercises[0]
         #expect(bench.loadDrop == nil)
