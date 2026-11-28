@@ -8,7 +8,11 @@ import PulseLiveActivity
 /// séance sans activité.
 struct SessionActivityController: SessionActivityControlling {
     func start(_ state: SessionActivityState) async {
-        _ = try? Activity.request(attributes: Self.attributes(for: state), content: Self.content(for: state))
+        do {
+            _ = try Activity.request(attributes: Self.attributes(for: state), content: Self.content(for: state))
+        } catch {
+            logger.failure("Live Activity de la séance refusée", error)
+        }
     }
 
     /// Met à jour l'activité de la séance ; sans elle (fermée par l'utilisateur ou par le système), rien.

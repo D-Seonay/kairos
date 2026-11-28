@@ -15,7 +15,14 @@ struct AppGroupWidgetPublisher: WidgetPublishing {
     }
 
     func publish(_ snapshot: WidgetSnapshot) async {
-        guard let changed = try? file?.write(snapshot), changed else { return }
+        let changed: Bool
+        do {
+            changed = try file?.write(snapshot) ?? false
+        } catch {
+            logger.failure("Instantané du widget non écrit", error)
+            return
+        }
+        guard changed else { return }
         reloadTimelines()
     }
 
@@ -26,7 +33,11 @@ struct AppGroupWidgetPublisher: WidgetPublishing {
 
     func clear() async {
         theme.clear()
-        if let file { try? file.delete() }
+        do {
+            try file?.delete()
+        } catch {
+            logger.failure("Instantané du widget non effacé", error)
+        }
         reloadTimelines()
     }
 

@@ -36,7 +36,11 @@ final class NotificationRouter: NSObject, UNUserNotificationCenterDelegate {
         if response.actionIdentifier == UserNotificationScheduler.supplementTakeAction,
            let intake = Self.supplementIntake(from: userInfo) {
             // Une prise déjà cochée, ou un complément supprimé entre-temps, ne compte pas : rien d'autre à faire.
-            _ = try? await supplements.take(supplementID: intake.id, day: intake.day)
+            do {
+                _ = try await supplements.take(supplementID: intake.id, day: intake.day)
+            } catch {
+                logger.failure("Prise de complément depuis la notification non enregistrée", error)
+            }
             await router.supplementsChanged()
             return
         }

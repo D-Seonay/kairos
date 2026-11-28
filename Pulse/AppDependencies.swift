@@ -188,7 +188,7 @@ struct AppDependencies: Sendable {
         do {
             return try make(wiring, mode: preferred, error: nil)
         } catch {
-            let message = String(localized: "Le stockage n'a pas pu être ouvert ; les données ne seront pas conservées.")
+            let message = storeFailureMessage(logging: error)
             guard let fallback = try? make(wiring, mode: .inMemory, error: message) else { crash(error) }
             return fallback
         }
