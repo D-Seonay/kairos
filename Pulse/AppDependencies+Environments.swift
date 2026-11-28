@@ -3,6 +3,7 @@ import LiveSessionFeature
 import OnboardingFeature
 import PlanningFeature
 import ProfileFeature
+import PulseDomain
 import PulseServices
 import RunFeature
 import StatsFeature
@@ -31,11 +32,17 @@ extension AppDependencies {
         return HealthAccess(source: healthSource, cache: healthCache, once: once, afterRequest: { delivery?.restart() })
     }
 
+    /// Les autres entraînements d'Apple Santé (natation, HIIT, sport…), lus dans le cache : la charge de l'accueil et des Stats,
+    /// et la grille d'assiduité. Ceux que Pulse a écrits ne comptent pas.
+    var healthActivities: HealthActivities {
+        HealthActivities(healthCache, profiles, calendar)
+    }
+
     func todayEnvironment() -> TodayEnvironment {
         TodayEnvironment(refresher: refresher, workouts: workouts, userExercises: userExercises, exerciseSettings: exerciseSettings,
                          activeSession: liveSession, library: content, calendar: calendar, now: now,
                          nights: NightDetailService(cache: healthCache, profiles: profiles, calendar: calendar, now: now),
-                         healthAccess: healthAccess)
+                         healthAccess: healthAccess, activities: healthActivities)
     }
 
     func trainEnvironment() -> TrainEnvironment {
@@ -53,7 +60,7 @@ extension AppDependencies {
     func statsEnvironment() -> StatsEnvironment {
         let service = StatsService(profiles: profiles, programs: programs, workouts: workouts, recoveries: recovery,
                                    records: personalRecords, userExercises: userExercises, library: content, calendar: calendar,
-                                   now: now, runEfforts: run.bestEfforts)
+                                   now: now, runEfforts: run.bestEfforts, activities: healthActivities)
         return StatsEnvironment(service: service, train: trainEnvironment(), calendar: calendar, now: now,
                                 nights: NightDetailService(cache: healthCache, profiles: profiles, calendar: calendar, now: now))
     }
@@ -128,5 +135,12 @@ extension AppDependencies {
             library: content, calendar: calendar, now: now, health: liveSession.health)
         return LiveSessionEnvironment(service: service, train: trainEnvironment(), notifications: liveSessionNotifications,
                                       calendar: calendar, now: now)
+    }
+}
+
+extension HealthActivities {
+    /// Les autres entraînements d'Apple Santé lus par l'app : ceux qu'elle a elle-même écrits (son identifiant) ne comptent pas.
+    init(_ cache: any HealthSampleCache, _ profiles: any ProfileRepository, _ calendar: Calendar) {
+        self.init(cache: cache, profiles: profiles, calendar: calendar, ownBundleIdentifier: Bundle.main.bundleIdentifier)
     }
 }

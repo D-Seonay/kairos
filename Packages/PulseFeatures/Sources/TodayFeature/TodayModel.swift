@@ -183,10 +183,10 @@ public final class TodayModel {
         }
     }
 
-    /// Les nuits lues font les tendances ; les séances des 28 derniers jours font le ratio de charge, et celles de la veille la
-    /// proposition de décharge. Le début de l'historique est celui des Stats, pour que les deux écrans montrent le même
-    /// ratio : il vient de la plus ancienne séance enregistrée, lue sans charger l'historique. Si les séances ne se lisent
-    /// pas, la carte garde son dernier contenu.
+    /// Les nuits lues font les tendances ; les séances des 28 derniers jours (et les autres entraînements d'Apple Santé) font le
+    /// ratio de charge, et celles de la veille la proposition de décharge. Le début de l'historique est celui des Stats, pour que
+    /// les deux écrans montrent le même ratio : il vient de la plus ancienne séance enregistrée, lue sans charger l'historique.
+    /// Si les séances ne se lisent pas, la carte garde son dernier contenu.
     private func updateLoadAndTrends(day: DayRefresh, now: Date) async {
         let calendar = environment.calendar
         let today = calendar.startOfDay(for: now)
@@ -204,9 +204,12 @@ public final class TodayModel {
             return
         }
         let historyStart = TrainingLoad.historyStart(oldestRecorded: oldest, onboardingCompletedAt: day.profile?.onboardingCompletedAt)
+        // Les autres entraînements d'Apple Santé (natation, HIIT, sport…) comptent aussi, comme dans les Stats.
+        let extra = await environment.activities?.loadSessions(from: start, to: end, excluding: sessions) ?? []
         load = LoadCardContent.make(TrainingLoad.acwr(
-            sessions: sessions.filter { $0.startedAt >= loadStart }, historyStart: historyStart, now: now, calendar: calendar))
-        deloadOffer = Deload.offer(sessions: sessions, historyStart: historyStart, profile: day.profile, now: now,
+            sessions: sessions.filter { $0.startedAt >= loadStart }, extra: extra.filter { $0.date >= loadStart },
+            historyStart: historyStart, now: now, calendar: calendar))
+        deloadOffer = Deload.offer(sessions: sessions, extra: extra, historyStart: historyStart, profile: day.profile, now: now,
                                    calendar: calendar)
     }
 

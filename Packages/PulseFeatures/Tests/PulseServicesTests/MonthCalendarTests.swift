@@ -40,6 +40,14 @@ struct MonthCalendarTests {
         #expect(day(result, "2026-11-14")?.done == [])
     }
 
+    @Test func otherAppleHealthWorkoutsMarkTheirDay() {
+        let context = ScheduleContext(program: Fixture.program(), calendar: calendar,
+                                      activities: [TestClock.date("2026-11-11T07:30"), TestClock.date("2026-11-11T19:00")])
+        let result = MonthCalendar.grid(month: now, context: context, now: now)
+        #expect(day(result, "2026-11-11")?.hasActivity == true && day(result, "2026-11-11")?.done == [])
+        #expect(result.weeks.joined().filter(\.hasActivity).count == 1)
+    }
+
     @Test func doneSessionsKeepTheirIDsFromOldestToNewest() {
         let evening = Fixture.session("2026-11-10T18:00")
         let morning = Fixture.session("2026-11-10T07:00", kind: .run)

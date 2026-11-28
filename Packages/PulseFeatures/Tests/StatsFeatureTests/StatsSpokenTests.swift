@@ -107,6 +107,18 @@ struct StatsAttendanceSpokenTests {
             == "Semaine en cours, du 2 novembre")
     }
 
+    @Test func otherWorkoutDaysFollowTheTrainedDays() {
+        var days = week(levels: [2, 0, 0, 0, 0, 0, 0])
+        days[1].hasActivity = true
+        days[0].hasActivity = true
+        #expect(StatsText.attendanceDays(week: days, calendar: Spoken.calendar)
+            == "1 jour d'entraînement : lundi · autre entraînement : mardi")
+        var only = week(levels: [0, 0, 0, 0, 0, 0, 0])
+        only[3].hasActivity = true
+        #expect(StatsText.attendanceDays(week: only, calendar: Spoken.calendar)
+            == "aucun jour d'entraînement · autre entraînement : jeudi")
+    }
+
     @Test func futureDaysAreNotCounted() {
         let days = [AttendanceDay(date: Spoken.date(11, 17), level: 1, isFuture: false),
                     AttendanceDay(date: Spoken.date(11, 18), level: 0, isFuture: true)]

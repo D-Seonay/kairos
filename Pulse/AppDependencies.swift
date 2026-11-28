@@ -241,7 +241,7 @@ struct AppDependencies: Sendable {
         let userExercises = SwiftDataUserExerciseRepository(modelContainer: container)
         let bodyMeasurements = SwiftDataBodyMeasurementRepository(modelContainer: container)
         let planning = PlanningService(profiles: profiles, programs: programs, workouts: workouts, scheduledDays: scheduledDays,
-                                       calendar: calendar, now: wiring.now)
+                                       calendar: calendar, now: wiring.now, activities: HealthActivities(healthCache, profiles, calendar))
         let stores = RefresherStores(
             profiles: profiles, programs: programs, recovery: recovery, storedWorkouts: storedWorkouts, scheduledDays: scheduledDays,
             userExercises: userExercises, bodyMeasurements: bodyMeasurements, healthCache: healthCache, activity: activity,

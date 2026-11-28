@@ -63,14 +63,17 @@ public struct ScheduleContext: Sendable {
     public var sessions: [WorkoutSession]
     public var restWeekdays: [Weekday]
     public var calendar: Calendar
+    /// Les débuts des autres entraînements d'Apple Santé (`HealthActivities`), pour la grille du mois.
+    public var activities: [Date]
 
     public init(program: Program?, overrides: [ScheduledDay] = [], sessions: [WorkoutSession] = [], restWeekdays: [Weekday] = [],
-                calendar: Calendar) {
+                calendar: Calendar, activities: [Date] = []) {
         self.program = program
         self.overrides = overrides
         self.sessions = sessions
         self.restWeekdays = restWeekdays
         self.calendar = calendar
+        self.activities = activities
     }
 }
 

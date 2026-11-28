@@ -6,13 +6,17 @@ public struct AttendanceDay: Sendable, Equatable, Identifiable {
     public var date: Date
     public var level: Int
     public var isFuture: Bool
+    /// Un autre entraînement d'Apple Santé ce jour-là (natation, HIIT, sport…, `HealthActivities`) : montré d'une marque neutre
+    /// quand aucune séance n'en fait déjà un jour entraîné. Il ne compte ni dans le niveau ni dans la série.
+    public var hasActivity: Bool
 
     public var id: Date { date }
 
-    public init(date: Date, level: Int, isFuture: Bool) {
+    public init(date: Date, level: Int, isFuture: Bool, hasActivity: Bool = false) {
         self.date = date
         self.level = level
         self.isFuture = isFuture
+        self.hasActivity = hasActivity
     }
 }
 
@@ -34,9 +38,10 @@ public struct AttendanceStats: Sendable, Equatable {
     /// Les semaines réussies sur celles de la période, de 0 à 1 ; `nil` sans semaine jugeable.
     public var regularity: Double?
 
-    // swiftlint:disable:next function_parameter_count
-    public static func make(sessions: [WorkoutSession], target: Int, historyStart: Date?, period: StatsPeriod, now: Date,
-                            calendar: Calendar) -> AttendanceStats {
+    // swiftlint:disable function_parameter_count
+    /// `activities` : les débuts des autres entraînements d'Apple Santé, montrés dans la matrice seulement.
+    public static func make(sessions: [WorkoutSession], activities: [Date] = [], target: Int, historyStart: Date?, period: StatsPeriod,
+                            now: Date, calendar: Calendar) -> AttendanceStats {
         // Les tuiles comptent les mêmes séances que la série. La matrice montre en plus les vélos terminés : le vélo ne compte
         // pas pour la série (spec M6 §5), mais une sortie reste un jour d'activité.
         let counted = sessions.filter(WeekStreak.counts)
@@ -45,7 +50,7 @@ public struct AttendanceStats: Sendable, Equatable {
         let minutes = inPeriod.compactMap { TrainingLoad.loadSession($0)?.minutes }
 
         return AttendanceStats(
-            weeks: matrix(sessions.filter(showsInMatrix), now: now, calendar: calendar),
+            weeks: matrix(sessions.filter(showsInMatrix), activities: activities, now: now, calendar: calendar),
             streak: WeekStreak.summary(sessions: sessions, target: target, historyStart: historyStart, now: now, calendar: calendar),
             best: WeekStreak.best(sessions: sessions, target: target, historyStart: historyStart, now: now, calendar: calendar),
             sessionsInPeriod: inPeriod.count,
@@ -56,6 +61,7 @@ public struct AttendanceStats: Sendable, Equatable {
             regularity: regularity(sessions: sessions, target: target, historyStart: historyStart, interval: interval, now: now,
                                    calendar: calendar))
     }
+    // swiftlint:enable function_parameter_count
 
     /// Une case de la matrice : une séance qui compte pour la série, ou un vélo terminé (lu d'Apple Santé). Les abandons restent
     /// hors de la matrice.
@@ -97,8 +103,9 @@ public struct AttendanceStats: Sendable, Equatable {
     }
     // swiftlint:enable function_parameter_count
 
-    /// Les 16 semaines qui finissent par la semaine en cours, de la plus ancienne à la plus récente, sur les séances `shown`.
-    private static func matrix(_ shown: [WorkoutSession], now: Date, calendar: Calendar) -> [[AttendanceDay]] {
+    /// Les 16 semaines qui finissent par la semaine en cours, de la plus ancienne à la plus récente, sur les séances `shown` et
+    /// les autres entraînements `activities`.
+    private static func matrix(_ shown: [WorkoutSession], activities: [Date], now: Date, calendar: Calendar) -> [[AttendanceDay]] {
         let today = calendar.startOfDay(for: now)
         let current = WeekSchedule.weekStart(of: now, calendar: calendar)
         let mondays = (0..<matrixWeeks).reversed().compactMap { calendar.date(byAdding: .weekOfYear, value: -$0, to: current) }
@@ -115,11 +122,12 @@ public struct AttendanceStats: Sendable, Equatable {
         }
         let window = Set(days.joined())
         let thresholds = quartiles(of: window.compactMap { loads[$0] }.filter { $0 > 0 })
+        let active = Set(activities.map { calendar.startOfDay(for: $0) })
 
         return days.map { week in
             week.map { day in
                 AttendanceDay(date: day, level: level(trained: trained.contains(day), load: loads[day] ?? 0, thresholds: thresholds),
-                              isFuture: day > today)
+                              isFuture: day > today, hasActivity: active.contains(day))
             }
         }
     }
