@@ -11,6 +11,56 @@
         }
       }
     },
+    "Comment tu te sens ?": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comment tu te sens ?"
+          }
+        }
+      }
+    },
+    "En forme": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En forme"
+          }
+        }
+      }
+    },
+    "Fatigué": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fatigué"
+          }
+        }
+      }
+    },
+    "Moyen": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moyen"
+          }
+        }
+      }
+    },
+    "Réponds d'un geste : Pulse estime ton score du jour.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réponds d'un geste : Pulse estime ton score du jour."
+          }
+        }
+      }
+    },
     "Ton score du matin est prêt": {
       "localizations": {
         "fr": {

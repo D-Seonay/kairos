@@ -191,6 +191,16 @@
         }
       }
     },
+    "autre entraînement": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "autre entraînement"
+          }
+        }
+      }
+    },
     "Cet entraînement est introuvable. Il a peut-être été supprimé d'Apple Santé.": {
       "localizations": {
         "fr": {

@@ -913,6 +913,16 @@
         }
       }
     },
+    "Importe ton historique Hevy : la progression part de tes charges dès la première séance." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importe ton historique Hevy : la progression part de tes charges dès la première séance."
+          }
+        }
+      }
+    },
     "Lancer la course %@" : {
       "localizations" : {
         "fr" : {
@@ -2619,6 +2629,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tu as signalé : %@. Cet exercice peut les solliciter : ajuste la charge ou prends une alternative."
+          }
+        }
+      }
+    },
+    "Tu viens d'une autre app ?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu viens d'une autre app ?"
           }
         }
       }

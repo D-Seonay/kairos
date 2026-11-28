@@ -441,6 +441,16 @@
         }
       }
     },
+    "Au réveil" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Au réveil"
+          }
+        }
+      }
+    },
     "Aucun compte iCloud : tes données restent sur ce téléphone." : {
       "localizations" : {
         "fr" : {
@@ -487,6 +497,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucune séance pour l'instant"
+          }
+        }
+      }
+    },
+    "Autres entraînements" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autres entraînements"
           }
         }
       }
@@ -941,6 +961,16 @@
         }
       }
     },
+    "Heure du rappel" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heure du rappel"
+          }
+        }
+      }
+    },
     "Heure plafond" : {
       "localizations" : {
         "fr" : {
@@ -957,6 +987,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Homme"
+          }
+        }
+      }
+    },
+    "Importer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importer"
+          }
+        }
+      }
+    },
+    "Importer depuis Hevy" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importer depuis Hevy"
           }
         }
       }
@@ -1631,6 +1681,16 @@
         }
       }
     },
+    "Rappel de check-in" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rappel de check-in"
+          }
+        }
+      }
+    },
     "Rappel de coucher" : {
       "localizations" : {
         "fr" : {
@@ -1811,6 +1871,16 @@
         }
       }
     },
+    "Seulement si ta montre n'a rien mesuré depuis 3 jours, et jamais une fois le check-in fait." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seulement si ta montre n'a rien mesuré depuis 3 jours, et jamais une fois le check-in fait."
+          }
+        }
+      }
+    },
     "Sexe" : {
       "localizations" : {
         "fr" : {
@@ -1977,6 +2047,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tes séances, compléments et scores se synchronisent avec ton compte iCloud. Les données d'Apple Santé restent sur ce téléphone."
+          }
+        }
+      }
+    },
+    "Ton historique de séances, depuis un export CSV de Hevy." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton historique de séances, depuis un export CSV de Hevy."
           }
         }
       }

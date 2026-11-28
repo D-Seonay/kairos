@@ -162,6 +162,16 @@
         }
       }
     },
+    "%@ · autre entraînement : %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · autre entraînement : %@"
+          }
+        }
+      }
+    },
     "%@, %@": {
       "localizations": {
         "fr": {
@@ -478,6 +488,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aucune charge"
+          }
+        }
+      }
+    },
+    "Autre entraînement d'Apple Santé": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autre entraînement d'Apple Santé"
           }
         }
       }
