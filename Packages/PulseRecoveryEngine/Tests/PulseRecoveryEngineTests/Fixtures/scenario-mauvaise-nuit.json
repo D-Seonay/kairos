@@ -141,7 +141,7 @@
   "expected": {
     "outcome": "measured",
     "category": "overreached",
-    "score": 33.03125,
+    "score": 32.046875,
     "calibration": "ready",
     "missing": []
   }

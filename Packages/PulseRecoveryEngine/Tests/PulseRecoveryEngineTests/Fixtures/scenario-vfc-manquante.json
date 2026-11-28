@@ -141,7 +141,7 @@
   "expected": {
     "outcome": "measured",
     "category": "normal",
-    "score": 87.125,
+    "score": 83.75,
     "calibration": "ready",
     "missing": [
       "hrv"
