@@ -29,6 +29,19 @@ struct LoadDropRuleTests {
         #expect(days.map(LoadDropRule.layoffPercent(daysSinceLast:)) == [nil, nil, 5, 5, 10, 10, 15, 15, 20, 20])
     }
 
+    @Test func thePauseIsCountedInCalendarDays() throws {
+        var paris = Calendar(identifier: .gregorian)
+        paris.timeZone = try #require(TimeZone(identifier: "Europe/Paris"))
+        // Lundi 19 h, puis deux lundis plus tard à 18 h 30 : 14 jours de calendrier, même s'il manque une demi-heure.
+        let monday = try #require(paris.date(from: DateComponents(year: 2026, month: 11, day: 2, hour: 19)))
+        let twoMondaysLater = try #require(paris.date(from: DateComponents(year: 2026, month: 11, day: 16, hour: 18, minute: 30)))
+        #expect(LoadDropRule.calendarDays(from: monday, to: twoMondaysLater, calendar: paris) == 14)
+        // Dimanche 23 h puis lundi 1 h : un jour.
+        let sunday = try #require(paris.date(from: DateComponents(year: 2026, month: 11, day: 1, hour: 23)))
+        let mondayNight = try #require(paris.date(from: DateComponents(year: 2026, month: 11, day: 2, hour: 1)))
+        #expect(LoadDropRule.calendarDays(from: sunday, to: mondayNight, calendar: paris) == 1)
+    }
+
     @Test func aLayoffNamesTheWeeksAndThePercent() throws {
         let layoff = try #require(drop(days: 37))
         #expect(layoff.reason == .layoff(weeks: 5) && layoff.percent == 15)

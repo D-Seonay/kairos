@@ -28,10 +28,11 @@ extension LiveSessionPlanner {
     struct Recall {
         var recent: [RecentExerciseSession]
         var start: Date
+        var calendar: Calendar
 
-        /// Les jours pleins depuis la dernière séance avec l'exercice, `nil` sans aucune.
+        /// Les jours de calendrier depuis la dernière séance avec l'exercice, comptés comme le plateau, `nil` sans aucune.
         var daysSinceLast: Int? {
-            recent.first.map { Int(start.timeIntervalSince($0.startedAt) / 86_400) }
+            recent.first.map { LoadDropRule.calendarDays(from: $0.startedAt, to: start, calendar: calendar) }
         }
 
         /// La note de la dernière séance avec l'exercice : la séance suivante la reprend, modifiable.

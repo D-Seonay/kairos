@@ -39,6 +39,16 @@ struct LiveSessionLoadDropTests {
         #expect(bench.dayNote == nil)
     }
 
+    @Test func thePauseIsCountedInCalendarDaysLikeThePlateau() {
+        // Lundi 19 h, puis deux lundis plus tard à 18 h 30 : deux semaines de calendrier, une reprise, comme pour le plateau.
+        let last = RecentExerciseSession(startedAt: TestClock.date("2026-11-02T19:00"), sets: flat)
+        let launch = Fix.launch(Fix.day([Fix.exercise(Fix.bench)]), nil)
+        let session = LiveSessionPlanner.session(for: launch, directory: Fix.directory, history: [Fix.bench: flat], settings: [:],
+                                                 profile: Fix.profile(), now: TestClock.date("2026-11-16T18:30"),
+                                                 recent: [Fix.bench: [last]], calendar: TestClock.calendar)
+        #expect(session.exercises[0].loadDrop?.text == "Reprise après 2 semaines : −5 %")
+    }
+
     @Test func aLayoffReplacesTheIncrease() {
         let topped = [Fix.done(Fix.bench, 100, 12), Fix.done(Fix.bench, 100, 12), Fix.done(Fix.bench, 100, 12)]
         let session = benchSession(history: topped, recent: [recent(50, sets: topped)])

@@ -10,7 +10,7 @@ enum LoadPreview {
     /// rien des hausses : un autre jour qu'optimal ou normal, une journée sans musculation, ou une hausse bloquée (score estimé,
     /// calibration en cours).
     static func adjustments(session: TodaySession, recovery: DailyRecovery, profile: UserProfile?, reading: LiveReading,
-                            directory: ExerciseDirectory, now: Date) -> [SessionAdjustment]? {
+                            directory: ExerciseDirectory, now: Date, calendar: Calendar) -> [SessionAdjustment]? {
         guard recovery.category == .optimal || recovery.category == .normal, case .strength(let day) = session.plannedDay else {
             return nil
         }
@@ -18,7 +18,8 @@ enum LoadPreview {
                                            deload: session.isDeload ? .active(since: now, until: now) : .none)
         guard launch.policy.allowsIncrease else { return nil }
         let planned = LiveSessionPlanner.session(for: launch, directory: directory, history: reading.history,
-                                                 settings: reading.settings, profile: profile, now: now, recent: reading.recent)
+                                                 settings: reading.settings, profile: profile, now: now, recent: reading.recent,
+                                                 calendar: calendar)
         return planned.appliedAdjustments.filter { $0.kind == .load }
     }
     // swiftlint:enable function_parameter_count

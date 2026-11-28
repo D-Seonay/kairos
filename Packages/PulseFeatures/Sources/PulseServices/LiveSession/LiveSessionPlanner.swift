@@ -19,19 +19,22 @@ public enum LiveSessionPlanner {
         var policy: ProgressionPolicy
         /// Le facteur des charges externes proposées : 0,9 pendant une semaine de décharge.
         var loadFactor = 1.0
-        /// Le début de la séance, d'où se compte la pause depuis la dernière fois.
+        /// Le début de la séance, d'où se compte la pause depuis la dernière fois, en jours de `calendar`.
         var start: Date
+        var calendar: Calendar
     }
 
     // swiftlint:disable function_parameter_count
     /// `recent` : les dernières séances de chaque exercice (`WorkoutRepository.recentSessions`), d'où se lisent la baisse des
-    /// charges après une pause ou des échecs répétés (`LoadDropRule`) et la note reprise de la dernière fois.
+    /// charges après une pause ou des échecs répétés (`LoadDropRule`) et la note reprise de la dernière fois. La pause se
+    /// compte en jours de `calendar`.
     public static func session(for launch: SessionLaunch, directory: ExerciseDirectory,
                                history: [ExerciseReference: [WorkoutSet]], settings: [ExerciseReference: ExerciseSettings],
                                profile: UserProfile?, now: Date,
-                               recent: [ExerciseReference: [RecentExerciseSession]] = [:]) -> LiveSession {
+                               recent: [ExerciseReference: [RecentExerciseSession]] = [:],
+                               calendar: Calendar = .current) -> LiveSession {
         let context = Context(directory: directory, profile: profile, policy: launch.policy, loadFactor: launch.loadFactor,
-                              start: launch.past?.start ?? now)
+                              start: launch.past?.start ?? now, calendar: calendar)
         let planned = Dictionary((launch.plannedDay?.exercises ?? []).map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         var applied = launch.applied
         var exercises: [LiveExercise] = []
@@ -64,14 +67,15 @@ public enum LiveSessionPlanner {
                                 settings: ExerciseSettings?, profile: UserProfile?, policy: ProgressionPolicy,
                                 workedMuscles: Set<Muscle> = [], routineExercise: RoutineExercise? = nil,
                                 loadFactor: Double = 1, recent: [RecentExerciseSession] = [],
-                                now: Date = Date()) -> LiveExercise {
+                                now: Date = Date(), calendar: Calendar = .current) -> LiveExercise {
         let info = directory.info(reference)
         let range = info?.tracksDuration == true ? addedHoldRange : addedRepRange
         let restSeconds = info?.defaultRestSeconds ?? profile?.defaultRestSeconds ?? fallbackRestSeconds
         let routineExercise = routineExercise ?? RoutineExercise(
             order: 0, exercise: reference, sets: addedSetCount, repsMin: range.lowerBound, repsMax: range.upperBound,
             targetRPE: addedTargetRPE, restSeconds: restSeconds)
-        let context = Context(directory: directory, profile: profile, policy: policy, loadFactor: loadFactor, start: now)
+        let context = Context(directory: directory, profile: profile, policy: policy, loadFactor: loadFactor, start: now,
+                              calendar: calendar)
         return build(routineExercise, planned: nil, lastSets: history, recent: recent, settings: settings, context: context,
                      workedMuscles: workedMuscles).exercise
     }
@@ -95,7 +99,7 @@ public enum LiveSessionPlanner {
                                                rounding: rounding, policy: context.policy)
         let scaledSets = loadKind == .external ? scaled(proposal.sets, by: context.loadFactor, increment: incrementKg,
                                                          rounding: rounding) : proposal.sets
-        let recall = Recall(recent: recent, start: context.start)
+        let recall = Recall(recent: recent, start: context.start, calendar: context.calendar)
         let dropped = applyingDrop(recall.drop(for: routineExercise, tracksDuration: tracksDuration), to: scaledSets,
                                    routineExercise: routineExercise, lastSets: lastSets, loadKind: loadKind,
                                    tracksDuration: tracksDuration, incrementKg: incrementKg, rounding: rounding,

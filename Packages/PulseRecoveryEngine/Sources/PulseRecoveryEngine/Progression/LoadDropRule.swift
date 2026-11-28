@@ -35,7 +35,8 @@ public struct LoadDrop: Sendable, Equatable, Codable {
 
 /// Quand et de combien baisser les charges proposées d'un exercice. Pur : l'historique est lu avant l'appel.
 ///
-/// **Reprise.** La pause se compte en semaines pleines depuis la dernière séance avec l'exercice (décharge comprise) :
+/// **Reprise.** La pause se compte en semaines pleines de jours de calendrier (`calendarDays`) depuis la dernière séance avec
+/// l'exercice (décharge comprise) :
 ///
 /// | Pause         | Baisse |
 /// |---------------|--------|
@@ -60,6 +61,12 @@ public enum LoadDropRule {
     public static let layoffDays = 14
     static let missPercent = 5
     static let heavyMissPercent = 10
+
+    /// Les jours de calendrier de `start` à `end`, de minuit à minuit dans `calendar` : lundi 19 h puis deux lundis plus tard à
+    /// 18 h 30 font 14 jours. La pause des charges proposées et la reprise du plateau se comptent ainsi toutes les deux.
+    public static func calendarDays(from start: Date, to end: Date, calendar: Calendar) -> Int {
+        calendar.dateComponents([.day], from: calendar.startOfDay(for: start), to: calendar.startOfDay(for: end)).day ?? 0
+    }
 
     /// La baisse d'une reprise après `days` jours sans l'exercice, `nil` avant deux semaines.
     public static func layoffPercent(daysSinceLast days: Int) -> Int? {

@@ -84,7 +84,7 @@ public enum PlateauDetector {
               !isRising(Array(counted.suffix(sessionCount))) else { return nil }
         let since = counted.filter { $0.date > best.date }
         guard let recentBest = since.map(\.estimate).max(), recentBest <= best.estimate + tolerance,
-              days(from: best.date, to: last.date, calendar: calendar) >= minimumDays else { return nil }
+              LoadDropRule.calendarDays(from: best.date, to: last.date, calendar: calendar) >= minimumDays else { return nil }
         let excluded = points.filter { !$0.counts && $0.date > best.date && $0.date <= last.date }.count
         return ExercisePlateau(exercise: exercise, bestKg: best.estimate, bestDate: best.date, recentBestKg: recentBest,
                                sessionCount: since.count, lastDate: last.date, excludedCount: excluded)
@@ -95,7 +95,8 @@ public enum PlateauDetector {
     /// ne servent plus de référence (un meilleur 1RM d'avant la pause ne fait pas un plateau pendant la remontée).
     private static func sinceLastReturn(_ points: [Point], calendar: Calendar) -> [Point] {
         guard let start = points.indices.dropFirst().last(where: { index in
-            days(from: points[index - 1].date, to: points[index].date, calendar: calendar) >= LoadDropRule.layoffDays
+            LoadDropRule.calendarDays(from: points[index - 1].date, to: points[index].date, calendar: calendar)
+                >= LoadDropRule.layoffDays
         }) else { return points }
         var kept = Array(points[start...])
         kept[0].counts = false
@@ -139,10 +140,6 @@ public enum PlateauDetector {
             .filter { $0.exercise == exercise && $0.setType != .warmup }
             .compactMap { set in set.actualReps.flatMap { OneRepMax.brzycki(weightKg: set.actualWeightKg ?? 0, reps: $0) } }
             .max()
-    }
-
-    private static func days(from start: Date, to end: Date, calendar: Calendar) -> Int {
-        calendar.dateComponents([.day], from: calendar.startOfDay(for: start), to: calendar.startOfDay(for: end)).day ?? 0
     }
 }
 

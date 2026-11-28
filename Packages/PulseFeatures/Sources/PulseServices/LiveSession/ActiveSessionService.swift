@@ -105,7 +105,7 @@ public final class ActiveSessionService: Sendable {
             }
             let session = LiveSessionPlanner.session(for: launch, directory: directory, history: history,
                                                      settings: settingsByExercise, profile: profile, now: self.now(),
-                                                     recent: recent)
+                                                     recent: recent, calendar: self.calendar)
             try await self.save(session, at: session.lastActionAt)
             if !session.isPastEntry { await self.activity.start(Self.activityState(for: session)) }
             return session
@@ -130,7 +130,7 @@ public final class ActiveSessionService: Sendable {
                     workedMuscles: worked, loadFactor: session.addedLoadFactor,
                     recent: try await self.workouts.recentSessions(for: reference, startedBefore: session.historyLimit,
                                                                    limit: Self.recentSessionCount),
-                    now: session.startedAt))
+                    now: session.startedAt, calendar: self.calendar))
                 worked.formUnion(directory.info(reference)?.primaryMuscles ?? [])
             }
             return added
