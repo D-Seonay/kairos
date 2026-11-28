@@ -187,6 +187,36 @@ import Testing
         #expect(n.restingHeartRateSource == .appleNearWake)
     }
 
+    /// Dix mesures endormies de 50 à 59 et une à 30 bpm (montre qui glisse) : hors de la plage plausible, elle ne fait pas la FC
+    /// de repos des 7 jours suivants. Sur si peu de mesures, le 5e centile s'interpole entre les deux plus basses.
+    @Test func implausibleHeartRatesAreIgnored() {
+        var heartRate = (0..<10).map { index in
+            TimedSample(date: d(2026, 11, 20, 0, 0).addingTimeInterval(Double(index) * 1200), value: 50 + Double(index))
+        }
+        heartRate.append(TimedSample(date: d(2026, 11, 20, 4, 0), value: 30))
+        heartRate.append(TimedSample(date: d(2026, 11, 20, 4, 10), value: 230))
+        let n = aggregator.night(for: day, sdnn: [], restingHeartRate: [], heartRate: heartRate, sleep: typicalSleep)
+        #expect(abs((n.restingHeartRate ?? 0) - 50.45) < 1e-9) // 50 + 0,45 × (51 − 50), rang 0,05 × (10 − 1)
+    }
+
+    @Test func implausibleHeartRatesDoNotCountTowardsTheMinimum() {
+        let heartRate = (0..<4).map { TimedSample(date: d(2026, 11, 20, 1 + $0, 0), value: 50) }
+            + [TimedSample(date: d(2026, 11, 20, 5, 30), value: 20)]
+        let rhr = [TimedSample(date: d(2026, 11, 20, 7, 30), value: 55)]
+        let n = aggregator.night(for: day, sdnn: [], restingHeartRate: rhr, heartRate: heartRate, sleep: typicalSleep)
+        #expect(n.restingHeartRateSource == .appleNearWake)
+    }
+
+    /// `nights` trie la fréquence cardiaque une fois pour toutes : le résultat ne dépend pas de l'ordre des mesures.
+    @Test func nightsReadUnsortedHeartRates() {
+        let heartRate = (0..<10).map { TimedSample(date: d(2026, 11, 20, 0, 0).addingTimeInterval(Double($0) * 1800), value: 50) }
+        let sorted = aggregator.nights(days: [day], sdnn: [], restingHeartRate: [], heartRate: heartRate, sleep: typicalSleep)
+        let shuffled = aggregator.nights(days: [day], sdnn: [], restingHeartRate: [], heartRate: heartRate.reversed(),
+                                         sleep: typicalSleep)
+        #expect(sorted == shuffled)
+        #expect(sorted.first?.restingHeartRate == 50)
+    }
+
     /// Le score n'est recalculé que jusqu'à midi : sans nouvelle nuit, de nouveaux échantillons de la matinée ne changent rien.
     @Test func lateMorningSamplesDoNotChangeTheNight() {
         let heartRate = (0..<10).map { TimedSample(date: d(2026, 11, 20, 0, 0).addingTimeInterval(Double($0) * 1800), value: 50) }
