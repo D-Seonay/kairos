@@ -42,7 +42,7 @@
   "expected": {
     "outcome": "measured",
     "category": "optimal",
-    "score": 97.8125,
+    "score": 95.53125,
     "calibration": "calibrating:3",
     "missing": [
       "hrv"

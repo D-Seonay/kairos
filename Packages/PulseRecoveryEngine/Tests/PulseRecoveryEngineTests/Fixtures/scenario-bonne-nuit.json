@@ -141,7 +141,7 @@
   "expected": {
     "outcome": "measured",
     "category": "optimal",
-    "score": 100,
+    "score": 98.59375,
     "calibration": "ready",
     "missing": []
   }

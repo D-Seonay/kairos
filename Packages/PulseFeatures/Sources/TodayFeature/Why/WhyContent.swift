@@ -1,6 +1,7 @@
 import Foundation
 import PulseDesignSystem
 import PulseDomain
+import PulseRecoveryEngine
 import PulseServices
 
 /// Tout ce que dit l'écran « Pourquoi » : la lecture de la nuit en français, une ligne par ajustement, les signaux du score avec
@@ -57,6 +58,10 @@ struct WhyContent: Equatable, Sendable {
     var changes: [Change]
     var signals: [Signal]
     var formula: String
+    /// Ce que le calcul a pris en compte : nuits de la ligne de base VFC, origine de la FC au repos, dette de sommeil.
+    var details: [String] = []
+    /// Le ressenti du matin et ce qu'il change au score mesuré, à part de la formule ; `nil` sans ressenti.
+    var feeling: String?
     var rule: String
     var primaryAction: Action?
     var restoreTitle: String?
@@ -64,10 +69,11 @@ struct WhyContent: Equatable, Sendable {
     /// `checkIn` : le check-in du jour, qui sert à lire un score estimé. `loadAdjustments` : les hausses de charge du jour, vides
     /// si aucune série n'a atteint le haut de sa fourchette, `nil` quand elles ne se calculent pas (voir `LoadPreview`).
     /// `progress` : la séance faite n'a plus de bouton de départ ni de charges du jour ; celle en cours se reprend.
-    /// `sleepGoalMinutes` : l'objectif de sommeil du profil, qui décide si la lecture dit la nuit courte.
+    /// `sleepGoalMinutes` : l'objectif de sommeil du profil, qui décide si la lecture dit la nuit courte. `insight` : ce que le
+    /// calcul dit de lui-même (`TodayInsight`).
     static func make(recovery: DailyRecovery, session: TodaySession, checkIn: CheckIn?, directory: ExerciseDirectory,
                      loadAdjustments: [SessionAdjustment]?, progress: Progress = .toStart,
-                     sleepGoalMinutes: Int = SleepGoal.defaultMinutes) -> WhyContent {
+                     sleepGoalMinutes: Int = SleepGoal.defaultMinutes, insight: RecoveryInsight? = nil) -> WhyContent {
         let signals = WhySignals.make(recovery: recovery, checkIn: checkIn)
         return WhyContent(
             reading: WhyReading.make(recovery: recovery, session: session, sleepGoalMinutes: sleepGoalMinutes),
@@ -76,6 +82,8 @@ struct WhyContent: Equatable, Sendable {
                                      loadAdjustments: progress == .done ? nil : loadAdjustments, listsLoads: progress != .done),
             signals: signals.signals,
             formula: signals.formula,
+            details: WhyDetails.lines(recovery: recovery, insight: insight),
+            feeling: WhyDetails.feeling(recovery: recovery, checkIn: checkIn),
             rule: rule(for: recovery.category),
             primaryAction: primaryAction(for: session, progress: progress),
             restoreTitle: restoreTitle(for: session))

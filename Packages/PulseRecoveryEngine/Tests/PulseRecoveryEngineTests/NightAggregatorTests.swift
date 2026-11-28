@@ -26,7 +26,8 @@ import Testing
     @Test func typicalNight() {
         let rhr = [TimedSample(date: d(2026, 11, 20, 10, 0), value: 49)]
         let n = aggregator.night(for: day, sdnn: typicalSDNN, restingHeartRate: rhr, sleep: typicalSleep)
-        #expect(n == NightSample(day: day, sdnnMs: 50, restingHeartRate: 49, sleep: typicalSummary))
+        #expect(n == NightSample(day: day, sdnnMs: 50, sdnnSampleCount: 3, restingHeartRate: 49,
+                                 restingHeartRateSource: .appleNearWake, appleRestingHeartRate: 49, sleep: typicalSummary))
     }
 
     @Test func noSleepFallsBackToMidnightToEight() {
@@ -146,9 +147,91 @@ import Testing
         #expect(aggregator.night(for: day, sdnn: [], restingHeartRate: rhr, sleep: []).restingHeartRate == nil)
     }
 
-    @Test func restingHeartRateTakesLastSampleOfDay() {
+    /// Sans sommeil, l'échantillon Apple le plus proche de 8 h : une mise à jour de fin de matinée ne remplace pas celle du matin.
+    @Test func restingHeartRateWithoutSleepTakesTheSampleNearestEight() {
         let rhr = [TimedSample(date: d(2026, 11, 20, 8, 0), value: 51), .init(date: d(2026, 11, 20, 10, 0), value: 49)]
-        #expect(aggregator.night(for: day, sdnn: [], restingHeartRate: rhr, sleep: []).restingHeartRate == 49)
+        let n = aggregator.night(for: day, sdnn: [], restingHeartRate: rhr, sleep: [])
+        #expect(n.restingHeartRate == 51)
+        #expect(n.restingHeartRateSource == .appleNearWake)
+    }
+
+    /// Le réveil est à 06:50 : l'échantillon de 07:30 l'emporte sur celui de 11:45, écrit après une marche ou un café.
+    @Test func restingHeartRateFallbackTakesTheSampleNearestWake() {
+        let rhr = [TimedSample(date: d(2026, 11, 20, 7, 30), value: 52), .init(date: d(2026, 11, 20, 11, 45), value: 60)]
+        let n = aggregator.night(for: day, sdnn: [], restingHeartRate: rhr, sleep: typicalSleep)
+        #expect(n.restingHeartRate == 52)
+        #expect(n.restingHeartRateSource == .appleNearWake)
+    }
+
+    /// Une mesure toutes les 10 minutes pendant le sommeil, de 23:10 à 06:50, plus une mesure aberrante à 30 bpm et des mesures
+    /// éveillées plus basses hors du bloc : la FC de repos est le 5e centile des mesures endormies.
+    @Test func restingHeartRateIsTheOvernightFifthPercentile() {
+        var heartRate = stride(from: 0, to: 460, by: 10).map { minutes in
+            TimedSample(date: d(2026, 11, 19, 23, 10).addingTimeInterval(Double(minutes) * 60), value: 52 + Double(minutes % 30) / 10)
+        }
+        heartRate.append(TimedSample(date: d(2026, 11, 20, 3, 35), value: 40)) // pendant l'éveil de 03:30 à 03:40
+        heartRate.append(TimedSample(date: d(2026, 11, 20, 2, 5), value: 30)) // mesure aberrante, endormi
+        heartRate.append(TimedSample(date: d(2026, 11, 20, 9, 0), value: 45)) // après le réveil
+        let rhr = [TimedSample(date: d(2026, 11, 20, 7, 30), value: 58)]
+        let n = aggregator.night(for: day, sdnn: [], restingHeartRate: rhr, heartRate: heartRate, sleep: typicalSleep)
+        #expect(n.restingHeartRate == 52)
+        #expect(n.restingHeartRateSource == .overnightLowest)
+        #expect(n.appleRestingHeartRate == 58, "L'échantillon Apple reste, pour comparer une nuit trop peu mesurée")
+    }
+
+    @Test func tooFewOvernightHeartRatesFallBackToApple() {
+        let heartRate = (0..<4).map { TimedSample(date: d(2026, 11, 20, 1 + $0, 0), value: 50) }
+        let rhr = [TimedSample(date: d(2026, 11, 20, 7, 30), value: 55)]
+        let n = aggregator.night(for: day, sdnn: [], restingHeartRate: rhr, heartRate: heartRate, sleep: typicalSleep)
+        #expect(n.restingHeartRate == 55)
+        #expect(n.restingHeartRateSource == .appleNearWake)
+    }
+
+    /// Dix mesures endormies de 50 à 59 et une à 30 bpm (montre qui glisse) : hors de la plage plausible, elle ne fait pas la FC
+    /// de repos des 7 jours suivants. Sur si peu de mesures, le 5e centile s'interpole entre les deux plus basses.
+    @Test func implausibleHeartRatesAreIgnored() {
+        var heartRate = (0..<10).map { index in
+            TimedSample(date: d(2026, 11, 20, 0, 0).addingTimeInterval(Double(index) * 1200), value: 50 + Double(index))
+        }
+        heartRate.append(TimedSample(date: d(2026, 11, 20, 4, 0), value: 30))
+        heartRate.append(TimedSample(date: d(2026, 11, 20, 4, 10), value: 230))
+        let n = aggregator.night(for: day, sdnn: [], restingHeartRate: [], heartRate: heartRate, sleep: typicalSleep)
+        #expect(abs((n.restingHeartRate ?? 0) - 50.45) < 1e-9) // 50 + 0,45 × (51 − 50), rang 0,05 × (10 − 1)
+    }
+
+    @Test func implausibleHeartRatesDoNotCountTowardsTheMinimum() {
+        let heartRate = (0..<4).map { TimedSample(date: d(2026, 11, 20, 1 + $0, 0), value: 50) }
+            + [TimedSample(date: d(2026, 11, 20, 5, 30), value: 20)]
+        let rhr = [TimedSample(date: d(2026, 11, 20, 7, 30), value: 55)]
+        let n = aggregator.night(for: day, sdnn: [], restingHeartRate: rhr, heartRate: heartRate, sleep: typicalSleep)
+        #expect(n.restingHeartRateSource == .appleNearWake)
+    }
+
+    /// `nights` trie la fréquence cardiaque une fois pour toutes : le résultat ne dépend pas de l'ordre des mesures.
+    @Test func nightsReadUnsortedHeartRates() {
+        let heartRate = (0..<10).map { TimedSample(date: d(2026, 11, 20, 0, 0).addingTimeInterval(Double($0) * 1800), value: 50) }
+        let sorted = aggregator.nights(days: [day], sdnn: [], restingHeartRate: [], heartRate: heartRate, sleep: typicalSleep)
+        let shuffled = aggregator.nights(days: [day], sdnn: [], restingHeartRate: [], heartRate: heartRate.reversed(),
+                                         sleep: typicalSleep)
+        #expect(sorted == shuffled)
+        #expect(sorted.first?.restingHeartRate == 50)
+    }
+
+    /// Le score n'est recalculé que jusqu'à midi : sans nouvelle nuit, de nouveaux échantillons de la matinée ne changent rien.
+    @Test func lateMorningSamplesDoNotChangeTheNight() {
+        let heartRate = (0..<10).map { TimedSample(date: d(2026, 11, 20, 0, 0).addingTimeInterval(Double($0) * 1800), value: 50) }
+        let rhr = [TimedSample(date: d(2026, 11, 20, 7, 0), value: 54)]
+        let morning = aggregator.night(for: day, sdnn: [], restingHeartRate: rhr, heartRate: heartRate, sleep: typicalSleep)
+        let lateHeartRate = heartRate + [TimedSample(date: d(2026, 11, 20, 11, 0), value: 44)]
+        let lateRHR = rhr + [TimedSample(date: d(2026, 11, 20, 11, 30), value: 48)]
+        let noon = aggregator.night(for: day, sdnn: [], restingHeartRate: lateRHR, heartRate: lateHeartRate, sleep: typicalSleep)
+        #expect(morning == noon)
+        #expect(noon.restingHeartRate == 50)
+    }
+
+    @Test func sdnnSampleCountCountsTheAveragedSamples() {
+        #expect(aggregator.night(for: day, sdnn: typicalSDNN, restingHeartRate: [], sleep: typicalSleep).sdnnSampleCount == 3)
+        #expect(aggregator.night(for: day, sdnn: [], restingHeartRate: [], sleep: typicalSleep).sdnnSampleCount == nil)
     }
 
     @Test func nightsBuildsOneSamplePerDay() {

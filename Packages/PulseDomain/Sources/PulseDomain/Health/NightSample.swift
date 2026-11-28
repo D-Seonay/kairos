@@ -21,17 +21,38 @@ public struct SleepSummary: Sendable, Equatable, Codable {
     }
 }
 
+/// D'où vient la FC de repos d'une nuit.
+public enum RestingHeartRateSource: String, Sendable, Equatable, Codable {
+    /// La fréquence cardiaque la plus basse du bloc de sommeil principal (5e centile des mesures endormies).
+    case overnightLowest
+    /// L'échantillon « FC au repos » d'Apple Santé le plus proche du réveil, faute d'assez de mesures pendant le sommeil.
+    case appleNearWake
+}
+
 /// Les mesures d'une nuit, rattachées au jour de réveil (`day` = minuit local du jour de réveil).
 public struct NightSample: Sendable, Equatable, Codable {
     public var day: Date
     public var sdnnMs: Double?
+    /// Le nombre de mesures SDNN moyennées dans `sdnnMs` ; `nil` quand il n'est pas connu (fixtures).
+    public var sdnnSampleCount: Int?
     public var restingHeartRate: Double?
+    /// D'où vient `restingHeartRate` ; `nil` quand il n'est pas connu (fixtures).
+    public var restingHeartRateSource: RestingHeartRateSource?
+    /// L'échantillon Apple « FC au repos » le plus proche du réveil, gardé même quand `restingHeartRate` est la FC la plus basse
+    /// de la nuit : une nuit sans assez de mesures se compare alors à des valeurs Apple, jamais à des minima nocturnes.
+    /// Recalculé à chaque agrégation, jamais enregistré.
+    public var appleRestingHeartRate: Double?
     public var sleep: SleepSummary?
 
-    public init(day: Date, sdnnMs: Double?, restingHeartRate: Double?, sleep: SleepSummary?) {
+    public init(day: Date, sdnnMs: Double?, sdnnSampleCount: Int? = nil, restingHeartRate: Double?,
+                restingHeartRateSource: RestingHeartRateSource? = nil, appleRestingHeartRate: Double? = nil,
+                sleep: SleepSummary?) {
         self.day = day
         self.sdnnMs = sdnnMs
+        self.sdnnSampleCount = sdnnSampleCount
         self.restingHeartRate = restingHeartRate
+        self.restingHeartRateSource = restingHeartRateSource
+        self.appleRestingHeartRate = appleRestingHeartRate
         self.sleep = sleep
     }
 }

@@ -38,7 +38,7 @@
 	<key>NSFaceIDUsageDescription</key>
 	<string>Pulse utilise Face ID pour protéger vos photos de corps.</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>Pulse lit votre sommeil, votre variabilité cardiaque et votre fréquence cardiaque au repos pour calculer votre score de récupération du matin, ainsi que vos entraînements, votre poids et votre masse grasse pour suivre votre progression. Ces données restent sur votre iPhone : elles ne sont ni synchronisées ni partagées.</string>
+	<string>Pulse lit votre sommeil, votre variabilité cardiaque et votre fréquence cardiaque, pendant la nuit et au repos, pour calculer votre score de récupération du matin, ainsi que vos entraînements, votre poids et votre masse grasse pour suivre votre progression. Ces données restent sur votre iPhone : elles ne sont ni synchronisées ni partagées.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>Pulse enregistre vos séances de musculation, vos courses avec leur tracé et vos prises de compléments dans Apple Santé.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

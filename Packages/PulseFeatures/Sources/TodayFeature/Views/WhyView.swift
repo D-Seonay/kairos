@@ -17,7 +17,13 @@ struct WhyView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     ReadingCard(text: why.reading, spokenText: why.spokenReading)
                     ChangesSection(changes: why.changes)
-                    SignalsSection(signals: why.signals, formula: why.formula, rule: why.rule)
+                    SignalsSection(signals: why.signals, formula: why.formula, feeling: why.feeling, rule: why.rule)
+                    if !why.details.isEmpty {
+                        WhyDetailsSection(details: why.details)
+                    }
+                    if model.canGiveFeeling {
+                        WhyFeelingSection(model: model)
+                    }
                     ActionButtons(model: model, why: why, onStart: onStart, onResume: onResume)
                 }
                 .padding(PulseMetrics.spacing)
@@ -123,6 +129,7 @@ private struct ChangeRow: View {
 private struct SignalsSection: View {
     let signals: [WhyContent.Signal]
     let formula: String
+    let feeling: String?
     let rule: String
 
     var body: some View {
@@ -140,6 +147,11 @@ private struct SignalsSection: View {
                         Text(formula)
                             .font(.footnote.weight(.semibold).monospacedDigit())
                             .foregroundStyle(PulsePalette.text)
+                        if let feeling {
+                            Text(feeling)
+                                .font(.footnote.weight(.semibold).monospacedDigit())
+                                .foregroundStyle(PulsePalette.text)
+                        }
                         Text(rule)
                             .font(.footnote)
                             .foregroundStyle(PulsePalette.text2)

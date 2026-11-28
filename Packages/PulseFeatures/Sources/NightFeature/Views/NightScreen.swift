@@ -96,7 +96,8 @@ private struct NightHeader: View {
     }
 }
 
-/// La durée endormie en grand, puis l'endormissement, le réveil et les réveils, l'écart à l'objectif et la régularité du coucher.
+/// La durée endormie en grand, puis l'endormissement, le réveil et les réveils, l'écart à l'objectif, la dette de sommeil des 7 nuits
+/// et la régularité du coucher.
 private struct SummaryCard: View {
     let detail: NightDetail
     let goalMinutes: Int
@@ -123,6 +124,13 @@ private struct SummaryCard: View {
                     .foregroundStyle(PulsePalette.text2)
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityLabel(NightText.spokenGoalGap(asleepMinutes: night.asleepMinutes, goalMinutes: goalMinutes))
+                if let debt = detail.sleepDebtMinutes {
+                    Text(NightText.sleepDebt(minutes: debt))
+                        .font(.subheadline)
+                        .foregroundStyle(PulsePalette.text2)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityLabel(NightText.spokenSleepDebt(minutes: debt))
+                }
                 if let regularity = detail.bedtimeRegularityMinutes {
                     Text(NightText.regularity(minutes: regularity))
                         .font(.subheadline)
