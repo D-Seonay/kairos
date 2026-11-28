@@ -5,3 +5,11 @@ line_length: { warning: 140, error: 180 }
 file_length: { warning: 400, error: 600 }
 function_body_length: { warning: 50, error: 80 }
 identifier_name: { min_length: 2, excluded: [id, x, y, z, i, n, r, d] }
+custom_rules:
+  silent_try:
+    name: "try? silencieux"
+    included: ".*/Packages/(PulsePersistence|PulseHealth)/Sources/.*\\.swift$"
+    regex: "\\btry\\?"
+    match_kinds: [keyword]
+    message: "Journaliser l'erreur (PulseLog : failure, attempt) ou justifier par swiftlint:disable:next silent_try."
+    severity: warning
