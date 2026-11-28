@@ -69,6 +69,14 @@ struct MyDataScreen: View {
                 .foregroundStyle(PulsePalette.text2)
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(minHeight: 44, alignment: .leading)
+            // La dernière synchronisation réussie, ou ce qui la bloque et quoi faire.
+            if let sync = model.syncText(now: environment.now()) {
+                Text(sync)
+                    .font(.footnote)
+                    .foregroundStyle(model.syncStatus?.lastError == nil ? PulsePalette.text2 : PulsePalette.text)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(minHeight: 44, alignment: .leading)
+            }
         } header: {
             Text(String(localized: "Sur ce téléphone", bundle: .module))
         }

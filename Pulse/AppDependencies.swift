@@ -87,6 +87,8 @@ struct AppDependencies: Sendable {
     /// Les photos de séance et de corps, avec le verrou et l'authentification des photos de corps.
     let photos: PhotoDependencies
     let inspector: any StoreInspector
+    /// La dernière synchronisation iCloud réussie et la dernière erreur ; rien à dire hors du mode iCloud.
+    let cloudSync: any CloudSyncMonitoring
     let exporter: any DataExporter
     let eraser: any DataEraser
     let seeder: SampleDataSeeder
@@ -137,6 +139,8 @@ struct AppDependencies: Sendable {
         var calendar: Calendar
         var now: @Sendable () -> Date
         var launch: LaunchOptions
+        /// Remplacé par le suivi des synchronisations quand le magasin va dans iCloud.
+        var cloudSync: any CloudSyncMonitoring = NoCloudSync()
     }
 
     /// Apple Santé réel quand l'appareil le permet ; iCloud sur appareil, fichier local sur simulateur, mémoire en dernier recours.
@@ -220,8 +224,11 @@ struct AppDependencies: Sendable {
         return dependencies
     }
 
+    /// Le suivi des synchronisations iCloud commence avant l'ouverture du magasin, pour voir sa mise en place.
     private static func make(_ wiring: Wiring, mode: StoreMode, error: String?) throws -> AppDependencies {
-        try make(wiring, container: PersistenceStack.makeContainer(mode: mode), mode: mode, error: error)
+        var wiring = wiring
+        if mode == .cloud { wiring.cloudSync = CloudKitSyncMonitor(suiteName: wiring.defaultsSuite) }
+        return try make(wiring, container: PersistenceStack.makeContainer(mode: mode), mode: mode, error: error)
     }
 
     private static func make(_ wiring: Wiring, container: ModelContainer, mode: StoreMode,
@@ -274,7 +281,7 @@ struct AppDependencies: Sendable {
             activeSession: activeSession, liveSession: liveSession, sessionActivity: wiring.sessionActivity,
             run: RunDependencies(wiring, container: container, workouts: workouts, profiles: profiles, bestEfforts: stores.runBestEfforts),
             photos: photos, inspector: wiring.inspector ?? SwiftDataStoreInspector(container: container, cloudEnabled: mode == .cloud),
-            exporter: makeExporter(container: container, content: content),
+            cloudSync: wiring.cloudSync, exporter: makeExporter(container: container, content: content),
             eraser: makeEraser(wiring, container: container, refresher: refresher),
             seeder: SampleDataSeeder(container: container, calendar: calendar), notificationStatus: wiring.notificationStatus)
     }
