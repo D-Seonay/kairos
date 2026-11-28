@@ -231,16 +231,6 @@
         }
       }
     },
-    "%@ kg": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ kg"
-          }
-        }
-      }
-    },
     "%lld rép.": {
       "localizations": {
         "fr": {
@@ -271,32 +261,32 @@
         }
       }
     },
-    "%@ : %@ kg, nouveau record de charge": {
+    "%@ : %@ %@, nouveau record de charge": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ : %@ kg, nouveau record de charge"
+            "value": "%@ : %@ %@, nouveau record de charge"
           }
         }
       }
     },
-    "%@ : 1RM estimé %@ kg, nouveau record": {
+    "%@ : 1RM estimé %@ %@, nouveau record": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ : 1RM estimé %@ kg, nouveau record"
+            "value": "%@ : 1RM estimé %@ %@, nouveau record"
           }
         }
       }
     },
-    "%@ : %@ à %@ kg, nouveau record": {
+    "%@ : %@ à %@ %@, nouveau record": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ : %@ à %@ kg, nouveau record"
+            "value": "%@ : %@ à %@ %@, nouveau record"
           }
         }
       }

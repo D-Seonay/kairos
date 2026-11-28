@@ -627,12 +627,12 @@
         }
       }
     },
-    "kg soulevés" : {
+    "%@ soulevés" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "kg soulevés"
+            "value" : "%@ soulevés"
           }
         }
       }

@@ -178,8 +178,9 @@ extension ExercisePlateau {
     }
 
     private func kilos(_ value: Double, spoken: Bool) -> String {
-        let rounded = (value * 10).rounded() / 10
-        return spoken ? LiveSessionText.kilosSpoken(rounded) : "\(LiveSessionText.decimal(rounded)) kg"
+        guard !spoken else { return LiveSessionText.kilosSpoken((value * 10).rounded() / 10) }
+        let units = PulseUnits.current
+        return "\(LiveSessionText.decimal((units.displayedWeight(kilograms: value) * 10).rounded() / 10)) \(units.weightSymbol)"
     }
 
     /// « 2 novembre ».

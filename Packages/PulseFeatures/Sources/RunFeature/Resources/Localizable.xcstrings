@@ -21,16 +21,6 @@
         }
       }
     },
-    "%@ km" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ km"
-          }
-        }
-      }
-    },
     "%@ · obj. %@" : {
       "localizations" : {
         "fr" : {
@@ -47,16 +37,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@. %2$@. Allure %3$@."
-          }
-        }
-      }
-    },
-    "%@/km" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@/km"
           }
         }
       }
@@ -151,12 +131,12 @@
         }
       }
     },
-    "Course interrompue : enregistrer %@ km jusqu'à %@ ?" : {
+    "Course interrompue : enregistrer %@ jusqu'à %@ ?" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Course interrompue : enregistrer %1$@ km jusqu'à %2$@ ?"
+            "value" : "Course interrompue : enregistrer %1$@ jusqu'à %2$@ ?"
           }
         }
       }

@@ -141,8 +141,7 @@ enum SessionCardState: Equatable {
             parts.append(PulseFormat.duration(minutes: minutes))
         }
         if let km = day.runTargetKm {
-            let number = km.formatted(.number.locale(Locale(identifier: "fr_FR")).precision(.fractionLength(0...1)))
-            parts.append(String(localized: "\(number) km", bundle: .module))
+            parts.append(PulseUnits.current.distance(kilometres: km, maxFractionDigits: 1, grouped: true))
         }
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }

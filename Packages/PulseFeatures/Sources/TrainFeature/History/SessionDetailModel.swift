@@ -228,8 +228,10 @@ public final class SessionDetailModel {
         }
         let tonnage = SessionTonnage.kilograms(of: session.sets, loadKind: directory.loadKind(of:))
         if tonnage > 0 {
-            metrics.append(ShareCardMetric(value: PulseFormat.grouped(tonnage, maxFractionDigits: 0),
-                                           label: String(localized: "kg soulevés", bundle: .module), caption: HistoryRow.tonnage(tonnage)))
+            let units = PulseUnits.current
+            metrics.append(ShareCardMetric(value: units.weightNumber(tonnage, maxFractionDigits: 0, grouped: true),
+                                           label: String(localized: "\(units.weightSymbol) soulevés", bundle: .module),
+                                           caption: HistoryRow.tonnage(tonnage)))
         }
         metrics.append(ShareCardMetric(value: "\(working.count)", label: String(localized: "Séries", bundle: .module),
                                        caption: TrainText.sets(working.count)))
@@ -252,7 +254,7 @@ public final class SessionDetailModel {
         var metrics: [ShareCardMetric] = []
         let distance = session.distanceMeters.flatMap { $0 > 0 ? $0 : nil }
         if let distance {
-            let text = String(localized: "\(PulseFormat.decimal(distance / 1_000, maxFractionDigits: 2)) km", bundle: .module)
+            let text = PulseUnits.current.distance(meters: distance, maxFractionDigits: 2)
             metrics.append(ShareCardMetric(value: text, label: String(localized: "Distance", bundle: .module), caption: text))
         }
         let minutes = HistoryModel.durationMinutes(of: session) ?? 0
@@ -274,15 +276,14 @@ public final class SessionDetailModel {
 
     /// « 5'29"/km » pour une course, « 24,5 km/h » pour une sortie vélo.
     nonisolated static func speedText(of session: WorkoutSession, meters: Double, minutes: Int) -> String? {
-        let kilometres = meters / 1_000
+        let units = PulseUnits.current
         if session.kind == .ride {
-            let speed = kilometres / (Double(minutes) / 60)
-            return String(localized: "\(PulseFormat.decimal(speed, maxFractionDigits: 1)) km/h", bundle: .module)
+            let speed = units.displayedDistance(meters: meters) / (Double(minutes) / 60)
+            return "\(PulseFormat.decimal(speed, maxFractionDigits: 1)) \(units.distanceSymbol)/h"
         }
-        let secondsPerKm = Int((Double(minutes * 60) / kilometres).rounded())
-        guard secondsPerKm > 0 else { return nil }
-        let rest = secondsPerKm % 60
-        return "\(secondsPerKm / 60)'\(rest < 10 ? "0" : "")\(rest)\"/km"
+        let secondsPerKm = Double(minutes * 60) / (meters / 1_000)
+        guard units.paceSeconds(secondsPerKilometer: secondsPerKm) > 0 else { return nil }
+        return units.pace(secondsPerKilometer: secondsPerKm)
     }
 
     // MARK: - Interne

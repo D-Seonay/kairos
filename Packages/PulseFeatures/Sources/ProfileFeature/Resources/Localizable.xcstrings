@@ -81,22 +81,12 @@
         }
       }
     },
-    "%@ kg" : {
+    "%@ %@ en 30 j" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ kg"
-          }
-        }
-      }
-    },
-    "%@ kg en 30 j" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ kg en 30 j"
+            "value" : "%@ %@ en 30 j"
           }
         }
       }

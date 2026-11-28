@@ -166,11 +166,11 @@ extension SessionRecap {
         let name = record.exerciseName
         switch record.kind {
         case .maxWeight:
-            let weight = LiveSessionText.decimal(record.value)
-            return String(localized: "\(name) : \(weight) kg, nouveau record de charge", bundle: .module)
+            let weight = LiveSessionText.weight(record.value)
+            return String(localized: "\(name) : \(weight) \(PulseUnits.current.weightSymbol), nouveau record de charge", bundle: .module)
         case .estimatedOneRepMax:
-            let estimate = LiveSessionText.decimal((record.value * 10).rounded() / 10)
-            return String(localized: "\(name) : 1RM estimé \(estimate) kg, nouveau record", bundle: .module)
+            let estimate = LiveSessionText.decimal((PulseUnits.current.displayedWeight(kilograms: record.value) * 10).rounded() / 10)
+            return String(localized: "\(name) : 1RM estimé \(estimate) \(PulseUnits.current.weightSymbol), nouveau record", bundle: .module)
         case .repsAtWeight:
             let reps = Int(record.value)
             let weightKg = record.weightKg ?? 0
@@ -184,8 +184,8 @@ extension SessionRecap {
             case .bodyweight: "+"
             case .assisted: "−"
             }
-            let weight = sign + LiveSessionText.decimal(weightKg)
-            return String(localized: "\(name) : \(count) à \(weight) kg, nouveau record", bundle: .module)
+            let weight = sign + LiveSessionText.weight(weightKg)
+            return String(localized: "\(name) : \(count) à \(weight) \(PulseUnits.current.weightSymbol), nouveau record", bundle: .module)
         }
     }
 

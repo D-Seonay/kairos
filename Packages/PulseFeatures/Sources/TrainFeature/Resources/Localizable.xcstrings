@@ -1,22 +1,22 @@
 {
   "sourceLanguage" : "fr",
   "strings" : {
+    "%@ soulevés" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ soulevés"
+          }
+        }
+      }
+    },
     "%@ : %@" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ : %@"
-          }
-        }
-      }
-    },
-    "%@ km" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ km"
           }
         }
       }
@@ -91,12 +91,12 @@
         }
       }
     },
-    "%@%@ kg en 30 jours" : {
+    "%@%@ en 30 jours" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@%@ kg en 30 jours"
+            "value" : "%@%@ en 30 jours"
           }
         }
       }
@@ -223,12 +223,12 @@
         }
       }
     },
-    "1RM %@ kg" : {
+    "1RM %@" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "1RM %@ kg"
+            "value" : "1RM %@"
           }
         }
       }

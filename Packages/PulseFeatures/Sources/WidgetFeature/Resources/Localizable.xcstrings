@@ -41,16 +41,6 @@
         }
       }
     },
-    "%@ km" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ km"
-          }
-        }
-      }
-    },
     "%lld · %@" : {
       "localizations" : {
         "fr" : {
@@ -77,16 +67,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld sur %lld cette semaine"
-          }
-        }
-      }
-    },
-    "%lld'%@\" /km" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld'%@\" /km"
           }
         }
       }

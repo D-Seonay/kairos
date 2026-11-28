@@ -17,18 +17,21 @@ public enum RunActivityText {
     /// « 4,38 km » ; « — » sans distance. Deux décimales fixes : la largeur ne saute pas d'une mise à jour à l'autre.
     public static func distance(_ meters: Double?) -> String {
         guard let meters, meters.isFinite else { return dash }
-        let km = (meters / 1000).formatted(
+        let units = PulseUnits.current
+        let distance = units.displayedDistance(meters: meters).formatted(
             .number.locale(Locale(identifier: "fr_FR")).precision(.fractionLength(2)).grouping(.never))
-        return String(localized: "\(km) km", bundle: .module)
+        return "\(distance) \(units.distanceSymbol)"
     }
 
     /// « 5'32" /km » ; « — » sans allure.
     public static func pace(_ secondsPerKm: Int?) -> String {
         guard let secondsPerKm, secondsPerKm > 0 else { return dash }
-        let minutes = secondsPerKm / 60
-        let seconds = secondsPerKm % 60
+        let units = PulseUnits.current
+        let perUnit = units.paceSeconds(secondsPerKilometer: Double(secondsPerKm))
+        let minutes = perUnit / 60
+        let seconds = perUnit % 60
         let padded = seconds < 10 ? "0\(seconds)" : "\(seconds)"
-        return String(localized: "\(minutes)'\(padded)\" /km", bundle: .module)
+        return "\(minutes)'\(padded)\" \(units.paceSuffix)"
     }
 
     /// « 12:34 », « 1:02:05 » : le temps en mouvement figé, affiché en pause. En marche, c'est le minuteur système qui l'affiche.

@@ -8,18 +8,24 @@ import PulseServices
 enum PlanningText {
     /// « 11 240 kg », sans décimale.
     static func tonnage(_ kilograms: Double) -> String {
-        "\(kilograms.formatted(.number.precision(.fractionLength(0)).locale(Locale(identifier: "fr_FR")))) kg"
+        PulseUnits.current.weight(kilograms, maxFractionDigits: 0, grouped: true)
     }
 
     /// « 8,2 km ».
     static func distance(meters: Double) -> String {
-        let km = (meters / 1000).formatted(.number.precision(.fractionLength(1)).locale(Locale(identifier: "fr_FR")))
-        return String(localized: "\(km) km", bundle: .module)
+        let units = PulseUnits.current
+        let distance = units.displayedDistance(meters: meters)
+            .formatted(.number.precision(.fractionLength(1)).locale(Locale(identifier: "fr_FR")))
+        return "\(distance) \(units.distanceSymbol)"
     }
 
     /// « 5:29 /km » ; `nil` sans distance ou sans durée.
     static func pace(minutes: Double?, meters: Double?) -> String? {
-        secondsPerKilometer(minutes: minutes, meters: meters).map { String(format: "%d:%02d /km", $0 / 60, $0 % 60) }
+        let units = PulseUnits.current
+        return secondsPerKilometer(minutes: minutes, meters: meters).map {
+            let seconds = units.paceSeconds(secondsPerKilometer: Double($0))
+            return String(format: "%d:%02d \(units.paceSuffix)", seconds / 60, seconds % 60)
+        }
     }
 
     /// « 5 minutes 29 par kilomètre » ; `nil` sans distance ou sans durée.
@@ -116,8 +122,9 @@ enum PlanningText {
                 ? PulseSpoken.duration(seconds: minutes * 60)
                 : String(localized: "\(minutes) min", bundle: .module))
         } else if let km = day.runTargetKm {
-            let distance = km.formatted(.number.precision(.fractionLength(0...1)).locale(Locale(identifier: "fr_FR")))
-            parts.append(spoken ? PulseSpoken.kilometres(km) : String(localized: "\(distance) km", bundle: .module))
+            parts.append(spoken
+                ? PulseSpoken.kilometres(km)
+                : PulseUnits.current.distance(kilometres: km, maxFractionDigits: 1, grouped: true))
         }
         return parts.joined(separator: spoken ? ", " : " · ")
     }

@@ -47,7 +47,7 @@ struct DoneCard: Equatable {
 
     /// « 6420 kg », « 62,5 kg ».
     var tonnageText: String {
-        String(localized: "\(PulseFormat.decimal(tonnageKg, maxFractionDigits: 1)) kg", bundle: .module)
+        PulseUnits.current.weight(tonnageKg, maxFractionDigits: 1)
     }
 
     /// « 1 record », « 2 records » ; `nil` sans record.

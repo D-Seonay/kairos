@@ -1,4 +1,5 @@
 import PulseDesignSystem
+import PulseDomain
 import SwiftUI
 
 /// Une séance de l'historique : titre et marques (« Hevy », « Abandonnée »), date et durée, séries, tonnage et records.
@@ -58,7 +59,7 @@ struct HistoryRow: View {
     }
 
     static func tonnage(_ kilograms: Double) -> String {
-        "\(kilograms.formatted(.number.precision(.fractionLength(0)).locale(Locale(identifier: "fr_FR")))) kg"
+        PulseUnits.current.weight(kilograms, maxFractionDigits: 0, grouped: true)
     }
 }
 

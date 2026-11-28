@@ -223,7 +223,7 @@ extension LiveHeader {
 
     /// « 1 240 kg », « 62,5 kg ».
     nonisolated static func tonnageText(kg: Double) -> String {
-        String(localized: "\(PulseFormat.grouped(kg, maxFractionDigits: 1)) kg", bundle: .module)
+        PulseUnits.current.weight(kg, maxFractionDigits: 1, grouped: true)
     }
 
     /// « 1 240 kilos ».

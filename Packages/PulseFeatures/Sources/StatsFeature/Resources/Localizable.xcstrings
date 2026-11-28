@@ -1,6 +1,16 @@
 {
   "sourceLanguage": "fr",
   "strings": {
+    "%@ × %lld": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ × %lld"
+          }
+        }
+      }
+    },
     "": {},
     "%@ %@": {
       "localizations": {
@@ -82,32 +92,12 @@
         }
       }
     },
-    "%@ kg": {
+    "%@ %@ × %lld": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ kg"
-          }
-        }
-      }
-    },
-    "%@ kg × %lld": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ kg × %lld"
-          }
-        }
-      }
-    },
-    "%@ km": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ km"
+            "value": "%@ %@ × %lld"
           }
         }
       }
@@ -268,16 +258,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld séances"
-          }
-        }
-      }
-    },
-    "+%@ kg": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "+%@ kg"
           }
         }
       }

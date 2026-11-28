@@ -136,7 +136,7 @@ enum TrainText {
     static func exerciseRowSubtitle(group: String, equipment: String, oneRepMax: Double?) -> String {
         var parts = [group, equipment.lowercased()]
         if let oneRepMax {
-            parts.append(String(localized: "1RM \(PulseFormat.decimal(oneRepMax, maxFractionDigits: 1)) kg", bundle: .module))
+            parts.append(String(localized: "1RM \(PulseUnits.current.weight(oneRepMax, maxFractionDigits: 1))", bundle: .module))
         }
         return parts.joined(separator: " · ")
     }

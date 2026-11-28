@@ -125,7 +125,7 @@ struct ReplaceExerciseSheet: View {
         guard let first = working.first else { return count }
         var parts = [count]
         if let weight = first.proposed.weightKg, let reps = first.proposed.reps {
-            parts.append(String(localized: "\(PulseFormat.decimal(weight, maxFractionDigits: 2)) kg × \(reps)", bundle: .module))
+            parts.append(String(localized: "\(PulseUnits.current.weight(weight, maxFractionDigits: 2)) × \(reps)", bundle: .module))
         } else if let reps = first.proposed.reps {
             parts.append(String(localized: "\(reps) répétitions", bundle: .module))
         }

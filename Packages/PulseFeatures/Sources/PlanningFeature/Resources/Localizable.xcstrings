@@ -21,16 +21,6 @@
         }
       }
     },
-    "%@ km": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ km"
-          }
-        }
-      }
-    },
     "%@ sur les %lld dernières": {
       "localizations": {
         "fr": {

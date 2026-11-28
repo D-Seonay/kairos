@@ -59,8 +59,7 @@ extension TrainText {
         case .minutes(let minutes):
             return String(localized: "\(minutes) min", bundle: .module)
         case .kilometres(let kilometres):
-            let distance = kilometres.formatted(.number.precision(.fractionLength(0...1)).locale(Locale(identifier: "fr_FR")))
-            return String(localized: "\(distance) km", bundle: .module)
+            return PulseUnits.current.distance(kilometres: kilometres, maxFractionDigits: 1, grouped: true)
         }
     }
 

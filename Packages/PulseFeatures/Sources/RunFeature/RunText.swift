@@ -84,7 +84,7 @@ public enum RunText {
     static func goal(_ launch: RunLaunch) -> String? {
         if let minutes = launch.targetMinutes, minutes > 0 { return PulseFormat.duration(minutes: minutes) }
         if let km = launch.targetKm, km > 0 {
-            return String(localized: "\(PulseFormat.decimal(km, maxFractionDigits: 1)) km", bundle: .module)
+            return PulseUnits.current.distance(kilometres: km, maxFractionDigits: 1)
         }
         return nil
     }
@@ -117,7 +117,7 @@ public enum RunText {
     /// « 4,38 km » ; « — » sans distance.
     static func distance(_ meters: Double?) -> String {
         guard let meters, meters.isFinite else { return dash }
-        return String(localized: "\(PulseFormat.decimal(meters / 1_000, maxFractionDigits: 2)) km", bundle: .module)
+        return PulseUnits.current.distance(meters: meters, maxFractionDigits: 2)
     }
 
     /// « 4,99 km », « 5,00 km » : la distance de la course en cours, toujours à deux décimales pour que le chiffre ne saute pas
@@ -128,7 +128,8 @@ public enum RunText {
             .locale(Locale(identifier: "fr_FR"))
             .precision(.fractionLength(2))
             .grouping(.never)
-        return String(localized: "\((max(0, meters) / 1_000).formatted(style)) km", bundle: .module)
+        let units = PulseUnits.current
+        return "\(units.displayedDistance(meters: max(0, meters)).formatted(style)) \(units.distanceSymbol)"
     }
 
     /// « 4,4 kilomètres » ; `nil` sans distance.
@@ -140,7 +141,8 @@ public enum RunText {
     /// « 5'31"/km » ; « — » sans allure.
     static func pace(_ secondsPerKm: Int?) -> String {
         guard let secondsPerKm, secondsPerKm > 0 else { return dash }
-        return String(localized: "\(splitTime(Double(secondsPerKm)))/km", bundle: .module)
+        let units = PulseUnits.current
+        return "\(splitTime(Double(units.paceSeconds(secondsPerKilometer: Double(secondsPerKm)))))\(units.paceSuffix)"
     }
 
     /// « 5 minutes 31 par kilomètre » ; « pas encore d'allure » sans allure.
@@ -245,8 +247,8 @@ public enum RunText {
         guard let meters = offer.distanceMeters else {
             return String(localized: "Course interrompue : l'enregistrer jusqu'à \(time) ?", bundle: .module)
         }
-        let km = PulseFormat.decimal(meters / 1_000, maxFractionDigits: 1)
-        return String(localized: "Course interrompue : enregistrer \(km) km jusqu'à \(time) ?", bundle: .module)
+        let distance = PulseUnits.current.distance(meters: meters, maxFractionDigits: 1)
+        return String(localized: "Course interrompue : enregistrer \(distance) jusqu'à \(time) ?", bundle: .module)
     }
 
     /// « Course toujours en cours ? Pulse peut la terminer à 7 h 52, ton dernier déplacement. »

@@ -127,7 +127,7 @@ private struct StrengthRecordsCard: View {
     private func value(_ line: StrengthRecordLine) -> String {
         switch line.kind {
         case .repsAtWeight: String(localized: "\(Int(line.value.rounded())) reps", bundle: .module)
-        default: String(localized: "\(PulseFormat.decimal(line.value, maxFractionDigits: 1)) kg", bundle: .module)
+        default: PulseUnits.current.weight(line.value, maxFractionDigits: 1)
         }
     }
 
@@ -135,7 +135,7 @@ private struct StrengthRecordsCard: View {
     private func origin(_ line: StrengthRecordLine) -> String {
         var parts: [String] = []
         if let weight = line.weightKg, weight > 0, let reps = line.reps {
-            parts.append(String(localized: "\(PulseFormat.decimal(weight, maxFractionDigits: 2)) kg × \(reps)", bundle: .module))
+            parts.append(String(localized: "\(PulseUnits.current.weight(weight, maxFractionDigits: 2)) × \(reps)", bundle: .module))
         }
         parts.append(StatsText.shortDate(line.date, calendar: window.calendar, today: window.today))
         return parts.joined(separator: " · ")
@@ -146,7 +146,7 @@ private struct StrengthRecordsCard: View {
         if let gain = line.gain, gain > 0 {
             return switch line.kind {
             case .repsAtWeight: String(localized: "+\(Int(gain.rounded())) reps", bundle: .module)
-            default: String(localized: "+\(PulseFormat.decimal(gain, maxFractionDigits: 1)) kg", bundle: .module)
+            default: "+" + PulseUnits.current.weight(gain, maxFractionDigits: 1)
             }
         }
         return line.isNew ? RecordsSection.newMark : nil
