@@ -15,14 +15,35 @@ struct BedtimeReminderPlannerTests {
     }
 
     /// `nights` : les minutes endormies par jour de réveil (« 2026-11-20 ») ; `lastNight` : la nuit qui finit le jour de `now`.
-    private func reminders(_ plan: SleepPlan? = nil, lastNight: Int? = nil, nights: [String: Int] = [:],
+    /// `debts` : la dette des 7 nuits par jour de réveil.
+    private func reminders(_ plan: SleepPlan? = nil, lastNight: Int? = nil, nights: [String: Int] = [:], debts: [String: Int] = [:],
                            sessions: [String: String] = [:], now: Date? = nil) -> [BedtimeReminder] {
         let now = now ?? self.now
         var nights = nights
         if let lastNight { nights[Self.dayKey(now)] = lastNight }
         return BedtimeReminderPlanner.reminders(plan: plan ?? self.plan(), nightAsleepMinutes: { nights[Self.dayKey($0)] },
+                                                sleepDebtMinutes: { debts[Self.dayKey($0)] },
                                                 sessionName: { day in sessions[Self.dayKey(day)] }, now: now,
                                                 calendar: calendar)
+    }
+
+    /// À partir d'une heure, le rappel du soir parle de la dette des 7 nuits plutôt que de la nuit d'hier (#117).
+    @Test func aSleepDebtOfAnHourOrMoreIsMentioned() {
+        let withSession = reminders(lastNight: 370, debts: ["2026-11-20": 220], sessions: ["2026-11-21": "Push"])
+        #expect(withSession.first?.body == "3 h 40 de retard sur 7 jours et séance Push demain : vise tes 8 h.")
+        let alone = reminders(lastNight: 370, debts: ["2026-11-20": 220])
+        #expect(alone.first?.body == "3 h 40 de retard sur 7 jours : vise tes 8 h cette nuit.")
+    }
+
+    @Test func aSmallSleepDebtKeepsTheShortNightText() {
+        let planned = reminders(lastNight: 370, debts: ["2026-11-20": 45])
+        #expect(planned.first?.body.hasPrefix("Nuit courte hier") == true)
+    }
+
+    /// Une dette qui ne vient que de la nuit d'hier (1 h 50 sous l'objectif, 1 h 50 de dette) se dit « nuit courte ».
+    @Test func aDebtMadeOfLastNightAloneKeepsTheShortNightText() {
+        let planned = reminders(lastNight: 370, debts: ["2026-11-20": 110])
+        #expect(planned.first?.body == "Nuit courte hier (6 h 10) : vise tes 8 h cette nuit.")
     }
 
     /// « 2026-11-23 » pour le jour donné, en heure de Paris.
