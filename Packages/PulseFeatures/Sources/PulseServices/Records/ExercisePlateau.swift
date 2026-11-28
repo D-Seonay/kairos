@@ -67,12 +67,15 @@ public enum PlateauDetector {
     public static func plateau(for exercise: ExerciseReference, in sessions: [WorkoutSession], loadKind: LoadKind, now: Date,
                                calendar: Calendar) -> ExercisePlateau? {
         guard loadKind == .external else { return nil }
-        let points = sinceLastReturn(sessions
-            .filter { $0.status == .completed || $0.status == .abandoned }
-            .compactMap { session in
-                bestEstimate(of: exercise, in: session).map { Point(date: session.startedAt, estimate: $0, counts: counts(session)) }
+        let visits = sessions
+            .filter { ($0.status == .completed || $0.status == .abandoned) && contains(exercise, $0) }
+            .sorted { $0.startedAt < $1.startedAt }
+        let returnDate = lastReturn(in: visits.map(\.startedAt), calendar: calendar)
+        let points = visits.filter { $0.startedAt >= returnDate ?? .distantPast }.compactMap { session in
+            bestEstimate(of: exercise, in: session).map {
+                Point(date: session.startedAt, estimate: $0, counts: counts(session) && session.startedAt != returnDate)
             }
-            .sorted { $0.date < $1.date }, calendar: calendar)
+        }
         let counted = points.filter(\.counts)
         guard counted.count > sessionCount, let last = counted.last, let windowStart = counted.suffix(sessionCount).first?.date,
               let staleLimit = calendar.date(byAdding: .day, value: -staleDays, to: now), last.date >= staleLimit,
@@ -90,17 +93,19 @@ public enum PlateauDetector {
                                sessionCount: since.count, lastDate: last.date, excludedCount: excluded)
     }
 
-    /// Repart de la dernière reprise : une séance qui suit la précédente séance de l'exercice d'au moins
-    /// `LoadDropRule.layoffDays` jours. Ses charges sont baissées exprès : elle ne compte pas, et les séances d'avant la pause
-    /// ne servent plus de référence (un meilleur 1RM d'avant la pause ne fait pas un plateau pendant la remontée).
-    private static func sinceLastReturn(_ points: [Point], calendar: Calendar) -> [Point] {
-        guard let start = points.indices.dropFirst().last(where: { index in
-            LoadDropRule.calendarDays(from: points[index - 1].date, to: points[index].date, calendar: calendar)
-                >= LoadDropRule.layoffDays
-        }) else { return points }
-        var kept = Array(points[start...])
-        kept[0].counts = false
-        return kept
+    /// La date de la dernière reprise, `nil` sans pause : une séance qui suit la précédente séance de l'exercice d'au moins
+    /// `LoadDropRule.layoffDays` jours. `dates` : toutes les séances avec l'exercice, triées, même sans 1RM estimé (trois
+    /// semaines en 15 répétitions ne sont pas une pause). Ses charges sont baissées exprès : elle ne compte pas, et les séances
+    /// d'avant la pause ne servent plus de référence (un meilleur 1RM d'avant la pause ne fait pas un plateau pendant la remontée).
+    private static func lastReturn(in dates: [Date], calendar: Calendar) -> Date? {
+        dates.indices.dropFirst().last { index in
+            LoadDropRule.calendarDays(from: dates[index - 1], to: dates[index], calendar: calendar) >= LoadDropRule.layoffDays
+        }.map { dates[$0] }
+    }
+
+    /// Vrai quand la séance a au moins une série de l'exercice hors échauffement.
+    private static func contains(_ exercise: ExerciseReference, _ session: WorkoutSession) -> Bool {
+        session.sets.contains { $0.exercise == exercise && $0.setType != .warmup }
     }
 
     /// Vrai quand la séance la plus récente bat toutes les autres de la liste : une remontée en cours, par exemple après une

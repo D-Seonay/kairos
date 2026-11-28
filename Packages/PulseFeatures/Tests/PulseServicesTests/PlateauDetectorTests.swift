@@ -85,6 +85,17 @@ struct PlateauDetectorTests {
         #expect(found.sessionCount == 4 && found.excludedCount == 0)
     }
 
+    @Test func sessionsWithoutAnEstimateStillBridgeThePause() throws {
+        // Deux séances en 15 répétitions (pas de 1RM estimé) entre 63 et 42 jours : le bench n'a jamais quitté la semaine, la
+        // séance de 42 jours n'est pas une reprise et le meilleur d'avant (85 × 5) reste la référence.
+        let highReps = [session(56, [(60, 15)]), session(49, [(60, 15)])]
+        let worked = [session(70, [(77.5, 5)]), session(63, [(85, 5)])] + highReps
+            + [session(42, [(72.5, 5)]), session(35, [(80, 5)]), session(28, [(80, 4)]), session(21, [(77.5, 6)]),
+               session(14, [(80, 5)]), session(7, [(80, 4)])]
+        let found = try #require(plateau(worked))
+        #expect(found.bestDate == day(63) && found.excludedCount == 0)
+    }
+
     @Test func refusedFatigueAdjustmentsStillMarkAFatigueDay() {
         let cap = SessionAdjustment(kind: .rpeCap, reason: "Effort plafonné à RPE 7,5", value: 7.5)
         let normalRest = SessionAdjustment(kind: .rest, reason: "Repos rallongés de 15 secondes", value: 15)
