@@ -16,7 +16,7 @@ public struct ExercisePlateau: Sendable, Equatable {
     public var sessionCount: Int
     /// La date de la dernière séance comptée.
     public var lastDate: Date
-    /// Les séances faites entre-temps en fatigue ou en décharge, écartées du calcul.
+    /// Les séances faites entre-temps en fatigue, en décharge ou en reprise après une pause, écartées du calcul.
     public var excludedCount: Int
 
     public init(exercise: ExerciseReference, bestKg: Double, bestDate: Date, recentBestKg: Double, sessionCount: Int,
@@ -36,7 +36,9 @@ public struct ExercisePlateau: Sendable, Equatable {
 /// Pour chaque séance terminée ou abandonnée (comme la courbe et les records de la fiche), la meilleure série de l'exercice
 /// donne un 1RM estimé (Brzycki, charge externe, 1 à 12 répétitions). Les séances faites en fatigue modérée, en surmenage ou
 /// pendant une décharge ne comptent pas : une séance ne garde pas sa catégorie de récupération, mais elle garde les ajustements
-/// du jour, appliqués ou refusés, qui la trahissent (voir `counts(_:)`). Il y a plateau quand les quatre dernières séances
+/// du jour, appliqués ou refusés, qui la trahissent (voir `counts(_:)`). Une séance de reprise, deux semaines au moins après
+/// la précédente avec l'exercice, ne compte pas non plus : ses charges sont baissées exprès (`LoadDropRule`), et le calcul
+/// repart d'elle, sans les séances d'avant la pause. Il y a plateau quand les quatre dernières séances
 /// comptées ne dépassent pas le meilleur 1RM des séances comptées des 90 jours d'avant, que la plus récente ne bat pas les trois
 /// autres (une remontée en cours n'est pas un plateau), et qu'au moins 21 jours séparent la première fois où ce meilleur 1RM a
 /// été atteint de la dernière séance comptée.
@@ -65,12 +67,12 @@ public enum PlateauDetector {
     public static func plateau(for exercise: ExerciseReference, in sessions: [WorkoutSession], loadKind: LoadKind, now: Date,
                                calendar: Calendar) -> ExercisePlateau? {
         guard loadKind == .external else { return nil }
-        let points = sessions
+        let points = sinceLastReturn(sessions
             .filter { $0.status == .completed || $0.status == .abandoned }
             .compactMap { session in
                 bestEstimate(of: exercise, in: session).map { Point(date: session.startedAt, estimate: $0, counts: counts(session)) }
             }
-            .sorted { $0.date < $1.date }
+            .sorted { $0.date < $1.date }, calendar: calendar)
         let counted = points.filter(\.counts)
         guard counted.count > sessionCount, let last = counted.last, let windowStart = counted.suffix(sessionCount).first?.date,
               let staleLimit = calendar.date(byAdding: .day, value: -staleDays, to: now), last.date >= staleLimit,
@@ -86,6 +88,18 @@ public enum PlateauDetector {
         let excluded = points.filter { !$0.counts && $0.date > best.date && $0.date <= last.date }.count
         return ExercisePlateau(exercise: exercise, bestKg: best.estimate, bestDate: best.date, recentBestKg: recentBest,
                                sessionCount: since.count, lastDate: last.date, excludedCount: excluded)
+    }
+
+    /// Repart de la dernière reprise : une séance qui suit la précédente séance de l'exercice d'au moins
+    /// `LoadDropRule.layoffDays` jours. Ses charges sont baissées exprès : elle ne compte pas, et les séances d'avant la pause
+    /// ne servent plus de référence (un meilleur 1RM d'avant la pause ne fait pas un plateau pendant la remontée).
+    private static func sinceLastReturn(_ points: [Point], calendar: Calendar) -> [Point] {
+        guard let start = points.indices.dropFirst().last(where: { index in
+            days(from: points[index - 1].date, to: points[index].date, calendar: calendar) >= LoadDropRule.layoffDays
+        }) else { return points }
+        var kept = Array(points[start...])
+        kept[0].counts = false
+        return kept
     }
 
     /// Vrai quand la séance la plus récente bat toutes les autres de la liste : une remontée en cours, par exemple après une
@@ -155,9 +169,9 @@ extension ExercisePlateau {
             mieux (au mieux \(recent)).
             """, bundle: .module)
         if excludedCount == 1 {
-            text += " " + String(localized: "1 séance faite en fatigue ou en décharge n'est pas comptée.", bundle: .module)
+            text += " " + String(localized: "1 séance faite en fatigue, en décharge ou en reprise n'est pas comptée.", bundle: .module)
         } else if excludedCount > 1 {
-            text += " " + String(localized: "\(excludedCount) séances faites en fatigue ou en décharge ne sont pas comptées.",
+            text += " " + String(localized: "\(excludedCount) séances faites en fatigue, en décharge ou en reprise ne sont pas comptées.",
                                  bundle: .module)
         }
         return text

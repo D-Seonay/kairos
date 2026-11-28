@@ -631,22 +631,22 @@
         }
       }
     },
-    "1 séance faite en fatigue ou en décharge n'est pas comptée.": {
+    "1 séance faite en fatigue, en décharge ou en reprise n'est pas comptée.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "1 séance faite en fatigue ou en décharge n'est pas comptée."
+            "value": "1 séance faite en fatigue, en décharge ou en reprise n'est pas comptée."
           }
         }
       }
     },
-    "%lld séances faites en fatigue ou en décharge ne sont pas comptées.": {
+    "%lld séances faites en fatigue, en décharge ou en reprise ne sont pas comptées.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld séances faites en fatigue ou en décharge ne sont pas comptées."
+            "value": "%lld séances faites en fatigue, en décharge ou en reprise ne sont pas comptées."
           }
         }
       }

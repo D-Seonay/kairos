@@ -74,6 +74,17 @@ struct PlateauDetectorTests {
         #expect(found.sessionCount == 4 && found.excludedCount == 2)
     }
 
+    @Test func aReturnAfterAPauseRestartsTheCount() throws {
+        // Trois semaines sans bench entre 63 et 42 jours. La séance de reprise, aux charges baissées, ne compte pas, et le
+        // meilleur d'avant la pause (85 × 5) n'est plus une référence.
+        let resumed = [session(70, [(77.5, 5)]), session(63, [(85, 5)]), session(42, [(72.5, 5)]), session(35, [(80, 5)]),
+                       session(28, [(80, 4)]), session(21, [(77.5, 6)]), session(14, [(80, 5)])]
+        #expect(plateau(resumed) == nil)
+        let found = try #require(plateau(resumed + [session(7, [(80, 4)])]))
+        #expect(found.bestKg == 90 && found.bestDate == day(35))
+        #expect(found.sessionCount == 4 && found.excludedCount == 0)
+    }
+
     @Test func refusedFatigueAdjustmentsStillMarkAFatigueDay() {
         let cap = SessionAdjustment(kind: .rpeCap, reason: "Effort plafonné à RPE 7,5", value: 7.5)
         let normalRest = SessionAdjustment(kind: .rest, reason: "Repos rallongés de 15 secondes", value: 15)
@@ -156,7 +167,7 @@ struct PlateauDetectorTests {
         var excluded = found
         excluded.excludedCount = 2
         #expect(excluded.explanation(calendar: TestClock.calendar, spoken: true).hasSuffix(
-            "(au mieux 90 kilos). 2 séances faites en fatigue ou en décharge ne sont pas comptées."))
+            "(au mieux 90 kilos). 2 séances faites en fatigue, en décharge ou en reprise ne sont pas comptées."))
         #expect(ExercisePlateau.tips(variant: "Développé haltères").last
             == "Le remplacer quelques semaines par une variante, comme Développé haltères.")
     }
