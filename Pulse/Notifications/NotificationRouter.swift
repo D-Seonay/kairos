@@ -12,7 +12,6 @@ import UserNotifications
 final class NotificationRouter: NSObject, UNUserNotificationCenterDelegate {
     /// La clé du lien dans `userInfo`, posée par `UserNotificationScheduler`.
     static let linkKey = "link"
-    private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "fr.seonay.pulse", category: "notifications")
 
     private let router: AppRouter
     private let supplements: SupplementService
@@ -46,7 +45,11 @@ final class NotificationRouter: NSObject, UNUserNotificationCenterDelegate {
         if response.actionIdentifier == UserNotificationScheduler.supplementTakeAction,
            let intake = Self.supplementIntake(from: userInfo) {
             // Une prise déjà cochée, ou un complément supprimé entre-temps, ne compte pas : rien d'autre à faire.
-            _ = try? await supplements.take(supplementID: intake.id, day: intake.day)
+            do {
+                _ = try await supplements.take(supplementID: intake.id, day: intake.day)
+            } catch {
+                logger.failure("Prise de complément depuis la notification non enregistrée", error)
+            }
             await router.supplementsChanged()
             return
         }
@@ -55,7 +58,7 @@ final class NotificationRouter: NSObject, UNUserNotificationCenterDelegate {
             // Une réponse d'arrière-plan ne peut pas ouvrir l'app : un check-in refusé (la notification de la veille touchée après
             // minuit, un score mesuré déjà là) n'est signalé nulle part, et l'accueil redemande le check-in du jour à l'ouverture.
             if await checkIns?.answer(answer, day: day) == false {
-                Self.logger.notice("Réponse rapide de check-in non enregistrée (autre jour ou check-in refusé)")
+                logger.notice("Réponse rapide de check-in non enregistrée (autre jour ou check-in refusé)")
             }
             return
         }

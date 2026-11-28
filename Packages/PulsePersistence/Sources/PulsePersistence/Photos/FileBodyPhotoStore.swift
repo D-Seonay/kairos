@@ -41,6 +41,7 @@ public actor FileBodyPhotoStore: BodyPhotoStore {
     /// La date de création du fichier, sinon celle de sa dernière modification (API à raison requise `C617.1` : fichiers du
     /// conteneur de l'app).
     public static func fileDate(_ url: URL) -> Date? {
+        // swiftlint:disable:next silent_try - sans date lisible, la reconstruction en pose une
         let values = try? url.resourceValues(forKeys: [.creationDateKey, .contentModificationDateKey])
         return values?.creationDate ?? values?.contentModificationDate
     }
@@ -57,7 +58,7 @@ public actor FileBodyPhotoStore: BodyPhotoStore {
             try writeIndex(present)
             let kept = Set(present.map(\.id))
             for gone in entries where !kept.contains(gone.id) {
-                try? removeIfPresent(thumbnailURL(gone.id))
+                discard(thumbnailURL(gone.id))
             }
         }
         sweepOrphans(keeping: Set(present.map(\.id)))
@@ -65,8 +66,8 @@ public actor FileBodyPhotoStore: BodyPhotoStore {
     }
 
     public func image(of photoID: UUID) async throws -> PhotoImage? {
-        guard let image = try? Data(contentsOf: imageURL(photoID)),
-              let thumbnail = try? Data(contentsOf: thumbnailURL(photoID)) else { return nil }
+        guard let image = logger.attempt("Photo de corps illisible", { try Data(contentsOf: imageURL(photoID)) }),
+              let thumbnail = logger.attempt("Vignette illisible", { try Data(contentsOf: thumbnailURL(photoID)) }) else { return nil }
         return PhotoImage(image: image, thumbnail: thumbnail)
     }
 
@@ -83,8 +84,8 @@ public actor FileBodyPhotoStore: BodyPhotoStore {
         } catch {
             // Une photo neuve qui n'a pas pu entrer dans l'index ne laisse pas de fichiers sans entrée.
             if isNew {
-                try? removeIfPresent(imageURL(photo.id))
-                try? removeIfPresent(thumbnailURL(photo.id))
+                discard(imageURL(photo.id))
+                discard(thumbnailURL(photo.id))
             }
             throw error
         }
@@ -119,7 +120,7 @@ public actor FileBodyPhotoStore: BodyPhotoStore {
         let staging = directory.appendingPathComponent("\(Self.stagingPrefix)\(UUID().uuidString)", isDirectory: true)
         let folder = staging.appendingPathComponent(stem, isDirectory: true)
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-        defer { try? FileManager.default.removeItem(at: staging) }
+        defer { discard(staging) }
 
         var taken = Set<String>()
         for photo in ordered {
@@ -145,14 +146,16 @@ public actor FileBodyPhotoStore: BodyPhotoStore {
         #if os(iOS)
         try FileManager.default.setAttributes(attributes, ofItemAtPath: archive.path)
         #else
+        // swiftlint:disable:next silent_try - Mac (tests) : protection posée au mieux, documenté
         try? FileManager.default.setAttributes(attributes, ofItemAtPath: archive.path)
         #endif
     }
 
     private func removePreviousArchives(in destination: URL, stem: String) {
+        // swiftlint:disable:next silent_try - dossier de destination vide ou absent
         let names = (try? FileManager.default.contentsOfDirectory(atPath: destination.path)) ?? []
         for name in names where name.hasPrefix("\(stem)-") && name.hasSuffix(".zip") {
-            try? FileManager.default.removeItem(at: destination.appendingPathComponent(name))
+            discard(destination.appendingPathComponent(name))
         }
     }
 
@@ -218,8 +221,10 @@ public actor FileBodyPhotoStore: BodyPhotoStore {
     /// Octets illisibles : `unreadable` (passager). Octets lus mais non décodables : l'index est reconstruit et réécrit.
     private func readIndex() throws -> IndexState {
         guard FileManager.default.fileExists(atPath: indexURL.path) else { return .absent }
-        guard let data = try? Data(contentsOf: indexURL) else { return .unreadable }
-        if let entries = try? Self.decoder.decode([BodyPhoto].self, from: data) { return .decoded(entries) }
+        guard let data = logger.attempt("Index des photos illisible", { try Data(contentsOf: indexURL) }) else { return .unreadable }
+        if let entries = logger.attempt("Index des photos abîmé", { try Self.decoder.decode([BodyPhoto].self, from: data) }) {
+            return .decoded(entries)
+        }
         return .decoded(try rebuildIndex(from: data))
     }
 
@@ -230,6 +235,7 @@ public actor FileBodyPhotoStore: BodyPhotoStore {
         let photo: BodyPhoto?
 
         init(from decoder: any Decoder) throws {
+            // swiftlint:disable:next silent_try - une entrée abîmée est passée, les autres sont gardées (documenté)
             photo = try? BodyPhoto(from: decoder)
         }
     }
@@ -243,11 +249,13 @@ public actor FileBodyPhotoStore: BodyPhotoStore {
         let name = "\(Self.damagedIndexPrefix)\(Int(now().timeIntervalSince1970))-\(UUID().uuidString.prefix(8)).json"
         try damaged.write(to: directory.appendingPathComponent(name), options: [.withoutOverwriting, .completeFileProtection])
         var entries: [BodyPhoto] = []
+        // swiftlint:disable:next silent_try - reprise au mieux d'un index déjà signalé abîmé
         let salvaged = (try? Self.decoder.decode([SalvagedEntry].self, from: damaged))?.compactMap(\.photo) ?? []
         for photo in salvaged where !entries.contains(where: { $0.id == photo.id }) {
             entries.append(photo)
         }
         let known = Set(entries.map(\.id))
+        // swiftlint:disable:next silent_try - dossier absent avant la première photo
         let names = (try? FileManager.default.contentsOfDirectory(atPath: directory.path)) ?? []
         let unindexed = names.compactMap { name -> UUID? in
             guard name.hasSuffix(".jpg"), !name.hasSuffix("-thumb.jpg") else { return nil }
@@ -257,7 +265,11 @@ public actor FileBodyPhotoStore: BodyPhotoStore {
         let images = unindexed.map { BodyPhotoIndexRepair.Image(id: $0, fileDate: fileDate(imageURL($0))) }
         entries += BodyPhotoIndexRepair.entries(for: images, existing: entries, now: now(), calendar: calendar)
         for photo in entries where !FileManager.default.fileExists(atPath: thumbnailURL(photo.id).path) {
-            try? FileManager.default.copyItem(at: imageURL(photo.id), to: thumbnailURL(photo.id))
+            do {
+                try FileManager.default.copyItem(at: imageURL(photo.id), to: thumbnailURL(photo.id))
+            } catch {
+                logger.failure("Vignette de remplacement non copiée", error)
+            }
         }
         try writeIndex(entries)
         return entries
@@ -266,18 +278,28 @@ public actor FileBodyPhotoStore: BodyPhotoStore {
     /// Supprime les `<id>.jpg` et `<id>-thumb.jpg` dont l'identifiant n'est pas dans l'index. Seulement quand l'index a été
     /// lu (ou n'existe pas) : jamais après un échec de lecture. Les dossiers de travail et les autres fichiers sont laissés.
     private func sweepOrphans(keeping kept: Set<UUID>) {
+        // swiftlint:disable:next silent_try - dossier absent avant la première photo
         let names = (try? FileManager.default.contentsOfDirectory(atPath: directory.path)) ?? []
         for name in names where name.hasSuffix(".jpg") {
             var stem = String(name.dropLast(".jpg".count))
             if stem.hasSuffix("-thumb") { stem = String(stem.dropLast("-thumb".count)) }
             guard let id = UUID(uuidString: stem), !kept.contains(id) else { continue }
-            try? FileManager.default.removeItem(at: directory.appendingPathComponent(name))
+            discard(directory.appendingPathComponent(name))
         }
     }
 
     private func writeIndex(_ entries: [BodyPhoto]) throws {
         try prepareDirectory()
         try Self.encoder.encode(entries).write(to: indexURL, options: Self.writeOptions)
+    }
+
+    /// Un nettoyage au mieux : l'échec est journalisé, rien d'autre (un fichier resté est balayé au passage suivant).
+    private func discard(_ url: URL) {
+        do {
+            try removeIfPresent(url)
+        } catch {
+            logger.failure("Fichier de photo non supprimé", error)
+        }
     }
 
     private func removeIfPresent(_ url: URL) throws {

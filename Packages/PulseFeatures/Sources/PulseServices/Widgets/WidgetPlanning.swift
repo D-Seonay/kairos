@@ -81,8 +81,7 @@ public struct WidgetPlanning: Sendable, Equatable {
             if let minutes = routine.runTargetMinutes {
                 parts.append(String(localized: "\(minutes) min", bundle: .module))
             } else if let km = routine.runTargetKm {
-                let distance = km.formatted(.number.precision(.fractionLength(0...1)).locale(Locale(identifier: "fr_FR")))
-                parts.append(String(localized: "\(distance) km", bundle: .module))
+                parts.append(PulseUnits.current.distance(kilometres: km, maxFractionDigits: 1, grouped: true))
             }
             return parts.joined(separator: " · ")
         }

@@ -9,8 +9,6 @@ import PulseDomain
 /// le tracé. `HKHealthStore`, la séance et les builders sont thread-safe ; l'état mutable est gardé par un verrou, d'où
 /// `@unchecked Sendable`.
 public final class HealthKitRunRecorder: NSObject, RunWorkoutRecording, @unchecked Sendable {
-    private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "fr.seonay.pulse", category: "run")
-
     let store: HKHealthStore
     private let lock = NSLock()
     private var session: HKWorkoutSession?
@@ -40,7 +38,11 @@ public final class HealthKitRunRecorder: NSObject, RunWorkoutRecording, @uncheck
     public func requestWriteAccess() async -> HealthWriteAccess {
         guard HKHealthStore.isHealthDataAvailable() else { return .unavailable }
         // Une demande refusée ou interrompue n'empêche rien : l'état relu dit ce qui est permis.
-        try? await store.requestAuthorization(toShare: HealthKitWorkoutWriter.shared, read: [])
+        do {
+            try await store.requestAuthorization(toShare: HealthKitWorkoutWriter.shared, read: [])
+        } catch {
+            logger.failure("Demande d'écriture de la course en échec", error)
+        }
         return await writeAccess()
     }
 
@@ -130,7 +132,12 @@ public final class HealthKitRunRecorder: NSObject, RunWorkoutRecording, @uncheck
             HKQuery.predicateForObjects(from: HKSource.default())
         ])
         let descriptor = HKSampleQueryDescriptor(predicates: [.workout(ownWorkout)], sortDescriptors: [], limit: 1)
-        return (try? await descriptor.result(for: store))?.first?.uuid
+        do {
+            return try await descriptor.result(for: store).first?.uuid
+        } catch {
+            logger.failure("Lecture de la course déjà écrite en échec", error)
+            return nil
+        }
     }
 
     /// Supprime l'entraînement écrit par Pulse, sa distance, son énergie et son tracé.
@@ -199,7 +206,7 @@ public final class HealthKitRunRecorder: NSObject, RunWorkoutRecording, @uncheck
         do {
             recovered = try await store.recoverActiveWorkoutSession()
         } catch {
-            Self.logger.error("Reprise de la séance de course impossible : \(error.localizedDescription, privacy: .public)")
+            logger.failure("Reprise de la séance de course impossible", error)
             return false
         }
         guard let recovered, Self.isAlive(recovered) else { return false }
@@ -294,7 +301,7 @@ extension HealthKitRunRecorder: HKWorkoutSessionDelegate, HKLiveWorkoutBuilderDe
     }
 
     public func workoutSession(_ workoutSession: HKWorkoutSession, didFailWithError error: any Error) {
-        Self.logger.error("Séance de course en échec : \(error.localizedDescription, privacy: .public)")
+        logger.failure("Séance de course en échec", error)
         endHeartRates(of: workoutSession)
     }
 

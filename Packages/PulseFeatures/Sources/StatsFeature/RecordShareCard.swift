@@ -11,7 +11,7 @@ public enum RecordShareCard {
         let isReps = line.kind == .repsAtWeight
         let value = isReps
             ? String(localized: "\(Int(line.value.rounded())) reps", bundle: .module)
-            : String(localized: "\(PulseFormat.decimal(line.value, maxFractionDigits: 1)) kg", bundle: .module)
+            : PulseUnits.current.weight(line.value, maxFractionDigits: 1)
         let label = switch line.kind {
         case .repsAtWeight: String(localized: "Répétitions", bundle: .module)
         case .maxWeight: String(localized: "Charge maximale", bundle: .module)
@@ -19,14 +19,15 @@ public enum RecordShareCard {
         }
         var metrics: [ShareCardMetric] = []
         if let weight = line.weightKg, weight > 0, let reps = line.reps {
-            let load = PulseFormat.decimal(weight, maxFractionDigits: 2)
+            let units = PulseUnits.current
+            let load = units.weightNumber(weight, maxFractionDigits: 2)
             metrics.append(ShareCardMetric(value: "\(load) × \(reps)", label: String(localized: "Série", bundle: .module),
-                                           caption: String(localized: "\(load) kg × \(reps)", bundle: .module)))
+                                           caption: String(localized: "\(load) \(units.weightSymbol) × \(reps)", bundle: .module)))
         }
         if let gain = line.gain, gain > 0 {
             let text = isReps
                 ? String(localized: "+\(Int(gain.rounded())) reps", bundle: .module)
-                : String(localized: "+\(PulseFormat.decimal(gain, maxFractionDigits: 1)) kg", bundle: .module)
+                : "+" + PulseUnits.current.weight(gain, maxFractionDigits: 1)
             metrics.append(ShareCardMetric(value: text, label: String(localized: "Progression", bundle: .module), caption: text))
         }
         return ShareCardContent(
@@ -37,9 +38,7 @@ public enum RecordShareCard {
     /// Un meilleur temps de course : « 24:13 » sur 5 km, avec l'allure moyenne ; `nil` pour une distance jamais couverte.
     public static func run(_ best: RunBest, calendar: Calendar) -> ShareCardContent? {
         guard let seconds = best.seconds, seconds > 0, seconds.isFinite else { return nil }
-        let paceSeconds = Int((seconds / (best.distance.rawValue / 1_000)).rounded())
-        let rest = paceSeconds % 60
-        let pace = "\(paceSeconds / 60)'\(rest < 10 ? "0" : "")\(rest)\"/km"
+        let pace = PulseUnits.current.pace(secondsPerKilometer: seconds / (best.distance.rawValue / 1_000))
         return ShareCardContent(
             eyebrow: String(localized: "Record", bundle: .module), title: title(best.distance),
             subtitle: best.date.map { day($0, calendar: calendar) } ?? "",

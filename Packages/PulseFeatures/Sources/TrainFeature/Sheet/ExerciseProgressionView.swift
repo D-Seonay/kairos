@@ -52,14 +52,14 @@ struct ProgressionPane: View {
     }
 
     private var oneRepMaxText: String {
-        model.currentOneRepMax.map { "\(PulseFormat.decimal($0, maxFractionDigits: 1)) kg" } ?? "—"
+        model.currentOneRepMax.map { PulseUnits.current.weight($0, maxFractionDigits: 1) } ?? "—"
     }
 
     /// « +2,5 kg en 30 jours » ; rien sans séance d'il y a 30 jours ou plus.
     private var changeText: String? {
         guard let change = model.oneRepMaxChange30Days else { return nil }
         let sign = change > 0 ? "+" : (change < 0 ? "\u{2212}" : "")
-        return String(localized: "\(sign)\(PulseFormat.decimal(abs(change), maxFractionDigits: 1)) kg en 30 jours", bundle: .module)
+        return String(localized: "\(sign)\(PulseUnits.current.weight(abs(change), maxFractionDigits: 1)) en 30 jours", bundle: .module)
     }
 
     private var changeColor: Color {
@@ -177,7 +177,7 @@ private struct SessionLineRow: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             VStack(alignment: .trailing, spacing: 2) {
-                Text(verbatim: "\(tonnageText) kg")
+                Text(verbatim: "\(tonnageText) \(PulseUnits.current.weightSymbol)")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(PulsePalette.text)
                 if line.hasRecord {
@@ -192,7 +192,7 @@ private struct SessionLineRow: View {
     }
 
     private var tonnageText: String {
-        PulseFormat.grouped(line.tonnageKg, maxFractionDigits: 0)
+        PulseUnits.current.weightNumber(line.tonnageKg, maxFractionDigits: 0, grouped: true)
     }
 
     /// « 70 × 5 · 5 · RPE 8,5 ».

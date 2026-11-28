@@ -17,7 +17,9 @@ public final class CloudKitSyncMonitor: CloudSyncMonitoring, @unchecked Sendable
     /// `suiteName` nul : `UserDefaults.standard`. Sans `center`, aucun événement n'est observé (tests).
     public init(suiteName: String?, center: NotificationCenter? = .default) {
         defaults = suiteName.flatMap(UserDefaults.init(suiteName:)) ?? .standard
-        let stored = defaults.data(forKey: Self.defaultsKey).flatMap { try? JSONDecoder().decode(CloudSyncStatus.self, from: $0) }
+        let stored = defaults.data(forKey: Self.defaultsKey).flatMap { data in
+            logger.attempt("État de synchro illisible") { try JSONDecoder().decode(CloudSyncStatus.self, from: data) }
+        }
         state = OSAllocatedUnfairLock(initialState: stored ?? CloudSyncStatus())
         self.center = center
         observer = center?.addObserver(forName: NSPersistentCloudKitContainer.eventChangedNotification, object: nil,
@@ -43,7 +45,9 @@ public final class CloudKitSyncMonitor: CloudSyncMonitoring, @unchecked Sendable
             status.record(event)
             return status
         }
-        if let data = try? JSONEncoder().encode(status) { defaults.set(data, forKey: Self.defaultsKey) }
+        if let data = logger.attempt("État de synchro non encodé", { try JSONEncoder().encode(status) }) {
+            defaults.set(data, forKey: Self.defaultsKey)
+        }
     }
 
     /// Un événement fini ; `nil` tant qu'il tourne. Une mise en place réussie n'est pas une synchronisation : elle est ignorée.

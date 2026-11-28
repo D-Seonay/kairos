@@ -1,6 +1,16 @@
 {
   "sourceLanguage" : "fr",
   "strings" : {
+    "%@ × %lld" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ × %lld"
+          }
+        }
+      }
+    },
     "%@. Pas possible exactement avec tes disques" : {
       "localizations" : {
         "fr" : {
@@ -677,12 +687,12 @@
         }
       }
     },
-    "kg soulevés" : {
+    "%@ soulevés" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "kg soulevés"
+            "value" : "%@ soulevés"
           }
         }
       }

@@ -97,10 +97,11 @@ extension PhotoText {
 
     /// « −1,4 kg », « +1,3 kg », « 0 kg » : arrondi au dixième, signe moins U+2212.
     static func signedKilos(_ kilograms: Double) -> String {
-        let rounded = (kilograms * 10).rounded() / 10
+        let units = PulseUnits.current
+        let rounded = (units.displayedWeight(kilograms: kilograms) * 10).rounded() / 10
         let magnitude = PulseFormat.decimal(abs(rounded), maxFractionDigits: 1)
         let signed = rounded > 0 ? "+\(magnitude)" : rounded < 0 ? "\u{2212}\(magnitude)" : magnitude
-        return String(localized: "\(signed) kg", bundle: .module)
+        return "\(signed) \(units.weightSymbol)"
     }
 
     /// « Poids, tendance, moins 1,4 kilo », « …, plus 1,3 kilo », « …, 0 kilo ».

@@ -45,7 +45,8 @@ struct CSVFormat: @unchecked Sendable {
             var container = encoder.singleValueContainer()
             try container.encode(dates.string(from: date))
         }
-        return (try? encoder.encode(value)).flatMap { String(bytes: $0, encoding: .utf8) }
+        let data = logger.attempt("Export CSV : valeur JSON non encodée") { try encoder.encode(value) }
+        return data.flatMap { String(bytes: $0, encoding: .utf8) }
     }
 
     func calibration(_ state: CalibrationState) -> String {

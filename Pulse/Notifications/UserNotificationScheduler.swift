@@ -33,7 +33,7 @@ struct UserNotificationScheduler: NotificationScheduling, NotificationCanceling,
         content.sound = .default
         content.userInfo = [NotificationRouter.linkKey: AppLink.today.rawValue]
         let request = UNNotificationRequest(identifier: Self.morningScoreIdentifier, content: content, trigger: nil)
-        try? await UNUserNotificationCenter.current().add(request)
+        await UNUserNotificationCenter.current().addLogged(request)
     }
 
     func cancelMorningScore() async {
@@ -55,7 +55,7 @@ struct UserNotificationScheduler: NotificationScheduling, NotificationCanceling,
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: Self.restEndDelay(until: date, now: now()), repeats: false)
         let request = UNNotificationRequest(identifier: Self.restTimerIdentifier, content: Self.restEndContent(message),
                                             trigger: trigger)
-        try? await center.add(request)
+        await center.addLogged(request)
     }
 
     func cancelRestEnd() async {
@@ -99,7 +99,7 @@ struct UserNotificationScheduler: NotificationScheduling, NotificationCanceling,
             let request = UNNotificationRequest(identifier: Self.supplementIdentifier(reminder, calendar: calendar),
                                                 content: Self.supplementContent(reminder),
                                                 trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: false))
-            try? await center.add(request)
+            await center.addLogged(request)
         }
     }
 
@@ -138,7 +138,7 @@ struct UserNotificationScheduler: NotificationScheduling, NotificationCanceling,
             let request = UNNotificationRequest(identifier: Self.bedtimeIdentifier(reminder, calendar: calendar),
                                                 content: Self.bedtimeContent(reminder),
                                                 trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: false))
-            try? await center.add(request)
+            await center.addLogged(request)
         }
     }
 
@@ -168,7 +168,7 @@ struct UserNotificationScheduler: NotificationScheduling, NotificationCanceling,
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: Self.restEndDelay(until: date, now: now()), repeats: false)
         let request = UNNotificationRequest(identifier: Self.runForgottenIdentifier, content: Self.runForgottenContent(),
                                             trigger: trigger)
-        try? await center.add(request)
+        await center.addLogged(request)
     }
 
     func cancelForgotten() async {
@@ -200,7 +200,7 @@ struct UserNotificationScheduler: NotificationScheduling, NotificationCanceling,
             let components = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: date)
             let request = UNNotificationRequest(identifier: "\(Self.bodyPhotoPrefix)\(index)", content: Self.bodyPhotoContent(),
                                                 trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: false))
-            try? await center.add(request)
+            await center.addLogged(request)
         }
     }
 

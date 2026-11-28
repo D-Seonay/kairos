@@ -11,16 +11,6 @@
         }
       }
     },
-    "%@ kg" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ kg"
-          }
-        }
-      }
-    },
     "%@, %@" : {
       "localizations" : {
         "fr" : {

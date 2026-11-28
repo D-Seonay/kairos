@@ -21,26 +21,6 @@
         }
       }
     },
-    "%@ kg" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ kg"
-          }
-        }
-      }
-    },
-    "%@ km" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ km"
-          }
-        }
-      }
-    },
     "%@ vs 14 j" : {
       "localizations" : {
         "fr" : {

@@ -1,5 +1,6 @@
 import Foundation
 import PulseDesignSystem
+import PulseDomain
 import PulseServices
 
 /// Les formats français des cinq vues Stats : `PulseFormat` pour les nombres et les durées, les temps de course en plus.
@@ -60,7 +61,9 @@ enum StatsText {
     /// « 64,3 km ».
     static func kilometers(meters: Double) -> String {
         guard meters.isFinite, meters >= 0 else { return dash }
-        let km = (meters / 1000).formatted(.number.precision(.fractionLength(1)).locale(Locale(identifier: "fr_FR")))
-        return String(localized: "\(km) km", bundle: .module)
+        let units = PulseUnits.current
+        let distance = units.displayedDistance(meters: meters)
+            .formatted(.number.precision(.fractionLength(1)).locale(Locale(identifier: "fr_FR")))
+        return "\(distance) \(units.distanceSymbol)"
     }
 }

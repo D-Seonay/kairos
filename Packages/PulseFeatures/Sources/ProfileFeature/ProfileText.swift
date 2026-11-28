@@ -43,16 +43,17 @@ enum ProfileText {
     /// « 78,4 kg ».
     static func weight(_ kilograms: Double) -> String {
         guard kilograms.isFinite else { return dash }
-        return String(localized: "\(PulseFormat.decimal(kilograms, maxFractionDigits: 1)) kg", bundle: .module)
+        return PulseUnits.current.weight(kilograms, maxFractionDigits: 1)
     }
 
     /// « −0,8 kg en 30 j », « +1,3 kg en 30 j », « 0 kg en 30 j » : arrondi au dixième, signe moins U+2212.
     static func weightChange(_ kilograms: Double) -> String {
         guard kilograms.isFinite else { return dash }
-        let rounded = (kilograms * 10).rounded() / 10
+        let units = PulseUnits.current
+        let rounded = (units.displayedWeight(kilograms: kilograms) * 10).rounded() / 10
         let magnitude = PulseFormat.decimal(abs(rounded), maxFractionDigits: 1)
         let signed = rounded > 0 ? "+\(magnitude)" : rounded < 0 ? "\(minus)\(magnitude)" : magnitude
-        return String(localized: "\(signed) kg en 30 j", bundle: .module)
+        return String(localized: "\(signed) \(units.weightSymbol) en 30 j", bundle: .module)
     }
 
     /// « 17,5 % · 12 nov. ».

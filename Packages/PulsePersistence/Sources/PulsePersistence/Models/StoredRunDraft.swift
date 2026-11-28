@@ -39,7 +39,7 @@ public final class StoredRunDraft {
 
     /// L'en-tête (format en paquets) ou le brouillon entier (format d'avant la V9) ; `nil` s'il ne se relit plus.
     func decodedPayload() -> RunDraft? {
-        payload.flatMap { try? JSONDecoder().decode(RunDraft.self, from: $0) }
+        payload.flatMap { data in logger.attempt("Brouillon de course illisible") { try JSONDecoder().decode(RunDraft.self, from: data) } }
     }
 }
 

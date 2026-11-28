@@ -38,7 +38,7 @@ extension HealthKitReader: HealthSampleSource, HealthWorkoutSource, HealthBodySo
     }
 
     private func biologicalSex() -> Sex? {
-        guard let sex = try? store.biologicalSex().biologicalSex else { return nil }
+        guard let sex = logger.attempt("Lecture du sexe en échec", { try store.biologicalSex().biologicalSex }) else { return nil }
         switch sex {
         case .female: return .female
         case .male: return .male
@@ -49,7 +49,9 @@ extension HealthKitReader: HealthSampleSource, HealthWorkoutSource, HealthBodySo
     }
 
     private func birthDate() -> Date? {
-        guard let components = try? store.dateOfBirthComponents() else { return nil }
+        guard let components = logger.attempt("Lecture de la date de naissance en échec", { try store.dateOfBirthComponents() }) else {
+            return nil
+        }
         return (components.calendar ?? Calendar(identifier: .gregorian)).date(from: components)
     }
 
@@ -59,8 +61,12 @@ extension HealthKitReader: HealthSampleSource, HealthWorkoutSource, HealthBodySo
             sortDescriptors: [SortDescriptor(\.endDate, order: .reverse)],
             limit: 1
         )
-        guard let sample = try? await descriptor.result(for: store).first else { return nil }
-        return sample.quantity.doubleValue(for: unit)
+        do {
+            return try await descriptor.result(for: store).first?.quantity.doubleValue(for: unit)
+        } catch {
+            logger.failure("Lecture de la dernière mesure en échec", error)
+            return nil
+        }
     }
 
     // MARK: - Lectures ancrées
@@ -172,6 +178,9 @@ extension HealthKitReader: HealthSampleSource, HealthWorkoutSource, HealthBodySo
 
     /// Une ancre illisible vaut une ancre absente : la lecture repart de zéro.
     private static func decodedAnchor(_ data: Data) -> HKQueryAnchor? {
-        try? NSKeyedUnarchiver.unarchivedObject(ofClass: HKQueryAnchor.self, from: data)
+        let anchor = logger.attempt("Ancre Apple Santé illisible") {
+            try NSKeyedUnarchiver.unarchivedObject(ofClass: HKQueryAnchor.self, from: data)
+        }
+        return anchor ?? nil
     }
 }

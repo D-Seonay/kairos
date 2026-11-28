@@ -8,7 +8,11 @@ import PulseLiveActivity
 /// sans activité.
 struct RunActivityController: RunActivityControlling {
     func start(_ state: RunActivityState) async {
-        _ = try? Activity.request(attributes: Self.attributes(for: state), content: Self.content(for: state))
+        do {
+            _ = try Activity.request(attributes: Self.attributes(for: state), content: Self.content(for: state))
+        } catch {
+            logger.failure("Live Activity de la course refusée", error)
+        }
     }
 
     /// Met à jour l'activité de la course ; sans elle (fermée par l'utilisateur ou par le système), rien.

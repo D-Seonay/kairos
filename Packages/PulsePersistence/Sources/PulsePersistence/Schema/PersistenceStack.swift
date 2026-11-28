@@ -1,5 +1,6 @@
 import Foundation
 import os
+import PulseDomain
 import SwiftData
 
 /// Où vivent les données : iCloud, fichier local seul, ou mémoire (tests).
@@ -65,12 +66,10 @@ public enum PersistenceStack {
         do {
             try DayKeyRepair.run(in: ModelContext(container), calendar: .autoupdatingCurrent, now: Date())
         } catch {
-            logger.error("Réparation des jours civils impossible : \(String(describing: error), privacy: .public)")
+            logger.failure("Réparation des jours civils impossible", error)
         }
         return container
     }
-
-    private static let logger = Logger(subsystem: "fr.seonay.pulse", category: "persistence")
 
     private static func storeDirectory() throws -> URL {
         let directory = URL.applicationSupportDirectory.appending(path: "Pulse", directoryHint: .isDirectory)

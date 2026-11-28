@@ -91,6 +91,7 @@ public struct SwiftDataExporter: DataExporter {
 
     /// Le dossier CSV du dernier export, s'il existe encore (tests et inspection).
     public func lastCSVDirectory(in directory: URL) -> URL? {
+        // swiftlint:disable:next silent_try - tests et inspection : dossier absent, aucun export
         let entries = (try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)) ?? []
         return entries.first { $0.hasDirectoryPath && $0.lastPathComponent.hasSuffix("-csv") }
     }

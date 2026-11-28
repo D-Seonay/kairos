@@ -1,6 +1,7 @@
 import Charts
 import Foundation
 import PulseDesignSystem
+import PulseDomain
 import PulseRecoveryEngine
 import PulseServices
 import SwiftUI
@@ -312,7 +313,8 @@ private struct LoadTotalsCard: View {
                             spoken: StatsText.durationSpoken(minutes: totals.minutes)))
         }
         if totals.tonnageKg > 0 {
-            rows.append(Row(label: String(localized: "Tonnage", bundle: .module), value: "\(StatsText.number(totals.tonnageKg)) kg",
+            rows.append(Row(label: String(localized: "Tonnage", bundle: .module),
+                            value: PulseUnits.current.weight(totals.tonnageKg, maxFractionDigits: 0, grouped: true),
                             spoken: PulseSpoken.kilos(totals.tonnageKg.rounded())))
         }
         if totals.runMeters > 0 {

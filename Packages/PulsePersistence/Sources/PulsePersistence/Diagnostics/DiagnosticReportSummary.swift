@@ -43,6 +43,7 @@ public struct DiagnosticReportSummary: Sendable, Equatable {
     /// `nil` quand les octets ne sont pas un objet JSON. Une clé absente ou d'un type inattendu compte pour rien : le format de
     /// MetricKit peut gagner des champs d'une version d'iOS à l'autre.
     public init?(json: Data) {
+        // swiftlint:disable:next silent_try - un rapport illisible rend nil, contrat de init(json:)
         guard let root = (try? JSONSerialization.jsonObject(with: json)) as? [String: Any] else { return nil }
         let crashes = Self.diagnostics(root["crashDiagnostics"])
         let hangs = Self.diagnostics(root["hangDiagnostics"])
@@ -96,6 +97,7 @@ public struct DiagnosticReportSummary: Sendable, Equatable {
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         if let date = formatter.date(from: text) { return date }
+        // swiftlint:disable:next silent_try - date facultative du rapport, nil attendu
         return try? Date(text, strategy: .iso8601)
     }
 }

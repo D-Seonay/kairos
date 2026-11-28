@@ -9,7 +9,9 @@ public enum DiagnosticReportSanitizer {
 
     /// Le rapport nettoyé, en JSON trié et indenté pour être lisible une fois partagé ; `nil` si ce n'est pas un objet JSON.
     public static func sanitized(_ json: Data) -> Data? {
+        // swiftlint:disable:next silent_try - un rapport illisible rend nil, contrat de clean(json:)
         guard let root = (try? JSONSerialization.jsonObject(with: json)) as? [String: Any] else { return nil }
+        // swiftlint:disable:next silent_try - un rapport illisible rend nil, contrat de clean(json:)
         return try? JSONSerialization.data(withJSONObject: clean(root), options: [.prettyPrinted, .sortedKeys])
     }
 

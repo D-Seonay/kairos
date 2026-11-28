@@ -43,23 +43,43 @@ public final class HealthWorkoutExporter: Sendable {
                                                              calendar: calendar)
         let entry = StrengthWorkoutEntry(sessionID: session.id, start: session.startedAt, end: endedAt,
                                          energyKcal: Self.energyKcal(weightKg: weightKg, from: session.startedAt, to: endedAt))
-        guard let id = try? await writer.save(entry) else { return session }
+        let id: UUID
+        do {
+            id = try await writer.save(entry)
+        } catch {
+            logger.failure("Séance non écrite dans Apple Santé", error)
+            return session
+        }
         var written = session
         written.healthKitUUID = id.uuidString
         do {
             try await workouts.save(written)
         } catch {
             // Sans identifiant enregistré, l'entraînement ne pourrait plus être supprimé avec la séance : on le retire.
-            try? await writer.deleteWorkout(id: id)
+            logger.failure("Identifiant Apple Santé de la séance non enregistré", error)
+            await removeWorkout(id: id)
             return session
         }
-        return (try? await workouts.session(id: session.id)) ?? written
+        do {
+            return try await workouts.session(id: session.id) ?? written
+        } catch {
+            logger.failure("Séance écrite non relue", error)
+            return written
+        }
     }
 
     /// Supprime l'entraînement Apple Santé de la séance, s'il y en a un. Un échec est ignoré : la séance reste supprimée.
     public func removeWorkout(of session: WorkoutSession) async {
         guard let id = session.healthKitUUID.flatMap(UUID.init(uuidString:)) else { return }
-        try? await writer.deleteWorkout(id: id)
+        await removeWorkout(id: id)
+    }
+
+    private func removeWorkout(id: UUID) async {
+        do {
+            try await writer.deleteWorkout(id: id)
+        } catch {
+            logger.failure("Entraînement Apple Santé non supprimé", error)
+        }
     }
 
     /// Une séance Pulse terminée, avec une fin, pas encore écrite.

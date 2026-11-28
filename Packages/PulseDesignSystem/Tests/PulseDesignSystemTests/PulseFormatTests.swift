@@ -1,3 +1,4 @@
+import PulseDomain
 import Testing
 
 @testable import PulseDesignSystem
@@ -57,4 +58,23 @@ import Testing
 @Test func nonFiniteDecimalsShowADash() {
     #expect(PulseFormat.decimal(.nan, maxFractionDigits: 1) == "\u{2014}")
     #expect(PulseFormat.decimal(.infinity, maxFractionDigits: 1) == "\u{2014}")
+}
+
+/// `PulseUnits` (PulseDomain) reprend le format des nombres de `PulseFormat` : en kilos et en kilomètres, les textes ne
+/// changent pas.
+@Suite("Unités par défaut au format de PulseFormat")
+struct PulseUnitsMatchPulseFormatTests {
+    private let units = PulseUnits(weightUnit: .kg, measurementSystem: .metric)
+
+    @Test("poids et distance identiques à decimal et grouped", arguments: [0, 1.25, 2.5, 62.5, 78.44, 1_240, 12_450.5, 105_000])
+    func sameNumbers(value: Double) {
+        for digits in 0...2 {
+            #expect(units.weightNumber(value, maxFractionDigits: digits) == PulseFormat.decimal(value, maxFractionDigits: digits))
+            #expect(units.weightNumber(value, maxFractionDigits: digits, grouped: true)
+                    == PulseFormat.grouped(value, maxFractionDigits: digits))
+            #expect(units.distanceNumber(kilometres: value, maxFractionDigits: digits)
+                    == PulseFormat.decimal(value, maxFractionDigits: digits))
+            #expect(units.weight(value, maxFractionDigits: digits) == "\(PulseFormat.decimal(value, maxFractionDigits: digits)) kg")
+        }
+    }
 }

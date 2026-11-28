@@ -33,7 +33,11 @@ public final class HealthKitWorkoutWriter: WorkoutHealthWriting, HealthErasing, 
     public func requestWriteAccess() async -> HealthWriteAccess {
         guard HKHealthStore.isHealthDataAvailable() else { return .unavailable }
         // Une demande refusée ou interrompue n'empêche rien : l'état relu dit ce qui est permis.
-        try? await store.requestAuthorization(toShare: Self.shared, read: [])
+        do {
+            try await store.requestAuthorization(toShare: Self.shared, read: [])
+        } catch {
+            logger.failure("Demande d'écriture Apple Santé en échec", error)
+        }
         return await writeAccess()
     }
 

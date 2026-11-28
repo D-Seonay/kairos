@@ -9,6 +9,10 @@ struct DiagnosticReportsEraser: DataEraser {
 
     func eraseEverything(options: EraseOptions) async throws {
         try await inner.eraseEverything(options: options)
-        try? await reports.removeAll()
+        do {
+            try await reports.removeAll()
+        } catch {
+            logger.failure("Rapports de diagnostic non effacés", error)
+        }
     }
 }

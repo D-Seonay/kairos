@@ -1,4 +1,5 @@
 import Foundation
+import PulseDomain
 
 /// Les choix de correspondance retenus aux imports Hevy précédents, par nom d'exercice de l'export.
 public protocol HevyMappingStore: Sendable {
@@ -24,11 +25,14 @@ public final class UserDefaultsHevyMappingStore: HevyMappingStore {
     /// Des choix illisibles valent une table vide : l'import repropose alors ses correspondances.
     public func load() -> [String: HevyMappingChoice] {
         guard let data = defaults.data(forKey: Self.key) else { return [:] }
-        return (try? JSONDecoder().decode([String: HevyMappingChoice].self, from: data)) ?? [:]
+        let choices = logger.attempt("Correspondances Hevy illisibles") {
+            try JSONDecoder().decode([String: HevyMappingChoice].self, from: data)
+        }
+        return choices ?? [:]
     }
 
     public func save(_ choices: [String: HevyMappingChoice]) {
-        guard let data = try? JSONEncoder().encode(choices) else { return }
+        guard let data = logger.attempt("Correspondances Hevy non encodées", { try JSONEncoder().encode(choices) }) else { return }
         defaults.set(data, forKey: Self.key)
     }
 }

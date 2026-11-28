@@ -11,6 +11,16 @@
         }
       }
     },
+    "%@ : %@ %@, nouveau record de charge": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : %@ %@, nouveau record de charge"
+          }
+        }
+      }
+    },
     "%@ : %@ au poids du corps, nouveau record": {
       "localizations": {
         "fr": {
@@ -51,6 +61,16 @@
         }
       }
     },
+    "%@ : %@ à %@ %@, nouveau record": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : %@ à %@ %@, nouveau record"
+          }
+        }
+      }
+    },
     "%@ : %@ à %@ kg, nouveau record": {
       "localizations": {
         "fr": {
@@ -77,6 +97,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ : %@, nouveau record de charge"
+          }
+        }
+      }
+    },
+    "%@ : 1RM estimé %@ %@, nouveau record": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : 1RM estimé %@ %@, nouveau record"
           }
         }
       }

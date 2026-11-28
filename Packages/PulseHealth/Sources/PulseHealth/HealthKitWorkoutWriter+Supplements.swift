@@ -37,7 +37,11 @@ extension HealthKitWorkoutWriter: SupplementHealthWriting {
 
     public func requestSupplementWriteAccess() async -> HealthWriteAccess {
         guard HKHealthStore.isHealthDataAvailable() else { return .unavailable }
-        try? await store.requestAuthorization(toShare: Self.supplementTypes, read: [])
+        do {
+            try await store.requestAuthorization(toShare: Self.supplementTypes, read: [])
+        } catch {
+            logger.failure("Demande d'écriture des compléments en échec", error)
+        }
         return await supplementWriteAccess()
     }
 

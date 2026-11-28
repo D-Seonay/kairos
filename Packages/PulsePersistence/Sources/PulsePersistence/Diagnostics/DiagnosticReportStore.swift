@@ -1,4 +1,5 @@
 import Foundation
+import PulseDomain
 
 /// Un rapport de diagnostic gardé sur l'iPhone : son fichier JSON, tel que MetricKit l'a livré, et ce qu'il raconte.
 public struct DiagnosticReport: Sendable, Equatable, Identifiable {
@@ -58,6 +59,7 @@ public actor DiagnosticReportStore {
     /// Les rapports gardés, du plus récent au plus ancien. Un fichier illisible est passé.
     public func reports() -> [DiagnosticReport] {
         reportFiles().prefix(limit).compactMap { url in
+            // swiftlint:disable:next silent_try - un fichier illisible est passé (documenté)
             guard let data = try? Data(contentsOf: url), let summary = DiagnosticReportSummary(json: data),
                   let receivedAt = Self.receivedAt(of: url) else { return nil }
             return DiagnosticReport(fileURL: url, receivedAt: receivedAt, summary: summary)
@@ -80,17 +82,23 @@ public actor DiagnosticReportStore {
         guard files.count > limit else { return }
         // `files` va du plus récent au plus ancien : un tri stable par rang garde cet ordre dans chaque rang.
         let ranked = files.map { url -> (url: URL, rank: Int) in
+            // swiftlint:disable:next silent_try - un fichier illisible part en premier (documenté)
             let summary = (try? Data(contentsOf: url)).flatMap(DiagnosticReportSummary.init(json:))
             return (url, summary.map { $0.crashes > 0 ? 0 : 1 } ?? 2)
         }
         let kept = Set([0, 1, 2].flatMap { rank in ranked.filter { $0.rank == rank }.map(\.url) }.prefix(limit))
         for url in files where !kept.contains(url) {
-            try? FileManager.default.removeItem(at: url)
+            do {
+                try FileManager.default.removeItem(at: url)
+            } catch {
+                logger.failure("Rapport de diagnostic non supprimé", error)
+            }
         }
     }
 
     /// Les fichiers de rapport du dossier, du plus récent au plus ancien (ordre inverse des noms).
     private func reportFiles() -> [URL] {
+        // swiftlint:disable:next silent_try - dossier absent tant qu'aucun rapport n'est arrivé
         let names = (try? FileManager.default.contentsOfDirectory(atPath: directory.path)) ?? []
         return names
             .filter { $0.hasPrefix(Self.prefix) && $0.hasSuffix(Self.suffix) }

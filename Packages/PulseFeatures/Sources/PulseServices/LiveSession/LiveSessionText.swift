@@ -12,6 +12,11 @@ enum LiveSessionText {
         value.formatted(.number.locale(french).grouping(.never).precision(.fractionLength(0...2)))
     }
 
+    /// Un poids en kilos, écrit dans l'unité affichée, sans symbole : 72.5 → « 72,5 ».
+    static func weight(_ kilograms: Double) -> String {
+        decimal(PulseUnits.current.displayedWeight(kilograms: kilograms))
+    }
+
     /// 105 → « 1:45 ».
     static func clock(seconds: Int) -> String {
         let total = max(0, seconds)
@@ -148,11 +153,11 @@ enum LiveSessionText {
     static func planned(_ set: LiveSet, of exercise: LiveExercise) -> String? {
         let weightKg = set.weightKg ?? 0
         let weight: String? = switch exercise.loadKind {
-        case .external: set.weightKg.map(decimal)
-        case .bodyweight: weightKg > 0 ? "+" + decimal(weightKg) : nil
-        case .assisted: weightKg > 0 ? "−" + decimal(weightKg) : nil
+        case .external: set.weightKg.map(weight)
+        case .bodyweight: weightKg > 0 ? "+" + weight(weightKg) : nil
+        case .assisted: weightKg > 0 ? "−" + weight(weightKg) : nil
         }
-        let load = weight.map { String(localized: "\($0) kg", bundle: .module) }
+        let load = weight.map { "\($0) \(PulseUnits.current.weightSymbol)" }
         let value: String? = exercise.tracksDuration
             ? set.durationSeconds.map { String(localized: "\($0) s", bundle: .module) }
             : set.reps.map { "\($0)" }

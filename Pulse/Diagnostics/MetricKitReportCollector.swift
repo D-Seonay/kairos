@@ -1,5 +1,6 @@
 import Foundation
 import MetricKit
+import PulseDomain
 import PulsePersistence
 import UIKit
 
@@ -34,7 +35,11 @@ final class MetricKitReportCollector: NSObject, MXMetricManagerSubscriber, Senda
             let background = BackgroundTask(name: "Rapports MetricKit")
             for json in reports {
                 // Un rapport qui ne s'écrit pas (disque plein) est perdu : ce n'est qu'un diagnostic.
-                _ = try? await store.save(json)
+                do {
+                    _ = try await store.save(json)
+                } catch {
+                    logger.failure("Rapport MetricKit non enregistré", error)
+                }
             }
             background.end()
         }

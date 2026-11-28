@@ -1,5 +1,6 @@
 import Foundation
 import PulseDesignSystem
+import PulseDomain
 import PulseServices
 
 extension RecapModel {
@@ -14,9 +15,10 @@ extension RecapModel {
                                        label: String(localized: "Durée", bundle: .module),
                                        caption: PulseFormat.duration(minutes: recap.durationMinutes))]
         if recap.tonnageKg > 0 {
-            let tonnage = PulseFormat.grouped(recap.tonnageKg, maxFractionDigits: 1)
-            metrics.append(ShareCardMetric(value: tonnage, label: String(localized: "kg soulevés", bundle: .module),
-                                           caption: String(localized: "\(tonnage) kg", bundle: .module)))
+            let units = PulseUnits.current
+            let tonnage = units.weightNumber(recap.tonnageKg, maxFractionDigits: 1, grouped: true)
+            metrics.append(ShareCardMetric(value: tonnage, label: String(localized: "\(units.weightSymbol) soulevés", bundle: .module),
+                                           caption: "\(tonnage) \(units.weightSymbol)"))
         }
         metrics.append(ShareCardMetric(value: "\(recap.workingSets)", label: String(localized: "Séries", bundle: .module),
                                        caption: RecapView.setsText(recap.workingSets)))
