@@ -31,7 +31,8 @@ public final class DailyScoreService: Sendable {
     }
 
     /// Enregistre le check-in. Sans score mesuré, il produit un score estimé, remplacé par un score mesuré avant midi ; avec un
-    /// score mesuré, il s'y ajoute comme léger modificateur (`FeelingAdjustment`). Refusé une fois le jour figé.
+    /// score mesuré, il s'y ajoute comme léger modificateur (`FeelingAdjustment`), jusqu'à midi. Refusé une fois le jour figé, et
+    /// pour un score mesuré dès midi, même si aucune passe ne l'a encore figé : rien n'est alors enregistré.
     public func saveCheckIn(_ answers: CheckInAnswers, plannedDay: PlannedDay?, now: Date) async throws -> DailyRecovery {
         try await queue.run { try await self.estimate(answers, plannedDay: plannedDay, now: now) }
     }
@@ -105,7 +106,8 @@ public final class DailyScoreService: Sendable {
     private func estimate(_ answers: CheckInAnswers, plannedDay: PlannedDay?, now: Date) async throws -> DailyRecovery {
         let day = calendar.startOfDay(for: now)
         let existing = try await stored(on: day)
-        if existing?.frozenAt != nil {
+        let isAfterFreeze = calendar.component(.hour, from: now) >= Self.freezeHour
+        if existing?.frozenAt != nil || (isAfterFreeze && existing?.isEstimated == false) {
             throw DailyScoreError.frozen
         }
         let score = CheckInScorer.score(answers)
@@ -119,7 +121,7 @@ public final class DailyScoreService: Sendable {
             id: existing?.id ?? UUID(), day: day, score: score, category: category, isEstimated: true,
             missingFactors: Factor.allCases, calibration: .calibrating(nights: 0),
             adjustments: Self.adjustments(for: plannedDay, category: category, keeping: existing),
-            frozenAt: calendar.component(.hour, from: now) >= Self.freezeHour ? now : nil,
+            frozenAt: isAfterFreeze ? now : nil,
             originalSessionChosen: existing?.originalSessionChosen,
             createdAt: existing?.createdAt ?? now, updatedAt: now)
         try await recovery.save(estimated)

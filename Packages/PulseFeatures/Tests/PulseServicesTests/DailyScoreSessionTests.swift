@@ -69,6 +69,21 @@ struct DailyScoreSessionTests: DailyScoreTesting {
         #expect(recomputed.category == adjusted.category)
     }
 
+    /// À 12 h 30, avant qu'une passe ait figé le jour, le ressenti ne se glisse plus dans le score mesuré : midi est passé.
+    @Test func aFeelingAfterNoonIsRefusedOnAMeasuredScore() async throws {
+        let fixture = fixture()
+        let now = TestClock.date("2026-11-02T08:00")
+        let measured = try scored(try await fixture.service.update(nights: await nights(.goodNight, at: now), now: now))
+        await #expect(throws: DailyScoreError.frozen) {
+            try await fixture.service.saveCheckIn(CheckInAnswers(sleep: 0, pain: 0, motivation: 0),
+                                                  now: TestClock.date("2026-11-02T12:30"))
+        }
+        #expect(try await records(fixture, on: "2026-11-02T00:00") == [measured])
+        let day = TestClock.date("2026-11-02T00:00")
+        #expect(try await fixture.repository.checkIns(from: day, to: TestClock.date("2026-11-03T00:00")).isEmpty,
+                "Le ressenti refusé n'est pas enregistré : la passe de midi ne le reprend pas")
+    }
+
     /// Le ressenti peut alléger la séance (catégorie plus basse), jamais la durcir.
     @Test func feelingWorseCanLightenTheSession() async throws {
         let fixture = fixture()
