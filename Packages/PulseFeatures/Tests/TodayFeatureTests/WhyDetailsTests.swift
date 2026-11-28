@@ -28,11 +28,19 @@ struct WhyDetailsTests {
     }
 
     @Test func theAppleFallbackIsNamed() {
-        #expect(WhyDetails.restingHeartRate(.appleNearWake).hasPrefix("FC au repos : la valeur d'Apple Santé la plus proche"))
+        #expect(WhyDetails.restingHeartRate(.appleNearWake)
+            == "FC au repos : la valeur d'Apple Santé la plus proche de ton réveil, comparée à celle de tes 7 nuits d'avant.")
     }
 
     @Test func noDebtIsSaid() {
-        #expect(WhyDetails.sleepDebt(minutes: 0) == "Pas de dette de sommeil sur 7 nuits : elle compte pour 30 % du sommeil.")
+        #expect(WhyDetails.sleepDebt(minutes: 0) == "La dette de sommeil (30 % du sommeil) est nulle sur 7 nuits.")
+    }
+
+    /// Mesuré 58, ressenti à 53,75 : −0,4 point, arrondi à 0. Ni « de plus » ni « de moins ».
+    @Test func aFeelingThatRoundsToZeroSaysNoPoint() {
+        let checkIn = WhyFixture.checkIn(sleep: 3, pain: 2, motivation: 1, score: 53.75)
+        #expect(WhyDetails.feeling(recovery: WhyFixture.recovery(), checkIn: checkIn)
+            == "Ressenti du matin : aucun point, le score reste à 58 (± 5 au plus).")
     }
 
     @Test func missingFactorsAndEstimatedScoresSayNothing() {

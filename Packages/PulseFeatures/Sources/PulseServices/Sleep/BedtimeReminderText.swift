@@ -19,9 +19,9 @@ public enum BedtimeReminderText {
         let goal = duration(minutes: goalMinutes)
         if let debt = debtMinutes.map(duration(minutes:)) {
             guard let sessionName else {
-                return String(localized: "\(debt) de retard sur 7 jours : vise tes \(goal) cette nuit.", bundle: .module)
+                return String(localized: "\(debt) de retard sur 7 nuits : vise tes \(goal) cette nuit.", bundle: .module)
             }
-            return String(localized: "\(debt) de retard sur 7 jours et séance \(sessionName) demain : vise tes \(goal).", bundle: .module)
+            return String(localized: "\(debt) de retard sur 7 nuits et séance \(sessionName) demain : vise tes \(goal).", bundle: .module)
         }
         switch (shortNightMinutes.map(duration(minutes:)), sessionName) {
         case let (short?, session?):

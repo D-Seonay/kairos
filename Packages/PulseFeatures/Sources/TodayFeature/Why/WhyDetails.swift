@@ -46,7 +46,7 @@ enum WhyDetails {
             String(localized: "FC au repos : la plus basse de ta nuit, comparée à celle de tes 7 nuits d'avant.", bundle: .module)
         case .appleNearWake:
             String(localized: """
-                FC au repos : la valeur d'Apple Santé la plus proche de ton réveil, faute d'assez de mesures pendant ton sommeil.
+                FC au repos : la valeur d'Apple Santé la plus proche de ton réveil, comparée à celle de tes 7 nuits d'avant.
                 """, bundle: .module)
         }
     }
@@ -55,13 +55,14 @@ enum WhyDetails {
     static func sleepDebt(minutes: Int) -> String {
         let share = Int((SleepDebt.shareOfSleepFactor * 100).rounded())
         guard minutes > 0 else {
-            return String(localized: "Pas de dette de sommeil sur 7 nuits : elle compte pour \(share) % du sommeil.", bundle: .module)
+            return String(localized: "La dette de sommeil (\(share) % du sommeil) est nulle sur 7 nuits.", bundle: .module)
         }
         let debt = PulseFormat.duration(minutes: minutes)
         return String(localized: "Dette de sommeil : \(debt) sur 7 nuits, qui compte pour \(share) % du sommeil.", bundle: .module)
     }
 
-    /// « Ressenti du matin : −2 points → 56 » ; à part de la formule, qui reste celle de la mesure. `nil` sans ressenti.
+    /// « Ressenti du matin : −2 → 56 » ; à part de la formule, qui reste celle de la mesure. La forme suit le signe des points
+    /// affichés, arrondis : −0,4 dit « aucun point ». `nil` sans ressenti.
     static func feeling(recovery: DailyRecovery, checkIn: CheckIn?) -> String? {
         guard let feeling = recovery.feeling(checkIn) else { return nil }
         let points = WhyContent.rounded(feeling.points)
@@ -69,8 +70,7 @@ enum WhyDetails {
         let cap = Int(FeelingAdjustment.cap)
         switch points {
         case 0:
-            return String(localized: "Ressenti du matin : aucun point de plus, le score reste dans sa catégorie (± \(cap) au plus).",
-                          bundle: .module)
+            return String(localized: "Ressenti du matin : aucun point, le score reste à \(score) (± \(cap) au plus).", bundle: .module)
         case let positive where positive > 0:
             return String(localized: "Ressenti du matin : +\(positive) → \(score) (± \(cap) au plus).", bundle: .module)
         case let negative:

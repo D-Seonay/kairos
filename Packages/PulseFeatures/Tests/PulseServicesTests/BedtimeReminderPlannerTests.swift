@@ -30,9 +30,9 @@ struct BedtimeReminderPlannerTests {
     /// À partir d'une heure, le rappel du soir parle de la dette des 7 nuits plutôt que de la nuit d'hier (#117).
     @Test func aSleepDebtOfAnHourOrMoreIsMentioned() {
         let withSession = reminders(lastNight: 370, debts: ["2026-11-20": 220], sessions: ["2026-11-21": "Push"])
-        #expect(withSession.first?.body == "3 h 40 de retard sur 7 jours et séance Push demain : vise tes 8 h.")
+        #expect(withSession.first?.body == "3 h 40 de retard sur 7 nuits et séance Push demain : vise tes 8 h.")
         let alone = reminders(lastNight: 370, debts: ["2026-11-20": 220])
-        #expect(alone.first?.body == "3 h 40 de retard sur 7 jours : vise tes 8 h cette nuit.")
+        #expect(alone.first?.body == "3 h 40 de retard sur 7 nuits : vise tes 8 h cette nuit.")
     }
 
     @Test func aSmallSleepDebtKeepsTheShortNightText() {
