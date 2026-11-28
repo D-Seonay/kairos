@@ -107,6 +107,24 @@ struct LoadDropRuleTests {
         #expect(LoadDropRule.lower(20, factor: 0.8, incrementKg: 2.5, rounding: bar) == 20)
     }
 
+    @Test func aSmallLoadNeverDropsToZeroNorByFarMoreThanTheRule() {
+        // Un haltère de 2 kg au pas de 2 kg, une machine à 5 kg au pas de 5 kg : jamais 0 kg.
+        #expect(LoadDropRule.lower(2, factor: 0.8, incrementKg: 2, rounding: .increment) == 2)
+        #expect(LoadDropRule.lower(5, factor: 0.85, incrementKg: 5, rounding: .increment) == 5)
+        // 4 kg → 2 kg, ce serait −50 % pour une règle à −5 % : la charge reste.
+        #expect(LoadDropRule.lower(4, factor: 0.95, incrementKg: 2, rounding: .increment) == 4)
+        // Un cran d'au plus deux fois la baisse voulue passe : 10 kg −20 % au pas de 2,5 → 7,5 kg.
+        #expect(LoadDropRule.lower(10, factor: 0.8, incrementKg: 2.5, rounding: .increment) == 7.5)
+        // 2,5 kg sous le pas de 2,5 kg après une pause de six semaines : jamais sous la plus petite charge.
+        #expect(LoadDropRule.lower(2.5, factor: 0.8, incrementKg: 2.5, rounding: .increment) == 2.5)
+    }
+
+    @Test func aSmallLoadThatCannotDropGivesNoLoweredSets() throws {
+        let layoff = try #require(drop(days: 20))
+        #expect(LoadDropRule.lowered([ProposedSet(weightKg: 4, reps: 10)], lastSets: [done(4, 10)], exercise: routine(sets: 1),
+                                     tracksDuration: false, drop: layoff, incrementKg: 2, rounding: .increment) == nil)
+    }
+
     @Test func theLoweredSetsStartFromLastTimeAtTheBottomOfTheRange() throws {
         let layoff = try #require(drop(days: 45))
         let last = [done(100, 12), done(100, 10)]

@@ -102,13 +102,26 @@ public enum LoadDropRule {
         return (checked, missed)
     }
 
-    /// `weightKg` baissé de `factor`, arrondi à la charge faisable la plus proche, et toujours au moins un cran plus bas ;
-    /// inchangé quand rien ne descend plus (la barre seule, une charge nulle).
+    /// Une baisse de plus de deux fois celle voulue n'est pas proposée : 4 kg → 2 kg ferait −50 % pour une règle à −5 %.
+    static let maximumCutRatio = 2.0
+
+    /// `weightKg` baissé de `factor`, arrondi à la charge faisable la plus proche, et au moins un cran plus bas. Inchangé quand
+    /// rien ne descend plus : la barre seule, une charge nulle, la plus petite charge de l'appareil (jamais 0 kg), ou un cran
+    /// de plus de deux fois la baisse voulue (un petit haltère au pas de 2 kg).
     public static func lower(_ weightKg: Double, factor: Double, incrementKg: Double, rounding: WeightRounding) -> Double {
         let nearest = PlateRounding.nearestLoad(weightKg * factor, increment: incrementKg, rounding: rounding)
-        if nearest < weightKg { return nearest }
-        let step = PlateRounding.floorLoad(weightKg - max(incrementKg, 0.01), increment: incrementKg, rounding: rounding)
-        return step < weightKg && step >= 0 ? step : weightKg
+        let candidate = nearest < weightKg ? nearest
+            : PlateRounding.floorLoad(weightKg - max(incrementKg, 0.01), increment: incrementKg, rounding: rounding)
+        let intendedCut = weightKg * (1 - factor)
+        guard candidate < weightKg, candidate >= smallestLoad(incrementKg: incrementKg, rounding: rounding),
+              weightKg - candidate <= maximumCutRatio * intendedCut + 1e-9 else { return weightKg }
+        return candidate
+    }
+
+    /// La plus petite charge qui se règle : la barre seule, sinon un cran ; jamais 0 kg.
+    private static func smallestLoad(incrementKg: Double, rounding: WeightRounding) -> Double {
+        if case .plates(let barKg, _) = rounding, barKg > 0 { return barKg }
+        return max(incrementKg, 0.01)
     }
 
     // swiftlint:disable function_parameter_count
