@@ -42,7 +42,7 @@ extension AppDependencies {
         TodayEnvironment(refresher: refresher, workouts: workouts, userExercises: userExercises, exerciseSettings: exerciseSettings,
                          activeSession: liveSession, library: content, calendar: calendar, now: now,
                          nights: NightDetailService(cache: healthCache, profiles: profiles, calendar: calendar, now: now),
-                         healthAccess: healthAccess, activities: healthActivities)
+                         healthAccess: healthAccess, activities: healthActivities, checkInReminders: checkInReminders)
     }
 
     func trainEnvironment() -> TrainEnvironment {
@@ -84,7 +84,7 @@ extension AppDependencies {
             appVersion: Self.appVersion, privacyPolicyURL: Self.privacyPolicyURL, calendar: calendar, now: now,
             runPreferences: run.preferences, bodyPhotos: photos.body, ownerAuthentication: photos.ownerAuthentication,
             bodyPhotoLock: photos.bodyLock, bodyPhotoReminders: photos.reminders, train: trainEnvironment(),
-            sleepPlan: { await bedtime.plan() }, healthAccess: healthAccess)
+            sleepPlan: { await bedtime.plan() }, healthAccess: healthAccess, checkInReminders: checkInReminders)
     }
 
     /// La politique de confidentialité, lue dans l'Info.plist (`PulsePrivacyPolicyURL`) ; `nil` tant que la clé est vide ou

@@ -30,6 +30,8 @@ struct AppDependencies: Sendable {
     /// L'autorisation que l'écran en direct demande ; celle des tests d'interface est accordée, pour que l'avis « notifications
     /// désactivées » ne couvre pas l'écran.
     let liveSessionNotifications: any NotificationAuthorizing
+    /// Le rappel de check-in pour qui n'a pas de montre : replanifié avec les autres rappels et après un check-in.
+    let checkInReminders: CheckInReminderService
     let onboardingSteps: any OnboardingStepStore
     let now: @Sendable () -> Date
     let launch: LaunchOptions
@@ -262,7 +264,7 @@ struct AppDependencies: Sendable {
             now: wiring.now, health: healthExporter(wiring, workouts, profiles, bodyMeasurements), sessionPhotos: photos.sessionRepository)
         return AppDependencies(
             health: wiring.health, healthSource: wiring.healthSource, notifications: wiring.notifications,
-            liveSessionNotifications: wiring.liveSessionNotifications,
+            liveSessionNotifications: wiring.liveSessionNotifications, checkInReminders: checkIns(wiring, stores, refresher),
             onboardingSteps: UserDefaultsOnboardingStepStore(suiteName: wiring.defaultsSuite), now: wiring.now, launch: wiring.launch,
             calendar: calendar, content: content, container: container, storeMode: mode, storeError: error,
             profiles: profiles, programs: programs, userExercises: userExercises, workouts: workouts, scheduledDays: scheduledDays,

@@ -146,8 +146,8 @@ struct RunSettingsSection: View {
 
 // MARK: - Notifications
 
-/// Le score du matin et son heure plafond, les rappels de compléments, la fin de repos ; un lien vers les réglages d'iOS quand les
-/// notifications de Pulse y sont coupées.
+/// Le score du matin et son heure plafond, le rappel de check-in, les rappels de compléments, la fin de repos ; un lien vers les
+/// réglages d'iOS quand les notifications de Pulse y sont coupées.
 struct NotificationSettingsSection: View {
     /// De 6 h à 12 h, par demi-heure.
     static let deadlines = Array(stride(from: SettingsService.deadlineRange.lowerBound,
@@ -175,6 +175,7 @@ struct NotificationSettingsSection: View {
                     minutes: profile.morningScoreDeadlineMinutes ?? MorningNotificationRule.defaultDeadlineMinutes))
                 .frame(minHeight: 44)
             }
+            if let checkIn = model.checkInReminder { CheckInReminderRows(model: model, settings: checkIn) }
             SettingsToggle(title: String(localized: "Rappels de compléments", bundle: .module),
                            isOn: model.notificationBinding(profile.supplementRemindersEnabled) {
                                $0.supplementRemindersEnabled = $1

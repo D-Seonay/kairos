@@ -142,6 +142,7 @@ public final class TodayModel {
             todayCheckIn = CheckIn(day: estimated.day, answers: answers, score: estimated.score,
                                    createdAt: estimated.createdAt, updatedAt: estimated.updatedAt)
             applyWritten(estimated)
+            await environment.checkInReminders?.reschedule()
         } catch DailyScoreError.alreadyMeasured {
             // Un score mesuré est arrivé entre-temps : il remplace le check-in, l'accueil se relit.
             errorMessage = nil

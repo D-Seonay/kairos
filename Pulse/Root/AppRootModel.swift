@@ -126,6 +126,7 @@ final class AppRootModel {
         await dependencies.supplementService.retryHealthWrites()
         await dependencies.supplementService.rescheduleReminders()
         await dependencies.bedtimeReminderService.reschedule()
+        await dependencies.checkInReminders.reschedule() // Le rappel de check-in suit les mesures de montre relues.
         await dependencies.photos.reminders.resumeIfIdle(now: dependencies.now())
     }
 
