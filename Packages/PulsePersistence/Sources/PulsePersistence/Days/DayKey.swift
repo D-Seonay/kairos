@@ -21,11 +21,21 @@ public enum DayKey {
         return calendar.date(from: components).map { calendar.startOfDay(for: $0) }
     }
 
-    /// La clé enregistrée, ou celle de `day` lue dans `calendar` pour une ligne écrite avant la V9 (ou par une version plus ancienne
-    /// de l'app, sur un autre appareil).
+    /// La clé enregistrée ; pour une ligne écrite avant la V9 (ou par une version plus ancienne de l'app, sur un autre appareil),
+    /// celle que son `day`, minuit du fuseau qui l'a écrite, désigne. Minuit de `calendar` : le jour de `calendar`. Sinon la ligne
+    /// vient d'un autre fuseau, inconnu : le jour dont le minuit UTC est le plus proche, juste pour tout fuseau de UTC−11 à UTC+11
+    /// (minuit à Paris, le 27, c'est le 26 à 18 h à New York : le jour de New York serait le 26).
     static func effective(_ stored: String?, day: Date, calendar: Calendar) -> String {
-        stored ?? key(for: day, calendar: calendar)
+        if let stored { return stored }
+        if calendar.startOfDay(for: day) == day { return key(for: day, calendar: calendar) }
+        return key(for: day.addingTimeInterval(12 * 3_600), calendar: utc)
     }
+
+    private static let utc: Calendar = {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = .gmt
+        return calendar
+    }()
 
     /// Les instants à lire pour couvrir les jours civils de `[from, to)` quel que soit le fuseau qui les a écrits.
     static func widened(from: Date, to: Date) -> (from: Date, to: Date) {

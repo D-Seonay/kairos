@@ -115,3 +115,22 @@ private func midnight(_ day: Int = 27, in calendar: Calendar) -> Date {
     #expect(readings.count == 1 && readings.first?.updatedAt == Fixed.t2 && readings.first?.dayKey == "2026-11-27")
     #expect(try !DayKeyRepair.run(in: context, calendar: paris, now: Fixed.t2.addingTimeInterval(120)))
 }
+
+/// Une ligne d'avant la V9, sans clé, écrite à minuit de Paris : relue et réparée à New York, elle reste le 27, pas le 26.
+@Test func anOldRowWithoutKeyKeepsItsDayInAnotherTimeZone() async throws {
+    #expect(DayKey.effective(nil, day: midnight(in: paris), calendar: paris) == "2026-11-27")
+    #expect(DayKey.effective(nil, day: midnight(in: paris), calendar: newYork) == "2026-11-27")
+    #expect(DayKey.effective(nil, day: midnight(in: newYork), calendar: paris) == "2026-11-27")
+    #expect(DayKey.effective(nil, day: midnight(in: calendar("Asia/Tokyo")), calendar: newYork) == "2026-11-27")
+    #expect(DayKey.effective("2026-11-26", day: midnight(in: paris), calendar: paris) == "2026-11-26")
+
+    let container = try TestContainer.make()
+    let context = ModelContext(container)
+    context.insert(StoredDailyRecovery(Sample.recovery(day: midnight(in: paris), score: 61)))
+    try context.save()
+    let inNewYork = SwiftDataRecoveryRepository(modelContainer: container, calendar: newYork)
+    let read = try await inNewYork.dailyRecoveries(from: midnight(in: newYork), to: midnight(28, in: newYork))
+    #expect(read.map(\.score) == [61])
+    #expect(try DayKeyRepair.run(in: context, calendar: newYork, now: Fixed.t2))
+    #expect(try context.fetch(FetchDescriptor<StoredDailyRecovery>()).map(\.dayKey) == ["2026-11-27"])
+}
