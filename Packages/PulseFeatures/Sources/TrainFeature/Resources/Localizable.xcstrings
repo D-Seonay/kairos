@@ -953,6 +953,16 @@
         }
       }
     },
+    "Note de la dernière séance : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Note de la dernière séance : %@"
+          }
+        }
+      }
+    },
     "Rechercher (ex. développé)" : {
       "localizations" : {
         "fr" : {

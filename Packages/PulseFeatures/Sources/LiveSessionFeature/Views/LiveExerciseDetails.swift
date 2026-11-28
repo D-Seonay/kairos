@@ -3,15 +3,32 @@ import PulseDomain
 import PulseServices
 import SwiftUI
 
-/// Sous le nom d'un exercice : son super set, « Dernière fois », la baisse du jour avec « Remettre », ce que le jour a changé,
-/// le RPE plafond et sa note.
+/// Sous le nom d'un exercice : sa note (reprise de la dernière fois, en tête, modifiable d'un appui), son super set, « Dernière
+/// fois », la baisse du jour avec « Remettre », ce que le jour a changé et le RPE plafond.
 struct LiveExerciseDetails: View {
     let exercise: LiveExercise
+    let onEditNote: () -> Void
     let onRestore: () -> Void
     @Environment(\.pulseTheme) private var theme
 
     var body: some View {
         let accent = Color(PulsePalette.accent(for: theme).accent)
+        if let note = exercise.note {
+            Button(action: onEditNote) {
+                Label {
+                    Text(note).multilineTextAlignment(.leading)
+                } icon: {
+                    Image(systemName: "pin.fill").accessibilityHidden(true)
+                }
+                .font(.footnote)
+                .foregroundStyle(PulsePalette.text2)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(String(localized: "Note : \(note)", bundle: .module))
+            .accessibilityHint(String(localized: "Modifie la note", bundle: .module))
+        }
         if let group = exercise.supersetGroup {
             Text(LiveExerciseCard.supersetText(group: group))
                 .font(.caption.weight(.bold))
@@ -37,9 +54,6 @@ struct LiveExerciseDetails: View {
         }
         if let cap = exercise.rpeCap {
             Text(LiveExerciseCard.rpeCapText(cap)).font(.footnote.weight(.semibold)).foregroundStyle(PulsePalette.warn)
-        }
-        if let note = exercise.note {
-            Text(note).font(.footnote.italic()).foregroundStyle(PulsePalette.text2)
         }
     }
 

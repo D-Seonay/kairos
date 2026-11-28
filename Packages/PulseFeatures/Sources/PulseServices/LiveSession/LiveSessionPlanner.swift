@@ -122,7 +122,7 @@ public enum LiveSessionPlanner {
                                              policy: context.policy, planned: planned, adjusted: routineExercise),
             lastTimeText: LiveSessionText.lastTime(lastSets, loadKind: loadKind, tracksDuration: tracksDuration),
             lastTimeSpoken: LiveSessionText.lastTimeSpoken(lastSets, loadKind: loadKind, tracksDuration: tracksDuration),
-            sets: sets, warmupPlan: warmupPlan, loadDrop: dropped.drop)
+            note: recall.pinnedNote, sets: sets, warmupPlan: warmupPlan, loadDrop: dropped.drop)
         return (exercise, loadAdjustment)
     }
 

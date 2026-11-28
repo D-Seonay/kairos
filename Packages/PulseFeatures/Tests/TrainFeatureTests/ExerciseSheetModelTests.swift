@@ -29,6 +29,23 @@ private func benchFixture() async throws -> TrainFixture {
                                                     .content(id: "incline-chest-press-machine")])
 }
 
+@MainActor @Test func sheetShowsTheNoteOfTheLastSessionWithTheExercise() async throws {
+    let fixture = try await benchFixture()
+    let model = ExerciseSheetModel(environment: fixture.environment, reference: bench)
+    await model.load()
+    #expect(model.pinnedNote == nil)
+    var last = try await fixture.log(on: TrainClock.date(month: 10, day: 28, hour: 18), sets: [LoggedSet(weightKg: 72.5, reps: 6)])
+    last.exerciseNotes = [ExerciseNote(exercise: bench, text: "Banc cran 3")]
+    try await fixture.environment.workouts.save(last)
+    // Une séance en cours n'est pas « la dernière fois ».
+    var live = try await fixture.log(on: TrainClock.date(month: 10, day: 30, hour: 18), sets: [LoggedSet(weightKg: 75, reps: 5)],
+                                     status: .inProgress)
+    live.exerciseNotes = [ExerciseNote(exercise: bench, text: "Brouillon")]
+    try await fixture.environment.workouts.save(live)
+    await model.load()
+    #expect(model.pinnedNote == "Banc cran 3")
+}
+
 @MainActor @Test func sheetComparesTheOneRepMaxWithThirtyDaysAgo() async throws {
     let fixture = try await benchFixture()
     let model = ExerciseSheetModel(environment: fixture.environment, reference: bench)

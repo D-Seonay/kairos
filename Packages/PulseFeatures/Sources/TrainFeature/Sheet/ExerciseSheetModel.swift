@@ -41,6 +41,8 @@ public final class ExerciseSheetModel {
     /// Une variante du même plan de mouvement faisable avec le matériel du profil, pour la piste du plateau.
     public private(set) var plateauVariant: ExerciseInfo?
     public private(set) var increment: Double = 2.5
+    /// La note de la dernière séance avec l'exercice : la séance suivante la reprend sur la carte (« banc cran 3 »).
+    public private(set) var pinnedNote: String?
     public private(set) var errorMessage: String?
 
     @ObservationIgnored private let environment: TrainEnvironment
@@ -67,6 +69,8 @@ public final class ExerciseSheetModel {
             increment = info.map { IncrementResolver.increment(for: $0, settings: settings, profile: profile) } ?? increment
             currentOneRepMax = records.filter { $0.kind == .estimatedOneRepMax }.map(\.value).max()
             applyHistory(of: sessions)
+            pinnedNote = sessions.filter { $0.status != .inProgress }.sorted { $0.startedAt > $1.startedAt }
+                .lazy.compactMap { RecentExerciseSession($0, exercise: self.reference) }.first?.note
             plateau = PlateauDetector.plateau(for: reference, in: sessions, loadKind: info?.loadKind ?? .external,
                                               now: environment.now(), calendar: environment.calendar)
             plateauVariant = plateau == nil ? nil

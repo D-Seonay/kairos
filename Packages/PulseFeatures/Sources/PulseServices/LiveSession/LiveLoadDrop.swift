@@ -34,6 +34,9 @@ extension LiveSessionPlanner {
             recent.first.map { Int(start.timeIntervalSince($0.startedAt) / 86_400) }
         }
 
+        /// La note de la dernière séance avec l'exercice : la séance suivante la reprend, modifiable.
+        var pinnedNote: String? { recent.first?.note }
+
         func drop(for exercise: RoutineExercise, tracksDuration: Bool) -> LoadDrop? {
             LoadDropRule.drop(daysSinceLast: daysSinceLast, recentSets: recent.filter { !$0.isDeloaded }.map(\.sets),
                               exercise: exercise, tracksDuration: tracksDuration)

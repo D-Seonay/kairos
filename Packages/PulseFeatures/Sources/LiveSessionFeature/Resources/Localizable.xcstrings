@@ -167,6 +167,26 @@
         }
       }
     },
+    "Modifie la note" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modifie la note"
+          }
+        }
+      }
+    },
+    "Note : %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Note : %@"
+          }
+        }
+      }
+    },
     "Pas possible exactement avec tes disques. Les charges les plus proches :" : {
       "localizations" : {
         "fr" : {

@@ -102,10 +102,18 @@ struct LiveSessionLoadDropTests {
         #expect(expected != lowWarmups)
     }
 
-    @Test func anAddedExerciseGetsTheDropToo() {
+    @Test func theNoteOfLastTimeIsPinnedToTheCard() {
+        #expect(benchSession(recent: [recent(3, note: "Banc cran 3"), recent(6, note: "Ancienne")]).exercises[0].note
+                == "Banc cran 3")
+        #expect(benchSession(recent: [recent(3), recent(6, note: "Ancienne")]).exercises[0].note == nil)
+        #expect(benchSession(recent: []).exercises[0].note == nil)
+    }
+
+    @Test func anAddedExerciseGetsTheDropAndTheNoteToo() {
         let added = LiveSessionPlanner.exercise(Fix.bench, directory: Fix.directory, history: flat, settings: nil,
                                                 profile: Fix.profile(), policy: ProgressionPolicy(allowsIncrease: true),
-                                                recent: [recent(36)], now: .t0)
+                                                recent: [recent(36, note: "Prise serrée")], now: .t0)
         #expect(added.loadDrop?.text == "Reprise après 5 semaines : −15 %")
+        #expect(added.note == "Prise serrée")
     }
 }

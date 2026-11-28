@@ -112,7 +112,7 @@ struct LiveExerciseCard: View {
     }
 
     private var details: some View {
-        LiveExerciseDetails(exercise: exercise) {
+        LiveExerciseDetails(exercise: exercise, onEditNote: editNote) {
             Task { await model.restoreLoads(exercise: exercise.id) }
         }
     }
