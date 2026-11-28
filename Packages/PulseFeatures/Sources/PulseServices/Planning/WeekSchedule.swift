@@ -7,6 +7,8 @@ public enum PlanningDayState: Sendable, Equatable {
     case done
     /// Un jour passé, prévu, sans séance qui le valide.
     case missed
+    /// Un jour passé dont la séance manquée a été rattrapée un autre jour de la semaine (`CatchUp`).
+    case caughtUp
     /// Une séance prévue aujourd'hui ou plus tard.
     case planned
     case rest
@@ -105,6 +107,8 @@ public enum WeekSchedule {
         if let routine {
             if done.contains(where: { validates($0, routine) }) {
                 state = .done
+            } else if CatchUp.isCaughtUp(scheduled) {
+                state = .caughtUp
             } else {
                 state = isPast ? .missed : .planned
             }

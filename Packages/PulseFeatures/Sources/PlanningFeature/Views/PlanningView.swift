@@ -60,6 +60,7 @@ public struct PlanningView: View {
         } message: {
             Text(String(localized: "Les deux jours échangent leur séance.", bundle: .module))
         }
+        .catchUpDialog(model: model, onDone: planChanged)
     }
 
     private func refresh() async {
@@ -162,7 +163,8 @@ public struct PlanningView: View {
                 .buttonStyle(PulseDesignSystem.LinkButtonStyle())
                 .accessibilityIdentifier(PlanningIdentifiers.restoreWeek)
             }
-            Text(String(localized: "Touche longue sur un jour à venir pour le déplacer.", bundle: .module))
+            Text(String(localized: "Touche longue sur un jour à venir pour le déplacer, sur un jour manqué pour le rattraper.",
+                        bundle: .module))
                 .font(.caption)
                 .foregroundStyle(PulsePalette.muted)
         }

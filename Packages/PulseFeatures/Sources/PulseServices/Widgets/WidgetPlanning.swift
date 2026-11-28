@@ -55,7 +55,7 @@ public struct WidgetPlanning: Sendable, Equatable {
         case .done: .done
         case .missed: .missed
         case .planned: .planned
-        case .rest, .mandatoryRest: .rest
+        case .rest, .mandatoryRest, .caughtUp: .rest
         }
     }
 

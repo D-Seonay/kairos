@@ -45,7 +45,7 @@ struct WeekStrip: View {
             Circle().fill(color).frame(width: 6, height: 6)
         case .planned:
             Circle().strokeBorder(color, lineWidth: 1).frame(width: 6, height: 6)
-        case .missed, .rest, .mandatoryRest:
+        case .missed, .caughtUp, .rest, .mandatoryRest:
             Color.clear.frame(width: 6, height: 6)
         }
     }
@@ -170,6 +170,11 @@ struct WeekDayRow: View {
                     Label(String(localized: "Déplacer à…", bundle: .module), systemImage: "arrow.left.arrow.right")
                 }
             }
+            if model.canCatchUp(day) {
+                Button { model.catchingUp = day } label: {
+                    Label(String(localized: "Rattraper…", bundle: .module), systemImage: "arrow.uturn.forward")
+                }
+            }
             if model.canKeepPlanned(day) {
                 Button(action: onKeepPlanned) {
                     Label(String(localized: "Garder le jour prévu", bundle: .module), systemImage: "arrow.uturn.backward")
@@ -180,6 +185,9 @@ struct WeekDayRow: View {
         .accessibilityLabel(model.accessibilityText(of: day))
         .accessibilityAction(named: String(localized: "Déplacer", bundle: .module)) {
             if !model.targets(for: day).isEmpty { model.moving = day }
+        }
+        .accessibilityAction(named: String(localized: "Rattraper", bundle: .module)) {
+            if model.canCatchUp(day) { model.catchingUp = day }
         }
         .accessibilityAction(named: String(localized: "Garder le jour prévu", bundle: .module)) {
             if model.canKeepPlanned(day) { onKeepPlanned() }
@@ -214,7 +222,7 @@ struct WeekDayRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(model.title(of: day))
                     .font(.headline)
-                    .foregroundStyle(day.state == .missed ? PulsePalette.text2 : PulsePalette.text)
+                    .foregroundStyle(day.state == .missed || day.state == .caughtUp ? PulsePalette.text2 : PulsePalette.text)
                 Text(model.detail(of: day))
                     .font(.footnote)
                     .foregroundStyle(PulsePalette.text2)
@@ -254,6 +262,8 @@ struct WeekDayRow: View {
             RowChevron()
         } else if day.state == .done {
             Image(systemName: "checkmark.circle.fill").foregroundStyle(PulsePalette.ink).accessibilityHidden(true)
+        } else if day.state == .caughtUp {
+            Image(systemName: "arrow.uturn.forward").foregroundStyle(PulsePalette.text2).accessibilityHidden(true)
         } else if day.movedFrom != nil {
             Image(systemName: "arrow.left.arrow.right").foregroundStyle(PulsePalette.text2).accessibilityHidden(true)
         } else if day.scheduled.map(AntiInterference.isRule) == true {
