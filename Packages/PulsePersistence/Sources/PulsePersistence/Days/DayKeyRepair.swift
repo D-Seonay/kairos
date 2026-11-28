@@ -1,7 +1,8 @@
 import Foundation
 import SwiftData
 
-/// Remplit la clé de jour civil des lignes qui n'en ont pas et retire les doublons d'un même jour, le plus récent gagnant.
+/// Remplit la clé de jour civil des lignes qui n'en ont pas et retire les doublons d'un même jour, le plus récent gagnant ; seulement
+/// pour les jours sûrs (clé enregistrée ou minuit pile de `calendar`), jamais sur une estimation.
 /// Les scores et check-ins en trop sont marqués supprimés (la marque part dans iCloud : les autres appareils, qui appliquent la
 /// même règle, gardent la même ligne) ; les lectures locales en trop sont supprimées pour de bon. Sans drapeau « déjà fait » :
 /// lancé à chaque ouverture du magasin, il ne fait rien quand tout est en ordre, et rattrape les lignes arrivées d'iCloud depuis
@@ -29,10 +30,12 @@ enum DayKeyRepair {
         return true
     }
 
-    /// Donne leur clé aux lignes qui n'en ont pas et rend les doublons à retirer.
+    /// Donne leur clé aux lignes qui n'en ont pas et rend les doublons à retirer. Une ligne dont le jour n'est qu'estimé (écrite
+    /// à minuit d'un autre fuseau) n'est pas touchée : elle garde une clé nulle, relue par estimation, jusqu'à ce qu'un appareil
+    /// de son fuseau la répare.
     private static func repair<Row: DayKeyedRow>(_ rows: [Row], calendar: Calendar) -> [Row] {
         var duplicates: [Row] = []
-        for (key, group) in DayRows.byDay(rows, calendar: calendar) {
+        for (key, group) in DayRows.byDay(rows, calendar: calendar, guesses: false) {
             for row in group where row.dayKey == nil {
                 row.dayKey = key
             }

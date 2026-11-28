@@ -107,9 +107,10 @@ import Testing
     #expect(profile.bedtimeReminderEnabled == false && profile.bedtimeReminderLeadMinutes == nil)
 }
 
-/// Un magasin V8 avec deux scores et deux check-ins pour le même jour (deux appareils), deux lectures locales du même jour et
-/// un brouillon de course à l'ancien format : à l'ouverture en V9, un seul score et un seul check-in vivants, les plus récents,
-/// tous avec leur clé ; une seule lecture ; le brouillon se relit.
+/// Un magasin V8 avec deux scores et deux check-ins pour le même jour (deux appareils), une lecture locale de ce jour et une autre
+/// écrite à minuit d'un autre fuseau, et un brouillon de course à l'ancien format : à l'ouverture en V9, un seul score et un seul
+/// check-in vivants, les plus récents, tous avec leur clé ; la lecture d'ici prend sa clé, celle de l'autre fuseau, dont le jour
+/// n'est qu'estimé, reste sans clé ; le brouillon se relit.
 @Test func v8StoreWithDuplicateDaysOpensAsV9WithOneRowPerDay() async throws {
     let directory = try makeStoreDirectory()
     defer { try? FileManager.default.removeItem(at: directory) }
@@ -123,8 +124,9 @@ import Testing
     let checkIns = try context.fetch(FetchDescriptor<StoredCheckIn>(predicate: #Predicate { $0.deletedAt == nil }))
     #expect(checkIns.map(\.score) == [80])
     #expect((recoveries.map(\.dayKey) + checkIns.map(\.dayKey)).allSatisfy { $0 != nil })
-    let readings = try context.fetch(FetchDescriptor<StoredRecoveryReading>())
-    #expect(readings.map(\.sdnnMs) == [55])
+    let readings = try context.fetch(FetchDescriptor<StoredRecoveryReading>(sortBy: [SortDescriptor(\.updatedAt, order: .reverse)]))
+    #expect(readings.map(\.sdnnMs) == [55, 45])
+    #expect(readings.map { $0.dayKey != nil } == [true, false])
     #expect(try await SwiftDataRunDraftStore(modelContainer: container).load() == draft)
 }
 
@@ -291,7 +293,8 @@ private func writeV8Store(in directory: URL) throws -> RunDraft {
     let container = try makeFrozenContainer(PulseSchemaV8.self, synced: PulseSchemaV8.syncedModels,
                                             local: PulseSchemaV8.localModels, in: directory)
     let context = ModelContext(container)
-    let day = Fixed.calendar.startOfDay(for: Fixed.t0)
+    // Minuit du fuseau de la machine, celui que la réparation de `PersistenceStack` lit : un jour sûr, pas une estimation.
+    let day = Calendar.autoupdatingCurrent.startOfDay(for: Fixed.t0)
     for (index, updatedAt) in [Fixed.t1, Fixed.t2].enumerated() {
         let recovery = PulseSchemaV8.StoredDailyRecovery()
         recovery.day = day
@@ -304,7 +307,7 @@ private func writeV8Store(in directory: URL) throws -> RunDraft {
         checkIn.updatedAt = updatedAt
         context.insert(checkIn)
         let reading = PulseSchemaV8.StoredRecoveryReading()
-        reading.day = day.addingTimeInterval(Double(index) * 60)   // même jour dans tous les fuseaux
+        reading.day = index == 0 ? day.addingTimeInterval(3_600) : day   // la première, à minuit d'un autre fuseau
         reading.sdnnMs = 45 + Double(index) * 10
         reading.updatedAt = updatedAt
         context.insert(reading)

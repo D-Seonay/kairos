@@ -102,8 +102,9 @@ private func midnight(_ day: Int = 27, in calendar: Calendar) -> Date {
     context.insert(older)
     context.insert(newer)
     context.insert(otherDay)
-    context.insert(StoredRecoveryReading(day: midnight(in: paris), from: Sample.recovery(), at: Fixed.t1))
-    context.insert(StoredRecoveryReading(day: midnight(in: paris).addingTimeInterval(3_600), from: Sample.recovery(), at: Fixed.t2))
+    // `day` est unique dans le magasin local : deux lectures d'un même jour ont deux minuits, ici New York (avec sa clé) et Paris.
+    context.insert(StoredRecoveryReading(day: midnight(in: newYork), dayKey: "2026-11-27", from: Sample.recovery(), at: Fixed.t1))
+    context.insert(StoredRecoveryReading(day: midnight(in: paris), from: Sample.recovery(), at: Fixed.t2))
     try context.save()
 
     #expect(try DayKeyRepair.run(in: context, calendar: paris, now: Fixed.t2.addingTimeInterval(60)))
@@ -131,8 +132,39 @@ private func midnight(_ day: Int = 27, in calendar: Calendar) -> Date {
     let inNewYork = SwiftDataRecoveryRepository(modelContainer: container, calendar: newYork)
     let read = try await inNewYork.dailyRecoveries(from: midnight(in: newYork), to: midnight(28, in: newYork))
     #expect(read.map(\.score) == [61])
-    #expect(try DayKeyRepair.run(in: context, calendar: newYork, now: Fixed.t2))
+    // À New York, le jour de la ligne n'est qu'une estimation : la réparation n'enregistre pas de clé, Paris le fera.
+    #expect(try !DayKeyRepair.run(in: context, calendar: newYork, now: Fixed.t2))
+    #expect(try context.fetch(FetchDescriptor<StoredDailyRecovery>()).map(\.dayKey) == [nil])
+    #expect(try DayKeyRepair.run(in: context, calendar: paris, now: Fixed.t2))
     #expect(try context.fetch(FetchDescriptor<StoredDailyRecovery>()).map(\.dayKey) == ["2026-11-27"])
+}
+
+/// Une ligne d'avant la V9 écrite à minuit d'Auckland (UTC+13 en été), le 28 : vue de Paris, l'estimation la place le 27. Ni la
+/// réparation ni l'enregistrement du 27 à Paris ne lui donnent cette clé ou ne la marquent supprimée.
+@Test func aGuessedDayIsNeitherSavedNorDeduplicated() async throws {
+    let auckland = calendar("Pacific/Auckland")
+    let container = try TestContainer.make()
+    let context = ModelContext(container)
+    let fromAuckland = StoredDailyRecovery(Sample.recovery(day: midnight(28, in: auckland), score: 44))
+    fromAuckland.updatedAt = Fixed.t2
+    var parisRecovery = Sample.recovery(day: midnight(in: paris), score: 66)
+    parisRecovery.id = UUID()
+    let inParis = StoredDailyRecovery(parisRecovery)
+    inParis.dayKey = "2026-11-27"
+    inParis.updatedAt = Fixed.t1
+    context.insert(fromAuckland)
+    context.insert(inParis)
+    try context.save()
+
+    #expect(try !DayKeyRepair.run(in: context, calendar: paris, now: Fixed.t2.addingTimeInterval(60)))
+    #expect(fromAuckland.dayKey == nil && fromAuckland.deletedAt == nil && inParis.deletedAt == nil)
+
+    let repo = SwiftDataRecoveryRepository(modelContainer: container, calendar: paris)
+    try await repo.save(Sample.recovery(day: midnight(in: paris), score: 80))
+    let after = ModelContext(container)
+    let live = try after.fetch(FetchDescriptor<StoredDailyRecovery>(predicate: #Predicate { $0.deletedAt == nil }))
+    #expect(Set(live.map(\.score)) == [44, 80])
+    #expect(live.first { $0.score == 44 }?.dayKey == nil)
 }
 
 /// Un iPhone réglé sur le calendrier bouddhiste ou japonais écrit la même clé qu'un iPad grégorien, et la relit au bon minuit.

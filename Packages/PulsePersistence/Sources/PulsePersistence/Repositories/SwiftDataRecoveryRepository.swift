@@ -149,13 +149,14 @@ public actor SwiftDataRecoveryRepository: ModelActor, RecoveryRepository {
         return (key, DayKey.date(for: key, calendar: calendar) ?? calendar.startOfDay(for: date))
     }
 
-    /// Les lignes du jour civil `key`, la plus récente d'abord, lues dans une fenêtre assez large pour tous les fuseaux.
+    /// Les lignes du jour civil `key`, la plus récente d'abord, lues dans une fenêtre assez large pour tous les fuseaux. Sans les
+    /// lignes d'avant la V9 dont le jour n'est qu'estimé : elles ne sont ni réécrites ni marquées supprimées.
     private func sameDay<Row: PersistentModel & DayKeyedRow>(
         _ type: Row.Type, key: String, day: Date, predicate: (Date, Date) -> Predicate<Row>
     ) throws -> [Row] {
         let wide = DayKey.widened(from: day, to: day)
         let rows = try modelContext.fetch(FetchDescriptor<Row>(predicate: predicate(wide.from, wide.to)))
-        return DayRows.byDay(rows, calendar: calendar)[key] ?? []
+        return DayRows.byDay(rows, calendar: calendar, guesses: false)[key] ?? []
     }
 
     /// La ligne la plus récente de chaque jour civil dont minuit, dans `calendar`, tombe dans `[from, to)`, triées par jour (une

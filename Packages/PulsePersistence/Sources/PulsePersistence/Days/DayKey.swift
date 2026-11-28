@@ -36,11 +36,16 @@ public enum DayKey {
     /// La clé enregistrée ; pour une ligne écrite avant la V9 (ou par une version plus ancienne de l'app, sur un autre appareil),
     /// celle que son `day`, minuit du fuseau qui l'a écrite, désigne. Minuit de `calendar` : le jour de `calendar`. Sinon la ligne
     /// vient d'un autre fuseau, inconnu : le jour dont le minuit UTC est le plus proche, juste pour tout fuseau de UTC−11 à UTC+11
-    /// (minuit à Paris, le 27, c'est le 26 à 18 h à New York : le jour de New York serait le 26).
+    /// (minuit à Paris, le 27, c'est le 26 à 18 h à New York : le jour de New York serait le 26). Cette estimation se trompe
+    /// au-delà (Auckland en été, Samoa, Tonga) : elle sert à lire, jamais à enregistrer une clé ni à retirer un doublon.
     static func effective(_ stored: String?, day: Date, calendar: Calendar) -> String {
+        exact(stored, day: day, calendar: calendar) ?? key(for: day.addingTimeInterval(12 * 3_600), calendar: utc)
+    }
+
+    /// La clé enregistrée, ou celle d'une ligne écrite à minuit pile de `calendar` ; `nil` quand il faudrait l'estimer.
+    static func exact(_ stored: String?, day: Date, calendar: Calendar) -> String? {
         if let stored { return stored }
-        if calendar.startOfDay(for: day) == day { return key(for: day, calendar: calendar) }
-        return key(for: day.addingTimeInterval(12 * 3_600), calendar: utc)
+        return calendar.startOfDay(for: day) == day ? key(for: day, calendar: calendar) : nil
     }
 
     private static let utc: Calendar = {
