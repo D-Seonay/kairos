@@ -217,7 +217,11 @@ public final class SupplementService: Sendable {
         }
         if let health, let sample = intake.healthKitUUID.flatMap(UUID.init(uuidString:)) {
             // L'échantillon a pu être supprimé dans l'app Santé : la prise est décochée quoi qu'il arrive.
-            try? await health.deleteSupplementSample(id: sample)
+            do {
+                try await health.deleteSupplementSample(id: sample)
+            } catch {
+                logger.failure("Prise de complément non retirée d'Apple Santé", error)
+            }
         }
         return true
     }
@@ -256,9 +260,14 @@ public final class SupplementService: Sendable {
     private func writeToHealth(_ intake: SupplementIntake, of supplement: Supplement) async -> SupplementIntake? {
         guard let health, let type = supplement.healthType,
               let amount = SupplementHealthDose.amount(dose: intake.dose, unit: supplement.unit, type: type),
-              await health.supplementWriteAccess() == .authorized,
-              let id = try? await health.save(SupplementHealthEntry(intakeID: intake.id, type: type, amount: amount,
-                                                                     date: intake.takenAt)) else { return nil }
+              await health.supplementWriteAccess() == .authorized else { return nil }
+        let id: UUID
+        do {
+            id = try await health.save(SupplementHealthEntry(intakeID: intake.id, type: type, amount: amount, date: intake.takenAt))
+        } catch {
+            logger.failure("Prise de complément non écrite dans Apple Santé", error)
+            return nil
+        }
         var written = intake
         written.writtenToHealthKit = true
         written.healthKitUUID = id.uuidString

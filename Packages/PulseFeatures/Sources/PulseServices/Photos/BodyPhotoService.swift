@@ -77,7 +77,11 @@ public actor BodyPhotoService {
         let photo = BodyPhoto(id: UUID(), pose: pose, takenAt: takenAt, createdAt: now())
         try await store.save(photo, image: processed.image)
         if let replacing, replacing != photo.id {
-            try? await store.delete(photoID: replacing)
+            do {
+                try await store.delete(photoID: replacing)
+            } catch {
+                logger.failure("Ancienne photo de corps non supprimée", error)
+            }
         }
         return photo
     }
