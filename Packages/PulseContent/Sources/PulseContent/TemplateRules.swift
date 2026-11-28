@@ -66,14 +66,19 @@ enum TemplateRules {
         return issues
     }
 
-    /// Un groupe de super set a exactement deux exercices, consécutifs.
+    /// Les tailles permises d'un super set : une paire, un tri-set, jusqu'à un circuit de cinq exercices.
+    static let supersetSizes = 2...5
+
+    /// Un groupe de super set a de deux à cinq exercices, consécutifs.
     private static func supersetIssues(for day: TemplateDay, subject: String) -> [ContentIssue] {
         let groups = Dictionary(grouping: day.exercises.indices.filter { day.exercises[$0].supersetGroup != nil },
                                 by: { day.exercises[$0].supersetGroup ?? 0 })
         return groups.keys.sorted().compactMap { group in
             let positions = groups[group] ?? []
-            guard positions.count != 2 || positions[1] != positions[0] + 1 else { return nil }
-            return ContentIssue(rule: .superset, subject: subject, message: "super set \(group) : deux exercices consécutifs attendus")
+            let consecutive = zip(positions, positions.dropFirst()).allSatisfy { $1 == $0 + 1 }
+            guard !supersetSizes.contains(positions.count) || !consecutive else { return nil }
+            return ContentIssue(rule: .superset, subject: subject,
+                                message: "super set \(group) : de deux à cinq exercices consécutifs attendus")
         }
     }
 
