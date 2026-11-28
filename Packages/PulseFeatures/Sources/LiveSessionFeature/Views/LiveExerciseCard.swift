@@ -111,35 +111,16 @@ struct LiveExerciseCard: View {
         }
     }
 
-    @ViewBuilder
     private var details: some View {
-        let accent = Color(PulsePalette.accent(for: theme).accent)
-        if let group = exercise.supersetGroup {
-            Text(Self.supersetText(group: group))
-                .font(.caption.weight(.bold))
-                .foregroundStyle(accent)
+        LiveExerciseDetails(exercise: exercise, supersetLabel: model.session.supersetLabel(of: exercise.id),
+                            onEditNote: editNote) {
+            Task { await model.restoreLoads(exercise: exercise.id) }
         }
-        if let lastTime = exercise.lastTimeText {
-            Text(lastTime)
-                .font(.footnote)
-                .foregroundStyle(PulsePalette.text2)
-                .accessibilityLabel(exercise.lastTimeSpoken ?? lastTime)
-        }
-        if let dayNote = exercise.dayNote {
-            Label {
-                Text(dayNote)
-            } icon: {
-                Image(systemName: "sparkles").accessibilityHidden(true)
-            }
-            .font(.footnote)
-            .foregroundStyle(accent)
-        }
-        if let cap = exercise.rpeCap {
-            Text(Self.rpeCapText(cap)).font(.footnote.weight(.semibold)).foregroundStyle(PulsePalette.warn)
-        }
-        if let note = exercise.note {
-            Text(note).font(.footnote.italic()).foregroundStyle(PulsePalette.text2)
-        }
+    }
+
+    private func editNote() {
+        noteDraft = exercise.note ?? ""
+        isEditingNote = true
     }
 
     /// Le calculateur de disques, sur les exercices à la barre (spec M4 §19.2).
@@ -159,10 +140,7 @@ struct LiveExerciseCard: View {
 
     private var menu: some View {
         Menu {
-            Button {
-                noteDraft = exercise.note ?? ""
-                isEditingNote = true
-            } label: {
+            Button(action: editNote) {
                 Label(String(localized: "Note", bundle: .module), systemImage: "note.text")
             }
             Picker(String(localized: "Incrément", bundle: .module), selection: incrementBinding) {
@@ -274,11 +252,9 @@ extension LiveExerciseCard {
         String(localized: "RPE \(PulseFormat.decimal(cap, maxFractionDigits: 1)) max", bundle: .module)
     }
 
-    /// « Super set A » : les groupes de la routine sont numérotés à partir de 1.
-    nonisolated static func supersetText(group: Int) -> String {
-        let letters = Array("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-        let letter = letters[((group - 1) % letters.count + letters.count) % letters.count]
-        return String(localized: "Super set \(String(letter))", bundle: .module)
+    /// « Super set A2 » : la lettre du groupe dans la séance, la place de l'exercice dans le groupe.
+    nonisolated static func supersetText(label: String) -> String {
+        String(localized: "Super set \(label)", bundle: .module)
     }
 
     /// « 2 séries faites sur 5 », « Exercice terminé » : l'anneau de la carte dit en mots.

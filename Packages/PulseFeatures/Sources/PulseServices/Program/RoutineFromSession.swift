@@ -56,22 +56,23 @@ public enum RoutineFromSession {
             : SetTarget(repsMin: max(1, reps - 1), repsMax: reps + 1)
     }
 
-    /// Reprend les super sets de la séance : deux exercices consécutifs qui partagent un groupe forment une paire.
+    /// Reprend les super sets de la séance : les exercices consécutifs qui partagent un groupe, de deux à
+    /// `RoutineEditor.maxSupersetSize`, forment un groupe. Un groupe plus long est coupé en morceaux de cette taille.
     private static func pairedSupersets(_ exercises: [RoutineExercise], sets: [ExerciseReference: [WorkoutSet]],
                                         references: [ExerciseReference]) -> [RoutineExercise] {
         let groups = references.map { sets[$0]?.compactMap(\.supersetGroup).first }
         var result = exercises
-        var position = 0
-        var pair = 1
-        while position + 1 < result.count {
-            if let group = groups[position], group == groups[position + 1] {
-                result[position].supersetGroup = pair
-                result[position + 1].supersetGroup = pair
-                pair += 1
-                position += 2
-            } else {
-                position += 1
+        var start = 0
+        var next = 1
+        while start < result.count {
+            var end = start + 1
+            while end < result.count, end - start < RoutineEditor.maxSupersetSize, groups[start] != nil,
+                  groups[end] == groups[start] { end += 1 }
+            if end - start >= 2 {
+                for position in start..<end { result[position].supersetGroup = next }
+                next += 1
             }
+            start = end
         }
         return result
     }
