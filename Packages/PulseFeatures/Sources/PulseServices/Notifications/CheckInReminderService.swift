@@ -111,17 +111,16 @@ public struct CheckInReminderService: Sendable {
     }
 
     /// Une réponse rapide touchée sur la notification du jour `day` : enregistre le check-in et replanifie. Rend faux, sans rien
-    /// écrire, pour la notification d'un autre jour ou un check-in qui n'a pas pu s'enregistrer.
+    /// écrire, pour la notification d'un autre jour (une réponse après minuit) ou un check-in qui n'a pas pu s'enregistrer ; les
+    /// rappels sont replanifiés dans tous les cas, ce qui prolonge leur suite.
     @discardableResult
     public func answer(_ quick: CheckInQuickAnswer, day: Date) async -> Bool {
-        guard calendar.isDate(day, inSameDayAs: now()) else { return false }
-        do {
-            try await saveCheckIn(quick.answers)
-        } catch {
-            return false
+        var saved = false
+        if calendar.isDate(day, inSameDayAs: now()) {
+            saved = (try? await saveCheckIn(quick.answers)) != nil
         }
         await reschedule()
-        return true
+        return saved
     }
 
     /// Recalcule les rappels. Un profil, un cache ou des scores illisibles laissent les rappels en attente en place.

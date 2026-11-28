@@ -97,6 +97,8 @@ struct CheckInReminderServiceTests {
         try await setUp()
         #expect(await service().answer(.good, day: TestClock.date("2026-11-17T00:00")) == false)
         #expect(try await savedAnswers().isEmpty)
+        #expect(await scheduler.replaceCount == 1, "Les rappels sont tout de même replanifiés, et leur suite prolongée")
+        #expect(await scheduler.reminders.first?.day == TestClock.date("2026-11-18T00:00"))
     }
 
     @Test func settingsAreKeptAndApplied() async throws {

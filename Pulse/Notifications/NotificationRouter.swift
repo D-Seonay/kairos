@@ -1,4 +1,5 @@
 import Foundation
+import os
 import PulseDomain
 import PulseServices
 import UserNotifications
@@ -11,6 +12,7 @@ import UserNotifications
 final class NotificationRouter: NSObject, UNUserNotificationCenterDelegate {
     /// La clé du lien dans `userInfo`, posée par `UserNotificationScheduler`.
     static let linkKey = "link"
+    private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "fr.seonay.pulse", category: "notifications")
 
     private let router: AppRouter
     private let supplements: SupplementService
@@ -50,8 +52,11 @@ final class NotificationRouter: NSObject, UNUserNotificationCenterDelegate {
         }
         if let answer = UserNotificationScheduler.checkInAnswer(fromAction: response.actionIdentifier),
            let day = Self.checkInDay(from: userInfo) {
-            // Un check-in d'un autre jour, ou déjà remplacé par un score mesuré, n'est pas enregistré : l'accueil le dira.
-            await checkIns?.answer(answer, day: day)
+            // Une réponse d'arrière-plan ne peut pas ouvrir l'app : un check-in refusé (la notification de la veille touchée après
+            // minuit, un score mesuré déjà là) n'est signalé nulle part, et l'accueil redemande le check-in du jour à l'ouverture.
+            if await checkIns?.answer(answer, day: day) == false {
+                Self.logger.notice("Réponse rapide de check-in non enregistrée (autre jour ou check-in refusé)")
+            }
             return
         }
         await router.open(Self.link(from: userInfo))
