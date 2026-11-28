@@ -151,7 +151,8 @@ struct AppDependencies: Sendable {
         #else
         let launch = LaunchOptions()
         #endif
-        let calendar = Calendar.current
+        // Suit le fuseau de l'iPhone : après un voyage, « aujourd'hui » et les jours civils sont ceux du nouveau fuseau.
+        let calendar = Calendar.autoupdatingCurrent
         let now: @Sendable () -> Date
         if let fixed = launch.fixedNow {
             now = { fixed }
