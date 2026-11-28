@@ -47,7 +47,7 @@ private func activate(_ gate: inout ActivationReloadGate, at date: Date) -> Bool
 @Test func aNotedChangeReloadsAtTheNextActivation() {
     var gate = ActivationReloadGate()
     #expect((activate(&gate, at: at(9, 0)) as Bool))
-    gate.noteChange()
+    gate.noteSave()
     #expect((activate(&gate, at: at(9, 1)) as Bool))
     #expect(!(activate(&gate, at: at(9, 2)) as Bool))
 }
@@ -57,9 +57,30 @@ private func activate(_ gate: inout ActivationReloadGate, at date: Date) -> Bool
     var gate = ActivationReloadGate()
     let started = gate.beginReload(at: at(9, 0), calendar: paris)
     #expect(started)
-    gate.noteChange()
+    gate.noteSave()
     gate.endReload(at: at(9, 0))
     #expect(!(activate(&gate, at: at(9, 1)) as Bool))
+}
+
+/// Un import iCloud (le check-in fait sur l'iPad) arrive pendant la relecture, après qu'elle a lu l'accueil : le retour suivant
+/// relit, une seule fois.
+@Test func anExternalChangeDuringTheReloadIsKept() {
+    var gate = ActivationReloadGate()
+    let started = gate.beginReload(at: at(9, 0), calendar: paris)
+    #expect(started)
+    gate.noteExternalChange()
+    gate.endReload(at: at(9, 0))
+    #expect((activate(&gate, at: at(9, 1)) as Bool))
+    #expect(!(activate(&gate, at: at(9, 2)) as Bool))
+}
+
+/// Un changement extérieur noté avant le retour est lu par la relecture de ce retour : il ne relance pas le suivant.
+@Test func anExternalChangeBeforeTheReloadIsConsumedByIt() {
+    var gate = ActivationReloadGate()
+    #expect((activate(&gate, at: at(9, 0)) as Bool))
+    gate.noteExternalChange()
+    #expect((activate(&gate, at: at(9, 1)) as Bool))
+    #expect(!(activate(&gate, at: at(9, 2)) as Bool))
 }
 
 /// Un retour pendant une relecture en cours ne la double pas.

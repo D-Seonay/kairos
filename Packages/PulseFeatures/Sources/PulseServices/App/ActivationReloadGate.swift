@@ -9,16 +9,25 @@ public struct ActivationReloadGate: Sendable {
     public let maxAge: TimeInterval
     /// Le début de la dernière relecture terminée.
     public private(set) var lastReload: Date?
-    public private(set) var hasPendingChange = false
+    /// Un enregistrement SwiftData noté depuis la dernière relecture.
+    public private(set) var hasPendingSave = false
+    /// Un import iCloud ou un changement de fuseau noté depuis le début de la dernière relecture.
+    public private(set) var hasPendingExternalChange = false
     public private(set) var isReloading = false
 
     public init(maxAge: TimeInterval = defaultMaxAge) {
         self.maxAge = maxAge
     }
 
-    /// Une donnée a changé hors de la relecture : le prochain retour relit tout.
-    public mutating func noteChange() {
-        hasPendingChange = true
+    /// Un enregistrement SwiftData : le prochain retour relit tout, sauf s'il vient de la relecture en cours.
+    public mutating func noteSave() {
+        hasPendingSave = true
+    }
+
+    /// Un import iCloud (un autre appareil a écrit) ou un changement de fuseau : le prochain retour relit tout, même s'il arrive
+    /// pendant une relecture, qui a pu lire avant lui.
+    public mutating func noteExternalChange() {
+        hasPendingExternalChange = true
     }
 
     /// Vrai si le retour à `now` doit relire ; la relecture commence alors, et un second retour pendant qu'elle tourne est ignoré.
@@ -28,19 +37,25 @@ public struct ActivationReloadGate: Sendable {
         let due: Bool
         if let lastReload {
             let age = now.timeIntervalSince(lastReload)
-            due = hasPendingChange || age >= maxAge || age < 0 || !calendar.isDate(now, inSameDayAs: lastReload)
+            due = hasPendingSave || hasPendingExternalChange || age >= maxAge || age < 0
+                || !calendar.isDate(now, inSameDayAs: lastReload)
         } else {
             due = true
         }
-        if due { isReloading = true }
+        if due {
+            isReloading = true
+            // La relecture lit ce qui est arrivé jusqu'ici ; ce qui arrivera pendant qu'elle tourne restera à lire.
+            hasPendingExternalChange = false
+        }
         return due
     }
 
-    /// La relecture commencée à `start` est finie. Les changements notés pendant qu'elle tournait sont les siens (le score du jour
-    /// qu'elle vient d'enregistrer) : ils sont oubliés, la limite d'âge rattrape un import iCloud arrivé au même moment.
+    /// La relecture commencée à `start` est finie. Les enregistrements notés pendant qu'elle tournait sont les siens (le score du
+    /// jour qu'elle vient d'enregistrer) : ils sont oubliés. Un import iCloud ou un changement de fuseau arrivé entre-temps reste
+    /// noté : le prochain retour relit.
     public mutating func endReload(at start: Date) {
         lastReload = start
-        hasPendingChange = false
+        hasPendingSave = false
         isReloading = false
     }
 }

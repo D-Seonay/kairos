@@ -7,6 +7,12 @@ import SwiftData
 /// (le jour civil a pu changer). Les brouillons de la séance et de la course, réécrits toutes les quelques secondes, ne comptent
 /// pas. `onChange` part sur la file qui publie la notification.
 public final class DataChangeObserver: @unchecked Sendable {
+    /// D'où vient le changement : un enregistrement de l'app, ou l'extérieur (import iCloud, changement de fuseau).
+    public enum Kind: Sendable, Equatable {
+        case save
+        case external
+    }
+
     /// Les modèles réécrits en continu pendant une séance ou une course, que les écrans ne relisent pas au retour dans l'app.
     static let transientEntities: Set<String> = [
         String(describing: StoredRunDraft.self), String(describing: StoredRunDraftChunk.self),
@@ -19,21 +25,21 @@ public final class DataChangeObserver: @unchecked Sendable {
     /// Écrit une fois, dans `init` ; d'où `@unchecked Sendable`.
     private let observers: [any NSObjectProtocol]
 
-    public init(center: NotificationCenter = .default, onChange: @escaping @Sendable () -> Void) {
+    public init(center: NotificationCenter = .default, onChange: @escaping @Sendable (Kind) -> Void) {
         self.center = center
         observers = [
             center.addObserver(forName: ModelContext.didSave, object: nil, queue: nil) { notification in
                 guard Self.isRelevant(entityNames: Self.entityNames(in: notification.userInfo)) else { return }
-                onChange()
+                onChange(.save)
             },
             center.addObserver(forName: NSPersistentCloudKitContainer.eventChangedNotification, object: nil,
                                queue: nil) { notification in
                 let key = NSPersistentCloudKitContainer.eventNotificationUserInfoKey
                 guard let event = notification.userInfo?[key] as? NSPersistentCloudKitContainer.Event,
                       event.type == .import, event.endDate != nil, event.succeeded else { return }
-                onChange()
+                onChange(.external)
             },
-            center.addObserver(forName: .NSSystemTimeZoneDidChange, object: nil, queue: nil) { _ in onChange() }
+            center.addObserver(forName: .NSSystemTimeZoneDidChange, object: nil, queue: nil) { _ in onChange(.external) }
         ]
     }
 

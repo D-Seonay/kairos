@@ -62,15 +62,19 @@ final class AppRootModel {
     init(dependencies: AppDependencies, sessionIntents: SessionIntentWiring? = nil, changes: NotificationCenter = .default) {
         self.dependencies = dependencies
         self.sessionIntents = sessionIntents
-        changeObserver = DataChangeObserver(center: changes) { [weak self] in
-            Task { @MainActor in self?.noteDataChange() }
+        changeObserver = DataChangeObserver(center: changes) { [weak self] kind in
+            Task { @MainActor in self?.noteDataChange(kind) }
         }
     }
 
     /// Une donnée a changé hors des écrans (passage du jour en arrière-plan, action d'une notification, autre appareil, fuseau) :
-    /// le prochain retour au premier plan relit les onglets.
-    func noteDataChange() {
-        reloadGate.noteChange()
+    /// le prochain retour au premier plan relit les onglets. Un import iCloud ou un changement de fuseau arrivé pendant une
+    /// relecture compte encore ; un enregistrement arrivé pendant une relecture est le sien.
+    func noteDataChange(_ kind: DataChangeObserver.Kind = .external) {
+        switch kind {
+        case .save: reloadGate.noteSave()
+        case .external: reloadGate.noteExternalChange()
+        }
     }
 
     var theme: Theme {

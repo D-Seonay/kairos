@@ -41,21 +41,24 @@ private final class Captured: @unchecked Sendable {
     #expect(DataChangeObserver.isRelevant(entityNames: nil))
 }
 
-/// Un changement de fuseau prévient aussi : le jour civil a pu changer.
-@Test func aTimeZoneChangeIsAChange() {
+/// Un changement de fuseau prévient aussi, comme un changement extérieur : le jour civil a pu changer ; un enregistrement de
+/// l'app prévient comme un enregistrement.
+@MainActor
+@Test func aTimeZoneChangeIsAnExternalChange() throws {
     let center = NotificationCenter()
-    let count = Counter()
-    let observer = DataChangeObserver(center: center) { count.increment() }
+    let kinds = Kinds()
+    let observer = DataChangeObserver(center: center) { kinds.append($0) }
     center.post(name: .NSSystemTimeZoneDidChange, object: nil)
-    #expect(count.value == 1)
+    center.post(name: ModelContext.didSave, object: nil, userInfo: nil)
+    #expect(kinds.value == [.external, .save])
     withExtendedLifetime(observer) {}
 }
 
-private final class Counter: @unchecked Sendable {
+private final class Kinds: @unchecked Sendable {
     private let lock = NSLock()
-    private var count = 0
+    private var kinds: [DataChangeObserver.Kind] = []
 
-    var value: Int { lock.withLock { count } }
+    var value: [DataChangeObserver.Kind] { lock.withLock { kinds } }
 
-    func increment() { lock.withLock { count += 1 } }
+    func append(_ kind: DataChangeObserver.Kind) { lock.withLock { kinds.append(kind) } }
 }
